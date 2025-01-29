@@ -33,9 +33,13 @@ import java.util.concurrent.Executor;
 
 @Mixin(ParticleEngine.class)
 public class MixinParticleEngine {
-	@Shadow @Final private Queue<Particle> particlesToAdd;
+	@Shadow
+	@Final
+	private Queue<Particle> particlesToAdd;
 
-	@Shadow @Final private Map<ParticleRenderType, Queue<Particle>> particles;
+	@Shadow
+	@Final
+	private Map<ParticleRenderType, Queue<Particle>> particles;
 
 	@WrapMethod(method = "tick")
 	public void wrapTick(Operation<Void> original) {
@@ -76,9 +80,17 @@ public class MixinParticleEngine {
 	public void redirectRemove(Iterator instance) {
 	}
 
+	@Inject(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Queue;isEmpty()Z", ordinal = 0), cancellable = true)
+	public void tickTrackingEmitterEmpty(CallbackInfo ci) {
+		if (Thread.interrupted()) {
+			ci.cancel();
+			Caches.particlesOperation = null;
+		}
+	}
+
 	@Inject(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"), cancellable = true)
 	public void tickTrackingEmitter(CallbackInfo ci) {
-		if (Caches.particlesOperationCancelled) {
+		if (Thread.interrupted()) {
 			ci.cancel();
 			Caches.particlesOperation = null;
 		}
@@ -86,7 +98,7 @@ public class MixinParticleEngine {
 
 	@Inject(method = "tickParticleList", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"), cancellable = true)
 	public void tickParticleList(CallbackInfo ci) {
-		if (Caches.particlesOperationCancelled) {
+		if (Thread.interrupted()) {
 			ci.cancel();
 			Caches.particlesOperation = null;
 		}
@@ -94,7 +106,7 @@ public class MixinParticleEngine {
 
 	@Inject(method = "tickParticleList", at = @At(value = "HEAD"), cancellable = true)
 	public void tickParticleListHead(CallbackInfo ci) {
-		if (Caches.particlesOperationCancelled) {
+		if (Thread.interrupted()) {
 			ci.cancel();
 			Caches.particlesOperation = null;
 		}

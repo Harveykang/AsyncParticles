@@ -18,22 +18,12 @@ public class MixinMinecraft {
 	private void onTick(CallbackInfo ci) {
 		Future<?> textureTickAsync = Caches.textureTickAsync;
 		if (textureTickAsync!= null) {
-			Caches.texturesOperationCancelled = true;
-			try {
-				textureTickAsync.get();
-			} catch (InterruptedException | ExecutionException ignored) {
-			}
-			Caches.texturesOperationCancelled = false;
+			textureTickAsync.cancel(true);
 			Caches.textureTickAsync = null;
 		}
 		Future<?> particleTickAsync = Caches.particleTickAsync;
 		if (particleTickAsync!= null) {
-			Caches.particlesOperationCancelled = true;
-			try {
-				particleTickAsync.get();
-			} catch (InterruptedException | ExecutionException ignored) {
-			}
-			Caches.particlesOperationCancelled = false;
+			particleTickAsync.cancel(true);
 			Caches.particleTickAsync = null;
 		}
 	}
@@ -46,8 +36,7 @@ public class MixinMinecraft {
 			if (texturesOperation != null) {
 				try {
 					texturesOperation.call();
-				} catch (Throwable e) {
-					AsyncedparticlesClient.LOGGER.warn("Error while executing textures operation", e);
+				} catch (Throwable ignored) {
 				}
 				Caches.texturesOperation = null;
 			}
@@ -57,8 +46,7 @@ public class MixinMinecraft {
 			if (particlesOperation != null) {
 				try {
 					particlesOperation.call();
-				} catch (Throwable e) {
-					AsyncedparticlesClient.LOGGER.warn("Error while executing particles operation", e);
+				} catch (Throwable ignored) {
 				}
 				Caches.particlesOperation = null;
 			}

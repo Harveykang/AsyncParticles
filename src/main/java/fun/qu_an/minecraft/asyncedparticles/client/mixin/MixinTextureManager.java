@@ -18,7 +18,7 @@ public class MixinTextureManager {
 
 	@Inject(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"), cancellable = true)
 	public void onTick(CallbackInfo ci) {
-		if (Caches.texturesOperationCancelled) {
+		if (Thread.interrupted()) {
 			ci.cancel();
 			Caches.texturesOperation = null;
 		}
