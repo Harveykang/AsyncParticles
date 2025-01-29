@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "asyncedparticles",
+  "version": "${version}",
+  "name": "AsyncedParticles",
+  "description": "",
+  "authors": ["Harvey_Husky"],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/asyncedparticles/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "fun.qu_an.minecraft.asyncedparticles.client.AsyncedparticlesClient"
+    ]
+  },
+  "mixins": [
+    "asyncedparticles.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric": "*",
+    "minecraft": ">=1.16"
+  }
+}
