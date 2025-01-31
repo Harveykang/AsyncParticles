@@ -1,11 +1,11 @@
-package fun.qu_an.minecraft.asyncedparticles.client.mixin;
+package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
 import com.google.common.collect.EvictingQueue;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import fun.qu_an.minecraft.asyncedparticles.client.Caches;
-import fun.qu_an.minecraft.asyncedparticles.client.config.SimplePropertiesConfig;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import fun.qu_an.minecraft.asyncparticles.client.Caches;
+import fun.qu_an.minecraft.asyncparticles.client.TickedParticle;
+import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -16,10 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -30,10 +27,10 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
 
 @Mixin(ParticleEngine.class)
 public abstract class MixinParticleEngine {
+	@Mutable
 	@Shadow
 	@Final
 	private Queue<Particle> particlesToAdd;
@@ -42,11 +39,48 @@ public abstract class MixinParticleEngine {
 	@Final
 	private Map<ParticleRenderType, Queue<Particle>> particles;
 
-	@Shadow protected ClientLevel level;
+	@Shadow
+	protected ClientLevel level;
 
-	@Shadow protected abstract void tickParticleList(Collection<Particle> collection);
+	/**
+	 * @author
+	 * @reason
+	 */
+	@Overwrite
+	private void tickParticleList(Collection<Particle> collection) {
+		if (!collection.isEmpty()) {
+			Iterator<Particle> iterator = collection.iterator();
+			while (iterator.hasNext()) {
+				if (Caches.cancelled) {
+					return;
+				}
+				Particle particle = iterator.next();
+				this.tickParticle(particle);
+				((TickedParticle) particle).setTicked();
+				// to prevent break some mixin, trust jit compiler
+				//noinspection PointlessBooleanExpression
+				if (!particle.isAlive() && false) {
+					iterator.remove();
+				}
+			}
+		}
+	}
 
-	@Shadow @Final private Queue<TrackingEmitter> trackingEmitters;
+	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/Particle;render(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/Camera;F)V"))
+	public void redirectRender(Particle instance, VertexConsumer vertexConsumer, Camera camera, float v) {
+		if (((TickedParticle) instance).isTicked()) {
+			instance.render(vertexConsumer, camera, v);
+		} else {
+			instance.render(vertexConsumer, camera, v + 1f);
+		}
+	}
+
+	@Shadow
+	@Final
+	private Queue<TrackingEmitter> trackingEmitters;
+
+	@Shadow
+	protected abstract void tickParticle(Particle particle);
 
 	/**
 	 * @author
@@ -54,27 +88,30 @@ public abstract class MixinParticleEngine {
 	 */
 	@Overwrite
 	public void tick() {
-		for (Map.Entry<ParticleRenderType, Queue<Particle>> entry : particles.entrySet()) {
-			if (Caches.cancelled) {
-				return;
+		if (!Caches.shouldTickParticles) {
+			if (!particlesToAdd.isEmpty()) {
+				particlesToAdd = new ArrayDeque<>();
 			}
-			ParticleRenderType particleRenderType = entry.getKey();
-			Queue<Particle> queue = entry.getValue();
-			this.level.getProfiler().push(particleRenderType.toString());
-			Caches.addParticleOperation(() -> tickParticleList(queue));
-			this.level.getProfiler().pop();
+			return;
 		}
+		particles.forEach((particleRenderType, queue) -> {
+			this.level.getProfiler().push(particleRenderType.toString());
+			Caches.parallelOperations.add(() -> tickParticleList(queue));
+			this.level.getProfiler().pop();
+		});
 
 		if (!this.trackingEmitters.isEmpty()) {
-			Caches.addParticleOperation(() -> {
-				if (Caches.cancelled) {
-					return;
-				}
-				for (TrackingEmitter trackingEmitter : this.trackingEmitters) {
+			Caches.parallelOperations.add(() -> {
+				Iterator<TrackingEmitter> iterator = this.trackingEmitters.iterator();
+				while (iterator.hasNext()) {
 					if (Caches.cancelled) {
 						return;
 					}
+					TrackingEmitter trackingEmitter = iterator.next();
 					trackingEmitter.tick();
+					if (!trackingEmitter.isAlive()) {
+						iterator.remove();
+					}
 				}
 			});
 		}
@@ -83,12 +120,8 @@ public abstract class MixinParticleEngine {
 			if (particles1.isEmpty()) {
 				return;
 			}
-			particles1.removeIf(particle1 -> !particle1.isAlive());
+			particles1.removeIf(particle1 -> ((TickedParticle) particle1).resetTicked());
 		});
-
-		if (!this.trackingEmitters.isEmpty()) {
-			trackingEmitters.removeIf(trackingEmitter -> !trackingEmitter.isAlive());
-		}
 
 		Particle particle;
 		if (!this.particlesToAdd.isEmpty()) {
@@ -98,23 +131,23 @@ public abstract class MixinParticleEngine {
 		}
 	}
 
-	@Redirect(method = "tickParticleList", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;remove()V"))
-	public void redirectRemove(Iterator instance) {
-	}
-
-	@Inject(method = "tickParticleList", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"), cancellable = true)
-	public void tickParticleListNext(CallbackInfo ci) {
-		if (Caches.cancelled) {
+	@Inject(method = "add", at = @At(value = "HEAD"), cancellable = true)
+	public void add(Particle particle, CallbackInfo ci) {
+		if (!Caches.shouldTickParticles) {
 			ci.cancel();
 		}
 	}
 
-	@Inject(method = "tickParticleList", at = @At(value = "HEAD"), cancellable = true)
-	public void tickParticleListHead(CallbackInfo ci) {
-		if (Caches.cancelled) {
-			ci.cancel();
-		}
-	}
+//	@Redirect(method = "tickParticleList", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;remove()V"))
+//	public void redirectRemove(Iterator instance) {
+//	}
+
+//	@Inject(method = "tickParticleList", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"), cancellable = true)
+//	public void tickParticleListNext(CallbackInfo ci) {
+//		if (Caches.cancelled) {
+//			ci.cancel();
+//		}
+//	}
 
 	@Inject(method = "reload", at = @At(value = "RETURN"), cancellable = true)
 	public void reload(PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller profilerFiller, ProfilerFiller profilerFiller2, Executor executor, Executor executor2, CallbackInfoReturnable<CompletableFuture<Void>> cir) {

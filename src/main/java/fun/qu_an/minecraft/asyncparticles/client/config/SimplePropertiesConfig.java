@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncedparticles.client.config;
+package fun.qu_an.minecraft.asyncparticles.client.config;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 public class SimplePropertiesConfig {
-	public static final Path CONFIG_FILE = Paths.get("config", "asyncedparticles.properties");
+	public static final Path CONFIG_FILE = Paths.get("config", "asyncparticles.properties");
 	public static int limit = 32768;
 
 	public static void load() throws IOException {

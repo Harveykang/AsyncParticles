@@ -1,10 +1,12 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "fun.qu_an.minecraft.asyncedparticles.client.mixin",
+  "package": "fun.qu_an.minecraft.asyncparticles.client.mixin",
   "compatibilityLevel": "JAVA_8",
   "client": [
+    "MixinClientLevel",
     "MixinMinecraft",
+    "MixinParticle",
     "MixinParticleEngine",
     "MixinTextureManager"
   ],
