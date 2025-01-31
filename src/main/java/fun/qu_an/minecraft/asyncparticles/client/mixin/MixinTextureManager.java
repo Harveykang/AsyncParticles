@@ -22,11 +22,4 @@ public class MixinTextureManager {
 			ci.cancel();
 		}
 	}
-
-	@Inject(method = "tick", at = @At(value = "HEAD"), cancellable = true)
-	public void onTickHead(CallbackInfo ci) {
-		if (Caches.cancelled) {
-			ci.cancel();
-		}
-	}
 }
