@@ -33,7 +33,7 @@ dependencies {
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+//    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "maven.modrinth:spark:1.9.1-forge1165"
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.4.1")))
 }
