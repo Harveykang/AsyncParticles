@@ -1,28 +1,43 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 import fun.qu_an.minecraft.asyncparticles.client.TickedParticle;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import org.spongepowered.asm.mixin.*;
 
 @Mixin(Particle.class)
-public class MixinParticle implements TickedParticle {
+public abstract class MixinParticle implements TickedParticle {
 	@Shadow protected boolean removed;
+
+	@Shadow public abstract void remove();
+
+	@Shadow public abstract boolean isAlive();
+
+	@Shadow public double x;
+	@Shadow public double y;
+	@Shadow public double z;
+	@Shadow @Final public ClientLevel level;
 	@Unique
-	private boolean ticked;
+	private boolean asyncParticles$ticked;
 
 	@Override
-	public boolean resetTicked() {
-		return removed || !ticked || (ticked = false);
+	public boolean asyncParticles$shouldRemove() {
+		if (!isAlive()) return true;
+		if (asyncParticles$ticked) return asyncParticles$ticked = false;
+		remove();
+		return true;
 	}
 
 	@Override
-	public void setTicked() {
-		this.ticked = true;
+	public void asyncParticles$setTicked() {
+		this.asyncParticles$ticked = true;
 	}
 
 	@Override
-	public boolean isTicked() {
-		return this.ticked;
+	public boolean asyncParticles$isTicked() {
+		return this.asyncParticles$ticked;
 	}
 }

@@ -2,15 +2,36 @@
   "required": true,
   "minVersion": "0.8",
   "package": "fun.qu_an.minecraft.asyncparticles.client.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_17",
+  "plugin": "fun.qu_an.minecraft.asyncparticles.client.APMixinPlugin",
   "client": [
+    "ForgeMixinMinecraft",
+    "MixinActiveProfiler",
     "MixinClientLevel",
+    "MixinLevelRenderer",
     "MixinMinecraft",
     "MixinParticle",
     "MixinParticleEngine",
-    "MixinTextureManager"
+    "MixinSoundEngine",
+    "MixinTextureManager",
+    "particlerain_vs.MixinDustParticle",
+    "particlerain_vs.MixinParticleRainClient",
+    "particlerain_vs.MixinRainParticle",
+    "particlerain_vs.MixinRippleParticle",
+    "particlerain_vs.MixinSnowParticle",
+    "particlerain_vs.MixinWeatherParticles",
+    "particlerain_vs.MixinWeatherParticleSpawner",
+    "particlerain_vs.MixinWeatherPatricle",
+    "vs2.InvokerEntityShipCollisionUtils",
+    "vs2.InvokerRaycastUtils",
+    "vs2.MixinParticle",
+    "vs2.MixinVSAnimation",
+    "vs2.MixinVSSoundEngine",
+    "sodium.MixinThreadLocalBufferBuilder"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+  ]
 }
