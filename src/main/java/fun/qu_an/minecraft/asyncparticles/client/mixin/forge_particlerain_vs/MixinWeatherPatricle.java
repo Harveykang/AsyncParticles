@@ -1,5 +1,6 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.particlerain_vs;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.forge_particlerain_vs;
 
+import com.leclowndu93150.particlerain.particle.WeatherParticle;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.vs2.InvokerEntityShipCollisionUtils;
 import net.minecraft.client.Camera;
@@ -17,7 +18,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.valkyrienskies.mod.common.util.EntityShipCollisionUtils;
-import pigcart.particlerain.particle.WeatherParticle;
 
 import java.util.List;
 
@@ -38,7 +38,7 @@ public abstract class MixinWeatherPatricle extends TextureSheetParticle {
 		weathersAABB = AABB.ofSize(new Vec3(x, y, z), 3, 3, 3);
 	}
 
-	@ModifyConstant(method = "tick", constant = @Constant(doubleValue = 0.2))
+	@ModifyConstant(method = "m_5989_", constant = @Constant(doubleValue = 0.2))
 	private double onTick(double original) {
 		return 1.7;
 	}

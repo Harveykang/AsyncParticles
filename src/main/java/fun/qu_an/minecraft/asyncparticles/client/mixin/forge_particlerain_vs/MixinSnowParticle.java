@@ -1,11 +1,11 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.particlerain_vs;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.forge_particlerain_vs;
 
 import fun.qu_an.minecraft.asyncparticles.client.VSClientUtils;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
-import pigcart.particlerain.particle.SnowParticle;
+import com.leclowndu93150.particlerain.particle.SnowParticle;
 
 import java.util.List;
 
@@ -47,7 +47,7 @@ public abstract class MixinSnowParticle extends MixinWeatherPatricle {
 			invisible = true;
 		}
 
-		if (h != e && h < (double) 0.0F){
+		if (h != e && h < (double) 0.0F) {
 			this.onGround = true;
 			invisible = true;
 		}

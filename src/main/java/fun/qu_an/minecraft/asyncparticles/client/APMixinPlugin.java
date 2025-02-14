@@ -40,9 +40,9 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		return switch (mixinClassName) {
 			case "fun.qu_an.minecraft.asyncparticles.client.mixin.ForgeMixinMinecraft" -> ModListHelper.IS_FORGE;
 			case "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinMinecraft" -> !ModListHelper.IS_FORGE;
-			case "fun.qu_an.minecraft.asyncparticles.client.mixin.sodium.MixinThreadLocalBufferBuilder" ->
-				ModListHelper.SODIUM_LOADED;
+			case "fun.qu_an.minecraft.asyncparticles.client.mixin.sodium.MixinThreadLocalBufferBuilder" -> ModListHelper.SODIUM_LOADED;
 			case "fun.qu_an.minecraft.asyncparticles.client.mixin.iris.MixinLevelRenderer" -> ModListHelper.IRIS_LOADED;
+			case "fun.qu_an.minecraft.asyncparticles.client.mixin.effectual.MixinAllEffects" -> ModListHelper.EFFECTUAL_LOADED;
 			default -> true;
 		};
 	}

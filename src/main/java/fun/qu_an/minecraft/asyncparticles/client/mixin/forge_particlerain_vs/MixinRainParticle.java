@@ -1,5 +1,6 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.particlerain_vs;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.forge_particlerain_vs;
 
+import com.leclowndu93150.particlerain.ParticleRegistry;
 import fun.qu_an.minecraft.asyncparticles.client.RippleParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.ShipHitResult;
 import fun.qu_an.minecraft.asyncparticles.client.VSClientUtils;
@@ -17,12 +18,11 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import pigcart.particlerain.ParticleRainClient;
-import pigcart.particlerain.particle.RainParticle;
+import com.leclowndu93150.particlerain.particle.RainParticle;
 
 import java.util.List;
 
-import static pigcart.particlerain.ParticleRainClient.config;
+import static com.leclowndu93150.particlerain.ParticleRainClient.config;
 
 @Mixin(value = RainParticle.class, remap = false)
 public abstract class MixinRainParticle extends MixinWeatherPatricle {
@@ -63,7 +63,7 @@ public abstract class MixinRainParticle extends MixinWeatherPatricle {
 			this.stoppedByCollision = true;
 		}
 
-		if (h != e && h < (double) 0.0F){
+		if (h != e && h < (double) 0.0F) {
 			this.onGround = true;
 		}
 
@@ -92,7 +92,7 @@ public abstract class MixinRainParticle extends MixinWeatherPatricle {
 			FluidState fluidState = level.getFluidState(hit.getBlockPos());
 			if (config.doRippleParticles && fluidState.isSourceOfType(Fluids.WATER)) {
 //						System.out.println("RIPPLE!" + hit.getBlockPos() + " " + spawnPos + " " + blockState + " " + fluidState);
-				Particle particle = mc.particleEngine.createParticle(ParticleRainClient.RIPPLE,
+				Particle particle = mc.particleEngine.createParticle(ParticleRegistry.RIPPLE.get(),
 					spawnPos.x,
 					spawnPos.y,
 					spawnPos.z,

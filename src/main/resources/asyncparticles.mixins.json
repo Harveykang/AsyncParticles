@@ -16,8 +16,17 @@
     "MixinParticleEngine",
     "MixinSoundEngine",
     "MixinTextureManager",
+    "effectual.MixinAllEffects",
+    "effectual.MixinWaterDripEffect",
+    "forge_particlerain_vs.MixinDustParticle",
+    "forge_particlerain_vs.MixinRainParticle",
+    "forge_particlerain_vs.MixinRippleParticle",
+    "forge_particlerain_vs.MixinSnowParticle",
+    "forge_particlerain_vs.MixinWeatherParticles",
+    "forge_particlerain_vs.MixinWeatherParticleSpawner",
+    "forge_particlerain_vs.MixinWeatherPatricle",
+    "iris.MixinLevelRenderer",
     "particlerain_vs.MixinDustParticle",
-    "particlerain_vs.MixinParticleRainClient",
     "particlerain_vs.MixinRainParticle",
     "particlerain_vs.MixinRippleParticle",
     "particlerain_vs.MixinSnowParticle",
@@ -35,6 +44,5 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "iris.MixinLevelRenderer"
   ]
 }

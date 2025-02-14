@@ -32,6 +32,10 @@ repositories {
     }
     maven { url = "https://maven.bawnorton.com/releases" } // mixin squared
     maven { url "https://maven.shedaniel.me/" }
+    maven {
+        name = 'MinecraftForge'
+        url = 'https://maven.minecraftforge.net/'
+    }
 }
 
 dependencies {
@@ -45,12 +49,13 @@ dependencies {
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-//    modRuntimeOnly "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
+    modRuntimeOnly "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
     modCompileOnly "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
-//    modRuntimeOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.5"
-//    modRuntimeOnly 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
+    modRuntimeOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.5"
+    modRuntimeOnly 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
     modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.5"
     modImplementation "maven.modrinth:particle-rain:3.0.6-1.20"
+    modImplementation "maven.modrinth:pretty-rain:96kQ9rp3"
     modRuntimeOnly "maven.modrinth:spark:1.10.53-fabric"
     modImplementation "maven.modrinth:sodium:mc1.20.1-0.5.11"
     modRuntimeOnly "me.shedaniel.cloth:cloth-config-fabric:11.1.136"
@@ -59,6 +64,9 @@ dependencies {
     modRuntimeOnly 'maven.modrinth:modernfix:5.20.2+mc1.20.1'
     modImplementation 'maven.modrinth:iris:1.7.5+1.20.1'
 
+    modImplementation 'maven.modrinth:effectual:0.5.0-1.20.1'
+    modRuntimeOnly 'maven.modrinth:owo-lib:0.11.2+1.20'
+
     modImplementation 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
     modRuntimeOnly "maven.modrinth:moonlight:fabric_1.20-2.13.62"
 
@@ -66,6 +74,8 @@ dependencies {
     modRuntimeOnly("org.antlr:antlr4-runtime:4.13.1")
     modRuntimeOnly("io.github.douira:glsl-transformer:2.0.1")
     modRuntimeOnly("org.anarres:jcpp:1.4.14")
+
+    compileOnly "net.minecraftforge:forge:1.20.1-47.3.0:universal"
 }
 
 processResources {

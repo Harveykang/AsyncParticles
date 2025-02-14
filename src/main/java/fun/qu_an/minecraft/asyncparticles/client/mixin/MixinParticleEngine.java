@@ -164,13 +164,6 @@ public abstract class MixinParticleEngine {
 	 */
 	@Overwrite
 	public void tick() {
-		if (!AsyncTicker.shouldTickParticles) {
-			if (!particlesToAdd.isEmpty()) {
-				particlesToAdd = new ArrayDeque<>();
-			}
-			return;
-		}
-
 		particles.forEach((particleRenderType, queue) -> {
 			this.level.getProfiler().push(particleRenderType.toString());
 			AsyncTicker.particleOperations.add(() -> tickParticleList(queue)); // TODO: 实现可分割队列
@@ -204,8 +197,8 @@ public abstract class MixinParticleEngine {
 			AsyncTicker.particleCleanup = null;
 		}
 
-		Particle particle;
 		if (!this.particlesToAdd.isEmpty()) {
+			Particle particle;
 			while ((particle = this.particlesToAdd.poll()) != null) {
 				this.particles.computeIfAbsent(particle.getRenderType(), (p_107347_) -> EvictingQueue.create(SimplePropertiesConfig.limit)).add(particle);
 			}

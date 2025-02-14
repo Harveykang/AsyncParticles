@@ -32,7 +32,7 @@ public class AsyncRenderer {
 	static {
 		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
 		SYNC_PARTICLE_TYPES.add(MobAppearanceParticle.class);
-		if (ModListHelper.DUMMY_MMY_LOADED) {
+		if (ModListHelper.DUMMMMMMY_LOADED) {
 			SYNC_PARTICLE_TYPES.add(DamageNumberParticle.class);
 		}
 		// TODO: configure this set

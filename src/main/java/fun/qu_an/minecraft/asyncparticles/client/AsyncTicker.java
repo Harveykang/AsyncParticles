@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticleEngine;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -21,8 +22,9 @@ public class AsyncTicker {
 	public static boolean shouldTickParticles = true;
 	public static CompletableFuture<Void> particleCleanup;
 	public static Operation<Void> tickParticleEngine;
+	public final static ArrayList<Runnable> endTickEvents = new ArrayList<>();
 	private static CompletableFuture<Void> taskAll = CompletableFuture.completedFuture(null);
-//	private static final AtomicInteger WORKER_COUNT = new AtomicInteger(1);
+	//	private static final AtomicInteger WORKER_COUNT = new AtomicInteger(1);
 //	public static final ExecutorService SCHEDULING_POOL = Util.makeExecutor("ParticleTick");
 	public static final ExecutorService SCHEDULING_POOL = Util.BACKGROUND_EXECUTOR;
 
@@ -53,7 +55,7 @@ public class AsyncTicker {
 	}
 
 	public static void onTickAfter(int j) {
-		if (tickParticleEngine != null){
+		if (tickParticleEngine != null) {
 			ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
 			profiler.push("particles");
 			tickParticleEngine.call();
@@ -72,6 +74,9 @@ public class AsyncTicker {
 		taskAll = CompletableFuture.runAsync(() -> {
 				for (Runnable blockEntityTask : blockEntityTasks) {
 					blockEntityTask.run();
+				}
+				for (Runnable endTickEvent : endTickEvents) {
+					endTickEvent.run();
 				}
 			}, SCHEDULING_POOL)
 			.thenCompose(v -> CompletableFuture.allOf(Arrays.stream(particleTasks)
