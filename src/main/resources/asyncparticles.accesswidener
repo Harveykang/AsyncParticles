@@ -24,3 +24,6 @@ accessible field net/minecraft/client/renderer/RenderStateShard WEATHER_TARGET L
 accessible method net/minecraft/Util onThreadException (Ljava/lang/Thread;Ljava/lang/Throwable;)V
 accessible method net/minecraft/Util getMaxThreads ()I
 accessible field net/minecraft/client/particle/ParticleEngine particlesToAdd Ljava/util/Queue;
+accessible field net/minecraft/client/renderer/RenderType sortOnUpload Z
+accessible field net/minecraft/client/renderer/LevelRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
+accessible method net/minecraft/Util makeExecutor (Ljava/lang/String;)Ljava/util/concurrent/ExecutorService;

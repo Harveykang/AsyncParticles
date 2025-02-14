@@ -8,8 +8,10 @@
     "ForgeMixinMinecraft",
     "MixinActiveProfiler",
     "MixinClientLevel",
+    "MixinFont",
     "MixinLevelRenderer",
     "MixinMinecraft",
+    "MixinMultiBufferSource$BufferSource",
     "MixinParticle",
     "MixinParticleEngine",
     "MixinSoundEngine",
@@ -22,16 +24,17 @@
     "particlerain_vs.MixinWeatherParticles",
     "particlerain_vs.MixinWeatherParticleSpawner",
     "particlerain_vs.MixinWeatherPatricle",
+    "sodium.MixinThreadLocalBufferBuilder",
     "vs2.InvokerEntityShipCollisionUtils",
     "vs2.InvokerRaycastUtils",
     "vs2.MixinParticle",
     "vs2.MixinVSAnimation",
-    "vs2.MixinVSSoundEngine",
-    "sodium.MixinThreadLocalBufferBuilder"
+    "vs2.MixinVSSoundEngine"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
+    "iris.MixinLevelRenderer"
   ]
 }

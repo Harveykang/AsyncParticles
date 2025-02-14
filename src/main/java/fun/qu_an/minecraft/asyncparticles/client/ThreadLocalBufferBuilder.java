@@ -1,7 +1,9 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Set;
@@ -9,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class ThreadLocalBufferBuilder implements BufferVertexConsumer {
-	private ThreadLocal<BufferBuilder> buffer;
+	private volatile ThreadLocal<BufferBuilder> buffer;
 	private final Set<BufferBuilder> bufferSet = Collections.newSetFromMap(new ConcurrentHashMap<>());
 	private final int size;
 
@@ -18,7 +20,7 @@ public class ThreadLocalBufferBuilder implements BufferVertexConsumer {
 	}
 
 	@Override
-	public VertexFormatElement currentElement() {
+	public @NotNull VertexFormatElement currentElement() {
 		return buffer.get().currentElement();
 	}
 
@@ -87,7 +89,23 @@ public class ThreadLocalBufferBuilder implements BufferVertexConsumer {
 		buffer.get().unsetDefaultColor();
 	}
 
-	public void end(Consumer<BufferBuilder.RenderedBuffer> consumer) {
+	public @Nullable BufferBuilder.RenderedBuffer end() {
+		BufferBuilder builder = buffer.get();
+		if (builder == null) {
+			return null;
+		}
+		try {
+			return builder.end();
+		} finally {
+			bufferSet.remove(builder);
+			buffer.remove();
+		}
+	}
+
+	public void endAll(Consumer<BufferBuilder.RenderedBuffer> consumer) {
+		if (!RenderSystem.isOnRenderThread()) {
+			throw new IllegalStateException("Cannot call end() outside of render thread");
+		}
 		bufferSet.forEach(bufferBuilder -> consumer.accept(bufferBuilder.end()));
 		bufferSet.clear();
 		this.buffer = null;
@@ -100,5 +118,18 @@ public class ThreadLocalBufferBuilder implements BufferVertexConsumer {
 			bufferSet.add(builder);
 			return builder;
 		});
+	}
+
+	public void setQuadSorting(VertexSorting vertexSorting) {
+		bufferSet.forEach(bufferBuilder -> bufferBuilder.setQuadSorting(vertexSorting));
+	}
+
+	public @Nullable BufferBuilder pollBuffer() {
+		try {
+			return buffer.get();
+		} finally {
+			bufferSet.remove(buffer.get());
+			buffer.remove();
+		}
 	}
 }

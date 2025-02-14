@@ -1,6 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
+import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
@@ -10,7 +12,13 @@ import java.util.Set;
 public class APMixinPlugin implements IMixinConfigPlugin {
 	@Override
 	public void onLoad(String mixinPackage) {
-
+		Mixins.registerErrorHandlerClass("fun.qu_an.minecraft.asyncparticles.client.APMixinErrorHandler");
+		MixinCancellerRegistrar.register((targetClassNames, mixinClassName)
+			-> switch (mixinClassName) {
+				case "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
+					 "com.moepus.flerovium.mixins.Particle.ParticleMixin" -> true;
+				default -> false;
+			});
 	}
 
 	@Override
@@ -30,9 +38,11 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			return ModListHelper.PARTICLERAIN_LOADED && ModListHelper.VS_LOADED && ModListHelper.IS_FORGE;
 		}
 		return switch (mixinClassName) {
-			case "fun.qu_an.minecraft.asyncparticles.client.mixin.ForgeMixinMinecraft"-> ModListHelper.IS_FORGE;
-			case "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinMinecraft"-> !ModListHelper.IS_FORGE;
-			case "fun.qu_an.minecraft.asyncparticles.client.mixin.sodium.MixinThreadLocalBufferBuilder" -> ModListHelper.SODIUM_LOADED;
+			case "fun.qu_an.minecraft.asyncparticles.client.mixin.ForgeMixinMinecraft" -> ModListHelper.IS_FORGE;
+			case "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinMinecraft" -> !ModListHelper.IS_FORGE;
+			case "fun.qu_an.minecraft.asyncparticles.client.mixin.sodium.MixinThreadLocalBufferBuilder" ->
+				ModListHelper.SODIUM_LOADED;
+			case "fun.qu_an.minecraft.asyncparticles.client.mixin.iris.MixinLevelRenderer" -> ModListHelper.IRIS_LOADED;
 			default -> true;
 		};
 	}

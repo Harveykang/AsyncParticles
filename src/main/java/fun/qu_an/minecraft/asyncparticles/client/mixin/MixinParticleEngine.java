@@ -4,21 +4,18 @@ import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.Lists;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.particle.TrackingEmitter;
+import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -30,6 +27,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -43,48 +41,18 @@ public abstract class MixinParticleEngine {
 	@Mutable
 	@Shadow
 	@Final
-	private Queue<Particle> particlesToAdd;
+	public Queue<Particle> particlesToAdd;
 
 	@Shadow
 	@Final
-	private Map<ParticleRenderType, Queue<Particle>> particles;
+	public Map<ParticleRenderType, Queue<Particle>> particles;
 
 	@Shadow
 	protected ClientLevel level;
 
-	/**
-	 * @author
-	 * @reason
-	 */
-	@Overwrite
-	private void tickParticleList(Collection<Particle> collection) {
-		if (!collection.isEmpty()) {
-			Iterator<Particle> iterator = collection.iterator();
-			while (iterator.hasNext()) {
-				if (AsyncTicker.cancelled) {
-					return;
-				}
-				Particle particle = iterator.next();
-				this.tickParticle(particle);
-				((TickedParticle) particle).asyncParticles$setTicked();
-				if (ModListHelper.VS_LOADED) {
-					if (VSClientUtils.isOutOfSight(particle)) {
-						particle.remove();
-						continue;
-					}
-				}
-				// to prevent break some mixin, trust jit compiler
-				//noinspection PointlessBooleanExpression
-				if (!particle.isAlive() && false) {
-					iterator.remove();
-				}
-			}
-		}
-	}
-
 //	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/Particle;render(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/Camera;F)V"))
 //	public void redirectRender(Particle instance, VertexConsumer vertexConsumer, Camera camera, float v) {
-//		if (((TickedParticle) instance).asyncParticles$isTicked()) {
+//		if (((ParticleAddon) instance).asyncParticles$isTicked()) {
 //			instance.render(vertexConsumer, camera, v);
 //		} else {
 //			instance.render(vertexConsumer, camera, v + 1f);
@@ -97,6 +65,7 @@ public abstract class MixinParticleEngine {
 	 */
 	@Overwrite
 	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f) {
+		// TODO: culling
 		PoseStack poseStack2 = null;
 		if (!AsyncRenderer.isStart) {
 			lightTexture.turnOnLightLayer();
@@ -107,43 +76,61 @@ public abstract class MixinParticleEngine {
 			RenderSystem.applyModelViewMatrix();
 		}
 
-		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
+		for (ParticleRenderType particleRenderType : (ModListHelper.IS_FORGE ? particles.keySet() : RENDER_ORDER)) {
 			Queue<Particle> iterable = this.particles.get(particleRenderType);
 			if (iterable == null) {
 				continue;
 			}
+			BufferBuilder bufferBuilder = AsyncRenderer.getBufferBuilder(particleRenderType);
 			if (!AsyncRenderer.isStart) {
-				RenderSystem.setShader(GameRenderer::getParticleShader);
-				BufferBuilder bufferBuilder = AsyncRenderer.getBufferBuilder(particleRenderType);
-				try {
-					particleRenderType.begin(null, this.textureManager);
-				} catch (NullPointerException ignored) {
-					// setup RenderSystem with a null bufferbuilder
-				}
-				BufferUploader.drawWithShader(bufferBuilder.end());
-			} else {
-				BufferBuilder bufferBuilder = AsyncRenderer.getBufferBuilder(particleRenderType);
-//					particleRenderType.begin(bufferBuilder, this.textureManager);
-				bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
-				Runnable runnable = () -> iterable.forEach(particle -> {
-					try {
-						if (((TickedParticle) particle).asyncParticles$isTicked()) {
-							AsyncRenderer.getBufferBuilder(particleRenderType);
-							particle.render(bufferBuilder, camera, f);
-						} else {
-							particle.render(bufferBuilder, camera, f + 1f);
+				List<? extends Particle> particles1 = AsyncRenderer.pollSync(particleRenderType);
+				if (!particles1.isEmpty()){
+					if (!bufferBuilder.building()) {
+						bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
+					}
+					for (Particle particle : particles1) {
+						float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
+						try {
+							particle.render(bufferBuilder, camera, g);
+						} catch (Throwable throwable) {
+							CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
+							CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
+							Objects.requireNonNull(particle);
+							crashReportCategory.setDetail("Particle", particle::toString);
+							Objects.requireNonNull(particleRenderType);
+							crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
+							throw new ReportedException(crashReport);
 						}
+					}
+				}
+				if (bufferBuilder.building()){
+					RenderSystem.setShader(GameRenderer::getParticleShader);
+					try {
+						particleRenderType.begin(null, this.textureManager);
+					} catch (NullPointerException ignored) {
+						// setup RenderSystem with a null bufferbuilder
+					}
+					BufferUploader.drawWithShader(bufferBuilder.end());
+				}
+			} else {
+				if (!bufferBuilder.building()) {
+					bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
+				}
+				Runnable runnable = () -> iterable.forEach(particle -> {
+					if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
+						AsyncRenderer.recordSync(particleRenderType, particle);
+						return;
+					}
+					float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
+					try {
+						particle.render(bufferBuilder, camera, g);
 					} catch (Throwable throwable) {
-						CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
-						CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
-						Objects.requireNonNull(particle);
-						crashReportCategory.setDetail("Particle", particle::toString);
-						Objects.requireNonNull(particleRenderType);
-						crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
-						throw new ReportedException(crashReport);
+						((ParticleAddon) particle).asyncedParticles$setRenderSync();
+						AsyncRenderer.markAsSync(particle.getClass());
+						AsyncRenderer.recordSync(particleRenderType, particle);
 					}
 				});
-				AsyncRenderer.add(particleRenderType, runnable);
+				AsyncRenderer.add(runnable);
 			}
 		}
 
@@ -183,9 +170,10 @@ public abstract class MixinParticleEngine {
 			}
 			return;
 		}
+
 		particles.forEach((particleRenderType, queue) -> {
 			this.level.getProfiler().push(particleRenderType.toString());
-			AsyncTicker.particleOperations.add(() -> tickParticleList(queue));
+			AsyncTicker.particleOperations.add(() -> tickParticleList(queue)); // TODO: 实现可分割队列
 			this.level.getProfiler().pop();
 		});
 
@@ -211,12 +199,6 @@ public abstract class MixinParticleEngine {
 			});
 		}
 
-//		particles.values().forEach(particles1 -> {
-//			if (particles1.isEmpty()) {
-//				return;
-//			}
-//			particles1.removeIf(particle1 -> ((TickedParticle) particle1).asyncParticles$shouldRemove());
-//		});
 		if (AsyncTicker.particleCleanup != null) {
 			AsyncTicker.particleCleanup.join();
 			AsyncTicker.particleCleanup = null;
@@ -228,6 +210,71 @@ public abstract class MixinParticleEngine {
 				this.particles.computeIfAbsent(particle.getRenderType(), (p_107347_) -> EvictingQueue.create(SimplePropertiesConfig.limit)).add(particle);
 			}
 		}
+
+//		particles.forEach((particleRenderType, queue) -> {
+//			this.level.getProfiler().push(particleRenderType.toString());
+//			tickParticleList(queue); // TODO: 实现可分割队列
+//			this.level.getProfiler().pop();
+//		});
+	}
+
+	/**
+	 * @author
+	 * @reason
+	 */
+	@Overwrite
+	private void tickParticleList(Collection<Particle> collection) {
+		if (collection.isEmpty()) {
+			return;
+		}
+		Iterator<Particle> iterator = collection.iterator();
+		//noinspection WhileLoopReplaceableByForEach
+		while (iterator.hasNext()) {
+			if (AsyncTicker.cancelled) {
+				return;
+			}
+			Particle particle = iterator.next();
+			this.tickParticle(particle);
+			((ParticleAddon) particle).asyncParticles$setTicked();
+			if (ModListHelper.VS_LOADED) {
+				if (VSClientUtils.isOutOfSight(particle)) {
+					particle.remove();
+				}
+			}
+		}
+//		int size = Math.min(16384, collection.size());
+//		Iterator<Particle> iterator = collection.iterator();
+//		while (iterator.hasNext()) {
+//			var particles = new Particle[size];
+//			for (int j = 0; j < size && iterator.hasNext(); j++) {
+//				particles[j] = iterator.next();
+//			}
+//			AsyncTicker.particleOperations.add(combineTasks(particles));
+//		}
+	}
+
+	@Unique
+	private Runnable combineTasks(Particle... task) {
+		int size = task.length;
+		return () -> {
+			//noinspection ForLoopReplaceableByForEach
+			for (int i = 0; i < size; i++) {
+				if (AsyncTicker.cancelled) {
+					return;
+				}
+				Particle particle = task[i];
+				if (particle == null) {
+					return;
+				}
+				this.tickParticle(particle);
+				((ParticleAddon) particle).asyncParticles$setTicked();
+				if (ModListHelper.VS_LOADED) {
+					if (VSClientUtils.isOutOfSight(particle)) {
+						particle.remove();
+					}
+				}
+			}
+		};
 	}
 
 	@WrapMethod(method = "tick")
@@ -242,19 +289,8 @@ public abstract class MixinParticleEngine {
 		}
 	}
 
-//	@Redirect(method = "tickParticleList", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;remove()V"))
-//	public void redirectRemove(Iterator instance) {
-//	}
-
-//	@Inject(method = "tickParticleList", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"), cancellable = true)
-//	public void tickParticleListNext(CallbackInfo ci) {
-//		if (Caches.cancelled) {
-//			ci.cancel();
-//		}
-//	}
-
 	@Inject(method = "reload", at = @At(value = "RETURN"), cancellable = true)
-	public void reload(PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller profilerFiller, ProfilerFiller profilerFiller2, Executor executor, Executor executor2, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+	public void reload(CallbackInfoReturnable<CompletableFuture<Void>> cir) {
 		cir.setReturnValue(cir.getReturnValue().thenRun(() -> {
 			try {
 				SimplePropertiesConfig.load();
@@ -266,28 +302,4 @@ public abstract class MixinParticleEngine {
 			return null;
 		}));
 	}
-
-//	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Map;forEach(Ljava/util/function/BiConsumer;)V"))
-//	public void redirectForEach(Map<ParticleRenderType, Queue<Particle>> instance, BiConsumer<ParticleRenderType, Queue<Particle>> v) {
-//		// do nothing
-//	}
-//
-//	@ModifyExpressionValue(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Queue;isEmpty()Z", ordinal = 1))
-//	public boolean modifyIsEmpty(boolean original) {
-//		return true;
-//	}
-
-//	@Inject(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Queue;isEmpty()Z", ordinal = 0), cancellable = true)
-//	public void tickTrackingEmitterEmpty(CallbackInfo ci) {
-//		if (Caches.cancelled) {
-//			ci.cancel();
-//		}
-//	}
-
-//	@Inject(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"), cancellable = true)
-//	public void tickTrackingEmitter(CallbackInfo ci) {
-//		if (Caches.cancelled) {
-//			ci.cancel();
-//		}
-//	}
 }

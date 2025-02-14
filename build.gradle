@@ -24,6 +24,12 @@ repositories {
         url = "https://api.modrinth.com/maven"
         name = "Modrinth"
     }
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
     maven { url = "https://maven.bawnorton.com/releases" } // mixin squared
     maven { url "https://maven.shedaniel.me/" }
 }
@@ -39,8 +45,10 @@ dependencies {
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
-    modRuntimeOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.5"
+//    modRuntimeOnly "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
+    modCompileOnly "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
+//    modRuntimeOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.5"
+//    modRuntimeOnly 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
     modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.5"
     modImplementation "maven.modrinth:particle-rain:3.0.6-1.20"
     modRuntimeOnly "maven.modrinth:spark:1.10.53-fabric"
@@ -49,7 +57,15 @@ dependencies {
     modRuntimeOnly 'maven.modrinth:architectury-api:9.2.14+fabric'
     modRuntimeOnly 'maven.modrinth:starlight:1.1.2+1.20'
     modRuntimeOnly 'maven.modrinth:modernfix:5.20.2+mc1.20.1'
+    modImplementation 'maven.modrinth:iris:1.7.5+1.20.1'
 
+    modImplementation 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
+    modRuntimeOnly "maven.modrinth:moonlight:fabric_1.20-2.13.62"
+
+    modCompileOnly "curse.maven:flerovium-1142875:6171369"
+    modRuntimeOnly("org.antlr:antlr4-runtime:4.13.1")
+    modRuntimeOnly("io.github.douira:glsl-transformer:2.0.1")
+    modRuntimeOnly("org.anarres:jcpp:1.4.14")
 }
 
 processResources {

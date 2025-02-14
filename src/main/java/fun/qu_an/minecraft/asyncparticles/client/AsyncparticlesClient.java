@@ -2,6 +2,8 @@ package fun.qu_an.minecraft.asyncparticles.client;
 
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.fabricmc.api.ClientModInitializer;
+import net.irisshaders.iris.Iris;
+import net.mehvahdjukaar.dummmmmmy.DummmmmmyClient;
 
 import java.io.IOException;
 

@@ -4,12 +4,14 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class AsyncTicker {
 	public static final Logger LOGGER = LogManager.getLogger();
@@ -20,6 +22,9 @@ public class AsyncTicker {
 	public static CompletableFuture<Void> particleCleanup;
 	public static Operation<Void> tickParticleEngine;
 	private static CompletableFuture<Void> taskAll = CompletableFuture.completedFuture(null);
+//	private static final AtomicInteger WORKER_COUNT = new AtomicInteger(1);
+//	public static final ExecutorService SCHEDULING_POOL = Util.makeExecutor("ParticleTick");
+	public static final ExecutorService SCHEDULING_POOL = Util.BACKGROUND_EXECUTOR;
 
 	public static void onTickBefore(int j) {
 		if (j != 0) {
@@ -37,8 +42,8 @@ public class AsyncTicker {
 						if (particles1.isEmpty()) {
 							return;
 						}
-						particles1.removeIf(particle1 -> ((TickedParticle) particle1).asyncParticles$shouldRemove());
-					}, Util.BACKGROUND_EXECUTOR);
+						particles1.removeIf(particle1 -> ((ParticleAddon) particle1).asyncParticles$shouldRemove());
+					}, SCHEDULING_POOL);
 				}
 				particleCleanup = CompletableFuture.allOf(futures);
 			}
@@ -68,9 +73,9 @@ public class AsyncTicker {
 				for (Runnable blockEntityTask : blockEntityTasks) {
 					blockEntityTask.run();
 				}
-			}, Util.BACKGROUND_EXECUTOR)
+			}, SCHEDULING_POOL)
 			.thenCompose(v -> CompletableFuture.allOf(Arrays.stream(particleTasks)
-				.map(runnable -> CompletableFuture.runAsync(runnable, Util.BACKGROUND_EXECUTOR)
+				.map(runnable -> CompletableFuture.runAsync(runnable, SCHEDULING_POOL)
 					.exceptionally(e -> {
 						LOGGER.error("Error executing particle operation", e);
 						return null;

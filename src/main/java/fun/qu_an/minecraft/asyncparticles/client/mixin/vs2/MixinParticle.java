@@ -31,10 +31,13 @@ public abstract class MixinParticle {
 	@WrapOperation(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;collideBoundingBox(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Lnet/minecraft/world/level/Level;Ljava/util/List;)Lnet/minecraft/world/phys/Vec3;"))
 	private Vec3 collideBoundingBox(Entity entity, Vec3 vec3, AABB aABB, Level level, List<VoxelShape> list, Operation<Vec3> original) {
 		// we do it in another thread, so we don't need to worry about costly collision checks
+		double xsize = aABB.getXsize();
+		double ysize = aABB.getYsize();
+		double zsize = aABB.getZsize();
 		return original.call(entity,
 			EntityShipCollisionUtils.INSTANCE.adjustEntityMovementForShipCollisions(null,
 				vec3,
-				aABB.inflate(0.1),
+				aABB.inflate(xsize >= 0.1 ? 0.0 : 0.1 - xsize, ysize >= 0.1 ? 0.0 : 0.1 - ysize, zsize >= 0.1 ? 0.0 : 0.1 - zsize),
 				level),
 			aABB, level, list);
 	}
