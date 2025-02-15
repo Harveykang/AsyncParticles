@@ -23,8 +23,7 @@
 
 ### Mods Tested
 
-###### ✅: (Full) Tested
-###### ⚠️: Partially Tested
+###### ✅: Compatible
 ###### ❌: Not Compatible
 
 ✅ Forge + Sinytra Connector  
@@ -39,7 +38,7 @@
 ✅ Particle Rain (Fabric)  
 ✅ Effectual (Fabric)  
 ✅ Valkyrien Skies (Fabric/Forge)  
-⚠️ Create (Fabric/Forge)  
+✅ Create (Fabric/Forge)  
 ✅ MmmMmmMmmMmm (Target Dummy) (Fabric/Forge)  
 ❌ MadParticle (Forge)  
 ⬜ ...  
