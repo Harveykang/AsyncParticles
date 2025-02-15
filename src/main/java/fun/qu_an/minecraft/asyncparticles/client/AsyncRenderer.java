@@ -201,11 +201,7 @@ public class AsyncRenderer {
 //				if (k != ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT) {
 //					return new ThreadLocalBufferBuilder(RenderType.SMALL_BUFFER_SIZE, ForkJoinPool.getCommonPoolParallelism());
 //				}
-				BufferBuilder bufferBuilder = new BufferBuilder(RenderType.SMALL_BUFFER_SIZE / 2);
-//				if (k == ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT) {
-//					bufferBuilder.setQuadSorting(VertexSorting.DISTANCE_TO_ORIGIN);
-//				}
-				return bufferBuilder;
+				return new BufferBuilder(RenderType.SMALL_BUFFER_SIZE / 2);
 			}); // 给多大好？
 	}
 

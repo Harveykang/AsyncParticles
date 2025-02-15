@@ -120,9 +120,9 @@ public class ThreadLocalBufferBuilder implements BufferVertexConsumer {
 		});
 	}
 
-	public void setQuadSorting(VertexSorting vertexSorting) {
-		bufferSet.forEach(bufferBuilder -> bufferBuilder.setQuadSorting(vertexSorting));
-	}
+//	public void setQuadSorting(VertexSorting vertexSorting) {
+//		bufferSet.forEach(bufferBuilder -> bufferBuilder.setQuadSorting(vertexSorting));
+//	}
 
 	public @Nullable BufferBuilder pollBuffer() {
 		try {
