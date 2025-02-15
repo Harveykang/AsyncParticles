@@ -62,7 +62,8 @@ dependencies {
     modRuntimeOnly 'maven.modrinth:architectury-api:9.2.14+fabric'
     modRuntimeOnly 'maven.modrinth:starlight:1.1.2+1.20'
     modRuntimeOnly 'maven.modrinth:modernfix:5.20.2+mc1.20.1'
-    modImplementation 'maven.modrinth:iris:1.7.5+1.20.1'
+    modCompileOnly 'maven.modrinth:iris:1.7.5+1.20.1'
+    modRuntimeOnly 'maven.modrinth:iris:1.7.5+1.20.1'
 
     modImplementation 'maven.modrinth:effectual:0.5.0-1.20.1'
     modRuntimeOnly 'maven.modrinth:owo-lib:0.11.2+1.20'

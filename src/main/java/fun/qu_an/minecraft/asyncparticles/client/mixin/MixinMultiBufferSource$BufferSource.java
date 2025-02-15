@@ -1,36 +1,20 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
-import com.mojang.blaze3d.pipeline.RenderCall;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.ThreadLocalBufferBuilder;
-import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.concurrent.ConcurrentHashMap;
 
 // FIXME: 可能导致兼容性地狱
 @Mixin(MultiBufferSource.BufferSource.class)
 public abstract class MixinMultiBufferSource$BufferSource
 //	implements RenderCall
 {
-	@Unique
-	private final ConcurrentHashMap<RenderType, ThreadLocalBufferBuilder> offThreads = new ConcurrentHashMap<>();
-	@Unique
-	private volatile boolean shouldEndOffThreads;
-	@Unique
-	private final ThreadLocal<Pair<RenderType, ThreadLocalBufferBuilder>> last = new ThreadLocal<>();
-
 	@Inject(method = "getBuffer", at = @At("HEAD"))
 	private void getBuffer(RenderType renderType, CallbackInfoReturnable<VertexConsumer> cir) {
 		RenderSystem.assertOnRenderThread();

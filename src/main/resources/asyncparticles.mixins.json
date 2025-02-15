@@ -27,7 +27,6 @@
     "forge_particlerain_vs.MixinWeatherParticles",
     "forge_particlerain_vs.MixinWeatherParticleSpawner",
     "forge_particlerain_vs.MixinWeatherPatricle",
-    "iris.MixinLevelRenderer",
     "particlerain_vs.MixinDustParticle",
     "particlerain_vs.MixinRainParticle",
     "particlerain_vs.MixinRippleParticle",

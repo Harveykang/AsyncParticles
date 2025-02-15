@@ -14,10 +14,11 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 	public void onLoad(String mixinPackage) {
 		MixinCancellerRegistrar.register((targetClassNames, mixinClassName)
 			-> switch (mixinClassName) {
-				case "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
-					 "com.moepus.flerovium.mixins.Particle.ParticleMixin" -> true;
-				default -> false;
-			});
+			case "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
+				 "com.moepus.flerovium.mixins.Particle.ParticleMixin",
+				 "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer" -> true;
+			default -> false;
+		});
 	}
 
 	@Override
@@ -45,9 +46,11 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		return switch (mixinClassName) {
 			case "fun.qu_an.minecraft.asyncparticles.client.mixin.ForgeMixinMinecraft" -> ModListHelper.IS_FORGE;
 			case "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinMinecraft" -> !ModListHelper.IS_FORGE;
-			case "fun.qu_an.minecraft.asyncparticles.client.mixin.sodium.MixinThreadLocalBufferBuilder" -> ModListHelper.SODIUM_LOADED;
+			case "fun.qu_an.minecraft.asyncparticles.client.mixin.sodium.MixinThreadLocalBufferBuilder" ->
+				ModListHelper.SODIUM_LOADED;
 			case "fun.qu_an.minecraft.asyncparticles.client.mixin.iris.MixinLevelRenderer" -> ModListHelper.IRIS_LOADED;
-			case "fun.qu_an.minecraft.asyncparticles.client.mixin.effectual.MixinAllEffects" -> ModListHelper.EFFECTUAL_LOADED;
+			case "fun.qu_an.minecraft.asyncparticles.client.mixin.effectual.MixinAllEffects" ->
+				ModListHelper.EFFECTUAL_LOADED;
 			default -> true;
 		};
 	}
