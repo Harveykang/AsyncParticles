@@ -18,6 +18,7 @@ public class MixinActiveProfiler {
 		thread = Thread.currentThread();
 	}
 
+	// TODO: 是否会破坏一些性能监测 mod？
 	@Inject(method = "push(Ljava/lang/String;)V", at = @At("HEAD"), cancellable = true)
 	private void push(String string, CallbackInfo ci) {
 		if (thread != Thread.currentThread()) {

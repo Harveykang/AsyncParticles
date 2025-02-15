@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinSoundEngine {
 	@Inject(method = "tick", at = @At("HEAD"), cancellable = true)
 	private void onTick(boolean bl, CallbackInfo ci) {
+		// TODO: 是否可以异步？（一些 mod 频繁播放音效会导致卡顿）
 		if (!AsyncTicker.shouldTickParticles) {
 			ci.cancel();
 		}

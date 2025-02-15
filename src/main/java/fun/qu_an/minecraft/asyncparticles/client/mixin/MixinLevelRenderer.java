@@ -42,6 +42,7 @@ public abstract class MixinLevelRenderer {
 		}
 	}
 
+	// TODO: 不加 iris 不应用这些 mixin
 	@Inject(method = "renderLevel",
 		slice = @Slice(from = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;")),
 		at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V"))

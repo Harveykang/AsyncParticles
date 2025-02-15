@@ -72,6 +72,7 @@ public class AsyncTicker {
 		Runnable[] blockEntityTasks = blockEntityOperations.toArray(new Runnable[0]);
 		blockEntityOperations.clear();
 		taskAll = CompletableFuture.runAsync(() -> {
+				// TODO: 是否可并行？（大概率不行）
 				for (Runnable blockEntityTask : blockEntityTasks) {
 					blockEntityTask.run();
 				}

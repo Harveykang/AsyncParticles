@@ -12,7 +12,6 @@ import java.util.Set;
 public class APMixinPlugin implements IMixinConfigPlugin {
 	@Override
 	public void onLoad(String mixinPackage) {
-		Mixins.registerErrorHandlerClass("fun.qu_an.minecraft.asyncparticles.client.APMixinErrorHandler");
 		MixinCancellerRegistrar.register((targetClassNames, mixinClassName)
 			-> switch (mixinClassName) {
 				case "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",

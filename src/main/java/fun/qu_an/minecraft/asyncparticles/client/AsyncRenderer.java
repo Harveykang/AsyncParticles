@@ -13,10 +13,7 @@ import net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.ItemPickupParticle;
-import net.minecraft.client.particle.MobAppearanceParticle;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.*;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -77,10 +74,11 @@ public class AsyncRenderer {
 		profiler.popPush("async_particles");
 		isStart = true;
 		MultiBufferSource.BufferSource bufferSource = mc.levelRenderer.renderBuffers.bufferSource();
+		ParticleEngine particleEngine = mc.particleEngine;
 		if (ModListHelper.IRIS_LOADED) {
-			((PhasedParticleEngine) mc.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
+			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
-		mc.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
+		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
 		Runnable poll;
 		var futures = new CompletableFuture[ASYNC_QUEUE.size()];
 		int i = 0;
@@ -112,8 +110,9 @@ public class AsyncRenderer {
 //		if (ModListHelper.IRIS_LOADED) {
 //			if (getRenderingSettings() == ParticleRenderingSettings.MIXED) {
 
-		((PhasedParticleEngine) mc.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
-		mc.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
+		ParticleEngine particleEngine = mc.particleEngine;
+		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
+		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
 
 //			}
 //		}
@@ -128,8 +127,9 @@ public class AsyncRenderer {
 //		if (ModListHelper.IRIS_LOADED) {
 //			if (getRenderingSettings() == ParticleRenderingSettings.MIXED) {
 
-		((PhasedParticleEngine) mc.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
-		mc.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
+		ParticleEngine particleEngine = mc.particleEngine;
+		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
+		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
 
 //			} else {
 //				((PhasedParticleEngine) mc.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
@@ -166,8 +166,9 @@ public class AsyncRenderer {
 //				mc.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
 //			} else {
 
-		((PhasedParticleEngine) mc.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
-		mc.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
+		ParticleEngine particleEngine = mc.particleEngine;
+		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
+		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
 
 //			}
 //		} else {

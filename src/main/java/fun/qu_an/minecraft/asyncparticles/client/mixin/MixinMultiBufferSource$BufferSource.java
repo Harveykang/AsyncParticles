@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+// FIXME: 可能导致兼容性地狱
 @Mixin(MultiBufferSource.BufferSource.class)
 public abstract class MixinMultiBufferSource$BufferSource
 //	implements RenderCall

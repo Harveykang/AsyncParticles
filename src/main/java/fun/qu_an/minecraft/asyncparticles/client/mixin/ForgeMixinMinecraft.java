@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
 public class ForgeMixinMinecraft {
+	// Forge 加了一个局部变量...
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
 	private void onRunTick(boolean bl, CallbackInfo ci, @Local(name = "k") int j) {
 		AsyncTicker.onTickBefore(j);

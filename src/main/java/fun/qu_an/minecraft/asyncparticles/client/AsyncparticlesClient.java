@@ -2,8 +2,10 @@ package fun.qu_an.minecraft.asyncparticles.client;
 
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.fabricmc.api.ClientModInitializer;
-import net.irisshaders.iris.Iris;
-import net.mehvahdjukaar.dummmmmmy.DummmmmmyClient;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.client.KeyboardHandler;
+import net.minecraft.client.gui.screens.controls.KeyBindsList;
 
 import java.io.IOException;
 

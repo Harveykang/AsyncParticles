@@ -36,6 +36,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+// TODO: 分为两个 Mixin
 @Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class MixinParticleEngine {
 	@Mutable
@@ -106,6 +107,7 @@ public abstract class MixinParticleEngine {
 				if (bufferBuilder.building()){
 					RenderSystem.setShader(GameRenderer::getParticleShader);
 					try {
+						// FIXME: 这样快还是查表快？
 						particleRenderType.begin(null, this.textureManager);
 					} catch (NullPointerException ignored) {
 						// setup RenderSystem with a null bufferbuilder
@@ -166,7 +168,7 @@ public abstract class MixinParticleEngine {
 	public void tick() {
 		particles.forEach((particleRenderType, queue) -> {
 			this.level.getProfiler().push(particleRenderType.toString());
-			AsyncTicker.particleOperations.add(() -> tickParticleList(queue)); // TODO: 实现可分割队列
+			AsyncTicker.particleOperations.add(() -> tickParticleList(queue));
 			this.level.getProfiler().pop();
 		});
 
@@ -200,6 +202,7 @@ public abstract class MixinParticleEngine {
 		if (!this.particlesToAdd.isEmpty()) {
 			Particle particle;
 			while ((particle = this.particlesToAdd.poll()) != null) {
+				// TODO: 实现可分割无锁队列
 				this.particles.computeIfAbsent(particle.getRenderType(), (p_107347_) -> EvictingQueue.create(SimplePropertiesConfig.limit)).add(particle);
 			}
 		}
