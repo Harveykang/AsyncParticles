@@ -20,17 +20,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.function.Supplier;
 
 @Mixin(value = ClientLevel.class, priority = 1001)
 public abstract class MixinClientLevel extends Level {
 	@Unique
 	private volatile boolean tickingBlockEntities;
-	@Unique
-	private final List<TickingBlockEntity> pendingBlockEntityTickers = new ArrayList<>();
 	@Unique
 	private static final Object lock = new Object();
 

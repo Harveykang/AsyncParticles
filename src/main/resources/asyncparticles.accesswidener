@@ -27,3 +27,4 @@ accessible field net/minecraft/client/particle/ParticleEngine particlesToAdd Lja
 accessible field net/minecraft/client/renderer/RenderType sortOnUpload Z
 accessible field net/minecraft/client/renderer/LevelRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
 accessible method net/minecraft/Util makeExecutor (Ljava/lang/String;)Ljava/util/concurrent/ExecutorService;
+accessible field net/minecraft/world/level/Level pendingBlockEntityTickers Ljava/util/List;
