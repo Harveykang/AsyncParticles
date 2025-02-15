@@ -5,6 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.APMixinPlugin",
   "client": [
+    "forge_particlerain.MixinWeatherParticleSpawner",
+    "particlerain.MixinWeatherParticleSpawner",
     "ForgeMixinMinecraft",
     "MixinActiveProfiler",
     "MixinClientLevel",
