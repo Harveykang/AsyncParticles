@@ -36,7 +36,7 @@ public abstract class MixinClientLevel extends Level {
 
 	@Override
 	public void addBlockEntityTicker(TickingBlockEntity tickingBlockEntity) {
-		synchronized (lock) {
+		synchronized (lock) { // TODO: Remove this shit
 			if (this.tickingBlockEntities) {
 				this.pendingBlockEntityTickers.add(tickingBlockEntity);
 			} else {
