@@ -15,13 +15,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class MixinMultiBufferSource$BufferSource
 //	implements RenderCall
 {
-	@Inject(method = "getBuffer", at = @At("HEAD"))
-	private void getBuffer(RenderType renderType, CallbackInfoReturnable<VertexConsumer> cir) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-	}
-
-	@Inject(method = "endBatch()V", at = @At("HEAD"))
-	private void endBatch(CallbackInfo ci) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-	}
+//	@Inject(method = "getBuffer", at = @At("HEAD"))
+//	private void getBuffer(RenderType renderType, CallbackInfoReturnable<VertexConsumer> cir) {
+//		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+//	}
+//
+//	@Inject(method = "endBatch()V", at = @At("HEAD"))
+//	private void endBatch(CallbackInfo ci) {
+//		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+//	}
 }

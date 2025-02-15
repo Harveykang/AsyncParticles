@@ -18,13 +18,13 @@ public abstract class MixinParticle implements ParticleAddon {
 
 	@Unique
 	private boolean asyncParticles$ticked;
-	@Unique
-	private boolean asyncParticles$renderSync;
+//	@Unique
+//	private boolean asyncParticles$renderSync;
 
-	@Inject(method = "<init>*", at = @At("RETURN"))
-	private void onInit(CallbackInfo ci) {
-		this.asyncParticles$renderSync = AsyncRenderer.shouldSync(((Particle) (Object) this).getClass());
-	}
+//	@Inject(method = "<init>*", at = @At("RETURN"))
+//	private void onInit(CallbackInfo ci) {
+//		this.asyncParticles$renderSync = AsyncRenderer.shouldSync(((Particle) (Object) this).getClass());
+//	}
 
 	@Override
 	public boolean asyncParticles$shouldRemove() {
@@ -44,13 +44,13 @@ public abstract class MixinParticle implements ParticleAddon {
 		return this.asyncParticles$ticked;
 	}
 
-	@Override
-	public void asyncedParticles$setRenderSync() {
-		asyncParticles$renderSync = true;
-	}
-
-	@Override
-	public boolean asyncedParticles$isRenderSync() {
-		return asyncParticles$renderSync;
-	}
+//	@Override
+//	public void asyncedParticles$setRenderSync() {
+//		asyncParticles$renderSync = true;
+//	}
+//
+//	@Override
+//	public boolean asyncedParticles$isRenderSync() {
+//		return asyncParticles$renderSync;
+//	}
 }

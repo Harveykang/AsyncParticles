@@ -49,11 +49,11 @@ dependencies {
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-//    modRuntimeOnly "maven.modrinth:sodium:mc1.16.5-0.2.0"
+    modRuntimeOnly "maven.modrinth:sodium:mc1.16.5-0.2.0"
     modCompileOnly "maven.modrinth:sodium:mc1.16.5-0.2.0"
 //    modRuntimeOnly "me.shedaniel.cloth:cloth-config-fabric:11.1.136"
-    modRuntimeOnly 'maven.modrinth:phosphor:mc1.16.2-0.8.0'
-    modRuntimeOnly 'maven.modrinth:modernfix:5.18.0+mc1.16.5'
+//    modRuntimeOnly 'maven.modrinth:phosphor:mc1.16.2-0.8.0'
+//    modRuntimeOnly 'maven.modrinth:modernfix:5.18.0+mc1.16.5'
 //    modRuntimeOnly 'maven.modrinth:iris:1.4.5+1.16.5'
     modCompileOnly 'maven.modrinth:iris:1.4.5+1.16.5'
 

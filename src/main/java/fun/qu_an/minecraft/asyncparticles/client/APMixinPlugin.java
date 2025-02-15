@@ -16,7 +16,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				case "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
 					 "com.moepus.flerovium.mixins.Particle.ParticleMixin",
 					 "net.coderbot.iris.mixin.fantastic.MixinLevelRenderer",
-					 "me.jellysquid.mods.sodium.mixin.features.particle.cull.MixinParticleManagerr"-> true;
+					 "me.jellysquid.mods.sodium.mixin.features.particle.cull.MixinParticleManager"-> true;
 				default -> false;
 			});
 	}

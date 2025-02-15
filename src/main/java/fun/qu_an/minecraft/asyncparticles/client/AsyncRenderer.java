@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.fantastic.ParticleRenderingPhase;
 import net.coderbot.iris.fantastic.PhasedParticleEngine;
@@ -75,17 +76,17 @@ public class AsyncRenderer {
 			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
-		Runnable poll;
-		var futures = new CompletableFuture[ASYNC_QUEUE.size()];
-		int i = 0;
-		while ((poll = ASYNC_QUEUE.poll()) != null) {
-			futures[i++] = CompletableFuture.runAsync(poll, executor)
-				.exceptionally(e -> {
-					LOGGER.error("Exception while rendering particle", e);
-					return null;
-				});
-		}
-		asyncTask = CompletableFuture.allOf(futures);
+//		Runnable poll;
+//		var futures = new CompletableFuture[ASYNC_QUEUE.size()];
+//		int i = 0;
+//		while ((poll = ASYNC_QUEUE.poll()) != null) {
+//			futures[i++] = CompletableFuture.runAsync(poll, executor)
+//				.exceptionally(e -> {
+//					LOGGER.error("Exception while rendering particle", e);
+//					return null;
+//				});
+//		}
+//		asyncTask = CompletableFuture.allOf(futures);
 		profiler.pop();
 	}
 
@@ -147,7 +148,11 @@ public class AsyncRenderer {
 			particlesTarget.copyDepthFrom(mc.getMainRenderTarget());
 			RenderStateShard.PARTICLES_TARGET.setupRenderState();
 		}
-		asyncTask.join();
+//		asyncTask.join();
+		Runnable poll;
+		while ((poll = ASYNC_QUEUE.poll()) != null) {
+			poll.run();
+		}
 		isStart = false;
 		MultiBufferSource.BufferSource bufferSource = mc.levelRenderer.renderBuffers.bufferSource();
 
