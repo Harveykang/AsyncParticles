@@ -73,7 +73,7 @@ public abstract class MixinParticleEngine {
 
 		for (ParticleRenderType particleRenderType : (ModListHelper.IS_FORGE ? particles.keySet() : RENDER_ORDER)) {
 			Queue<Particle> iterable = this.particles.get(particleRenderType);
-			if (iterable == null) {
+			if (iterable == null || iterable.isEmpty()) {
 				continue;
 			}
 			BufferBuilder bufferBuilder = AsyncRenderer.getBufferBuilder(particleRenderType);
