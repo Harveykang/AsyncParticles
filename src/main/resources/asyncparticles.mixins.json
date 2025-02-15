@@ -3,13 +3,10 @@
   "minVersion": "0.8",
   "package": "fun.qu_an.minecraft.asyncparticles.client.mixin",
   "compatibilityLevel": "JAVA_8",
-  "plugin": "fun.qu_an.minecraft.asyncparticles.client.APMixinPlugin",
   "client": [
     "MixinActiveProfiler",
     "MixinClientLevel",
-    "MixinLevelRenderer",
     "MixinMinecraft",
-    "MixinMultiBufferSource$BufferSource",
     "MixinParticle",
     "MixinParticleEngine",
     "MixinSoundEngine",

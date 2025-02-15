@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.profiling.ActiveProfiler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

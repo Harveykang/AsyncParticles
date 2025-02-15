@@ -4,20 +4,13 @@ import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.Lists;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
-import me.jellysquid.mods.sodium.client.model.vertex.VanillaVertexTypes;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.*;
@@ -54,108 +47,12 @@ public abstract class MixinParticleEngine {
 		particle.render(vertexConsumer, camera, f);
 	}
 
-//	/**
-//	 * @author
-//	 * @reason
-//	 */
-//	@Overwrite
-//	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f) {
-//		// TODO: culling
-//		if (!AsyncRenderer.isStart) {
-//			lightTexture.turnOnLightLayer();
-//			RenderSystem.enableAlphaTest();
-//			RenderSystem.defaultAlphaFunc();
-//			RenderSystem.enableDepthTest();
-//			RenderSystem.enableFog();
-//			RenderSystem.pushMatrix();
-//			RenderSystem.multMatrix(poseStack.last().pose());
-//		}
-//
-//		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
-//			Queue<Particle> iterable = this.particles.get(particleRenderType);
-//			if (iterable == null || iterable.isEmpty()) {
-//				continue;
-//			}
-//			BufferBuilder bufferBuilder = AsyncRenderer.getBufferBuilder(particleRenderType);
-//			if (!AsyncRenderer.isStart) {
-//				List<? extends Particle> particles1 = AsyncRenderer.pollSync(particleRenderType);
-//				if (!particles1.isEmpty()){
-//					if (!bufferBuilder.building()) {
-//						bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
-//					}
-//					for (Particle particle : particles1) {
-//						float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
-//						try {
-//							particle.render(bufferBuilder, camera, g);
-//						} catch (Throwable throwable) {
-//							CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
-//							CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
-//							Objects.requireNonNull(particle);
-//							crashReportCategory.setDetail("Particle", particle::toString);
-//							Objects.requireNonNull(particleRenderType);
-//							crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
-//							throw new ReportedException(crashReport);
-//						}
-//					}
-//				}
-//				if (bufferBuilder.building()){
-//					RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-//					try {
-//						// FIXME: 这样快还是查表快？
-//						particleRenderType.begin(null, this.textureManager);
-//					} catch (NullPointerException ignored) {
-//						// setup RenderSystem with a null bufferbuilder
-//					}
-//					bufferBuilder.end();
-//					BufferUploader.end(bufferBuilder);
-//				}
-//			} else {
-//				if (!bufferBuilder.building()) {
-//					bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
-//				}
-//				Runnable runnable = () -> iterable.forEach(particle -> {
-//					if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
-//						AsyncRenderer.recordSync(particleRenderType, particle);
-//						return;
-//					}
-//					float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
-//					try {
-//						particle.render(bufferBuilder, camera, g);
-//					} catch (Throwable throwable) {
-//						((ParticleAddon) particle).asyncedParticles$setRenderSync();
-//						AsyncRenderer.markAsSync(particle.getClass());
-//						AsyncRenderer.recordSync(particleRenderType, particle);
-//					}
-//				});
-//				AsyncRenderer.add(runnable);
-//			}
-//		}
-//
-//		if (!AsyncRenderer.isStart) {
-//			RenderSystem.popMatrix();
-//			RenderSystem.depthMask(true);
-//			RenderSystem.depthFunc(515);
-//			RenderSystem.disableBlend();
-//			RenderSystem.defaultAlphaFunc();
-//			lightTexture.turnOffLightLayer();
-//			RenderSystem.disableFog();
-//		}
-//	}
-
 	@Shadow
 	@Final
 	private Queue<TrackingEmitter> trackingEmitters;
 
 	@Shadow
 	protected abstract void tickParticle(Particle particle);
-
-	@Shadow
-	@Final
-	private TextureManager textureManager;
-
-	@Shadow
-	@Final
-	private static List<ParticleRenderType> RENDER_ORDER;
 
 	/**
 	 * @author

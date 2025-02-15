@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.fabricmc.api.ClientModInitializer;
 
 import java.io.IOException;
