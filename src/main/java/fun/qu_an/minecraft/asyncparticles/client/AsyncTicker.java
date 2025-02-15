@@ -79,7 +79,14 @@ public class AsyncTicker {
 				for (Runnable endTickEvent : endTickEvents) {
 					endTickEvent.run();
 				}
-			}, SCHEDULING_POOL)
+			}, SCHEDULING_POOL).exceptionally(e -> {
+				if (Minecraft.getInstance().level != null) {
+					// FIXME: 更好的异常处理方案
+					throw new RuntimeException(e);
+				}
+				LOGGER.error("Error executing before particle operation", e);
+				return null;
+			})
 			.thenCompose(v -> CompletableFuture.allOf(Arrays.stream(particleTasks)
 				.map(runnable -> CompletableFuture.runAsync(runnable, SCHEDULING_POOL)
 					.exceptionally(e -> {

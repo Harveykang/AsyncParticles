@@ -37,13 +37,13 @@ public class AsyncRenderer {
 
 	public static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = new ConcurrentHashMap<>();
 	private static final ArrayDeque<Runnable> ASYNC_QUEUE = new ArrayDeque<>();
-	private static final AtomicInteger WORKER_COUNT = new AtomicInteger(1);
 	private static final Logger LOGGER = LogUtils.getLogger();
-	public static final ForkJoinPool executor;
+	public static final ForkJoinPool EXECUTOR;
 
 	static {
+		AtomicInteger workerCount = new AtomicInteger(1);
 		int clamp = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 5);
-		executor = new ForkJoinPool(clamp, (forkJoinPool) -> {
+		EXECUTOR = new ForkJoinPool(clamp, (forkJoinPool) -> {
 			ForkJoinWorkerThread forkJoinWorkerThread = new ForkJoinWorkerThread(forkJoinPool) {
 				protected void onTermination(Throwable throwable) {
 					if (throwable != null) {
@@ -55,7 +55,7 @@ public class AsyncRenderer {
 					super.onTermination(throwable);
 				}
 			};
-			forkJoinWorkerThread.setName("AsyncParticle-" + WORKER_COUNT.getAndIncrement());
+			forkJoinWorkerThread.setName("AsyncParticle-" + workerCount.getAndIncrement());
 			return forkJoinWorkerThread;
 		}, Util::onThreadException, true);
 	}
@@ -83,7 +83,7 @@ public class AsyncRenderer {
 		var futures = new CompletableFuture[ASYNC_QUEUE.size()];
 		int i = 0;
 		while ((poll = ASYNC_QUEUE.poll()) != null) {
-			futures[i++] = CompletableFuture.runAsync(poll, executor)
+			futures[i++] = CompletableFuture.runAsync(poll, EXECUTOR)
 				.exceptionally(e -> {
 					LOGGER.error("Exception while rendering particle", e);
 					return null;
