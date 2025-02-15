@@ -75,6 +75,10 @@ dependencies {
     modRuntimeOnly("io.github.douira:glsl-transformer:2.0.1")
     modRuntimeOnly("org.anarres:jcpp:1.4.14")
 
+//    modRuntimeOnly("maven.modrinth:create-fabric:0.5.1-j-build.1631+mc1.20.1")
+//    modRuntimeOnly("maven.modrinth:brute-force-rendering-culling:F6dedvxg")
+    modRuntimeOnly("maven.modrinth:indium:1.0.34+mc1.20.1")
+
     compileOnly "net.minecraftforge:forge:1.20.1-47.3.0:universal"
 }
 

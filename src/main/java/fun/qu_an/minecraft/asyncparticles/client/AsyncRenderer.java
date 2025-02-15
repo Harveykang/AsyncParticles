@@ -94,6 +94,9 @@ public class AsyncRenderer {
 	}
 
 	public static void irisOpaque(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
+		if (!ModListHelper.IRIS_LOADED || !Iris.isPackInUseQuick() || getRenderingSettings() != ParticleRenderingSettings.MIXED) {
+			return;
+		}
 		Minecraft mc = Minecraft.getInstance();
 		mc.getProfiler().popPush("async_particles");
 		LevelRenderer levelRenderer = mc.levelRenderer;
@@ -119,6 +122,9 @@ public class AsyncRenderer {
 	}
 
 	public static void irisTranslucent(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
+		if (!ModListHelper.IRIS_LOADED || !Iris.isPackInUseQuick() || getRenderingSettings() != ParticleRenderingSettings.MIXED) {
+			return;
+		}
 		Minecraft mc = Minecraft.getInstance();
 		mc.getProfiler().popPush("async_particles");
 		LevelRenderer levelRenderer = mc.levelRenderer;
@@ -145,6 +151,9 @@ public class AsyncRenderer {
 	}
 
 	public static void join(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
+		if (ModListHelper.IRIS_LOADED && Iris.isPackInUseQuick() && getRenderingSettings() == ParticleRenderingSettings.MIXED) {
+			return;
+		}
 		Minecraft mc = Minecraft.getInstance();
 		mc.getProfiler().popPush("async_particles");
 		LevelRenderer levelRenderer = mc.levelRenderer;

@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.ParticleAddon;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -38,9 +40,9 @@ public abstract class MixinParticle implements ParticleAddon {
 		this.asyncParticles$renderSync = AsyncRenderer.shouldSync(((Particle) (Object) this).getClass());
 	}
 
-	@Redirect(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V",
+	@WrapOperation(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V",
 		at = @At(value = "INVOKE", target ="Lnet/minecraft/util/RandomSource;create()Lnet/minecraft/util/RandomSource;"))
-	private RandomSource onInit() {
+	private RandomSource onInit(Operation<RandomSource> original) {
 		return RandomSource.createNewThreadLocalInstance();
 	}
 

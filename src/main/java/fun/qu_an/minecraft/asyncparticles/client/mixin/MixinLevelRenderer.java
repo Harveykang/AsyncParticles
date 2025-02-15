@@ -6,8 +6,6 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
-import net.irisshaders.iris.Iris;
-import net.irisshaders.iris.shaderpack.properties.ParticleRenderingSettings;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.*;
@@ -37,9 +35,7 @@ public abstract class MixinLevelRenderer {
 		slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderWorldBorder(Lnet/minecraft/client/Camera;)V")),
 		at = @At(value = "INVOKE", shift = At.Shift.AFTER, remap = false, target = "Lcom/mojang/blaze3d/systems/RenderSystem;applyModelViewMatrix()V"))
 	private void onRenderLevelReturn(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-		if (!ModListHelper.IRIS_LOADED || !Iris.isPackInUseQuick() || AsyncRenderer.getRenderingSettings() != ParticleRenderingSettings.MIXED) {
-			AsyncRenderer.join(poseStack, f, camera, lightTexture);
-		}
+		AsyncRenderer.join(poseStack, f, camera, lightTexture);
 	}
 
 	// TODO: 不加 iris 不应用这些 mixin
@@ -47,16 +43,12 @@ public abstract class MixinLevelRenderer {
 		slice = @Slice(from = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;")),
 		at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V"))
 	private void onRenderLevelTransparencyChain(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-		if (ModListHelper.IRIS_LOADED && Iris.isPackInUseQuick() && AsyncRenderer.getRenderingSettings() == ParticleRenderingSettings.MIXED) {
-			AsyncRenderer.irisOpaque(poseStack, f, camera, lightTexture);
-		}
+		AsyncRenderer.irisOpaque(poseStack, f, camera, lightTexture);
 	}
 
 	@WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V"))
 	private void redirectRenderParticles(ParticleEngine instance, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f, Operation<Void> original) {
-		if (ModListHelper.IRIS_LOADED && Iris.isPackInUseQuick() && AsyncRenderer.getRenderingSettings() == ParticleRenderingSettings.MIXED) {
-			AsyncRenderer.irisTranslucent(poseStack, f, camera, lightTexture);
-		}
+		AsyncRenderer.irisTranslucent(poseStack, f, camera, lightTexture);
 	}
 
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;clear(Z)V"))
