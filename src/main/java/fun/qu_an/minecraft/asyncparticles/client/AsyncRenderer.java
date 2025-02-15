@@ -176,7 +176,9 @@ public class AsyncRenderer {
 //			} else {
 
 		ParticleEngine particleEngine = mc.particleEngine;
-		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
+		if (ModListHelper.IRIS_LOADED){
+			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
+		}
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
 
 //			}
