@@ -1,7 +1,6 @@
 accessWidener v2 named
 
 accessible field net/minecraft/Util BACKGROUND_EXECUTOR Ljava/util/concurrent/ExecutorService;
-transitive-mutable field net/minecraft/world/level/Level random Lnet/minecraft/util/RandomSource;
 accessible field net/minecraft/client/particle/ParticleEngine particles Ljava/util/Map;
 accessible field net/minecraft/client/particle/Particle x D
 accessible field net/minecraft/client/particle/Particle y D
@@ -10,7 +9,6 @@ accessible field net/minecraft/client/particle/Particle level Lnet/minecraft/cli
 accessible field net/minecraft/world/phys/HitResult location Lnet/minecraft/world/phys/Vec3;
 transitive-mutable field net/minecraft/world/phys/HitResult location Lnet/minecraft/world/phys/Vec3;
 accessible field net/minecraft/client/particle/Particle stoppedByCollision Z
-accessible field net/minecraft/client/particle/Particle MAXIMUM_COLLISION_VELOCITY_SQUARED D
 accessible field com/mojang/blaze3d/vertex/PoseStack poseStack Ljava/util/Deque;
 accessible method net/minecraft/client/renderer/RenderStateShard setupRenderState ()V
 accessible method net/minecraft/client/renderer/RenderStateShard clearRenderState ()V
@@ -22,7 +20,6 @@ accessible field net/minecraft/client/renderer/RenderStateShard PARTICLES_TARGET
 accessible field net/minecraft/client/renderer/RenderStateShard CLOUDS_TARGET Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;
 accessible field net/minecraft/client/renderer/RenderStateShard WEATHER_TARGET Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;
 accessible method net/minecraft/Util onThreadException (Ljava/lang/Thread;Ljava/lang/Throwable;)V
-accessible method net/minecraft/Util getMaxThreads ()I
 accessible field net/minecraft/client/particle/ParticleEngine particlesToAdd Ljava/util/Queue;
 accessible field net/minecraft/client/renderer/RenderType sortOnUpload Z
 accessible field net/minecraft/client/renderer/LevelRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;

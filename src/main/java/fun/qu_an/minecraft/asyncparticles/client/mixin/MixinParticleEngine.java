@@ -15,7 +15,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -45,15 +44,6 @@ public abstract class MixinParticleEngine {
 	@Shadow
 	protected ClientLevel level;
 
-//	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/Particle;render(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/Camera;F)V"))
-//	public void redirectRender(Particle instance, VertexConsumer vertexConsumer, Camera camera, float v) {
-//		if (((ParticleAddon) instance).asyncParticles$isTicked()) {
-//			instance.render(vertexConsumer, camera, v);
-//		} else {
-//			instance.render(vertexConsumer, camera, v + 1f);
-//		}
-//	}
-
 	/**
 	 * @author
 	 * @reason
@@ -61,19 +51,19 @@ public abstract class MixinParticleEngine {
 	@Overwrite
 	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f) {
 		// TODO: culling
-		PoseStack poseStack2 = null;
 		if (!AsyncRenderer.isStart) {
 			lightTexture.turnOnLightLayer();
+			RenderSystem.enableAlphaTest();
+			RenderSystem.defaultAlphaFunc();
 			RenderSystem.enableDepthTest();
-			poseStack2 = RenderSystem.getModelViewStack();
-			poseStack2.pushPose();
-			poseStack2.mulPoseMatrix(poseStack.last().pose());
-			RenderSystem.applyModelViewMatrix();
+			RenderSystem.enableFog();
+			RenderSystem.pushMatrix();
+			RenderSystem.multMatrix(poseStack.last().pose());
 		}
 
-		for (ParticleRenderType particleRenderType : (ModListHelper.IS_FORGE ? particles.keySet() : RENDER_ORDER)) {
+		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			Queue<Particle> iterable = this.particles.get(particleRenderType);
-			if (iterable == null) {
+			if (iterable == null || iterable.isEmpty()) {
 				continue;
 			}
 			BufferBuilder bufferBuilder = AsyncRenderer.getBufferBuilder(particleRenderType);
@@ -81,7 +71,7 @@ public abstract class MixinParticleEngine {
 				List<? extends Particle> particles1 = AsyncRenderer.pollSync(particleRenderType);
 				if (!particles1.isEmpty()){
 					if (!bufferBuilder.building()) {
-						bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
+						bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
 					}
 					for (Particle particle : particles1) {
 						float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
@@ -99,18 +89,19 @@ public abstract class MixinParticleEngine {
 					}
 				}
 				if (bufferBuilder.building()){
-					RenderSystem.setShader(GameRenderer::getParticleShader);
+					RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 					try {
 						// FIXME: 这样快还是查表快？
 						particleRenderType.begin(null, this.textureManager);
 					} catch (NullPointerException ignored) {
 						// setup RenderSystem with a null bufferbuilder
 					}
-					BufferUploader.drawWithShader(bufferBuilder.end());
+					bufferBuilder.end();
+					BufferUploader.end(bufferBuilder);
 				}
 			} else {
 				if (!bufferBuilder.building()) {
-					bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
+					bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
 				}
 				Runnable runnable = () -> iterable.forEach(particle -> {
 					if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
@@ -131,11 +122,13 @@ public abstract class MixinParticleEngine {
 		}
 
 		if (!AsyncRenderer.isStart) {
-			poseStack2.popPose();
-			RenderSystem.applyModelViewMatrix();
+			RenderSystem.popMatrix();
 			RenderSystem.depthMask(true);
+			RenderSystem.depthFunc(515);
 			RenderSystem.disableBlend();
+			RenderSystem.defaultAlphaFunc();
 			lightTexture.turnOffLightLayer();
+			RenderSystem.disableFog();
 		}
 	}
 
@@ -175,11 +168,6 @@ public abstract class MixinParticleEngine {
 						return;
 					}
 					emitter.tick();
-					if (ModListHelper.VS_LOADED) {
-						if (VSClientUtils.isOutOfSight(emitter)) {
-							emitter.remove();
-						}
-					}
 					if (!emitter.isAlive()) {
 						list.add(emitter);
 					}
@@ -200,12 +188,6 @@ public abstract class MixinParticleEngine {
 				this.particles.computeIfAbsent(particle.getRenderType(), (p_107347_) -> EvictingQueue.create(SimplePropertiesConfig.limit)).add(particle);
 			}
 		}
-
-//		particles.forEach((particleRenderType, queue) -> {
-//			this.level.getProfiler().push(particleRenderType.toString());
-//			tickParticleList(queue); // TODO: 实现可分割队列
-//			this.level.getProfiler().pop();
-//		});
 	}
 
 	/**
@@ -226,45 +208,7 @@ public abstract class MixinParticleEngine {
 			Particle particle = iterator.next();
 			this.tickParticle(particle);
 			((ParticleAddon) particle).asyncParticles$setTicked();
-			if (ModListHelper.VS_LOADED) {
-				if (VSClientUtils.isOutOfSight(particle)) {
-					particle.remove();
-				}
-			}
 		}
-//		int size = Math.min(16384, collection.size());
-//		Iterator<Particle> iterator = collection.iterator();
-//		while (iterator.hasNext()) {
-//			var particles = new Particle[size];
-//			for (int j = 0; j < size && iterator.hasNext(); j++) {
-//				particles[j] = iterator.next();
-//			}
-//			AsyncTicker.particleOperations.add(combineTasks(particles));
-//		}
-	}
-
-	@Unique
-	private Runnable combineTasks(Particle... task) {
-		int size = task.length;
-		return () -> {
-			//noinspection ForLoopReplaceableByForEach
-			for (int i = 0; i < size; i++) {
-				if (AsyncTicker.cancelled) {
-					return;
-				}
-				Particle particle = task[i];
-				if (particle == null) {
-					return;
-				}
-				this.tickParticle(particle);
-				((ParticleAddon) particle).asyncParticles$setTicked();
-				if (ModListHelper.VS_LOADED) {
-					if (VSClientUtils.isOutOfSight(particle)) {
-						particle.remove();
-					}
-				}
-			}
-		};
 	}
 
 	@WrapMethod(method = "tick")
