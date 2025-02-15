@@ -80,7 +80,8 @@ public class AsyncTicker {
 					endTickEvent.run();
 				}
 			}, SCHEDULING_POOL).exceptionally(e -> {
-				if (Minecraft.getInstance().level != null) {
+				Minecraft mc = Minecraft.getInstance();
+				if (mc.level != null && mc.player != null) {
 					// FIXME: 更好的异常处理方案
 					throw new RuntimeException(e);
 				}
