@@ -32,7 +32,7 @@ public class MixinSoundEngine {
 			// FIXME: 查明原因
 			original.call(bl);
 		} catch (NullPointerException e) {
-			LOGGER.error("Error while ticking particles", e);
+			LOGGER.error("Error while ticking sound engine", e);
 		}
 	}
 }
