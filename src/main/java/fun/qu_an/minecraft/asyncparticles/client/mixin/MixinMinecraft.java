@@ -11,12 +11,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
-	private void onRunTick(boolean bl, CallbackInfo ci, @Local(name = "j") int j) {
+	private void onRunTick(boolean bl, CallbackInfo ci, @Local(ordinal = 1) int j) {
 		AsyncTicker.onTickBefore(j);
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/Minecraft;tick()V"))
-	private void onRunTickAfter(boolean bl, CallbackInfo ci, @Local(name = "j") int j) {
+	private void onRunTickAfter(boolean bl, CallbackInfo ci, @Local(ordinal = 1) int j) {
 		AsyncTicker.onTickAfter(j);
 	}
 }
