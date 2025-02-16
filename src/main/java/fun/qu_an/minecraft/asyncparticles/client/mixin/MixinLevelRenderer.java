@@ -50,35 +50,27 @@ public abstract class MixinLevelRenderer {
 		AsyncRenderer.irisTranslucent(poseStack, f, camera, lightTexture);
 	}
 
-	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;clear(Z)V"))
+	@Redirect(method = "renderLevel",
+		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;particlesTarget:Lcom/mojang/blaze3d/pipeline/RenderTarget;")),
+		at = @At(value = "INVOKE", ordinal = 0, target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;clear(Z)V"))
 	private void redirectClearRenderTarget(RenderTarget instance, boolean bl) {
-		if (instance == particlesTarget) {
-			return;
-		}
-		instance.clear(bl);
 	}
 
-	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;copyDepthFrom(Lcom/mojang/blaze3d/pipeline/RenderTarget;)V"))
+	@Redirect(method = "renderLevel",
+		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;particlesTarget:Lcom/mojang/blaze3d/pipeline/RenderTarget;")),
+		at = @At(value = "INVOKE", ordinal = 0, target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;copyDepthFrom(Lcom/mojang/blaze3d/pipeline/RenderTarget;)V"))
 	private void redirectCopyDepthFrom(RenderTarget instance, RenderTarget target) {
-		if (instance == particlesTarget) {
-			return;
-		}
-		instance.copyDepthFrom(target);
 	}
 
-	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;setupRenderState()V"))
+	@Redirect(method = "renderLevel",
+		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderStateShard;PARTICLES_TARGET:Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;")),
+		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;setupRenderState()V"))
 	private void redirectSetupRenderState(RenderStateShard.OutputStateShard instance) {
-		if (RenderStateShard.PARTICLES_TARGET == instance) {
-			return;
-		}
-		instance.setupRenderState();
 	}
 
-	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;clearRenderState()V"))
+	@Redirect(method = "renderLevel",
+		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderStateShard;PARTICLES_TARGET:Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;")),
+		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;clearRenderState()V"))
 	private void redirectClearRenderState(RenderStateShard.OutputStateShard instance) {
-		if (RenderStateShard.PARTICLES_TARGET == instance) {
-			return;
-		}
-		instance.clearRenderState();
 	}
 }
