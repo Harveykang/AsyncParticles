@@ -27,8 +27,8 @@ public class AsyncTicker {
 	public static final ExecutorService SCHEDULING_POOL = Util.BACKGROUND_EXECUTOR;;
 
 	public static void onTickBefore(int j) {
+		beforeParticleFuture.join();
 		if (j != 0) {
-			beforeParticleFuture.join();
 			shouldTickParticles = false;
 		} else {
 			cancelled = true;
