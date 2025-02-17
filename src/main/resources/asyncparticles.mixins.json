@@ -39,7 +39,8 @@
     "vs2.InvokerRaycastUtils",
     "vs2.MixinParticle",
     "vs2.MixinVSAnimation",
-    "vs2.MixinVSSoundEngine"
+    "vs2.MixinVSSoundEngine",
+    "create.MixinDepotBehaviour"
   ],
   "injectors": {
     "defaultRequire": 1
