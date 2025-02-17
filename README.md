@@ -1,5 +1,7 @@
 # AsyncParticles
 
+- [Download](https://github.com/Harveykang/AsyncParticles/releases)
+
 ## Features
 
 - Vanilla Minecraft
