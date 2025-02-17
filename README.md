@@ -35,7 +35,7 @@
 ✅ Brute force Rendering Culling (Fabric/Forge)  
 ✅ Iris/Oculus (Fabric/Forge)  
 ✅ Startlight (Fabric/Forge)  
-✅ Particle Rain/Pretty Rain (Fabric/Forge)
+✅ Particle Rain/Pretty Rain (Fabric/Forge)  
 ✅ Effectual (Fabric)  
 ✅ Valkyrien Skies (Fabric/Forge)  
 ⚠️ Create (Fabric/Forge)  
