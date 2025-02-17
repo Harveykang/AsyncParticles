@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.storage.WritableLevelData;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,7 +37,11 @@ public abstract class MixinClientLevel extends Level {
 	}
 
 	@Override
-	public void addBlockEntityTicker(TickingBlockEntity tickingBlockEntity) {
+	public void addBlockEntityTicker(@NotNull TickingBlockEntity tickingBlockEntity) {
+		if (!AsyncTicker.shouldAsyncBlockEntityTick()) {
+			super.addBlockEntityTicker(tickingBlockEntity);
+			return;
+		}
 		synchronized (lock) { // TODO: Remove this shit
 			if (this.tickingBlockEntities) {
 				this.pendingBlockEntityTickers.add(tickingBlockEntity);
@@ -47,6 +53,10 @@ public abstract class MixinClientLevel extends Level {
 
 	@Override
 	protected void tickBlockEntities() {
+		if (!AsyncTicker.shouldAsyncBlockEntityTick()) {
+			super.tickBlockEntities();
+			return;
+		}
 		if (!AsyncTicker.shouldTickParticles) {
 			return;
 		}
@@ -83,7 +93,7 @@ public abstract class MixinClientLevel extends Level {
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	public void onInit(CallbackInfo ci) {
 		if (this.random instanceof LegacyRandomSource) {
-			this.random = RandomSource.createThreadSafe();
+			this.random = RandomSource.createNewThreadLocalInstance();
 		}
 	}
 

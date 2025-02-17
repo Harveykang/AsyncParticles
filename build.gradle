@@ -48,6 +48,10 @@ repositories {
         url = "https://jitpack.io/"
         content { includeGroupAndSubgroups("com.github") }
     }
+    maven {
+        name 'IzzelAliz Maven'
+        url 'https://maven.izzel.io/releases/'
+    }
 }
 
 dependencies {
@@ -98,10 +102,10 @@ dependencies {
 
     compileOnly "net.minecraftforge:forge:1.20.1-47.3.0:universal"
 
-    modImplementation("com.simibubi.create:create-fabric-$minecraft_version:0.5.1-j-build.1631+mc1.20.1")
+    compileOnly('maven.modrinth:create:1.20.1-0.5.1.j') // create forge
 
-
-    modCompileOnly 'maven.modrinth:create:1.20.1-0.5.1.j'
+    modCompileOnly("com.simibubi.create:create-fabric-$minecraft_version:0.5.1-j-build.1631+mc1.20.1")
+    modRuntimeOnly("com.simibubi.create:create-fabric-$minecraft_version:0.5.1-j-build.1631+mc1.20.1")
 
 }
 

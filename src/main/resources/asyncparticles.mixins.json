@@ -16,6 +16,10 @@
     "MixinParticleEngine",
     "MixinSoundEngine",
     "MixinTextureManager",
+    "create.MixinDepotBehaviour",
+    "create.MixinEjectorBlockEntity",
+    "forge_create.MixinDepotBehaviour",
+    "forge_create.MixinEjectorBlockEntity",
     "effectual.MixinAllEffects",
     "effectual.MixinWaterDripEffect",
     "forge_particlerain.MixinWeatherParticleSpawner",
@@ -39,8 +43,7 @@
     "vs2.InvokerRaycastUtils",
     "vs2.MixinParticle",
     "vs2.MixinVSAnimation",
-    "vs2.MixinVSSoundEngine",
-    "create.MixinDepotBehaviour"
+    "vs2.MixinVSSoundEngine"
   ],
   "injectors": {
     "defaultRequire": 1

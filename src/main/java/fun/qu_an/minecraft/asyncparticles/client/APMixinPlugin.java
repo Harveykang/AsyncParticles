@@ -44,7 +44,10 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			return ModListHelper.PARTICLERAIN_LOADED && ModListHelper.IS_FORGE;
 		}
 		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.create")) {
-			return ModListHelper.CREATE_LOADED;
+			return ModListHelper.CREATE_LOADED && !ModListHelper.IS_FORGE;
+		}
+		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.forge_create")) {
+			return ModListHelper.CREATE_LOADED && ModListHelper.IS_FORGE;
 		}
 		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.iris")) {
 			return ModListHelper.IRIS_LOADED;

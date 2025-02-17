@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -23,15 +24,15 @@ public class AsyncTicker {
 	public final static ArrayList<Runnable> endTickEvents = new ArrayList<>();
 	public final static ArrayList<Runnable> endTickOperations = new ArrayList<>();
 	private static CompletableFuture<Void> particleFuture = CompletableFuture.completedFuture(null);
-	private static CompletableFuture<Void> beforeParticleFuture;
+	private static CompletableFuture<Void> blockEntityTickFuture;
 	//	private static final AtomicInteger WORKER_COUNT = new AtomicInteger(1);
 //	public static final ExecutorService SCHEDULING_POOL = Util.makeExecutor("ParticleTick");
 	public static final ExecutorService SCHEDULING_POOL = Util.BACKGROUND_EXECUTOR;;
 
 	public static void onTickBefore(int j) {
-		if (beforeParticleFuture != null) {
-			beforeParticleFuture.join();
-			beforeParticleFuture = null;
+		if (blockEntityTickFuture != null) {
+			blockEntityTickFuture.join();
+			blockEntityTickFuture = null;
 		}
 		if (j != 0) {
 			shouldTickParticles = false;
@@ -58,6 +59,10 @@ public class AsyncTicker {
 		}
 	}
 
+	public static boolean shouldAsyncBlockEntityTick() {
+		return SimplePropertiesConfig.asyncClientBlockEntityTick;
+	}
+
 	public static void onTickAfter(int j) {
 		if (tickParticleEngine != null) {
 			ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
@@ -69,15 +74,21 @@ public class AsyncTicker {
 		if (j != 0) {
 			return;
 		}
-		List<Runnable> blockEntityOperations = AsyncTicker.blockEntityOperations;
-		Runnable[] blockEntityTasks = blockEntityOperations.toArray(new Runnable[0]);
-		blockEntityOperations.clear();
-		CompletableFuture<Void> beforeParticleFuture = CompletableFuture.runAsync(() -> {
-			for (Runnable blockEntityTask : blockEntityTasks) {
-				blockEntityTask.run();
-			}
-		}, SCHEDULING_POOL).exceptionally(AsyncTicker::tickBeforeExceptionally);
-		AsyncTicker.beforeParticleFuture = beforeParticleFuture;
+
+		CompletableFuture<Void> blockEntityTickFuture;
+		if (!shouldAsyncBlockEntityTick()) {
+			blockEntityTickFuture = CompletableFuture.completedFuture(null);
+		} else {
+			List<Runnable> blockEntityOperations = AsyncTicker.blockEntityOperations;
+			Runnable[] blockEntityTasks = blockEntityOperations.toArray(new Runnable[0]);
+			blockEntityOperations.clear();
+			blockEntityTickFuture = CompletableFuture.runAsync(() -> {
+				for (Runnable blockEntityTask : blockEntityTasks) {
+					blockEntityTask.run();
+				}
+			}, SCHEDULING_POOL).exceptionally(AsyncTicker::tickBeforeExceptionally);
+			AsyncTicker.blockEntityTickFuture = blockEntityTickFuture;
+		}
 
 		List<Runnable> endTickOperations = AsyncTicker.endTickOperations;
 		Runnable[] endTickTasks = endTickOperations.toArray(new Runnable[0]);
@@ -86,7 +97,7 @@ public class AsyncTicker {
 		Runnable[] particleTasks = particleOperations.toArray(new Runnable[0]);
 		particleOperations.clear();
 
-		particleFuture = beforeParticleFuture
+		particleFuture = blockEntityTickFuture
 			.thenRun(() -> {
 				// 每 tick 添加的不固定操作
 				for (Runnable endTickTask : endTickTasks) {
