@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -24,9 +25,22 @@ public abstract class MixinDepotBehaviour extends BlockEntityBehaviour {
 
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void onInit(SmartBlockEntity be, CallbackInfo ci) {
-		Level level = blockEntity.getLevel();
-		if (level != null && level.isClientSide) {
+		Level level = be.getLevel();
+		if (level == null) { // god-damn it, WHY!?!?!
+			if (!Thread.currentThread().getName().startsWith("Server")){
+				// TODO: Dimensional threads compat
+				incoming = new CopyOnWriteArrayList<>(incoming);
+			}
+		} else if (!level.isClientSide) {
 			incoming = new CopyOnWriteArrayList<>(incoming);
 		}
 	}
+
+//	@Inject(method = "tick()V", at = @At(value = "HEAD"))
+//	private void onTick(CallbackInfo ci) {
+//		List<TransportedItemStack> incoming = this.incoming;
+//		if (incoming instanceof ArrayList) {
+//			this.incoming = new CopyOnWriteArrayList<>(incoming);
+//		}
+//	}
 }
