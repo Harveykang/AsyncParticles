@@ -34,9 +34,10 @@ public abstract class MixinDepotBehaviour extends BlockEntityBehaviour {
 			if (!threadName.contains("server")){
 				incoming = new CopyOnWriteArrayList<>(incoming);
 			}
-		} else if (!level.isClientSide) {
+		} else if (level.isClientSide) {
 			incoming = new CopyOnWriteArrayList<>(incoming);
 		}
+		// TODO: 查明 CME 的原因；目前不清楚这么改会导致什么问题，但不会影响服务端，可能无关紧要
 	}
 
 //	@Inject(method = "tick()V", at = @At(value = "HEAD"))
