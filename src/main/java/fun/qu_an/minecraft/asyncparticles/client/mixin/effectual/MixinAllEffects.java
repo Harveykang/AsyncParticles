@@ -44,6 +44,11 @@ public abstract class MixinAllEffects {
 	@Redirect(method = "register", at = @At(value = "INVOKE", target = "Lnet/fabricmc/fabric/api/event/Event;register(Ljava/lang/Object;)V"))
 	private static void register(Event<?> instance, Object t) {
 		ClientTickEvents.EndTick endTick = (ClientTickEvents.EndTick) t;
-		AsyncTicker.endTickEvents.add(() -> endTick.onEndTick(Minecraft.getInstance()));
+		AsyncTicker.endTickEvents.add(() -> {
+			Minecraft mc = Minecraft.getInstance();
+			if (mc.level != null && mc.player != null) {
+				endTick.onEndTick(mc);
+			}
+		});
 	}
 }

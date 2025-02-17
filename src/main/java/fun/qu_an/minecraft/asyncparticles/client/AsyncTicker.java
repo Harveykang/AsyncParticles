@@ -1,18 +1,15 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticleEngine;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class AsyncTicker {
 	public static final Logger LOGGER = LogManager.getLogger();
@@ -23,17 +20,19 @@ public class AsyncTicker {
 	public static CompletableFuture<Void> particleCleanup;
 	public static Operation<Void> tickParticleEngine;
 	public final static ArrayList<Runnable> endTickEvents = new ArrayList<>();
-	private static CompletableFuture<Void> taskAll = CompletableFuture.completedFuture(null);
+	private static CompletableFuture<Void> particleFuture = CompletableFuture.completedFuture(null);
+	private static CompletableFuture<Void> beforeParticleFuture = CompletableFuture.completedFuture(null);
 	//	private static final AtomicInteger WORKER_COUNT = new AtomicInteger(1);
 //	public static final ExecutorService SCHEDULING_POOL = Util.makeExecutor("ParticleTick");
-	public static final ExecutorService SCHEDULING_POOL = Util.BACKGROUND_EXECUTOR;
+	public static final ExecutorService SCHEDULING_POOL = Util.BACKGROUND_EXECUTOR;;
 
 	public static void onTickBefore(int j) {
 		if (j != 0) {
+			beforeParticleFuture.join();
 			shouldTickParticles = false;
 		} else {
 			cancelled = true;
-			taskAll.join();
+			particleFuture.join();
 			Minecraft mc = Minecraft.getInstance();
 			if (!mc.isPaused()) {
 				Collection<Queue<Particle>> values = mc.particleEngine.particles.values();
@@ -62,32 +61,33 @@ public class AsyncTicker {
 			tickParticleEngine = null;
 			profiler.pop();
 		}
+		List<Runnable> blockEntityOperations = beforeParticleOperations;
+		Runnable[] blockEntityTasks = blockEntityOperations.toArray(new Runnable[0]);
+		blockEntityOperations.clear();
+		beforeParticleFuture = CompletableFuture.runAsync(() -> {
+			// TODO: 是否可并行？（大概率不行）
+			for (Runnable blockEntityTask : blockEntityTasks) {
+				blockEntityTask.run();
+			}
+			for (Runnable endTickEvent : endTickEvents) {
+				endTickEvent.run();
+			}
+		}, SCHEDULING_POOL).exceptionally(e -> {
+			Minecraft mc = Minecraft.getInstance();
+			if (mc.level != null && mc.player != null) {
+				// FIXME: 更好的异常处理方案
+				throw new RuntimeException(e);
+			}
+			LOGGER.error("Error executing before particle operation", e);
+			return null;
+		});
 		if (j != 0) {
 			return;
 		}
 		List<Runnable> particleOperations = AsyncTicker.particleOperations;
 		Runnable[] particleTasks = particleOperations.toArray(new Runnable[0]);
 		particleOperations.clear();
-		List<Runnable> blockEntityOperations = beforeParticleOperations;
-		Runnable[] blockEntityTasks = blockEntityOperations.toArray(new Runnable[0]);
-		blockEntityOperations.clear();
-		taskAll = CompletableFuture.runAsync(() -> {
-				// TODO: 是否可并行？（大概率不行）
-				for (Runnable blockEntityTask : blockEntityTasks) {
-					blockEntityTask.run();
-				}
-				for (Runnable endTickEvent : endTickEvents) {
-					endTickEvent.run();
-				}
-			}, SCHEDULING_POOL).exceptionally(e -> {
-				Minecraft mc = Minecraft.getInstance();
-				if (mc.level != null && mc.player != null) {
-					// FIXME: 更好的异常处理方案
-					throw new RuntimeException(e);
-				}
-				LOGGER.error("Error executing before particle operation", e);
-				return null;
-			})
+		particleFuture = beforeParticleFuture
 			.thenCompose(v -> CompletableFuture.allOf(Arrays.stream(particleTasks)
 				.map(runnable -> CompletableFuture.runAsync(runnable, SCHEDULING_POOL)
 					.exceptionally(e -> {

@@ -36,6 +36,18 @@ repositories {
         name = 'MinecraftForge'
         url = 'https://maven.minecraftforge.net/'
     }
+    maven { url = "https://maven.parchmentmc.org" } // Parchment mappings
+
+    maven { url = "https://mvn.devos.one/releases" } // Porting Lib releases
+    maven { url = "https://mvn.devos.one/snapshots" } // Create and several dependencies
+    maven { url = "https://maven.tterrag.com/" } // Flywheel
+    maven { url = "https://maven.jamieswhiteshirt.com/libs-release" } // Reach Entity Attributes
+    maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven" } // Forge Config API Port
+
+    maven { // Fabric ASM for Porting Lib
+        url = "https://jitpack.io/"
+        content { includeGroupAndSubgroups("com.github") }
+    }
 }
 
 dependencies {
@@ -44,7 +56,11 @@ dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
 //    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    mappings loom.officialMojangMappings()
+//    mappings loom.officialMojangMappings()
+    mappings(loom.layered {
+        it.officialMojangMappings { nameSyntheticMembers = false }
+        it.parchment("org.parchmentmc.data:parchment-$minecraft_version:2023.09.03@zip")
+    })
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
@@ -72,15 +88,18 @@ dependencies {
     modRuntimeOnly "maven.modrinth:moonlight:fabric_1.20-2.13.62"
 
     modCompileOnly "curse.maven:flerovium-1142875:6171369"
-    modRuntimeOnly("org.antlr:antlr4-runtime:4.13.1")
-    modRuntimeOnly("io.github.douira:glsl-transformer:2.0.1")
-    modRuntimeOnly("org.anarres:jcpp:1.4.14")
+    runtimeOnly("org.antlr:antlr4-runtime:4.13.1")
+    runtimeOnly("io.github.douira:glsl-transformer:2.0.1")
+    runtimeOnly("org.anarres:jcpp:1.4.14")
 
 //    modRuntimeOnly("maven.modrinth:create-fabric:0.5.1-j-build.1631+mc1.20.1")
 //    modRuntimeOnly("maven.modrinth:brute-force-rendering-culling:F6dedvxg")
     modRuntimeOnly("maven.modrinth:indium:1.0.34+mc1.20.1")
 
     compileOnly "net.minecraftforge:forge:1.20.1-47.3.0:universal"
+
+    modImplementation("com.simibubi.create:create-fabric-$minecraft_version:0.5.1-j-build.1631+mc1.20.1")
+
 }
 
 processResources {

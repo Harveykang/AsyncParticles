@@ -35,11 +35,4 @@ public class MixinWeatherParticleSpawner {
 			level.addParticle(particleOptions, x, y, z, g, h, i);
 		}
 	}
-
-	@WrapMethod(method = "update")
-	private static void onUpdate(ClientLevel level, Entity entity, float f, Operation<Void> original){
-		if (AsyncTicker.shouldTickParticles && level != null) {
-			AsyncTicker.beforeParticleOperations.add(() -> original.call(level, entity, f));
-		}
-	}
 }
