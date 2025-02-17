@@ -43,6 +43,9 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.forge_particlerain")) {
 			return ModListHelper.PARTICLERAIN_LOADED && ModListHelper.IS_FORGE;
 		}
+		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.create")) {
+			return ModListHelper.CREATE_LOADED;
+		}
 		return switch (mixinClassName) {
 			case "fun.qu_an.minecraft.asyncparticles.client.mixin.ForgeMixinMinecraft" -> ModListHelper.IS_FORGE;
 			case "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinMinecraft" -> !ModListHelper.IS_FORGE;

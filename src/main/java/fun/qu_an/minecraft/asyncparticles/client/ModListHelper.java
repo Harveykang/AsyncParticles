@@ -10,6 +10,7 @@ public class ModListHelper {
 	public static final boolean IRIS_LOADED = isModLoaded("iris");
 	public static final boolean DUMMMMMMY_LOADED = isModLoaded("dummmmmmy");
 	public static final boolean EFFECTUAL_LOADED = isModLoaded("effectual");
+	public static final boolean CREATE_LOADED = isModLoaded("create");
 
 	private static boolean isModLoaded(String modId) {
 		return FabricLoader.getInstance().isModLoaded(modId);
