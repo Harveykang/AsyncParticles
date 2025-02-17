@@ -3,6 +3,7 @@ import com.simibubi.create.content.kinetics.belt.transport.TransportedItemStack;
 import com.simibubi.create.content.logistics.depot.DepotBehaviour;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -12,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Mixin(value = DepotBehaviour.class, remap = false)
@@ -27,8 +29,9 @@ public abstract class MixinDepotBehaviour extends BlockEntityBehaviour {
 	private void onInit(SmartBlockEntity be, CallbackInfo ci) {
 		Level level = be.getLevel();
 		if (level == null) { // god-damn it, WHY!?!?!
-			if (!Thread.currentThread().getName().startsWith("Server")){
-				// TODO: Dimensional threads compat
+			String threadName = Thread.currentThread().getName().toLowerCase(Locale.ROOT);
+			// TODO: Dimensional threading 兼容，但是写成这样太丑了，有更好的方法吗？
+			if (!threadName.contains("server")){
 				incoming = new CopyOnWriteArrayList<>(incoming);
 			}
 		} else if (!level.isClientSide) {
