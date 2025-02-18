@@ -77,7 +77,7 @@ public class AsyncTicker {
 
 		CompletableFuture<Void> blockEntityTickFuture;
 		if (!shouldAsyncBlockEntityTick()) {
-			blockEntityTickFuture = CompletableFuture.completedFuture(null);
+			blockEntityTickFuture = CompletableFuture.runAsync(() -> {}, SCHEDULING_POOL);
 		} else {
 			List<Runnable> blockEntityOperations = AsyncTicker.blockEntityOperations;
 			Runnable[] blockEntityTasks = blockEntityOperations.toArray(new Runnable[0]);

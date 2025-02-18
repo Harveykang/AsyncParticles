@@ -9,9 +9,9 @@ import java.util.Properties;
 public class SimplePropertiesConfig {
 	public static final Path CONFIG_FILE = Paths.get("config", "asyncparticles.properties");
 	public static final int DEFAULT_LIMIT = 32768;
+	public static final boolean DEFAULT_ASYNC_BLOCK_ENTITY_TICK = true;
 	public static int limit = DEFAULT_LIMIT;
-	public static boolean DEFAULT_ASYNC_BLOCK_ENTITY_TICK = true;
-	public static boolean asyncClientBlockEntityTick = true;
+	public static boolean asyncClientBlockEntityTick = DEFAULT_ASYNC_BLOCK_ENTITY_TICK;
 	public static boolean asyncParticleCleanup = true;
 	public static boolean smoothParticleMotion = true;
 
