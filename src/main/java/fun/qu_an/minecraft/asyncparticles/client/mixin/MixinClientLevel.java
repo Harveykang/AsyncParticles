@@ -26,11 +26,6 @@ import java.util.function.Supplier;
 
 @Mixin(value = ClientLevel.class, priority = 1001)
 public abstract class MixinClientLevel extends Level {
-	@Unique
-	private volatile boolean tickingBlockEntities;
-	@Unique
-	private static final Object lock = new Object();
-
 	protected MixinClientLevel(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, RegistryAccess registryAccess, Holder<DimensionType> holder, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l, int i) {
 		super(writableLevelData, resourceKey, registryAccess, holder, supplier, bl, bl2, l, i);
 	}
@@ -41,12 +36,8 @@ public abstract class MixinClientLevel extends Level {
 			super.addBlockEntityTicker(tickingBlockEntity);
 			return;
 		}
-		synchronized (lock) { // TODO: Remove this shit
-			if (this.tickingBlockEntities) {
-				this.pendingBlockEntityTickers.add(tickingBlockEntity);
-			} else {
-				this.blockEntityTickers.add(tickingBlockEntity);
-			}
+		synchronized (pendingBlockEntityTickers) {
+			this.pendingBlockEntityTickers.add(tickingBlockEntity);
 		}
 	}
 
@@ -62,9 +53,8 @@ public abstract class MixinClientLevel extends Level {
 		ProfilerFiller profilerFiller = this.getProfiler();
 		profilerFiller.push("blockEntities");
 		Runnable runnable = () -> {
-			this.tickingBlockEntities = true;
 			if (!this.pendingBlockEntityTickers.isEmpty()) {
-				synchronized (lock) {
+				synchronized (pendingBlockEntityTickers) {
 					if (!this.pendingBlockEntityTickers.isEmpty()) {
 						this.blockEntityTickers.addAll(this.pendingBlockEntityTickers);
 						this.pendingBlockEntityTickers.clear();
@@ -83,7 +73,6 @@ public abstract class MixinClientLevel extends Level {
 				}
 			}
 
-			this.tickingBlockEntities = false;
 		};
 		AsyncTicker.blockEntityOperations.add(runnable);
 		profilerFiller.pop();
