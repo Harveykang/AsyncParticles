@@ -3,17 +3,16 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
-import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.level.storage.WritableLevelData;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
@@ -92,9 +91,7 @@ public abstract class MixinClientLevel extends Level {
 
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	public void onInit(CallbackInfo ci) {
-		if (this.random instanceof LegacyRandomSource) {
-			this.random = RandomSource.createNewThreadLocalInstance();
-		}
+		this.random = new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong());
 	}
 
 	@WrapMethod(method = "animateTick")
