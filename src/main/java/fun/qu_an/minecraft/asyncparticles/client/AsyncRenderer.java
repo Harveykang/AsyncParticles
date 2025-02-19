@@ -15,6 +15,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class AsyncRenderer {
 	public static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
+	public static Frustum frustum;
 
 	static {
 		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
@@ -55,7 +57,8 @@ public class AsyncRenderer {
 					super.onTermination(throwable);
 				}
 			};
-			forkJoinWorkerThread.setName("AsyncParticle-" + workerCount.getAndIncrement());
+			forkJoinWorkerThread.setName("AsyncParticleRenderer-" + workerCount.getAndIncrement());
+			forkJoinWorkerThread.setDaemon(true);
 			return forkJoinWorkerThread;
 		}, Util::onThreadException, true);
 	}
@@ -176,7 +179,7 @@ public class AsyncRenderer {
 //			} else {
 
 		ParticleEngine particleEngine = mc.particleEngine;
-		if (ModListHelper.IRIS_LOADED){
+		if (ModListHelper.IRIS_LOADED) {
 			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
@@ -191,7 +194,7 @@ public class AsyncRenderer {
 		}
 	}
 
-	public static ParticleRenderingSettings getRenderingSettings() {
+	private static ParticleRenderingSettings getRenderingSettings() {
 		return Iris.getPipelineManager().getPipeline().map(WorldRenderingPipeline::getParticleRenderingSettings).orElse(ParticleRenderingSettings.MIXED);
 	}
 

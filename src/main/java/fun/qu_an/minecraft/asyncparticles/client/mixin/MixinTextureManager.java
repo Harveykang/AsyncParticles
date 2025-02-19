@@ -14,13 +14,13 @@ public class MixinTextureManager {
 	@WrapMethod(method = "tick")
 	public void wrapTick(Operation<Void> original) {
 		if (AsyncTicker.shouldTickParticles) {
-			AsyncTicker.particleOperations.add(original::call);
+			AsyncTicker.endTickOperations.add(original::call);
 		}
 	}
 
 	@Inject(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"), cancellable = true)
 	public void onTickIteratorNext(CallbackInfo ci) {
-		if (AsyncTicker.cancelled) {
+		if (AsyncTicker.isCancelled() && !AsyncTicker.forceDoneTextureTick()) {
 			ci.cancel();
 		}
 	}

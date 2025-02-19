@@ -28,3 +28,11 @@ accessible field net/minecraft/client/renderer/RenderType sortOnUpload Z
 accessible field net/minecraft/client/renderer/LevelRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
 accessible method net/minecraft/Util makeExecutor (Ljava/lang/String;)Ljava/util/concurrent/ExecutorService;
 accessible field net/minecraft/world/level/Level pendingBlockEntityTickers Ljava/util/List;
+accessible field net/minecraft/client/particle/Particle bbWidth F
+accessible field net/minecraft/client/particle/Particle bbHeight F
+accessible field net/minecraft/client/renderer/culling/Frustum intersection Lorg/joml/FrustumIntersection;
+accessible field net/minecraft/client/renderer/culling/Frustum camX D
+accessible field net/minecraft/client/renderer/culling/Frustum camY D
+accessible field net/minecraft/client/renderer/culling/Frustum camZ D
+accessible method net/minecraft/client/particle/ParticleEngine clearParticles ()V
+accessible method net/minecraft/client/particle/ParticleEngine updateCount (Lnet/minecraft/core/particles/ParticleGroup;I)V

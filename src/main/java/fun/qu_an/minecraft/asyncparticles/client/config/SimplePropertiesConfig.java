@@ -9,24 +9,22 @@ import java.util.Properties;
 public class SimplePropertiesConfig {
 	public static final Path CONFIG_FILE = Paths.get("config", "asyncparticles.properties");
 	public static final int DEFAULT_LIMIT = 32768;
-	public static final boolean DEFAULT_ASYNC_BLOCK_ENTITY_TICK = true;
 	public static int limit = DEFAULT_LIMIT;
-	public static boolean asyncClientBlockEntityTick = DEFAULT_ASYNC_BLOCK_ENTITY_TICK;
-	public static boolean asyncParticleCleanup = true;
-	public static boolean smoothParticleMotion = true;
+	public static boolean asyncClientBlockEntityTick = true;
+	public static boolean forceDoneBlockAnimateTick = false;
+	public static boolean forceDoneParticleTick = false;
+	public static boolean forceDoneTextureTick = false;
+	private static boolean shouldSave;
 
 	public static void load() throws IOException {
 		Properties properties = new Properties();
 		if (!Files.exists(CONFIG_FILE)) {
 			Files.createDirectories(CONFIG_FILE.getParent());
 			Files.createFile(CONFIG_FILE);
-			properties.setProperty("limit", String.valueOf(DEFAULT_LIMIT));
-			properties.setProperty("asyncClientBlockEntityTick", String.valueOf(DEFAULT_ASYNC_BLOCK_ENTITY_TICK));
-			properties.store(Files.newOutputStream(CONFIG_FILE), null);
 		} else {
 			properties.load(Files.newInputStream(CONFIG_FILE));
 		}
-		boolean shouldSave = false;
+
 		String limitStr = properties.getProperty("limit");
 		int limit;
 		try {
@@ -37,21 +35,31 @@ public class SimplePropertiesConfig {
 			limit = DEFAULT_LIMIT;
 		}
 		SimplePropertiesConfig.limit = limit;
-		
-		String asyncClientBlockEntityTickStr = properties.getProperty("asyncClientBlockEntityTick");
-		boolean asyncClientBlockEntityTick;
-		if (asyncClientBlockEntityTickStr != null) {
-			asyncClientBlockEntityTick = Boolean.parseBoolean(asyncClientBlockEntityTickStr);
-		} else {
-			properties.setProperty("asyncClientBlockEntityTick", String.valueOf(DEFAULT_ASYNC_BLOCK_ENTITY_TICK));
-			shouldSave = true;
-			asyncClientBlockEntityTick = DEFAULT_ASYNC_BLOCK_ENTITY_TICK;
-		}
-		SimplePropertiesConfig.asyncClientBlockEntityTick = asyncClientBlockEntityTick;
-		
+
+		asyncClientBlockEntityTick = getBoolean(properties, "asyncClientBlockEntityTick", true);
+		forceDoneBlockAnimateTick = getBoolean(properties, "forceDoneBlockAnimateTick", false);
+		forceDoneParticleTick = getBoolean(properties, "forceDoneParticleTick", false);
+		forceDoneTextureTick = getBoolean(properties, "forceDoneTextureTick", false);
+
 		if (shouldSave) {
 			properties.store(Files.newOutputStream(CONFIG_FILE), null);
+			shouldSave = false;
 		}
 	}
 
+	private static boolean getBoolean(Properties properties, String key, boolean defaultValue) {
+		String b = properties.getProperty(key);
+		if (b != null) {
+			return !Boolean.toString(!defaultValue).equalsIgnoreCase(b);
+		} else {
+			properties.setProperty(key, String.valueOf(defaultValue));
+			shouldSave = true;
+			return defaultValue;
+		}
+	}
+
+	@FunctionalInterface
+	private interface BooleanPropertyConsumer<T> {
+		void accept(T value, boolean shouldSave);
+	}
 }

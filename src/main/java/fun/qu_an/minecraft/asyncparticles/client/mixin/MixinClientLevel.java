@@ -16,7 +16,6 @@ import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.level.storage.WritableLevelData;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -92,7 +91,7 @@ public abstract class MixinClientLevel extends Level {
 
 	@Inject(method = "animateTick", at = @At(value = "CONSTANT", args = "intValue=16"), cancellable = true)
 	public void onAnimateTick(int i, int j, int k, CallbackInfo ci) {
-		if (AsyncTicker.cancelled) {
+		if (AsyncTicker.isCancelled() && !AsyncTicker.forceDoneBlockAnimateTick()) {
 			ci.cancel();
 		}
 	}

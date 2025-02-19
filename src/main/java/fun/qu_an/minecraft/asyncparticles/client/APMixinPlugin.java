@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
+import com.moepus.flerovium.mixins.Particle.ParticleEngineMixin;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -14,7 +15,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 	public void onLoad(String mixinPackage) {
 		MixinCancellerRegistrar.register((targetClassNames, mixinClassName)
 			-> switch (mixinClassName) {
-			case "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
+			case
+//				"com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
 				 "com.moepus.flerovium.mixins.Particle.ParticleMixin",
 				 "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer" -> true;
 			default -> false;
@@ -57,6 +59,9 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		}
 		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.sodium")) {
 			return ModListHelper.SODIUM_LOADED;
+		}
+		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.flerovium")) {
+			return ModListHelper.FLEROVIUM_LOADED;
 		}
 		return switch (mixinClassName) {
 			case "fun.qu_an.minecraft.asyncparticles.client.mixin.ForgeMixinMinecraft" -> ModListHelper.IS_FORGE;

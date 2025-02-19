@@ -107,7 +107,10 @@ dependencies {
     modCompileOnly("com.simibubi.create:create-fabric-$minecraft_version:0.5.1-j-build.1631+mc1.20.1")
     modRuntimeOnly("com.simibubi.create:create-fabric-$minecraft_version:0.5.1-j-build.1631+mc1.20.1")
 
-//    modImplementation 'maven.modrinth:c2me-fabric:0.2.0+alpha.11.16+1.20.1'
+    modCompileOnly("maven.modrinth:effective:2.3.2-1.20.1")
+//    modRuntimeOnly("maven.modrinth:effective:2.3.2-1.20.1") // add to /libs and unzip all jarinjars
+
+//    modImplementation 'maven.modrinth:c2me-fabric:0.2.0+alpha.11.16+1.20.1' // add to /libs and unzip all jarinjars
     modRuntimeOnly fileTree(dir: 'libs', include: '*.jar')
     modCompileOnly fileTree(dir: 'libs', include: 'c2me-*.jar')
 }

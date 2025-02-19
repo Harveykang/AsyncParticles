@@ -11,6 +11,8 @@ public class ModListHelper {
 	public static final boolean DUMMMMMMY_LOADED = isModLoaded("dummmmmmy");
 	public static final boolean EFFECTUAL_LOADED = isModLoaded("effectual");
 	public static final boolean CREATE_LOADED = isModLoaded("create");
+	public static final boolean FABRIC_API_LOADED = isModLoaded("fabric");
+	public static final boolean FLEROVIUM_LOADED = isModLoaded("flerovium");
 
 	private static boolean isModLoaded(String modId) {
 		return FabricLoader.getInstance().isModLoaded(modId);
