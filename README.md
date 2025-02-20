@@ -8,11 +8,11 @@
     - Async ticking/rendering of particles.  
       (Reduced frame-time and spikes.)
 - Pretty Rain/Particle Rain
-    - Reduced frame-time spikes.
+    - Async particle gen.
 - Valkyrien Skies + Pretty Rain/Particle Rain
     - Weather particles no longer pass through ships.
 - Effectual
-    - Reduced frame-time spikes.
+    - Async particle gen.
 
 ## Mods Recommended
 
@@ -26,11 +26,13 @@
 ###### ✅: Compatible
 ###### 🔄️: Work in progress
 ###### ⚠️: Need more testing
+###### ❔: Works fine, but not fully tested.
 ###### ❌: Not Compatible
 
 ### Mods Tested
 
-⚠️ Create (Fabric/Forge)  
+❔ Create (Fabric/Forge)  
+❔ Effective/Effecticularity (Fabric/Forge)  
 ✅ Forge + Sinytra Connector  
 ✅ Fabric  
 ✅ ModernFix (Fabric/Forge)  
