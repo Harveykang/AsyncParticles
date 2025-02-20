@@ -5,6 +5,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
+import team.lodestar.lodestone.config.ClientConfig;
 
 import java.io.IOException;
 
@@ -22,6 +23,7 @@ public class AsyncparticlesClient implements ClientModInitializer {
 						.executes(context -> {
 							FabricClientCommandSource source = context.getSource();
 							AsyncTicker.debugLater(s -> source.sendFeedback(Component.nullToEmpty(s)));
+							AsyncRenderer.debugLater(s -> source.sendFeedback(Component.nullToEmpty(s)));
 							return 1;
 						}))
 					.then(literal("reload")
@@ -31,10 +33,9 @@ public class AsyncparticlesClient implements ClientModInitializer {
 								SimplePropertiesConfig.load();
 							} catch (IOException e) {
 								source.sendFeedback(Component.nullToEmpty("Failed to reload config"));
-
 								return 1;
 							}
-							AsyncTicker.reload();
+							AsyncTicker.reloadLater();
 							source.sendFeedback(Component.nullToEmpty("AsyncParticles config reloaded"));
 							return 1;
 						})));

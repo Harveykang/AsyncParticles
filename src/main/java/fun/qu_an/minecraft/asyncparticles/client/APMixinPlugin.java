@@ -1,9 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
-import com.moepus.flerovium.mixins.Particle.ParticleEngineMixin;
 import org.objectweb.asm.tree.ClassNode;
-import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
@@ -16,9 +14,9 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		MixinCancellerRegistrar.register((targetClassNames, mixinClassName)
 			-> switch (mixinClassName) {
 			case
-//				"com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
-				 "com.moepus.flerovium.mixins.Particle.ParticleMixin",
-				 "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer" -> true;
+				"com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
+				"com.moepus.flerovium.mixins.Particle.ParticleMixin",
+				"net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer" -> true;
 			default -> false;
 		});
 	}
@@ -30,42 +28,41 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.vs2")) {
-			return ModListHelper.VS_LOADED;
-		}
-		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.particlerain_vs")) {
-			return ModListHelper.PARTICLERAIN_LOADED && ModListHelper.VS_LOADED && !ModListHelper.IS_FORGE;
-		}
-		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.forge_particlerain_vs")) {
-			return ModListHelper.PARTICLERAIN_LOADED && ModListHelper.VS_LOADED && ModListHelper.IS_FORGE;
-		}
-		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.particlerain")) {
-			return ModListHelper.PARTICLERAIN_LOADED && !ModListHelper.IS_FORGE;
-		}
-		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.forge_particlerain")) {
-			return ModListHelper.PARTICLERAIN_LOADED && ModListHelper.IS_FORGE;
-		}
-		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.create")) {
-			return ModListHelper.CREATE_LOADED && !ModListHelper.IS_FORGE;
-		}
-		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.forge_create")) {
-			return ModListHelper.CREATE_LOADED && ModListHelper.IS_FORGE;
-		}
-		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.iris")) {
-			return ModListHelper.IRIS_LOADED;
-		}
-		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.effectual")) {
-			return ModListHelper.EFFECTUAL_LOADED;
-		}
-		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.sodium")) {
-			return ModListHelper.SODIUM_LOADED;
-		}
-		if (mixinClassName.startsWith("fun.qu_an.minecraft.asyncparticles.client.mixin.flerovium")) {
-			return ModListHelper.FLEROVIUM_LOADED;
-		}
-		return switch (mixinClassName) {
-			case "fun.qu_an.minecraft.asyncparticles.client.mixin.ForgeMixinMinecraft" -> ModListHelper.IS_FORGE;
-			case "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinMinecraft" -> !ModListHelper.IS_FORGE;
+		String mixinPackageName = mixinClassName.substring("fun.qu_an.minecraft.asyncparticles.client.mixin.".length());
+		String[] split = mixinPackageName.split("\\.");
+		return switch (split[0]) {
+			case "fabric" -> {
+				if (split.length <= 2) {
+					yield !ModListHelper.IS_FORGE;
+				}
+				yield switch (split[1]) {
+					case "particlerain_vs" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.VS_LOADED;
+					case "particlerain" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED;
+					case "create" -> ModListHelper.FABRIC_CREATE_LOADED;
+					case "effective" -> ModListHelper.FABRIC_EFFECTIVE_LOADED;
+					case "effectual" -> ModListHelper.FABRIC_EFFECTUAL_LOADED;
+					default -> false;
+				};
+			}
+			case "forge" -> {
+				if (split.length <= 2) {
+					yield ModListHelper.IS_FORGE;
+				}
+				yield switch (split[1]) {
+					case "particlerain_vs" -> ModListHelper.FORGE_PARTICLERAIN_LOADED && ModListHelper.VS_LOADED;
+					case "particlerain" -> ModListHelper.FORGE_PARTICLERAIN_LOADED;
+					case "create" -> ModListHelper.FORGE_CREATE_LOADED;
+					// TODO: 下面这个 mod 没有正式发布，且不确定是否是唯一的 forge 移植版
+					case "effecticularity" -> ModListHelper.FORGE_EFFECTIVE_LOADED;
+					case "flerovium" -> ModListHelper.FORGE_FLEROVIUM_LOADED;
+					default -> false;
+				};
+			}
+			case "vs2" -> ModListHelper.VS_LOADED;
+			case "iris" -> ModListHelper.IRIS_LOADED;
+			case "sodium" -> ModListHelper.SODIUM_LOADED;
+			case "flerovium" -> ModListHelper.FORGE_FLEROVIUM_LOADED;
+			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
 			default -> true;
 		};
 	}

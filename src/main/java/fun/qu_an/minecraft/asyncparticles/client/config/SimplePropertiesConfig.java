@@ -11,6 +11,7 @@ public class SimplePropertiesConfig {
 	public static final int DEFAULT_LIMIT = 32768;
 	public static int limit = DEFAULT_LIMIT;
 	public static boolean asyncClientBlockEntityTick = true;
+//	public static boolean modParticlesCompatible = true;
 	public static boolean forceDoneBlockAnimateTick = false;
 	public static boolean forceDoneParticleTick = false;
 	public static boolean forceDoneTextureTick = false;
@@ -37,6 +38,7 @@ public class SimplePropertiesConfig {
 		SimplePropertiesConfig.limit = limit;
 
 		asyncClientBlockEntityTick = getBoolean(properties, "asyncClientBlockEntityTick", true);
+//		modParticlesCompatible = getBoolean(properties, "modParticlesCompatible", true);
 		forceDoneBlockAnimateTick = getBoolean(properties, "forceDoneBlockAnimateTick", false);
 		forceDoneParticleTick = getBoolean(properties, "forceDoneParticleTick", false);
 		forceDoneTextureTick = getBoolean(properties, "forceDoneTextureTick", false);

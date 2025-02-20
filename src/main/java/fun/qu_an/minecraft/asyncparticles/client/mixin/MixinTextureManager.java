@@ -14,7 +14,7 @@ public class MixinTextureManager {
 	@WrapMethod(method = "tick")
 	public void wrapTick(Operation<Void> original) {
 		if (AsyncTicker.shouldTickParticles) {
-			AsyncTicker.endTickOperations.add(original::call);
+			AsyncTicker.END_TICK_OPERATIONS.add(original::call);
 		}
 	}
 

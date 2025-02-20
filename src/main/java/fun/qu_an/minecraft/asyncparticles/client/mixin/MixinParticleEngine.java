@@ -8,6 +8,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.util.TrackedParticleCountsMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -20,6 +22,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.particles.ParticleGroup;
+import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -59,16 +62,15 @@ public abstract class MixinParticleEngine {
 	@Final
 	private static List<ParticleRenderType> RENDER_ORDER;
 
-//	@Redirect(method = "<init>",
-//		at = @At(value = "INVOKE", ordinal = 1, target = "Lcom/google/common/collect/Queues;newArrayDeque()Ljava/util/ArrayDeque;"))
-//	public ArrayDeque<Particle> redirectNewArrayDeque() {
-//		return null;
-//	}
-//
-//	@Inject(method = "<init>", at = @At(value = "RETURN"))
-//	public void init(CallbackInfo ci) {
-//		particlesToAdd = new ArrayBlockingQueue<>(SimplePropertiesConfig.limit); // TODO: 实现更高效的队列
-//	}
+	@Shadow @Final private static Logger LOGGER;
+
+	@Mutable
+	@Shadow @Final private Object2IntOpenHashMap<ParticleGroup> trackedParticleCounts;
+
+	@Inject(method = "<init>", at = @At(value = "RETURN"))
+	public void init(CallbackInfo ci) {
+		trackedParticleCounts = new TrackedParticleCountsMap();
+	}
 
 	@Shadow
 	public abstract void updateCount(ParticleGroup group, int count);
@@ -107,7 +109,7 @@ public abstract class MixinParticleEngine {
 			}
 			BufferBuilder bufferBuilder = AsyncRenderer.getBufferBuilder(particleRenderType);
 			if (!AsyncRenderer.isStart) {
-				List<? extends Particle> particles1 = AsyncRenderer.pollSync(particleRenderType);
+				List<? extends Particle> particles1 = AsyncRenderer.getSync(particleRenderType);
 				if (!particles1.isEmpty()) {
 					if (!bufferBuilder.building()) {
 						bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
@@ -145,7 +147,8 @@ public abstract class MixinParticleEngine {
 					bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 				}
 				Runnable runnable = () -> iterable.forEach(particle -> {
-					if (!frustum.isVisible(particle.getBoundingBox())) {
+					if (particle == null // might be null because ArrayDeque is not thread-safe
+						|| !frustum.isVisible(particle.getBoundingBox())) {
 						return;
 					}
 					if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
@@ -156,6 +159,7 @@ public abstract class MixinParticleEngine {
 					try {
 						particle.render(bufferBuilder, camera, g);
 					} catch (Throwable throwable) {
+						LOGGER.error("Exception while rendering particle, marking as sync", throwable);
 						((ParticleAddon) particle).asyncedParticles$setRenderSync();
 						AsyncRenderer.markAsSync(particle.getClass());
 						AsyncRenderer.recordSync(particleRenderType, particle);
@@ -183,16 +187,16 @@ public abstract class MixinParticleEngine {
 	public void tick() {
 		particles.forEach((particleRenderType, queue) -> {
 			this.level.getProfiler().push(particleRenderType.toString());
-			AsyncTicker.particleOperations.add(() -> tickParticleList(queue));
+			AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue));
 			this.level.getProfiler().pop();
 		});
 
 		if (!this.trackingEmitters.isEmpty()) {
-			AsyncTicker.particleOperations.add(() -> {
-				List<TrackingEmitter> list = Lists.newArrayList();
+			AsyncTicker.PARTICLE_OPERATIONS.add(() -> {
+				HashSet<TrackingEmitter> set = new HashSet<>();
 				for (TrackingEmitter emitter : this.trackingEmitters) {
 					if (AsyncTicker.isCancelled() && !AsyncTicker.forceDoneParticleTick()) {
-						this.trackingEmitters.removeAll(list);
+						this.trackingEmitters.removeAll(set);
 						return;
 					}
 					emitter.tick();
@@ -202,10 +206,10 @@ public abstract class MixinParticleEngine {
 						}
 					}
 					if (!emitter.isAlive()) {
-						list.add(emitter);
+						set.add(emitter);
 					}
 				}
-				this.trackingEmitters.removeAll(list);
+				this.trackingEmitters.removeAll(set);
 			});
 		}
 

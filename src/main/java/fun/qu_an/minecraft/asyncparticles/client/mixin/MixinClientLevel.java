@@ -73,7 +73,7 @@ public abstract class MixinClientLevel extends Level {
 			}
 
 		};
-		AsyncTicker.blockEntityOperations.add(runnable);
+		AsyncTicker.BLOCK_ENTITY_OPERATIONS.add(runnable);
 		profilerFiller.pop();
 	}
 
@@ -85,7 +85,7 @@ public abstract class MixinClientLevel extends Level {
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int i, int j, int k, Operation<Void> original) {
 		if (AsyncTicker.shouldTickParticles) {
-			AsyncTicker.blockEntityOperations.add(() -> original.call(i, j, k));
+			AsyncTicker.BLOCK_ENTITY_OPERATIONS.add(() -> original.call(i, j, k));
 		}
 	}
 

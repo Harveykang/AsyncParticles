@@ -18,15 +18,18 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
+import org.ladysnake.effective.core.particle.SplashParticle;
 import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 public class AsyncRenderer {
-	public static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
+	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 	public static Frustum frustum;
+	private static Consumer<String> debugConsumer;
 
 	static {
 		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
@@ -34,11 +37,14 @@ public class AsyncRenderer {
 		if (ModListHelper.DUMMMMMMY_LOADED) {
 			SYNC_PARTICLE_TYPES.add(DamageNumberParticle.class);
 		}
+		if (ModListHelper.FABRIC_EFFECTIVE_LOADED) {
+			SYNC_PARTICLE_TYPES.add(SplashParticle.class);
+		}
 		// TODO: configure this set
 	}
 
-	public static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = new ConcurrentHashMap<>();
-	private static final ArrayDeque<Runnable> ASYNC_QUEUE = new ArrayDeque<>();
+	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = new ConcurrentHashMap<>();
+	private static final List<Runnable> ASYNC_QUEUE = new ArrayList<>();
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final ForkJoinPool EXECUTOR;
 
@@ -82,16 +88,18 @@ public class AsyncRenderer {
 			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
-		Runnable poll;
+		tryDebug();
+		clearSync();
 		var futures = new CompletableFuture[ASYNC_QUEUE.size()];
-		int i = 0;
-		while ((poll = ASYNC_QUEUE.poll()) != null) {
-			futures[i++] = CompletableFuture.runAsync(poll, EXECUTOR)
+		for (int i = 0, asyncQueueSize = ASYNC_QUEUE.size(); i < asyncQueueSize; i++) {
+			Runnable runnable = ASYNC_QUEUE.get(i);
+			futures[i] = CompletableFuture.runAsync(runnable, EXECUTOR)
 				.exceptionally(e -> {
 					LOGGER.error("Exception while rendering particle", e);
-					return null;
+					throw new RuntimeException(e);
 				});
 		}
+		ASYNC_QUEUE.clear();
 		asyncTask = CompletableFuture.allOf(futures);
 		profiler.pop();
 	}
@@ -168,26 +176,13 @@ public class AsyncRenderer {
 		}
 		asyncTask.join();
 		isStart = false;
+
 		MultiBufferSource.BufferSource bufferSource = mc.levelRenderer.renderBuffers.bufferSource();
-
-//		if (ModListHelper.IRIS_LOADED) {
-//			if (getRenderingSettings() == ParticleRenderingSettings.MIXED) {
-//				((PhasedParticleEngine) mc.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
-//				mc.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
-//				((PhasedParticleEngine) mc.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
-//				mc.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
-//			} else {
-
 		ParticleEngine particleEngine = mc.particleEngine;
 		if (ModListHelper.IRIS_LOADED) {
 			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
-
-//			}
-//		} else {
-//			mc.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
-//		}
 
 		if (levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();
@@ -225,8 +220,30 @@ public class AsyncRenderer {
 		}
 	}
 
-	public static List<? extends Particle> pollSync(ParticleRenderType particleRenderType) {
-		List<Particle> list = SYNC_PARTICLES.put(particleRenderType, new ArrayList<>());
+	public static List<? extends Particle> getSync(ParticleRenderType particleRenderType) {
+		List<Particle> list = SYNC_PARTICLES.get(particleRenderType);
 		return list == null ? List.of() : list;
+	}
+
+	private static void clearSync() {
+		SYNC_PARTICLES.clear();
+	}
+
+	public static void debugLater(Consumer<String> consumer) {
+		debugConsumer = consumer;
+	}
+
+	private static void tryDebug() {
+		if (debugConsumer != null) {
+			debugConsumer.accept("""
+			[Debug AsyncRenderer]
+			async queue size: %d,
+			sync particle count: %d,
+			sync particle types: %s"""
+				.formatted(ASYNC_QUEUE.size(),
+					SYNC_PARTICLES.values().stream().mapToInt(List::size).sum(),
+					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList()));
+			debugConsumer = null;
+		}
 	}
 }

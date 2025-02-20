@@ -18,7 +18,7 @@
 
 - ModernFix (Epic fixes!)
 - Sodium/Embeddium (Epic optimizations!)
-- Flerovium (Fast item rendering)
+- Flerovium (Fast item/particle rendering)
 - Startlight (Fast light cache)
 
 ## Mod Compatability

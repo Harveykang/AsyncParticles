@@ -52,6 +52,10 @@ repositories {
         name 'IzzelAliz Maven'
         url 'https://maven.izzel.io/releases/'
     }
+    maven {
+        name = "Sinytra"
+        url = "https://maven.su5ed.dev/releases"
+    }
 }
 
 dependencies {
@@ -66,6 +70,7 @@ dependencies {
         it.parchment("org.parchmentmc.data:parchment-$minecraft_version:2023.09.03@zip")
     })
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    compileOnly "org.sinytra:Connector:1.0.0-beta.46+1.20.1"
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
@@ -100,19 +105,20 @@ dependencies {
 //    modRuntimeOnly("maven.modrinth:brute-force-rendering-culling:F6dedvxg")
     modRuntimeOnly("maven.modrinth:indium:1.0.34+mc1.20.1")
 
-    compileOnly "net.minecraftforge:forge:1.20.1-47.3.0:universal"
+    modCompileOnly "net.minecraftforge:forge:1.20.1-47.3.0:universal"
 
-    compileOnly('maven.modrinth:create:1.20.1-0.5.1.j') // create forge
+    modCompileOnly('maven.modrinth:create:1.20.1-0.5.1.j') // create forge
 
     modCompileOnly("com.simibubi.create:create-fabric-$minecraft_version:0.5.1-j-build.1631+mc1.20.1")
     modRuntimeOnly("com.simibubi.create:create-fabric-$minecraft_version:0.5.1-j-build.1631+mc1.20.1")
 
+    modCompileOnly("curse.maven:lodestone-616457:6070172")
     modCompileOnly("maven.modrinth:effective:2.3.2-1.20.1")
-//    modRuntimeOnly("maven.modrinth:effective:2.3.2-1.20.1") // add to /libs and unzip all jarinjars
 
-//    modImplementation 'maven.modrinth:c2me-fabric:0.2.0+alpha.11.16+1.20.1' // add to /libs and unzip all jarinjars
-    modRuntimeOnly fileTree(dir: 'libs', include: '*.jar')
-    modCompileOnly fileTree(dir: 'libs', include: 'c2me-*.jar')
+//    modImplementation("maven.modrinth:effective:2.3.2-1.20.1") // put into /libs and unzip all jarinjars
+//    modImplementation 'maven.modrinth:c2me-fabric:0.2.0+alpha.11.16+1.20.1' // put into /libs and unzip all jarinjars
+    modRuntimeOnly fileTree(dir: 'libs', include: '*.jar', exclude: 'effective-1.0.2-all.jar')
+    modCompileOnly fileTree(dir: 'libs', include: ['c2me-*.jar', 'effective-1.0.2-all.jar'])
 }
 
 processResources {
