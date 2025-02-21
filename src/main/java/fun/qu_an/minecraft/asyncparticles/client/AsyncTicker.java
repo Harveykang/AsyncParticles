@@ -4,6 +4,7 @@ import com.google.common.collect.EvictingQueue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.lointain.cosmos.procedures.SkyboxshapeProcedure;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -39,9 +40,9 @@ public class AsyncTicker {
 	public static boolean shouldTickParticles = true;
 	public static CompletableFuture<Void> particleCleanup;
 	public static Operation<Void> tickParticleEngine;
-	private final static ArrayList<Runnable> END_TICK_EVENTS = new ArrayList<>();
-	public final static ArrayList<Runnable> END_TICK_OPERATIONS = new ArrayList<>();
-	private static CompletableFuture<Void> particleFuture = CompletableFuture.completedFuture(null);
+	private final static List<Runnable> END_TICK_EVENTS = new ArrayList<>();
+	public final static List<Runnable> END_TICK_OPERATIONS = new ArrayList<>();
+	private static CompletableFuture<Void> particleFuture;
 	private static CompletableFuture<Void> blockEntityTickFuture;
 	//	private static final AtomicInteger WORKER_COUNT = new AtomicInteger(1);
 //	public static final ExecutorService SCHEDULING_POOL = Util.makeExecutor("ParticleTick");
@@ -71,17 +72,28 @@ public class AsyncTicker {
 		}, Util::onThreadException, true);
 	}
 
-	public static void onTickBefore(int j) {
+	public static void onRunAllTasks() {
+		// Make sure not concurrently tick block entities
 		if (blockEntityTickFuture != null) {
 			blockEntityTickFuture.join();
 			blockEntityTickFuture = null;
 		}
+	}
+
+	public static void onTickBefore(int j) {
 		if (j != 0) {
+			if (blockEntityTickFuture != null) {
+				blockEntityTickFuture.join();
+				blockEntityTickFuture = null;
+			}
 			shouldTickParticles = false;
 		} else {
 			cancelled = true;
 			debug_cancelled = false;
-			particleFuture.join();
+			if (particleFuture != null) {
+				particleFuture.join();
+				particleFuture = null;
+			}
 			Minecraft mc = Minecraft.getInstance();
 			if (!mc.isPaused()) {
 				Collection<Queue<Particle>> values = mc.particleEngine.particles.values();
@@ -122,8 +134,16 @@ public class AsyncTicker {
 		if (tickParticleEngine != null) {
 			ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
 			profiler.push("particles");
-			tickParticleEngine.call();
-			tickParticleEngine = null;
+			try {
+				tickParticleEngine.call();
+			} catch (Exception e) {
+				Minecraft mc = Minecraft.getInstance();
+				if (mc.level != null && mc.player != null) {
+					throw e;
+				}
+			}
+			SkyboxshapeProcedure
+				tickParticleEngine = null;
 			profiler.pop();
 		}
 		if (j != 0) {
@@ -253,5 +273,21 @@ public class AsyncTicker {
 
 	public static void registerEndTickEvent(Runnable operation) {
 		AsyncTicker.END_TICK_EVENTS.add(operation);
+	}
+
+	public static void destroy() {
+		cancelled = true;
+		if (blockEntityTickFuture != null) {
+			blockEntityTickFuture.join();
+			blockEntityTickFuture = null;
+		}
+		if (particleFuture != null) {
+			particleFuture.join();
+			particleFuture = null;
+		}
+		BLOCK_ENTITY_OPERATIONS.clear();
+		PARTICLE_OPERATIONS.clear();
+		END_TICK_OPERATIONS.clear();
+		cancelled = false;
 	}
 }

@@ -36,3 +36,4 @@ accessible field net/minecraft/client/renderer/culling/Frustum camY D
 accessible field net/minecraft/client/renderer/culling/Frustum camZ D
 accessible method net/minecraft/client/particle/ParticleEngine clearParticles ()V
 accessible method net/minecraft/client/particle/ParticleEngine updateCount (Lnet/minecraft/core/particles/ParticleGroup;I)V
+accessible field com/mojang/blaze3d/vertex/BufferBuilder buffer Ljava/nio/ByteBuffer;

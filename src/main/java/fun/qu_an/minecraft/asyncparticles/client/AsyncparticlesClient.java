@@ -5,6 +5,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
+import ovh.corail.tombstone.command.TombstoneCommand;
 import team.lodestar.lodestone.config.ClientConfig;
 
 import java.io.IOException;

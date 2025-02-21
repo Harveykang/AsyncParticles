@@ -18,6 +18,7 @@ public class ModListHelper {
 	public static final boolean FORGE_EFFECTIVE_LOADED = isForgeModLoaded("effective");
 	public static final boolean FABRIC_EFFECTIVE_LOADED = isFabricModLoaded("effective");
 	public static final boolean LODESTONE_LOADED = isModLoaded("lodestone");
+	public static final boolean TOMBSTONE_LOADED = isModLoaded("tombstone");
 	public static final boolean FORGE_LODESTONE_LOADED = isForgeModLoaded("lodestone");
 	public static final boolean FABRIC_LODESTONE_LOADED = isFabricModLoaded("lodestone");
 	public static final boolean FABRIC_PARTICLERAIN_LOADED = isFabricModLoaded("particlerain");

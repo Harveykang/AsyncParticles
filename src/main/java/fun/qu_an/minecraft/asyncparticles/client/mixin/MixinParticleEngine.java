@@ -1,13 +1,14 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
 import com.google.common.collect.EvictingQueue;
-import com.google.common.collect.Lists;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.util.FakeBeginBufferBuilder;
+import fun.qu_an.minecraft.asyncparticles.client.util.FakeEndTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.TrackedParticleCountsMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.CrashReport;
@@ -62,10 +63,14 @@ public abstract class MixinParticleEngine {
 	@Final
 	private static List<ParticleRenderType> RENDER_ORDER;
 
-	@Shadow @Final private static Logger LOGGER;
+	@Shadow
+	@Final
+	private static Logger LOGGER;
 
 	@Mutable
-	@Shadow @Final private Object2IntOpenHashMap<ParticleGroup> trackedParticleCounts;
+	@Shadow
+	@Final
+	private Object2IntOpenHashMap<ParticleGroup> trackedParticleCounts;
 
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	public void init(CallbackInfo ci) {
@@ -74,15 +79,6 @@ public abstract class MixinParticleEngine {
 
 	@Shadow
 	public abstract void updateCount(ParticleGroup group, int count);
-
-	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/Particle;render(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/Camera;F)V"))
-	public void redirectRender(Particle instance, VertexConsumer vertexConsumer, Camera camera, float v) {
-		if (((ParticleAddon) instance).asyncParticles$isTicked()) {
-			instance.render(vertexConsumer, camera, v);
-		} else {
-			instance.render(vertexConsumer, camera, v + 1f);
-		}
-	}
 
 	/**
 	 * @author
@@ -134,13 +130,9 @@ public abstract class MixinParticleEngine {
 				}
 				if (bufferBuilder.building()) {
 					RenderSystem.setShader(GameRenderer::getParticleShader);
-					try {
-						// FIXME: 这样快还是查表快？
-						particleRenderType.begin(null, this.textureManager);
-					} catch (NullPointerException ignored) {
-						// setup RenderSystem with a null bufferbuilder
-					}
+					particleRenderType.begin(FakeBeginBufferBuilder.INSTANCE, this.textureManager);
 					BufferUploader.drawWithShader(bufferBuilder.end());
+					particleRenderType.end(FakeEndTesselator.INSTANCE);
 				}
 			} else {
 				if (!bufferBuilder.building()) {
@@ -175,7 +167,6 @@ public abstract class MixinParticleEngine {
 			RenderSystem.depthMask(true);
 			RenderSystem.disableBlend();
 			lightTexture.turnOffLightLayer();
-			AsyncRenderer.frustum = null;
 		}
 	}
 
@@ -193,10 +184,12 @@ public abstract class MixinParticleEngine {
 
 		if (!this.trackingEmitters.isEmpty()) {
 			AsyncTicker.PARTICLE_OPERATIONS.add(() -> {
-				HashSet<TrackingEmitter> set = new HashSet<>();
+				HashSet<TrackingEmitter> set = null;
 				for (TrackingEmitter emitter : this.trackingEmitters) {
 					if (AsyncTicker.isCancelled() && !AsyncTicker.forceDoneParticleTick()) {
-						this.trackingEmitters.removeAll(set);
+						if (set != null) {
+							this.trackingEmitters.removeAll(set);
+						}
 						return;
 					}
 					emitter.tick();
@@ -206,10 +199,15 @@ public abstract class MixinParticleEngine {
 						}
 					}
 					if (!emitter.isAlive()) {
+						if (set == null) {
+							set = new HashSet<>();
+						}
 						set.add(emitter);
 					}
 				}
-				this.trackingEmitters.removeAll(set);
+				if (set != null) {
+					this.trackingEmitters.removeAll(set);
+				}
 			});
 		}
 

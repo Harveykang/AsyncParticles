@@ -1,13 +1,16 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.*;
+import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
@@ -72,5 +75,50 @@ public abstract class MixinLevelRenderer {
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderStateShard;PARTICLES_TARGET:Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;clearRenderState()V"))
 	private void redirectClearRenderState(RenderStateShard.OutputStateShard instance) {
+	}
+
+	@WrapMethod(method = "setSectionDirty(IIIZ)V")
+	public void setSectionDirty(int x, int y, int z, boolean updateNeighbors, Operation<Void> original) {
+		if (RenderSystem.isOnRenderThread() || !AsyncRenderer.forceSyncLevelRenderMarkDirty()) {
+			original.call(x, y, z, updateNeighbors);
+		} else {
+			RenderSystem.recordRenderCall(() -> original.call(x, y, z, updateNeighbors));
+		}
+	}
+
+	@WrapMethod(method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Z)V")
+	public void setBlockDirty(BlockPos pos, boolean updateNeighbors, Operation<Void> original) {
+		if (RenderSystem.isOnRenderThread() || !AsyncRenderer.forceSyncLevelRenderMarkDirty()) {
+			original.call(pos, updateNeighbors);
+		} else {
+			RenderSystem.recordRenderCall(() -> original.call(pos, updateNeighbors));
+		}
+	}
+
+	@WrapMethod(method = "setBlocksDirty")
+	public void setBlocksDirty(int minX, int minY, int minZ, int maxX, int maxY, int maxZ, Operation<Void> original) {
+		if (RenderSystem.isOnRenderThread() || !AsyncRenderer.forceSyncLevelRenderMarkDirty()) {
+			original.call(minX, minY, minZ, maxX, maxY, maxZ);
+		} else {
+			RenderSystem.recordRenderCall(() -> original.call(minX, minY, minZ, maxX, maxY, maxZ));
+		}
+	}
+
+	@WrapMethod(method = "setSectionDirtyWithNeighbors")
+	public void setSectionDirtyWithNeighbors(int sectionX, int sectionY, int sectionZ, Operation<Void> original) {
+		if (RenderSystem.isOnRenderThread() || !AsyncRenderer.forceSyncLevelRenderMarkDirty()) {
+			original.call(sectionX, sectionY, sectionZ);
+		} else {
+			RenderSystem.recordRenderCall(() -> original.call(sectionX, sectionY, sectionZ));
+		}
+	}
+
+	@WrapMethod(method = "destroyBlockProgress")
+	public void destroyBlockProgress(int breakerId, BlockPos pos, int progress, Operation<Void> original) {
+		if (RenderSystem.isOnRenderThread() || !AsyncRenderer.forceSyncLevelRenderMarkDirty()) {
+			original.call(breakerId, pos, progress);
+		} else {
+			RenderSystem.recordRenderCall(() -> original.call(breakerId, pos, progress));
+		}
 	}
 }

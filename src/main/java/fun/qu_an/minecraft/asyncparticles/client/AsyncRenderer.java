@@ -4,6 +4,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
+import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
@@ -19,6 +20,7 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.slf4j.Logger;
+import ovh.corail.tombstone.particle.*;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -26,9 +28,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class AsyncRenderer {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
-	public static Frustum frustum;
-	private static Consumer<String> debugConsumer;
 
 	static {
 		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
@@ -42,12 +43,24 @@ public class AsyncRenderer {
 		if (ModListHelper.FORGE_EFFECTIVE_LOADED) {
 			SYNC_PARTICLE_TYPES.add(concerrox.effective.particle.SplashParticle.class);
 		}
+		if (ModListHelper.TOMBSTONE_LOADED) {
+			// tomestone may have duplicate ids with other mods, so we need to check if these classes are present
+			try {
+				SYNC_PARTICLE_TYPES.add(ParticleCasting.class);
+				SYNC_PARTICLE_TYPES.add(ParticleGhost.class);
+				SYNC_PARTICLE_TYPES.add(ParticleGraveSoul.class);
+				SYNC_PARTICLE_TYPES.add(ParticleMagicCircle.class);
+				SYNC_PARTICLE_TYPES.add(ParticleMarker.class);
+				SYNC_PARTICLE_TYPES.add(ParticleRounding.class);
+			} catch (Exception e) {
+				LOGGER.error("", e);
+			}
+		}
 		// TODO: configure this set
 	}
 
 	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = new ConcurrentHashMap<>();
 	private static final List<Runnable> ASYNC_QUEUE = new ArrayList<>();
-	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final ForkJoinPool EXECUTOR;
 
 	static {
@@ -72,6 +85,8 @@ public class AsyncRenderer {
 	}
 
 	private static final Map<ParticleRenderType, BufferBuilder> BUFFER_BUILDERS = new ConcurrentHashMap<>();
+	public static Frustum frustum;
+	private static Consumer<String> debugConsumer;
 	public static boolean isStart;
 	private static CompletableFuture<Void> asyncTask;
 
@@ -97,7 +112,7 @@ public class AsyncRenderer {
 			Runnable runnable = ASYNC_QUEUE.get(i);
 			futures[i] = CompletableFuture.runAsync(runnable, EXECUTOR)
 				.exceptionally(e -> {
-					LOGGER.error("Exception while rendering particle", e);
+					LOGGER.error("Error rendering particle", e);
 					throw new RuntimeException(e);
 				});
 		}
@@ -238,14 +253,28 @@ public class AsyncRenderer {
 	private static void tryDebug() {
 		if (debugConsumer != null) {
 			debugConsumer.accept("""
-			[Debug AsyncRenderer]
-			async queue size: %d,
-			sync particle count: %d,
-			sync particle types: %s"""
+				[Debug AsyncRenderer]
+				async queue size: %d,
+				sync particle count: %d,
+				sync particle types: %s"""
 				.formatted(ASYNC_QUEUE.size(),
 					SYNC_PARTICLES.values().stream().mapToInt(List::size).sum(),
 					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList()));
 			debugConsumer = null;
 		}
+	}
+
+	public static boolean forceSyncLevelRenderMarkDirty() {
+		return SimplePropertiesConfig.forceSyncLevelRenderMarkDirty;
+	}
+
+	public static void destroy() {
+		if (asyncTask != null) {
+			// 应该不会到这里
+			asyncTask.join();
+//			asyncTask = null;
+		}
+		ASYNC_QUEUE.clear();
+		clearSync();
 	}
 }

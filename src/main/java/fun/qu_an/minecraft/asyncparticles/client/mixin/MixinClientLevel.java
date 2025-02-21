@@ -2,20 +2,28 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.level.storage.WritableLevelData;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -51,29 +59,9 @@ public abstract class MixinClientLevel extends Level {
 		}
 		ProfilerFiller profilerFiller = this.getProfiler();
 		profilerFiller.push("blockEntities");
-		Runnable runnable = () -> {
-			if (!this.pendingBlockEntityTickers.isEmpty()) {
-				synchronized (pendingBlockEntityTickers) {
-					if (!this.pendingBlockEntityTickers.isEmpty()) {
-						this.blockEntityTickers.addAll(this.pendingBlockEntityTickers);
-						this.pendingBlockEntityTickers.clear();
-					}
-				}
-			}
 
-			Iterator<TickingBlockEntity> iterator = this.blockEntityTickers.iterator();
-
-			while (iterator.hasNext()) {
-				TickingBlockEntity tickingBlockEntity = iterator.next();
-				if (tickingBlockEntity.isRemoved()) {
-					iterator.remove();
-				} else if (this.shouldTickBlocksAt(tickingBlockEntity.getPos())) {
-					tickingBlockEntity.tick();
-				}
-			}
-
-		};
-		AsyncTicker.BLOCK_ENTITY_OPERATIONS.add(runnable);
+		// this is more compatible with mixins
+		AsyncTicker.BLOCK_ENTITY_OPERATIONS.add(super::tickBlockEntities);
 		profilerFiller.pop();
 	}
 
