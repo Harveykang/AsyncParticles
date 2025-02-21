@@ -131,19 +131,18 @@ public class AsyncTicker {
 	}
 
 	public static void onTickAfter(int j) {
+		Minecraft mc = Minecraft.getInstance();
 		if (tickParticleEngine != null) {
-			ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
+			ProfilerFiller profiler = mc.getProfiler();
 			profiler.push("particles");
 			try {
 				tickParticleEngine.call();
 			} catch (Exception e) {
-				Minecraft mc = Minecraft.getInstance();
 				if (mc.level != null && mc.player != null) {
 					throw e;
 				}
 			}
-			SkyboxshapeProcedure
-				tickParticleEngine = null;
+			tickParticleEngine = null;
 			profiler.pop();
 		}
 		if (j != 0) {

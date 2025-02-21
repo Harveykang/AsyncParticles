@@ -61,6 +61,7 @@ public abstract class MixinClientLevel extends Level {
 		profilerFiller.push("blockEntities");
 
 		// this is more compatible with mixins
+		// See MixinLevel.tickBlockEntities
 		AsyncTicker.BLOCK_ENTITY_OPERATIONS.add(super::tickBlockEntities);
 		profilerFiller.pop();
 	}
