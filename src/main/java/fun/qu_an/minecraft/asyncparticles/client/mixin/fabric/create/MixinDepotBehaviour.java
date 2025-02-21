@@ -25,21 +25,21 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
-@Mixin(value = DepotBehaviour.class, remap = false)
+@Mixin(value = DepotBehaviour.class)
 public abstract class MixinDepotBehaviour extends BlockEntityBehaviour {
-	@Shadow
+	@Shadow(remap = false)
 	List<TransportedItemStack> incoming;
 
-	@Shadow protected abstract boolean tick(TransportedItemStack heldItem);
+	@Shadow(remap = false) protected abstract boolean tick(TransportedItemStack heldItem);
 
-	@Shadow
+	@Shadow(remap = false)
 	TransportedItemStack heldItem;
 
 	public MixinDepotBehaviour(SmartBlockEntity be) {
 		super(be);
 	}
 
-	@Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"))
+	@Redirect(method = "tick()V", remap = false, at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"))
 	private Iterator<TransportedItemStack> onTick(List<TransportedItemStack> instance, @Local(name = "world") Level world) {
 		if (!world.isClientSide) {
 			return instance.iterator();
@@ -67,7 +67,7 @@ public abstract class MixinDepotBehaviour extends BlockEntityBehaviour {
 		return Collections.emptyIterator();
 	}
 
-	@Inject(method = "<init>", at = @At(value = "RETURN"))
+	@Inject(method = "<init>", remap = false, at = @At(value = "RETURN"))
 	private void onInit(SmartBlockEntity be, CallbackInfo ci) {
 		Level level = be.getLevel();
 		// 这个列表很小，不会过于影响性能

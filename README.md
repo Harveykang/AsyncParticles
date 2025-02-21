@@ -47,3 +47,8 @@
 ✅ MmmMmmMmmMmm (Target Dummy) (Fabric/Forge)    
 ❌ MadParticle (Forge)  
 ⬜ ...  
+
+## Credits
+
+- [MixinSquared](https://github.com/Bawnorton/MixinSquared)
+

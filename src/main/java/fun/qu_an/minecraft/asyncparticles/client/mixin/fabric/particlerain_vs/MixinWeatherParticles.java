@@ -15,7 +15,7 @@ import pigcart.particlerain.particle.*;
 	GroundFogParticle.class,
 	StreakParticle.class,
 	ShrubParticle.class,
-	RippleParticle.class}, remap = false)
+	RippleParticle.class})
 public abstract class MixinWeatherParticles extends MixinWeatherPatricle {
 
 	protected MixinWeatherParticles(ClientLevel clientLevel, double d, double e, double f) {

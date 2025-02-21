@@ -24,7 +24,7 @@ import java.util.List;
 
 import static pigcart.particlerain.ParticleRainClient.config;
 
-@Mixin(value = RainParticle.class, remap = false)
+@Mixin(value = RainParticle.class)
 public abstract class MixinRainParticle extends MixinWeatherPatricle {
 	protected MixinRainParticle(ClientLevel clientLevel, double d, double e, double f) {
 		super(clientLevel, d, e, f);

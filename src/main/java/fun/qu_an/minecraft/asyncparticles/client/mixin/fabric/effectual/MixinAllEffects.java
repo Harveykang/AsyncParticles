@@ -38,9 +38,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 	CaveDustEffect.class,
 	BubbleBreathEffect.class,
 	BubbleChestEffect.class,
-}, remap = false)
+})
 public abstract class MixinAllEffects {
-	@Redirect(method = "register", at = @At(value = "INVOKE", target = "Lnet/fabricmc/fabric/api/event/Event;register(Ljava/lang/Object;)V"))
+	@Redirect(method = "register", remap = false, at = @At(value = "INVOKE", remap = false, target = "Lnet/fabricmc/fabric/api/event/Event;register(Ljava/lang/Object;)V"))
 	private static void register(Event<?> instance, Object t) {
 		AsyncTicker.registerEndTickEvent((ClientTickEvents.EndTick) t);
 	}

@@ -26,30 +26,30 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
-@Mixin(value = EjectorBlockEntity.class, remap = false)
+@Mixin(value = EjectorBlockEntity.class)
 public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 
-	@Shadow
+	@Shadow(remap = false)
 	List<LongAttached<ItemStack>> launchedItems;
 
 	@Shadow
 	ItemStack trackedItem;
 
-	@Shadow protected abstract boolean scanTrajectoryForObstacles(long time);
+	@Shadow(remap = false) protected abstract boolean scanTrajectoryForObstacles(long time);
 
-	@Shadow
+	@Shadow(remap = false)
 	Pair<Vec3, BlockPos> earlyTarget;
 
-	@Shadow
+	@Shadow(remap = false)
 	float earlyTargetTime;
 
-	@Shadow protected abstract void placeItemAtTarget(boolean doLogic, float maxTime, LongAttached<ItemStack> LongAttached);
+	@Shadow(remap = false) protected abstract void placeItemAtTarget(boolean doLogic, float maxTime, LongAttached<ItemStack> LongAttached);
 
 	public MixinEjectorBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
 		super(typeIn, pos, state);
 	}
 
-	@Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"))
+	@Redirect(method = "tick()V", remap = false, at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"))
 	private Iterator<LongAttached<ItemStack>> onTick(List<LongAttached<ItemStack>> instance,
 													 @Local(name = "totalTime") float totalTime,
 													 @Local(name = "doLogic") boolean doLogic) {

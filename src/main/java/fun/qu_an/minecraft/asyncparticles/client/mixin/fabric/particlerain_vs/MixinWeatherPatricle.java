@@ -20,7 +20,7 @@ import pigcart.particlerain.particle.WeatherParticle;
 
 import java.util.List;
 
-@Mixin(value = WeatherParticle.class, remap = false)
+@Mixin(value = WeatherParticle.class)
 public abstract class MixinWeatherPatricle extends TextureSheetParticle {
 	@Unique
 	protected boolean invisible;

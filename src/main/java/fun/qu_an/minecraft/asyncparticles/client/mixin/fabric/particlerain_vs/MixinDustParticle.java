@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pigcart.particlerain.particle.DustParticle;
 
-@Mixin(value = DustParticle.class, remap = false)
+@Mixin(value = DustParticle.class)
 public abstract class MixinDustParticle extends MixinWeatherPatricle {
 	protected MixinDustParticle(ClientLevel clientLevel, double d, double e, double f) {
 		super(clientLevel, d, e, f);

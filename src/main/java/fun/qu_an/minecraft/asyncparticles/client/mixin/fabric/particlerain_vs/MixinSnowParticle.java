@@ -9,7 +9,7 @@ import pigcart.particlerain.particle.SnowParticle;
 
 import java.util.List;
 
-@Mixin(value = SnowParticle.class, remap = false)
+@Mixin(value = SnowParticle.class)
 public abstract class MixinSnowParticle extends MixinWeatherPatricle {
 	protected MixinSnowParticle(ClientLevel clientLevel, double d, double e, double f) {
 		super(clientLevel, d, e, f);

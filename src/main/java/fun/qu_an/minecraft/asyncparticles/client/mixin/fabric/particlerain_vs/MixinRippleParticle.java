@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import pigcart.particlerain.particle.RippleParticle;
 
-@Mixin(value = RippleParticle.class, remap = false)
+@Mixin(value = RippleParticle.class)
 public abstract class MixinRippleParticle extends MixinWeatherPatricle implements RippleParticleAddon {
 	@Unique
 	private Vector3f normal;
@@ -20,7 +20,7 @@ public abstract class MixinRippleParticle extends MixinWeatherPatricle implement
 		super(level, x, y, z);
 	}
 
-	@Redirect(method = "render", at = @At(value = "NEW", target = "(Lorg/joml/AxisAngle4d;)Lorg/joml/Quaternionf;"))
+	@Redirect(method = "render", at = @At(value = "NEW", remap = false, target = "(Lorg/joml/AxisAngle4d;)Lorg/joml/Quaternionf;"))
 	private Quaternionf redirectNewQuaternionf(AxisAngle4d axisAngle) {
 		Vector3f normal = this.normal;
 		if (normal == null) {

@@ -13,10 +13,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-@Mixin(value = WaterDripEffect.class, remap = false)
+@Mixin(value = WaterDripEffect.class)
 public class MixinWaterDripEffect {
 	@Mutable
-	@Shadow
+	@Shadow(remap = false)
 	@Final
 	private static Map<Player, Long> lastFullySubmergedTicks;
 

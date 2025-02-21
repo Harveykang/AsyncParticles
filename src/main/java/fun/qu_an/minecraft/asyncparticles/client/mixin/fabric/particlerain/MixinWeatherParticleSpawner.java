@@ -8,7 +8,7 @@ import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import pigcart.particlerain.WeatherParticleSpawner;
 
-@Mixin(value = WeatherParticleSpawner.class, remap = false)
+@Mixin(value = WeatherParticleSpawner.class)
 public class MixinWeatherParticleSpawner {
 	@WrapMethod(method = "update")
 	private static void onUpdate(ClientLevel level, Entity entity, float f, Operation<Void> original){

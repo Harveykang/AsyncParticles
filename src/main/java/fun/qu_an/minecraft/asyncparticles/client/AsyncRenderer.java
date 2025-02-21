@@ -18,7 +18,6 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.ladysnake.effective.core.particle.SplashParticle;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -38,7 +37,10 @@ public class AsyncRenderer {
 			SYNC_PARTICLE_TYPES.add(DamageNumberParticle.class);
 		}
 		if (ModListHelper.FABRIC_EFFECTIVE_LOADED) {
-			SYNC_PARTICLE_TYPES.add(SplashParticle.class);
+			SYNC_PARTICLE_TYPES.add(org.ladysnake.effective.core.particle.SplashParticle.class);
+		}
+		if (ModListHelper.FORGE_EFFECTIVE_LOADED) {
+			SYNC_PARTICLE_TYPES.add(concerrox.effective.particle.SplashParticle.class);
 		}
 		// TODO: configure this set
 	}

@@ -10,9 +10,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import pigcart.particlerain.ParticleRainClient;
 import pigcart.particlerain.WeatherParticleSpawner;
 
-@Mixin(value = WeatherParticleSpawner.class, remap = false)
+@Mixin(value = WeatherParticleSpawner.class)
 public class MixinWeatherParticleSpawner {
-	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", target = "Lpigcart/particlerain/ParticleRainClient;particleCount:I"))
+	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", remap = false, target = "Lpigcart/particlerain/ParticleRainClient;particleCount:I"))
 	private static int modifyParticleCount(int original) {
 		return 0;
 	}

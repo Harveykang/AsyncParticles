@@ -95,7 +95,7 @@ public class AsyncTicker {
 					futures[i++] = CompletableFuture.runAsync(() -> {
 						Queue<Particle> particles = (Queue<Particle>) EvictingQueue$delegate.get(particles1);
 						particles.removeIf(particle1 -> {
-							// use ArrayDeque's removeIf to improve performance and prevent crash
+							// use ArrayDeque's removeIf to improve performance
 							boolean b = ((ParticleAddon) particle1).asyncParticles$shouldRemove();
 							if (b) {
 								// make sure the tracked count is correct
