@@ -7,6 +7,7 @@
 - Vanilla Minecraft
     - Async ticking/rendering of particles.  
       (Reduced frame-time and spikes.)
+    - Async client block entity ticking.
 - Pretty Rain/Particle Rain
     - Async particle gen.
 - Valkyrien Skies + Pretty Rain/Particle Rain
