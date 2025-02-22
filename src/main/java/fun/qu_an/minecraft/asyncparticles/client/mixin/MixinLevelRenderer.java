@@ -73,20 +73,20 @@ public abstract class MixinLevelRenderer {
 	}
 
 	@WrapMethod(method = "setSectionDirty(IIIZ)V")
-	public void setSectionDirty(int x, int y, int z, boolean updateNeighbors, Operation<Void> original) {
+	public void setSectionDirty(int x, int y, int z, boolean reRenderOnMainThread, Operation<Void> original) {
 		if (RenderSystem.isOnRenderThread() || !AsyncRenderer.forceSyncLevelRenderMarkDirty()) {
-			original.call(x, y, z, updateNeighbors);
+			original.call(x, y, z, reRenderOnMainThread);
 		} else {
-			RenderSystem.recordRenderCall(() -> original.call(x, y, z, updateNeighbors));
+			RenderSystem.recordRenderCall(() -> original.call(x, y, z, reRenderOnMainThread));
 		}
 	}
 
 	@WrapMethod(method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Z)V")
-	public void setBlockDirty(BlockPos pos, boolean updateNeighbors, Operation<Void> original) {
+	public void setBlockDirty(BlockPos pos, boolean reRenderOnMainThread, Operation<Void> original) {
 		if (RenderSystem.isOnRenderThread() || !AsyncRenderer.forceSyncLevelRenderMarkDirty()) {
-			original.call(pos, updateNeighbors);
+			original.call(pos, reRenderOnMainThread);
 		} else {
-			RenderSystem.recordRenderCall(() -> original.call(pos, updateNeighbors));
+			RenderSystem.recordRenderCall(() -> original.call(pos, reRenderOnMainThread));
 		}
 	}
 

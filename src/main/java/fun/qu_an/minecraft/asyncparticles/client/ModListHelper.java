@@ -27,6 +27,7 @@ public class ModListHelper {
 	public static final boolean FABRIC_EFFECTUAL_LOADED = isFabricModLoaded("effectual");
 	public static final boolean TOMBSTONE_LOADED = isModLoaded("tombstone");
 	public static final boolean HEXCASTING_LOADED = isModLoaded("hexcasting");
+	public static final boolean FLYWHEEL_LOADED = isModLoaded("flywheel");
 
 	private static boolean isModLoaded(String modId) {
 		return FabricLoader.getInstance().isModLoaded(modId);

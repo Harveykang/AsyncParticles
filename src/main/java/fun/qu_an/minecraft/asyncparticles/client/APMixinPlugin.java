@@ -64,6 +64,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			case "flerovium" -> ModListHelper.FORGE_FLEROVIUM_LOADED;
 			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
 			case "hexcasting" -> ModListHelper.HEXCASTING_LOADED;
+			case "flywheel" -> ModListHelper.FLYWHEEL_LOADED;
 			default -> true;
 		};
 	}

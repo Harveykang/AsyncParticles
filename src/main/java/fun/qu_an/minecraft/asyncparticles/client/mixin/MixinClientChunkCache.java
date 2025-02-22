@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
 import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LightLayer;
@@ -13,7 +14,9 @@ import org.spongepowered.asm.mixin.Mixin;
 public abstract class MixinClientChunkCache {
 	@WrapMethod(method = "onLightUpdate")
 	public void onLightUpdateWrap(LightLayer layer, SectionPos pos, Operation<Void> original) {
-		if (RenderSystem.isOnRenderThread() || !AsyncRenderer.forceSyncLevelRenderMarkDirty()) {
+		if ((RenderSystem.isOnRenderThread()
+			 // this fix a crash
+			 || (!ModListHelper.FLYWHEEL_LOADED && !AsyncRenderer.forceSyncLevelRenderMarkDirty()))) {
 			original.call(layer, pos);
 		} else {
 			RenderSystem.recordRenderCall(() -> original.call(layer, pos));
