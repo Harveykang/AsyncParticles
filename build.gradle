@@ -108,11 +108,10 @@ dependencies {
     runtimeOnly("io.github.douira:glsl-transformer:2.0.1")
     runtimeOnly("org.anarres:jcpp:1.4.14")
 
-//    modRuntimeOnly("maven.modrinth:create-fabric:0.5.1-j-build.1631+mc1.20.1")
 //    modRuntimeOnly("maven.modrinth:brute-force-rendering-culling:F6dedvxg")
     modRuntimeOnly("maven.modrinth:indium:1.0.34+mc1.20.1")
-
-    modRuntimeOnly("maven.modrinth:indium:1.0.34+mc1.20.1")
+//    modRuntimeOnly("maven.modrinth:ebe:0.9+1.20")
+    modCompileOnly("maven.modrinth:ebe:0.9+1.20")
 
     modCompileOnly "net.minecraftforge:forge:1.20.1-47.3.0:universal"
 
@@ -123,11 +122,12 @@ dependencies {
 
     modCompileOnly("curse.maven:lodestone-616457:6070172")
     modCompileOnly("maven.modrinth:effective:2.3.2-1.20.1")
+    modCompileOnly("maven.modrinth:hex-casting:0.11.2")
 
 //    modImplementation("maven.modrinth:effective:2.3.2-1.20.1") // put into /libs and unzip all jarinjars
 //    modImplementation 'maven.modrinth:c2me-fabric:0.2.0+alpha.11.16+1.20.1' // put into /libs and unzip all jarinjars
-    modRuntimeOnly fileTree(dir: 'libs', include: '*.jar', exclude: 'effective-1.0.2-all.jar')
-    modCompileOnly fileTree(dir: 'libs', include: ['c2me-*.jar', 'effective-1.0.2-all.jar', 'tombstone-1.20.1-8.9.0.jar'])
+    modLocalRuntime(fileTree(dir: 'libs', include: '*.jar', exclude: 'effective-1.0.2-all.jar'))
+    modCompileOnly fileTree(dir: 'libs', include: ['effective-1.0.2-all.jar', 'tombstone-1.20.1-8.9.0.jar'])
 }
 
 processResources {

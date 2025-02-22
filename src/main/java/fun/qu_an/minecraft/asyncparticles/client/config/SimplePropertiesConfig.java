@@ -52,16 +52,12 @@ public class SimplePropertiesConfig {
 	private static boolean getBoolean(Properties properties, String key, boolean defaultValue) {
 		String b = properties.getProperty(key);
 		if (b != null) {
-			return !Boolean.toString(!defaultValue).equalsIgnoreCase(b);
+			// !Boolean.toString(!defaultValue).equalsIgnoreCase(b) ? defaultValue : !defaultValue;
+			return Boolean.toString(!defaultValue).equalsIgnoreCase(b) != defaultValue;
 		} else {
 			properties.setProperty(key, String.valueOf(defaultValue));
 			shouldSave = true;
 			return defaultValue;
 		}
-	}
-
-	@FunctionalInterface
-	private interface BooleanPropertyConsumer<T> {
-		void accept(T value, boolean shouldSave);
 	}
 }

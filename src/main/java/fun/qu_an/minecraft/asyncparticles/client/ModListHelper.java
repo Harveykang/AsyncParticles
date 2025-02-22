@@ -18,7 +18,6 @@ public class ModListHelper {
 	public static final boolean FORGE_EFFECTIVE_LOADED = isForgeModLoaded("effective");
 	public static final boolean FABRIC_EFFECTIVE_LOADED = isFabricModLoaded("effective");
 	public static final boolean LODESTONE_LOADED = isModLoaded("lodestone");
-	public static final boolean TOMBSTONE_LOADED = isModLoaded("tombstone");
 	public static final boolean FORGE_LODESTONE_LOADED = isForgeModLoaded("lodestone");
 	public static final boolean FABRIC_LODESTONE_LOADED = isFabricModLoaded("lodestone");
 	public static final boolean FABRIC_PARTICLERAIN_LOADED = isFabricModLoaded("particlerain");
@@ -26,6 +25,8 @@ public class ModListHelper {
 	public static final boolean FABRIC_CREATE_LOADED = isFabricModLoaded("create");
 	public static final boolean FORGE_CREATE_LOADED = isForgeModLoaded("create");
 	public static final boolean FABRIC_EFFECTUAL_LOADED = isFabricModLoaded("effectual");
+	public static final boolean TOMBSTONE_LOADED = isModLoaded("tombstone");
+	public static final boolean HEXCASTING_LOADED = isModLoaded("hexcasting");
 
 	private static boolean isModLoaded(String modId) {
 		return FabricLoader.getInstance().isModLoaded(modId);

@@ -23,11 +23,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = LevelRenderer.class, priority = 499)
 public abstract class MixinLevelRenderer {
-
-	@Shadow
-	@Nullable
-	private RenderTarget particlesTarget;
-
 	@Inject(method = "renderLevel", at = @At(value = "HEAD"))
 	private void onRenderLevelHead(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
 		AsyncRenderer.start(poseStack, f, camera, lightTexture);
@@ -36,7 +31,7 @@ public abstract class MixinLevelRenderer {
 	@Inject(method = "renderLevel",
 		slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderWorldBorder(Lnet/minecraft/client/Camera;)V")),
 		at = @At(value = "INVOKE", shift = At.Shift.AFTER, remap = false, target = "Lcom/mojang/blaze3d/systems/RenderSystem;applyModelViewMatrix()V"))
-	private void onRenderLevelReturn(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+	private void onRenderLevelTail(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
 		AsyncRenderer.join(poseStack, f, camera, lightTexture);
 	}
 

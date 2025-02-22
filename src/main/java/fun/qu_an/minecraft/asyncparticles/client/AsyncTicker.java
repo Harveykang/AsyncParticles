@@ -4,7 +4,6 @@ import com.google.common.collect.EvictingQueue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.lointain.cosmos.procedures.SkyboxshapeProcedure;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -53,7 +52,7 @@ public class AsyncTicker {
 
 	static {
 		AtomicInteger workerCount = new AtomicInteger(1);
-		int clamp = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 5);
+		int clamp = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 		EXECUTOR = new ForkJoinPool(clamp, (forkJoinPool) -> {
 			ForkJoinWorkerThread forkJoinWorkerThread = new ForkJoinWorkerThread(forkJoinPool) {
 				protected void onTermination(Throwable throwable) {
@@ -276,6 +275,10 @@ public class AsyncTicker {
 
 	public static void destroy() {
 		cancelled = true;
+		if (particleCleanup != null) {
+			particleCleanup.join();
+			particleCleanup = null;
+		}
 		if (blockEntityTickFuture != null) {
 			blockEntityTickFuture.join();
 			blockEntityTickFuture = null;

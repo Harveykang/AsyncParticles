@@ -97,7 +97,10 @@ public abstract class MixinParticleEngine {
 			poseStack2.mulPoseMatrix(poseStack.last().pose());
 			RenderSystem.applyModelViewMatrix();
 		}
-
+//		System.out.println(RENDER_ORDER);
+//		System.out.println(particles.keySet());
+		// Some mod has duplicated render type, cause concurrent access to the same queue
+		// See MixinParticleEngine_Late.java
 		for (ParticleRenderType particleRenderType : (ModListHelper.IS_FORGE ? particles.keySet() : RENDER_ORDER)) {
 			Queue<Particle> iterable = this.particles.get(particleRenderType);
 			if (iterable == null || iterable.isEmpty()) {
@@ -131,16 +134,15 @@ public abstract class MixinParticleEngine {
 				if (bufferBuilder.building()) {
 					RenderSystem.setShader(GameRenderer::getParticleShader);
 					particleRenderType.begin(FakeBeginBufferBuilder.INSTANCE, this.textureManager);
-					BufferUploader.drawWithShader(bufferBuilder.end());
-					particleRenderType.end(FakeEndTesselator.INSTANCE);
+					particleRenderType.end(FakeEndTesselator.INSTANCE
+						.onEnd(() -> BufferUploader.drawWithShader(bufferBuilder.end())));
 				}
 			} else {
 				if (!bufferBuilder.building()) {
 					bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 				}
 				Runnable runnable = () -> iterable.forEach(particle -> {
-					if (particle == null // might be null because ArrayDeque is not thread-safe
-						|| !frustum.isVisible(particle.getBoundingBox())) {
+					if (!frustum.isVisible(particle.getBoundingBox())) {
 						return;
 					}
 					if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {

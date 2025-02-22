@@ -65,7 +65,7 @@ public class AsyncRenderer {
 
 	static {
 		AtomicInteger workerCount = new AtomicInteger(1);
-		int clamp = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 5);
+		int clamp = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 		EXECUTOR = new ForkJoinPool(clamp, (forkJoinPool) -> {
 			ForkJoinWorkerThread forkJoinWorkerThread = new ForkJoinWorkerThread(forkJoinPool) {
 				protected void onTermination(Throwable throwable) {
@@ -211,6 +211,9 @@ public class AsyncRenderer {
 	}
 
 	public static BufferBuilder getBufferBuilder(ParticleRenderType particleRenderType) {
+//		System.out.println(particleRenderType.getClass());
+//		System.out.println(particleRenderType.hashCode());
+		// FIXME: Some mod use record class as render type, FUCK
 		return BUFFER_BUILDERS.computeIfAbsent(particleRenderType,
 			k -> {
 //				if (k != ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT) {

@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class MixinMixinParticleEngine {
 	@SuppressWarnings("UnresolvedMixinReference")
 	@TargetHandler(
-		name = "lambda$render$0",
+		name = "lambda$render$1",
 		mixin = "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticleEngine"
 	)
 	@Redirect(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;isVisible(Lnet/minecraft/world/phys/AABB;)Z"))

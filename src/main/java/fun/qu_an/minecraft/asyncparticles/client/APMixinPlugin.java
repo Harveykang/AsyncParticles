@@ -63,6 +63,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			case "sodium" -> ModListHelper.SODIUM_LOADED;
 			case "flerovium" -> ModListHelper.FORGE_FLEROVIUM_LOADED;
 			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
+			case "hexcasting" -> ModListHelper.HEXCASTING_LOADED;
 			default -> true;
 		};
 	}
