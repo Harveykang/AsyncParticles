@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 // TODO: 整理这一坨
 public class AsyncTicker {
@@ -209,8 +210,8 @@ public class AsyncTicker {
 				PARTICLE_OPERATIONS.size(),
 				END_TICK_EVENTS.size(),
 				END_TICK_OPERATIONS.size(),
-				Minecraft.getInstance().particleEngine.particles.values()
-					.stream().map(particles -> String.valueOf(particles.size())).toList(),
+				Minecraft.getInstance().particleEngine.particles.entrySet()
+					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().size())),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size())));
 		debugConsumer = null;
 	}
@@ -255,6 +256,8 @@ public class AsyncTicker {
 
 	private static void tryReload() {
 		if (shouldReload) {
+			destroy();
+			AsyncRenderer.destroy();
 			Minecraft.getInstance().particleEngine.clearParticles();
 			shouldReload = false;
 		}

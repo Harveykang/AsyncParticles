@@ -3,8 +3,12 @@ package fun.qu_an.minecraft.asyncparticles.client;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
+import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
+import it.unimi.dsi.fastutil.Pair;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
@@ -17,8 +21,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import ovh.corail.tombstone.particle.*;
 
@@ -59,9 +66,13 @@ public class AsyncRenderer {
 		// TODO: configure this set
 	}
 
-	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = new ConcurrentHashMap<>();
+	//	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = new ConcurrentHashMap<>();
+	// some mod use zero content record class as particle render type, so we need to use IdentityHashMap to get rid of duplicated hashcode...
+	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = Collections.synchronizedMap(new IdentityHashMap<>());
 	private static final List<Runnable> ASYNC_QUEUE = new ArrayList<>();
 	public static final ForkJoinPool EXECUTOR;
+	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
+	public static final Set<Thread> PARTICLE_THREADS = Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
 
 	static {
 		AtomicInteger workerCount = new AtomicInteger(1);
@@ -78,13 +89,16 @@ public class AsyncRenderer {
 					super.onTermination(throwable);
 				}
 			};
-			forkJoinWorkerThread.setName("AsyncParticleRenderer-" + workerCount.getAndIncrement());
+			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());
 			forkJoinWorkerThread.setDaemon(true);
+			PARTICLE_THREADS.add(forkJoinWorkerThread);
 			return forkJoinWorkerThread;
 		}, Util::onThreadException, true);
 	}
 
-	private static final Map<ParticleRenderType, BufferBuilder> BUFFER_BUILDERS = new ConcurrentHashMap<>();
+	//	private static final Map<ParticleRenderType, BufferBuilder> BUFFER_BUILDERS = new ConcurrentHashMap<>();
+// some mod use zero content record class as particle render type, so we need to use IdentityHashMap to get rid of duplicated hashcode...
+	private static final Map<ParticleRenderType, BufferBuilder> BUFFER_BUILDERS = new IdentityHashMap<>();
 	public static Frustum frustum;
 	private static Consumer<String> debugConsumer;
 	public static boolean isStart;
@@ -210,10 +224,7 @@ public class AsyncRenderer {
 		return Iris.getPipelineManager().getPipeline().map(WorldRenderingPipeline::getParticleRenderingSettings).orElse(ParticleRenderingSettings.MIXED);
 	}
 
-	public static BufferBuilder getBufferBuilder(ParticleRenderType particleRenderType) {
-//		System.out.println(particleRenderType.getClass());
-//		System.out.println(particleRenderType.hashCode());
-		// FIXME: Some mod use record class as render type, FUCK
+	private static BufferBuilder getBufferBuilder(ParticleRenderType particleRenderType) {
 		return BUFFER_BUILDERS.computeIfAbsent(particleRenderType,
 			k -> {
 //				if (k != ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT) {
@@ -221,6 +232,48 @@ public class AsyncRenderer {
 //				}
 				return new BufferBuilder(RenderType.SMALL_BUFFER_SIZE / 2);
 			}); // 给多大好？
+	}
+
+	private static final Map<ParticleRenderType, Pair<VertexFormat.Mode, VertexFormat>> FORMATS = new IdentityHashMap<>();
+	private static final Pair<VertexFormat.Mode, VertexFormat> EMPTY_FORMAT = Pair.of(null, null);
+
+	public static @Nullable BufferBuilder beginBufferBuilder(ParticleRenderType particleRenderType, TextureManager textureManager) {
+		BufferBuilder builder = getBufferBuilder(particleRenderType);
+		if (builder.building()) {
+			return builder;
+		}
+		Pair<VertexFormat.Mode, VertexFormat> pair = FORMATS.computeIfAbsent(particleRenderType, k -> computeVertexFormatPair(k, textureManager));
+		if (pair == EMPTY_FORMAT) {
+			return null;
+		}
+		builder.begin(pair.first(), pair.second());
+		return builder;
+	}
+
+	public static boolean begin(ParticleRenderType particleRenderType, TextureManager textureManager, BufferBuilder builder) {
+		if (builder.building()) {
+			return true;
+		}
+		Pair<VertexFormat.Mode, VertexFormat> pair = FORMATS.computeIfAbsent(particleRenderType, k -> computeVertexFormatPair(k, textureManager));
+		if (pair == EMPTY_FORMAT) {
+			return false;
+		}
+		builder.begin(pair.first(), pair.second());
+		return true;
+	}
+
+	private static @NotNull Pair<VertexFormat.Mode, VertexFormat> computeVertexFormatPair(ParticleRenderType k, TextureManager textureManager) {
+		// we try and store the vertex format/mode to avoid call begin() twice per frame...
+		FakeBufferBuilder fakeBuilder = new FakeBufferBuilder();
+		// compatibility shit...
+		k.begin(fakeBuilder, textureManager);
+		k.end(FakeTesselator.INSTANCE); // we must call end since some mod may reset something in this method
+		VertexFormat.Mode mode = fakeBuilder.getVertexFormatMode();
+		VertexFormat format = fakeBuilder.getFormat();
+		if (mode == null || format == null) {
+			return EMPTY_FORMAT;
+		}
+		return Pair.of(mode, format);
 	}
 
 	public static void markAsSync(Class<? extends Particle> aClass) {
@@ -278,6 +331,7 @@ public class AsyncRenderer {
 //			asyncTask = null;
 		}
 		ASYNC_QUEUE.clear();
+		FORMATS.clear();
 		clearSync();
 	}
 }

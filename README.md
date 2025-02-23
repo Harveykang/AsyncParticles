@@ -17,10 +17,10 @@
 
 ## Mods Recommended
 
-- ModernFix (Epic fixes!)
-- Sodium/Embeddium (Epic optimizations!)
-- Flerovium (Fast item/particle rendering)
-- Startlight (Fast light cache)
+- ModernFix
+- Sodium/Embeddium
+- Flerovium
+- Startlight
 
 ## Mod Compatability
 
@@ -46,6 +46,7 @@
 ✅ Effectual (Fabric)  
 ✅ Valkyrien Skies (Fabric/Forge)  
 ✅ MmmMmmMmmMmm (Target Dummy) (Fabric/Forge)    
+✅ Hex Casting (Fabric/Forge)    
 ❌ MadParticle (Forge)  
 ⬜ ...  
 

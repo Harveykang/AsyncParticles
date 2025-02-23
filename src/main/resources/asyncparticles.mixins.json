@@ -35,6 +35,8 @@
     "fabric.particlerain_vs.MixinWeatherParticles",
     "fabric.particlerain_vs.MixinWeatherParticleSpawner",
     "fabric.particlerain_vs.MixinWeatherPatricle",
+    "fake_renders.MixinBufferBuilder",
+    "fake_renders.MixinTesselator",
     "forge.MixinMinecraft",
     "forge.create.MixinDepotBehaviour",
     "forge.create.MixinEjectorBlockEntity",
@@ -49,6 +51,8 @@
     "forge.particlerain_vs.MixinWeatherParticleSpawner",
     "forge.particlerain_vs.MixinWeatherPatricle",
     "hexcasting.MixinConjureParticle",
+    "iris.MixinFullyBufferedMultiBufferSource",
+    "iris.MixinOldFullyBufferedMultiBufferSource",
     "lodestone.MixinLodestoneWorldParticle",
     "sodium.MixinThreadLocalBufferBuilder",
     "vs2.InvokerEntityShipCollisionUtils",
@@ -59,7 +63,5 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "mixins": [
-  ]
+  }
 }

@@ -60,6 +60,9 @@ repositories {
 
 dependencies {
     include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.2.0")))
+    include(implementation("com.github.bawnorton.mixinsquared:mixinsquared-forge:0.2.0"))
+//    include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.4.1")))
+    include(implementation("io.github.llamalad7:mixinextras-forge:0.4.1"))
 
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -74,49 +77,49 @@ dependencies {
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modRuntimeOnly "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
+    modLocalRuntime "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
     modCompileOnly "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
 
-    modRuntimeOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.5"
-//    modRuntimeOnly "maven.modrinth:vmod:0.1.2"
-    modRuntimeOnly 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
+    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.5"
     modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.5"
+//    modRuntimeOnly "maven.modrinth:vmod:0.1.2"
+
+    modLocalRuntime 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
 //    modCompileOnly "maven.modrinth:cosmic-horizons-cosmos:0.0.7.3"
-    modCompileOnly "maven.modrinth:cosmic-horizons-cosmos:0.0.7.3"
 
     modImplementation "maven.modrinth:particle-rain:3.0.6-1.20"
     modCompileOnly "maven.modrinth:pretty-rain:96kQ9rp3"
 
-    modRuntimeOnly "maven.modrinth:spark:1.10.53-fabric"
+    modLocalRuntime "maven.modrinth:spark:1.10.53-fabric"
     modImplementation "maven.modrinth:sodium:mc1.20.1-0.5.11"
-    modRuntimeOnly "me.shedaniel.cloth:cloth-config-fabric:11.1.136"
-    modRuntimeOnly 'maven.modrinth:architectury-api:9.2.14+fabric'
-    modRuntimeOnly 'maven.modrinth:starlight:1.1.2+1.20'
+    modLocalRuntime "me.shedaniel.cloth:cloth-config-fabric:11.1.136"
+    modLocalRuntime 'maven.modrinth:architectury-api:9.2.14+fabric'
+    modLocalRuntime 'maven.modrinth:starlight:1.1.2+1.20'
     modCompileOnly 'maven.modrinth:starlight:1.1.2+1.20'
-    modRuntimeOnly 'maven.modrinth:modernfix:5.20.2+mc1.20.1'
+    modLocalRuntime 'maven.modrinth:modernfix:5.20.2+mc1.20.1'
     modCompileOnly 'maven.modrinth:iris:1.7.5+1.20.1'
-    modRuntimeOnly 'maven.modrinth:iris:1.7.5+1.20.1'
+    modLocalRuntime 'maven.modrinth:iris:1.7.5+1.20.1'
 
     modImplementation 'maven.modrinth:effectual:0.5.0-1.20.1'
-    modRuntimeOnly 'maven.modrinth:owo-lib:0.11.2+1.20'
+    modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
 
     modImplementation 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
-    modRuntimeOnly "maven.modrinth:moonlight:fabric_1.20-2.13.62"
+    modLocalRuntime "maven.modrinth:moonlight:fabric_1.20-2.13.62"
 
     modCompileOnly "curse.maven:flerovium-1142875:6171369"
-    runtimeOnly("org.antlr:antlr4-runtime:4.13.1")
-    runtimeOnly("io.github.douira:glsl-transformer:2.0.1")
-    runtimeOnly("org.anarres:jcpp:1.4.14")
+    localRuntime("org.antlr:antlr4-runtime:4.13.1")
+    localRuntime("io.github.douira:glsl-transformer:2.0.1")
+    localRuntime("org.anarres:jcpp:1.4.14")
 
-//    modRuntimeOnly("maven.modrinth:brute-force-rendering-culling:F6dedvxg")
-    modRuntimeOnly("maven.modrinth:indium:1.0.34+mc1.20.1")
+//    modLocalRuntime("maven.modrinth:brute-force-rendering-culling:F6dedvxg")
+    modLocalRuntime("maven.modrinth:indium:1.0.34+mc1.20.1")
 
-    modCompileOnly "net.minecraftforge:forge:1.20.1-47.3.0:universal"
+    compileOnly "net.minecraftforge:forge:1.20.1-47.3.0:universal"
 
     modCompileOnly('maven.modrinth:create:1.20.1-0.5.1.j') // create forge
 
     modCompileOnly("com.simibubi.create:create-fabric-$minecraft_version:0.5.1-j-build.1631+mc1.20.1")
-//    modRuntimeOnly("com.simibubi.create:create-fabric-$minecraft_version:0.5.1-j-build.1631+mc1.20.1")
+    modLocalRuntime("com.simibubi.create:create-fabric-$minecraft_version:0.5.1-j-build.1631+mc1.20.1")
 
     modCompileOnly("curse.maven:lodestone-616457:6070172")
     modCompileOnly("maven.modrinth:effective:2.3.2-1.20.1")

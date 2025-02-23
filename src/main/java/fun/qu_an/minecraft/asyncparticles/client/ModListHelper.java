@@ -29,15 +29,15 @@ public class ModListHelper {
 	public static final boolean HEXCASTING_LOADED = isModLoaded("hexcasting");
 	public static final boolean FLYWHEEL_LOADED = isModLoaded("flywheel");
 
-	private static boolean isModLoaded(String modId) {
+	public static boolean isModLoaded(String modId) {
 		return FabricLoader.getInstance().isModLoaded(modId);
 	}
 
-	private static boolean isForgeModLoaded(String modId) {
+	public static boolean isForgeModLoaded(String modId) {
 		return IS_FORGE && isModLoaded(modId) && !ConnectorEarlyLoader.isConnectorMod(modId);
 	}
 
-	private static boolean isFabricModLoaded(String modId) {
+	public static boolean isFabricModLoaded(String modId) {
 		return IS_FORGE ? ConnectorEarlyLoader.isConnectorMod(modId) : isModLoaded(modId);
 	}
 }

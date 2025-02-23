@@ -8,7 +8,7 @@ import com.mojang.blaze3d.vertex.*;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBeginBufferBuilder;
-import fun.qu_an.minecraft.asyncparticles.client.util.FakeEndTesselator;
+import fun.qu_an.minecraft.asyncparticles.client.util.CustomableEndTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.TrackedParticleCountsMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.CrashReport;
@@ -102,17 +102,20 @@ public abstract class MixinParticleEngine {
 		// Some mod has duplicated render type, cause concurrent access to the same queue
 		// See MixinParticleEngine_Late.java
 		for (ParticleRenderType particleRenderType : (ModListHelper.IS_FORGE ? particles.keySet() : RENDER_ORDER)) {
+			if (particleRenderType == ParticleRenderType.NO_RENDER) {
+				continue;
+			}
 			Queue<Particle> iterable = this.particles.get(particleRenderType);
 			if (iterable == null || iterable.isEmpty()) {
 				continue;
 			}
-			BufferBuilder bufferBuilder = AsyncRenderer.getBufferBuilder(particleRenderType);
+			BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
+			if (bufferBuilder == null) {
+				continue;
+			}
 			if (!AsyncRenderer.isStart) {
 				List<? extends Particle> particles1 = AsyncRenderer.getSync(particleRenderType);
 				if (!particles1.isEmpty()) {
-					if (!bufferBuilder.building()) {
-						bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
-					}
 					for (Particle particle : particles1) {
 						if (!frustum.isVisible(particle.getBoundingBox())) {
 							continue;
@@ -131,16 +134,14 @@ public abstract class MixinParticleEngine {
 						}
 					}
 				}
+				RenderSystem.setShader(GameRenderer::getParticleShader);
+				// use fake, mod compatibility
+				particleRenderType.begin(FakeBeginBufferBuilder.INSTANCE, this.textureManager);
+				particleRenderType.end(CustomableEndTesselator.INSTANCE.onEnd(() -> BufferUploader.drawWithShader(bufferBuilder.end())));
 				if (bufferBuilder.building()) {
-					RenderSystem.setShader(GameRenderer::getParticleShader);
-					particleRenderType.begin(FakeBeginBufferBuilder.INSTANCE, this.textureManager);
-					particleRenderType.end(FakeEndTesselator.INSTANCE
-						.onEnd(() -> BufferUploader.drawWithShader(bufferBuilder.end())));
+					bufferBuilder.end().release(); // release buffer manually if not released by particleRenderType.end()
 				}
 			} else {
-				if (!bufferBuilder.building()) {
-					bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
-				}
 				Runnable runnable = () -> iterable.forEach(particle -> {
 					if (!frustum.isVisible(particle.getBoundingBox())) {
 						return;
@@ -321,7 +322,7 @@ public abstract class MixinParticleEngine {
 //				throw new RuntimeException(e);
 //			}
 //		}).exceptionally(t -> {
-//			Minecraft.getInstance().gui.getChat().addMessage(Component.nullToEmpty(t.getMessage()));
+//			Minecraft.getInstance().gui.getChat().addMessage(Component.literal(t.getMessage()));
 //			return null;
 //		}));
 //	}

@@ -12,11 +12,6 @@ import pigcart.particlerain.WeatherParticleSpawner;
 
 @Mixin(value = WeatherParticleSpawner.class)
 public class MixinWeatherParticleSpawner {
-	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", remap = false, target = "Lpigcart/particlerain/ParticleRainClient;particleCount:I"))
-	private static int modifyParticleCount(int original) {
-		return 0;
-	}
-
 	@Redirect(method = "spawnParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"))
 	private static void onSpawnParticle(ClientLevel level, ParticleOptions particleOptions, double x, double y, double z, double g, double h, double i) {
 		if (particleOptions == ParticleRainClient.DUST) {
