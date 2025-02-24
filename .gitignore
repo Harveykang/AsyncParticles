@@ -115,6 +115,9 @@ gradle-app.setting
 run/
 runs/
 libs/
+Merged/
+
+.architectury-transformer/
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar

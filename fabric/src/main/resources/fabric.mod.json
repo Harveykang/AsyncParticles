@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "asyncparticles",
+  "version": "${version}",
+  "name": "AsyncParticles",
+  "description": "",
+  "authors": ["Harvey_Husky"],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/asyncparticles/icon.png",
+  "accessWidener": "asyncparticles-common.accesswidener",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "fun.qu_an.minecraft.asyncparticles.client.fabric.AsyncparticlesClientFabric"
+    ]
+  },
+  "mixins": [
+    "asyncparticles-common.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": ">=1.20",
+    "mixinextras": ">=0.4.1"
+  },
+  "suggests": {
+    "fabric": "*"
+  }
+}

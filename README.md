@@ -32,8 +32,8 @@
 
 ### Mods Tested
 
+🔄️ Particular (Fabric/Forge)  
 ❔ Create (Fabric/Forge)  
-❔ Effective/Effecticularity (Fabric/Forge)  
 ✅ Forge + Sinytra Connector  
 ✅ Fabric  
 ✅ ModernFix (Fabric/Forge)  
@@ -44,6 +44,7 @@
 ✅ Startlight (Fabric/Forge)  
 ✅ Particle Rain/Pretty Rain (Fabric/Forge)  
 ✅ Effectual (Fabric)  
+✅ Effective/Effecticularity (Fabric/Forge)  
 ✅ Valkyrien Skies (Fabric/Forge)  
 ✅ MmmMmmMmmMmm (Target Dummy) (Fabric/Forge)    
 ✅ Hex Casting (Fabric/Forge)    
