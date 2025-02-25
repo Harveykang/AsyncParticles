@@ -1,10 +1,19 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.loader.api.FabricLoader;
 import org.sinytra.connector.loader.ConnectorEarlyLoader;
 
 public class ModListHelper {
-	public static final boolean IS_FORGE = isModLoaded("connectormod");
+	public static final boolean IS_FORGE = isForge();
+
+	@ExpectPlatform
+	private static boolean isForge() {
+		throw new AssertionError();
+	}
+
+	public static final boolean CONNECTORMOD_LOADED = isModLoaded("connectormod");
+
 	public static final boolean VS_LOADED = isModLoaded("valkyrienskies");
 	public static final boolean SODIUM_LOADED = isModLoaded("sodium") || isModLoaded("embeddium");
 	public static final boolean PARTICLERAIN_LOADED = isModLoaded("particlerain");
@@ -29,15 +38,17 @@ public class ModListHelper {
 	public static final boolean HEXCASTING_LOADED = isModLoaded("hexcasting");
 	public static final boolean FLYWHEEL_LOADED = isModLoaded("flywheel");
 
+	@ExpectPlatform
 	public static boolean isModLoaded(String modId) {
-		return FabricLoader.getInstance().isModLoaded(modId);
+		throw new UnsupportedOperationException();
 	}
 
+	@SuppressWarnings("ConstantValue")
 	public static boolean isForgeModLoaded(String modId) {
-		return IS_FORGE && isModLoaded(modId) && !ConnectorEarlyLoader.isConnectorMod(modId);
+		return IS_FORGE && isModLoaded(modId) && (!CONNECTORMOD_LOADED || !ConnectorEarlyLoader.isConnectorMod(modId));
 	}
 
 	public static boolean isFabricModLoaded(String modId) {
-		return IS_FORGE ? ConnectorEarlyLoader.isConnectorMod(modId) : isModLoaded(modId);
+		return IS_FORGE ? (CONNECTORMOD_LOADED && ConnectorEarlyLoader.isConnectorMod(modId)) : isModLoaded(modId);
 	}
 }
