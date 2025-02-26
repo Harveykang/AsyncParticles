@@ -32,7 +32,7 @@ public abstract class MixinRippleParticle extends TextureSheetParticle {
 		setSpriteFromAge(this.spriteProvider);
 	}
 
-	@Redirect(method = "render", at = @At(value = "INVOKE", remap = false,
+	@Redirect(method = "render", at = @At(value = "INVOKE",
 		target = "Lconcerrox/effective/particle/RippleParticle;setSpriteFromAge(Lnet/minecraft/client/particle/SpriteSet;)V"))
 	private void onRender(RippleParticle particle, SpriteSet spriteProvider) {
 		// do nothing

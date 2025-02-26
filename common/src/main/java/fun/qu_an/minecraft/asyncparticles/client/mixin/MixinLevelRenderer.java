@@ -2,13 +2,11 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import net.minecraft.client.Camera;
-import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.*;
 import net.minecraft.core.BlockPos;
 import org.joml.Matrix4f;

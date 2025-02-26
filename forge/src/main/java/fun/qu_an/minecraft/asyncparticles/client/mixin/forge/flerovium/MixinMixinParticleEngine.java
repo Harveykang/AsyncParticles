@@ -33,8 +33,10 @@ public class MixinMixinParticleEngine {
 	}
 
 	/**
-	 * &#064;See  {@link com.moepus.flerovium.mixins.Particle.ParticleEngineMixin#FastFrustumCheck)}
-	 * **Note: this method is under LGPL license, author: Moepus**
+	 * &#064;See  {@link com.moepus.flerovium.mixins.Particle.ParticleEngineMixin#FastFrustumCheck)}<p>
+	 * **Note: this method is under LGPL license, author: Moepus**<p>
+	 * This may be a violation of LGPL...<p>
+	 * but mixin classes cannot reference directly :(
 	 */
 	@Unique
 	private static boolean flerovium$FastFrustumCheck(Frustum instance, AABB aabb, Particle particle) {

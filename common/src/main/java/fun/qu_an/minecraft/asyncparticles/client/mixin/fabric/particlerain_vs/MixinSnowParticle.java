@@ -25,9 +25,9 @@ public abstract class MixinSnowParticle extends MixinWeatherPatricle {
 		double i = f;
 		if (this.hasPhysics && (d != (double) 0.0F || e != (double) 0.0F || f != (double) 0.0F) && d * d + e * e + f * f < MAXIMUM_COLLISION_VELOCITY_SQUARED) {
 			Vec3 vec3 = new Vec3(d, e, f);
-			Vec3 shipMovement = VSClientUtils.adjustEntityMovementForShipCollisions(null, vec3, asyncparticles$weathersAABB, level);
+			Vec3 shipMovement = VSClientUtils.entityMovColShipOnly(null, vec3, asyncparticles$weathersAABB, level);
 			if (shipMovement == null) {
-				vec3 = Entity.collideBoundingBox(null, vec3, getBoundingBox(), this.level, List.of());
+				vec3 = Entity.collideBoundingBox(null, vec3, getBoundingBox().inflate(1), this.level, List.of());
 			} else {
 				vec3 = shipMovement;
 			}
@@ -47,7 +47,7 @@ public abstract class MixinSnowParticle extends MixinWeatherPatricle {
 			asyncparticles$invisible = true;
 		}
 
-		if (h != e && h < (double) 0.0F){
+		if (h != e && h < (double) 0.0F) {
 			this.onGround = true;
 			asyncparticles$invisible = true;
 		}

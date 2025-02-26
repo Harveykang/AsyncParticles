@@ -41,11 +41,11 @@ public abstract class MixinRainParticle extends MixinWeatherPatricle {
 		if (this.hasPhysics && (d != (double) 0.0F || e != (double) 0.0F || f != (double) 0.0F) && d * d + e * e + f * f < MAXIMUM_COLLISION_VELOCITY_SQUARED) {
 			Vec3 vec3 = new Vec3(d, e, f);
 			Vec3 location = new Vec3(this.x, this.y, this.z);
-			Vec3 shipMovement = VSClientUtils.adjustEntityMovementForShipCollisions(null, vec3, weathersAABB, level);
+			Vec3 shipMovement = VSClientUtils.entityMovColShipOnly(null, vec3, asyncparticles$weathersAABB, level);
 			if (shipMovement == null) {
-				vec3 = Entity.collideBoundingBox(null, vec3, weathersAABB, this.level, List.of());
+				vec3 = Entity.collideBoundingBox(null, vec3, asyncparticles$weathersAABB, this.level, List.of());
 			} else {
-				asyncParticles$shipCollision(location, shipMovement);
+				asyncparticles$shipCollision(location, shipMovement);
 				vec3 = shipMovement;
 			}
 			d = vec3.x;
@@ -54,7 +54,7 @@ public abstract class MixinRainParticle extends MixinWeatherPatricle {
 		}
 
 		if (d != (double) 0.0F || e != (double) 0.0F || f != (double) 0.0F) {
-			weathersAABB = weathersAABB.move(d, e, f);
+			asyncparticles$weathersAABB = asyncparticles$weathersAABB.move(d, e, f);
 			this.setBoundingBox(this.getBoundingBox().move(d, e, f));
 			this.setLocationFromBoundingbox();
 		}
@@ -78,10 +78,10 @@ public abstract class MixinRainParticle extends MixinWeatherPatricle {
 	}
 
 	@Unique
-	protected void asyncParticles$shipCollision(Vec3 location, Vec3 movement) {
+	private void asyncparticles$shipCollision(Vec3 location, Vec3 movement) {
 		Minecraft mc = Minecraft.getInstance();
 		ShipHitResult hit = VSClientUtils.clipShip(level, new ClipContext(location,
-				location.add(movement).add(movement.normalize().scale(weathersAABB.getSize())),
+				location.add(movement).add(movement.normalize().scale(asyncparticles$weathersAABB.getSize())),
 				ClipContext.Block.COLLIDER,
 				ClipContext.Fluid.ANY,
 				mc.player),

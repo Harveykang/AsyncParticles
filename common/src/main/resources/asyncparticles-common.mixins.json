@@ -20,15 +20,18 @@
     "MixinTesselator",
     "MixinTextureManager",
     "fabric.MixinLevelRenderer",
-    "fabric.MixinParticleEngine_Render",
     "fabric.MixinParticleEngine_Late",
+    "fabric.MixinParticleEngine_Render",
     "fabric.create.MixinDepotBehaviour",
     "fabric.create.MixinEjectorBlockEntity",
     "fabric.effective.MixinEffective",
     "fabric.effective.MixinRippleParticle",
     "fabric.effectual.MixinAllEffects",
     "fabric.effectual.MixinWaterDripEffect",
+    "fabric.particlerain.MixinGroundFogParticle",
+    "fabric.particlerain.MixinParticleRainClient",
     "fabric.particlerain.MixinWeatherParticleSpawner",
+    "fabric.particlerain.MixinWeatherPatricle",
     "fabric.particlerain_vs.MixinDustParticle",
     "fabric.particlerain_vs.MixinRainParticle",
     "fabric.particlerain_vs.MixinRippleParticle",
@@ -54,5 +57,6 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "fabric.particular.MixinMain"
   ]
 }

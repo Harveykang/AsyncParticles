@@ -76,6 +76,10 @@ dependencies {
 
     /* Effective */
 //    modLocalRuntime "maven.modrinth:effective:2.3.2-1.20.1" // dependency hell
+
+    /* Particular */
+    modLocalRuntime "maven.modrinth:particular:1.1.1"
+    modLocalRuntime "maven.modrinth:sushi-bar:0.2.2+1.20"
 }
 
 processResources {

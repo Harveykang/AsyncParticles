@@ -23,10 +23,10 @@ import java.util.List;
 @Mixin(value = WeatherParticle.class)
 public abstract class MixinWeatherPatricle extends TextureSheetParticle {
 	@Unique
-	protected boolean invisible;
+	protected boolean asyncparticles$invisible;
 
 	@Unique
-	protected AABB weathersAABB;
+	protected AABB asyncparticles$weathersAABB;
 
 	protected MixinWeatherPatricle(ClientLevel clientLevel, double d, double e, double f) {
 		super(clientLevel, d, e, f);
@@ -34,12 +34,12 @@ public abstract class MixinWeatherPatricle extends TextureSheetParticle {
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
-		weathersAABB = AABB.ofSize(new Vec3(x, y, z), 3, 3, 3);
+		asyncparticles$weathersAABB = AABB.ofSize(new Vec3(x, y, z), 3.8, 3.8, 3.8);
 	}
 
 	@ModifyConstant(method = "tick", constant = @Constant(doubleValue = 0.2))
 	private double onTick(double original) {
-		return 1.7;
+		return 2.1;
 	}
 
 	/**
@@ -49,8 +49,8 @@ public abstract class MixinWeatherPatricle extends TextureSheetParticle {
 	@Override
 	public void move(double d, double e, double f) {
 		if (!((InvokerEntityShipCollisionUtils) (Object) EntityShipCollisionUtils.INSTANCE)
-			.invoker_getShipPolygonsCollidingWithEntity(null, new Vec3(d, e, f), weathersAABB, level).isEmpty()) {
-			invisible = true;
+			.invoker_getShipPolygonsCollidingWithEntity(null, new Vec3(d, e, f), asyncparticles$weathersAABB, level).isEmpty()) {
+			asyncparticles$invisible = true;
 			remove();
 			return;
 		}
@@ -61,14 +61,14 @@ public abstract class MixinWeatherPatricle extends TextureSheetParticle {
 		double h = e;
 		double i = f;
 		if (this.hasPhysics && (d != (double)0.0F || e != (double)0.0F || f != (double)0.0F) && d * d + e * e + f * f < MAXIMUM_COLLISION_VELOCITY_SQUARED) {
-			Vec3 vec3 = Entity.collideBoundingBox((Entity)null, new Vec3(d, e, f), this.getBoundingBox(), this.level, List.of());
+			Vec3 vec3 = Entity.collideBoundingBox(null, new Vec3(d, e, f), this.getBoundingBox(), this.level, List.of());
 			d = vec3.x;
 			e = vec3.y;
 			f = vec3.z;
 		}
 
 		if (d != (double)0.0F || e != (double)0.0F || f != (double)0.0F) {
-			weathersAABB = weathersAABB.move(d, e, f);
+			asyncparticles$weathersAABB = asyncparticles$weathersAABB.move(d, e, f);
 			this.setBoundingBox(this.getBoundingBox().move(d, e, f));
 			this.setLocationFromBoundingbox();
 		}
@@ -79,18 +79,18 @@ public abstract class MixinWeatherPatricle extends TextureSheetParticle {
 
 		this.onGround = h != e && h < (double)0.0F;
 		if (g != d) {
-			this.xd = (double)0.0F;
+			this.xd = 0.0F;
 		}
 
 		if (i != f) {
-			this.zd = (double)0.0F;
+			this.zd = 0.0F;
 		}
 
 	}
 
 	@Override
 	public void render(VertexConsumer vertexConsumer, Camera camera, float f) {
-		if (invisible) {
+		if (asyncparticles$invisible) {
 			return;
 		}
 		super.render(vertexConsumer, camera, f);

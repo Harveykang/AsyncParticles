@@ -32,7 +32,7 @@ dependencies {
 
     /* Particle Rain/Pretty Rain */
     modCompileOnly "maven.modrinth:particle-rain:3.0.6-1.20"
-    modCompileOnly "maven.modrinth:pretty-rain:96kQ9rp3"
+//    modCompileOnly "maven.modrinth:pretty-rain:TGjK6ChS"
 
     /* Effectual */
     modCompileOnly 'maven.modrinth:effectual:0.5.0-1.20.1'
@@ -55,4 +55,7 @@ dependencies {
 
     /* Tombstone */
 //    modCompileOnly fileTree(dir: '../libs', include: 'tombstone-1.20.1-8.9.0.jar')
+
+    /* Particular */
+    modCompileOnly "maven.modrinth:particular:1.1.1"
 }

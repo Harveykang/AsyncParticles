@@ -49,8 +49,8 @@ dependencies {
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')
 
-    modLocalRuntime "org.sinytra:Connector:1.0.0-beta.46+1.20.1"
-    modLocalRuntime "dev.su5ed.sinytra.fabric-api:fabric-api:0.92.2+1.11.9+1.20.1"
+//    modLocalRuntime "org.sinytra:Connector:1.0.0-beta.46+1.20.1"
+//    modLocalRuntime "dev.su5ed.sinytra.fabric-api:fabric-api:0.92.2+1.11.9+1.20.1"
 
     if (rootProject.vanilla == 'true') {
         return
@@ -59,9 +59,9 @@ dependencies {
     /* APIs */
     modLocalRuntime 'maven.modrinth:architectury-api:9.2.14+forge'
     modLocalRuntime "me.shedaniel.cloth:cloth-config-forge:11.1.136"
-    if (rootProject.use_connector_mod == "true") {
-        modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
-    }
+//    if (rootProject.use_connector_mod == "true") {
+//        modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
+//    }
 
     /* Performance */
     modLocalRuntime "maven.modrinth:spark:1.10.53-forge"
@@ -75,7 +75,7 @@ dependencies {
     modLocalRuntime "curse.maven:flerovium-1142875:6171369"
 
     /* Valkyrien Skies */
-    localRuntime 'thedarkcolour:kotlinforforge:4.10.0'
+    modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'
     modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.5"
     modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.5"
     modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.5.1-beta.3'
@@ -83,17 +83,17 @@ dependencies {
     /* Particle Rain/Pretty Rain */
 //    modCompileOnly "maven.modrinth:pretty-rain:96kQ9rp3" // 1.0.8
     modCompileOnly "maven.modrinth:pretty-rain:TGjK6ChS" // 1.1.0
-    if (rootProject.use_connector_mod == "true") {
+//    if (rootProject.use_connector_mod == "true") {
 //        modLocalRuntime "maven.modrinth:pretty-rain:96kQ9rp3" // 1.0.8
-        modLocalRuntime "maven.modrinth:pretty-rain:TGjK6ChS" // 1.1.0
-    } else {
-        modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
-    }
+    modLocalRuntime "maven.modrinth:pretty-rain:TGjK6ChS" // 1.1.0
+//    } else {
+//        modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
+//    }
 
     /* Effectual */
-    if (rootProject.use_connector_mod == "true") {
-        modLocalRuntime 'maven.modrinth:effectual:0.5.0-1.20.1'
-    }
+//    if (rootProject.use_connector_mod == "true") {
+//        modLocalRuntime 'maven.modrinth:effectual:0.5.0-1.20.1'
+//    }
 
     /* Create */
     modLocalRuntime("com.simibubi.create:create-1.20.1:0.5.1.j-55:slim") { transitive = false }

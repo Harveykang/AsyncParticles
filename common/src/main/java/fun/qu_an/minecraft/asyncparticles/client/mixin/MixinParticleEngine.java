@@ -60,6 +60,24 @@ public abstract class MixinParticleEngine {
 	 */
 	@Overwrite
 	public void tick() {
+		if (!AsyncTicker.shouldTickParticles) {
+			if (!this.particlesToAdd.isEmpty()) {
+				particlesToAdd.forEach(p -> {
+					if (p == null) { // might be null because ArrayDeque is not thread-safe
+						return;
+					}
+					p.remove();
+					// this will fix some mod's particle count management bug
+				});
+				particlesToAdd.clear();
+			}
+			if (AsyncTicker.particleCleanup != null) {
+				AsyncTicker.particleCleanup.join();
+				AsyncTicker.particleCleanup = null;
+			}
+			return;
+		}
+
 		particles.forEach((particleRenderType, queue) -> {
 			this.level.getProfiler().push(particleRenderType.toString());
 			AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue));
@@ -105,15 +123,21 @@ public abstract class MixinParticleEngine {
 				if (p == null) { // might be null because ArrayDeque is not thread-safe
 					return;
 				}
-				Queue<Particle> queue = this.particles.computeIfAbsent(p.getRenderType(), (p_107347_) -> EvictingQueue.create(SimplePropertiesConfig.limit));
-				if (queue.size() < SimplePropertiesConfig.limit) { // TODO: 能不能取消粒子组检查？
-					p.getParticleGroup().ifPresent(g -> updateCount(g, 1));
+				Queue<Particle> queue = this.particles.computeIfAbsent(p.getRenderType(),
+					(p_107347_) -> EvictingQueue.create(SimplePropertiesConfig.limit));
+				while (queue.size() >= SimplePropertiesConfig.limit) {
+					Particle removed = queue.remove();
+					removed.remove(); // remove if the limit exceeded
+					removed.getParticleGroup().ifPresent(g -> updateCount(g, -1));
+					// this will fix some mod's particle count management bug
+					// TODO: 这样的话就不需要 EvictingQueue 了
 				}
+				p.getParticleGroup().ifPresent(g -> updateCount(g, 1));
 				queue.add(p);
 			});
 			particlesToAdd.clear();
-			// TODO: 实现线程安全的低锁开销队列，目前会因为一些粒子在tick时添加新的粒子导致并发访问
-			//  不会抛异常，因为遍历的时候不会检查为空性，无明显影响
+			// FIXME: 实现线程安全的低锁开销队列，目前会因为一些粒子在tick时添加新的粒子导致并发访问
+			//  不会抛异常，因为遍历的时候不会检查为空性，无明显影响，但可能导致一些模组的粒子计数出现偏差
 		}
 	}
 
@@ -184,6 +208,7 @@ public abstract class MixinParticleEngine {
 	@Inject(method = "add", at = @At(value = "HEAD"), cancellable = true)
 	public void add(Particle particle, CallbackInfo ci) {
 		if (!AsyncTicker.shouldTickParticles) {
+			particle.remove(); // to compatible with some mods...
 			ci.cancel();
 		}
 	}

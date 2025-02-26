@@ -335,7 +335,8 @@ public class AsyncRenderer {
 	}
 
 	public static boolean forceSyncLevelRenderMarkDirty() {
-		return SimplePropertiesConfig.forceSyncLevelRenderMarkDirty;
+		// TODO: 详细看看 EBE Mod
+		return ModListHelper.ENHANCEDBLOCKENTITIES_LOADED || SimplePropertiesConfig.forceSyncLevelRenderMarkDirty;
 	}
 
 	public static void destroy() {

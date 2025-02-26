@@ -38,7 +38,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					case "create" -> ModListHelper.FABRIC_CREATE_LOADED;
 					case "effective" -> ModListHelper.FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> ModListHelper.FABRIC_EFFECTUAL_LOADED;
-					default -> false;
+					case "particular" -> ModListHelper.FABRIC_PARTICULAR_LOADED;
+					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
 			case "vs2" -> ModListHelper.VS_LOADED;
@@ -47,6 +48,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
 			case "hexcasting" -> ModListHelper.HEXCASTING_LOADED;
 			case "flywheel" -> ModListHelper.FLYWHEEL_LOADED;
+//			case "enhancedblockentities" -> ModListHelper.ENHANCEDBLOCKENTITIES_LOADED;
 			default -> true;
 		};
 	}

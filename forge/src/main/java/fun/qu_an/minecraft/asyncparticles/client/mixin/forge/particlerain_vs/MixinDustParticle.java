@@ -17,7 +17,7 @@ public abstract class MixinDustParticle extends MixinWeatherPatricle {
 
 	@Inject(method = "render", at = @At("HEAD"), cancellable = true)
 	private void onRender(VertexConsumer vertexConsumer, Camera camera, float tickPercentage, CallbackInfo ci) {
-		if (invisible) {
+		if (asyncparticles$invisible) {
 			ci.cancel();
 		}
 	}

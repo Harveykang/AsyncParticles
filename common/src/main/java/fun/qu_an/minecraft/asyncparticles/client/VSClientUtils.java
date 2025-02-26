@@ -17,6 +17,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4dc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
@@ -36,7 +37,15 @@ import static net.minecraft.util.Mth.floor;
 import static org.valkyrienskies.mod.common.util.VectorConversionsMCKt.toJOML;
 import static org.valkyrienskies.mod.common.util.VectorConversionsMCKt.toMinecraft;
 
+/**
+ * See {@link EntityShipCollisionUtils}<p>
+ * See {@link VSGameUtilsKt}<p>
+ * Make sure our methods behave same as these.
+ */
 public class VSClientUtils {
+	/**
+	 * include matrices in hit result.
+	 */
 	public static BlockHitResult clipIncludeShips(ClientLevel level, ClipContext ctx, boolean shouldTransformHitPos) {
 		var vanillaHit = InvokerRaycastUtils.invoker_vanillaClip(level, ctx);
 		var shipObjectWorld = VSGameUtilsKt.getShipObjectWorld(level);
@@ -75,8 +84,13 @@ public class VSClientUtils {
 	}
 
 	private static final EntityPolygonCollider collider = ValkyrienSkiesMod.vsCore.getEntityPolygonCollider();
-	public static Pair<Vec3, ClientShip> adjustEntityMovementForShipCollisionsAndGetShip(
-		Entity entity,
+
+	/**
+	 * No vanilla collision check.
+	 * get ship
+	 */
+	public static Pair<Vec3, ClientShip> entityMovColShipOnlyAndGet(
+		@Nullable Entity entity,
 		Vec3 movement,
 		AABB entityBoundingBox,
 		ClientLevel world) {
@@ -109,8 +123,12 @@ public class VSClientUtils {
 		return new Pair<>(toMinecraft(newMovement), null);
 	}
 
-	public static Vec3 adjustEntityMovementForShipCollisions(
-		Entity entity,
+	/**
+	 * No vanilla collision check.
+	 */
+	@Nullable
+	public static Vec3 entityMovColShipOnly(
+		@Nullable Entity entity,
 		Vec3 movement,
 		AABB entityBoundingBox,
 		ClientLevel world) {
@@ -143,6 +161,10 @@ public class VSClientUtils {
 		return null;
 	}
 
+	/**
+	 * include matrices in hit result.
+	 * No vanilla hit result.
+	 */
 	public static ShipHitResult clipShip(ClientLevel level, ClipContext ctx, boolean shouldTransformHitPos) {
 		var shipObjectWorld = VSGameUtilsKt.getShipObjectWorld(level);
 		ShipHitResult closestHit = null;
@@ -263,8 +285,10 @@ public class VSClientUtils {
 			inWorldZ2 = m.m02() * x2 + m.m12() * y2 + m.m22() * z2 + m.m32();
 		}
 
-		int renderDistance = mc.options.renderDistance().get();
+		int renderDistance = mc.levelRenderer.lastViewDistance << 4;
 
-		return Math.abs(inWorldX2 - inWorldX1) > renderDistance * 16 || Math.abs(inWorldY2 - inWorldY1) > renderDistance * 16 || Math.abs(inWorldZ2 - inWorldZ1) > renderDistance * 16;
+		return Math.abs(inWorldX2 - inWorldX1) > renderDistance
+			   || Math.abs(inWorldY2 - inWorldY1) > renderDistance
+			   || Math.abs(inWorldZ2 - inWorldZ1) > renderDistance;
 	}
 }

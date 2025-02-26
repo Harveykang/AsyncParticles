@@ -2,7 +2,6 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.particlerain_vs;
 
 import com.leclowndu93150.particlerain.ParticleRegistry;
 import com.leclowndu93150.particlerain.WeatherParticleSpawner;
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import fun.qu_an.minecraft.asyncparticles.client.VSClientUtils;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.ParticleOptions;

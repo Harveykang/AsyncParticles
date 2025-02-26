@@ -29,7 +29,6 @@ public class APMixinPluginForge implements IMixinConfigPlugin {
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		String mixinPackageName = mixinClassName.substring("fun.qu_an.minecraft.asyncparticles.client.mixin.forge.".length());
 		String[] split = mixinPackageName.split("\\.");
-
 		if (split.length <= 2) {
 			return true;
 		}
@@ -40,7 +39,7 @@ public class APMixinPluginForge implements IMixinConfigPlugin {
 			// TODO: 下面这个 mod 没有正式发布，且不确定是否是唯一的 forge 移植版
 			case "effecticularity" -> ModListHelper.FORGE_EFFECTIVE_LOADED;
 			case "flerovium" -> ModListHelper.FORGE_FLEROVIUM_LOADED;
-			default -> false;
+			default -> throw new IllegalArgumentException("Unknown forge mixin: " + mixinClassName);
 		};
 	}
 

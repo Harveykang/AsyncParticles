@@ -3,9 +3,9 @@ package fun.qu_an.minecraft.asyncparticles.client;
 import com.google.common.collect.EvictingQueue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -73,7 +73,7 @@ public class AsyncTicker {
 	}
 
 	public static void onRunAllTasks() {
-		// Make sure not concurrently tick block entities
+		// join before runAllTasks
 		if (blockEntityTickFuture != null) {
 			blockEntityTickFuture.join();
 			blockEntityTickFuture = null;
@@ -107,6 +107,7 @@ public class AsyncTicker {
 					futures[i++] = CompletableFuture.runAsync(() -> {
 						Queue<Particle> particles = (Queue<Particle>) EvictingQueue$delegate.get(particles1);
 						particles.removeIf(particle1 -> {
+							// JDK 并没有定义这个判断会对每个对象执行多少次，但目前没遇到例外情况
 							// use ArrayDeque's removeIf to improve performance
 							boolean b = ((ParticleAddon) particle1).asyncParticles$shouldRemove();
 							if (b) {
@@ -263,11 +264,20 @@ public class AsyncTicker {
 		}
 	}
 
-	public static void registerEndTickEvent(ClientTickEvents.EndTick endTick) {
-		AsyncTicker.END_TICK_EVENTS.add(() -> {
+	public static void registerEndTickEvent(MinecraftConsumer consumer) {
+		registerEndTickEvent(() -> {
 			Minecraft mc = Minecraft.getInstance();
 			if (mc.level != null && mc.player != null) {
-				endTick.onEndTick(mc);
+				consumer.accept(mc);
+			}
+		});
+	}
+
+	public static void registerEndTickEvent(ClientLevelConsumer consumer) {
+		registerEndTickEvent(() -> {
+			Minecraft mc = Minecraft.getInstance();
+			if (mc.level != null && mc.player != null) {
+				consumer.accept(mc.level);
 			}
 		});
 	}
@@ -294,5 +304,15 @@ public class AsyncTicker {
 		PARTICLE_OPERATIONS.clear();
 		END_TICK_OPERATIONS.clear();
 		cancelled = false;
+	}
+
+	@FunctionalInterface
+	public interface MinecraftConsumer {
+		void accept(Minecraft mc);
+	}
+
+	@FunctionalInterface
+	public interface ClientLevelConsumer {
+		void accept(ClientLevel level);
 	}
 }

@@ -25,9 +25,9 @@ public abstract class MixinSnowParticle extends MixinWeatherPatricle {
 		double i = f;
 		if (this.hasPhysics && (d != (double) 0.0F || e != (double) 0.0F || f != (double) 0.0F) && d * d + e * e + f * f < MAXIMUM_COLLISION_VELOCITY_SQUARED) {
 			Vec3 vec3 = new Vec3(d, e, f);
-			Vec3 shipMovement = VSClientUtils.adjustEntityMovementForShipCollisions(null, vec3, weathersAABB, level);
+			Vec3 shipMovement = VSClientUtils.entityMovColShipOnly(null, vec3, asyncparticles$weathersAABB, level);
 			if (shipMovement == null) {
-				vec3 = Entity.collideBoundingBox(null, vec3, getBoundingBox(), this.level, List.of());
+				vec3 = Entity.collideBoundingBox(null, vec3, getBoundingBox().inflate(1), this.level, List.of());
 			} else {
 				vec3 = shipMovement;
 			}
@@ -37,19 +37,19 @@ public abstract class MixinSnowParticle extends MixinWeatherPatricle {
 		}
 
 		if (d != (double) 0.0F || e != (double) 0.0F || f != (double) 0.0F) {
-			weathersAABB = weathersAABB.move(d, e, f);
+			asyncparticles$weathersAABB = asyncparticles$weathersAABB.move(d, e, f);
 			this.setBoundingBox(this.getBoundingBox().move(d, e, f));
 			this.setLocationFromBoundingbox();
 		}
 
 		if (Math.abs(h) >= (double) 1.0E-5F && Math.abs(e) < (double) 1.0E-5F) {
 			this.stoppedByCollision = true;
-			invisible = true;
+			asyncparticles$invisible = true;
 		}
 
 		if (h != e && h < (double) 0.0F) {
 			this.onGround = true;
-			invisible = true;
+			asyncparticles$invisible = true;
 		}
 
 		if (g != d) {

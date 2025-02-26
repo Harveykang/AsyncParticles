@@ -42,6 +42,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public abstract class MixinAllEffects {
 	@Redirect(method = "register", remap = false, at = @At(value = "INVOKE", remap = false, target = "Lnet/fabricmc/fabric/api/event/Event;register(Ljava/lang/Object;)V"))
 	private static void register(Event<?> instance, Object t) {
-		AsyncTicker.registerEndTickEvent((ClientTickEvents.EndTick) t);
+		AsyncTicker.registerEndTickEvent(((ClientTickEvents.EndTick) t)::onEndTick);
 	}
 }
