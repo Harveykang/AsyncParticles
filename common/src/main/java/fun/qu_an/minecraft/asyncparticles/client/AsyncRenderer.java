@@ -206,6 +206,7 @@ public class AsyncRenderer {
 		}
 	}
 
+	// TODO: 是否需要在transparencyChain.process(partialTick)前调用？
 	public static void join(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
 		if (ModListHelper.IRIS_LOADED && Iris.isPackInUseQuick() && getRenderingSettings() == ParticleRenderingSettings.MIXED) {
 			return;

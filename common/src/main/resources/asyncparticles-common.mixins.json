@@ -39,6 +39,7 @@
     "fabric.particlerain_vs.MixinWeatherParticles",
     "fabric.particlerain_vs.MixinWeatherParticleSpawner",
     "fabric.particlerain_vs.MixinWeatherPatricle",
+    "fabric.particular.MixinMain",
     "fake_renders.MixinBufferBuilder",
     "fake_renders.MixinTesselator",
     "hexcasting.MixinConjureParticle",
@@ -57,6 +58,5 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "fabric.particular.MixinMain"
   ]
 }
