@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.ParticleAddon;
 import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -31,14 +32,18 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Shadow
 	@Final
 	public ClientLevel level;
+	// TODO: 换 byte?
 	@Unique
 	private boolean asyncParticles$ticked;
 	@Unique
 	private boolean asyncParticles$renderSync;
+	@Unique
+	private boolean asyncParticles$tickSync;
 
 	@Inject(method = "<init>*", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
 		this.asyncParticles$renderSync = AsyncRenderer.shouldSync(((Particle) (Object) this).getClass());
+		this.asyncParticles$tickSync = AsyncTicker.shouldSync(((Particle) (Object) this).getClass());
 	}
 
 	@WrapOperation(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V",
@@ -73,5 +78,15 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Override
 	public boolean asyncedParticles$isRenderSync() {
 		return asyncParticles$renderSync;
+	}
+
+	@Override
+	public void asyncedParticles$setTickSync() {
+		asyncParticles$tickSync = true;
+	}
+
+	@Override
+	public boolean asyncedParticles$isTickSync() {
+		return asyncParticles$tickSync;
 	}
 }

@@ -16,21 +16,19 @@ public class MixinMinecraft {
 	@Shadow
 	private ProfilerFiller profiler;
 
-	@Inject(method = "runTick", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V"))
+	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;runAllTasks()V"))
 	private void onRunAllTasks(boolean bl, CallbackInfo ci) {
-		profiler.push("tick");
 		AsyncTicker.onRunAllTasks();
-		profiler.pop();
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
-	private void onRunTick(boolean bl, CallbackInfo ci, @Local(ordinal = 1) int j) {
-		AsyncTicker.onTickBefore(j);
+	private void onRunTick(boolean bl, CallbackInfo ci, @Local(ordinal = 1) int k) {
+		AsyncTicker.onTickBefore(k);
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/Minecraft;tick()V"))
-	private void onRunTickAfter(boolean bl, CallbackInfo ci, @Local(ordinal = 1) int j) {
-		AsyncTicker.onTickAfter(j);
+	private void onRunTickAfter(boolean bl, CallbackInfo ci, @Local(ordinal = 1) int k) {
+		AsyncTicker.onTickAfter(k);
 	}
 
 	@Inject(method = "setLevel", at = @At(value = "FIELD", ordinal = 0,

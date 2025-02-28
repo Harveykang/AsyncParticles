@@ -14,7 +14,7 @@ public class ModListHelper {
 	/* Sodium */
 	public static final boolean SODIUM_LOADED = isModLoaded("sodium") || isModLoaded("embeddium");
 	/* IRIS */
-	public static final boolean IRIS_LOADED = isModLoaded("iris");
+	public static final boolean IRIS_LOADED = isModLoaded("iris") || isModLoaded("oculus");
 	/* Dummmmmmy */
 	public static final boolean DUMMMMMMY_LOADED = isModLoaded("dummmmmmy");
 	/* Effectual */
@@ -27,6 +27,7 @@ public class ModListHelper {
 	/* Lodestone */
 	public static final boolean LODESTONE_LOADED = isModLoaded("lodestone");
 	/* Particle Rain */
+	public static final boolean PARTICLERAIN_LOADED = isModLoaded("particlerain");
 	public static final boolean FABRIC_PARTICLERAIN_LOADED = isFabricModLoaded("particlerain");
 	public static final boolean FORGE_PARTICLERAIN_LOADED = isForgeModLoaded("particlerain");
 	/* Flywheel */
@@ -42,6 +43,10 @@ public class ModListHelper {
 	public static final boolean ENHANCEDBLOCKENTITIES_LOADED = isModLoaded("enhancedblockentities");
 	/* Particular */
 	public static final boolean FABRIC_PARTICULAR_LOADED = isFabricModLoaded("particular");
+	/* Particle Core */
+	public static final boolean PARTICLE_CORE_LOADED = isModLoaded("particle_core");
+	/* Physics Mod */
+	public static final boolean PHYSICSMOD_LOADED = isModLoaded("physicsmod");
 
 	@ExpectPlatform
 	private static boolean isForge() {

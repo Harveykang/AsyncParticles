@@ -42,15 +42,8 @@ public abstract class MixinParticleEngine_Render {
 	public Map<ParticleRenderType, Queue<Particle>> particles;
 
 	@Shadow
-	protected ClientLevel level;
-
-	@Shadow
 	@Final
 	private TextureManager textureManager;
-
-	@Shadow
-	@Final
-	private static List<ParticleRenderType> RENDER_ORDER;
 
 	@Shadow
 	@Final
@@ -62,7 +55,6 @@ public abstract class MixinParticleEngine_Render {
 	 */
 	@Overwrite(remap = false) // Forge override
 	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f, @Nullable Frustum ignored) {
-		// TODO: culling
 		PoseStack poseStack2 = null;
 		Frustum frustum = AsyncRenderer.frustum;
 		if (!AsyncRenderer.isStart) {
@@ -77,7 +69,7 @@ public abstract class MixinParticleEngine_Render {
 //		System.out.println(particles.keySet());
 		// Some mod has duplicated render type, cause concurrent access to the same queue
 		// See MixinParticleEngine_Late.java
-		assert ModListHelper.IS_FORGE;
+//		assert ModListHelper.IS_FORGE;
 		// We don't use entrySet() to compatible with iris.
 		for (ParticleRenderType particleRenderType : particles.keySet()) {
 			// FORGE doesn't skip NO_RENDER
@@ -89,16 +81,13 @@ public abstract class MixinParticleEngine_Render {
 				continue;
 			}
 			BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
-			if (bufferBuilder == null) {
-				continue;
-			}
 			if (!AsyncRenderer.isStart) {
 				List<? extends Particle> particles1 = AsyncRenderer.getSync(particleRenderType);
 				if (!particles1.isEmpty()) {
 					for (Particle particle : particles1) {
-						if (!frustum.isVisible(particle.getBoundingBox())) {
-							continue;
-						}
+//						if (!frustum.isVisible(particle.getBoundingBox())) {
+//							continue;
+//						}
 						float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
 						try {
 							particle.render(bufferBuilder, camera, g);
@@ -122,7 +111,7 @@ public abstract class MixinParticleEngine_Render {
 				}
 			} else {
 				Runnable runnable = () -> iterable.forEach(particle -> {
-					if (!frustum.isVisible(particle.getBoundingBox())) {
+					if (particle.shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
 						return;
 					}
 					if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
@@ -133,7 +122,7 @@ public abstract class MixinParticleEngine_Render {
 					try {
 						particle.render(bufferBuilder, camera, g);
 					} catch (Throwable throwable) {
-						LOGGER.error("Exception while rendering particle, marking as sync", throwable);
+						LOGGER.error("Exception while rendering particle {}, marking as sync", particle, throwable);
 						((ParticleAddon) particle).asyncedParticles$setRenderSync();
 						AsyncRenderer.markAsSync(particle.getClass());
 						AsyncRenderer.recordSync(particleRenderType, particle);

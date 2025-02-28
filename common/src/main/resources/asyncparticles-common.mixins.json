@@ -30,6 +30,8 @@
     "fabric.effectual.MixinWaterDripEffect",
     "fabric.particlerain.MixinGroundFogParticle",
     "fabric.particlerain.MixinParticleRainClient",
+    "fabric.particlerain.MixinRainParticle",
+    "fabric.particlerain.MixinSnowParticle",
     "fabric.particlerain.MixinWeatherParticleSpawner",
     "fabric.particlerain.MixinWeatherPatricle",
     "fabric.particlerain_vs.MixinDustParticle",
@@ -47,12 +49,14 @@
     "iris.MixinIris",
     "iris.MixinOldFullyBufferedMultiBufferSource",
     "lodestone.MixinLodestoneWorldParticle",
+    "physicsmod.MixinWeatherParticle",
     "sodium.MixinThreadLocalBufferBuilder",
     "vs2.InvokerEntityShipCollisionUtils",
     "vs2.InvokerRaycastUtils",
     "vs2.MixinParticle",
     "vs2.MixinVSAnimation",
-    "vs2.MixinVSSoundEngine"
+    "vs2.MixinVSSoundEngine",
+    "flywheel.MixinClientLevelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

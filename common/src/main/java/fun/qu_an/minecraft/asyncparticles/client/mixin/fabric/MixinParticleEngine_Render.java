@@ -53,7 +53,6 @@ public abstract class MixinParticleEngine_Render {
 	 */
 	@Overwrite
 	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f) {
-		// TODO: culling
 		PoseStack poseStack2 = null;
 		Frustum frustum = AsyncRenderer.frustum;
 		if (!AsyncRenderer.isStart) {
@@ -68,7 +67,7 @@ public abstract class MixinParticleEngine_Render {
 //		System.out.println(particles.keySet());
 		// Some mod has duplicated render type, cause concurrent access to the same queue
 		// See MixinParticleEngine_Late.java
-		assert !ModListHelper.IS_FORGE;
+//		assert !ModListHelper.IS_FORGE;
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			// FABRIC skips NO_RENDER
 //			if (particleRenderType == ParticleRenderType.NO_RENDER) {
@@ -79,16 +78,13 @@ public abstract class MixinParticleEngine_Render {
 				continue;
 			}
 			BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
-			if (bufferBuilder == null) {
-				continue;
-			}
 			if (!AsyncRenderer.isStart) {
 				List<? extends Particle> particles1 = AsyncRenderer.getSync(particleRenderType);
 				if (!particles1.isEmpty()) {
 					for (Particle particle : particles1) {
-						if (!frustum.isVisible(particle.getBoundingBox())) {
-							continue;
-						}
+//						if (!frustum.isVisible(particle.getBoundingBox())) {
+//							continue;
+//						}
 						float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
 						try {
 							particle.render(bufferBuilder, camera, g);
@@ -123,7 +119,7 @@ public abstract class MixinParticleEngine_Render {
 					try {
 						particle.render(bufferBuilder, camera, g);
 					} catch (Throwable throwable) {
-						LOGGER.error("Exception while rendering particle, marking as sync", throwable);
+						LOGGER.error("Exception while rendering particle {}, marking as sync", particle, throwable);
 						((ParticleAddon) particle).asyncedParticles$setRenderSync();
 						AsyncRenderer.markAsSync(particle.getClass());
 						AsyncRenderer.recordSync(particleRenderType, particle);

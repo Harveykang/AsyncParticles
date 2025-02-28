@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.AssertionUtil;
@@ -13,11 +12,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinTesselator {
 	@Inject(method = "getInstance", at = @At("HEAD"))
 	private static void getInstance(CallbackInfoReturnable<Tesselator> cir) {
-		AssertionUtil.assertNotParticleThread();
+		AssertionUtil.assertNotParticleRendererThread();
 	}
 
 	@Inject(method = "getBuilder", at = @At("HEAD"))
 	private void getBuilder(CallbackInfoReturnable<BufferBuilder> cir) {
-		AssertionUtil.assertNotParticleThread();
+		AssertionUtil.assertNotParticleRendererThread();
 	}
 }

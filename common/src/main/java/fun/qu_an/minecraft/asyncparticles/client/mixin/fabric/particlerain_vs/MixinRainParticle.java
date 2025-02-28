@@ -48,9 +48,10 @@ public abstract class MixinRainParticle extends MixinWeatherPatricle {
 				asyncparticles$shipCollision(location, shipMovement);
 				vec3 = shipMovement;
 			}
-			d = vec3.x;
+			double d1 = vec3.y / h;
+			d = Math.min(g * d1, vec3.x);
 			e = vec3.y;
-			f = vec3.z;
+			f = Math.min(i * d1, vec3.z);
 		}
 
 		if (d != (double) 0.0F || e != (double) 0.0F || f != (double) 0.0F) {
@@ -65,6 +66,8 @@ public abstract class MixinRainParticle extends MixinWeatherPatricle {
 
 		if (h != e && h < (double) 0.0F) {
 			this.onGround = true;
+		} else {
+			this.onGround = false;
 		}
 
 		if (g != d) {

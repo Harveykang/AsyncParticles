@@ -50,6 +50,8 @@ public abstract class MixinSnowParticle extends MixinWeatherPatricle {
 		if (h != e && h < (double) 0.0F) {
 			this.onGround = true;
 			asyncparticles$invisible = true;
+		} else {
+			this.onGround = false;
 		}
 
 		if (g != d) {

@@ -67,6 +67,7 @@ dependencies {
     modLocalRuntime "maven.modrinth:spark:1.10.53-forge"
     modLocalRuntime 'maven.modrinth:embeddium:0.3.31+mc1.20.1'
     modLocalRuntime 'maven.modrinth:starlight-forge:1.1.2+1.20'
+    modCompileOnly "maven.modrinth:oculus:1.20.1-1.8.0"
     modLocalRuntime "maven.modrinth:oculus:1.20.1-1.8.0"
     localRuntime "org.antlr:antlr4-runtime:4.13.1"
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
@@ -105,6 +106,12 @@ dependencies {
 //    modLocalRuntime fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
     modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
 //    modCompileOnly "com.github.ConcerroX:Effecticularity:31265b5750" // no they didn't publish 1.0.2 :(
+
+    /* Particle Core */
+//    modCompileOnly "maven.modrinth:particle-core:0.2.5+1.20.1+forge"
+//    modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.20.1+forge"
+//    modLocalRuntime "maven.modrinth:fzzy-config:0.6.4+1.20.1+forge"
+//    modLocalRuntime("com.github.Fallen-Breath.conditional-mixin:conditional-mixin-forge:0.6.2")
 }
 
 processResources {

@@ -43,6 +43,18 @@ import static org.valkyrienskies.mod.common.util.VectorConversionsMCKt.toMinecra
  * Make sure our methods behave same as these.
  */
 public class VSClientUtils {
+	public static Iterable<ClientShip> getShipsInAABB(ClientLevel level, Vector3d v1, Vector3d v2) {
+		return getShipsInAABB(level, new AABBd(v1, v2));
+	}
+
+	public static Iterable<ClientShip> getShipsInAABB(ClientLevel world, double x1, double y1, double z1, double x2, double y2, double z2) {
+		return getShipsInAABB(world, new AABBd(x1, y1, z1, x2, y2, z2));
+	}
+
+	public static Iterable<ClientShip> getShipsInAABB(ClientLevel world, AABBd aabb) {
+		return VSGameUtilsKt.getShipObjectWorld(world).getLoadedShips().getIntersecting(aabb.correctBounds());
+	}
+
 	/**
 	 * include matrices in hit result.
 	 */

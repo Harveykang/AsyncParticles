@@ -66,7 +66,10 @@ subprojects {
             name = "Ladysnake Mods"
             url = 'https://maven.ladysnake.org/releases'
         }
-
+        maven { // conditional-mixin (particlecore)
+            name = "FallenBreath"
+            url = uri("https://maven.fallenbreath.me/releases")
+        }
     }
 
     dependencies {

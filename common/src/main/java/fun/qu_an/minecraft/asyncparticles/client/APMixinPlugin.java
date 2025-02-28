@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -13,7 +14,18 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 	public void onLoad(String mixinPackage) {
 		MixinCancellerRegistrar.register((targetClassNames, mixinClassName)
 			-> switch (mixinClassName) {
-			case "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer" -> true;
+			case "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer",
+				 // o(≧口≦)o particle_core: These mixins not support async rendering
+				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerFrustumMixin",
+				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerRotationMixin",
+				 "me.fzzyhmstrs.particle_core.mixins.WorldRendererFrustumMixin",
+				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerCachedLightMixin",
+				 "me.fzzyhmstrs.particle_core.mixins.BillboardParticleMixin",
+				 "me.fzzyhmstrs.particle_core.mixins.ParticleMixin",
+				 "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
+				 "com.moepus.flerovium.mixins.Particle.ParticleMixin"
+//				 , "net.diebuddies.mixins.ocean.MixinParticleEngine"
+				-> true;
 			default -> false;
 		});
 	}
@@ -27,6 +39,9 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		String mixinPackageName = mixinClassName.substring("fun.qu_an.minecraft.asyncparticles.client.mixin.".length());
 		String[] split = mixinPackageName.split("\\.");
+		if (split.length == 1) {
+			return true;
+		}
 		return switch (split[0]) {
 			case "fabric" -> {
 				if (split.length <= 2) {
@@ -42,14 +57,17 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
+			case "fake_renders" -> true;
 			case "vs2" -> ModListHelper.VS_LOADED;
 			case "iris" -> ModListHelper.IRIS_LOADED;
 			case "sodium" -> ModListHelper.SODIUM_LOADED;
 			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
 			case "hexcasting" -> ModListHelper.HEXCASTING_LOADED;
 			case "flywheel" -> ModListHelper.FLYWHEEL_LOADED;
+			case "particle_core" -> ModListHelper.PARTICLE_CORE_LOADED;
+			case "physicsmod" -> ModListHelper.PHYSICSMOD_LOADED;
 //			case "enhancedblockentities" -> ModListHelper.ENHANCEDBLOCKENTITIES_LOADED;
-			default -> true;
+			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}
 

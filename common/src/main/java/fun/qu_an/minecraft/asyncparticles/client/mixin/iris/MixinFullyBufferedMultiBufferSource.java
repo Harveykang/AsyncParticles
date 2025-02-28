@@ -14,21 +14,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinFullyBufferedMultiBufferSource {
 	@Inject(method = "getBuffer", at = @At("HEAD"))
 	private void getBuffer(RenderType renderType, CallbackInfoReturnable<VertexConsumer> cir) {
-		AssertionUtil.assertNotParticleThread();
+		AssertionUtil.assertNotParticleRendererThread();
 	}
 
 	@Inject(method = "endBatch()V", at = @At("HEAD"))
 	private void endBatch(CallbackInfo ci) {
-		AssertionUtil.assertNotParticleThread();
+		AssertionUtil.assertNotParticleRendererThread();
 	}
 
 	@Inject(method = "endBatch(Lnet/minecraft/client/renderer/RenderType;)V", at = @At("HEAD"))
 	private void endBatch1(CallbackInfo ci) {
-		AssertionUtil.assertNotParticleThread();
+		AssertionUtil.assertNotParticleRendererThread();
 	}
 
 	@Inject(method = "endBatchWithType", remap = false, at = @At("HEAD"))
 	private void endLastBatch(CallbackInfo ci) {
-		AssertionUtil.assertNotParticleThread();
+		AssertionUtil.assertNotParticleRendererThread();
 	}
 }

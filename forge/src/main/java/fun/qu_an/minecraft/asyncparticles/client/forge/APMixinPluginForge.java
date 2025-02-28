@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.forge;
 
-import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -12,12 +11,6 @@ import java.util.Set;
 public class APMixinPluginForge implements IMixinConfigPlugin {
 	@Override
 	public void onLoad(String mixinPackage) {
-		MixinCancellerRegistrar.register((targetClassNames, mixinClassName)
-			-> switch (mixinClassName) {
-			case "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
-				 "com.moepus.flerovium.mixins.Particle.ParticleMixin" -> true;
-			default -> false;
-		});
 	}
 
 	@Override

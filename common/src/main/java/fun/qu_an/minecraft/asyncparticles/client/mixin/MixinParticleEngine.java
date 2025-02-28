@@ -4,12 +4,15 @@ import com.google.common.collect.EvictingQueue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.*;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.CountManagements;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.TrackedParticleCountsMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.ParticleGroup;
+import net.minecraft.util.profiling.ProfilerFiller;
+import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,7 +21,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
 
-// TODO: 分为两个 Mixin
 @Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class MixinParticleEngine {
 	@Mutable
@@ -54,6 +56,10 @@ public abstract class MixinParticleEngine {
 	@Shadow
 	public abstract void updateCount(ParticleGroup group, int count);
 
+	@Shadow
+	@Final
+	private static Logger LOGGER;
+
 	/**
 	 * @author
 	 * @reason
@@ -79,9 +85,10 @@ public abstract class MixinParticleEngine {
 		}
 
 		particles.forEach((particleRenderType, queue) -> {
-			this.level.getProfiler().push(particleRenderType.toString());
+			ProfilerFiller profiler = this.level.getProfiler();
+			profiler.push(particleRenderType.toString());
 			AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue));
-			this.level.getProfiler().pop();
+			profiler.pop();
 		});
 
 		if (!this.trackingEmitters.isEmpty()) {
@@ -94,17 +101,33 @@ public abstract class MixinParticleEngine {
 						}
 						return;
 					}
-					emitter.tick();
-					if (ModListHelper.VS_LOADED) {
-						if (VSClientUtils.isOutOfSight(emitter)) {
-							emitter.remove();
-						}
-					}
 					if (!emitter.isAlive()) {
 						if (set == null) {
 							set = new HashSet<>();
 						}
 						set.add(emitter);
+						continue;
+					}
+					if (((ParticleAddon) emitter).asyncedParticles$isTickSync()) {
+						AsyncTicker.recordSync(emitter);
+						continue;
+					}
+					try {
+						emitter.tick();
+						if (ModListHelper.VS_LOADED) {
+							if (VSClientUtils.isOutOfSight(emitter)) {
+								emitter.remove();
+							}
+						}
+					} catch (Throwable t) {
+						if (AsyncTicker.markSyncIfTickFailed()){
+							LOGGER.error("Error ticking emitter particle {}, marking as sync", emitter, t);
+							((ParticleAddon) emitter).asyncedParticles$setTickSync();
+							AsyncTicker.markAsSync(emitter.getClass());
+							AsyncTicker.recordSync(emitter);
+						} else {
+							throw t;
+						}
 					}
 				}
 				if (set != null) {
@@ -157,11 +180,26 @@ public abstract class MixinParticleEngine {
 				return;
 			}
 			Particle particle = iterator.next();
-			this.tickParticle(particle);
-			((ParticleAddon) particle).asyncParticles$setTicked();
-			if (ModListHelper.VS_LOADED) {
-				if (VSClientUtils.isOutOfSight(particle)) {
-					particle.remove();
+			if (((ParticleAddon) particle).asyncedParticles$isTickSync()) {
+				AsyncTicker.recordSync(particle); // TODO: 不要每次tick时记录
+				continue;
+			}
+			try {
+				particle.tick();
+				((ParticleAddon) particle).asyncParticles$setTicked();
+				if (ModListHelper.VS_LOADED) {
+					if (VSClientUtils.isOutOfSight(particle)) {
+						particle.remove();
+					}
+				}
+			} catch (Throwable t) {
+				if (AsyncTicker.markSyncIfTickFailed()) {
+					LOGGER.error("Error ticking particle {}, marking as sync", particle, t);
+					((ParticleAddon) particle).asyncedParticles$setTickSync();
+					AsyncTicker.markAsSync(particle.getClass());
+					AsyncTicker.recordSync(particle);
+				} else {
+					throw t;
 				}
 			}
 		}
@@ -233,10 +271,12 @@ public abstract class MixinParticleEngine {
 //		}));
 //	}
 
-//	@Redirect(method = "clearParticles",
-//		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/particle/ParticleEngine;particlesToAdd:Ljava/util/Queue;")),
-//		at = @At(value = "INVOKE", target = "Ljava/util/Queue;clear()V"))
-//	public void redirectClearParticles(Queue<Particle> queue) {
-//		particlesToAdd = new ArrayBlockingQueue<>(SimplePropertiesConfig.limit);
-//	}
+	@Inject(method = "clearParticles", at = @At("HEAD"))
+	public void redirectClearParticles(CallbackInfo ci) {
+		// this fix particlerain's particle count management bug
+		if (ModListHelper.PARTICLERAIN_LOADED) {
+			CountManagements.asyncParticles$particleCount.set(0);
+			CountManagements.asyncParticles$fogCount.set(0);
+		}
+	}
 }

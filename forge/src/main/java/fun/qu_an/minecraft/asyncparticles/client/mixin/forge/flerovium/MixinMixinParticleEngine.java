@@ -22,15 +22,15 @@ public class MixinMixinParticleEngine {
 		return flerovium$FastFrustumCheck(frustum, aabb, particle);
 	}
 
-	@SuppressWarnings("UnresolvedMixinReference")
-	@TargetHandler(
-		name = "render",
-		mixin = "fun.qu_an.minecraft.asyncparticles.client.mixin.forge.MixinParticleEngine_Render"
-	)
-	@Redirect(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;isVisible(Lnet/minecraft/world/phys/AABB;)Z"))
-	private boolean isVisible2(Frustum frustum, AABB aabb, @Local Particle particle) {
-		return flerovium$FastFrustumCheck(frustum, aabb, particle);
-	}
+//	@SuppressWarnings("UnresolvedMixinReference")
+//	@TargetHandler(
+//		name = "render",
+//		mixin = "fun.qu_an.minecraft.asyncparticles.client.mixin.forge.MixinParticleEngine_Render"
+//	)
+//	@Redirect(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;isVisible(Lnet/minecraft/world/phys/AABB;)Z"))
+//	private boolean isVisible2(Frustum frustum, AABB aabb, @Local Particle particle) {
+//		return flerovium$FastFrustumCheck(frustum, aabb, particle);
+//	}
 
 	/**
 	 * &#064;See  {@link com.moepus.flerovium.mixins.Particle.ParticleEngineMixin#FastFrustumCheck)}<p>

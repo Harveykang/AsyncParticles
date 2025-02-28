@@ -47,6 +47,7 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
     modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
+    modLocalRuntime 'maven.modrinth:modmenu:7.2.2'
 
     /* Performance */
     modLocalRuntime "maven.modrinth:spark:1.10.53-fabric"
@@ -57,7 +58,7 @@ dependencies {
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
     localRuntime "org.anarres:jcpp:1.4.14"
     modLocalRuntime "maven.modrinth:indium:1.0.34+mc1.20.1"
-    modLocalRuntime 'maven.modrinth:iris-flw-compat:1.1.2'
+    modLocalRuntime 'maven.modrinth:iris-flw-compat:1.1.4'
 
     /* Valkyrien Skies */
     modLocalRuntime "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
@@ -66,6 +67,10 @@ dependencies {
 
     /* Particle Rain/Pretty Rain */
     modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
+
+    /* Mmmmmmmmmmmm */
+    modLocalRuntime 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
+    modLocalRuntime "maven.modrinth:moonlight:fabric_1.20-2.13.62"
 
     /* Effectual */
     modLocalRuntime 'maven.modrinth:effectual:0.5.0-1.20.1'
@@ -80,6 +85,14 @@ dependencies {
     /* Particular */
     modLocalRuntime "maven.modrinth:particular:1.1.1"
     modLocalRuntime "maven.modrinth:sushi-bar:0.2.2+1.20"
+
+    /* Particle Core */
+    modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.20.1"
+    modLocalRuntime "maven.modrinth:fzzy-config:0.6.4+1.20.1"
+    modLocalRuntime "me.fallenbreath:conditional-mixin:0.5.1"
+
+    /* Physics Mod */
+//    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v171b-fabric-1.20.1.jar')
 }
 
 processResources {

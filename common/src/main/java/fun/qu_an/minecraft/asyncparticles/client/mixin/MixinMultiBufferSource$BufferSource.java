@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.util.AssertionUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -18,16 +17,16 @@ public abstract class MixinMultiBufferSource$BufferSource
 {
 	@Inject(method = "getBuffer", at = @At("HEAD"))
 	private void getBuffer(RenderType renderType, CallbackInfoReturnable<VertexConsumer> cir) {
-		AssertionUtil.assertNotParticleThread();
+		AssertionUtil.assertNotParticleRendererThread();
 	}
 
 	@Inject(method = "endBatch()V", at = @At("HEAD"))
 	private void endBatch(CallbackInfo ci) {
-		AssertionUtil.assertNotParticleThread();
+		AssertionUtil.assertNotParticleRendererThread();
 	}
 
 	@Inject(method = "endLastBatch", at = @At("HEAD"))
 	private void endLastBatch(CallbackInfo ci) {
-		AssertionUtil.assertNotParticleThread();
+		AssertionUtil.assertNotParticleRendererThread();
 	}
 }
