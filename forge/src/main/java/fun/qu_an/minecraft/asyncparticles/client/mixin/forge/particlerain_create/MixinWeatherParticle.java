@@ -1,14 +1,13 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_create;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.particlerain_create;
 
+import com.leclowndu93150.particlerain.particle.WeatherParticle;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.fabric.ParticleRainUtilsImpl;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
-import pigcart.particlerain.particle.WeatherParticle;
 
 @Mixin(value = WeatherParticle.class)
 public abstract class MixinWeatherParticle extends TextureSheetParticle implements WeatherParticleAddon {

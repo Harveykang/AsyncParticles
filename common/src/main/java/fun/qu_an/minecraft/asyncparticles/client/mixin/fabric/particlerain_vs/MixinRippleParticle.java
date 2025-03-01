@@ -30,11 +30,6 @@ public abstract class MixinRippleParticle extends MixinWeatherParticle implement
 	}
 
 	@Override
-	public void move(double d, double e, double f) {
-		// do nothing
-	}
-
-	@Override
 	public void asyncedParticles$setNormal(Vector3f normal) {
 		this.asyncparticles$normal = normal;
 	}

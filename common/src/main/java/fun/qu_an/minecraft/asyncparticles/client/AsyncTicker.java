@@ -44,7 +44,7 @@ public class AsyncTicker {
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 
 	static {
-		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
+//		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
 		if (ModListHelper.PHYSICSMOD_LOADED) {
 			try {
 				addSyncByClassName("net.diebuddies.minecraft.weather.RainParticle");

@@ -14,15 +14,15 @@
     "particlerain.MixinGroundFogParticle",
     "particlerain.MixinModClientForgeEvents",
     "particlerain.MixinRainParticle",
+    "particlerain.MixinRippleParticle",
     "particlerain.MixinSnowParticle",
+    "particlerain.MixinWeatherParticle",
+    "particlerain.MixinWeatherParticles",
     "particlerain.MixinWeatherParticleSpawner",
-    "particlerain_vs.MixinDustParticle",
-    "particlerain_vs.MixinRainParticle",
+    "particlerain_create.MixinWeatherParticle",
     "particlerain_vs.MixinRippleParticle",
-    "particlerain_vs.MixinSnowParticle",
-    "particlerain_vs.MixinWeatherParticles",
-    "particlerain_vs.MixinWeatherParticleSpawner",
-    "particlerain_vs.MixinWeatherPatricle"
+    "particlerain_vs.MixinWeatherParticle",
+    "particlerain_vs.MixinWeatherParticleSpawner"
   ],
   "injectors": {
     "defaultRequire": 1

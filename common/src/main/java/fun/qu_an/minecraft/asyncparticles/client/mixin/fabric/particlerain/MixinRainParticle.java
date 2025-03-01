@@ -20,7 +20,7 @@ public abstract class MixinRainParticle extends MixinWeatherParticle {
 
 	@Inject(method = "tick", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lpigcart/particlerain/particle/WeatherParticle;tick()V"))
 	private void onTick(CallbackInfo ci) {
-		if (!level.getFluidState(ModListHelper.VS_LOADED ? pos : pos.below(2)).isEmpty()) {
+		if (!level.getFluidState(pos).isEmpty()) {
 			asyncparticles$setInvisible(true);
 		}
 	}

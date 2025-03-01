@@ -10,6 +10,7 @@ public class ModListHelper {
 	/* Valkyrien Skies */
 	public static final boolean VS_LOADED = isModLoaded("valkyrienskies");
 	public static final boolean FABRIC_VS_LOADED = isFabricModLoaded("valkyrienskies");
+	public static final boolean FORGE_VS_LOADED = isForgeModLoaded("valkyrienskies");
 	/* Sodium */
 	public static final boolean SODIUM_LIKE_LOADED = isModLoaded("sodium") || isModLoaded("embeddium");
 	public static final boolean SODIUM_LOADED = isModLoaded("sodium");

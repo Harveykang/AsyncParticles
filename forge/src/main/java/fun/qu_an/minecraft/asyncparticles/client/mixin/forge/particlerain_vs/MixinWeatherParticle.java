@@ -1,5 +1,6 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_vs;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.particlerain_vs;
 
+import com.leclowndu93150.particlerain.particle.WeatherParticle;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
@@ -9,7 +10,6 @@ import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.valkyrienskies.mod.common.util.EntityShipCollisionUtils;
-import pigcart.particlerain.particle.WeatherParticle;
 
 @Mixin(value = WeatherParticle.class)
 public abstract class MixinWeatherParticle extends TextureSheetParticle implements WeatherParticleAddon {

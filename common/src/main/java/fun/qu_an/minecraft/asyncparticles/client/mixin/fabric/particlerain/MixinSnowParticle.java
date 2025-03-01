@@ -22,7 +22,7 @@ public abstract class MixinSnowParticle extends MixinWeatherParticle {
 
 	@Inject(method = "tick", at = @At("TAIL"))
 	private void onTick(CallbackInfo ci) {
-		if (!level.getFluidState(ModListHelper.VS_LOADED ? pos : pos.below()).isEmpty()) {
+		if (!level.getFluidState(pos).isEmpty()) {
 			asyncparticles$setInvisible(true);
 		}
 	}
