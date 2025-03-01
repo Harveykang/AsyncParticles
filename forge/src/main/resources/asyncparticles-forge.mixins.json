@@ -16,7 +16,6 @@
     "particlerain.MixinRainParticle",
     "particlerain.MixinSnowParticle",
     "particlerain.MixinWeatherParticleSpawner",
-    "particlerain.MixinWeatherPatricle",
     "particlerain_vs.MixinDustParticle",
     "particlerain_vs.MixinRainParticle",
     "particlerain_vs.MixinRippleParticle",

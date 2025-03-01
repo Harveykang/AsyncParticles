@@ -43,7 +43,7 @@ public abstract class MixinRainParticle extends MixinWeatherParticle {
 			Vec3 motion = Entity.collideBoundingBox(
 				null,
 				apply,
-				this.getBoundingBox(),
+				asyncparticles$getWeatherAABB(), // It looks good that way
 				this.level,
 				List.of());
 			double d1 = motion.y / h;

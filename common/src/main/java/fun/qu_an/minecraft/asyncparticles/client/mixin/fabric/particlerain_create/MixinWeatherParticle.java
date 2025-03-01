@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_crea
 
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.fabric.ParticleRainUtils;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.world.phys.Vec3;
@@ -15,12 +16,19 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 	}
 
 	static {
+		Type.RAIN.register((level, position, motion, aabb) -> {
+			Vec3 collide = CreateUtils.collideMotionWithContraptions(level, position, motion, aabb);
+			if (collide == null) {
+				return motion;
+			}
+			ParticleRainUtils.onCreateCollision(level, motion, collide, aabb);
+			return collide;
+		});
 		CollisionFunction function = (level, position, motion, aabb) -> {
-			Vec3 collide = CreateUtils.collideWithContraptions(level, position, motion, aabb);
-			return collide == null || collide.equals(motion) ? null : motion;
+			Vec3 collide = CreateUtils.collideMotionWithContraptions(level, position, motion, aabb);
+			return collide == null ? motion : collide;
 		};
 		Type.OTHER.register(function);
-		Type.RAIN.register(function);
 		Type.SNOW.register(function);
 	}
 }

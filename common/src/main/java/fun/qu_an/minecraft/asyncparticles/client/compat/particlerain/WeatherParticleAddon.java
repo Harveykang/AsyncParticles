@@ -34,6 +34,9 @@ public interface WeatherParticleAddon {
 
 	@FunctionalInterface
 	interface CollisionFunction {
+		/**
+		 * @return null if the particle should be removed, otherwise the motion vector
+		 */
 		@Nullable Vec3 apply(@NotNull ClientLevel level, @NotNull Vec3 location, @NotNull Vec3 v, @NotNull AABB aabb);
 
 		default CollisionFunction andThen(CollisionFunction function) {

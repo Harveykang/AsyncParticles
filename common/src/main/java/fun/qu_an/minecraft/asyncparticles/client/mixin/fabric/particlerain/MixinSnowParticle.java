@@ -45,7 +45,7 @@ public abstract class MixinSnowParticle extends MixinWeatherParticle {
 			Vec3 motion =  Entity.collideBoundingBox(
 				null,
 				apply,
-				this.getBoundingBox(),
+				getBoundingBox().inflate(1), // It looks good that way
 				this.level,
 				List.of());
 			double d1 = motion.y / h;

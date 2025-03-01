@@ -8,6 +8,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.ItemPickupParticle;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.TrackingEmitter;
@@ -43,6 +44,7 @@ public class AsyncTicker {
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 
 	static {
+		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
 		if (ModListHelper.PHYSICSMOD_LOADED) {
 			try {
 				addSyncByClassName("net.diebuddies.minecraft.weather.RainParticle");
@@ -256,7 +258,9 @@ public class AsyncTicker {
 		if (ignoreParticleTickExceptions()) {
 			return;
 		}
-		if (e instanceof ReportedException || e.getClass() == RuntimeException.class) {
+		if (e instanceof ReportedException
+			|| e instanceof CompletionException
+			|| e.getClass() == RuntimeException.class) {
 			Throwable t = e.getCause();
 			if (t == null) {
 				throw new RuntimeException(e);
@@ -267,7 +271,7 @@ public class AsyncTicker {
 		if (e instanceof MissingPaletteEntryException
 			|| e instanceof NullPointerException
 			|| e instanceof ArrayIndexOutOfBoundsException) {
-			LOGGER.error("Error executing particle operation", e);
+			LOGGER.warn("Exception while executing particle operation, you can ignore it if it doesn't happen frequently.", e);
 			return;
 		}
 		throw new RuntimeException(e);
@@ -279,7 +283,7 @@ public class AsyncTicker {
 			// FIXME: 更好的异常处理方案
 			throw new RuntimeException(e);
 		}
-		LOGGER.error("Error executing before particle operation", e);
+		LOGGER.warn("Exception while executing before particle operation", e);
 		return null;
 	}
 

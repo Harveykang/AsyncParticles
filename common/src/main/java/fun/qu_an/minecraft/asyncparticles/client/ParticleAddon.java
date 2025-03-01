@@ -8,4 +8,11 @@ public interface ParticleAddon {
 	boolean asyncedParticles$isRenderSync();
 	void asyncedParticles$setTickSync();
 	boolean asyncedParticles$isTickSync();
+
+	/**
+	 * Forge shouldCull()
+	 */
+	default boolean shouldCull() {
+		return true;
+	}
 }
