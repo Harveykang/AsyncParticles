@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = WeatherParticle.class)
-public abstract class MixinWeatherPatricle  {
+public abstract class MixinWeatherParticle {
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
 		CountManagements.asyncParticles$particleCount.getAndIncrement();

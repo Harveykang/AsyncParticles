@@ -10,7 +10,7 @@ import pigcart.particlerain.particle.SnowParticle;
 import pigcart.particlerain.particle.WeatherParticle;
 
 @Mixin(SnowParticle.class)
-public abstract class MixinSnowParticle extends WeatherParticle {
+public abstract class MixinSnowParticle extends MixinWeatherParticle {
 	protected MixinSnowParticle(ClientLevel level, double x, double y, double z) {
 		super(level, x, y, z);
 	}

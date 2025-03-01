@@ -33,7 +33,7 @@
     "fabric.particlerain.MixinRainParticle",
     "fabric.particlerain.MixinSnowParticle",
     "fabric.particlerain.MixinWeatherParticleSpawner",
-    "fabric.particlerain.MixinWeatherPatricle",
+    "fabric.particlerain.MixinWeatherParticle",
     "fabric.particlerain_vs.MixinDustParticle",
     "fabric.particlerain_vs.MixinRainParticle",
     "fabric.particlerain_vs.MixinRippleParticle",

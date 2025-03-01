@@ -7,10 +7,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pigcart.particlerain.particle.RainParticle;
-import pigcart.particlerain.particle.WeatherParticle;
 
 @Mixin(RainParticle.class)
-public abstract class MixinRainParticle extends WeatherParticle {
+public abstract class MixinRainParticle extends MixinWeatherParticle {
 	protected MixinRainParticle(ClientLevel level, double x, double y, double z) {
 		super(level, x, y, z);
 	}
