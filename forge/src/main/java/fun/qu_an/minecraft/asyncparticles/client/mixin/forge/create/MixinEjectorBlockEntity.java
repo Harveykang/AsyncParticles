@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.create_6;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.create;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -6,7 +6,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.logistics.depot.EjectorBlockEntity;
-import net.createmod.catnip.data.LongAttached;
+import net.createmod.catnip.data.IntAttached;
 import net.createmod.catnip.data.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -31,7 +31,7 @@ import java.util.function.Function;
 @Mixin(value = EjectorBlockEntity.class, remap = false)
 public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 	@Shadow
-	List<LongAttached<ItemStack>> launchedItems;
+	List<IntAttached<ItemStack>> launchedItems;
 
 	@Shadow
 	ItemStack trackedItem;
@@ -41,7 +41,7 @@ public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 
 	@Shadow @Nullable Pair<Vec3, BlockPos> earlyTarget;
 
-	@Shadow protected abstract void placeItemAtTarget(boolean doLogic, float maxTime, LongAttached<ItemStack> intAttached);
+	@Shadow protected abstract void placeItemAtTarget(boolean doLogic, float maxTime, IntAttached<ItemStack> intAttached);
 
 	@Shadow protected abstract boolean scanTrajectoryForObstacles(int time);
 
@@ -50,25 +50,25 @@ public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 	}
 
 	@Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"))
-	private Iterator<LongAttached<ItemStack>> onTick(List<LongAttached<ItemStack>> instance,
+	private Iterator<IntAttached<ItemStack>> onTick(List<IntAttached<ItemStack>> instance,
 													 @Local(name = "totalTime") float totalTime,
 													 @Local(name = "doLogic") boolean doLogic) {
 		if (!level.isClientSide) {
 			return instance.iterator();
 		}
-		Set<LongAttached<ItemStack>> toRemove = new HashSet<>();
-		LongAttached<ItemStack> longAttached;
-		for (Iterator<LongAttached<ItemStack>> iterator = launchedItems.iterator(); iterator.hasNext(); longAttached.increment()) {
-			longAttached = iterator.next();
+		Set<IntAttached<ItemStack>> toRemove = new HashSet<>();
+		IntAttached<ItemStack> intAttached;
+		for (Iterator<IntAttached<ItemStack>> iterator = launchedItems.iterator(); iterator.hasNext(); intAttached.increment()) {
+			intAttached = iterator.next();
 			boolean hit = false;
-			if (longAttached.getSecond() == this.trackedItem) {
-				hit = this.scanTrajectoryForObstacles(longAttached.getFirst());
+			if (intAttached.getSecond() == this.trackedItem) {
+				hit = this.scanTrajectoryForObstacles(intAttached.getFirst());
 			}
 
 			float maxTime = this.earlyTarget != null ? Math.min(this.earlyTargetTime, totalTime) : totalTime;
-			if (hit || longAttached.exceeds((long) maxTime)) {
-				this.placeItemAtTarget(doLogic, maxTime, longAttached);
-				toRemove.add(longAttached);
+			if (hit || intAttached.exceeds((int) maxTime)) {
+				this.placeItemAtTarget(doLogic, maxTime, intAttached);
+				toRemove.add(intAttached);
 			}
 		}
 		launchedItems.removeAll(toRemove);

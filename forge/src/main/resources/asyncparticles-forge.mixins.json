@@ -7,8 +7,8 @@
   "client": [
     "MixinLevelRenderer",
     "MixinParticleEngine_Render",
-    "create_5.MixinDepotBehaviour",
-    "create_5.MixinEjectorBlockEntity",
+    "create.MixinDepotBehaviour",
+    "create.MixinEjectorBlockEntity",
     "effecticularity.MixinRippleParticle",
     "flerovium.MixinMixinParticleEngine",
     "particlerain.MixinGroundFogParticle",

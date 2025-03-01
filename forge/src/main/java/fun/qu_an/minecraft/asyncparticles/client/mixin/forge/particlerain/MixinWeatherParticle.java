@@ -27,20 +27,18 @@ import java.util.List;
 public abstract class MixinWeatherParticle extends TextureSheetParticle implements WeatherParticleAddon {
 	@Unique
 	protected boolean asyncparticles$invisible;
-	@Unique
-	protected AABB asyncparticles$weathersAABB;
 
 	@Shadow
 	public abstract void remove();
 
 	@Override
 	public AABB asyncparticles$getWeatherAABB() {
-		return asyncparticles$weathersAABB;
+		return getBoundingBox();
 	}
 
 	@Override
 	public void asyncparticles$setWeatherAABB(AABB aabb) {
-		asyncparticles$weathersAABB = aabb;
+		setBoundingBox(aabb);
 	}
 
 	@Override
@@ -123,11 +121,6 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 			this.zd = 0.0F;
 		}
 
-	}
-
-	@Override
-	public @NotNull AABB getBoundingBox() {
-		return asyncparticles$getWeatherAABB();
 	}
 
 	@Override

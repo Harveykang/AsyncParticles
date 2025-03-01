@@ -36,6 +36,11 @@ public class ModListHelper {
 	/* Create */
 	public static final boolean CREATE_LOADED = isModLoaded("create");
 	public static final int CREATE_MAJOR_VERSION = versionMajor("create");
+
+	static {
+		System.out.println("CREATE_MAJOR_VERSION: " + CREATE_MAJOR_VERSION);
+	}
+
 	public static final boolean FABRIC_CREATE_LOADED = isFabricModLoaded("create");
 	public static final boolean FORGE_CREATE_LOADED = isForgeModLoaded("create");
 	/* Tombstone */

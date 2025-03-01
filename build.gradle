@@ -71,6 +71,7 @@ subprojects {
             name = "FallenBreath"
             url = uri("https://maven.fallenbreath.me/releases")
         }
+        maven { url = "https://repo.spongepowered.org/repository/maven-public" } // Mixin
     }
 
     dependencies {
