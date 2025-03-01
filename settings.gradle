@@ -12,3 +12,7 @@ rootProject.name = 'asyncparticles'
 include 'common'
 include 'fabric'
 include 'forge'
+include 'legacy_mod_forge'
+include 'legacy_mod_forge'
+include 'legacy_mod_forge'
+

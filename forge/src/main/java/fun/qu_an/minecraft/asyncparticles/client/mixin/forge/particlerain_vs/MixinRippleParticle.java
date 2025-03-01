@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.particlerain_vs;
 
-import fun.qu_an.minecraft.asyncparticles.client.RippleParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.RippleParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.forge.particlerain.MixinWeatherParticle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import org.joml.AxisAngle4d;
 import org.joml.Quaternionf;
@@ -12,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import com.leclowndu93150.particlerain.particle.RippleParticle;
 
 @Mixin(value = RippleParticle.class)
-public abstract class MixinRippleParticle extends MixinWeatherPatricle implements RippleParticleAddon {
+public abstract class MixinRippleParticle extends MixinWeatherParticle implements RippleParticleAddon {
 	@Unique
 	private Vector3f asyncParticles$normal;
 
@@ -27,11 +28,6 @@ public abstract class MixinRippleParticle extends MixinWeatherPatricle implement
 			return new Quaternionf(axisAngle);
 		}
 		return new Quaternionf().rotateTo(0, 0, 1, normal.x, normal.y, normal.z);
-	}
-
-	@Override
-	public void move(double d, double e, double f) {
-		// do nothing
 	}
 
 	@Override

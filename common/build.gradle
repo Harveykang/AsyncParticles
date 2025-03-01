@@ -17,6 +17,7 @@ dependencies {
 
     // We currently use Connector of forge
     implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.2.0"))
+
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
     compileOnly "org.sinytra:Connector:1.0.0-beta.46+1.20.1"
@@ -41,6 +42,12 @@ dependencies {
 //    modCompileOnly 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
 
     /* Create */
+    // 6.0.0
+//    modCompileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}") { transitive = false }
+    modCompileOnly("net.createmod.ponder:Ponder-Fabric-${minecraft_version}:${ponder_version}")
+//    modCompileOnly("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}")
+//    modCompileOnly("com.tterrag.registrate:Registrate:${registrate_version}")
+    // 0.5.0
     modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
 
     /* Lodestone */

@@ -55,7 +55,8 @@ subprojects {
         maven { url = "https://maven.blamejared.com/" } // Hex Casting
         maven { url = "https://mvn.devos.one/releases" } // Porting Lib releases
         maven { url = "https://mvn.devos.one/snapshots" } // Create and several dependencies
-        maven { url = "https://maven.tterrag.com/" } // Flywheel
+        maven { url = "https://maven.createmod.net" } // Create, Ponder, Flywheel
+        maven { url = "https://maven.tterrag.com" } // Registrate
         maven { url = "https://maven.jamieswhiteshirt.com/libs-release" } // Reach Entity Attributes
         maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven" } // Forge Config API Port
         maven {
@@ -70,6 +71,7 @@ subprojects {
             name = "FallenBreath"
             url = uri("https://maven.fallenbreath.me/releases")
         }
+        maven { url = "https://repo.spongepowered.org/repository/maven-public" } // Mixin
     }
 
     dependencies {

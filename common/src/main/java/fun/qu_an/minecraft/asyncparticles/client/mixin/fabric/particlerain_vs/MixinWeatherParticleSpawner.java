@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_vs;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import fun.qu_an.minecraft.asyncparticles.client.VSClientUtils;
+import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.ParticleOptions;
 import org.spongepowered.asm.mixin.Mixin;

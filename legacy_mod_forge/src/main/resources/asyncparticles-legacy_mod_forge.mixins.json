@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "fun.qu_an.minecraft.asyncparticles.client.mixin.forge.legacy",
+  "compatibilityLevel": "JAVA_17",
+  "plugin": "fun.qu_an.minecraft.asyncparticles.client.forge.APMixinPluginLegacyModForge",
+  "client": [
+    "create.MixinDepotBehaviour",
+    "create.MixinEjectorBlockEntity"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+  ]
+}

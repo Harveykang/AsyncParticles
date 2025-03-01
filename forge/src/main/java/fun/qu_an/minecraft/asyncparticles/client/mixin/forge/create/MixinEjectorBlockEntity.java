@@ -3,10 +3,11 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.create;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.logistics.depot.EjectorBlockEntity;
-import com.simibubi.create.foundation.utility.IntAttached;
-import com.simibubi.create.foundation.utility.Pair;
+import net.createmod.catnip.data.IntAttached;
+import net.createmod.catnip.data.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -29,7 +30,6 @@ import java.util.function.Function;
 
 @Mixin(value = EjectorBlockEntity.class, remap = false)
 public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
-
 	@Shadow
 	List<IntAttached<ItemStack>> launchedItems;
 
@@ -79,10 +79,8 @@ public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 	private void onInit(BlockEntityType<?> typeIn, BlockPos pos, BlockState state, CallbackInfo ci) {
 		Level level = getLevel();
 		// 这个列表很小，不会过于影响性能
-		if (level == null) { // god-damn it, WHY!?!?!
-			String threadName = Thread.currentThread().getName().toLowerCase(Locale.ROOT);
-			// TODO: Dimensional threading 兼容，但是写成这样太丑了，有更好的方法吗？
-			if (!threadName.contains("server")){
+		if (level == null) {
+			if (RenderSystem.isOnRenderThread()) {
 				launchedItems = new CopyOnWriteArrayList<>(launchedItems);
 			}
 		} else if (level.isClientSide) {
@@ -90,14 +88,12 @@ public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 		}
 	}
 
-	@WrapOperation(method = "read", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/foundation/utility/NBTHelper;readCompoundList(Lnet/minecraft/nbt/ListTag;Ljava/util/function/Function;)Ljava/util/List;"))
+	@WrapOperation(method = "read", at = @At(value = "INVOKE", target = "Lnet/createmod/catnip/nbt/NBTHelper;readCompoundList(Lnet/minecraft/nbt/ListTag;Ljava/util/function/Function;)Ljava/util/List;"))
 	private <T> List<T> readCompoundList(ListTag listNBT, Function<CompoundTag, T> deserializer, Operation<List<T>> original) {
 		Level level = getLevel();
 		// 这个列表很小，不会过于影响性能
-		if (level == null) { // god-damn it, WHY!?!?!
-			String threadName = Thread.currentThread().getName().toLowerCase(Locale.ROOT);
-			// TODO: Dimensional threading 兼容，但是写成这样太丑了，有更好的方法吗？
-			if (!threadName.contains("server")) {
+		if (level == null) {
+			if (RenderSystem.isOnRenderThread()) {
 				return new CopyOnWriteArrayList<>(original.call(listNBT, deserializer));
 			}
 		} else if (level.isClientSide) {

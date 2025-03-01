@@ -9,6 +9,8 @@ public class ModListHelper {
 	public static final boolean CONNECTORMOD_LOADED = isModLoaded("connectormod");
 	/* Valkyrien Skies */
 	public static final boolean VS_LOADED = isModLoaded("valkyrienskies");
+	public static final boolean FABRIC_VS_LOADED = isFabricModLoaded("valkyrienskies");
+	public static final boolean FORGE_VS_LOADED = isForgeModLoaded("valkyrienskies");
 	/* Sodium */
 	public static final boolean SODIUM_LIKE_LOADED = isModLoaded("sodium") || isModLoaded("embeddium");
 	public static final boolean SODIUM_LOADED = isModLoaded("sodium");
@@ -32,6 +34,13 @@ public class ModListHelper {
 	/* Flywheel */
 	public static final boolean FLYWHEEL_LOADED = isModLoaded("flywheel");
 	/* Create */
+	public static final boolean CREATE_LOADED = isModLoaded("create");
+	public static final int CREATE_MAJOR_VERSION = versionMajor("create");
+
+	static {
+		System.out.println("CREATE_MAJOR_VERSION: " + CREATE_MAJOR_VERSION);
+	}
+
 	public static final boolean FABRIC_CREATE_LOADED = isFabricModLoaded("create");
 	public static final boolean FORGE_CREATE_LOADED = isForgeModLoaded("create");
 	/* Tombstone */
@@ -54,6 +63,11 @@ public class ModListHelper {
 
 	@ExpectPlatform
 	public static boolean isModLoaded(String modId) {
+		throw new AssertionError();
+	}
+
+	@ExpectPlatform
+	public static int versionMajor(String modId) {
 		throw new AssertionError();
 	}
 

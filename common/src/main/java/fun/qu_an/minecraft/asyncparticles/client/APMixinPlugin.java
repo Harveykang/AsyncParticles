@@ -47,9 +47,11 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					yield !ModListHelper.IS_FORGE;
 				}
 				yield switch (split[1]) {
-					case "particlerain_vs" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.VS_LOADED;
+					case "particlerain_vs" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_VS_LOADED;
+					case "particlerain_create" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_CREATE_LOADED;
 					case "particlerain" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED;
-					case "create" -> ModListHelper.FABRIC_CREATE_LOADED;
+					case "create_5" -> ModListHelper.FABRIC_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION < 6;
+					case "create_6" -> ModListHelper.FABRIC_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION == 6;
 					case "effective" -> ModListHelper.FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> ModListHelper.FABRIC_EFFECTUAL_LOADED;
 					case "particular" -> ModListHelper.FABRIC_PARTICULAR_LOADED;
@@ -58,6 +60,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			}
 			case "fake_renders" -> true;
 			case "vs2" -> ModListHelper.VS_LOADED;
+			case "create" -> ModListHelper.CREATE_LOADED;
 			case "iris" -> ModListHelper.IRIS_LOADED;
 			case "sodium_like" -> ModListHelper.SODIUM_LIKE_LOADED;
 			case "lodestone" -> ModListHelper.LODESTONE_LOADED;

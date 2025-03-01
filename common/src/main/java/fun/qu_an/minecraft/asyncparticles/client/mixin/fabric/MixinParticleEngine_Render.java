@@ -108,7 +108,7 @@ public abstract class MixinParticleEngine_Render {
 				}
 			} else {
 				Runnable runnable = () -> iterable.forEach(particle -> {
-					if (!frustum.isVisible(particle.getBoundingBox())) {
+					if (((ParticleAddon) particle).shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
 						return;
 					}
 					if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
