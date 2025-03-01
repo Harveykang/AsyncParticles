@@ -19,6 +19,7 @@ public class SimplePropertiesConfig {
 	public static boolean forceDoneTextureTick = false;
 	public static boolean markSyncIfTickFailed = false;
 	public static boolean ignoreParticleTickExceptions = false;
+
 	private static boolean shouldSave;
 
 	public static void load() throws IOException {

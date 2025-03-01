@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -95,7 +96,7 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 			Vec3 motion = Entity.collideBoundingBox(
 				null,
 				apply,
-				this.getBoundingBox(),
+				asyncparticles$getWeatherAABB(),
 				this.level,
 				List.of());
 			d = motion.x;
@@ -122,6 +123,11 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 			this.zd = 0.0F;
 		}
 
+	}
+
+	@Override
+	public @NotNull AABB getBoundingBox() {
+		return asyncparticles$getWeatherAABB();
 	}
 
 	@Override

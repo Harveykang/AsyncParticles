@@ -1,8 +1,9 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.create;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.create_5;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.simibubi.create.content.kinetics.belt.transport.TransportedItemStack;
 import com.simibubi.create.content.logistics.depot.DepotBehaviour;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
@@ -71,10 +72,8 @@ public abstract class MixinDepotBehaviour extends BlockEntityBehaviour {
 	private void onInit(SmartBlockEntity be, CallbackInfo ci) {
 		Level level = be.getLevel();
 		// 这个列表很小，不会过于影响性能
-		if (level == null) { // god-damn it, WHY!?!?!
-			String threadName = Thread.currentThread().getName().toLowerCase(Locale.ROOT);
-			// TODO: Dimensional threading 兼容，但是写成这样太丑了，有更好的方法吗？
-			if (!threadName.contains("server")) {
+		if (level == null) {
+			if (RenderSystem.isOnRenderThread()) {
 				incoming = new CopyOnWriteArrayList<>(incoming);
 			}
 		} else if (level.isClientSide) {
@@ -87,10 +86,8 @@ public abstract class MixinDepotBehaviour extends BlockEntityBehaviour {
 	private <T> List<T> readCompoundList(ListTag listNBT, Function<CompoundTag, T> deserializer, Operation<List<T>> original) {
 		Level level = blockEntity.getLevel();
 		// 这个列表很小，不会过于影响性能
-		if (level == null) { // god-damn it, WHY!?!?!
-			String threadName = Thread.currentThread().getName().toLowerCase(Locale.ROOT);
-			// TODO: Dimensional threading 兼容，但是写成这样太丑了，有更好的方法吗？
-			if (!threadName.contains("server")) {
+		if (level == null) {
+			if (RenderSystem.isOnRenderThread()) {
 				return new CopyOnWriteArrayList<>(original.call(listNBT, deserializer));
 			}
 		} else if (level.isClientSide) {

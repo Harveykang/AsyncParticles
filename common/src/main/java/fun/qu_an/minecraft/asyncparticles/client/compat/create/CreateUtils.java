@@ -5,8 +5,7 @@ import com.simibubi.create.foundation.collision.ContinuousOBBCollider;
 import com.simibubi.create.foundation.collision.Matrix3d;
 import com.simibubi.create.foundation.collision.OrientedBB;
 import com.simibubi.create.foundation.utility.BlockHelper;
-import com.simibubi.create.foundation.utility.Iterate;
-import com.simibubi.create.foundation.utility.VecHelper;
+import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.create.InvokerContraptionCollider;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -30,6 +29,8 @@ import java.util.stream.Stream;
  * See {@link ContraptionCollider}
  */
 public class CreateUtils {
+	public static final boolean[] trueAndFalse = {true, false};
+
 	public static Stream<AbstractContraptionEntity> contraptions(ClientLevel level) {
 		return ContraptionHandler.loadedContraptions.get(level)
 			.values()
@@ -108,6 +109,7 @@ public class CreateUtils {
 
 	/**
 	 * @return null if no collision
+	 * TODO 用一个假实体直接调用原函数？
 	 */
 	@Nullable
 	public static Vec3 collideMotionWithContraptions(ClientLevel level, Vec3 position, Vec3 motion, AABB bounds) {
@@ -192,7 +194,7 @@ public class CreateUtils {
 
 		// Apply separation maths
 		boolean doHorizontalPass = !rotation.hasVerticalRotation();
-		for (boolean horizontalPass : Iterate.trueAndFalse) {
+		for (boolean horizontalPass : trueAndFalse) {
 			boolean verticalPass = !horizontalPass || !doHorizontalPass;
 
 			for (AABB bb : collidableBBs) {
@@ -267,12 +269,12 @@ public class CreateUtils {
 		motionResponse = rotationMatrix.transform(motionResponse)
 			.add(contraptionMotion);
 		totalResponse = rotationMatrix.transform(totalResponse);
-		totalResponse = VecHelper.rotate(totalResponse, yawOffset, Direction.Axis.Y);
+		totalResponse = rotate(totalResponse, yawOffset, Direction.Axis.Y);
 		collisionNormal = rotationMatrix.transform(collisionNormal);
-		collisionNormal = VecHelper.rotate(collisionNormal, yawOffset, Direction.Axis.Y);
+		collisionNormal = rotate(collisionNormal, yawOffset, Direction.Axis.Y);
 		collisionNormal = collisionNormal.normalize();
 		collisionLocation = rotationMatrix.transform(collisionLocation);
-		collisionLocation = VecHelper.rotate(collisionLocation, yawOffset, Direction.Axis.Y);
+		collisionLocation = rotate(collisionLocation, yawOffset, Direction.Axis.Y);
 		rotationMatrix.transpose();
 
 		double bounce = 0;
@@ -343,5 +345,17 @@ public class CreateUtils {
 		}
 
 		return entityMotion;
+	}
+
+	public static Vec3 rotate(Vec3 collisionLocation, float yawOffset, Direction.Axis axis) {
+		return ModListHelper.CREATE_MAJOR_VERSION < 6
+			? Create5Utils.rotate(collisionLocation, yawOffset, axis)
+			: Create6Utils.rotate(collisionLocation, yawOffset, axis);
+	}
+
+	public static Vec3 getCenterOf(BlockPos blockPos) {
+		return ModListHelper.CREATE_MAJOR_VERSION < 6
+			? Create5Utils.getCenterOf(blockPos)
+			: Create6Utils.getCenterOf(blockPos);
 	}
 }

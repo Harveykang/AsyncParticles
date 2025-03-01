@@ -35,6 +35,7 @@ public class ModListHelper {
 	public static final boolean FLYWHEEL_LOADED = isModLoaded("flywheel");
 	/* Create */
 	public static final boolean CREATE_LOADED = isModLoaded("create");
+	public static final int CREATE_MAJOR_VERSION = versionMajor("create");
 	public static final boolean FABRIC_CREATE_LOADED = isFabricModLoaded("create");
 	public static final boolean FORGE_CREATE_LOADED = isForgeModLoaded("create");
 	/* Tombstone */
@@ -57,6 +58,11 @@ public class ModListHelper {
 
 	@ExpectPlatform
 	public static boolean isModLoaded(String modId) {
+		throw new AssertionError();
+	}
+
+	@ExpectPlatform
+	public static int versionMajor(String modId) {
 		throw new AssertionError();
 	}
 

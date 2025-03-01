@@ -3,7 +3,6 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_crea
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.fabric.ParticleRainUtilsImpl;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.world.phys.Vec3;

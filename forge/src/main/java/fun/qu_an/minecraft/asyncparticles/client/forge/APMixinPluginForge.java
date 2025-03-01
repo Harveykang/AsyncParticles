@@ -29,7 +29,8 @@ public class APMixinPluginForge implements IMixinConfigPlugin {
 			case "particlerain_vs" -> ModListHelper.FORGE_PARTICLERAIN_LOADED && ModListHelper.FORGE_VS_LOADED;
 			case "particlerain_create" -> ModListHelper.FORGE_PARTICLERAIN_LOADED && ModListHelper.FORGE_CREATE_LOADED;
 			case "particlerain" -> ModListHelper.FORGE_PARTICLERAIN_LOADED;
-			case "create" -> ModListHelper.FORGE_CREATE_LOADED;
+			case "create_5" -> ModListHelper.FORGE_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION < 6;
+			case "create_6" -> ModListHelper.FORGE_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION == 6;
 			// TODO: 下面这个 mod 没有正式发布，且不确定是否是唯一的 forge 移植版
 			case "effecticularity" -> ModListHelper.FORGE_EFFECTIVE_LOADED;
 			case "flerovium" -> ModListHelper.FORGE_FLEROVIUM_LOADED;

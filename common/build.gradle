@@ -41,7 +41,13 @@ dependencies {
 //    modCompileOnly 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
 
     /* Create */
+    // 0.5.0
     modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
+    // 6.0.0
+//    modCompileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}") { transitive = false }
+    modCompileOnly("net.createmod.ponder:Ponder-Fabric-${minecraft_version}:${ponder_version}")
+//    modCompileOnly("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}")
+//    modCompileOnly("com.tterrag.registrate:Registrate:${registrate_version}")
 
     /* Lodestone */
     modCompileOnly "maven.modrinth:lodestonelib:1.20.1-1.6.2.3f"

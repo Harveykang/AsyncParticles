@@ -1,14 +1,15 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.create;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.create_6;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.simibubi.create.content.kinetics.belt.transport.TransportedItemStack;
 import com.simibubi.create.content.logistics.depot.DepotBehaviour;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.item.ItemHelper;
-import com.simibubi.create.foundation.utility.VecHelper;
+import net.createmod.catnip.math.VecHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.Containers;
@@ -71,26 +72,21 @@ public abstract class MixinDepotBehaviour extends BlockEntityBehaviour {
 	private void onInit(SmartBlockEntity be, CallbackInfo ci) {
 		Level level = be.getLevel();
 		// 这个列表很小，不会过于影响性能
-		if (level == null) { // god-damn it, WHY!?!?!
-			String threadName = Thread.currentThread().getName().toLowerCase(Locale.ROOT);
-			// TODO: Dimensional threading 兼容，但是写成这样太丑了，有更好的方法吗？
-			if (!threadName.contains("server")) {
+		if (level == null) {
+			if (RenderSystem.isOnRenderThread()) {
 				incoming = new CopyOnWriteArrayList<>(incoming);
 			}
 		} else if (level.isClientSide) {
 			incoming = new CopyOnWriteArrayList<>(incoming);
 		}
-		// TODO: 查明 CME 的原因；目前不清楚这么改会导致什么问题，但不会影响服务端，可能无关紧要
 	}
 
-	@WrapOperation(method = "read", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/foundation/utility/NBTHelper;readCompoundList(Lnet/minecraft/nbt/ListTag;Ljava/util/function/Function;)Ljava/util/List;"))
+	@WrapOperation(method = "read", at = @At(value = "INVOKE", target = "Lnet/createmod/catnip/nbt/NBTHelper;readCompoundList(Lnet/minecraft/nbt/ListTag;Ljava/util/function/Function;)Ljava/util/List;"))
 	private <T> List<T> readCompoundList(ListTag listNBT, Function<CompoundTag, T> deserializer, Operation<List<T>> original) {
 		Level level = blockEntity.getLevel();
 		// 这个列表很小，不会过于影响性能
-		if (level == null) { // god-damn it, WHY!?!?!
-			String threadName = Thread.currentThread().getName().toLowerCase(Locale.ROOT);
-			// TODO: Dimensional threading 兼容，但是写成这样太丑了，有更好的方法吗？
-			if (!threadName.contains("server")) {
+		if (level == null) {
+			if (RenderSystem.isOnRenderThread()) {
 				return new CopyOnWriteArrayList<>(original.call(listNBT, deserializer));
 			}
 		} else if (level.isClientSide) {

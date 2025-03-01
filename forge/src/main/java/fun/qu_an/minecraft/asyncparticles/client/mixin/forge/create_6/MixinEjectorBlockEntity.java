@@ -1,12 +1,13 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.create;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.create_6;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.logistics.depot.EjectorBlockEntity;
-import com.simibubi.create.foundation.utility.IntAttached;
-import com.simibubi.create.foundation.utility.Pair;
+import net.createmod.catnip.data.LongAttached;
+import net.createmod.catnip.data.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -29,9 +30,8 @@ import java.util.function.Function;
 
 @Mixin(value = EjectorBlockEntity.class, remap = false)
 public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
-
 	@Shadow
-	List<IntAttached<ItemStack>> launchedItems;
+	List<LongAttached<ItemStack>> launchedItems;
 
 	@Shadow
 	ItemStack trackedItem;
@@ -41,7 +41,7 @@ public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 
 	@Shadow @Nullable Pair<Vec3, BlockPos> earlyTarget;
 
-	@Shadow protected abstract void placeItemAtTarget(boolean doLogic, float maxTime, IntAttached<ItemStack> intAttached);
+	@Shadow protected abstract void placeItemAtTarget(boolean doLogic, float maxTime, LongAttached<ItemStack> intAttached);
 
 	@Shadow protected abstract boolean scanTrajectoryForObstacles(int time);
 
@@ -50,25 +50,25 @@ public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 	}
 
 	@Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"))
-	private Iterator<IntAttached<ItemStack>> onTick(List<IntAttached<ItemStack>> instance,
+	private Iterator<LongAttached<ItemStack>> onTick(List<LongAttached<ItemStack>> instance,
 													 @Local(name = "totalTime") float totalTime,
 													 @Local(name = "doLogic") boolean doLogic) {
 		if (!level.isClientSide) {
 			return instance.iterator();
 		}
-		Set<IntAttached<ItemStack>> toRemove = new HashSet<>();
-		IntAttached<ItemStack> intAttached;
-		for (Iterator<IntAttached<ItemStack>> iterator = launchedItems.iterator(); iterator.hasNext(); intAttached.increment()) {
-			intAttached = iterator.next();
+		Set<LongAttached<ItemStack>> toRemove = new HashSet<>();
+		LongAttached<ItemStack> longAttached;
+		for (Iterator<LongAttached<ItemStack>> iterator = launchedItems.iterator(); iterator.hasNext(); longAttached.increment()) {
+			longAttached = iterator.next();
 			boolean hit = false;
-			if (intAttached.getSecond() == this.trackedItem) {
-				hit = this.scanTrajectoryForObstacles(intAttached.getFirst());
+			if (longAttached.getSecond() == this.trackedItem) {
+				hit = this.scanTrajectoryForObstacles(longAttached.getFirst());
 			}
 
 			float maxTime = this.earlyTarget != null ? Math.min(this.earlyTargetTime, totalTime) : totalTime;
-			if (hit || intAttached.exceeds((int) maxTime)) {
-				this.placeItemAtTarget(doLogic, maxTime, intAttached);
-				toRemove.add(intAttached);
+			if (hit || longAttached.exceeds((long) maxTime)) {
+				this.placeItemAtTarget(doLogic, maxTime, longAttached);
+				toRemove.add(longAttached);
 			}
 		}
 		launchedItems.removeAll(toRemove);
@@ -79,10 +79,8 @@ public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 	private void onInit(BlockEntityType<?> typeIn, BlockPos pos, BlockState state, CallbackInfo ci) {
 		Level level = getLevel();
 		// 这个列表很小，不会过于影响性能
-		if (level == null) { // god-damn it, WHY!?!?!
-			String threadName = Thread.currentThread().getName().toLowerCase(Locale.ROOT);
-			// TODO: Dimensional threading 兼容，但是写成这样太丑了，有更好的方法吗？
-			if (!threadName.contains("server")){
+		if (level == null) {
+			if (RenderSystem.isOnRenderThread()) {
 				launchedItems = new CopyOnWriteArrayList<>(launchedItems);
 			}
 		} else if (level.isClientSide) {
@@ -90,14 +88,12 @@ public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 		}
 	}
 
-	@WrapOperation(method = "read", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/foundation/utility/NBTHelper;readCompoundList(Lnet/minecraft/nbt/ListTag;Ljava/util/function/Function;)Ljava/util/List;"))
+	@WrapOperation(method = "read", at = @At(value = "INVOKE", target = "Lnet/createmod/catnip/nbt/NBTHelper;readCompoundList(Lnet/minecraft/nbt/ListTag;Ljava/util/function/Function;)Ljava/util/List;"))
 	private <T> List<T> readCompoundList(ListTag listNBT, Function<CompoundTag, T> deserializer, Operation<List<T>> original) {
 		Level level = getLevel();
 		// 这个列表很小，不会过于影响性能
-		if (level == null) { // god-damn it, WHY!?!?!
-			String threadName = Thread.currentThread().getName().toLowerCase(Locale.ROOT);
-			// TODO: Dimensional threading 兼容，但是写成这样太丑了，有更好的方法吗？
-			if (!threadName.contains("server")) {
+		if (level == null) {
+			if (RenderSystem.isOnRenderThread()) {
 				return new CopyOnWriteArrayList<>(original.call(listNBT, deserializer));
 			}
 		} else if (level.isClientSide) {
