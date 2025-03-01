@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client;
+package fun.qu_an.minecraft.asyncparticles.client.compat.vs2;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

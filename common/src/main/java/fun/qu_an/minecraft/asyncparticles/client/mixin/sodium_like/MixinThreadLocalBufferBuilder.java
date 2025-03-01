@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.sodium_like;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import fun.qu_an.minecraft.asyncparticles.client.ThreadLocalBufferBuilder;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadLocalBufferBuilder;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.caffeinemc.mods.sodium.api.vertex.format.VertexFormatDescription;
 import org.lwjgl.system.MemoryStack;

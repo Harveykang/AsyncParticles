@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.particlerain_vs;
 
-import fun.qu_an.minecraft.asyncparticles.client.RippleParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.RippleParticleAddon;
 import net.minecraft.client.multiplayer.ClientLevel;
 import org.joml.AxisAngle4d;
 import org.joml.Quaternionf;

@@ -1,7 +1,8 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.vs2;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.create;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -23,21 +24,23 @@ public abstract class MixinParticle {
 	@Final
 	public ClientLevel level;
 
+	@Shadow public double x;
+
+	@Shadow public double y;
+
+	@Shadow public double z;
+
+	@Shadow public abstract AABB getBoundingBox();
+
 	/**
-	 * See {@link fun.qu_an.minecraft.asyncparticles.client.mixin.create.MixinParticle#collideBoundingBox}
+	 * See {@link fun.qu_an.minecraft.asyncparticles.client.mixin.vs2.MixinParticle#collideBoundingBox}
 	 */
 	@WrapOperation(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;collideBoundingBox(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Lnet/minecraft/world/level/Level;Ljava/util/List;)Lnet/minecraft/world/phys/Vec3;"))
-	private Vec3 collideBoundingBox(Entity entity, Vec3 vec3, AABB aABB, Level level, List<VoxelShape> list, Operation<Vec3> original) {
+	private Vec3 collideBoundingBox(Entity entity, Vec3 motion, AABB aABB, Level level, List<VoxelShape> list, Operation<Vec3> original) {
 		// we do it in another thread, so we don't need to worry about costly collision checks
-		double xsize = aABB.getXsize();
-		double ysize = aABB.getYsize();
-		double zsize = aABB.getZsize();
-		Vec3 mov = VSClientUtils.entityMovColShipOnly(null,
-			vec3,
-			aABB.inflate(xsize >= 0.1 ? 0.0 : 0.1 - xsize, ysize >= 0.1 ? 0.0 : 0.1 - ysize, zsize >= 0.1 ? 0.0 : 0.1 - zsize),
-			(ClientLevel) level);
+		Vec3 mov = CreateUtils.collideWithContraptions((ClientLevel) level, new Vec3(x, y, z), motion, getBoundingBox());
 		return original.call(entity,
-			mov == null ? vec3 : mov,
+			mov == null ? motion : mov,
 			aABB, level, list);
 	}
 }

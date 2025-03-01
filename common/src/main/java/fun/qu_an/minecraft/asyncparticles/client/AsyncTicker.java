@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.google.common.collect.EvictingQueue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;

@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client;
+package fun.qu_an.minecraft.asyncparticles.client.compat.vs2;
 
 import fun.qu_an.minecraft.asyncparticles.client.mixin.vs2.InvokerEntityShipCollisionUtils;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.vs2.InvokerRaycastUtils;

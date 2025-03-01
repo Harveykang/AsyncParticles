@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.particlerain_vs;
 
-import fun.qu_an.minecraft.asyncparticles.client.VSClientUtils;
+import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;

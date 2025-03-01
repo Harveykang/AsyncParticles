@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.physicsmod;
 
-import fun.qu_an.minecraft.asyncparticles.client.VSClientUtils;
+import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import net.diebuddies.physics.snow.math.AABB3D;
 import net.diebuddies.physics.vines.VineHelper;
 import net.minecraft.client.multiplayer.ClientLevel;

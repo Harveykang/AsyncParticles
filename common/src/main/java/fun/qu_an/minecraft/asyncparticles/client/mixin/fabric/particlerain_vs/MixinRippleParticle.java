@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_vs;
 
-import fun.qu_an.minecraft.asyncparticles.client.RippleParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.RippleParticleAddon;
 import net.minecraft.client.multiplayer.ClientLevel;
 import org.joml.AxisAngle4d;
 import org.joml.Quaternionf;
@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import pigcart.particlerain.particle.RippleParticle;
 
 @Mixin(value = RippleParticle.class)
-public abstract class MixinRippleParticle extends MixinWeatherPatricle implements RippleParticleAddon {
+public abstract class MixinRippleParticle extends MixinWeatherParticle implements RippleParticleAddon {
 	@Unique
 	private Vector3f asyncparticles$normal;
 

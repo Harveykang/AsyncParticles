@@ -59,7 +59,9 @@ public abstract class MixinClientLevel extends Level {
 
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	public void onInit(CallbackInfo ci) {
-		this.random = new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong());
+		if (this.random.getClass() != SingleThreadedRandomSource.class) {
+			this.random = new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong());
+		}
 	}
 
 	@WrapMethod(method = "animateTick")

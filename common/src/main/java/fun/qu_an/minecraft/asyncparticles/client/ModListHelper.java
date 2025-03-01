@@ -9,6 +9,7 @@ public class ModListHelper {
 	public static final boolean CONNECTORMOD_LOADED = isModLoaded("connectormod");
 	/* Valkyrien Skies */
 	public static final boolean VS_LOADED = isModLoaded("valkyrienskies");
+	public static final boolean FABRIC_VS_LOADED = isFabricModLoaded("valkyrienskies");
 	/* Sodium */
 	public static final boolean SODIUM_LIKE_LOADED = isModLoaded("sodium") || isModLoaded("embeddium");
 	public static final boolean SODIUM_LOADED = isModLoaded("sodium");
@@ -32,6 +33,7 @@ public class ModListHelper {
 	/* Flywheel */
 	public static final boolean FLYWHEEL_LOADED = isModLoaded("flywheel");
 	/* Create */
+	public static final boolean CREATE_LOADED = isModLoaded("create");
 	public static final boolean FABRIC_CREATE_LOADED = isFabricModLoaded("create");
 	public static final boolean FORGE_CREATE_LOADED = isForgeModLoaded("create");
 	/* Tombstone */
