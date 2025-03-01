@@ -44,19 +44,19 @@
     "fabric.particular.MixinMain",
     "fake_renders.MixinBufferBuilder",
     "fake_renders.MixinTesselator",
+    "flywheel.MixinClientLevelMixin",
     "hexcasting.MixinConjureParticle",
     "iris.MixinFullyBufferedMultiBufferSource",
     "iris.MixinIris",
     "iris.MixinOldFullyBufferedMultiBufferSource",
     "lodestone.MixinLodestoneWorldParticle",
     "physicsmod.MixinWeatherParticle",
-    "sodium.MixinThreadLocalBufferBuilder",
+    "sodium_like.MixinThreadLocalBufferBuilder",
     "vs2.InvokerEntityShipCollisionUtils",
     "vs2.InvokerRaycastUtils",
     "vs2.MixinParticle",
     "vs2.MixinVSAnimation",
-    "vs2.MixinVSSoundEngine",
-    "flywheel.MixinClientLevelMixin"
+    "vs2.MixinVSSoundEngine"
   ],
   "injectors": {
     "defaultRequire": 1

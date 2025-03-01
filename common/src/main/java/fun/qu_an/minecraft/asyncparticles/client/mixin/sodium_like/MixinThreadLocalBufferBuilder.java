@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.sodium;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.sodium_like;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.ThreadLocalBufferBuilder;

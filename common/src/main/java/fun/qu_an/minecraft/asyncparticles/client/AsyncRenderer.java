@@ -340,8 +340,8 @@ public class AsyncRenderer {
 	/* Config */
 
 	public static boolean forceSyncLevelRenderMarkDirty() {
-		// TODO: 详细看看 EBE Mod
-		return ModListHelper.ENHANCEDBLOCKENTITIES_LOADED || SimplePropertiesConfig.forceSyncLevelRenderMarkDirty;
+		return ModListHelper.SODIUM_LOADED // can't mark dirty asynchronously in sodium
+			   || SimplePropertiesConfig.forceSyncLevelRenderMarkDirty;
 	}
 
 	/* Destroy */

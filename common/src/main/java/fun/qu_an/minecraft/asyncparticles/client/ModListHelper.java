@@ -1,8 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
-import com.chailotl.particular.Main;
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.fabricmc.loader.api.FabricLoader;
 import org.sinytra.connector.loader.ConnectorEarlyLoader;
 
 public class ModListHelper {
@@ -12,7 +10,8 @@ public class ModListHelper {
 	/* Valkyrien Skies */
 	public static final boolean VS_LOADED = isModLoaded("valkyrienskies");
 	/* Sodium */
-	public static final boolean SODIUM_LOADED = isModLoaded("sodium") || isModLoaded("embeddium");
+	public static final boolean SODIUM_LIKE_LOADED = isModLoaded("sodium") || isModLoaded("embeddium");
+	public static final boolean SODIUM_LOADED = isModLoaded("sodium");
 	/* IRIS */
 	public static final boolean IRIS_LOADED = isModLoaded("iris") || isModLoaded("oculus");
 	/* Dummmmmmy */
@@ -40,7 +39,7 @@ public class ModListHelper {
 	/* Hexcasting */
 	public static final boolean HEXCASTING_LOADED = isModLoaded("hexcasting");
 	/* Enhanced Block Entities */
-	public static final boolean ENHANCEDBLOCKENTITIES_LOADED = isModLoaded("enhancedblockentities");
+//	public static final boolean ENHANCEDBLOCKENTITIES_LOADED = isModLoaded("enhancedblockentities");
 	/* Particular */
 	public static final boolean FABRIC_PARTICULAR_LOADED = isFabricModLoaded("particular");
 	/* Particle Core */

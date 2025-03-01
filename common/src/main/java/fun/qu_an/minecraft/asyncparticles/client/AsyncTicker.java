@@ -12,7 +12,6 @@ import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.TrackingEmitter;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -108,9 +107,10 @@ public class AsyncTicker {
 		return true;
 	}
 
+	// called per frame
 	public static void onRunAllTasks() {
 		// join before runAllTasks
-		if (blockEntityTickFuture != null && !aggressiveAsyncClientBlockEntityTick()) {
+		if (blockEntityTickFuture != null && !greedyAsyncClientBlockEntityTick()) {
 			blockEntityTickFuture.join();
 			blockEntityTickFuture = null;
 		}
@@ -124,7 +124,7 @@ public class AsyncTicker {
 			}
 			shouldTickParticles = false;
 		} else {
-			if (blockEntityTickFuture != null && aggressiveAsyncClientBlockEntityTick()) {
+			if (blockEntityTickFuture != null && greedyAsyncClientBlockEntityTick()) {
 				blockEntityTickFuture.join();
 				blockEntityTickFuture = null;
 			}
@@ -288,7 +288,7 @@ public class AsyncTicker {
 		return SimplePropertiesConfig.asyncClientBlockEntityTick;
 	}
 
-	public static boolean aggressiveAsyncClientBlockEntityTick() {
+	public static boolean greedyAsyncClientBlockEntityTick() {
 		return SimplePropertiesConfig.greedyAsyncClientBlockEntityTick;
 	}
 

@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
-import net.minecraft.client.renderer.texture.AbstractTexture;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -60,7 +59,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			case "fake_renders" -> true;
 			case "vs2" -> ModListHelper.VS_LOADED;
 			case "iris" -> ModListHelper.IRIS_LOADED;
-			case "sodium" -> ModListHelper.SODIUM_LOADED;
+			case "sodium_like" -> ModListHelper.SODIUM_LIKE_LOADED;
 			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
 			case "hexcasting" -> ModListHelper.HEXCASTING_LOADED;
 			case "flywheel" -> ModListHelper.FLYWHEEL_LOADED;
