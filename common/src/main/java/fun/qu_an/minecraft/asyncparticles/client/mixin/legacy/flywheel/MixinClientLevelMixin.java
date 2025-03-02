@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.flywheel;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.legacy.flywheel;
 
 import com.bawnorton.mixinsquared.TargetHandler;
 import com.mojang.blaze3d.systems.RenderSystem;

@@ -33,6 +33,7 @@ public class ModListHelper {
 	public static final boolean FORGE_PARTICLERAIN_LOADED = isForgeModLoaded("particlerain");
 	/* Flywheel */
 	public static final boolean FLYWHEEL_LOADED = isModLoaded("flywheel");
+	public static final int FLYWHEEL_MAJOR_VERSION = versionMajor("flywheel");
 	/* Create */
 	public static final boolean CREATE_LOADED = isModLoaded("create");
 	public static final int CREATE_MAJOR_VERSION = versionMajor("create");

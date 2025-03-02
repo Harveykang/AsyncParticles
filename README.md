@@ -8,12 +8,10 @@
   - Async particle ticking/rendering(buffer filling).  
   - Async client block entity ticking.
 - Valkyrien Skies + Pretty Rain/Particle Rain
-  - Weather particles no longer pass through ships.
-- Pretty Rain/Particle Rain
-  - Async particle gen.
-- Effectual
-  - Async particle gen.
-- Particular
+  - Weather particles now collide with ships.
+- Create + Pretty Rain/Particle Rain
+  - Weather particles now collide with contraptions.
+- Pretty Rain/Particle Rain/Effectual/Particular
   - Async particle gen.
 
 ## Mods Recommended
@@ -41,12 +39,12 @@
 ✅ Brute force Rendering Culling (Fabric/Forge)  
 ✅ Iris/Oculus (Fabric/Forge)  
 ✅ Startlight (Fabric/Forge)  
-❔ Create (Fabric/Forge)  
+⚠️ Create (Fabric/Forge)  
 ✅ Valkyrien Skies (Fabric/Forge)  
 ✅ Particle Rain/Pretty Rain (Fabric/Forge)  
-✅ Effectual (Fabric)  
-✅ Effective/Effecticularity (Fabric/Forge)  
-✅ Particular (Fabric/Forge)  
+❔ Effectual (Fabric)  
+❔ Effective/Effecticularity (Fabric/Forge)  
+❔ Particular (Fabric/Forge)  
 ✅ MmmMmmMmmMmm (Target Dummy) (Fabric/Forge)    
 ✅ Hex Casting (Fabric/Forge)  
 ❌ MadParticle (Forge)  

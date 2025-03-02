@@ -37,7 +37,7 @@ public interface WeatherParticleAddon {
 		/**
 		 * @return null if the particle should be removed, otherwise the motion vector
 		 */
-		@Nullable Vec3 apply(@NotNull ClientLevel level, @NotNull Vec3 location, @NotNull Vec3 v, @NotNull AABB aabb);
+		@Nullable Vec3 apply(@NotNull ClientLevel level, @NotNull Vec3 location, @NotNull Vec3 motion, @NotNull AABB aabb);
 
 		default CollisionFunction andThen(CollisionFunction function) {
 			return (level, location, v, aabb) -> {
@@ -59,7 +59,7 @@ public interface WeatherParticleAddon {
 		/**
 		 * @return null if the particle should be removed, otherwise the motion vector
 		 */
-		public @Nullable Vec3 apply(@NotNull ClientLevel level, @NotNull Vec3 position, @NotNull Vec3 motion, @NotNull AABB aabb) {
+		public @Nullable Vec3 collide(@NotNull ClientLevel level, @NotNull Vec3 position, @NotNull Vec3 motion, @NotNull AABB aabb) {
 			return function == null ? motion : function.apply(level, position, motion, aabb);
 		}
 

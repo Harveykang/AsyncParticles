@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.fabric;
 
+import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.RippleParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
@@ -20,13 +21,15 @@ import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Unique;
 import pigcart.particlerain.ParticleRainClient;
 
+import java.lang.ref.WeakReference;
+
 import static pigcart.particlerain.ParticleRainClient.config;
 
 @SuppressWarnings("unused")
 public class ParticleRainUtilsImpl {
 	@Unique
 	public static void onShipCollision(ClientLevel level, Vec3 location, Vec3 movement, AABB aabb) {
-		if (!config.doRippleParticles) {
+		if (!config.doRippleParticles && !config.doSplashParticles) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -64,19 +67,26 @@ public class ParticleRainUtilsImpl {
 	}
 
 	public static void onCreateCollision(@NotNull ClientLevel level, Vec3 originalMotion, @NotNull Vec3 clipMotion, @NotNull AABB aabb) {
-		if (!config.doRippleParticles || Math.abs(clipMotion.y) > 0.001) {
+		if (!config.doSplashParticles || Math.abs(clipMotion.y) > 0.001) {
 			return;
 		}
 		Vec3 center = aabb.getCenter();
 		AABB aabb1 = new AABB(center.x, aabb.minY - 1, center.z, center.x, aabb.minY, center.z);
 		Vec3 spawnPos = new Vec3(center.x, aabb.minY, center.z);
 		Vec3 motion1 = originalMotion.scale(2);
-		boolean b = CreateUtils.contraptions(level).filter(contraption -> contraption.getBoundingBox().intersects(aabb1))
-			.anyMatch(contraptionEntity ->
-				CreateUtils.collideWithContraption(level, spawnPos, motion1, aabb1, contraptionEntity));
-		if (b) {
-			Minecraft.getInstance().particleEngine
-				.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
+		for (WeakReference<AbstractContraptionEntity> r : CreateUtils.contraptions(level)) {
+			AbstractContraptionEntity contraptionEntity = r.get();
+			if (contraptionEntity == null || !contraptionEntity.isAliveOrStale()) {
+				continue;
+			}
+			if (!contraptionEntity.getBoundingBox().intersects(aabb1)) {
+				continue;
+			}
+			if (CreateUtils.collideWithContraption(level, spawnPos, motion1, aabb1, contraptionEntity)) {
+				Minecraft.getInstance().particleEngine
+					.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
+				return;
+			}
 		}
 	}
 }

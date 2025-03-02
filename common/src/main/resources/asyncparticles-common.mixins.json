@@ -38,14 +38,11 @@
     "fabric.particlerain.MixinWeatherParticle",
     "fabric.particlerain.MixinWeatherParticles",
     "fabric.particlerain.MixinWeatherParticleSpawner",
-    "fabric.particlerain_create.MixinWeatherParticle",
     "fabric.particlerain_vs.MixinRippleParticle",
-    "fabric.particlerain_vs.MixinWeatherParticle",
     "fabric.particlerain_vs.MixinWeatherParticleSpawner",
     "fabric.particular.MixinMain",
     "fake_renders.MixinBufferBuilder",
     "fake_renders.MixinTesselator",
-    "flywheel.MixinClientLevelMixin",
     "hexcasting.MixinConjureParticle",
     "iris.MixinFullyBufferedMultiBufferSource",
     "iris.MixinIris",
@@ -57,7 +54,8 @@
     "vs2.InvokerRaycastUtils",
     "vs2.MixinParticle",
     "vs2.MixinVSAnimation",
-    "vs2.MixinVSSoundEngine"
+    "vs2.MixinVSSoundEngine",
+    "legacy.flywheel.MixinClientLevelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

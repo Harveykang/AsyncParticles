@@ -143,10 +143,10 @@ public class VSClientUtils {
 		@Nullable Entity entity,
 		Vec3 movement,
 		AABB entityBoundingBox,
-		ClientLevel world) {
+		ClientLevel world,
+		double inflation) {
 		// Inflate the bounding box more for players than other entities, to give players a better collision result.
 		// Note that this increases the cost of doing collision, so we only do it for the players
-		double inflation = (entity instanceof Player) ? 0.5 : 0.1;
 		double stepHeight = (entity != null) ? entity.maxUpStep() : 0.0;
 		// Add [max(stepHeight - inflation, 0.0)] to search for polygons we might collide with while stepping
 		double yMovement = movement.y() + Math.max(stepHeight - inflation, 0.0);
@@ -171,6 +171,19 @@ public class VSClientUtils {
 			return toMinecraft(newMovement);
 		}
 		return null;
+	}
+
+	/**
+	 * No vanilla collision check.
+	 */
+	@Nullable
+	public static Vec3 entityMovColShipOnly(
+		@Nullable Entity entity,
+		Vec3 movement,
+		AABB entityBoundingBox,
+		ClientLevel world) {
+		double inflation = (entity instanceof Player) ? 0.5 : 0.1;
+		return entityMovColShipOnly(entity, movement, entityBoundingBox, world, inflation);
 	}
 
 	/**

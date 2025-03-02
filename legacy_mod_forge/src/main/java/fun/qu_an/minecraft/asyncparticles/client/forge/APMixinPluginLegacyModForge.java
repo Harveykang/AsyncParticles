@@ -27,7 +27,7 @@ public class APMixinPluginLegacyModForge implements IMixinConfigPlugin {
 		}
 		return switch (split[0]) {
 			case "create" -> ModListHelper.FORGE_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION < 6;
-			default -> throw new IllegalArgumentException("Unknown forge mixin: " + mixinClassName);
+			default -> throw new IllegalArgumentException("Unknown legacy mod forge mixin: " + mixinClassName);
 		};
 	}
 

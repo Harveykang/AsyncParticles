@@ -10,7 +10,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -28,19 +27,21 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 	@Shadow
 	protected BlockPos.MutableBlockPos pos;
 	@Unique
-	protected boolean asyncparticles$invisible;
+	private boolean asyncparticles$invisible;
+	@Unique
+	private AABB asyncparticles$weathersAABB = INITIAL_AABB;
 
 	@Shadow
 	public abstract void remove();
 
 	@Override
 	public AABB asyncparticles$getWeatherAABB() {
-		return getBoundingBox();
+		return asyncparticles$weathersAABB;
 	}
 
 	@Override
 	public void asyncparticles$setWeatherAABB(AABB aabb) {
-		setBoundingBox(aabb);
+		asyncparticles$weathersAABB = aabb;
 	}
 
 	@Override
@@ -86,8 +87,8 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 		double h = e;
 		double i = f;
 		if (this.hasPhysics && (d != (double) 0.0F || e != (double) 0.0F || f != (double) 0.0F) && d * d + e * e + f * f < MAXIMUM_COLLISION_VELOCITY_SQUARED) {
-			Vec3 originalMotion = new Vec3(x, y, z);
-			Vec3 apply = Type.OTHER.apply(level, originalMotion, new Vec3(d, e, f), asyncparticles$getWeatherAABB());
+			Vec3 position = new Vec3(x, y, z);
+			Vec3 apply = Type.OTHER.collide(level, position, new Vec3(d, e, f), asyncparticles$getWeatherAABB());
 			if (apply == null) {
 				asyncparticles$setInvisible(true);
 				remove();
@@ -96,7 +97,7 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 			Vec3 motion = Entity.collideBoundingBox(
 				null,
 				apply,
-				asyncparticles$getWeatherAABB(),
+				getBoundingBox(),
 				this.level,
 				List.of());
 			d = motion.x;

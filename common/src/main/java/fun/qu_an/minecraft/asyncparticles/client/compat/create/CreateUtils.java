@@ -20,10 +20,8 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
-import java.lang.ref.Reference;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
+import java.lang.ref.WeakReference;
+import java.util.*;
 
 /**
  * See {@link ContraptionCollider}
@@ -31,11 +29,8 @@ import java.util.stream.Stream;
 public class CreateUtils {
 	public static final boolean[] trueAndFalse = {true, false};
 
-	public static Stream<AbstractContraptionEntity> contraptions(ClientLevel level) {
-		return ContraptionHandler.loadedContraptions.get(level)
-			.values()
-			.stream()
-			.map(Reference::get);
+	public static Collection<WeakReference<AbstractContraptionEntity>> contraptions(ClientLevel level) {
+		return loadedContraptions(level).values();
 	}
 
 	/**
@@ -114,18 +109,23 @@ public class CreateUtils {
 	@Nullable
 	public static Vec3 collideMotionWithContraptions(ClientLevel level, Vec3 position, Vec3 motion, AABB bounds) {
 		AABB bounds1 = bounds.inflate(0.1).move(motion);
-		Vector3d collect = contraptions(level)
-			.filter(c -> c.getBoundingBox().intersects(bounds1))
-			.map(c -> {
-				Vec3 vec3 = collideMotionWithContraption(level, position, motion, bounds1, c);
-				return new Vector3d(vec3.x, vec3.y, vec3.z);
-			})
-			.reduce(new Vector3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE), Vector3d::min);
-		if (collect.x == Double.MAX_VALUE
-			|| (motion.x == collect.x && motion.y == collect.y && motion.z == collect.z)) {
+		Vector3d result = new Vector3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+		for (WeakReference<AbstractContraptionEntity> r : contraptions(level)) {
+			AbstractContraptionEntity contraptionEntity = r.get();
+			if (contraptionEntity == null || !contraptionEntity.isAliveOrStale()) {
+				continue;
+			}
+			if (!contraptionEntity.getBoundingBox().intersects(bounds1)) {
+				continue;
+			}
+			Vec3 vec3 = collideMotionWithContraption(level, position, motion, bounds1, contraptionEntity);
+			result.set(Math.min(result.x, vec3.x), Math.min(result.y, vec3.y), Math.min(result.z, vec3.z));
+		}
+		if (result.x == Double.MAX_VALUE
+			|| (motion.x == result.x && motion.y == result.y && motion.z == result.z)) {
 			return null;
 		}
-		return new Vec3(collect.x, collect.y, collect.z);
+		return new Vec3(result.x, result.y, result.z);
 	}
 
 	private static Vec3 getWorldToLocalTranslation(Vec3 entityPosition,
@@ -357,5 +357,11 @@ public class CreateUtils {
 		return ModListHelper.CREATE_MAJOR_VERSION < 6
 			? Create5Utils.getCenterOf(blockPos)
 			: Create6Utils.getCenterOf(blockPos);
+	}
+
+	public static Map<Integer, WeakReference<AbstractContraptionEntity>> loadedContraptions(ClientLevel level) {
+		return ModListHelper.CREATE_MAJOR_VERSION < 6
+			? Create5Utils.loadedContraptions(level)
+			: Create6Utils.loadedContraptions(level);
 	}
 }

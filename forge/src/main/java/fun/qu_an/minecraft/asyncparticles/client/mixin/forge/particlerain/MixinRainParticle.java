@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.particlerain;
 
 import com.leclowndu93150.particlerain.particle.RainParticle;
-import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -9,7 +8,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
@@ -24,6 +25,11 @@ public abstract class MixinRainParticle extends MixinWeatherParticle {
 		return instance;
 	}
 
+	@Inject(method = "<init>", at = @At("RETURN"))
+	private void onInit(CallbackInfo ci) {
+		setSize(3.8F, 3.8F);
+	}
+
 	@Override
 	public void move(double d, double e, double f) {
 		if (this.stoppedByCollision) {
@@ -33,7 +39,8 @@ public abstract class MixinRainParticle extends MixinWeatherParticle {
 		double h = e;
 		double i = f;
 		if (this.hasPhysics && (d != (double) 0.0F || e != (double) 0.0F || f != (double) 0.0F) && d * d + e * e + f * f < MAXIMUM_COLLISION_VELOCITY_SQUARED) {
-			Vec3 apply = WeatherParticleAddon.Type.RAIN.apply(level, new Vec3(x, y, z), new Vec3(d, e, f), asyncparticles$getWeatherAABB());
+			Vec3 originalMotion = new Vec3(d, e, f);
+			Vec3 apply = WeatherParticleAddon.Type.RAIN.collide(level, new Vec3(x, y, z), originalMotion, asyncparticles$getWeatherAABB());
 			if (apply == null) {
 				asyncparticles$setInvisible(true);
 				remove();
@@ -45,10 +52,18 @@ public abstract class MixinRainParticle extends MixinWeatherParticle {
 				asyncparticles$getWeatherAABB(), // It looks good that way
 				this.level,
 				List.of());
-			double d1 = motion.y / h;
-			d = Math.min(g * d1, motion.x);
-			e = motion.y;
-			f = Math.min(i * d1, motion.z);
+			if (!apply.equals(originalMotion) && motion.equals(apply)) {
+				d = apply.x;
+				e = apply.y;
+				f = apply.z;
+			} else {
+				double d1 = Math.abs(motion.y / h);
+				double d2 = g * d1;
+				d = Math.abs(d2) > Math.abs(motion.x) ? motion.x : d2;
+				e = motion.y;
+				double d3 = i * d1;
+				f = Math.abs(d3) > Math.abs(motion.z) ? motion.z : d3;
+			}
 		}
 
 		if (d != (double) 0.0F || e != (double) 0.0F || f != (double) 0.0F) {

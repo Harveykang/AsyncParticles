@@ -43,12 +43,11 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		}
 		return switch (split[0]) {
 			case "fabric" -> {
-				if (split.length <= 2) {
+				if (split.length == 2) {
 					yield !ModListHelper.IS_FORGE;
 				}
 				yield switch (split[1]) {
 					case "particlerain_vs" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_VS_LOADED;
-					case "particlerain_create" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_CREATE_LOADED;
 					case "particlerain" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED;
 					case "create_5" -> ModListHelper.FABRIC_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION < 6;
 					case "create_6" -> ModListHelper.FABRIC_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION == 6;
@@ -58,6 +57,15 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
+			case "legacy" -> {
+				if (split.length == 2) {
+					yield true;
+				}
+				yield switch (split[1]) {
+					case "flywheel" -> ModListHelper.FLYWHEEL_LOADED && ModListHelper.FLYWHEEL_MAJOR_VERSION < 1;
+					default -> throw new IllegalArgumentException("Unknown legacy mod mixin: " + mixinClassName);
+				};
+			}
 			case "fake_renders" -> true;
 			case "vs2" -> ModListHelper.VS_LOADED;
 			case "create" -> ModListHelper.CREATE_LOADED;
@@ -65,7 +73,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			case "sodium_like" -> ModListHelper.SODIUM_LIKE_LOADED;
 			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
 			case "hexcasting" -> ModListHelper.HEXCASTING_LOADED;
-			case "flywheel" -> ModListHelper.FLYWHEEL_LOADED;
+			case "flywheel" -> ModListHelper.FLYWHEEL_LOADED && ModListHelper.FLYWHEEL_MAJOR_VERSION == 1;
 			case "particle_core" -> ModListHelper.PARTICLE_CORE_LOADED;
 			case "physicsmod" -> ModListHelper.PHYSICSMOD_LOADED;
 //			case "enhancedblockentities" -> ModListHelper.ENHANCEDBLOCKENTITIES_LOADED;
