@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.forge;
 
 import com.leclowndu93150.particlerain.ParticleRegistry;
-import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.RippleParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
@@ -19,8 +18,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
-
-import java.lang.ref.WeakReference;
 
 import static com.leclowndu93150.particlerain.ParticleRainClient.config;
 
@@ -69,19 +66,13 @@ public class ParticleRainUtilsImpl {
 		AABB aabb1 = new AABB(center.x, aabb.minY - 1, center.z, center.x, aabb.minY, center.z);
 		Vec3 spawnPos = new Vec3(center.x, aabb.minY, center.z);
 		Vec3 motion1 = originalMotion.scale(2);
-		for (WeakReference<AbstractContraptionEntity> r : CreateUtils.contraptions(level)) {
-			AbstractContraptionEntity contraptionEntity = r.get();
-			if (contraptionEntity == null || !contraptionEntity.isAliveOrStale()) {
-				continue;
-			}
-			if (!contraptionEntity.getBoundingBox().intersects(aabb1)) {
-				continue;
-			}
+		CreateUtils.forEachCollidingContraption(level, aabb1, contraptionEntity -> {
 			if (CreateUtils.collideWithContraption(level, spawnPos, motion1, aabb1, contraptionEntity)) {
 				Minecraft.getInstance().particleEngine
 					.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
-				return;
+				return false;
 			}
-		}
+			return true;
+		});
 	}
 }

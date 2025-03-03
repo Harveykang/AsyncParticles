@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.iris;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.iris_like;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.util.AssertionUtil;

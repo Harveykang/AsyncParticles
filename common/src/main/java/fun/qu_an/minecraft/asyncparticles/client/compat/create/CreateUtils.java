@@ -22,6 +22,7 @@ import org.joml.Vector3d;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * See {@link ContraptionCollider}
@@ -36,9 +37,7 @@ public class CreateUtils {
 	/**
 	 * 完全没搞懂，先能用，后面再优化吧
 	 */
-	public static boolean collideWithContraption(ClientLevel level, Vec3 originalPosition, Vec3 originalMotion, AABB bounds, AbstractContraptionEntity contraptionEntity) {
-		Vec3 motion = originalMotion;
-
+	public static boolean collideWithContraption(ClientLevel level, Vec3 originalPosition, Vec3 motion, AABB bounds, AbstractContraptionEntity contraptionEntity) {
 		Contraption contraption = contraptionEntity.getContraption();
 		Vec3 contraptionPosition = contraptionEntity.position();
 		Vec3 contraptionMotion = contraptionPosition.subtract(contraptionEntity.getPrevPositionVec());
@@ -110,22 +109,35 @@ public class CreateUtils {
 	public static Vec3 collideMotionWithContraptions(ClientLevel level, Vec3 position, Vec3 motion, AABB bounds) {
 		AABB bounds1 = bounds.inflate(0.1).move(motion);
 		Vector3d result = new Vector3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-		for (WeakReference<AbstractContraptionEntity> r : contraptions(level)) {
-			AbstractContraptionEntity contraptionEntity = r.get();
-			if (contraptionEntity == null || !contraptionEntity.isAliveOrStale()) {
-				continue;
-			}
-			if (!contraptionEntity.getBoundingBox().intersects(bounds1)) {
-				continue;
-			}
+		forEachCollidingContraption(level, bounds1, contraptionEntity -> {
 			Vec3 vec3 = collideMotionWithContraption(level, position, motion, bounds1, contraptionEntity);
 			result.set(Math.min(result.x, vec3.x), Math.min(result.y, vec3.y), Math.min(result.z, vec3.z));
-		}
+			return true;
+		});
 		if (result.x == Double.MAX_VALUE
 			|| (motion.x == result.x && motion.y == result.y && motion.z == result.z)) {
 			return null;
 		}
 		return new Vec3(result.x, result.y, result.z);
+	}
+
+	public static void forEachCollidingContraption(ClientLevel level, AABB bounds1, Predicate<AbstractContraptionEntity> consumer) {
+		try {
+			for (WeakReference<AbstractContraptionEntity> r : contraptions(level)) {
+				AbstractContraptionEntity contraptionEntity = r.get();
+				if (contraptionEntity == null || !contraptionEntity.isAliveOrStale()) {
+					continue;
+				}
+				if (!contraptionEntity.getBoundingBox().intersects(bounds1)) {
+					continue;
+				}
+				if (!consumer.test(contraptionEntity)) {
+					return;
+				}
+			}
+		} catch (ConcurrentModificationException ignored) {
+			// Ignore as they are not critical
+		}
 	}
 
 	private static Vec3 getWorldToLocalTranslation(Vec3 entityPosition,
@@ -363,5 +375,20 @@ public class CreateUtils {
 		return ModListHelper.CREATE_MAJOR_VERSION < 6
 			? Create5Utils.loadedContraptions(level)
 			: Create6Utils.loadedContraptions(level);
+	}
+
+	public static boolean isUnderContraption(ClientLevel instance, double x, double y, double z) {
+		boolean[] b = {false};
+		Vec3 pos = new Vec3(x, y, z);
+		AABB bounds = new AABB(x, y, z, x, y + 128, z);
+		forEachCollidingContraption(instance, bounds, contraptionEntity -> {
+			boolean b1 = collideWithContraption(instance, pos, Vec3.ZERO, bounds, contraptionEntity);
+			if (!b1) {
+				return true;
+			}
+			b[0] = true;
+			return false;
+		});
+		return b[0];
 	}
 }

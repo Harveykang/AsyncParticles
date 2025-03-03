@@ -15,7 +15,7 @@ public class ModListHelper {
 	public static final boolean SODIUM_LIKE_LOADED = isModLoaded("sodium") || isModLoaded("embeddium");
 	public static final boolean SODIUM_LOADED = isModLoaded("sodium");
 	/* IRIS */
-	public static final boolean IRIS_LOADED = isModLoaded("iris") || isModLoaded("oculus");
+	public static final boolean IRIS_LIKE_LOADED = isModLoaded("iris") || isModLoaded("oculus");
 	/* Dummmmmmy */
 	public static final boolean DUMMMMMMY_LOADED = isModLoaded("dummmmmmy");
 	/* Effectual */

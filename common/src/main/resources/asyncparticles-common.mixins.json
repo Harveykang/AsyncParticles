@@ -38,15 +38,17 @@
     "fabric.particlerain.MixinWeatherParticle",
     "fabric.particlerain.MixinWeatherParticles",
     "fabric.particlerain.MixinWeatherParticleSpawner",
+    "fabric.particlerain_create.MixinWeatherParticleSpawner",
     "fabric.particlerain_vs.MixinRippleParticle",
     "fabric.particlerain_vs.MixinWeatherParticleSpawner",
     "fabric.particular.MixinMain",
     "fake_renders.MixinBufferBuilder",
     "fake_renders.MixinTesselator",
     "hexcasting.MixinConjureParticle",
-    "iris.MixinFullyBufferedMultiBufferSource",
-    "iris.MixinIris",
-    "iris.MixinOldFullyBufferedMultiBufferSource",
+    "iris_like.MixinFullyBufferedMultiBufferSource",
+    "iris_like.MixinIris",
+    "iris_like.MixinOldFullyBufferedMultiBufferSource",
+    "legacy.flywheel.MixinClientLevelMixin",
     "lodestone.MixinLodestoneWorldParticle",
     "physicsmod.MixinWeatherParticle",
     "sodium_like.MixinThreadLocalBufferBuilder",
@@ -54,8 +56,7 @@
     "vs2.InvokerRaycastUtils",
     "vs2.MixinParticle",
     "vs2.MixinVSAnimation",
-    "vs2.MixinVSSoundEngine",
-    "legacy.flywheel.MixinClientLevelMixin"
+    "vs2.MixinVSSoundEngine"
   ],
   "injectors": {
     "defaultRequire": 1

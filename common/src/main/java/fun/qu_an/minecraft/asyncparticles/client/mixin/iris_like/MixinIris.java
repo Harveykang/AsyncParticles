@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.iris;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.iris_like;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import net.irisshaders.iris.Iris;

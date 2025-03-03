@@ -142,7 +142,7 @@ public class AsyncRenderer {
 		isStart = true;
 		MultiBufferSource.BufferSource bufferSource = mc.levelRenderer.renderBuffers.bufferSource();
 		ParticleEngine particleEngine = mc.particleEngine;
-		if (ModListHelper.IRIS_LOADED) {
+		if (ModListHelper.IRIS_LIKE_LOADED) {
 			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
@@ -154,7 +154,8 @@ public class AsyncRenderer {
 			futures[i] = CompletableFuture.runAsync(runnable, EXECUTOR)
 				.exceptionally(e -> {
 					LOGGER.error("Error rendering particle", e);
-					if (mc.level != null && mc.player != null){
+					Minecraft mc1 = Minecraft.getInstance();
+					if (mc1.level != null && mc1.player != null){
 						throw new RuntimeException(e);
 					}
 					return null;
@@ -166,7 +167,7 @@ public class AsyncRenderer {
 	}
 
 	public static void irisOpaque(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
-		if (!ModListHelper.IRIS_LOADED || !Iris.isPackInUseQuick() || getRenderingSettings() != ParticleRenderingSettings.MIXED) {
+		if (!ModListHelper.IRIS_LIKE_LOADED || !Iris.isPackInUseQuick() || getRenderingSettings() != ParticleRenderingSettings.MIXED) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -188,7 +189,7 @@ public class AsyncRenderer {
 	}
 
 	public static void irisTranslucent(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
-		if (!ModListHelper.IRIS_LOADED || !Iris.isPackInUseQuick() || getRenderingSettings() != ParticleRenderingSettings.MIXED) {
+		if (!ModListHelper.IRIS_LIKE_LOADED || !Iris.isPackInUseQuick() || getRenderingSettings() != ParticleRenderingSettings.MIXED) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -207,7 +208,7 @@ public class AsyncRenderer {
 
 	// TODO: 是否需要在transparencyChain.process(partialTick)前调用？
 	public static void join(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
-		if (ModListHelper.IRIS_LOADED && Iris.isPackInUseQuick() && getRenderingSettings() == ParticleRenderingSettings.MIXED) {
+		if (ModListHelper.IRIS_LIKE_LOADED && Iris.isPackInUseQuick() && getRenderingSettings() == ParticleRenderingSettings.MIXED) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -224,7 +225,7 @@ public class AsyncRenderer {
 
 		MultiBufferSource.BufferSource bufferSource = mc.levelRenderer.renderBuffers.bufferSource();
 		ParticleEngine particleEngine = mc.particleEngine;
-		if (ModListHelper.IRIS_LOADED) {
+		if (ModListHelper.IRIS_LIKE_LOADED) {
 			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
@@ -332,7 +333,7 @@ public class AsyncRenderer {
 				.formatted(ASYNC_QUEUE.size(),
 					SYNC_PARTICLES.values().stream().mapToInt(List::size).sum(),
 					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList(),
-					ModListHelper.IRIS_LOADED && Iris.isPackInUseQuick() ? getRenderingSettings().name() : "disabled"));
+					ModListHelper.IRIS_LIKE_LOADED && Iris.isPackInUseQuick() ? getRenderingSettings().name() : "disabled"));
 			debugConsumer = null;
 		}
 	}

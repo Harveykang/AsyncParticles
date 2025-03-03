@@ -11,9 +11,9 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import java.util.List;
 
 @Mixin(ContraptionCollider.class)
-public class InvokerContraptionCollider {
+public interface InvokerContraptionCollider {
 	@Invoker("getPotentiallyCollidedShapes")
-	public static List<VoxelShape> invoker_getPotentiallyCollidedShapes(Level world, Contraption contraption, AABB localBB) {
+	static List<VoxelShape> invoker_getPotentiallyCollidedShapes(Level world, Contraption contraption, AABB localBB) {
 		throw new AssertionError();
 	}
 }

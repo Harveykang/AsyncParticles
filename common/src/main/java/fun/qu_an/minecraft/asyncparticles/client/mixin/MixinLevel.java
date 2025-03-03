@@ -1,7 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import org.spongepowered.asm.mixin.Final;

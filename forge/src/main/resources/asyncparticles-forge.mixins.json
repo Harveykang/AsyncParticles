@@ -19,6 +19,7 @@
     "particlerain.MixinWeatherParticle",
     "particlerain.MixinWeatherParticles",
     "particlerain.MixinWeatherParticleSpawner",
+    "particlerain_create.MixinWeatherParticleSpawner",
     "particlerain_vs.MixinRippleParticle",
     "particlerain_vs.MixinWeatherParticleSpawner"
   ],
