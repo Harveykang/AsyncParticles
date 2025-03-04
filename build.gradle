@@ -1,5 +1,5 @@
 plugins {
-    id 'dev.architectury.loom' version '1.9-SNAPSHOT' apply false
+    id 'dev.architectury.loom' version '1.7-SNAPSHOT' apply false
     id 'architectury-plugin' version '3.4-SNAPSHOT'
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
     id "io.github.pacifistmc.forgix" version "1.2.9"
@@ -56,7 +56,7 @@ subprojects {
         maven { url = "https://mvn.devos.one/releases" } // Porting Lib releases
         maven { url = "https://mvn.devos.one/snapshots" } // Create and several dependencies
         maven { url = "https://maven.createmod.net" } // Create, Ponder, Flywheel
-        maven { url = "https://maven.tterrag.com" } // Registrate
+        maven { url = "https://mvn.devos.one/snapshots" } // Registrate
         maven { url = "https://maven.jamieswhiteshirt.com/libs-release" } // Reach Entity Attributes
         maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven" } // Forge Config API Port
         maven {
@@ -78,7 +78,7 @@ subprojects {
         minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
         mappings(loom.layered {
             it.officialMojangMappings { nameSyntheticMembers = false }
-            it.parchment("org.parchmentmc.data:parchment-$minecraft_version:2023.09.03@zip")
+            it.parchment("org.parchmentmc.data:parchment-$minecraft_version:2024.11.17@zip")
         })
     }
 
@@ -88,12 +88,12 @@ subprojects {
         // If you remove this line, sources will not be generated.
         withSourcesJar()
 
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     tasks.withType(JavaCompile).configureEach {
-        it.options.release = 17
+        it.options.release = 21
     }
 
     // Configure Maven publishing.

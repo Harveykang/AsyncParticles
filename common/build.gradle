@@ -4,10 +4,6 @@ architectury {
 
 loom {
     accessWidenerPath = file('src/main/resources/asyncparticles-common.accesswidener')
-
-    mixin {
-        defaultRefmapName = "asyncparticles-common-refmap.json"
-    }
 }
 
 dependencies {
@@ -15,28 +11,21 @@ dependencies {
     // which get remapped to the correct annotations on each platform.
     // Do NOT use other classes from Fabric Loader.
 
-    // We currently use Connector of forge
     implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.2.0"))
 
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
     compileOnly "org.sinytra:Connector:1.0.0-beta.46+1.20.1"
 
     /* Performance */
-    modCompileOnly "maven.modrinth:sodium:mc1.20.1-0.5.11"
-    modCompileOnly 'maven.modrinth:iris:1.7.5+1.20.1'
-
-    /* Valkyrien Skies */
-    modCompileOnly "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
-    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.5"
-    modCompileOnly 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
+    modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.6.9-neoforge"
+    modCompileOnly 'maven.modrinth:iris:1.8.8+1.21.1-neoforge'
 
     /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:particle-rain:3.0.6-1.20"
+    modCompileOnly "maven.modrinth:particle-rain:3.0.5"
 //    modCompileOnly "maven.modrinth:pretty-rain:TGjK6ChS"
 
     /* Effectual */
-    modCompileOnly 'maven.modrinth:effectual:0.5.0-1.20.1'
+    modCompileOnly 'maven.modrinth:effectual:0.5.2-1.21.1'
 
     /* Mmmmmmmmmmmm */
 //    modCompileOnly 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
@@ -44,31 +33,31 @@ dependencies {
     /* Create */
     // 6.0.0
 //    modCompileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}") { transitive = false }
-    modCompileOnly("net.createmod.ponder:Ponder-Fabric-${minecraft_version}:${ponder_version}")
+//    modCompileOnly("net.createmod.ponder:Ponder-Fabric-${minecraft_version}:${ponder_version}")
 //    modCompileOnly("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}")
 //    modCompileOnly("com.tterrag.registrate:Registrate:${registrate_version}")
     // 0.5.0
-    modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
+//    modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
 
     /* Lodestone */
-    modCompileOnly "maven.modrinth:lodestonelib:1.20.1-1.6.2.3f"
+    modCompileOnly "maven.modrinth:lodestonelib:1.21.1-1.7.0.5-fabric"
 
     /* Effective */
-    modCompileOnly "maven.modrinth:effective:2.3.2-1.20.1"
+    modCompileOnly "maven.modrinth:effective:2.4.8-1.21.1"
 //    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
 
     /* Hex Casting */
-    modCompileOnly "at.petra-k.hexcasting:hexcasting-fabric-1.20.1:0.11.2-pre-715"
+//    modCompileOnly "at.petra-k.hexcasting:hexcasting-fabric-1.20.1:0.11.2-pre-715"
 
     /* Tombstone */
 //    modCompileOnly fileTree(dir: '../libs', include: 'tombstone-1.20.1-8.9.0.jar')
 
     /* Particular */
-    modCompileOnly "maven.modrinth:particular:1.1.1"
+    modCompileOnly "maven.modrinth:particular:1.1.1+1.21"
 
     /* Particle Core */
-//    modCompileOnly "maven.modrinth:particle-core:0.2.5+1.20.1"
+    modCompileOnly "maven.modrinth:particle-core:0.2.5+1.21"
 
     /* Physics Mod */
-    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171b-fabric-1.20.1.jar')
+//    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171b-fabric-1.20.1.jar')
 }

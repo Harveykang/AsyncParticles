@@ -1,0 +1,45 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+#issueTrackerURL = ""
+license = "Insert License Here"
+
+[[mods]]
+modId = "asyncparticles"
+version = "${version}"
+displayName = "AsyncParticles"
+authors = "Me!"
+description = '''
+This is an example description! Tell everyone what your mod is about!
+'''
+#logoFile = ""
+
+[[dependencies.asyncparticles]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.asyncparticles]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.asyncparticles]]
+modId = "mixinsquared"
+mandatory = true
+versionRange = "[0.4.1,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.asyncparticles]]
+modId = "mixinextras"
+mandatory = true
+versionRange = "[0.2.0,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[mixins]]
+config = "asyncparticles-neoforge.mixins.json"
