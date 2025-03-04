@@ -37,7 +37,28 @@ public class CreateUtils {
 	/**
 	 * 完全没搞懂，先能用，后面再优化吧
 	 */
-	public static boolean collideWithContraption(ClientLevel level, Vec3 originalPosition, Vec3 motion, AABB bounds, AbstractContraptionEntity contraptionEntity) {
+	public static boolean collideWithContraption(ClientLevel level,
+												 Vec3 originalPosition,
+												 Vec3 originalMotion,
+												 AABB bounds,
+												 AbstractContraptionEntity contraptionEntity) {
+		return collideWithContraption(level, originalPosition, originalMotion, bounds, contraptionEntity, false);
+	}
+
+	/**
+	 * 完全没搞懂，先能用，后面再优化吧
+	 */
+	public static boolean collideWithContraption(ClientLevel level,
+												 Vec3 originalPosition,
+												 Vec3 originalMotion,
+												 AABB bounds,
+												 AbstractContraptionEntity contraptionEntity,
+												 boolean estimate) {
+		if (!bounds.intersects(contraptionEntity.getBoundingBox())) {
+			return false;
+		}
+
+		Vec3 motion = originalMotion;
 		Contraption contraption = contraptionEntity.getContraption();
 		Vec3 contraptionPosition = contraptionEntity.position();
 		Vec3 contraptionMotion = contraptionPosition.subtract(contraptionEntity.getPrevPositionVec());
@@ -60,17 +81,20 @@ public class CreateUtils {
 		obb.setRotation(rotationMatrix);
 
 		// Use simplified bbs when present
-		final Vec3 motionCopy = motion;
-		List<AABB> collidableBBs = contraption.getSimplifiedEntityColliders()
-			.orElseGet(() -> {
-				// Else find 'nearby' individual block shapes to collide with
-				List<AABB> bbs = new ArrayList<>();
-				List<VoxelShape> potentialHits =
-					InvokerContraptionCollider.invoker_getPotentiallyCollidedShapes(
-						level, contraption, localBB.expandTowards(motionCopy));
-				potentialHits.forEach(shape -> bbs.addAll(shape.toAabbs()));
-				return bbs;
-			});
+		Optional<List<AABB>> optionalAABBList = contraption.getSimplifiedEntityColliders();
+		List<AABB> collidableBBs;
+		if (optionalAABBList.isPresent()) {
+			collidableBBs = optionalAABBList.get();
+		} else if (estimate) {
+			return true; // No simplified bbs, use full entity bounds, this is a fallback for better performance
+		} else {
+			collidableBBs = new ArrayList<>();
+			List<VoxelShape> potentialHits =
+				// TODO 这里完全不需要高精度形状，重写一个类似方法
+				InvokerContraptionCollider.invoker_getPotentiallyCollidedShapes(
+					level, contraption, localBB.expandTowards(motion));
+			potentialHits.forEach(shape -> collidableBBs.addAll(shape.toAabbs()));
+		}
 
 		Vec3 obbCenter = obb.getCenter();
 		for (AABB bb : collidableBBs) {
@@ -109,8 +133,11 @@ public class CreateUtils {
 	public static Vec3 collideMotionWithContraptions(ClientLevel level, Vec3 position, Vec3 motion, AABB bounds) {
 		AABB bounds1 = bounds.inflate(0.1).move(motion);
 		Vector3d result = new Vector3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-		forEachCollidingContraption(level, bounds1, contraptionEntity -> {
+		forEachContraption(level, bounds1, contraptionEntity -> {
 			Vec3 vec3 = collideMotionWithContraption(level, position, motion, bounds1, contraptionEntity);
+			if (vec3 == null) {
+				return true;
+			}
 			result.set(Math.min(result.x, vec3.x), Math.min(result.y, vec3.y), Math.min(result.z, vec3.z));
 			return true;
 		});
@@ -121,14 +148,11 @@ public class CreateUtils {
 		return new Vec3(result.x, result.y, result.z);
 	}
 
-	public static void forEachCollidingContraption(ClientLevel level, AABB bounds1, Predicate<AbstractContraptionEntity> consumer) {
+	public static void forEachContraption(ClientLevel level, AABB bounds1, Predicate<AbstractContraptionEntity> consumer) {
 		try {
 			for (WeakReference<AbstractContraptionEntity> r : contraptions(level)) {
 				AbstractContraptionEntity contraptionEntity = r.get();
 				if (contraptionEntity == null || !contraptionEntity.isAliveOrStale()) {
-					continue;
-				}
-				if (!contraptionEntity.getBoundingBox().intersects(bounds1)) {
 					continue;
 				}
 				if (!consumer.test(contraptionEntity)) {
@@ -157,13 +181,30 @@ public class CreateUtils {
 	/**
 	 * 完全没搞懂，先能用，后面再优化吧
 	 */
-	private static Vec3 collideMotionWithContraption(ClientLevel level,
-													 Vec3 originalPosition,
-													 Vec3 originalMotion,
-													 AABB bounds,
-													 AbstractContraptionEntity contraptionEntity) {
-		Vec3 motion = originalMotion;
+	@Nullable
+	public static Vec3 collideMotionWithContraption(ClientLevel level,
+													Vec3 originalPosition,
+													Vec3 originalMotion,
+													AABB bounds,
+													AbstractContraptionEntity contraptionEntity) {
+		return collideMotionWithContraption(level, originalPosition, originalMotion, bounds, contraptionEntity, false);
+	}
 
+	/**
+	 * 完全没搞懂，先能用，后面再优化吧
+	 */
+	@Nullable
+	public static Vec3 collideMotionWithContraption(ClientLevel level,
+													Vec3 originalPosition,
+													Vec3 originalMotion,
+													AABB bounds,
+													AbstractContraptionEntity contraptionEntity,
+													boolean estimate) {
+		if (!bounds.intersects(contraptionEntity.getBoundingBox())) {
+			return null;
+		}
+
+		Vec3 motion = originalMotion;
 		Contraption contraption = contraptionEntity.getContraption();
 		Vec3 contraptionPosition = contraptionEntity.position();
 		Vec3 contraptionMotion = contraptionPosition.subtract(contraptionEntity.getPrevPositionVec());
@@ -186,17 +227,20 @@ public class CreateUtils {
 		obb.setRotation(rotationMatrix);
 
 		// Use simplified bbs when present
-		final Vec3 motionCopy = motion;
-		List<AABB> collidableBBs = contraption.getSimplifiedEntityColliders()
-			.orElseGet(() -> {
-				// Else find 'nearby' individual block shapes to collide with
-				List<AABB> bbs = new ArrayList<>();
-				List<VoxelShape> potentialHits =
-					InvokerContraptionCollider.invoker_getPotentiallyCollidedShapes(
-						level, contraption, localBB.expandTowards(motionCopy));
-				potentialHits.forEach(shape -> bbs.addAll(shape.toAabbs()));
-				return bbs;
-			});
+		Optional<List<AABB>> optionalAABBList = contraption.getSimplifiedEntityColliders();
+		List<AABB> collidableBBs;
+		if (optionalAABBList.isPresent()) {
+			collidableBBs = optionalAABBList.get();
+		} else if (estimate) {
+			return Vec3.ZERO; // No simplified bbs, use full entity bounds, this is a fallback for better performance
+		} else {
+			collidableBBs = new ArrayList<>();
+			List<VoxelShape> potentialHits =
+				// TODO 这里完全不需要高精度形状，重写一个类似方法
+				InvokerContraptionCollider.invoker_getPotentiallyCollidedShapes(
+					level, contraption, localBB.expandTowards(motion));
+			potentialHits.forEach(shape -> collidableBBs.addAll(shape.toAabbs()));
+		}
 
 		MutableObject<Vec3> collisionResponse = new MutableObject<>(Vec3.ZERO);
 		MutableObject<Vec3> normal = new MutableObject<>(Vec3.ZERO);
@@ -377,12 +421,13 @@ public class CreateUtils {
 			: Create6Utils.loadedContraptions(level);
 	}
 
-	public static boolean isUnderContraption(ClientLevel instance, double x, double y, double z) {
+	public static boolean isUnderContraption(ClientLevel level, double x, double y, double z) {
 		boolean[] b = {false};
 		Vec3 pos = new Vec3(x, y, z);
-		AABB bounds = new AABB(x, y, z, x, y + 128, z);
-		forEachCollidingContraption(instance, bounds, contraptionEntity -> {
-			boolean b1 = collideWithContraption(instance, pos, Vec3.ZERO, bounds, contraptionEntity);
+		AABB bounds = new AABB(x - 1, y - 1, z - 1, x + 1, Math.max(y + 16, level.getMaxBuildHeight()), z + 1);
+		forEachContraption(level, bounds, contraptionEntity -> {
+			boolean b1 = collideWithContraption(level, pos, Vec3.ZERO, bounds, contraptionEntity, true);
+			// estimate = true for a better performance
 			if (!b1) {
 				return true;
 			}

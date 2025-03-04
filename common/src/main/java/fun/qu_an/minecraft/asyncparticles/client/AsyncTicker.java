@@ -238,6 +238,7 @@ public class AsyncTicker {
 				}
 				// 每 tick 结束时都要执行的固定事件
 				for (Runnable endTickEvent : END_TICK_EVENTS) {
+					// FIXME 这个应该可以取消，防止卡死主线程
 					endTickEvent.run();
 				}
 			}).exceptionally(AsyncTicker::tickBeforeExceptionally)

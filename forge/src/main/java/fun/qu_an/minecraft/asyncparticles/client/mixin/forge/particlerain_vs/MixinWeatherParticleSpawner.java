@@ -9,7 +9,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.ParticleOptions;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(value = WeatherParticleSpawner.class)
 public class MixinWeatherParticleSpawner {
@@ -23,7 +22,7 @@ public class MixinWeatherParticleSpawner {
 			return;
 		}
 		if ((particleOptions != ParticleRegistry.RAIN.get() && particleOptions != ParticleRegistry.SNOW.get())
-			|| !VSClientUtils.isUnderHeightMap(instance, x, y, z)) {
+			|| !VSClientUtils.isUnderHeightMapIncludeShips(instance, x, y, z)) {
 			original.call(instance, particleOptions, x, y, z, xSpeed, ySpeed, zSpeed);
 		}
 	}

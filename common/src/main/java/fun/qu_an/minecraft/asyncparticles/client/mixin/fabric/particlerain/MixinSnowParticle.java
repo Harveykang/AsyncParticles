@@ -49,7 +49,7 @@ public abstract class MixinSnowParticle extends MixinWeatherParticle {
 			Vec3 motion = Entity.collideBoundingBox(
 				null,
 				apply,
-				asyncparticles$getWeatherAABB(), // It looks good that way
+				getBoundingBox().inflate(0, 1.3, 0), // It looks good that way
 				this.level,
 				List.of());
 			if (!apply.equals(originalMotion) && motion.equals(apply)) {
