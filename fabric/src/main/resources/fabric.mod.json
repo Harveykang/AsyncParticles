@@ -21,7 +21,8 @@
   "depends": {
     "fabricloader": ">=0.16.0",
     "minecraft": ">=1.20",
-    "mixinextras": ">=0.4.1"
+    "mixinextras": ">=0.4.1",
+    "mixinsquared": "*"
   },
   "suggests": {
     "fabric": "*"

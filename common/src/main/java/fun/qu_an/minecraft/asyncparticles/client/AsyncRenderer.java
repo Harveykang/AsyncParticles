@@ -11,6 +11,7 @@ import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
 import it.unimi.dsi.fastutil.Pair;
 import net.irisshaders.iris.Iris;
+import net.irisshaders.iris.api.v0.IrisApi;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
 import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
@@ -28,7 +29,9 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -167,7 +170,7 @@ public class AsyncRenderer {
 	}
 
 	public static void irisOpaque(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
-		if (!ModListHelper.IRIS_LIKE_LOADED || !Iris.isPackInUseQuick() || getRenderingSettings() != ParticleRenderingSettings.MIXED) {
+		if (!ModListHelper.IRIS_LIKE_LOADED || !IrisApi.getInstance().isShaderPackInUse() || getRenderingSettings() != ParticleRenderingSettings.MIXED) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -189,7 +192,7 @@ public class AsyncRenderer {
 	}
 
 	public static void irisTranslucent(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
-		if (!ModListHelper.IRIS_LIKE_LOADED || !Iris.isPackInUseQuick() || getRenderingSettings() != ParticleRenderingSettings.MIXED) {
+		if (!ModListHelper.IRIS_LIKE_LOADED || !IrisApi.getInstance().isShaderPackInUse() || getRenderingSettings() != ParticleRenderingSettings.MIXED) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -208,7 +211,7 @@ public class AsyncRenderer {
 
 	// TODO: 是否需要在transparencyChain.process(partialTick)前调用？
 	public static void join(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
-		if (ModListHelper.IRIS_LIKE_LOADED && Iris.isPackInUseQuick() && getRenderingSettings() == ParticleRenderingSettings.MIXED) {
+		if (ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse() && getRenderingSettings() == ParticleRenderingSettings.MIXED) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -333,7 +336,7 @@ public class AsyncRenderer {
 				.formatted(ASYNC_QUEUE.size(),
 					SYNC_PARTICLES.values().stream().mapToInt(List::size).sum(),
 					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList(),
-					ModListHelper.IRIS_LIKE_LOADED && Iris.isPackInUseQuick() ? getRenderingSettings().name() : "disabled"));
+					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse() ? getRenderingSettings().name() : "disabled"));
 			debugConsumer = null;
 		}
 	}

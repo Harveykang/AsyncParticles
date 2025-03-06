@@ -79,7 +79,9 @@ public abstract class MixinParticleEngine_Render {
 			}
 			BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
 			if (!AsyncRenderer.isStart) {
-				List<? extends Particle> particles1 = AsyncRenderer.getSync(particleRenderType);
+				Collection<? extends Particle> particles1 = bufferBuilder == FakeBeginBufferBuilder.INSTANCE
+					? iterable
+					: AsyncRenderer.getSync(particleRenderType);
 				if (!particles1.isEmpty()) {
 					for (Particle particle : particles1) {
 //						if (!frustum.isVisible(particle.getBoundingBox())) {
@@ -107,6 +109,9 @@ public abstract class MixinParticleEngine_Render {
 					bufferBuilder.end().release(); // release buffer manually if not released by particleRenderType.end()
 				}
 			} else {
+				if (bufferBuilder == FakeBeginBufferBuilder.INSTANCE) {
+					continue;
+				}
 				Runnable runnable = () -> iterable.forEach(particle -> {
 					if (((ParticleAddon) particle).shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
 						return;

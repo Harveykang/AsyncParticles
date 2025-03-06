@@ -29,10 +29,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Queue;
+import java.util.*;
 
 // TODO: 分为两个 Mixin
 @Mixin(value = ParticleEngine.class, priority = 500)
@@ -82,7 +79,9 @@ public abstract class MixinParticleEngine_Render {
 			}
 			BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
 			if (!AsyncRenderer.isStart) {
-				List<? extends Particle> particles1 = AsyncRenderer.getSync(particleRenderType);
+				Collection<? extends Particle> particles1 = bufferBuilder == FakeBeginBufferBuilder.INSTANCE
+					? iterable
+					: AsyncRenderer.getSync(particleRenderType);
 				if (!particles1.isEmpty()) {
 					for (Particle particle : particles1) {
 //						if (!frustum.isVisible(particle.getBoundingBox())) {
@@ -110,6 +109,9 @@ public abstract class MixinParticleEngine_Render {
 					bufferBuilder.end().release(); // release buffer manually if not released by particleRenderType.end()
 				}
 			} else {
+				if (bufferBuilder == FakeBeginBufferBuilder.INSTANCE) {
+					continue;
+				}
 				Runnable runnable = () -> iterable.forEach(particle -> {
 					if (particle.shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
 						return;

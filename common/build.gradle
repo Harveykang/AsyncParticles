@@ -15,16 +15,15 @@ dependencies {
     // which get remapped to the correct annotations on each platform.
     // Do NOT use other classes from Fabric Loader.
 
-    // We currently use Connector of forge
     implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.2.0"))
 
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
+//    modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
     compileOnly "org.sinytra:Connector:1.0.0-beta.46+1.20.1"
 
     /* Performance */
     modCompileOnly "maven.modrinth:sodium:mc1.20.1-0.5.11"
-    modCompileOnly 'maven.modrinth:iris:1.7.5+1.20.1'
+    modCompileOnly 'maven.modrinth:iris:1.7.6+1.20.1'
 
     /* Valkyrien Skies */
     modCompileOnly "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
@@ -36,7 +35,7 @@ dependencies {
 //    modCompileOnly "maven.modrinth:pretty-rain:TGjK6ChS"
 
     /* Effectual */
-    modCompileOnly 'maven.modrinth:effectual:0.5.0-1.20.1'
+    modCompileOnly 'maven.modrinth:effectual:0.5.2-1.20.1'
 
     /* Mmmmmmmmmmmm */
 //    modCompileOnly 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
