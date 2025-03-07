@@ -6,6 +6,7 @@ import fun.qu_an.minecraft.asyncparticles.client.util.AssertionUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = Tesselator.class, priority = 100) // make sure before other mod's mixins
@@ -15,8 +16,13 @@ public class MixinTesselator {
 		AssertionUtil.assertNotParticleRendererThread();
 	}
 
-	@Inject(method = "getBuilder", at = @At("HEAD"))
+	@Inject(method = "begin", at = @At("HEAD"))
 	private void getBuilder(CallbackInfoReturnable<BufferBuilder> cir) {
+		AssertionUtil.assertNotParticleRendererThread();
+	}
+
+	@Inject(method = "clear", at = @At("HEAD"))
+	private void clear(CallbackInfo ci) {
 		AssertionUtil.assertNotParticleRendererThread();
 	}
 }

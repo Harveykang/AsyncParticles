@@ -12,15 +12,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 // FIXME: 可能导致兼容性地狱
 @Mixin(MultiBufferSource.BufferSource.class)
-public abstract class MixinMultiBufferSource$BufferSource
-//	implements RenderCall
-{
+public abstract class MixinMultiBufferSource$BufferSource {
 	@Inject(method = "getBuffer", at = @At("HEAD"))
 	private void getBuffer(RenderType renderType, CallbackInfoReturnable<VertexConsumer> cir) {
 		AssertionUtil.assertNotParticleRendererThread();
 	}
 
-	@Inject(method = "endBatch()V", at = @At("HEAD"))
+	@Inject(method = "endBatch(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/BufferBuilder;)V",
+		at = @At("HEAD"))
 	private void endBatch(CallbackInfo ci) {
 		AssertionUtil.assertNotParticleRendererThread();
 	}

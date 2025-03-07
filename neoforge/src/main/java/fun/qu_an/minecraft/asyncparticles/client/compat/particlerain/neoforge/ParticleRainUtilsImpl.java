@@ -1,21 +1,21 @@
-package fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.fabric;
+package fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.neoforge;
 
+import com.leclowndu93150.particlerain.ParticleRainConfig;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CreateUtilsImpl;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
 public class ParticleRainUtilsImpl {
-//	@Unique
 //	public static void onShipCollision(ClientLevel level, Vec3 location, Vec3 movement, AABB aabb) {
 //		if (!config.doRippleParticles && !config.doSplashParticles) {
 //			return;
 //		}
 //		Minecraft mc = Minecraft.getInstance();
-//		if (mc.player == null) {
-//			return;
-//		}
 //		ShipHitResult hit = VSClientUtils.clipShip(level, new ClipContext(location,
 //				location.add(movement).add(movement.normalize().scale(aabb.getSize())),
 //				ClipContext.Block.COLLIDER,
@@ -26,7 +26,7 @@ public class ParticleRainUtilsImpl {
 //			Vec3 spawnPos = hit.getLocation();
 //			FluidState fluidState = level.getFluidState(hit.getBlockPos());
 //			if (config.doRippleParticles && fluidState.isSourceOfType(Fluids.WATER)) {
-//				Particle particle = mc.particleEngine.createParticle(ParticleRainClient.RIPPLE,
+//				Particle particle = mc.particleEngine.createParticle(ParticleRegistry.RIPPLE.get(),
 //					spawnPos.x,
 //					spawnPos.y,
 //					spawnPos.z,
@@ -47,21 +47,20 @@ public class ParticleRainUtilsImpl {
 //	}
 
 	public static void onCreateCollision(@NotNull ClientLevel level, Vec3 originalMotion, @NotNull Vec3 clipMotion, @NotNull AABB aabb) {
-//		if (!config.doSplashParticles || Math.abs(clipMotion.y) > 0.001) {
-//			return;
-//		}
-//		Vec3 center = aabb.getCenter();
-//		AABB aabb1 = new AABB(center.x, aabb.minY - 1, center.z, center.x, aabb.minY, center.z);
-//		Vec3 spawnPos = new Vec3(center.x, aabb.minY, center.z);
-//		Vec3 motion1 = originalMotion.scale(2);
-//		CreateUtils.forEachContraption(level, aabb1, contraptionEntity -> {
-//			if (CreateUtils.collideWithContraption(level, spawnPos, motion1, aabb1, contraptionEntity)) {
-//				Minecraft.getInstance().particleEngine
-//					.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
-//				return false;
-//			}
-//			return true;
-//		});
-		throw new UnsupportedOperationException();
+		if (!ParticleRainConfig.doSplashParticles || Math.abs(clipMotion.y) > 0.001) {
+			return;
+		}
+		Vec3 center = aabb.getCenter();
+		AABB aabb1 = new AABB(center.x, aabb.minY - 1, center.z, center.x, aabb.minY, center.z);
+		Vec3 spawnPos = new Vec3(center.x, aabb.minY, center.z);
+		Vec3 motion1 = originalMotion.scale(2);
+		CreateUtilsImpl.forEachContraption(level, aabb1, contraptionEntity -> {
+			if (CreateUtilsImpl.collideWithContraption(level, spawnPos, motion1, aabb1, contraptionEntity)) {
+				Minecraft.getInstance().particleEngine
+					.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
+				return false;
+			}
+			return true;
+		});
 	}
 }

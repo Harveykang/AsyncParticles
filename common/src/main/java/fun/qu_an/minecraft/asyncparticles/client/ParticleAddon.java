@@ -1,5 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
+
+import net.minecraft.world.phys.AABB;
+
 public interface ParticleAddon {
 	boolean asyncParticles$shouldRemove();
 	void asyncParticles$setTicked();
@@ -9,10 +12,5 @@ public interface ParticleAddon {
 	void asyncedParticles$setTickSync();
 	boolean asyncedParticles$isTickSync();
 
-	/**
-	 * Forge shouldCull()
-	 */
-	default boolean shouldCull() {
-		return true;
-	}
+	AABB getRenderBoundingBox(float partialTicks);
 }

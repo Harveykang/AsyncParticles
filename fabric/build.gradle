@@ -9,6 +9,10 @@ architectury {
 
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
+
+    mixin {
+        useLegacyMixinAp = true
+    }
 }
 
 configurations {
@@ -38,16 +42,22 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 
     /* APIs */
-    modLocalRuntime 'maven.modrinth:architectury-api:9.2.14+fabric'
-    modLocalRuntime("me.shedaniel.cloth:cloth-config-fabric:11.1.136") {
+    modLocalRuntime 'maven.modrinth:architectury-api:13.0.8+fabric'
+    modLocalRuntime("me.shedaniel.cloth:cloth-config-fabric:15.0.140") {
         exclude(group: "net.fabricmc.fabric-api")
     }
-    modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
-    modLocalRuntime 'maven.modrinth:modmenu:7.2.2'
+    modLocalRuntime("io.wispforest:owo-lib:0.12.15+1.21") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+    modLocalRuntime 'maven.modrinth:modmenu:11.0.3'
+    modLocalRuntime 'maven.modrinth:fabric-permissions-api:0.3.3'
 
     /* Performance */
-    modLocalRuntime "maven.modrinth:sodium:mc1.21.1-0.6.9-neoforge"
-    modLocalRuntime 'maven.modrinth:iris:1.8.8+1.21.1-neoforge'
+    modLocalRuntime "maven.modrinth:sodium:mc1.21.1-0.6.9-fabric"
+    modLocalRuntime 'maven.modrinth:iris:1.8.8+1.21.1-fabric'
+    localRuntime "org.antlr:antlr4-runtime:4.13.1"
+    localRuntime "io.github.douira:glsl-transformer:2.0.1"
+    localRuntime "org.anarres:jcpp:1.4.14"
     modLocalRuntime 'maven.modrinth:scalablelux:0.1.0+fabric.26c6e72'
     modLocalRuntime 'maven.modrinth:spark:1.10.109-fabric'
 
@@ -56,7 +66,7 @@ dependencies {
 //    modLocalRuntime "maven.modrinth:pretty-rain:TGjK6ChS"
 
     /* Effectual */
-    modLocalRuntime 'maven.modrinth:effectual:0.5.2-1.21.1'
+//    modLocalRuntime 'maven.modrinth:effectual:0.5.2-1.21.1'
 
     /* Mmmmmmmmmmmm */
 //    modLocalRuntime 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
@@ -71,10 +81,10 @@ dependencies {
 //    modLocalRuntime("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
 
     /* Lodestone */
-    modLocalRuntime "maven.modrinth:lodestonelib:1.21.1-1.7.0.5-fabric"
+//    modLocalRuntime "maven.modrinth:lodestonelib:1.21.1-1.7.0.5-fabric"
 
     /* Effective */
-    modLocalRuntime "maven.modrinth:effective:2.4.8-1.21.1"
+//    modLocalRuntime "maven.modrinth:effective:2.4.8-1.21.1"
 //    modLocalRuntime fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
 
     /* Hex Casting */
@@ -84,12 +94,15 @@ dependencies {
 //    modLocalRuntime fileTree(dir: '../libs', include: 'tombstone-1.20.1-8.9.0.jar')
 
     /* Particular */
-    modLocalRuntime "maven.modrinth:particular:1.1.1+1.21"
+//    modLocalRuntime "maven.modrinth:particular:1.1.1+1.21"
 
     /* Particle Core */
     modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.21"
     modLocalRuntime "maven.modrinth:fzzy-config:0.6.4+1.21"
-    modLocalRuntime("com.github.Fallen-Breath.conditional-mixin:conditional-mixin-fabric:0.6.2")
+    modLocalRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.2")
+    modLocalRuntime("net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
 
     /* Physics Mod */
 //    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v171b-fabric-1.20.1.jar')
@@ -110,4 +123,14 @@ shadowJar {
 
 remapJar {
     inputFile.set shadowJar.archiveFile
+}
+
+runClient {
+    sourceSets {
+        main {
+            resources {
+                srcDirs += "../common/src/main/resources"
+            }
+        }
+    }
 }

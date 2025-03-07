@@ -16,8 +16,6 @@ accessible method net/minecraft/client/renderer/RenderStateShard setupRenderStat
 accessible method net/minecraft/client/renderer/RenderStateShard clearRenderState ()V
 accessible class net/minecraft/client/renderer/RenderStateShard$OutputStateShard
 accessible field net/minecraft/client/renderer/LevelRenderer transparencyChain Lnet/minecraft/client/renderer/PostChain;
-accessible class net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo
-accessible field net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo chunk Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk;
 accessible field net/minecraft/client/renderer/RenderStateShard PARTICLES_TARGET Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;
 accessible field net/minecraft/client/renderer/RenderStateShard CLOUDS_TARGET Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;
 accessible field net/minecraft/client/renderer/RenderStateShard WEATHER_TARGET Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;
@@ -36,8 +34,7 @@ accessible field net/minecraft/client/renderer/culling/Frustum camY D
 accessible field net/minecraft/client/renderer/culling/Frustum camZ D
 accessible method net/minecraft/client/particle/ParticleEngine clearParticles ()V
 accessible method net/minecraft/client/particle/ParticleEngine updateCount (Lnet/minecraft/core/particles/ParticleGroup;I)V
-accessible field com/mojang/blaze3d/vertex/BufferBuilder buffer Ljava/nio/ByteBuffer;
-accessible field com/mojang/blaze3d/vertex/Tesselator builder Lcom/mojang/blaze3d/vertex/BufferBuilder;
+accessible field com/mojang/blaze3d/vertex/BufferBuilder buffer Lcom/mojang/blaze3d/vertex/ByteBufferBuilder;
 accessible field com/mojang/blaze3d/vertex/BufferBuilder mode Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;
 accessible field com/mojang/blaze3d/vertex/BufferBuilder format Lcom/mojang/blaze3d/vertex/VertexFormat;
 accessible field net/minecraft/client/renderer/LevelRenderer lastViewDistance I
@@ -46,3 +43,7 @@ accessible field net/minecraft/client/particle/Particle INITIAL_AABB Lnet/minecr
 accessible class net/minecraft/client/multiplayer/ClientChunkCache$Storage
 accessible field net/minecraft/client/multiplayer/ClientChunkCache$Storage chunks Ljava/util/concurrent/atomic/AtomicReferenceArray;
 accessible field net/minecraft/world/level/chunk/ChunkAccess blockEntities Ljava/util/Map;
+accessible field com/mojang/blaze3d/vertex/Tesselator buffer Lcom/mojang/blaze3d/vertex/ByteBufferBuilder;
+accessible field com/mojang/blaze3d/vertex/ByteBufferBuilder pointer J
+accessible field com/mojang/blaze3d/vertex/BufferBuilder building Z
+accessible method net/minecraft/client/particle/Particle getLightColor (F)I

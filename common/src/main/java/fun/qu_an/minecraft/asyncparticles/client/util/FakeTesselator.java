@@ -1,23 +1,29 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
+
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.logging.LogUtils;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
 
 public class FakeTesselator extends Tesselator {
-	public static final FakeTesselator INSTANCE = new FakeTesselator();
+	private static final FakeTesselator INSTANCE = new FakeTesselator();
+
+	public static FakeTesselator getFakeInstance() {
+		return INSTANCE;
+	}
 
 	protected FakeTesselator() {
 		super(0);
 	}
 
-	public void end() {
+	@Override
+	public void clear() {
 		// Do nothing
 	}
 
-	public @NotNull BufferBuilder getBuilder() {
-		throw new UnsupportedOperationException("FakeTesselator does not support getBuilder()");
+	@Override
+	public @NotNull BufferBuilder begin(VertexFormat.Mode mode, VertexFormat format) {
+		return FakeBufferBuilder.INSTANCE;
 	}
 }

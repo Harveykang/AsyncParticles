@@ -1,116 +1,74 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import com.mojang.blaze3d.vertex.*;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+
 public class FakeBufferBuilder extends BufferBuilder {
-	public FakeBufferBuilder() {
-		super(0);
+	public static final FakeBufferBuilder INSTANCE = new FakeBufferBuilder();
+	private FakeBufferBuilder() {
+		super(null, VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
 	}
 
-	public void setQuadSorting(VertexSorting quadSorting) {
-		throw new UnsupportedOperationException("Cannot set sort state of a fake buffer builder");
-	}
-
-	public SortState getSortState() {
-		throw new UnsupportedOperationException("Cannot get sort state of a fake buffer builder");
-	}
-
-	public void restoreSortState(SortState sortState) {
-		throw new UnsupportedOperationException("Cannot restore sort state of a fake buffer builder");
-	}
-
-	@SuppressWarnings("DataFlowIssue")
-	public void begin(@Nullable VertexFormat.Mode mode, @Nullable VertexFormat format) {
-		this.mode = mode;
-		this.format = format;
-	}
-
-	public VertexFormat	getFormat() {
-		return format;
-	}
-
-	public VertexFormat.Mode getVertexFormatMode() {
-		return mode;
-	}
-
-	public boolean isCurrentBatchEmpty() {
-		throw new UnsupportedOperationException("Cannot check if a fake buffer builder is empty");
-	}
-
+	@Override
 	@Nullable
-	public BufferBuilder.RenderedBuffer endOrDiscardIfEmpty() {
-		throw new UnsupportedOperationException("Cannot end or discard a fake buffer builder");
-	}
-
-	public RenderedBuffer end() {
-		throw new UnsupportedOperationException("Cannot end a fake buffer builder");
+	public MeshData build() {
+		return null;
 	}
 
 	@Override
-	public void putByte(int index, byte byteValue) {
-		throw new UnsupportedOperationException("Cannot put a byte to a fake buffer builder");
+	public @NotNull MeshData buildOrThrow() {
+		throw new UnsupportedOperationException("Cannot build mesh or throw in FakeBufferBuilder");
 	}
 
 	@Override
-	public void putShort(int index, short shortValue) {
-		throw new UnsupportedOperationException("Cannot put a short to a fake buffer builder");
+	public @NotNull VertexConsumer addVertex(float x, float y, float z) {
+		throw new UnsupportedOperationException("Cannot add vertex in FakeBufferBuilder");
 	}
 
 	@Override
-	public void putFloat(int index, float floatValue) {
-		throw new UnsupportedOperationException("Cannot put a float to a fake buffer builder");
+	public @NotNull VertexConsumer setColor(int red, int green, int blue, int alpha) {
+		throw new UnsupportedOperationException("Cannot set color in FakeBufferBuilder");
 	}
 
 	@Override
-	public void endVertex() {
-		throw new UnsupportedOperationException("Cannot end a vertex in a fake buffer builder");
+	public @NotNull VertexConsumer setColor(int color) {
+		throw new UnsupportedOperationException("Cannot set color in FakeBufferBuilder");
 	}
 
 	@Override
-	public void nextElement() {
-		throw new UnsupportedOperationException("Cannot advance to the next element in a fake buffer builder");
+	public @NotNull VertexConsumer setUv(float u, float v) {
+		throw new UnsupportedOperationException("Cannot set uv in FakeBufferBuilder");
 	}
 
 	@Override
-	public VertexConsumer color(int red, int green, int blue, int alpha) {
-		throw new UnsupportedOperationException("Cannot set color in a fake buffer builder");
+	public @NotNull VertexConsumer setUv1(int u, int v) {
+		throw new UnsupportedOperationException("Cannot set uv1 in FakeBufferBuilder");
 	}
 
 	@Override
-	public void vertex(
-		float x,
-		float y,
-		float z,
-		float red,
-		float green,
-		float blue,
-		float alpha,
-		float texU,
-		float texV,
-		int overlayUV,
-		int lightmapUV,
-		float normalX,
-		float normalY,
-		float normalZ
-	) {
-		throw new UnsupportedOperationException("Cannot add a vertex to a fake buffer builder");
-	}
-
-	public void clear() {
-		throw new UnsupportedOperationException("Cannot clear a fake buffer builder");
-	}
-
-	public void discard() {
-		throw new UnsupportedOperationException("Cannot discard a fake buffer builder");
+	public @NotNull VertexConsumer setOverlay(int packedOverlay) {
+		throw new UnsupportedOperationException("Cannot set overlay in FakeBufferBuilder");
 	}
 
 	@Override
-	public VertexFormatElement currentElement() {
-		throw new UnsupportedOperationException("Cannot get the current element in a fake buffer builder");
+	public @NotNull VertexConsumer setUv2(int u, int v) {
+		throw new UnsupportedOperationException("Cannot set uv2 in FakeBufferBuilder");
 	}
 
-	public boolean building() {
-		return false;
+	@Override
+	public @NotNull VertexConsumer setLight(int packedLight) {
+		throw new UnsupportedOperationException("Cannot set light in FakeBufferBuilder");
+	}
+
+	@Override
+	public @NotNull VertexConsumer setNormal(float normalX, float normalY, float normalZ) {
+		throw new UnsupportedOperationException("Cannot set normal in FakeBufferBuilder");
+	}
+
+	@Override
+	public void addVertex(float x, float y, float z, int color, float u, float v, int packedOverlay, int packedLight, float normalX, float normalY, float normalZ) {
+		throw new UnsupportedOperationException("Cannot add vertex in FakeBufferBuilder");
 	}
 }

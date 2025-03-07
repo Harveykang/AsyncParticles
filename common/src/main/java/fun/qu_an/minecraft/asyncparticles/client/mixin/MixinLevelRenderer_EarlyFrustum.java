@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;

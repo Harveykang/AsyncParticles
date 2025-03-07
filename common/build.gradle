@@ -4,6 +4,11 @@ architectury {
 
 loom {
     accessWidenerPath = file('src/main/resources/asyncparticles-common.accesswidener')
+
+    mixin {
+        useLegacyMixinAp = true
+        defaultRefmapName = "asyncparticles-common-refmap.json"
+    }
 }
 
 dependencies {
@@ -14,6 +19,7 @@ dependencies {
     implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.2.0"))
 
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+    modCompileOnly "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
     compileOnly "org.sinytra:Connector:1.0.0-beta.46+1.20.1"
 
     /* Performance */

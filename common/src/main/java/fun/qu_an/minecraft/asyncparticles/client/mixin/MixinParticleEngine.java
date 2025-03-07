@@ -3,14 +3,19 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 import com.google.common.collect.EvictingQueue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import fun.qu_an.minecraft.asyncparticles.client.*;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.SingleQuadParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.CountManagements;
-import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.TrackedParticleCountsMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.*;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.TrackingEmitter;
 import net.minecraft.core.particles.ParticleGroup;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.slf4j.Logger;
@@ -42,7 +47,7 @@ public abstract class MixinParticleEngine {
 	private Queue<TrackingEmitter> trackingEmitters;
 
 	@Shadow
-	protected abstract void tickParticle(Particle particle);
+	public abstract void tickParticle(Particle particle);
 
 	@Mutable
 	@Shadow
@@ -96,7 +101,7 @@ public abstract class MixinParticleEngine {
 			AsyncTicker.PARTICLE_OPERATIONS.add(() -> {
 				HashSet<TrackingEmitter> set = null;
 				for (TrackingEmitter emitter : this.trackingEmitters) {
-					if (AsyncTicker.isCancelled() && !AsyncTicker.forceDoneParticleTick()) {
+					if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneParticleTick()) {
 						if (set != null) {
 							this.trackingEmitters.removeAll(set);
 						}
@@ -115,13 +120,13 @@ public abstract class MixinParticleEngine {
 					}
 					try {
 						emitter.tick();
-						if (ModListHelper.VS_LOADED) {
-							if (VSClientUtils.isOutOfSight(emitter)) {
-								emitter.remove();
-							}
-						}
+//						if (ModListHelper.VS_LOADED) {
+//							if (VSClientUtils.isOutOfSight(emitter)) {
+//								emitter.remove();
+//							}
+//						}
 					} catch (Throwable t) {
-						if (AsyncTicker.markSyncIfTickFailed()){
+						if (SimplePropertiesConfig.markSyncIfTickFailed()){
 							LOGGER.error("Error ticking emitter particle {}, marking as sync", emitter, t);
 							((ParticleAddon) emitter).asyncedParticles$setTickSync();
 							AsyncTicker.markAsSync(emitter.getClass());
@@ -177,24 +182,28 @@ public abstract class MixinParticleEngine {
 		Iterator<Particle> iterator = collection.iterator();
 		//noinspection WhileLoopReplaceableByForEach
 		while (iterator.hasNext()) {
-			if (AsyncTicker.isCancelled() && !AsyncTicker.forceDoneParticleTick()) {
+			if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneParticleTick()) {
 				return;
 			}
 			Particle particle = iterator.next();
+			if (particle instanceof SingleQuadParticleAddon singleQuadParticle
+				&& SimplePropertiesConfig.particleLightCache()){
+				singleQuadParticle.asyncParticles$setLight(particle.getLightColor(0));
+			}
 			if (((ParticleAddon) particle).asyncedParticles$isTickSync()) {
 				AsyncTicker.recordSync(particle); // TODO: 不要每次tick时记录
 				continue;
 			}
 			try {
-				particle.tick();
+				tickParticle(particle);
 				((ParticleAddon) particle).asyncParticles$setTicked();
-				if (ModListHelper.VS_LOADED) {
-					if (VSClientUtils.isOutOfSight(particle)) {
-						particle.remove();
-					}
-				}
+//				if (ModListHelper.VS_LOADED) {
+//					if (VSClientUtils.isOutOfSight(particle)) {
+//						particle.remove();
+//					}
+//				}
 			} catch (Throwable t) {
-				if (AsyncTicker.markSyncIfTickFailed()) {
+				if (SimplePropertiesConfig.markSyncIfTickFailed()) {
 					LOGGER.error("Error ticking particle {}, marking as sync", particle, t);
 					((ParticleAddon) particle).asyncedParticles$setTickSync();
 					AsyncTicker.markAsSync(particle.getClass());
@@ -204,40 +213,7 @@ public abstract class MixinParticleEngine {
 				}
 			}
 		}
-//		int size = Math.min(16384, collection.size());
-//		Iterator<Particle> iterator = collection.iterator();
-//		while (iterator.hasNext()) {
-//			var particles = new Particle[size];
-//			for (int j = 0; j < size && iterator.hasNext(); j++) {
-//				particles[j] = iterator.next();
-//			}
-//			AsyncTicker.particleOperations.add(combineTasks(particles));
-//		}
 	}
-
-//	@Unique
-//	private Runnable combineTasks(Particle... task) {
-//		int size = task.length;
-//		return () -> {
-//			//noinspection ForLoopReplaceableByForEach
-//			for (int i = 0; i < size; i++) {
-//				if (AsyncTicker.cancelled) {
-//					return;
-//				}
-//				Particle particle = task[i];
-//				if (particle == null) {
-//					return;
-//				}
-//				this.tickParticle(particle);
-//				((ParticleAddon) particle).asyncParticles$setTicked();
-//				if (ModListHelper.VS_LOADED) {
-//					if (VSClientUtils.isOutOfSight(particle)) {
-//						particle.remove();
-//					}
-//				}
-//			}
-//		};
-//	}
 
 	@WrapMethod(method = "tick")
 	public void wrapTick(Operation<Void> original) {
@@ -257,20 +233,6 @@ public abstract class MixinParticleEngine {
 		// do nothing
 		// we check this later in tick()
 	}
-
-//	@Inject(method = "reload", at = @At(value = "RETURN"), cancellable = true)
-//	public void reload(CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-//		cir.setReturnValue(cir.getReturnValue().thenRun(() -> {
-//			try {
-//				SimplePropertiesConfig.load();
-//			} catch (IOException e) {
-//				throw new RuntimeException(e);
-//			}
-//		}).exceptionally(t -> {
-//			Minecraft.getInstance().gui.getChat().addMessage(Component.literal(t.getMessage()));
-//			return null;
-//		}));
-//	}
 
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void redirectClearParticles(CallbackInfo ci) {

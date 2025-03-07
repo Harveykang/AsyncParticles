@@ -1,7 +1,8 @@
-package fun.qu_an.minecraft.asyncparticles.client.forge;
+package fun.qu_an.minecraft.asyncparticles.client.neoforge;
 
-import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
+
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
 
 @SuppressWarnings("unused")
 public class ModListHelperImpl {
@@ -18,6 +19,6 @@ public class ModListHelperImpl {
 		if (modFileById == null) {
 			return -1;
 		}
-		return modFileById.getMods().get(0).getVersion().getMajorVersion();
+		return modFileById.getMods().getFirst().getVersion().getMajorVersion();
 	}
 }

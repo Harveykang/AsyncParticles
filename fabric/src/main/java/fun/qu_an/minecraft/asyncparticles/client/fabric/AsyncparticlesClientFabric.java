@@ -16,7 +16,6 @@ import net.minecraft.network.chat.Component;
 import java.io.IOException;
 
 import static fun.qu_an.minecraft.asyncparticles.client.ModListHelper.*;
-import static fun.qu_an.minecraft.asyncparticles.client.ModListHelper.isModLoaded;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 

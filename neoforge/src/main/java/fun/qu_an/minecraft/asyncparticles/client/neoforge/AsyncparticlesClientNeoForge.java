@@ -1,19 +1,25 @@
-package fun.qu_an.minecraft.asyncparticles.client.forge;
+package fun.qu_an.minecraft.asyncparticles.client.neoforge;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CreateUtilsImpl;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainUtils;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.event.RegisterClientCommandsEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.moddiscovery.ModInfo;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.io.IOException;
 
@@ -23,10 +29,27 @@ import static net.minecraft.commands.Commands.literal;
 
 @Mod(AsyncparticlesClient.MOD_ID)
 public final class AsyncparticlesClientNeoForge {
-	public AsyncparticlesClientNeoForge() {
+	public AsyncparticlesClientNeoForge(IEventBus modBus) {
 		// Run our common setup.
 		AsyncparticlesClient.init();
-		MinecraftForge.EVENT_BUS.addListener(this::registerClientCommands);
+
+		if (ModListHelper.CREATE_LOADED) {
+			WeatherParticleAddon.Type.RAIN.register((level, position, motion, aabb) -> {
+				Vec3 collide = CreateUtilsImpl.collideMotionWithContraptions(level, position, motion, aabb);
+				if (collide == null) {
+					return motion;
+				}
+				ParticleRainUtils.onCreateCollision(level, motion, collide, aabb);
+				return collide;
+			});
+			WeatherParticleAddon.CollisionFunction function = (level, position, motion, aabb) -> {
+				Vec3 collide = CreateUtilsImpl.collideMotionWithContraptions(level, position, motion, aabb);
+				return collide == null ? motion : collide;
+			};
+			WeatherParticleAddon.Type.SNOW.register(function);
+			WeatherParticleAddon.Type.OTHER.register(function);
+		}
+		NeoForge.EVENT_BUS.addListener(this::registerClientCommands);
 	}
 
 	private void registerClientCommands(RegisterClientCommandsEvent event) {

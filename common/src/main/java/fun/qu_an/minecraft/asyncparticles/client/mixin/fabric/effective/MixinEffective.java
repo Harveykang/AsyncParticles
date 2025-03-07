@@ -3,7 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.effective;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.Event;
-import org.ladysnake.effective.core.Effective;
+import org.ladysnake.effective.Effective;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;

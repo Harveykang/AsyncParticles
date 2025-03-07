@@ -1,5 +1,5 @@
 plugins {
-    id 'dev.architectury.loom' version '1.7-SNAPSHOT' apply false
+    id 'dev.architectury.loom' version '1.9-SNAPSHOT' apply false
     id 'architectury-plugin' version '3.4-SNAPSHOT'
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
     id "io.github.pacifistmc.forgix" version "1.2.9"
@@ -72,6 +72,11 @@ subprojects {
             url = uri("https://maven.fallenbreath.me/releases")
         }
         maven { url = "https://repo.spongepowered.org/repository/maven-public" } // Mixin
+        maven { url 'https://maven.wispforest.io' } // owo lib
+        maven {
+            name = 'Kotlin for Forge'
+            url = 'https://thedarkcolour.github.io/KotlinForForge/'
+        }
     }
 
     dependencies {
@@ -96,7 +101,7 @@ subprojects {
         it.options.release = 21
     }
 
-    // Configure Maven publishing.
+// Configure Maven publishing.
     publishing {
         publications {
             mavenJava(MavenPublication) {

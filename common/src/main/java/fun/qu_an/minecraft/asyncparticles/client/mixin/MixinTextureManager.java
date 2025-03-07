@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.client.renderer.texture.TextureManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,7 +21,7 @@ public class MixinTextureManager {
 
 	@Inject(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"), cancellable = true)
 	public void onTickIteratorNext(CallbackInfo ci) {
-		if (AsyncTicker.isCancelled() && !AsyncTicker.forceDoneTextureTick()) {
+		if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneTextureTick()) {
 			ci.cancel();
 		}
 	}

@@ -5,17 +5,18 @@ import org.sinytra.connector.loader.ConnectorEarlyLoader;
 
 public class ModListHelper {
 	public static final boolean IS_FORGE = isForge();
-	public static final boolean FABRIC_API_LOADED = isModLoaded("fabric");
+	public static final boolean FABRIC_API_LOADED = isModLoaded("fabric-api") || isModLoaded("fabric_api");
 	public static final boolean CONNECTORMOD_LOADED = isModLoaded("connectormod");
 	/* Valkyrien Skies */
 	public static final boolean VS_LOADED = isModLoaded("valkyrienskies");
 	public static final boolean FABRIC_VS_LOADED = isFabricModLoaded("valkyrienskies");
 	public static final boolean FORGE_VS_LOADED = isForgeModLoaded("valkyrienskies");
 	/* Sodium */
-	public static final boolean SODIUM_LIKE_LOADED = isModLoaded("sodium") || isModLoaded("embeddium");
 	public static final boolean SODIUM_LOADED = isModLoaded("sodium");
+	public static final boolean EMBEDDIUM_LOADED = isModLoaded("embeddium");
 	/* IRIS */
 	public static final boolean IRIS_LIKE_LOADED = isModLoaded("iris") || isModLoaded("oculus");
+	public static final boolean FABRIC_IRIS_LOADED = isFabricModLoaded("iris");
 	/* Dummmmmmy */
 	public static final boolean DUMMMMMMY_LOADED = isModLoaded("dummmmmmy");
 	/* Effectual */
@@ -37,11 +38,6 @@ public class ModListHelper {
 	/* Create */
 	public static final boolean CREATE_LOADED = isModLoaded("create");
 	public static final int CREATE_MAJOR_VERSION = versionMajor("create");
-
-	static {
-		System.out.println("CREATE_MAJOR_VERSION: " + CREATE_MAJOR_VERSION);
-	}
-
 	public static final boolean FABRIC_CREATE_LOADED = isFabricModLoaded("create");
 	public static final boolean FORGE_CREATE_LOADED = isForgeModLoaded("create");
 	/* Tombstone */

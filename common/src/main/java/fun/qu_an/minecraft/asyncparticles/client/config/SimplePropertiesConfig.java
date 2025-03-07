@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
+import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,15 +12,16 @@ public class SimplePropertiesConfig {
 	public static final Path CONFIG_FILE = Paths.get("config", "asyncparticles.properties");
 	public static final int DEFAULT_LIMIT = 32768;
 	public static int limit = DEFAULT_LIMIT;
-	public static boolean asyncClientBlockEntityTick = true;
-	public static boolean greedyAsyncClientBlockEntityTick = false;
-	public static boolean asyncClientBlockEntityAnimate = true;
-	public static boolean forceSyncLevelRenderMarkDirty = false;
-	public static boolean forceDoneBlockAnimateTick = false;
-	public static boolean forceDoneParticleTick = false;
-	public static boolean forceDoneTextureTick = false;
-	public static boolean markSyncIfTickFailed = false;
-	public static boolean ignoreParticleTickExceptions = false;
+	private static boolean asyncClientBlockEntityTick = true;
+	private static boolean greedyAsyncClientBlockEntityTick = false;
+	private static boolean asyncClientBlockEntityAnimate = true;
+	private static boolean forceSyncLevelRenderMarkDirty = false;
+	private static boolean forceDoneBlockAnimateTick = false;
+	private static boolean forceDoneParticleTick = false;
+	private static boolean forceDoneTextureTick = false;
+	private static boolean markSyncIfTickFailed = false;
+	private static boolean ignoreParticleTickExceptions = false;
+	private static boolean particleLightCache = true;
 
 	private static boolean shouldSave;
 
@@ -51,6 +54,7 @@ public class SimplePropertiesConfig {
 		forceDoneTextureTick = getBoolean(properties, "forceDoneTextureTick", false);
 		markSyncIfTickFailed = getBoolean(properties, "markSyncIfTickFailed", false);
 		ignoreParticleTickExceptions = getBoolean(properties, "ignoreParticleTickExceptions", false);
+		particleLightCache = getBoolean(properties, "particleLightCache", true);
 
 		if (shouldSave) {
 			properties.store(Files.newOutputStream(CONFIG_FILE), null);
@@ -68,5 +72,46 @@ public class SimplePropertiesConfig {
 			shouldSave = true;
 			return defaultValue;
 		}
+	}
+
+	public static boolean forceSyncLevelRenderMarkDirty() {
+		return ModListHelper.SODIUM_LOADED // can't mark dirty asynchronously in sodium
+			   || forceSyncLevelRenderMarkDirty;
+	}
+
+	public static boolean asyncBlockEntityAnimate() {
+		return !ModListHelper.PHYSICSMOD_LOADED && asyncClientBlockEntityAnimate;
+	}
+
+	public static boolean asyncBlockEntityTick() {
+		return asyncClientBlockEntityTick;
+	}
+
+	public static boolean greedyAsyncClientBlockEntityTick() {
+		return greedyAsyncClientBlockEntityTick;
+	}
+
+	public static boolean forceDoneBlockAnimateTick() {
+		return forceDoneBlockAnimateTick;
+	}
+
+	public static boolean forceDoneParticleTick() {
+		return forceDoneParticleTick;
+	}
+
+	public static boolean forceDoneTextureTick() {
+		return forceDoneTextureTick;
+	}
+
+	public static boolean markSyncIfTickFailed() {
+		return markSyncIfTickFailed;
+	}
+
+	public static boolean ignoreParticleTickExceptions() {
+		return ignoreParticleTickExceptions;
+	}
+
+	public static boolean particleLightCache() {
+		return particleLightCache;
 	}
 }

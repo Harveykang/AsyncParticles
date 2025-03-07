@@ -22,9 +22,9 @@
     "fabricloader": ">=0.16.0",
     "minecraft": ">=1.21",
     "mixinextras": ">=0.4.1",
-    "mixinsquared": ">=0.2.0"
+    "mixinsquared": ">0.1.999"
   },
   "suggests": {
-    "fabric": "*"
+    "fabric-api": "*"
   }
 }

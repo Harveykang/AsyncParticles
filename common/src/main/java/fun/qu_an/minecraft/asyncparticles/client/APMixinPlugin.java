@@ -14,16 +14,16 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		MixinCancellerRegistrar.register((targetClassNames, mixinClassName)
 			-> switch (mixinClassName) {
 			case "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer",
+				 "net.irisshaders.iris.mixin.fabric.MixinLevelRenderer",
+				 "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin",
 				 // o(≧口≦)o particle_core: These mixins not support async rendering
 				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerFrustumMixin",
 				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerRotationMixin",
 				 "me.fzzyhmstrs.particle_core.mixins.WorldRendererFrustumMixin",
 				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerCachedLightMixin",
 				 "me.fzzyhmstrs.particle_core.mixins.BillboardParticleMixin",
-				 "me.fzzyhmstrs.particle_core.mixins.ParticleMixin",
-				 "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
-				 "com.moepus.flerovium.mixins.Particle.ParticleMixin"
-//				 , "net.diebuddies.mixins.ocean.MixinParticleEngine"
+				 "me.fzzyhmstrs.particle_core.mixins.ParticleMixin"
+//				 , "net.diebuddies.mixins.ocean.MixinParticleEngine" // Physics mod
 				-> true;
 			default -> false;
 		});
@@ -31,7 +31,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public String getRefMapperConfig() {
-		return null;
+		// this fixes the useless refmap (crash) on neoforge
+		return ModListHelper.IS_FORGE ? null : "fabric-asyncparticles-common-refmap.json";
 	}
 
 	@Override
@@ -47,37 +48,21 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					yield !ModListHelper.IS_FORGE;
 				}
 				yield switch (split[1]) {
-					case "particlerain_vs" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_VS_LOADED;
-					case "particlerain_create" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_CREATE_LOADED;
+					case "particlerain_create" ->
+						ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_CREATE_LOADED;
 					case "particlerain" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED;
-					case "create_5" -> ModListHelper.FABRIC_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION < 6;
-					case "create_6" -> ModListHelper.FABRIC_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION == 6;
+					case "create" -> ModListHelper.FABRIC_CREATE_LOADED;
 					case "effective" -> ModListHelper.FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> ModListHelper.FABRIC_EFFECTUAL_LOADED;
 					case "particular" -> ModListHelper.FABRIC_PARTICULAR_LOADED;
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
-			case "legacy" -> {
-				if (split.length == 2) {
-					yield true;
-				}
-				yield switch (split[1]) {
-					case "flywheel" -> ModListHelper.FLYWHEEL_LOADED && ModListHelper.FLYWHEEL_MAJOR_VERSION < 1;
-					default -> throw new IllegalArgumentException("Unknown legacy mod mixin: " + mixinClassName);
-				};
-			}
 			case "fake_renders" -> true;
-			case "vs2" -> ModListHelper.VS_LOADED;
 			case "create" -> ModListHelper.CREATE_LOADED;
+			case "sodium" -> ModListHelper.SODIUM_LOADED;
 			case "iris_like" -> ModListHelper.IRIS_LIKE_LOADED;
-			case "sodium_like" -> ModListHelper.SODIUM_LIKE_LOADED;
 			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
-			case "hexcasting" -> ModListHelper.HEXCASTING_LOADED;
-			case "flywheel" -> ModListHelper.FLYWHEEL_LOADED && ModListHelper.FLYWHEEL_MAJOR_VERSION == 1;
-			case "particle_core" -> ModListHelper.PARTICLE_CORE_LOADED;
-			case "physicsmod" -> ModListHelper.PHYSICSMOD_LOADED;
-//			case "enhancedblockentities" -> ModListHelper.ENHANCEDBLOCKENTITIES_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}
