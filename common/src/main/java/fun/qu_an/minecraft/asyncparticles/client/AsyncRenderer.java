@@ -149,6 +149,7 @@ public class AsyncRenderer {
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
 		tryDebug();
 		clearSync();
+		profiler.push("schedule_tasks");
 		var futures = new CompletableFuture[ASYNC_QUEUE.size()];
 		for (int i = 0, asyncQueueSize = ASYNC_QUEUE.size(); i < asyncQueueSize; i++) {
 			Runnable runnable = ASYNC_QUEUE.get(i);

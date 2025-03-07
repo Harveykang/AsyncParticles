@@ -12,7 +12,7 @@
     "create.MixinEjectorBlockEntity",
     "effecticularity.MixinRippleParticle",
     "embeddium.MixinBillboardParticleMixin",
-    "flerovium.MixinBillboardParticleMixin",
+    "flerovium.MixinSingleQuadParticleMixin",
     "flerovium.MixinMixinParticleEngine",
     "particlerain.MixinGroundFogParticle",
     "particlerain.MixinModClientForgeEvents",
