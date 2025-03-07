@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "fun.qu_an.minecraft.asyncparticles.client.mixin",
   "compatibilityLevel": "JAVA_17",
+  "refmap": "asyncparticles-common-refmap.json",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.APMixinPlugin",
   "client": [
     "MixinActiveProfiler",
@@ -16,6 +17,7 @@
     "MixinMultiBufferSource$BufferSource",
     "MixinParticle",
     "MixinParticleEngine",
+    "MixinSingleQuadParticle",
     "MixinSoundEngine",
     "MixinTesselator",
     "MixinTextureManager",
@@ -51,6 +53,7 @@
     "legacy.flywheel.MixinClientLevelMixin",
     "lodestone.MixinLodestoneWorldParticle",
     "physicsmod.MixinWeatherParticle",
+    "fabric.sodium.MixinBillboardParticleMixin",
     "sodium_like.MixinThreadLocalBufferBuilder",
     "vs2.InvokerEntityShipCollisionUtils",
     "vs2.InvokerRaycastUtils",

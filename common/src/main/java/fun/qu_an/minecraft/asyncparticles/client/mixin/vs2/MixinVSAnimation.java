@@ -2,7 +2,9 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.vs2;
 
 import com.bawnorton.mixinsquared.TargetHandler;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.client.multiplayer.ClientLevel;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -10,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = ClientLevel.class, remap = false, priority = 1001)
 public class MixinVSAnimation {
+	@Dynamic
 	@TargetHandler(
 		mixin = "org.valkyrienskies.mod.mixin.client.world.MixinClientLevel",
 		name = "afterAnimatedTick"
@@ -18,7 +21,7 @@ public class MixinVSAnimation {
 		at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"),
 		cancellable = true) // two injections with the same mixin
 	private void afterAnimatedTick1(int posX, int posY, int posZ, CallbackInfo ignored, CallbackInfo ci) {
-		if (AsyncTicker.isCancelled() && !AsyncTicker.forceDoneBlockAnimateTick()) {
+		if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneBlockAnimateTick()) {
 			ci.cancel();
 		}
 	}

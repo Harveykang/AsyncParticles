@@ -5,15 +5,15 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.util.CustomableEndTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBeginBufferBuilder;
+import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
-import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -22,6 +22,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
@@ -54,6 +55,7 @@ public abstract class MixinParticleEngine_Render {
 	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f, @Nullable Frustum ignored) {
 		PoseStack poseStack2 = null;
 		Frustum frustum = AsyncRenderer.frustum;
+		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
 		if (!AsyncRenderer.isStart) {
 			lightTexture.turnOnLightLayer();
 			RenderSystem.enableDepthTest();
@@ -79,14 +81,17 @@ public abstract class MixinParticleEngine_Render {
 			}
 			BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
 			if (!AsyncRenderer.isStart) {
+				profiler.push("sync_particles");
 				Collection<? extends Particle> particles1 = bufferBuilder == FakeBeginBufferBuilder.INSTANCE
 					? iterable
 					: AsyncRenderer.getSync(particleRenderType);
+				// begin before sync particles to be compatible with some mod
+				particleRenderType.begin(FakeBeginBufferBuilder.INSTANCE, this.textureManager);
 				if (!particles1.isEmpty()) {
 					for (Particle particle : particles1) {
-//						if (!frustum.isVisible(particle.getBoundingBox())) {
-//							continue;
-//						}
+						if (!frustum.isVisible(particle.getBoundingBox())) {
+							continue;
+						}
 						float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
 						try {
 							particle.render(bufferBuilder, camera, g);
@@ -101,17 +106,25 @@ public abstract class MixinParticleEngine_Render {
 						}
 					}
 				}
+				profiler.pop();
+				if (!bufferBuilder.building()) {
+					particleRenderType.end(FakeTesselator.INSTANCE);
+					// call end to be compatible with some mod
+					continue;
+				}
+				profiler.push("upload_particles");
 				RenderSystem.setShader(GameRenderer::getParticleShader);
 				// use fake, mod compatibility
-				particleRenderType.begin(FakeBeginBufferBuilder.INSTANCE, this.textureManager);
 				particleRenderType.end(CustomableEndTesselator.INSTANCE.onEnd(() -> BufferUploader.drawWithShader(bufferBuilder.end())));
 				if (bufferBuilder.building()) {
 					bufferBuilder.end().release(); // release buffer manually if not released by particleRenderType.end()
 				}
+				profiler.pop();
 			} else {
 				if (bufferBuilder == FakeBeginBufferBuilder.INSTANCE) {
 					continue;
 				}
+				profiler.push("async_particles");
 				Runnable runnable = () -> iterable.forEach(particle -> {
 					if (particle.shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
 						return;
@@ -131,6 +144,7 @@ public abstract class MixinParticleEngine_Render {
 					}
 				});
 				AsyncRenderer.add(runnable);
+				profiler.pop();
 			}
 		}
 

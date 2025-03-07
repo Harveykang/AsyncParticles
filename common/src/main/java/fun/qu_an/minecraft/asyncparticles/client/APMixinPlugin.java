@@ -52,6 +52,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					case "particlerain" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED;
 					case "create_5" -> ModListHelper.FABRIC_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION < 6;
 					case "create_6" -> ModListHelper.FABRIC_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION == 6;
+					case "sodium" -> ModListHelper.FABRIC_SODIUM_LOADED;
 					case "effective" -> ModListHelper.FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> ModListHelper.FABRIC_EFFECTUAL_LOADED;
 					case "particular" -> ModListHelper.FABRIC_PARTICULAR_LOADED;

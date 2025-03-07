@@ -33,6 +33,7 @@ public class APMixinPluginForge implements IMixinConfigPlugin {
 			// TODO: 下面这个 mod 没有正式发布，且不确定是否是唯一的 forge 移植版
 			case "effecticularity" -> ModListHelper.FORGE_EFFECTIVE_LOADED;
 			case "flerovium" -> ModListHelper.FORGE_FLEROVIUM_LOADED;
+			case "embeddium" -> ModListHelper.FORGE_EMBEDDIUM_LOADED;
 			default -> throw new IllegalArgumentException("Unknown forge mixin: " + mixinClassName);
 		};
 	}

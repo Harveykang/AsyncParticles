@@ -5,6 +5,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.AABB;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(ParticleEngine.class)
 public class MixinMixinParticleEngine {
-	@SuppressWarnings("UnresolvedMixinReference")
+	@Dynamic
 	@TargetHandler(
 		name = "lambda$render$1",
 		mixin = "fun.qu_an.minecraft.asyncparticles.client.mixin.forge.MixinParticleEngine_Render"
@@ -22,15 +23,16 @@ public class MixinMixinParticleEngine {
 		return flerovium$FastFrustumCheck(frustum, aabb, particle);
 	}
 
-//	@SuppressWarnings("UnresolvedMixinReference")
-//	@TargetHandler(
-//		name = "render",
-//		mixin = "fun.qu_an.minecraft.asyncparticles.client.mixin.forge.MixinParticleEngine_Render"
-//	)
-//	@Redirect(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;isVisible(Lnet/minecraft/world/phys/AABB;)Z"))
-//	private boolean isVisible2(Frustum frustum, AABB aabb, @Local Particle particle) {
-//		return flerovium$FastFrustumCheck(frustum, aabb, particle);
-//	}
+	@Dynamic
+	@TargetHandler(
+		name = "render",
+		mixin = "fun.qu_an.minecraft.asyncparticles.client.mixin.forge.MixinParticleEngine_Render"
+	)
+	@Redirect(method = "@MixinSquared:Handler",
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;isVisible(Lnet/minecraft/world/phys/AABB;)Z"))
+	private boolean isVisible2(Frustum frustum, AABB aabb, @Local Particle particle) {
+		return flerovium$FastFrustumCheck(frustum, aabb, particle);
+	}
 
 	/**
 	 * &#064;See  {@link com.moepus.flerovium.mixins.Particle.ParticleEngineMixin#FastFrustumCheck)}<p>

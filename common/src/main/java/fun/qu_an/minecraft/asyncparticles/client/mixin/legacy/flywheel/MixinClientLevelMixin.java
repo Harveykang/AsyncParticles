@@ -4,6 +4,7 @@ import com.bawnorton.mixinsquared.TargetHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -12,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientLevel.class)
 public class MixinClientLevelMixin {
+	@Dynamic
 	@TargetHandler(
 		mixin = "com.jozufozu.flywheel.mixin.ClientLevelMixin",
 		name = "filterEntities"

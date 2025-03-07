@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Holder;
@@ -30,7 +31,7 @@ public abstract class MixinClientLevel extends Level {
 
 	@Override
 	public void addBlockEntityTicker(@NotNull TickingBlockEntity tickingBlockEntity) {
-		if (!AsyncTicker.asyncBlockEntityTick()) {
+		if (!SimplePropertiesConfig.asyncBlockEntityTick()) {
 			super.addBlockEntityTicker(tickingBlockEntity);
 			return;
 		}
@@ -41,7 +42,7 @@ public abstract class MixinClientLevel extends Level {
 
 	@Override
 	protected void tickBlockEntities() {
-		if (!AsyncTicker.asyncBlockEntityTick()) {
+		if (!SimplePropertiesConfig.asyncBlockEntityTick()) {
 			super.tickBlockEntities();
 			return;
 		}
@@ -67,7 +68,7 @@ public abstract class MixinClientLevel extends Level {
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int i, int j, int k, Operation<Void> original) {
 		if (AsyncTicker.shouldTickParticles) {
-			if (!AsyncTicker.asyncBlockEntityAnimate()) {
+			if (!SimplePropertiesConfig.asyncBlockEntityAnimate()) {
 				original.call(i, j, k);
 				return;
 			}
@@ -77,7 +78,7 @@ public abstract class MixinClientLevel extends Level {
 
 	@Inject(method = "animateTick", at = @At(value = "CONSTANT", args = "intValue=16"), cancellable = true)
 	public void onAnimateTick(int i, int j, int k, CallbackInfo ci) {
-		if (AsyncTicker.isCancelled() && !AsyncTicker.forceDoneBlockAnimateTick()) {
+		if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneBlockAnimateTick()) {
 			ci.cancel();
 		}
 	}

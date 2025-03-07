@@ -46,3 +46,4 @@ accessible field net/minecraft/client/particle/Particle INITIAL_AABB Lnet/minecr
 accessible class net/minecraft/client/multiplayer/ClientChunkCache$Storage
 accessible field net/minecraft/client/multiplayer/ClientChunkCache$Storage chunks Ljava/util/concurrent/atomic/AtomicReferenceArray;
 accessible field net/minecraft/world/level/chunk/ChunkAccess blockEntities Ljava/util/Map;
+accessible method net/minecraft/client/particle/Particle getLightColor (F)I

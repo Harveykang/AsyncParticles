@@ -41,9 +41,6 @@ public abstract class MixinParticleEngine {
 	@Final
 	private Queue<TrackingEmitter> trackingEmitters;
 
-	@Shadow
-	protected abstract void tickParticle(Particle particle);
-
 	@Mutable
 	@Shadow
 	@Final
@@ -96,7 +93,7 @@ public abstract class MixinParticleEngine {
 			AsyncTicker.PARTICLE_OPERATIONS.add(() -> {
 				HashSet<TrackingEmitter> set = null;
 				for (TrackingEmitter emitter : this.trackingEmitters) {
-					if (AsyncTicker.isCancelled() && !AsyncTicker.forceDoneParticleTick()) {
+					if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneParticleTick()) {
 						if (set != null) {
 							this.trackingEmitters.removeAll(set);
 						}
@@ -121,7 +118,7 @@ public abstract class MixinParticleEngine {
 							}
 						}
 					} catch (Throwable t) {
-						if (AsyncTicker.markSyncIfTickFailed()){
+						if (SimplePropertiesConfig.markSyncIfTickFailed()){
 							LOGGER.error("Error ticking emitter particle {}, marking as sync", emitter, t);
 							((ParticleAddon) emitter).asyncedParticles$setTickSync();
 							AsyncTicker.markAsSync(emitter.getClass());
@@ -177,7 +174,7 @@ public abstract class MixinParticleEngine {
 		Iterator<Particle> iterator = collection.iterator();
 		//noinspection WhileLoopReplaceableByForEach
 		while (iterator.hasNext()) {
-			if (AsyncTicker.isCancelled() && !AsyncTicker.forceDoneParticleTick()) {
+			if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneParticleTick()) {
 				return;
 			}
 			Particle particle = iterator.next();
@@ -187,6 +184,10 @@ public abstract class MixinParticleEngine {
 			}
 			try {
 				particle.tick();
+				if (particle instanceof SingleQuadParticleAddon singleQuadParticle
+					&& SimplePropertiesConfig.particleLightCache()){
+					singleQuadParticle.asyncParticles$setLight(particle.getLightColor(0));
+				}
 				((ParticleAddon) particle).asyncParticles$setTicked();
 				if (ModListHelper.VS_LOADED) {
 					if (VSClientUtils.isOutOfSight(particle)) {
@@ -194,7 +195,7 @@ public abstract class MixinParticleEngine {
 					}
 				}
 			} catch (Throwable t) {
-				if (AsyncTicker.markSyncIfTickFailed()) {
+				if (SimplePropertiesConfig.markSyncIfTickFailed()) {
 					LOGGER.error("Error ticking particle {}, marking as sync", particle, t);
 					((ParticleAddon) particle).asyncedParticles$setTickSync();
 					AsyncTicker.markAsSync(particle.getClass());

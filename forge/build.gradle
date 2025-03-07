@@ -68,6 +68,7 @@ dependencies {
 
     /* Performance */
     modLocalRuntime "maven.modrinth:spark:1.10.53-forge"
+    modCompileOnly 'maven.modrinth:embeddium:0.3.31+mc1.20.1'
     modLocalRuntime 'maven.modrinth:embeddium:0.3.31+mc1.20.1'
     modLocalRuntime 'maven.modrinth:starlight-forge:1.1.2+1.20'
     modCompileOnly "maven.modrinth:oculus:1.20.1-1.8.0"
@@ -76,7 +77,8 @@ dependencies {
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
     localRuntime "org.anarres:jcpp:1.4.14"
     modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
-    modLocalRuntime "curse.maven:flerovium-1142875:6171369"
+    modCompileOnly "curse.maven:flerovium-1142875:6203111"
+    modLocalRuntime "curse.maven:flerovium-1142875:6203111"
 
     /* Valkyrien Skies */
     modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'

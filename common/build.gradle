@@ -22,7 +22,7 @@ dependencies {
     compileOnly "org.sinytra:Connector:1.0.0-beta.46+1.20.1"
 
     /* Performance */
-    modCompileOnly "maven.modrinth:sodium:mc1.20.1-0.5.11"
+    modCompileOnly "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
     modCompileOnly 'maven.modrinth:iris:1.7.6+1.20.1'
 
     /* Valkyrien Skies */

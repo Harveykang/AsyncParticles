@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
-import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBeginBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
@@ -140,8 +139,7 @@ public class AsyncRenderer {
 
 	public static void start(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
 		Minecraft mc = Minecraft.getInstance();
-		ProfilerFiller profiler = mc.getProfiler();
-		profiler.popPush("async_particles");
+		mc.getProfiler().popPush("async_particles");
 		isStart = true;
 		MultiBufferSource.BufferSource bufferSource = mc.levelRenderer.renderBuffers.bufferSource();
 		ParticleEngine particleEngine = mc.particleEngine;
@@ -166,7 +164,6 @@ public class AsyncRenderer {
 		}
 		ASYNC_QUEUE.clear();
 		asyncTask = CompletableFuture.allOf(futures);
-		profiler.pop();
 	}
 
 	public static void irisOpaque(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
@@ -174,16 +171,14 @@ public class AsyncRenderer {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		mc.getProfiler().popPush("async_particles");
-		LevelRenderer levelRenderer = mc.levelRenderer;
-		if (levelRenderer.transparencyChain != null) {
-			RenderTarget particlesTarget = levelRenderer.getParticlesTarget();
-			particlesTarget.clear(Minecraft.ON_OSX);
-			particlesTarget.copyDepthFrom(mc.getMainRenderTarget());
-			RenderStateShard.PARTICLES_TARGET.setupRenderState();
-		}
+		ProfilerFiller profiler = mc.getProfiler();
+		profiler.popPush("async_particles");
+
+		profiler.push("wait_for_async_tasks");
 		asyncTask.join();
+		profiler.pop();
 		isStart = false;
+		LevelRenderer levelRenderer = mc.levelRenderer;
 		MultiBufferSource.BufferSource bufferSource = levelRenderer.renderBuffers.bufferSource();
 
 		ParticleEngine particleEngine = mc.particleEngine;
@@ -200,6 +195,13 @@ public class AsyncRenderer {
 		LevelRenderer levelRenderer = mc.levelRenderer;
 		MultiBufferSource.BufferSource bufferSource = levelRenderer.renderBuffers.bufferSource();
 
+		if (levelRenderer.transparencyChain != null) {
+			RenderTarget particlesTarget = levelRenderer.getParticlesTarget();
+			particlesTarget.clear(Minecraft.ON_OSX);
+			particlesTarget.copyDepthFrom(mc.getMainRenderTarget());
+			RenderStateShard.PARTICLES_TARGET.setupRenderState();
+		}
+
 		ParticleEngine particleEngine = mc.particleEngine;
 		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
@@ -209,13 +211,13 @@ public class AsyncRenderer {
 		}
 	}
 
-	// TODO: 是否需要在transparencyChain.process(partialTick)前调用？
 	public static void join(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
 		if (ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse() && getRenderingSettings() == ParticleRenderingSettings.MIXED) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		mc.getProfiler().popPush("async_particles");
+		ProfilerFiller profiler = mc.getProfiler();
+		profiler.popPush("async_particles");
 		LevelRenderer levelRenderer = mc.levelRenderer;
 		if (levelRenderer.transparencyChain != null) {
 			RenderTarget particlesTarget = levelRenderer.getParticlesTarget();
@@ -223,7 +225,9 @@ public class AsyncRenderer {
 			particlesTarget.copyDepthFrom(mc.getMainRenderTarget());
 			RenderStateShard.PARTICLES_TARGET.setupRenderState();
 		}
+		profiler.push("wait_for_async_tasks");
 		asyncTask.join();
+		profiler.pop();
 		isStart = false;
 
 		MultiBufferSource.BufferSource bufferSource = mc.levelRenderer.renderBuffers.bufferSource();
@@ -339,13 +343,6 @@ public class AsyncRenderer {
 					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse() ? getRenderingSettings().name() : "disabled"));
 			debugConsumer = null;
 		}
-	}
-
-	/* Config */
-
-	public static boolean forceSyncLevelRenderMarkDirty() {
-		return ModListHelper.SODIUM_LOADED // can't mark dirty asynchronously in sodium
-			   || SimplePropertiesConfig.forceSyncLevelRenderMarkDirty;
 	}
 
 	/* Destroy */

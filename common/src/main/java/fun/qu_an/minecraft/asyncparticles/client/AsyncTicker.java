@@ -112,7 +112,7 @@ public class AsyncTicker {
 	// called per frame
 	public static void onRunAllTasks() {
 		// join before runAllTasks
-		if (blockEntityTickFuture != null && !greedyAsyncClientBlockEntityTick()) {
+		if (blockEntityTickFuture != null && !SimplePropertiesConfig.greedyAsyncClientBlockEntityTick()) {
 			blockEntityTickFuture.join();
 			blockEntityTickFuture = null;
 		}
@@ -126,7 +126,7 @@ public class AsyncTicker {
 			}
 			shouldTickParticles = false;
 		} else {
-			if (blockEntityTickFuture != null && greedyAsyncClientBlockEntityTick()) {
+			if (blockEntityTickFuture != null && SimplePropertiesConfig.greedyAsyncClientBlockEntityTick()) {
 				blockEntityTickFuture.join();
 				blockEntityTickFuture = null;
 			}
@@ -146,6 +146,10 @@ public class AsyncTicker {
 			if (!syncList.isEmpty()) {
 				for (Particle particle : syncList) {
 					particleEngine.tickParticle(particle);
+					if (particle instanceof SingleQuadParticleAddon singleQuadParticle
+						&& SimplePropertiesConfig.particleLightCache()){
+						singleQuadParticle.asyncParticles$setLight(particle.getLightColor(0));
+					}
 					if (!(particle instanceof TrackingEmitter)) {
 						((ParticleAddon) particle).asyncParticles$setTicked();
 					}
@@ -209,7 +213,7 @@ public class AsyncTicker {
 		tryDebug();
 		clearSync();
 		CompletableFuture<Void> blockEntityTickFuture;
-		if (!asyncBlockEntityTick()) {
+		if (!SimplePropertiesConfig.asyncBlockEntityTick()) {
 			blockEntityTickFuture = CompletableFuture.runAsync(() -> {
 			}, EXECUTOR);
 		} else {
@@ -252,10 +256,10 @@ public class AsyncTicker {
 	}
 
 	private static void throwIfNotTolerable(@NotNull Throwable e) {
-		if (markSyncIfTickFailed()) {
+		if (SimplePropertiesConfig.markSyncIfTickFailed()) {
 			throw new RuntimeException(e);
 		}
-		if (ignoreParticleTickExceptions()) {
+		if (SimplePropertiesConfig.ignoreParticleTickExceptions()) {
 			return;
 		}
 		if (e instanceof ReportedException
@@ -285,40 +289,6 @@ public class AsyncTicker {
 		}
 		LOGGER.warn("Exception while executing before particle operation", e);
 		return null;
-	}
-
-	/* Config */
-
-	public static boolean asyncBlockEntityTick() {
-		return SimplePropertiesConfig.asyncClientBlockEntityTick;
-	}
-
-	public static boolean greedyAsyncClientBlockEntityTick() {
-		return SimplePropertiesConfig.greedyAsyncClientBlockEntityTick;
-	}
-
-	public static boolean asyncBlockEntityAnimate() {
-		return !ModListHelper.PHYSICSMOD_LOADED && SimplePropertiesConfig.asyncClientBlockEntityAnimate;
-	}
-
-	public static boolean forceDoneBlockAnimateTick() {
-		return SimplePropertiesConfig.forceDoneBlockAnimateTick;
-	}
-
-	public static boolean forceDoneParticleTick() {
-		return SimplePropertiesConfig.forceDoneParticleTick;
-	}
-
-	public static boolean forceDoneTextureTick() {
-		return SimplePropertiesConfig.forceDoneTextureTick;
-	}
-
-	public static boolean markSyncIfTickFailed() {
-		return SimplePropertiesConfig.markSyncIfTickFailed;
-	}
-
-	public static boolean ignoreParticleTickExceptions() {
-		return SimplePropertiesConfig.ignoreParticleTickExceptions;
 	}
 
 	/* Sync Ticking */
