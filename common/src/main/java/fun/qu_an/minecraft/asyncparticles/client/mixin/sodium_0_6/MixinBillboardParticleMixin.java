@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.sodium;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.sodium_0_6;
 
 import com.bawnorton.mixinsquared.TargetHandler;
 import fun.qu_an.minecraft.asyncparticles.client.SingleQuadParticleAddon;
@@ -23,7 +23,7 @@ public abstract class MixinBillboardParticleMixin extends Particle implements Si
 		name = "renderRotatedQuad"
 	)
 	@Redirect(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/SingleQuadParticle;getLightColor(F)I"))
-	private int redirectGetLightColor(SingleQuadParticle instance, float v) {
+	private int redirectGetLightColor1(SingleQuadParticle instance, float v) {
 		return SimplePropertiesConfig.particleLightCache() ? asyncParticles$getLight() : instance.getLightColor(v);
 	}
 }

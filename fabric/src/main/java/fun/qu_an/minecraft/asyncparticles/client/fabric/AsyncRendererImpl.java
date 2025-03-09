@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 @SuppressWarnings("unused")
 public class AsyncRendererImpl {
 	public static void irisOpaque(float f, Camera camera, LightTexture lightTexture, Predicate<ParticleRenderType> predicate) {
-		if (!ModListHelper.IRIS_LIKE_LOADED || !Iris.isPackInUseQuick() || AsyncRenderer.getRenderingSettings() != ParticleRenderingSettings.MIXED) {
+		if (!ModListHelper.FABRIC_IRIS_LOADED || !Iris.isPackInUseQuick() || AsyncRenderer.getRenderingSettings() != ParticleRenderingSettings.MIXED) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -33,14 +33,12 @@ public class AsyncRendererImpl {
 		AsyncRenderer.isStart = false;
 
 		ParticleEngine particleEngine = mc.particleEngine;
-		if (ModListHelper.FABRIC_IRIS_LOADED) {
-			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
-		}
+		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
 		particleEngine.render(lightTexture, camera, f);
 	}
 
 	public static void irisTranslucent(float f, Camera camera, LightTexture lightTexture, Predicate<ParticleRenderType> predicate) {
-		if (!ModListHelper.IRIS_LIKE_LOADED || !Iris.isPackInUseQuick() || AsyncRenderer.getRenderingSettings() != ParticleRenderingSettings.MIXED) {
+		if (!ModListHelper.FABRIC_IRIS_LOADED || !Iris.isPackInUseQuick() || AsyncRenderer.getRenderingSettings() != ParticleRenderingSettings.MIXED) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -54,9 +52,7 @@ public class AsyncRendererImpl {
 		}
 
 		ParticleEngine particleEngine = mc.particleEngine;
-		if (ModListHelper.FABRIC_IRIS_LOADED) {
-			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
-		}
+		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
 		particleEngine.render(lightTexture, camera, f);
 
 		if (levelRenderer.transparencyChain != null) {

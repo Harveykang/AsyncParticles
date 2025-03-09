@@ -54,6 +54,7 @@ dependencies {
 
     /* Performance */
     modLocalRuntime "maven.modrinth:sodium:mc1.21.1-0.6.9-fabric"
+    modCompileOnly 'maven.modrinth:iris:1.8.8+1.21.1-fabric'
     modLocalRuntime 'maven.modrinth:iris:1.8.8+1.21.1-fabric'
     localRuntime "org.antlr:antlr4-runtime:4.13.1"
     localRuntime "io.github.douira:glsl-transformer:2.0.1"

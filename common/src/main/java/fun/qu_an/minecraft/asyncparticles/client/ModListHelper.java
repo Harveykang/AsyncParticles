@@ -34,10 +34,8 @@ public class ModListHelper {
 	public static final boolean FORGE_PARTICLERAIN_LOADED = isForgeModLoaded("particlerain");
 	/* Flywheel */
 	public static final boolean FLYWHEEL_LOADED = isModLoaded("flywheel");
-	public static final int FLYWHEEL_MAJOR_VERSION = versionMajor("flywheel");
 	/* Create */
 	public static final boolean CREATE_LOADED = isModLoaded("create");
-	public static final int CREATE_MAJOR_VERSION = versionMajor("create");
 	public static final boolean FABRIC_CREATE_LOADED = isFabricModLoaded("create");
 	public static final boolean FORGE_CREATE_LOADED = isForgeModLoaded("create");
 	/* Tombstone */
@@ -64,7 +62,13 @@ public class ModListHelper {
 	}
 
 	@ExpectPlatform
-	public static int versionMajor(String modId) {
+	public static boolean versionCheck(String modId, String minInclusive, String maxExclusive) {
+		// Suppressing the ConstantValue check because this is a generated method.
+		throwAssertionError();
+		return true;
+	}
+
+	private static void throwAssertionError() {
 		throw new AssertionError();
 	}
 

@@ -60,7 +60,10 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			}
 			case "fake_renders" -> true;
 			case "create" -> ModListHelper.CREATE_LOADED;
-			case "sodium" -> ModListHelper.SODIUM_LOADED;
+			case "sodium_0_6" -> ModListHelper.SODIUM_LOADED
+							   && ModListHelper.versionCheck("sodium", "0.6", "0.7");
+			case "sodium_0_7" -> ModListHelper.SODIUM_LOADED
+							   && ModListHelper.versionCheck("sodium", "0.7", "0.8");
 			case "iris_like" -> ModListHelper.IRIS_LIKE_LOADED;
 			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);

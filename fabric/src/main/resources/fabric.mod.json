@@ -5,6 +5,8 @@
   "name": "AsyncParticles",
   "description": "",
   "authors": ["Harvey_Husky"],
+  "sources": "https://github.com/Harveykang/AsyncParticles",
+  "issues": "https://github.com/Harveykang/AsyncParticles/issues",
   "contact": {},
   "license": "MIT",
   "icon": "assets/asyncparticles/icon.png",

@@ -1,13 +1,13 @@
 modLoader = "javafml"
 loaderVersion = "[4,)"
-#issueTrackerURL = ""
-license = "Insert License Here"
+issueTrackerURL = "https://github.com/Harveykang/AsyncParticles/issues"
+license = "MIT"
 
 [[mods]]
 modId = "asyncparticles"
 version = "${version}"
 displayName = "AsyncParticles"
-authors = "Me!"
+authors = "Harvey_Husky"
 description = '''
 This is an example description! Tell everyone what your mod is about!
 '''

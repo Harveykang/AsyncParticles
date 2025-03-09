@@ -40,7 +40,8 @@
     "iris_like.MixinIris",
     "iris_like.MixinOldFullyBufferedMultiBufferSource",
     "lodestone.MixinLodestoneWorldParticle",
-    "sodium.MixinBillboardParticleMixin"
+    "sodium_0_6.MixinBillboardParticleMixin",
+    "sodium_0_7.MixinBillboardParticleMixin"
   ],
   "injectors": {
     "defaultRequire": 1

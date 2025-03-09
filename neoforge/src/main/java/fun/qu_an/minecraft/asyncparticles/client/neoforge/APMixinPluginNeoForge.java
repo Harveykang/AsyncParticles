@@ -28,7 +28,7 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 		return switch (split[0]) {
 			case "particlerain_create" -> ModListHelper.FORGE_PARTICLERAIN_LOADED && ModListHelper.FORGE_CREATE_LOADED;
 			case "particlerain" -> ModListHelper.FORGE_PARTICLERAIN_LOADED;
-			case "create" -> ModListHelper.FORGE_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION == 6;
+			case "create" -> ModListHelper.FORGE_CREATE_LOADED;
 			// TODO: 下面这个 mod 没有正式发布，且不确定是否是唯一的 forge 移植版
 			case "effecticularity" -> ModListHelper.FORGE_EFFECTIVE_LOADED;
 			case "embeddium" -> ModListHelper.EMBEDDIUM_LOADED;
