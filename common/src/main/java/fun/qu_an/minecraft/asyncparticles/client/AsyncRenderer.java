@@ -5,9 +5,9 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
-import fun.qu_an.minecraft.asyncparticles.client.util.FakeBeginBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
+import fun.qu_an.minecraft.asyncparticles.client.util.TryAndStoreFakeBufferBuilder;
 import it.unimi.dsi.fastutil.Pair;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.api.v0.IrisApi;
@@ -43,54 +43,38 @@ public class AsyncRenderer {
 		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
 		SYNC_PARTICLE_TYPES.add(MobAppearanceParticle.class);
 		if (ModListHelper.DUMMMMMMY_LOADED) {
-			try {
-				addSyncByClassName("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
-			} catch (Exception e) {
-				LOGGER.error("", e);
-			}
+			addSyncByClassName("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
 		}
 		if (ModListHelper.FABRIC_EFFECTIVE_LOADED) {
-			try {
-				addSyncByClassName("org.ladysnake.effective.core.particle.SplashParticle");
-			} catch (Exception e) {
-				LOGGER.error("", e);
-			}
+			addSyncByClassName("org.ladysnake.effective.core.particle.SplashParticle");
 		}
 		if (ModListHelper.FORGE_EFFECTIVE_LOADED) {
-			try {
-				addSyncByClassName("concerrox.effective.particle.SplashParticle");
-			} catch (Exception e) {
-				LOGGER.error("", e);
-			}
+			addSyncByClassName("concerrox.effective.particle.SplashParticle");
 		}
 		if (ModListHelper.TOMBSTONE_LOADED) {
 			// tomestone may have duplicate ids with other mods, so we need to check if these classes are present
-			try {
-				addSyncByClassName("ovh.corail.tombstone.particle.ParticleCasting");
-				addSyncByClassName("ovh.corail.tombstone.particle.ParticleGhost");
-				addSyncByClassName("ovh.corail.tombstone.particle.ParticleGraveSoul");
-				addSyncByClassName("ovh.corail.tombstone.particle.ParticleMagicCircle");
-				addSyncByClassName("ovh.corail.tombstone.particle.ParticleMarker");
-				addSyncByClassName("ovh.corail.tombstone.particle.ParticleRounding");
-			} catch (Exception e) {
-				LOGGER.error("", e);
-			}
+			addSyncByClassName("ovh.corail.tombstone.particle.ParticleCasting");
+			addSyncByClassName("ovh.corail.tombstone.particle.ParticleGhost");
+			addSyncByClassName("ovh.corail.tombstone.particle.ParticleGraveSoul");
+			addSyncByClassName("ovh.corail.tombstone.particle.ParticleMagicCircle");
+			addSyncByClassName("ovh.corail.tombstone.particle.ParticleMarker");
+			addSyncByClassName("ovh.corail.tombstone.particle.ParticleRounding");
 		}
 		if (ModListHelper.PHYSICSMOD_LOADED) {
-			try {
-				addSyncByClassName("net.diebuddies.minecraft.weather.RainParticle");
-				addSyncByClassName("net.diebuddies.minecraft.weather.DustParticle");
-				addSyncByClassName("net.diebuddies.minecraft.weather.SnowParticle");
-				addSyncByClassName("net.diebuddies.physics.ocean.RainParticle");
-			} catch (Exception e) {
-				LOGGER.error("", e);
-			}
+			addSyncByClassName("net.diebuddies.minecraft.weather.RainParticle");
+			addSyncByClassName("net.diebuddies.minecraft.weather.DustParticle");
+			addSyncByClassName("net.diebuddies.minecraft.weather.SnowParticle");
+			addSyncByClassName("net.diebuddies.physics.ocean.RainParticle");
 		}
 		// TODO: configure this set
 	}
 
-	private static void addSyncByClassName(String className) throws Exception {
-		SYNC_PARTICLE_TYPES.add((Class<? extends Particle>) Class.forName(className));
+	private static void addSyncByClassName(String className) {
+		try {
+			SYNC_PARTICLE_TYPES.add((Class<? extends Particle>) Class.forName(className));
+		} catch (Exception e) {
+			LOGGER.error("", e);
+		}
 	}
 
 	//	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = new ConcurrentHashMap<>();
@@ -139,7 +123,8 @@ public class AsyncRenderer {
 
 	public static void start(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
 		Minecraft mc = Minecraft.getInstance();
-		mc.getProfiler().popPush("async_particles");
+		ProfilerFiller profiler = mc.getProfiler();
+		profiler.popPush("async_particles");
 		isStart = true;
 		MultiBufferSource.BufferSource bufferSource = mc.levelRenderer.renderBuffers.bufferSource();
 		ParticleEngine particleEngine = mc.particleEngine;
@@ -157,7 +142,7 @@ public class AsyncRenderer {
 				.exceptionally(e -> {
 					LOGGER.error("Error rendering particle", e);
 					Minecraft mc1 = Minecraft.getInstance();
-					if (mc1.level != null && mc1.player != null){
+					if (mc1.level != null && mc1.player != null) {
 						throw new RuntimeException(e);
 					}
 					return null;
@@ -165,6 +150,7 @@ public class AsyncRenderer {
 		}
 		ASYNC_QUEUE.clear();
 		asyncTask = CompletableFuture.allOf(futures);
+		profiler.pop();
 	}
 
 	public static void irisOpaque(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
@@ -264,36 +250,37 @@ public class AsyncRenderer {
 		}
 		Pair<VertexFormat.Mode, VertexFormat> pair = FORMATS.computeIfAbsent(particleRenderType, k -> computeVertexFormatPair(k, textureManager));
 		if (pair == EMPTY_FORMAT) {
-			return FakeBeginBufferBuilder.INSTANCE;
+			return FakeBufferBuilder.INSTANCE;
 		}
 		builder.begin(pair.first(), pair.second());
 		return builder;
 	}
 
-	public static boolean begin(ParticleRenderType particleRenderType, TextureManager textureManager, BufferBuilder builder) {
-		if (builder.building()) {
-			return true;
-		}
-		Pair<VertexFormat.Mode, VertexFormat> pair = FORMATS.computeIfAbsent(particleRenderType, k -> computeVertexFormatPair(k, textureManager));
-		if (pair == EMPTY_FORMAT) {
-			return false;
-		}
-		builder.begin(pair.first(), pair.second());
-		return true;
-	}
-
 	private static @NotNull Pair<VertexFormat.Mode, VertexFormat> computeVertexFormatPair(ParticleRenderType k, TextureManager textureManager) {
 		// we try and store the vertex format/mode to avoid call begin() twice per frame...
-		FakeBufferBuilder fakeBuilder = new FakeBufferBuilder();
+		TryAndStoreFakeBufferBuilder fakeBufferBuilder = new TryAndStoreFakeBufferBuilder();
 		// compatibility shit...
-		k.begin(fakeBuilder, textureManager);
-		k.end(FakeTesselator.INSTANCE); // we must call end since some mod may reset something in this method
-		VertexFormat.Mode mode = fakeBuilder.getVertexFormatMode();
-		VertexFormat format = fakeBuilder.getFormat();
-		if (mode == null || format == null) {
+		k.begin(fakeBufferBuilder, textureManager);
+		RuntimeException exception = null;
+		try {
+			k.end(FakeTesselator.INSTANCE); // we must call end since some mod may reset something in this method
+		} catch (Exception e) {
+			// pray it doesn't throw...
+			// this most breaks only one frame, so we can ignore it for now...
+			exception = new RuntimeException(e);
+			LOGGER.warn("Exception try&store-ing vertex format/mode for particle render type: {}", k, e);
+		}
+		VertexFormat.Mode mode = fakeBufferBuilder.getVertexFormatMode();
+		VertexFormat format = fakeBufferBuilder.getFormat();
+		if (mode != null && format != null) {
+			return Pair.of(mode, format);
+		}
+		if (exception == null) {
 			return EMPTY_FORMAT;
 		}
-		return Pair.of(mode, format);
+		// this should never happen...
+		// because custom particles should not throw any exception in end()...
+		throw exception;
 	}
 
 	/* Sync Rendering */

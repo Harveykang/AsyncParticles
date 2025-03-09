@@ -40,6 +40,9 @@ public class ModListHelper {
 	/* Create */
 	public static final boolean CREATE_LOADED = isModLoaded("create");
 	public static final int CREATE_MAJOR_VERSION = versionMajor("create");
+	/* Epic Fight */
+	public static final boolean EPICFIGHT_LOADED = isModLoaded("epicfight");
+	public static final boolean FORGE_EPICFIGHT_LOADED = isForgeModLoaded("epicfight");
 
 	static {
 		System.out.println("CREATE_MAJOR_VERSION: " + CREATE_MAJOR_VERSION);

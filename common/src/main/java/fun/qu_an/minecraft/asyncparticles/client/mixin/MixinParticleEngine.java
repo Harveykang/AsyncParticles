@@ -4,6 +4,8 @@ import com.google.common.collect.EvictingQueue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.*;
+import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.CountManagements;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
@@ -117,9 +119,13 @@ public abstract class MixinParticleEngine {
 								emitter.remove();
 							}
 						}
-					} catch (Throwable t) {
-						if (SimplePropertiesConfig.markSyncIfTickFailed()){
-							LOGGER.error("Error ticking emitter particle {}, marking as sync", emitter, t);
+					} catch (Exception t) {
+						if (AsyncTicker.isTolerable(t)) {
+							LOGGER.warn("Exception ticking emitter particle {}, you can ignore it if it doesn't happen frequently.", emitter, t);
+							continue;
+						}
+						if (SimplePropertiesConfig.markSyncIfTickFailed()) {
+							LOGGER.warn("Exception ticking emitter particle {}, marking as sync", emitter, t);
 							((ParticleAddon) emitter).asyncedParticles$setTickSync();
 							AsyncTicker.markAsSync(emitter.getClass());
 							AsyncTicker.recordSync(emitter);
@@ -183,10 +189,11 @@ public abstract class MixinParticleEngine {
 				continue;
 			}
 			try {
+				// keep this tick() to compatible with some mixins...
 				particle.tick();
-				if (particle instanceof SingleQuadParticleAddon singleQuadParticle
-					&& SimplePropertiesConfig.particleLightCache()){
-					singleQuadParticle.asyncParticles$setLight(particle.getLightColor(0));
+				if (particle instanceof LightCachedParticleAddon lightCachedParticle
+					&& SimplePropertiesConfig.particleLightCache()) {
+					lightCachedParticle.asyncParticles$refresh();
 				}
 				((ParticleAddon) particle).asyncParticles$setTicked();
 				if (ModListHelper.VS_LOADED) {
@@ -194,9 +201,13 @@ public abstract class MixinParticleEngine {
 						particle.remove();
 					}
 				}
-			} catch (Throwable t) {
+			} catch (Exception t) {
+				if (AsyncTicker.isTolerable(t)) {
+					LOGGER.warn("Exception ticking particle {}, you can ignore it if it doesn't happen frequently.", particle, t);
+					continue;
+				}
 				if (SimplePropertiesConfig.markSyncIfTickFailed()) {
-					LOGGER.error("Error ticking particle {}, marking as sync", particle, t);
+					LOGGER.warn("Exception ticking particle {}, marking as sync", particle, t);
 					((ParticleAddon) particle).asyncedParticles$setTickSync();
 					AsyncTicker.markAsSync(particle.getClass());
 					AsyncTicker.recordSync(particle);
@@ -205,40 +216,7 @@ public abstract class MixinParticleEngine {
 				}
 			}
 		}
-//		int size = Math.min(16384, collection.size());
-//		Iterator<Particle> iterator = collection.iterator();
-//		while (iterator.hasNext()) {
-//			var particles = new Particle[size];
-//			for (int j = 0; j < size && iterator.hasNext(); j++) {
-//				particles[j] = iterator.next();
-//			}
-//			AsyncTicker.particleOperations.add(combineTasks(particles));
-//		}
 	}
-
-//	@Unique
-//	private Runnable combineTasks(Particle... task) {
-//		int size = task.length;
-//		return () -> {
-//			//noinspection ForLoopReplaceableByForEach
-//			for (int i = 0; i < size; i++) {
-//				if (AsyncTicker.cancelled) {
-//					return;
-//				}
-//				Particle particle = task[i];
-//				if (particle == null) {
-//					return;
-//				}
-//				this.tickParticle(particle);
-//				((ParticleAddon) particle).asyncParticles$setTicked();
-//				if (ModListHelper.VS_LOADED) {
-//					if (VSClientUtils.isOutOfSight(particle)) {
-//						particle.remove();
-//					}
-//				}
-//			}
-//		};
-//	}
 
 	@WrapMethod(method = "tick")
 	public void wrapTick(Operation<Void> original) {
@@ -250,6 +228,10 @@ public abstract class MixinParticleEngine {
 		if (!AsyncTicker.shouldTickParticles) {
 			particle.remove(); // to compatible with some mods...
 			ci.cancel();
+			return;
+		}
+		if (particle instanceof LightCachedParticleAddon lightCachedParticle) {
+			lightCachedParticle.asyncParticles$refresh();
 		}
 	}
 
@@ -258,20 +240,6 @@ public abstract class MixinParticleEngine {
 		// do nothing
 		// we check this later in tick()
 	}
-
-//	@Inject(method = "reload", at = @At(value = "RETURN"), cancellable = true)
-//	public void reload(CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-//		cir.setReturnValue(cir.getReturnValue().thenRun(() -> {
-//			try {
-//				SimplePropertiesConfig.load();
-//			} catch (IOException e) {
-//				throw new RuntimeException(e);
-//			}
-//		}).exceptionally(t -> {
-//			Minecraft.getInstance().gui.getChat().addMessage(Component.literal(t.getMessage()));
-//			return null;
-//		}));
-//	}
 
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void redirectClearParticles(CallbackInfo ci) {

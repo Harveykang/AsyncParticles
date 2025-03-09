@@ -125,7 +125,9 @@ dependencies {
 //    modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.20.1+forge"
 //    modLocalRuntime "maven.modrinth:fzzy-config:0.6.4+1.20.1+forge"
 //    modLocalRuntime("com.github.Fallen-Breath.conditional-mixin:conditional-mixin-forge:0.6.2")
-
+    /* Epic Fight */
+    modCompileOnly "maven.modrinth:epic-fight:20.9.7"
+    modLocalRuntime "maven.modrinth:epic-fight:20.9.7"
 }
 
 processResources {

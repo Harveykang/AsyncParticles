@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client;
+package fun.qu_an.minecraft.asyncparticles.client.addon;
 
 public interface ParticleAddon {
 	boolean asyncParticles$shouldRemove();

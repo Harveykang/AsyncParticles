@@ -72,7 +72,6 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			case "vs2" -> ModListHelper.VS_LOADED;
 			case "create" -> ModListHelper.CREATE_LOADED;
 			case "iris_like" -> ModListHelper.IRIS_LIKE_LOADED;
-			case "sodium_like" -> ModListHelper.SODIUM_LIKE_LOADED;
 			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
 			case "hexcasting" -> ModListHelper.HEXCASTING_LOADED;
 			case "flywheel" -> ModListHelper.FLYWHEEL_LOADED && ModListHelper.FLYWHEEL_MAJOR_VERSION == 1;

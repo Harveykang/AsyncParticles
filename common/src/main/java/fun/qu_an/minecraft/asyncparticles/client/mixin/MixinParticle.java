@@ -1,11 +1,10 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
-import fun.qu_an.minecraft.asyncparticles.client.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -43,8 +42,12 @@ public abstract class MixinParticle implements ParticleAddon {
 
 	@Inject(method = "<init>*", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
-		this.asyncParticles$renderSync = AsyncRenderer.shouldSync(((Particle) (Object) this).getClass());
-		this.asyncParticles$tickSync = AsyncTicker.shouldSync(((Particle) (Object) this).getClass());
+		if (AsyncRenderer.shouldSync(((Particle) (Object) this).getClass())) {
+			asyncedParticles$setRenderSync();
+		}
+		if (AsyncTicker.shouldSync(((Particle) (Object) this).getClass())) {
+			asyncedParticles$setTickSync();
+		}
 	}
 
 	@WrapOperation(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V",

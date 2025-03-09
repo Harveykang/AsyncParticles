@@ -2,6 +2,8 @@ package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.google.common.collect.EvictingQueue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.ReportedException;
@@ -26,6 +28,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static fun.qu_an.minecraft.asyncparticles.client.util.Utils.toThrowDirectly;
+
 // TODO: 整理这一坨
 public class AsyncTicker {
 	public static final Logger LOGGER = LogManager.getLogger();
@@ -43,7 +47,6 @@ public class AsyncTicker {
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 
 	static {
-//		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
 		if (ModListHelper.PHYSICSMOD_LOADED) {
 			try {
 				addSyncByClassName("net.diebuddies.minecraft.weather.RainParticle");
@@ -56,15 +59,12 @@ public class AsyncTicker {
 		}
 	}
 
-	private static void addSyncByClassName(String className) throws Exception {
-		SYNC_PARTICLE_TYPES.add((Class<? extends Particle>) Class.forName(className));
-	}
-
 	private static final List<Particle> SYNC_PARTICLES = new ArrayList<>();
 
 	public static final List<Runnable> BLOCK_ENTITY_OPERATIONS = new ArrayList<>();
 	public static final List<Runnable> PARTICLE_OPERATIONS = new ArrayList<>();
 	private static boolean cancelled = false;
+	private static boolean tickingSync;
 	public static boolean shouldTickParticles = true;
 	public static CompletableFuture<Void> particleCleanup;
 	public static Operation<Void> tickParticleEngine;
@@ -97,6 +97,10 @@ public class AsyncTicker {
 			forkJoinWorkerThread.setDaemon(true);
 			return forkJoinWorkerThread;
 		}, Util::onThreadException, true);
+	}
+
+	private static void addSyncByClassName(String className) throws Exception {
+		SYNC_PARTICLE_TYPES.add((Class<? extends Particle>) Class.forName(className));
 	}
 
 	/* Ticker */
@@ -144,12 +148,14 @@ public class AsyncTicker {
 
 			List<? extends Particle> syncList = AsyncTicker.getSync();
 			if (!syncList.isEmpty()) {
+				tickingSync = true;
 				for (Particle particle : syncList) {
 					particleEngine.tickParticle(particle);
-					if (particle instanceof SingleQuadParticleAddon singleQuadParticle
-						&& SimplePropertiesConfig.particleLightCache()){
-						singleQuadParticle.asyncParticles$setLight(particle.getLightColor(0));
-					}
+					// refresh light cache asynchronously
+//					if (particle instanceof LightCachedParticleAddon lightCachedParticle
+//						&& SimplePropertiesConfig.particleLightCache()) {
+//						lightCachedParticle.asyncParticles$refresh();
+//					}
 					if (!(particle instanceof TrackingEmitter)) {
 						((ParticleAddon) particle).asyncParticles$setTicked();
 					}
@@ -159,6 +165,7 @@ public class AsyncTicker {
 						}
 					}
 				}
+				tickingSync = false;
 			}
 
 			if (!mc.isPaused()) {
@@ -189,6 +196,9 @@ public class AsyncTicker {
 				particleCleanup = CompletableFuture.allOf(futures);
 			}
 		}
+	}
+
+	public static void updateLightCache(LightCachedParticleAddon lightCachedParticle) {
 	}
 
 	public static void onTickAfter(int j) {
@@ -249,46 +259,49 @@ public class AsyncTicker {
 			.thenCompose(v -> CompletableFuture.allOf(Arrays.stream(particleTasks)
 				.map(runnable -> CompletableFuture.runAsync(runnable, EXECUTOR)
 					.exceptionally(e -> {
-						throwIfNotTolerable(e);
-						return null;
+						if (!SimplePropertiesConfig.markSyncIfTickFailed()
+							&& isTolerable(e)) {
+							LOGGER.warn("Exception while executing particle operation, you can ignore it if it doesn't happen frequently.", e);
+							return null;
+						}
+						throw toThrowDirectly(e);
 					}))
 				.toArray(CompletableFuture[]::new)));
 	}
 
-	private static void throwIfNotTolerable(@NotNull Throwable e) {
-		if (SimplePropertiesConfig.markSyncIfTickFailed()) {
-			throw new RuntimeException(e);
+	public static boolean isTickingSync() {
+		return tickingSync;
+	}
+
+	private static Void tickBeforeExceptionally(Throwable e) {
+		if (!(e instanceof Exception)) {
+			throw toThrowDirectly(e);
 		}
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.level != null && mc.player != null) {
+			// FIXME: 更好的异常处理方案
+			throw toThrowDirectly(e);
+		}
+		LOGGER.warn("Exception while executing before particle operation", e);
+		return null;
+	}
+
+	public static boolean isTolerable(@NotNull Throwable e) {
 		if (SimplePropertiesConfig.ignoreParticleTickExceptions()) {
-			return;
+			return true;
 		}
 		if (e instanceof ReportedException
 			|| e instanceof CompletionException
 			|| e.getClass() == RuntimeException.class) {
 			Throwable t = e.getCause();
 			if (t == null) {
-				throw new RuntimeException(e);
+				return false;
 			}
-			throwIfNotTolerable(t);
-			return;
+			return isTolerable(t);
 		}
-		if (e instanceof MissingPaletteEntryException
-			|| e instanceof NullPointerException
-			|| e instanceof ArrayIndexOutOfBoundsException) {
-			LOGGER.warn("Exception while executing particle operation, you can ignore it if it doesn't happen frequently.", e);
-			return;
-		}
-		throw new RuntimeException(e);
-	}
-
-	private static Void tickBeforeExceptionally(Throwable e) {
-		Minecraft mc = Minecraft.getInstance();
-		if (mc.level != null && mc.player != null) {
-			// FIXME: 更好的异常处理方案
-			throw new RuntimeException(e);
-		}
-		LOGGER.warn("Exception while executing before particle operation", e);
-		return null;
+		return e instanceof MissingPaletteEntryException
+			   || e instanceof NullPointerException
+			   || e instanceof ArrayIndexOutOfBoundsException;
 	}
 
 	/* Sync Ticking */

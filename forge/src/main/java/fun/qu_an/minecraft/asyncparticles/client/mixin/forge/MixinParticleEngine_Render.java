@@ -5,9 +5,9 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.util.CustomableEndTesselator;
-import fun.qu_an.minecraft.asyncparticles.client.util.FakeBeginBufferBuilder;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.util.CustomTesselator;
+import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -82,11 +82,12 @@ public abstract class MixinParticleEngine_Render {
 			BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
 			if (!AsyncRenderer.isStart) {
 				profiler.push("sync_particles");
-				Collection<? extends Particle> particles1 = bufferBuilder == FakeBeginBufferBuilder.INSTANCE
+				Collection<? extends Particle> particles1 = bufferBuilder == FakeBufferBuilder.INSTANCE
 					? iterable
 					: AsyncRenderer.getSync(particleRenderType);
 				// begin before sync particles to be compatible with some mod
-				particleRenderType.begin(FakeBeginBufferBuilder.INSTANCE, this.textureManager);
+				RenderSystem.setShader(GameRenderer::getParticleShader);
+				particleRenderType.begin(FakeBufferBuilder.INSTANCE, this.textureManager);
 				if (!particles1.isEmpty()) {
 					for (Particle particle : particles1) {
 						if (!frustum.isVisible(particle.getBoundingBox())) {
@@ -113,15 +114,16 @@ public abstract class MixinParticleEngine_Render {
 					continue;
 				}
 				profiler.push("upload_particles");
-				RenderSystem.setShader(GameRenderer::getParticleShader);
 				// use fake, mod compatibility
-				particleRenderType.end(CustomableEndTesselator.INSTANCE.onEnd(() -> BufferUploader.drawWithShader(bufferBuilder.end())));
+				particleRenderType.end(bufferBuilder == FakeBufferBuilder.INSTANCE
+					? FakeTesselator.INSTANCE
+					: CustomTesselator.of(bufferBuilder, b -> BufferUploader.drawWithShader(b.end())));
 				if (bufferBuilder.building()) {
 					bufferBuilder.end().release(); // release buffer manually if not released by particleRenderType.end()
 				}
 				profiler.pop();
 			} else {
-				if (bufferBuilder == FakeBeginBufferBuilder.INSTANCE) {
+				if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
 					continue;
 				}
 				profiler.push("async_particles");
