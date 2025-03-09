@@ -150,6 +150,9 @@ public abstract class MixinParticleEngine {
 				if (p == null) { // might be null because ArrayDeque is not thread-safe
 					return;
 				}
+				if (((ParticleAddon) p).asyncedParticles$isTickSync()) {
+					AsyncTicker.recordSync(p);
+				}
 				Queue<Particle> queue = this.particles.computeIfAbsent(p.getRenderType(),
 					(p_107347_) -> EvictingQueue.create(SimplePropertiesConfig.limit));
 				while (queue.size() >= SimplePropertiesConfig.limit) {
@@ -185,7 +188,7 @@ public abstract class MixinParticleEngine {
 			}
 			Particle particle = iterator.next();
 			if (((ParticleAddon) particle).asyncedParticles$isTickSync()) {
-				AsyncTicker.recordSync(particle); // TODO: 不要每次tick时记录
+				AsyncTicker.recordSync(particle);
 				continue;
 			}
 			try {
@@ -220,6 +223,10 @@ public abstract class MixinParticleEngine {
 
 	@WrapMethod(method = "tick")
 	public void wrapTick(Operation<Void> original) {
+		// tick sync
+		if (AsyncTicker.shouldTickParticles){
+			AsyncTicker.tickSync();
+		}
 		AsyncTicker.tickParticleEngine = original;
 	}
 

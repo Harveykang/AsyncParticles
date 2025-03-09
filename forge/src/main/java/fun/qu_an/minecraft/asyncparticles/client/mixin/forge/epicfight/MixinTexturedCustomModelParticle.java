@@ -14,8 +14,9 @@ public abstract class MixinTexturedCustomModelParticle implements ParticleAddon 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
 		asyncedParticles$setRenderSync();
-		if (!AsyncRenderer.shouldSync(((Particle)(Object)this).getClass())) {
-			AsyncRenderer.markAsSync(((Particle)(Object)this).getClass());
+		Class<? extends Particle> clazz = ((Particle) (Object) this).getClass();
+		if (!AsyncRenderer.shouldSync(clazz)) {
+			AsyncRenderer.markAsSync(clazz);
 		}
 	}
 }

@@ -22,6 +22,7 @@ public class SimplePropertiesConfig {
 	private static boolean markSyncIfTickFailed = false;
 	private static boolean ignoreParticleTickExceptions = false;
 	private static boolean particleLightCache = true;
+	private static boolean collideWithCreateModContraptions = true;
 
 	private static boolean shouldSave;
 

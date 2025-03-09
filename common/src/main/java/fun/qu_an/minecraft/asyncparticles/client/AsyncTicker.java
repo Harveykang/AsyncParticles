@@ -48,18 +48,14 @@ public class AsyncTicker {
 
 	static {
 		if (ModListHelper.PHYSICSMOD_LOADED) {
-			try {
-				addSyncByClassName("net.diebuddies.minecraft.weather.RainParticle");
-				addSyncByClassName("net.diebuddies.minecraft.weather.DustParticle");
-				addSyncByClassName("net.diebuddies.minecraft.weather.SnowParticle");
-				addSyncByClassName("net.diebuddies.physics.ocean.RainParticle");
-			} catch (Exception e) {
-				LOGGER.error("", e);
-			}
+			addSyncByClassName("net.diebuddies.minecraft.weather.RainParticle");
+			addSyncByClassName("net.diebuddies.minecraft.weather.DustParticle");
+			addSyncByClassName("net.diebuddies.minecraft.weather.SnowParticle");
+			addSyncByClassName("net.diebuddies.physics.ocean.RainParticle");
 		}
 	}
 
-	private static final List<Particle> SYNC_PARTICLES = new ArrayList<>();
+	private static final Set<Particle> SYNC_PARTICLES = Collections.newSetFromMap(new IdentityHashMap<>());
 
 	public static final List<Runnable> BLOCK_ENTITY_OPERATIONS = new ArrayList<>();
 	public static final List<Runnable> PARTICLE_OPERATIONS = new ArrayList<>();
@@ -99,8 +95,12 @@ public class AsyncTicker {
 		}, Util::onThreadException, true);
 	}
 
-	private static void addSyncByClassName(String className) throws Exception {
-		SYNC_PARTICLE_TYPES.add((Class<? extends Particle>) Class.forName(className));
+	private static void addSyncByClassName(String className) {
+		try {
+			SYNC_PARTICLE_TYPES.add((Class<? extends Particle>) Class.forName(className));
+		} catch (Exception e) {
+			LOGGER.error("", e);
+		}
 	}
 
 	/* Ticker */
@@ -146,28 +146,6 @@ public class AsyncTicker {
 			Minecraft mc = Minecraft.getInstance();
 			ParticleEngine particleEngine = mc.particleEngine;
 
-			List<? extends Particle> syncList = AsyncTicker.getSync();
-			if (!syncList.isEmpty()) {
-				tickingSync = true;
-				for (Particle particle : syncList) {
-					particleEngine.tickParticle(particle);
-					// refresh light cache asynchronously
-//					if (particle instanceof LightCachedParticleAddon lightCachedParticle
-//						&& SimplePropertiesConfig.particleLightCache()) {
-//						lightCachedParticle.asyncParticles$refresh();
-//					}
-					if (!(particle instanceof TrackingEmitter)) {
-						((ParticleAddon) particle).asyncParticles$setTicked();
-					}
-					if (ModListHelper.VS_LOADED) {
-						if (VSClientUtils.isOutOfSight(particle)) {
-							particle.remove();
-						}
-					}
-				}
-				tickingSync = false;
-			}
-
 			if (!mc.isPaused()) {
 				Collection<Queue<Particle>> values = particleEngine.particles.values();
 				var futures = new CompletableFuture[values.size()];
@@ -182,7 +160,9 @@ public class AsyncTicker {
 						particles.removeIf(particle1 -> {
 							// JDK 并没有定义这个判断会对每个对象执行多少次，但目前没遇到例外情况
 							// use ArrayDeque's removeIf to improve performance
-							boolean b = ((ParticleAddon) particle1).asyncParticles$shouldRemove();
+							boolean b = ((ParticleAddon) particle1).asyncedParticles$isTickSync()
+								? !particle1.isAlive()
+								: ((ParticleAddon) particle1).asyncParticles$shouldRemove();
 							if (b) {
 								// make sure the tracked count is correct
 								particle1.getParticleGroup().ifPresent(
@@ -221,7 +201,6 @@ public class AsyncTicker {
 		}
 		tryReload();
 		tryDebug();
-		clearSync();
 		CompletableFuture<Void> blockEntityTickFuture;
 		if (!SimplePropertiesConfig.asyncBlockEntityTick()) {
 			blockEntityTickFuture = CompletableFuture.runAsync(() -> {
@@ -306,6 +285,37 @@ public class AsyncTicker {
 
 	/* Sync Ticking */
 
+	public static void tickSync() {
+		if (SYNC_PARTICLES.isEmpty()) {
+			return;
+		}
+		tickingSync = true;
+		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
+		for (Iterator<Particle> iterator = SYNC_PARTICLES.iterator(); iterator.hasNext(); ) {
+			Particle particle = iterator.next();
+			particleEngine.tickParticle(particle);
+			// refresh light cache asynchronously
+//					if (particle instanceof LightCachedParticleAddon lightCachedParticle
+//						&& SimplePropertiesConfig.particleLightCache()) {
+//						lightCachedParticle.asyncParticles$refresh();
+//					}
+			if (!(particle instanceof TrackingEmitter)) {
+				((ParticleAddon) particle).asyncParticles$setTicked();
+			}
+			if (ModListHelper.VS_LOADED) {
+				if (VSClientUtils.isOutOfSight(particle)) {
+					particle.remove();
+				}
+			}
+			if (!particle.isAlive()) {
+				// we manage the count in cleanup task
+//				particle.getParticleGroup().ifPresent((particleGroup) -> particleEngine.updateCount(particleGroup, -1));
+				iterator.remove();
+			}
+		}
+		tickingSync = false;
+	}
+
 	public static void markAsSync(Class<? extends Particle> aClass) {
 		synchronized (SYNC_PARTICLE_TYPES) {
 			SYNC_PARTICLE_TYPES.add(aClass);
@@ -317,18 +327,11 @@ public class AsyncTicker {
 	}
 
 	public static void recordSync(Particle particle) {
+		if (SYNC_PARTICLES.contains(particle)) {
+			return;
+		}
 		synchronized (SYNC_PARTICLES) {
 			SYNC_PARTICLES.add(particle);
-		}
-	}
-
-	public static List<? extends Particle> getSync() {
-		return SYNC_PARTICLES;
-	}
-
-	public static void clearSync() {
-		if (!SYNC_PARTICLES.isEmpty()) {
-			SYNC_PARTICLES.clear();
 		}
 	}
 
@@ -420,7 +423,7 @@ public class AsyncTicker {
 		BLOCK_ENTITY_OPERATIONS.clear();
 		PARTICLE_OPERATIONS.clear();
 		END_TICK_OPERATIONS.clear();
-		clearSync();
+		SYNC_PARTICLES.clear();
 		cancelled = false;
 	}
 
