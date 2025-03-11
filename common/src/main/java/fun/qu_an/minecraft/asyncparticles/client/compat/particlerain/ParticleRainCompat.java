@@ -6,7 +6,15 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
-public class ParticleRainUtils {
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class ParticleRainCompat {
+	public static final AtomicInteger asyncParticles$particleCount = new AtomicInteger(0);
+	public static final AtomicInteger asyncParticles$fogCount = new AtomicInteger(0);
+	public static void clearCounters() {
+		asyncParticles$particleCount.set(0);
+		asyncParticles$fogCount.set(0);
+	}
 	@ExpectPlatform
 	public static void onShipCollision(ClientLevel level, Vec3 location, Vec3 movement, AABB aabb) {
 		throw new AssertionError();

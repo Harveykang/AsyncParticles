@@ -58,7 +58,6 @@ dependencies {
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
     localRuntime "org.anarres:jcpp:1.4.14"
     modLocalRuntime "maven.modrinth:indium:1.0.36+mc1.20.1"
-    modLocalRuntime 'maven.modrinth:iris-flw-compat:1.1.4'
 
     /* Valkyrien Skies */
     modLocalRuntime "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
@@ -76,8 +75,9 @@ dependencies {
     modLocalRuntime 'maven.modrinth:effectual:0.5.0-1.20.1'
 
     /* Create */
-    modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
+//    modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
     modLocalRuntime("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
+    modLocalRuntime 'maven.modrinth:iris-flw-compat:1.1.4'
 
     /* Effective */
 //    modLocalRuntime "maven.modrinth:effective:2.3.2-1.20.1" // dependency hell
@@ -91,8 +91,14 @@ dependencies {
     modLocalRuntime "maven.modrinth:fzzy-config:0.6.4+1.20.1"
     modLocalRuntime "me.fallenbreath:conditional-mixin:0.5.1"
 
+    /* A Good Placement */
+    modLocalRuntime "curse.maven:a-good-placement-1020455:6277409" // 1.2.6
+
     /* Physics Mod */
 //    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v171b-fabric-1.20.1.jar')
+
+    /* Carpet */
+//    modLocalRuntime "curse.maven:carpet-349239:4573334" // 1.4.112
 }
 
 processResources {

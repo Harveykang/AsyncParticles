@@ -227,13 +227,6 @@ public class VSClientUtils {
 		return closestHit;
 	}
 
-	public static double ceil(double num, double multipleOf) {
-		if (num % multipleOf == 0) {
-			return num;
-		}
-		return Math.ceil(num / multipleOf) * multipleOf;
-	}
-
 	public static boolean isUnderHeightMapIncludeShips(ClientLevel level, double x, double y, double z) {
 		if (level.getHeight(Heightmap.Types.MOTION_BLOCKING, floor(x), floor(z)) >= y) {
 			return true;
@@ -253,34 +246,7 @@ public class VSClientUtils {
 		return false;
 	}
 
-	public static boolean isClipped(ClientLevel level, double x, double y, double z) {
-		if (isBlockAround(level, BlockPos.containing(x, y, z))) {
-			return true;
-		}
-		var shipObjectWorld = VSGameUtilsKt.getShipObjectWorld(level);
-		for (var nearbyShip : shipObjectWorld.getAllShips().getIntersecting(new AABBd(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1))) {
-			var posInShip = nearbyShip.getWorldToShip().transformPosition(new Vector3d(x, y, z));
-			BlockPos containing = BlockPos.containing(posInShip.x, posInShip.y, posInShip.z);
-			if (isBlockAround(level, containing)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public static boolean isBlockAround(ClientLevel level, BlockPos containing) {
-		if (!level.getBlockState(containing).isAir()) {
-			return true;
-		}
-		for (Direction direction : LevelRenderer.DIRECTIONS) {
-			if (!level.getBlockState(containing.relative(direction)).isAir()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public static boolean isOutOfSight(Particle particle) {
+	public static boolean isOutSight(Particle particle) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player == null) {
 			return true;

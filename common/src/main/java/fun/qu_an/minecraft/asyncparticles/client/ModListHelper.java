@@ -43,6 +43,8 @@ public class ModListHelper {
 	/* Epic Fight */
 	public static final boolean EPICFIGHT_LOADED = isModLoaded("epicfight");
 	public static final boolean FORGE_EPICFIGHT_LOADED = isForgeModLoaded("epicfight");
+	/* A Good Place */
+	public static final boolean A_GOOD_PLACE_LOADED = isModLoaded("a_good_place");
 
 	static {
 		System.out.println("CREATE_MAJOR_VERSION: " + CREATE_MAJOR_VERSION);
@@ -52,10 +54,6 @@ public class ModListHelper {
 	public static final boolean FORGE_CREATE_LOADED = isForgeModLoaded("create");
 	/* Tombstone */
 	public static final boolean TOMBSTONE_LOADED = isModLoaded("tombstone");
-	/* Hexcasting */
-	public static final boolean HEXCASTING_LOADED = isModLoaded("hexcasting");
-	/* Enhanced Block Entities */
-//	public static final boolean ENHANCEDBLOCKENTITIES_LOADED = isModLoaded("enhancedblockentities");
 	/* Particular */
 	public static final boolean FABRIC_PARTICULAR_LOADED = isFabricModLoaded("particular");
 	/* Particle Core */
@@ -85,5 +83,10 @@ public class ModListHelper {
 
 	public static boolean isFabricModLoaded(String modId) {
 		return IS_FORGE ? CONNECTORMOD_LOADED && ConnectorEarlyLoader.isConnectorMod(modId) : isModLoaded(modId);
+	}
+
+	@ExpectPlatform
+	public static boolean isDevelopmentEnvironment() {
+		throw new AssertionError();
 	}
 }

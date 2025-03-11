@@ -27,7 +27,7 @@ import java.util.function.Predicate;
 /**
  * See {@link ContraptionCollider}
  */
-public class CreateUtils {
+public class CreateCompat {
 	public static final boolean[] trueAndFalse = {true, false};
 
 	public static Collection<WeakReference<AbstractContraptionEntity>> contraptions(ClientLevel level) {
@@ -405,20 +405,20 @@ public class CreateUtils {
 
 	public static Vec3 rotate(Vec3 collisionLocation, float yawOffset, Direction.Axis axis) {
 		return ModListHelper.CREATE_MAJOR_VERSION < 6
-			? Create5Utils.rotate(collisionLocation, yawOffset, axis)
-			: Create6Utils.rotate(collisionLocation, yawOffset, axis);
+			? Create5Compat.rotate(collisionLocation, yawOffset, axis)
+			: Create6Compat.rotate(collisionLocation, yawOffset, axis);
 	}
 
 	public static Vec3 getCenterOf(BlockPos blockPos) {
 		return ModListHelper.CREATE_MAJOR_VERSION < 6
-			? Create5Utils.getCenterOf(blockPos)
-			: Create6Utils.getCenterOf(blockPos);
+			? Create5Compat.getCenterOf(blockPos)
+			: Create6Compat.getCenterOf(blockPos);
 	}
 
 	public static Map<Integer, WeakReference<AbstractContraptionEntity>> loadedContraptions(ClientLevel level) {
 		return ModListHelper.CREATE_MAJOR_VERSION < 6
-			? Create5Utils.loadedContraptions(level)
-			: Create6Utils.loadedContraptions(level);
+			? Create5Compat.loadedContraptions(level)
+			: Create6Compat.loadedContraptions(level);
 	}
 
 	public static boolean isUnderContraption(ClientLevel level, double x, double y, double z) {

@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtils;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainUtils;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
@@ -25,7 +25,7 @@ public class AsyncparticlesClient {
 					if (shipMovement == null) {
 						return v;
 					}
-					ParticleRainUtils.onShipCollision(level, location, shipMovement, aabb);
+					ParticleRainCompat.onShipCollision(level, location, shipMovement, aabb);
 					return shipMovement;
 				});
 				WeatherParticleAddon.CollisionFunction function = (level, location, v, aabb) -> {
@@ -37,15 +37,15 @@ public class AsyncparticlesClient {
 			}
 			if (ModListHelper.CREATE_LOADED) {
 				WeatherParticleAddon.Type.RAIN.register((level, position, motion, aabb) -> {
-					Vec3 collide = CreateUtils.collideMotionWithContraptions(level, position, motion, aabb);
+					Vec3 collide = CreateCompat.collideMotionWithContraptions(level, position, motion, aabb);
 					if (collide == null) {
 						return motion;
 					}
-					ParticleRainUtils.onCreateCollision(level, motion, collide, aabb);
+					ParticleRainCompat.onCreateCollision(level, motion, collide, aabb);
 					return collide;
 				});
 				WeatherParticleAddon.CollisionFunction function = (level, position, motion, aabb) -> {
-					Vec3 collide = CreateUtils.collideMotionWithContraptions(level, position, motion, aabb);
+					Vec3 collide = CreateCompat.collideMotionWithContraptions(level, position, motion, aabb);
 					return collide == null ? motion : collide;
 				};
 				WeatherParticleAddon.Type.SNOW.register(function);

@@ -1,13 +1,11 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
 import com.google.common.collect.EvictingQueue;
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.CountManagements;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
+import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.TrackedParticleCountsMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -59,6 +57,8 @@ public abstract class MixinParticleEngine {
 	@Shadow
 	@Final
 	private static Logger LOGGER;
+
+	@Shadow public abstract void tickParticle(Particle particle);
 
 	/**
 	 * @author
@@ -115,9 +115,7 @@ public abstract class MixinParticleEngine {
 					try {
 						emitter.tick();
 						if (ModListHelper.VS_LOADED) {
-							if (VSClientUtils.isOutOfSight(emitter)) {
-								emitter.remove();
-							}
+							VSCompat.removeIfOutSight(emitter);
 						}
 					} catch (Exception t) {
 						if (AsyncTicker.isTolerable(t)) {
@@ -154,7 +152,12 @@ public abstract class MixinParticleEngine {
 					AsyncTicker.recordSync(p);
 				}
 				Queue<Particle> queue = this.particles.computeIfAbsent(p.getRenderType(),
-					(p_107347_) -> EvictingQueue.create(SimplePropertiesConfig.limit));
+					(p_107347_) -> {
+						EvictingQueue<Particle> queue1 = EvictingQueue.create(SimplePropertiesConfig.limit);
+						// fix the first added particle not ticked.
+						AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue1));
+						return queue1;
+					});
 				while (queue.size() >= SimplePropertiesConfig.limit) {
 					Particle removed = queue.remove();
 					removed.remove(); // remove if the limit exceeded
@@ -193,16 +196,14 @@ public abstract class MixinParticleEngine {
 			}
 			try {
 				// keep this tick() to compatible with some mixins...
-				particle.tick();
+				tickParticle(particle);
 				if (particle instanceof LightCachedParticleAddon lightCachedParticle
 					&& SimplePropertiesConfig.particleLightCache()) {
 					lightCachedParticle.asyncParticles$refresh();
 				}
 				((ParticleAddon) particle).asyncParticles$setTicked();
 				if (ModListHelper.VS_LOADED) {
-					if (VSClientUtils.isOutOfSight(particle)) {
-						particle.remove();
-					}
+					VSCompat.removeIfOutSight(particle);
 				}
 			} catch (Exception t) {
 				if (AsyncTicker.isTolerable(t)) {
@@ -221,23 +222,13 @@ public abstract class MixinParticleEngine {
 		}
 	}
 
-	@WrapMethod(method = "tick")
-	public void wrapTick(Operation<Void> original) {
-		// tick sync
-		if (AsyncTicker.shouldTickParticles){
-			AsyncTicker.tickSync();
-		}
-		AsyncTicker.tickParticleEngine = original;
-	}
-
 	@Inject(method = "add", at = @At(value = "HEAD"), cancellable = true)
 	public void add(Particle particle, CallbackInfo ci) {
 		if (!AsyncTicker.shouldTickParticles) {
 			particle.remove(); // to compatible with some mods...
 			ci.cancel();
-			return;
-		}
-		if (particle instanceof LightCachedParticleAddon lightCachedParticle) {
+		} else if (particle instanceof LightCachedParticleAddon lightCachedParticle
+				   && SimplePropertiesConfig.particleLightCache()) {
 			lightCachedParticle.asyncParticles$refresh();
 		}
 	}
@@ -250,10 +241,6 @@ public abstract class MixinParticleEngine {
 
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void redirectClearParticles(CallbackInfo ci) {
-		// this fix particlerain's particle count management bug
-		if (ModListHelper.PARTICLERAIN_LOADED) {
-			CountManagements.asyncParticles$particleCount.set(0);
-			CountManagements.asyncParticles$fogCount.set(0);
-		}
+		AsyncTicker.onParticleEngineClear();
 	}
 }

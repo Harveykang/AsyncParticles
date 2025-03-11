@@ -20,4 +20,8 @@ public class ModListHelperImpl {
 		}
 		return modFileById.getMods().get(0).getVersion().getMajorVersion();
 	}
+
+	public static boolean isDevelopmentEnvironment() {
+		return !FMLLoader.isProduction();
+	}
 }

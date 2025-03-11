@@ -12,7 +12,7 @@ import org.joml.Matrix4dc;
 import org.joml.Vector3d;
 import org.valkyrienskies.core.api.ships.ClientShip;
 
-public class PhysicsModVSClientUtils {
+public class PhysicsModCompat {
 	public static boolean collideWithShip(ClientLevel level, double x, double y, double z, AABB3D aabb) {
 		Vector3d min = aabb.getMin();
 		Vector3d max = aabb.getMax();

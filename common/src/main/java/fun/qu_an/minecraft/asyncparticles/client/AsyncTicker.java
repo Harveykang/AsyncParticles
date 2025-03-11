@@ -1,11 +1,12 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.google.common.collect.EvictingQueue;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
+import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.a_good_place.InvokerBlocksParticlesManager;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -16,6 +17,7 @@ import net.minecraft.client.particle.TrackingEmitter;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
+import nl.enjarai.a_good_place.particles.BlocksParticlesManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -63,7 +65,6 @@ public class AsyncTicker {
 	private static boolean tickingSync;
 	public static boolean shouldTickParticles = true;
 	public static CompletableFuture<Void> particleCleanup;
-	public static Operation<Void> tickParticleEngine;
 	private final static List<Runnable> END_TICK_EVENTS = new ArrayList<>();
 	public final static List<Runnable> END_TICK_OPERATIONS = new ArrayList<>();
 	private static CompletableFuture<Void> particleFuture;
@@ -123,6 +124,8 @@ public class AsyncTicker {
 	}
 
 	public static void onTickBefore(int j) {
+		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
+		profiler.push("async_particles");
 		if (j != 0) {
 			if (blockEntityTickFuture != null) {
 				blockEntityTickFuture.join();
@@ -176,24 +179,22 @@ public class AsyncTicker {
 				particleCleanup = CompletableFuture.allOf(futures);
 			}
 		}
-	}
-
-	public static void updateLightCache(LightCachedParticleAddon lightCachedParticle) {
+		profiler.pop();
 	}
 
 	public static void onTickAfter(int j) {
 		Minecraft mc = Minecraft.getInstance();
-		if (tickParticleEngine != null) {
-			ProfilerFiller profiler = mc.getProfiler();
-			profiler.push("particles");
+		ProfilerFiller profiler = mc.getProfiler();
+		profiler.push("async_particles");
+		if (!mc.isPaused()){
+			profiler.push("particle_tick");
 			try {
-				tickParticleEngine.call();
+				mc.particleEngine.tick();
 			} catch (Exception e) {
 				if (mc.level != null && mc.player != null) {
 					throw e;
 				}
 			}
-			tickParticleEngine = null;
 			profiler.pop();
 		}
 		if (j != 0) {
@@ -246,10 +247,7 @@ public class AsyncTicker {
 						throw toThrowDirectly(e);
 					}))
 				.toArray(CompletableFuture[]::new)));
-	}
-
-	public static boolean isTickingSync() {
-		return tickingSync;
+		profiler.pop();
 	}
 
 	private static Void tickBeforeExceptionally(Throwable e) {
@@ -285,6 +283,10 @@ public class AsyncTicker {
 
 	/* Sync Ticking */
 
+	public static boolean isTickingSync() {
+		return tickingSync;
+	}
+
 	public static void tickSync() {
 		if (SYNC_PARTICLES.isEmpty()) {
 			return;
@@ -303,9 +305,7 @@ public class AsyncTicker {
 				((ParticleAddon) particle).asyncParticles$setTicked();
 			}
 			if (ModListHelper.VS_LOADED) {
-				if (VSClientUtils.isOutOfSight(particle)) {
-					particle.remove();
-				}
+				VSCompat.removeIfOutSight(particle);
 			}
 			if (!particle.isAlive()) {
 				// we manage the count in cleanup task
@@ -425,6 +425,17 @@ public class AsyncTicker {
 		END_TICK_OPERATIONS.clear();
 		SYNC_PARTICLES.clear();
 		cancelled = false;
+	}
+
+	public static void onParticleEngineClear() {
+		// this fix a good placement mod block invisible
+		if (ModListHelper.A_GOOD_PLACE_LOADED) {
+			AGoodPlaceCompat.onParticleEngineClear();
+		}
+		// this fix particlerain's particle count management bug
+		if (ModListHelper.PARTICLERAIN_LOADED) {
+			ParticleRainCompat.clearCounters();
+		}
 	}
 
 	@FunctionalInterface

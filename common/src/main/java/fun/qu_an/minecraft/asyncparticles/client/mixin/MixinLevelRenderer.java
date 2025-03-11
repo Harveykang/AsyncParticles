@@ -26,8 +26,7 @@ public abstract class MixinLevelRenderer {
 	}
 
 	@Inject(method = "renderLevel",
-		slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderWorldBorder(Lnet/minecraft/client/Camera;)V")),
-		at = @At(value = "INVOKE", shift = At.Shift.AFTER, remap = false, target = "Lcom/mojang/blaze3d/systems/RenderSystem;applyModelViewMatrix()V"))
+		at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/renderer/LevelRenderer;renderDebug(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/Camera;)V"))
 	private void onRenderLevelTail(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
 		AsyncRenderer.join(poseStack, f, camera, lightTexture);
 	}
@@ -36,6 +35,11 @@ public abstract class MixinLevelRenderer {
 		at = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;"))
 	private void onRenderLevelTransparencyChain(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
 		AsyncRenderer.irisOpaque(poseStack, f, camera, lightTexture);
+	}
+
+	@Inject(method = "renderLevel", at = @At(value = "CONSTANT", args = "stringValue=entities"))
+	private void beforeRenderEntities(PoseStack poseStack, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
+		AsyncRenderer.irisSync(poseStack, partialTick, camera, lightTexture);
 	}
 
 	// See fabric/MixinLevelRenderer.java
@@ -71,7 +75,7 @@ public abstract class MixinLevelRenderer {
 
 	@WrapMethod(method = "setSectionDirty(IIIZ)V")
 	public void setSectionDirty(int x, int y, int z, boolean reRenderOnMainThread, Operation<Void> original) {
-		if (RenderSystem.isOnRenderThread() || !SimplePropertiesConfig.forceSyncLevelRenderMarkDirty()) {
+		if (RenderSystem.isOnRenderThread() || !SimplePropertiesConfig.forceSyncLevelRendererMarkDirty()) {
 			original.call(x, y, z, reRenderOnMainThread);
 		} else {
 			RenderSystem.recordRenderCall(() -> original.call(x, y, z, reRenderOnMainThread));
@@ -80,7 +84,7 @@ public abstract class MixinLevelRenderer {
 
 	@WrapMethod(method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Z)V")
 	public void setBlockDirty(BlockPos pos, boolean reRenderOnMainThread, Operation<Void> original) {
-		if (RenderSystem.isOnRenderThread() || !SimplePropertiesConfig.forceSyncLevelRenderMarkDirty()) {
+		if (RenderSystem.isOnRenderThread() || !SimplePropertiesConfig.forceSyncLevelRendererMarkDirty()) {
 			original.call(pos, reRenderOnMainThread);
 		} else {
 			RenderSystem.recordRenderCall(() -> original.call(pos, reRenderOnMainThread));
@@ -89,7 +93,7 @@ public abstract class MixinLevelRenderer {
 
 	@WrapMethod(method = "setBlocksDirty")
 	public void setBlocksDirty(int minX, int minY, int minZ, int maxX, int maxY, int maxZ, Operation<Void> original) {
-		if (RenderSystem.isOnRenderThread() || !SimplePropertiesConfig.forceSyncLevelRenderMarkDirty()) {
+		if (RenderSystem.isOnRenderThread() || !SimplePropertiesConfig.forceSyncLevelRendererMarkDirty()) {
 			original.call(minX, minY, minZ, maxX, maxY, maxZ);
 		} else {
 			RenderSystem.recordRenderCall(() -> original.call(minX, minY, minZ, maxX, maxY, maxZ));
@@ -98,7 +102,7 @@ public abstract class MixinLevelRenderer {
 
 	@WrapMethod(method = "setSectionDirtyWithNeighbors")
 	public void setSectionDirtyWithNeighbors(int sectionX, int sectionY, int sectionZ, Operation<Void> original) {
-		if (RenderSystem.isOnRenderThread() || !SimplePropertiesConfig.forceSyncLevelRenderMarkDirty()) {
+		if (RenderSystem.isOnRenderThread() || !SimplePropertiesConfig.forceSyncLevelRendererMarkDirty()) {
 			original.call(sectionX, sectionY, sectionZ);
 		} else {
 			RenderSystem.recordRenderCall(() -> original.call(sectionX, sectionY, sectionZ));
@@ -107,7 +111,7 @@ public abstract class MixinLevelRenderer {
 
 	@WrapMethod(method = "destroyBlockProgress")
 	public void destroyBlockProgress(int breakerId, BlockPos pos, int progress, Operation<Void> original) {
-		if (RenderSystem.isOnRenderThread() || !SimplePropertiesConfig.forceSyncLevelRenderMarkDirty()) {
+		if (RenderSystem.isOnRenderThread() || !SimplePropertiesConfig.forceSyncLevelRendererMarkDirty()) {
 			original.call(breakerId, pos, progress);
 		} else {
 			RenderSystem.recordRenderCall(() -> original.call(breakerId, pos, progress));

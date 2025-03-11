@@ -9,12 +9,12 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
 import static fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon.*;
+import static net.minecraft.util.Mth.floor;
 
 @Mixin(Particle.class)
 public abstract class MixinParticle_LightCache implements LightCachedParticleAddon {
 	@Shadow
 	public abstract int getLightColor(float partialTick);
-
 	@Unique
 	private short asyncParticles$lightCache = INITIAL_LIGHT_CACHE;
 

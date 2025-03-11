@@ -12,7 +12,7 @@ import net.minecraft.world.phys.Vec3;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
-public class Create5Utils {
+public class Create5Compat {
 	static Vec3 rotate(Vec3 collisionLocation, float yawOffset, Direction.Axis axis) {
 		return VecHelper.rotate(collisionLocation, yawOffset, axis);
 	}

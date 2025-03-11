@@ -23,6 +23,7 @@ public class SimplePropertiesConfig {
 	private static boolean ignoreParticleTickExceptions = false;
 	private static boolean particleLightCache = true;
 	private static boolean collideWithCreateModContraptions = true;
+	private static boolean collideWithVSModShips = true;
 
 	private static boolean shouldSave;
 
@@ -111,7 +112,7 @@ public class SimplePropertiesConfig {
 		return particleLightCache;
 	}
 
-	public static boolean forceSyncLevelRenderMarkDirty() {
+	public static boolean forceSyncLevelRendererMarkDirty() {
 		return ModListHelper.SODIUM_LOADED // can't mark dirty asynchronously in sodium
 			   || forceSyncLevelRenderMarkDirty;
 	}

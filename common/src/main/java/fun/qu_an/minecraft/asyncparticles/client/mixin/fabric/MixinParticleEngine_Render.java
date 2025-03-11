@@ -4,11 +4,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.util.CustomTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
+import net.irisshaders.iris.shaderpack.properties.ParticleRenderingSettings;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -20,11 +22,16 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.profiling.ProfilerFiller;
+import org.joml.Matrix4f;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
 
@@ -37,7 +44,7 @@ public abstract class MixinParticleEngine_Render {
 
 	@Shadow
 	@Final
-	private TextureManager textureManager;
+	public TextureManager textureManager;
 
 	@Shadow
 	@Final
@@ -77,9 +84,12 @@ public abstract class MixinParticleEngine_Render {
 				BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
 				if (!AsyncRenderer.isStart) {
 					profiler.push("sync_particles");
-					Collection<? extends Particle> particles1 = bufferBuilder == FakeBufferBuilder.INSTANCE
-						? iterable
-						: AsyncRenderer.getSync(particleRenderType);
+					Collection<? extends Particle> particles1;
+					if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
+						particles1 = AsyncRenderer.isMixedRenderingSetting() ? List.of() : iterable;
+					} else {
+						particles1 = AsyncRenderer.getSync(particleRenderType);
+					}
 					// begin before sync particles to be compatible with some mod
 					RenderSystem.setShader(GameRenderer::getParticleShader);
 					particleRenderType.begin(FakeBufferBuilder.INSTANCE, this.textureManager);

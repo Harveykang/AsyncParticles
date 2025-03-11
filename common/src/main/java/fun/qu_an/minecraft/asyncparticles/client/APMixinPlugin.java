@@ -47,8 +47,10 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					yield !ModListHelper.IS_FORGE;
 				}
 				yield switch (split[1]) {
-					case "particlerain_vs" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_VS_LOADED;
-					case "particlerain_create" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_CREATE_LOADED;
+					case "particlerain_vs" ->
+						ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_VS_LOADED;
+					case "particlerain_create" ->
+						ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_CREATE_LOADED;
 					case "particlerain" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED;
 					case "create_5" -> ModListHelper.FABRIC_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION < 6;
 					case "create_6" -> ModListHelper.FABRIC_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION == 6;
@@ -73,11 +75,10 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			case "create" -> ModListHelper.CREATE_LOADED;
 			case "iris_like" -> ModListHelper.IRIS_LIKE_LOADED;
 			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
-			case "hexcasting" -> ModListHelper.HEXCASTING_LOADED;
 			case "flywheel" -> ModListHelper.FLYWHEEL_LOADED && ModListHelper.FLYWHEEL_MAJOR_VERSION == 1;
 			case "particle_core" -> ModListHelper.PARTICLE_CORE_LOADED;
 			case "physicsmod" -> ModListHelper.PHYSICSMOD_LOADED;
-//			case "enhancedblockentities" -> ModListHelper.ENHANCEDBLOCKENTITIES_LOADED;
+			case "a_good_place" -> ModListHelper.A_GOOD_PLACE_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

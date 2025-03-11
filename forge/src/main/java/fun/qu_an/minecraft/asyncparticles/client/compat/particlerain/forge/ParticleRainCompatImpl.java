@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.forge;
 
 import com.leclowndu93150.particlerain.ParticleRegistry;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtils;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.RippleParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
@@ -22,7 +22,7 @@ import org.joml.Vector3f;
 import static com.leclowndu93150.particlerain.ParticleRainClient.config;
 
 @SuppressWarnings("unused")
-public class ParticleRainUtilsImpl {
+public class ParticleRainCompatImpl {
 	public static void onShipCollision(ClientLevel level, Vec3 location, Vec3 movement, AABB aabb) {
 		if (!config.doRippleParticles && !config.doSplashParticles) {
 			return;
@@ -66,8 +66,8 @@ public class ParticleRainUtilsImpl {
 		AABB aabb1 = new AABB(center.x, aabb.minY - 1, center.z, center.x, aabb.minY, center.z);
 		Vec3 spawnPos = new Vec3(center.x, aabb.minY, center.z);
 		Vec3 motion1 = originalMotion.scale(2);
-		CreateUtils.forEachContraption(level, aabb1, contraptionEntity -> {
-			if (CreateUtils.collideWithContraption(level, spawnPos, motion1, aabb1, contraptionEntity)) {
+		CreateCompat.forEachContraption(level, aabb1, contraptionEntity -> {
+			if (CreateCompat.collideWithContraption(level, spawnPos, motion1, aabb1, contraptionEntity)) {
 				Minecraft.getInstance().particleEngine
 					.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
 				return false;

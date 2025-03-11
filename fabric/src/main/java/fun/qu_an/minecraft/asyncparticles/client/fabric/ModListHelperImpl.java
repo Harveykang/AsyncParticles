@@ -27,4 +27,8 @@ public class ModListHelperImpl {
 			}
 		}).orElse(-1);
 	}
+
+	public static boolean isDevelopmentEnvironment() {
+		return FabricLoader.getInstance().isDevelopmentEnvironment();
+	}
 }

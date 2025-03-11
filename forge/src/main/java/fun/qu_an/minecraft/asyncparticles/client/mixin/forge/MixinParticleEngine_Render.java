@@ -41,7 +41,7 @@ public abstract class MixinParticleEngine_Render {
 
 	@Shadow
 	@Final
-	private TextureManager textureManager;
+	public TextureManager textureManager;
 
 	@Shadow
 	@Final
@@ -79,9 +79,12 @@ public abstract class MixinParticleEngine_Render {
 				BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
 				if (!AsyncRenderer.isStart) {
 					profiler.push("sync_particles");
-					Collection<? extends Particle> particles1 = bufferBuilder == FakeBufferBuilder.INSTANCE
-						? iterable
-						: AsyncRenderer.getSync(particleRenderType);
+					Collection<? extends Particle> particles1;
+					if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
+						particles1 = AsyncRenderer.isMixedRenderingSetting() ? List.of() : iterable;
+					} else {
+						particles1 = AsyncRenderer.getSync(particleRenderType);
+					}
 					// begin before sync particles to be compatible with some mod
 					RenderSystem.setShader(GameRenderer::getParticleShader);
 					particleRenderType.begin(FakeBufferBuilder.INSTANCE, this.textureManager);

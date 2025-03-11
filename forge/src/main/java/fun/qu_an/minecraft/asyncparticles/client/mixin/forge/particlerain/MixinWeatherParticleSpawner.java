@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.CountManagements;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,12 +15,12 @@ import org.spongepowered.asm.mixin.injection.At;
 public class MixinWeatherParticleSpawner {
 	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", remap = false, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;particleCount:I"))
 	private static int modifyParticleCount(int original) {
-		return CountManagements.asyncParticles$particleCount.get();
+		return ParticleRainCompat.asyncParticles$particleCount.get();
 	}
 
 	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", remap = false, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;fogCount:I"))
 	private static int modifyFogCount(int original) {
-		return CountManagements.asyncParticles$fogCount.get();
+		return ParticleRainCompat.asyncParticles$fogCount.get();
 	}
 
 	@WrapMethod(method = "update")
