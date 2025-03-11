@@ -15,11 +15,13 @@
     "MixinMinecraft",
     "MixinMultiBufferSource$BufferSource",
     "MixinParticle",
+    "MixinParticle_LightCache",
     "MixinParticleEngine",
-    "MixinSingleQuadParticle",
     "MixinSoundEngine",
     "MixinTesselator",
     "MixinTextureManager",
+    "a_good_place.InvokerBlocksParticlesManager",
+    "a_good_place.MixinBlocksParticlesManager",
     "fabric.MixinLevelRenderer",
     "fabric.MixinParticleEngine_Late",
     "fabric.MixinParticleEngine_Render",
@@ -39,9 +41,7 @@
     "iris_like.MixinFullyBufferedMultiBufferSource",
     "iris_like.MixinIris",
     "iris_like.MixinOldFullyBufferedMultiBufferSource",
-    "lodestone.MixinLodestoneWorldParticle",
-    "sodium_0_6.MixinBillboardParticleMixin",
-    "sodium_0_7.MixinBillboardParticleMixin"
+    "lodestone.MixinLodestoneWorldParticle"
   ],
   "injectors": {
     "defaultRequire": 1

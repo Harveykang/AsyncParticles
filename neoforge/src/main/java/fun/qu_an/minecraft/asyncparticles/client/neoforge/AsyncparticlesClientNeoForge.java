@@ -6,8 +6,8 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CreateUtilsImpl;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainUtils;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CreateCompatImpl;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.commands.CommandSourceStack;
@@ -35,15 +35,15 @@ public final class AsyncparticlesClientNeoForge {
 
 		if (ModListHelper.CREATE_LOADED) {
 			WeatherParticleAddon.Type.RAIN.register((level, position, motion, aabb) -> {
-				Vec3 collide = CreateUtilsImpl.collideMotionWithContraptions(level, position, motion, aabb);
+				Vec3 collide = CreateCompatImpl.collideMotionWithContraptions(level, position, motion, aabb);
 				if (collide == null) {
 					return motion;
 				}
-				ParticleRainUtils.onCreateCollision(level, motion, collide, aabb);
+				ParticleRainCompat.onCreateCollision(level, motion, collide, aabb);
 				return collide;
 			});
 			WeatherParticleAddon.CollisionFunction function = (level, position, motion, aabb) -> {
-				Vec3 collide = CreateUtilsImpl.collideMotionWithContraptions(level, position, motion, aabb);
+				Vec3 collide = CreateCompatImpl.collideMotionWithContraptions(level, position, motion, aabb);
 				return collide == null ? motion : collide;
 			};
 			WeatherParticleAddon.Type.SNOW.register(function);

@@ -6,7 +6,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
-public class ParticleRainUtilsImpl {
+public class ParticleRainCompatImpl {
 //	@Unique
 //	public static void onShipCollision(ClientLevel level, Vec3 location, Vec3 movement, AABB aabb) {
 //		if (!config.doRippleParticles && !config.doSplashParticles) {

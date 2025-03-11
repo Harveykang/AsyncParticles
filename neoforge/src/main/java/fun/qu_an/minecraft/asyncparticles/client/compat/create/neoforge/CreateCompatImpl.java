@@ -31,7 +31,7 @@ import java.util.function.Predicate;
 /**
  * See {@link ContraptionCollider}
  */
-public class CreateUtilsImpl {
+public class CreateCompatImpl {
 	public static final boolean[] trueAndFalse = {true, false};
 
 	public static Collection<WeakReference<AbstractContraptionEntity>> contraptions(ClientLevel level) {

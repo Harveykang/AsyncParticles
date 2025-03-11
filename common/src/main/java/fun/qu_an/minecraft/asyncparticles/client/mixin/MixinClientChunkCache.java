@@ -16,7 +16,7 @@ public abstract class MixinClientChunkCache {
 	public void onLightUpdateWrap(LightLayer layer, SectionPos pos, Operation<Void> original) {
 		if ((RenderSystem.isOnRenderThread()
 			 // this fix a crash
-			 || (!ModListHelper.FLYWHEEL_LOADED && !SimplePropertiesConfig.forceSyncLevelRenderMarkDirty()))) {
+			 || (!ModListHelper.FLYWHEEL_LOADED && !SimplePropertiesConfig.forceSyncLevelRendererMarkDirty()))) {
 			original.call(layer, pos);
 		} else {
 			RenderSystem.recordRenderCall(() -> original.call(layer, pos));

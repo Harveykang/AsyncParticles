@@ -50,6 +50,8 @@ public class ModListHelper {
 	public static final boolean PARTICLE_CORE_LOADED = isModLoaded("particle_core");
 	/* Physics Mod */
 	public static final boolean PHYSICSMOD_LOADED = isModLoaded("physicsmod");
+	/* A Good Place */
+	public static final boolean A_GOOD_PLACE_LOADED = isModLoaded("a_good_place");
 
 	@ExpectPlatform
 	private static boolean isForge() {

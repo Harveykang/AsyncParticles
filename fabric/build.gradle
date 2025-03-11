@@ -105,6 +105,9 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
+    /* A Good Place */
+    modLocalRuntime "maven.modrinth:a-good-place:fabric_1.21-1.2.6"
+
     /* Physics Mod */
 //    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v171b-fabric-1.20.1.jar')
 }

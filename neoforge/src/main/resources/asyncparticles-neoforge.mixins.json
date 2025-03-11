@@ -12,7 +12,7 @@
     "create.MixinDepotBehaviour",
     "create.MixinEjectorBlockEntity",
     "create.MixinParticle",
-    "embeddium.MixinBillboardParticleMixin",
+    "create.MixinParticle_LightCache",
     "particlerain.MixinGroundFogParticle",
     "particlerain.MixinModClientForgeEvents",
     "particlerain.MixinRainParticle",

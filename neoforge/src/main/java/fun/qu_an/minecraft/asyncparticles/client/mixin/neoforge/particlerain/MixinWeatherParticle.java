@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.particlerain;
 
 import com.leclowndu93150.particlerain.particle.WeatherParticle;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.CountManagements;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -53,13 +53,13 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
-		CountManagements.asyncParticles$particleCount.getAndIncrement();
+		ParticleRainCompat.asyncParticles$particleCount.getAndIncrement();
 		asyncparticles$setWeatherAABB(AABB.ofSize(new Vec3(x, y, z), 3.8, 3.8, 3.8));
 	}
 
 	@Inject(method = "remove", at = @At(value = "FIELD", remap = false, ordinal = 0, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;particleCount:I"))
 	private void onRemove(CallbackInfo ci) {
-		CountManagements.asyncParticles$particleCount.getAndDecrement();
+		ParticleRainCompat.asyncParticles$particleCount.getAndDecrement();
 	}
 
 	protected MixinWeatherParticle(ClientLevel clientLevel, double d, double e, double f) {

@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.iris_like;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import fun.qu_an.minecraft.asyncparticles.client.util.AssertionUtil;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.irisshaders.batchedentityrendering.impl.FullyBufferedMultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,21 +14,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinFullyBufferedMultiBufferSource {
 	@Inject(method = "getBuffer", at = @At("HEAD"))
 	private void getBuffer(RenderType renderType, CallbackInfoReturnable<VertexConsumer> cir) {
-		AssertionUtil.assertNotParticleRendererThread();
+		ThreadUtil.assertNotParticleRendererThread();
 	}
 
 	@Inject(method = "endBatch()V", at = @At("HEAD"))
 	private void endBatch(CallbackInfo ci) {
-		AssertionUtil.assertNotParticleRendererThread();
+		ThreadUtil.assertNotParticleRendererThread();
 	}
 
 	@Inject(method = "endBatch(Lnet/minecraft/client/renderer/RenderType;)V", at = @At("HEAD"))
 	private void endBatch1(CallbackInfo ci) {
-		AssertionUtil.assertNotParticleRendererThread();
+		ThreadUtil.assertNotParticleRendererThread();
 	}
 
 	@Inject(method = "endBatchWithType", remap = false, at = @At("HEAD"))
 	private void endLastBatch(CallbackInfo ci) {
-		AssertionUtil.assertNotParticleRendererThread();
+		ThreadUtil.assertNotParticleRendererThread();
 	}
 }

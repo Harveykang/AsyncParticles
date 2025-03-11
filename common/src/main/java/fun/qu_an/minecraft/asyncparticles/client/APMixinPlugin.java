@@ -66,6 +66,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 							   && ModListHelper.versionCheck("sodium", "0.7", "0.8");
 			case "iris_like" -> ModListHelper.IRIS_LIKE_LOADED;
 			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
+			case "a_good_place" -> ModListHelper.A_GOOD_PLACE_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

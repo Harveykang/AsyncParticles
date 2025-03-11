@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.neoforge;
 
 import com.leclowndu93150.particlerain.ParticleRainConfig;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CreateUtilsImpl;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CreateCompatImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.ParticleTypes;
@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
-public class ParticleRainUtilsImpl {
+public class ParticleRainCompatImpl {
 //	public static void onShipCollision(ClientLevel level, Vec3 location, Vec3 movement, AABB aabb) {
 //		if (!config.doRippleParticles && !config.doSplashParticles) {
 //			return;
@@ -54,8 +54,8 @@ public class ParticleRainUtilsImpl {
 		AABB aabb1 = new AABB(center.x, aabb.minY - 1, center.z, center.x, aabb.minY, center.z);
 		Vec3 spawnPos = new Vec3(center.x, aabb.minY, center.z);
 		Vec3 motion1 = originalMotion.scale(2);
-		CreateUtilsImpl.forEachContraption(level, aabb1, contraptionEntity -> {
-			if (CreateUtilsImpl.collideWithContraption(level, spawnPos, motion1, aabb1, contraptionEntity)) {
+		CreateCompatImpl.forEachContraption(level, aabb1, contraptionEntity -> {
+			if (CreateCompatImpl.collideWithContraption(level, spawnPos, motion1, aabb1, contraptionEntity)) {
 				Minecraft.getInstance().particleEngine
 					.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
 				return false;

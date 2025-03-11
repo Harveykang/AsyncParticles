@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain;
 
-import fun.qu_an.minecraft.asyncparticles.client.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.CountManagements;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,12 +18,12 @@ public abstract class MixinGroundFogParticle extends MixinWeatherParticle implem
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
-		CountManagements.asyncParticles$fogCount.getAndIncrement();
+		ParticleRainCompat.asyncParticles$fogCount.getAndIncrement();
 	}
 
 	@Inject(method = "remove", at = @At(value = "FIELD", ordinal = 0, remap = false, target = "Lpigcart/particlerain/ParticleRainClient;fogCount:I"))
 	private void onRemove(CallbackInfo ci) {
-		CountManagements.asyncParticles$fogCount.getAndDecrement();
+		ParticleRainCompat.asyncParticles$fogCount.getAndDecrement();
 	}
 
 	@Override

@@ -64,6 +64,9 @@ dependencies {
     /* Particle Core */
     modCompileOnly "maven.modrinth:particle-core:0.2.5+1.21"
 
+    /* A Good Place */
+    modCompileOnly "maven.modrinth:a-good-place:fabric_1.21-1.2.6"
+
     /* Physics Mod */
 //    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171b-fabric-1.20.1.jar')
 }

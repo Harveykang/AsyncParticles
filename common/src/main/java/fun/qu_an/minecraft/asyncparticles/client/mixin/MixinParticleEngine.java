@@ -1,13 +1,9 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
 import com.google.common.collect.EvictingQueue;
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
-import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.SingleQuadParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.CountManagements;
+import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.TrackedParticleCountsMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -125,9 +121,13 @@ public abstract class MixinParticleEngine {
 //								emitter.remove();
 //							}
 //						}
-					} catch (Throwable t) {
-						if (SimplePropertiesConfig.markSyncIfTickFailed()){
-							LOGGER.error("Error ticking emitter particle {}, marking as sync", emitter, t);
+					} catch (Exception t) {
+						if (AsyncTicker.isTolerable(t)) {
+							LOGGER.warn("Exception ticking emitter particle {}, you can ignore it if it doesn't happen frequently.", emitter, t);
+							continue;
+						}
+						if (SimplePropertiesConfig.markSyncIfTickFailed()) {
+							LOGGER.warn("Exception ticking emitter particle {}, marking as sync", emitter, t);
 							((ParticleAddon) emitter).asyncedParticles$setTickSync();
 							AsyncTicker.markAsSync(emitter.getClass());
 							AsyncTicker.recordSync(emitter);
@@ -152,8 +152,16 @@ public abstract class MixinParticleEngine {
 				if (p == null) { // might be null because ArrayDeque is not thread-safe
 					return;
 				}
+				if (((ParticleAddon) p).asyncedParticles$isTickSync()) {
+					AsyncTicker.recordSync(p);
+				}
 				Queue<Particle> queue = this.particles.computeIfAbsent(p.getRenderType(),
-					(p_107347_) -> EvictingQueue.create(SimplePropertiesConfig.limit));
+					(p_107347_) -> {
+						EvictingQueue<Particle> queue1 = EvictingQueue.create(SimplePropertiesConfig.limit);
+						// fix the first added particle not ticked.
+						AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue1));
+						return queue1;
+					});
 				while (queue.size() >= SimplePropertiesConfig.limit) {
 					Particle removed = queue.remove();
 					removed.remove(); // remove if the limit exceeded
@@ -186,25 +194,30 @@ public abstract class MixinParticleEngine {
 				return;
 			}
 			Particle particle = iterator.next();
-			if (particle instanceof SingleQuadParticleAddon singleQuadParticle
-				&& SimplePropertiesConfig.particleLightCache()){
-				singleQuadParticle.asyncParticles$setLight(particle.getLightColor(0));
-			}
 			if (((ParticleAddon) particle).asyncedParticles$isTickSync()) {
-				AsyncTicker.recordSync(particle); // TODO: 不要每次tick时记录
+				AsyncTicker.recordSync(particle);
 				continue;
 			}
 			try {
+				// keep this tick() to compatible with some mixins...
 				tickParticle(particle);
+				if (particle instanceof LightCachedParticleAddon lightCachedParticle
+					&& SimplePropertiesConfig.particleLightCache()) {
+					lightCachedParticle.asyncParticles$refresh();
+				}
 				((ParticleAddon) particle).asyncParticles$setTicked();
 //				if (ModListHelper.VS_LOADED) {
 //					if (VSClientUtils.isOutOfSight(particle)) {
 //						particle.remove();
 //					}
 //				}
-			} catch (Throwable t) {
+			} catch (Exception t) {
+				if (AsyncTicker.isTolerable(t)) {
+					LOGGER.warn("Exception ticking particle {}, you can ignore it if it doesn't happen frequently.", particle, t);
+					continue;
+				}
 				if (SimplePropertiesConfig.markSyncIfTickFailed()) {
-					LOGGER.error("Error ticking particle {}, marking as sync", particle, t);
+					LOGGER.warn("Exception ticking particle {}, marking as sync", particle, t);
 					((ParticleAddon) particle).asyncedParticles$setTickSync();
 					AsyncTicker.markAsSync(particle.getClass());
 					AsyncTicker.recordSync(particle);
@@ -215,16 +228,14 @@ public abstract class MixinParticleEngine {
 		}
 	}
 
-	@WrapMethod(method = "tick")
-	public void wrapTick(Operation<Void> original) {
-		AsyncTicker.tickParticleEngine = original;
-	}
-
 	@Inject(method = "add", at = @At(value = "HEAD"), cancellable = true)
 	public void add(Particle particle, CallbackInfo ci) {
 		if (!AsyncTicker.shouldTickParticles) {
 			particle.remove(); // to compatible with some mods...
 			ci.cancel();
+		} else if (particle instanceof LightCachedParticleAddon lightCachedParticle
+				   && SimplePropertiesConfig.particleLightCache()) {
+			lightCachedParticle.asyncParticles$refresh();
 		}
 	}
 
@@ -236,10 +247,6 @@ public abstract class MixinParticleEngine {
 
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void redirectClearParticles(CallbackInfo ci) {
-		// this fix particlerain's particle count management bug
-		if (ModListHelper.PARTICLERAIN_LOADED) {
-			CountManagements.asyncParticles$particleCount.set(0);
-			CountManagements.asyncParticles$fogCount.set(0);
-		}
+		AsyncTicker.onParticleEngineClear();
 	}
 }
