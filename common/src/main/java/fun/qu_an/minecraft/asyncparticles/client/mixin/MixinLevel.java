@@ -1,5 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import org.spongepowered.asm.mixin.Final;
@@ -22,7 +25,7 @@ public class MixinLevel {
 	// This is only necessary on the client side
 	@SuppressWarnings("SynchronizeOnNonFinalField")
 	@Redirect(method = "tickBlockEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;isEmpty()Z"))
-	private boolean onTickBlockEntities(List instance) {
+	private boolean onTickBlockEntities(List<?> instance) {
 		if (!isClientSide) {
 			return instance.isEmpty();
 		}
@@ -35,5 +38,21 @@ public class MixinLevel {
 			}
 		}
 		return true;
+	}
+
+	@WrapOperation(method = "tickBlockEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/TickingBlockEntity;tick()V"))
+	private void onTickBlockEntity(TickingBlockEntity instance, Operation<Void> original) {
+		if (!isClientSide) {
+			original.call(instance);
+			return;
+		}
+		try {
+			original.call(instance);
+		} catch (Exception e) {
+			if (!AsyncTicker.isTolerable(e)) {
+				throw e;
+			}
+			AsyncTicker.LOGGER.warn("Exception while ticking block entity {}", instance, e);
+		}
 	}
 }

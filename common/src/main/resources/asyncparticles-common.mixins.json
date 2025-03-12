@@ -6,6 +6,8 @@
   "refmap": "asyncparticles-common-refmap.json",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.APMixinPlugin",
   "client": [
+    "MixinChunkAccess",
+    "MixinLevelChunk",
     "MixinActiveProfiler",
     "MixinClientChunkCache",
     "MixinClientLevel",
@@ -14,6 +16,7 @@
     "MixinLevelRenderer",
     "MixinLevelRenderer_EarlyFrustum",
     "MixinMinecraft",
+    "MixinMixinParticle_NoRefreshLightCache",
     "MixinMultiBufferSource$BufferSource",
     "MixinParticle",
     "MixinParticle_LightCache",

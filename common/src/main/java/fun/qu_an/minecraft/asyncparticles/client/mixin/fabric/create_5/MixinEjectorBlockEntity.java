@@ -3,11 +3,11 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.create_5;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.logistics.depot.EjectorBlockEntity;
 import com.simibubi.create.foundation.utility.LongAttached;
 import com.simibubi.create.foundation.utility.Pair;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -78,7 +78,7 @@ public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 		Level level = getLevel();
 		// 这个列表很小，不会过于影响性能
 		if (level == null) {
-			if (RenderSystem.isOnRenderThread()) {
+			if (ThreadUtil.isOnClientTickThread()) {
 				launchedItems = new CopyOnWriteArrayList<>(launchedItems);
 			}
 		} else if (level.isClientSide) {
@@ -91,7 +91,7 @@ public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 		Level level = getLevel();
 		// 这个列表很小，不会过于影响性能
 		if (level == null) {
-			if (RenderSystem.isOnRenderThread()) {
+			if (ThreadUtil.isOnClientTickThread()) {
 				return new CopyOnWriteArrayList<>(original.call(listNBT, deserializer));
 			}
 		} else if (level.isClientSide) {

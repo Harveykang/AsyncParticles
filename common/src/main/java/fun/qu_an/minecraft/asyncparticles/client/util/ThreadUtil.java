@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 
@@ -36,5 +37,9 @@ public class ThreadUtil {
 
 	public static boolean isOnParticleTickerThread() {
 		return Thread.currentThread() instanceof ForkJoinWorkerThread t && t.getPool() == AsyncTicker.EXECUTOR;
+	}
+
+	public static boolean isOnClientTickThread() {
+		return RenderSystem.isOnRenderThread() || isOnParticleTickerThread();
 	}
 }

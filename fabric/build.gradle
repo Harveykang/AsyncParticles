@@ -59,6 +59,10 @@ dependencies {
     localRuntime "org.anarres:jcpp:1.4.14"
     modLocalRuntime "maven.modrinth:indium:1.0.36+mc1.20.1"
 
+    if (rootProject.optimizations_only == 'true') {
+        return
+    }
+
     /* Valkyrien Skies */
     modLocalRuntime "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
     modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.5"

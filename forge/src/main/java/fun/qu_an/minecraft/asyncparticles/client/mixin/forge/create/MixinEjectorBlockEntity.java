@@ -3,9 +3,9 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.create;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.logistics.depot.EjectorBlockEntity;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.createmod.catnip.data.IntAttached;
 import net.createmod.catnip.data.Pair;
 import net.minecraft.core.BlockPos;
@@ -80,7 +80,7 @@ public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 		Level level = getLevel();
 		// 这个列表很小，不会过于影响性能
 		if (level == null) {
-			if (RenderSystem.isOnRenderThread()) {
+			if (ThreadUtil.isOnClientTickThread()) {
 				launchedItems = new CopyOnWriteArrayList<>(launchedItems);
 			}
 		} else if (level.isClientSide) {
@@ -93,7 +93,7 @@ public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 		Level level = getLevel();
 		// 这个列表很小，不会过于影响性能
 		if (level == null) {
-			if (RenderSystem.isOnRenderThread()) {
+			if (ThreadUtil.isOnClientTickThread()) {
 				return new CopyOnWriteArrayList<>(original.call(listNBT, deserializer));
 			}
 		} else if (level.isClientSide) {

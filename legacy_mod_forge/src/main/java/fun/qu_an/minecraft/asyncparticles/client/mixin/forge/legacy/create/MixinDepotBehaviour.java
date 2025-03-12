@@ -10,6 +10,7 @@ import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.utility.VecHelper;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.Containers;
@@ -73,7 +74,7 @@ public abstract class MixinDepotBehaviour extends BlockEntityBehaviour {
 		Level level = be.getLevel();
 		// 这个列表很小，不会过于影响性能
 		if (level == null) {
-			if (RenderSystem.isOnRenderThread()) {
+			if (ThreadUtil.isOnClientTickThread()) {
 				incoming = new CopyOnWriteArrayList<>(incoming);
 			}
 		} else if (level.isClientSide) {
@@ -86,7 +87,7 @@ public abstract class MixinDepotBehaviour extends BlockEntityBehaviour {
 		Level level = blockEntity.getLevel();
 		// 这个列表很小，不会过于影响性能
 		if (level == null) {
-			if (RenderSystem.isOnRenderThread()) {
+			if (ThreadUtil.isOnClientTickThread()) {
 				return new CopyOnWriteArrayList<>(original.call(listNBT, deserializer));
 			}
 		} else if (level.isClientSide) {
