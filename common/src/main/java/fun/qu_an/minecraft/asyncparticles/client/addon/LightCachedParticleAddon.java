@@ -8,7 +8,12 @@ import net.minecraft.client.particle.Particle;
 
 public interface LightCachedParticleAddon {
 	short INITIAL_LIGHT_CACHE = -1;
-	static int unpackLight(byte lightCache) {
+
+	static byte compress(int light) {
+		return (byte) (light >> 4 & 0xF | light >> 16 & 0xF0);
+	}
+
+	static int decompress(byte lightCache) {
 		return (lightCache & 0xF) << 4 | (lightCache & 0xF0) << 16;
 	}
 
@@ -28,10 +33,9 @@ public interface LightCachedParticleAddon {
 
 	void asyncParticles$setLight(int light);
 
-	short asyncParticles$getPackedLight();
+	byte asyncParticles$getCompressedLight();
 
 	void asyncParticles$refresh();
 
 	int asyncParticles$invoke_getLightColor(float partialTick);
-
 }

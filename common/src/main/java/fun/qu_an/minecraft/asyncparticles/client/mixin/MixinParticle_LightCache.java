@@ -3,43 +3,54 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.core.BlockPos;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
-import static fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon.unpackLight;
+import static fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon.compress;
+import static fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon.decompress;
 
 @Mixin(Particle.class)
 public abstract class MixinParticle_LightCache implements LightCachedParticleAddon {
+	@Shadow @Final public ClientLevel level;
+	@Shadow public double x;
+	@Shadow public double y;
+	@Shadow public double z;
+	@Unique
+	private byte asyncParticles$lightCache = INITIAL_LIGHT_CACHE;
 	@Shadow
 	public abstract int getLightColor(float partialTick);
-	@Unique
-	private short asyncParticles$lightCache = INITIAL_LIGHT_CACHE;
 
 	@WrapMethod(method = "getLightColor")
 	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {
-		short lightCache = asyncParticles$getPackedLight();
-		return LightCachedParticleAddon.isLightCacheValid(lightCache)
-			? unpackLight((byte) lightCache)
+		return SimplePropertiesConfig.particleLightCache()
+			? decompress(asyncParticles$getCompressedLight())
 			: original.call(partialTick);
 	}
 
 	@Override
-	public void asyncParticles$setLight(int light) {
-		asyncParticles$lightCache = (short) (light >> 4 & 0xF | light >> 16 & 0xF0);
-	}
-
-	@Override
-	public short asyncParticles$getPackedLight() {
-		return asyncParticles$lightCache;
-	}
-
-	@Override
 	public void asyncParticles$refresh() {
-		// mark as outdated, we don't set to -1 because -1 was used as a special value for initial cache
-		asyncParticles$lightCache |= Short.MIN_VALUE;
-		asyncParticles$setLight(getLightColor(0));
+		// for some particles, light is hard coded to 15, so this is not necessary for all particles
+		// do we need a better design?
+		BlockPos blockPos = BlockPos.containing(x, y, z);
+		int light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
+		asyncParticles$setLight(light);
+	}
+
+	@Override
+	public void asyncParticles$setLight(int light) {
+		asyncParticles$lightCache = compress(light);
+	}
+
+	@Override
+	public byte asyncParticles$getCompressedLight() {
+		return asyncParticles$lightCache;
 	}
 
 	@Override

@@ -15,6 +15,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			-> switch (mixinClassName) {
 			case "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer",
 				 "net.irisshaders.iris.mixin.fabric.MixinLevelRenderer",
+				 // disable this because our implementation is better
 				 "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin",
 				 // o(≧口≦)o particle_core: These mixins not support async rendering
 				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerFrustumMixin",

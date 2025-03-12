@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.APMixinPlugin",
   "client": [
+    "MixinLevelChunk",
     "MixinActiveProfiler",
     "MixinClientChunkCache",
     "MixinClientLevel",
@@ -13,6 +14,7 @@
     "MixinLevelRenderer",
     "MixinLevelRenderer_EarlyFrustum",
     "MixinMinecraft",
+    "MixinMixinParticle_NoRefreshLightCache",
     "MixinMultiBufferSource$BufferSource",
     "MixinParticle",
     "MixinParticle_LightCache",
