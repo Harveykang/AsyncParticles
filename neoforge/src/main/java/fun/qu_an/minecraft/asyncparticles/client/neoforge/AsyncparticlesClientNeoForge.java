@@ -12,7 +12,10 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherPart
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -76,8 +79,12 @@ public final class AsyncparticlesClientNeoForge {
 			.then(literal("debug")
 				.executes(context -> {
 					CommandSourceStack source = context.getSource();
-					AsyncTicker.debugLater(s -> source.sendSystemMessage(Component.literal(s)));
-					AsyncRenderer.debugLater(s -> source.sendSystemMessage(Component.literal(s)));
+					AsyncTicker.debugLater(s -> source.sendSystemMessage(Component.literal(s)
+						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
+					AsyncRenderer.debugLater(s -> source.sendSystemMessage(Component.literal(s)
+						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
 					return 1;
 				}))
 			.then(literal("reload")

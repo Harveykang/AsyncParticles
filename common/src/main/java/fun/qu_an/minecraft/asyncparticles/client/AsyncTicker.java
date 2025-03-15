@@ -184,7 +184,7 @@ public class AsyncTicker {
 		ProfilerFiller profiler = mc.getProfiler();
 		profiler.push("async_particles");
 		if (!mc.isPaused()){
-			profiler.push("particle_tick");
+			profiler.push("particle_engine");
 			try {
 				mc.particleEngine.tick();
 			} catch (Exception e) {

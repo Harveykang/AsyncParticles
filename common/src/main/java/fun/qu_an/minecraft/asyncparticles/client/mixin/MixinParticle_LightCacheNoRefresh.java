@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.Pseudo;
 	VibrationSignalParticle.class,
 	// Add more particle classes here if needed
 })
-public abstract class MixinMixinParticle_NoRefreshLightCache implements LightCachedParticleAddon {
+public abstract class MixinParticle_LightCacheNoRefresh implements LightCachedParticleAddon {
 	@Override
 	public void asyncParticles$refresh() {
 	}

@@ -22,7 +22,6 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -42,15 +41,11 @@ public abstract class MixinParticleEngine_Render {
 
 	@Shadow
 	@Final
-	private TextureManager textureManager;
+	public TextureManager textureManager;
 
 	@Shadow
 	@Final
 	private static List<ParticleRenderType> RENDER_ORDER;
-
-	@Shadow
-	@Final
-	private static Logger LOGGER;
 
 	/**
 	 * @author
@@ -60,100 +55,66 @@ public abstract class MixinParticleEngine_Render {
 	public void render(LightTexture lightTexture, Camera camera, float f) {
 		Frustum frustum = AsyncRenderer.frustum;
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-		if (!AsyncRenderer.isStart) {
-			profiler.push("prepare");
-			lightTexture.turnOnLightLayer();
-			RenderSystem.enableDepthTest();
-			profiler.pop();
-		}
+		profiler.push("prepare");
+		lightTexture.turnOnLightLayer();
+		RenderSystem.enableDepthTest();
+		profiler.pop();
 		try {
 			for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 				// FABRIC skips NO_RENDER
-//			if (particleRenderType == ParticleRenderType.NO_RENDER) {
-//				continue;
-//			}
+//				if (particleRenderType == ParticleRenderType.NO_RENDER) {
+//					continue;
+//				}
 				Queue<Particle> iterable = this.particles.get(particleRenderType);
 				if (iterable == null || iterable.isEmpty()) {
 					continue;
 				}
 				BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
-				if (!AsyncRenderer.isStart) {
-					profiler.push("render_sync");
-					Collection<? extends Particle> particles1 = bufferBuilder == FakeBufferBuilder.INSTANCE
-						? iterable
-						: AsyncRenderer.getSync(particleRenderType);
-					// begin before sync particles to be compatible with some mod
-					particleRenderType.begin(FakeTesselator.getFakeInstance(), this.textureManager);
-					if (!particles1.isEmpty()) {
-						for (Particle particle : particles1) {
-							if (!particle.isAlive()) {
-								continue;
-							}
-							float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
-							if (!frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(g))) {
-								continue;
-							}
-							try {
-								particle.render(bufferBuilder, camera, g);
-							} catch (Throwable throwable) {
-								CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
-								CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
-								Objects.requireNonNull(particle);
-								crashReportCategory.setDetail("Particle", particle::toString);
-								Objects.requireNonNull(particleRenderType);
-								crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
-								throw new ReportedException(crashReport);
-							}
-						}
-					}
-					profiler.popPush("build_buffer");
-					MeshData meshData = bufferBuilder.build();
-					if (meshData != null) {
-						profiler.popPush("upload_particles");
-						// set shader before begin
-						RenderSystem.setShader(GameRenderer::getParticleShader);
-						BufferUploader.drawWithShader(meshData);
-					}
-					profiler.pop();
-				} else {
-					if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
-						continue;
-					}
-					profiler.push("render_async");
-					Runnable runnable = () -> iterable.forEach(particle -> {
+				// set shader before begin
+				RenderSystem.setShader(GameRenderer::getParticleShader);
+				// begin before sync particles to be compatible with some mod
+				particleRenderType.begin(FakeTesselator.getFakeInstance(), this.textureManager);
+				profiler.push("render_sync");
+				Collection<? extends Particle> particles1 = bufferBuilder == FakeBufferBuilder.INSTANCE
+					? iterable
+					: AsyncRenderer.getSync(particleRenderType);
+				if (!particles1.isEmpty()) {
+					for (Particle particle : particles1) {
 						if (!particle.isAlive()) {
-							return;
+							continue;
 						}
 						float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
 						if (!frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(g))) {
-							return;
-						}
-						if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
-							AsyncRenderer.recordSync(particleRenderType, particle);
-							return;
+							continue;
 						}
 						try {
 							particle.render(bufferBuilder, camera, g);
 						} catch (Throwable throwable) {
-							LOGGER.error("Exception while rendering particle {}, marking as sync", particle, throwable);
-							((ParticleAddon) particle).asyncedParticles$setRenderSync();
-							AsyncRenderer.markAsSync(particle.getClass());
-							AsyncRenderer.recordSync(particleRenderType, particle);
+							CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
+							CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
+							Objects.requireNonNull(particle);
+							crashReportCategory.setDetail("Particle", particle::toString);
+							Objects.requireNonNull(particleRenderType);
+							crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
+							throw new ReportedException(crashReport);
 						}
-					});
-					AsyncRenderer.add(runnable);
-					profiler.pop();
+					}
 				}
-			}
-		} finally {
-			if (!AsyncRenderer.isStart) {
-				profiler.push("cleanup");
-				RenderSystem.depthMask(true);
-				RenderSystem.disableBlend();
-				lightTexture.turnOffLightLayer();
-				RenderSystem.defaultBlendFunc();
+				profiler.popPush("build_buffer");
+				MeshData meshData = bufferBuilder.build();
+				if (meshData != null) {
+					profiler.popPush("upload_particles");
+					BufferUploader.drawWithShader(meshData);
+				}
 				profiler.pop();
 			}
+		} finally {
+			profiler.push("cleanup");
+			RenderSystem.depthMask(true);
+			RenderSystem.disableBlend();
+			lightTexture.turnOffLightLayer();
+			RenderSystem.defaultBlendFunc();
+			profiler.pop();
 		}
 	}
 }

@@ -34,7 +34,7 @@ public abstract class MixinLevelRenderer {
 								   Matrix4f projectionMatrix,
 								   CallbackInfo ci) {
 		// as early as possible
-		AsyncRenderer.start(deltaTracker.getGameTimeDeltaPartialTick(false), camera, lightTexture);
+		AsyncRenderer.start(deltaTracker.getGameTimeDeltaPartialTick(false), camera);
 	}
 
 	@Inject(method = "renderLevel",

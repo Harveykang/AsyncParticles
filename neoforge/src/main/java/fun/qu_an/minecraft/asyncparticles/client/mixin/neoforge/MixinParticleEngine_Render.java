@@ -21,7 +21,6 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -43,11 +42,7 @@ public abstract class MixinParticleEngine_Render {
 
 	@Shadow
 	@Final
-	private TextureManager textureManager;
-
-	@Shadow
-	@Final
-	private static Logger LOGGER;
+	public TextureManager textureManager;
 
 	/**
 	 * @author
@@ -57,13 +52,12 @@ public abstract class MixinParticleEngine_Render {
 	public void render(LightTexture lightTexture, Camera camera, float f, @Nullable Frustum ignored, Predicate<ParticleRenderType> renderTypePredicate) {
 		Frustum frustum = AsyncRenderer.frustum;
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-		if (!AsyncRenderer.isStart) {
-			profiler.push("prepare");
-			lightTexture.turnOnLightLayer();
-			RenderSystem.enableDepthTest();
-			RenderSystem.activeTexture(33986);
-			RenderSystem.activeTexture(33984);
-		}
+		profiler.push("prepare");
+		lightTexture.turnOnLightLayer();
+		RenderSystem.enableDepthTest();
+		RenderSystem.activeTexture(33986);
+		RenderSystem.activeTexture(33984);
+		profiler.pop();
 		try {
 			for (ParticleRenderType particleRenderType : particles.keySet()) {
 				if (particleRenderType == ParticleRenderType.NO_RENDER
@@ -75,75 +69,51 @@ public abstract class MixinParticleEngine_Render {
 					continue;
 				}
 				BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
-				if (!AsyncRenderer.isStart) {
-					Collection<? extends Particle> particles1 = bufferBuilder == FakeBufferBuilder.INSTANCE
-						? iterable
-						: AsyncRenderer.getSync(particleRenderType);
-					if (!particles1.isEmpty()) {
-						for (Particle particle : particles1) {
-							if (!particle.isAlive()) {
-								continue;
-							}
-							float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
-							if (!frustum.isVisible(particle.getRenderBoundingBox(g))) {
-								continue;
-							}
-							try {
-								particle.render(bufferBuilder, camera, g);
-							} catch (Throwable throwable) {
-								CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
-								CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
-								Objects.requireNonNull(particle);
-								crashReportCategory.setDetail("Particle", particle::toString);
-								Objects.requireNonNull(particleRenderType);
-								crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
-								throw new ReportedException(crashReport);
-							}
-						}
-					}
-					MeshData meshData = bufferBuilder.build();
-					if (meshData != null) {
-						// set shader before begin
-						RenderSystem.setShader(GameRenderer::getParticleShader);
-						// use fake, mod compatibility
-						particleRenderType.begin(FakeTesselator.getFakeInstance(), this.textureManager);
-						BufferUploader.drawWithShader(meshData);
-					}
-				} else {
-					if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
-						continue;
-					}
-					Runnable runnable = () -> iterable.forEach(particle -> {
+				// set shader before begin
+				RenderSystem.setShader(GameRenderer::getParticleShader);
+				// begin before sync particles to be compatible with some mod
+				particleRenderType.begin(FakeTesselator.getFakeInstance(), this.textureManager);
+				profiler.push("render_sync");
+				Collection<? extends Particle> particles1 = bufferBuilder == FakeBufferBuilder.INSTANCE
+					? iterable
+					: AsyncRenderer.getSync(particleRenderType);
+				if (!particles1.isEmpty()) {
+					for (Particle particle : particles1) {
 						if (!particle.isAlive()) {
-							return;
+							continue;
 						}
 						float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
 						if (!frustum.isVisible(particle.getRenderBoundingBox(g))) {
-							return;
-						}
-						if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
-							AsyncRenderer.recordSync(particleRenderType, particle);
-							return;
+							continue;
 						}
 						try {
 							particle.render(bufferBuilder, camera, g);
 						} catch (Throwable throwable) {
-							LOGGER.error("Exception while rendering particle {}, marking as sync", particle, throwable);
-							((ParticleAddon) particle).asyncedParticles$setRenderSync();
-							AsyncRenderer.markAsSync(particle.getClass());
-							AsyncRenderer.recordSync(particleRenderType, particle);
+							CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
+							CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
+							Objects.requireNonNull(particle);
+							crashReportCategory.setDetail("Particle", particle::toString);
+							Objects.requireNonNull(particleRenderType);
+							crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
+							throw new ReportedException(crashReport);
 						}
-					});
-					AsyncRenderer.add(runnable);
+					}
 				}
+				profiler.popPush("build_buffer");
+				MeshData meshData = bufferBuilder.build();
+				if (meshData != null) {
+					profiler.popPush("upload_particles");
+					BufferUploader.drawWithShader(meshData);
+				}
+				profiler.pop();
 			}
 		} finally {
-			if (!AsyncRenderer.isStart) {
-				RenderSystem.depthMask(true);
-				RenderSystem.disableBlend();
-				lightTexture.turnOffLightLayer();
-				RenderSystem.defaultBlendFunc();
-			}
+			profiler.push("cleanup");
+			RenderSystem.depthMask(true);
+			RenderSystem.disableBlend();
+			lightTexture.turnOffLightLayer();
+			RenderSystem.defaultBlendFunc();
+			profiler.pop();
 		}
 	}
 }

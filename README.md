@@ -25,10 +25,10 @@
 
 ## Mod Compatability
 
+🔄️: Work in progress  
 ✅: Compatible  
 ❔: Works fine, but not fully tested  
 ⚠️: More testing needed  
-🔄️: Work in progress  
 ❌: Not Compatible
 
 ### Mods Tested
@@ -41,14 +41,17 @@
 ✅ Brute force Rendering Culling  
 ✅ Iris/Oculus  
 ✅ Startlight  
-⚠️ Create  
 ✅ Valkyrien Skies  
 ✅ Particle Rain/Pretty Rain  
+✅ MmmMmmMmmMmm (Target Dummy)  
+✅ Hex Casting  
+⚠️ Create  
 ❔ Effectual  
 ❔ Effective/Effecticularity  
 ❔ Particular  
-✅ MmmMmmMmmMmm (Target Dummy)  
-✅ Hex Casting  
+❔ Epic Fight  
+❔ Draconic Evolution  
+❔ Gateways to Eternity  
 ❌ MadParticle  
 ⬜ ...
 

@@ -14,7 +14,7 @@
     "MixinLevelRenderer",
     "MixinLevelRenderer_EarlyFrustum",
     "MixinMinecraft",
-    "MixinMixinParticle_NoRefreshLightCache",
+    "MixinParticle_LightCacheNoRefresh",
     "MixinMultiBufferSource$BufferSource",
     "MixinParticle",
     "MixinParticle_LightCache",

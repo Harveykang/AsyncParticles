@@ -2,11 +2,8 @@ package fun.qu_an.minecraft.asyncparticles.client.fabric;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
-import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
-import net.irisshaders.iris.shaderpack.properties.ParticleRenderingSettings;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
@@ -21,7 +18,7 @@ import java.util.function.Predicate;
 @SuppressWarnings("unused")
 public class AsyncRendererImpl {
 	public static void irisOpaque(float f, Camera camera, LightTexture lightTexture, Predicate<ParticleRenderType> predicate) {
-		if (!ModListHelper.FABRIC_IRIS_LOADED || !Iris.isPackInUseQuick() || AsyncRenderer.getRenderingSettings() != ParticleRenderingSettings.MIXED) {
+		if (!AsyncRenderer.isMixedParticleRenderingSetting()) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -30,7 +27,7 @@ public class AsyncRendererImpl {
 
 		profiler.push("wait_for_async_tasks");
 		AsyncRenderer.asyncTask.join();
-		AsyncRenderer.isStart = false;
+		profiler.pop();
 
 		ParticleEngine particleEngine = mc.particleEngine;
 		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
@@ -38,7 +35,7 @@ public class AsyncRendererImpl {
 	}
 
 	public static void irisTranslucent(float f, Camera camera, LightTexture lightTexture, Predicate<ParticleRenderType> predicate) {
-		if (!ModListHelper.FABRIC_IRIS_LOADED || !Iris.isPackInUseQuick() || AsyncRenderer.getRenderingSettings() != ParticleRenderingSettings.MIXED) {
+		if (!AsyncRenderer.isMixedParticleRenderingSetting()) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
