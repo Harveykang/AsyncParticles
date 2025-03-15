@@ -33,6 +33,13 @@
 
 ### Mods Tested
 
+⚠️ Create  
+❔ Effectual  
+❔ Effective/Effecticularity  
+❔ Particular  
+❔ Epic Fight  
+❔ Draconic Evolution  
+❔ Gateways to Eternity  
 ✅ Forge + Sinytra Connector  
 ✅ Fabric  
 ✅ ModernFix  
@@ -45,13 +52,6 @@
 ✅ Particle Rain/Pretty Rain  
 ✅ MmmMmmMmmMmm (Target Dummy)  
 ✅ Hex Casting  
-⚠️ Create  
-❔ Effectual  
-❔ Effective/Effecticularity  
-❔ Particular  
-❔ Epic Fight  
-❔ Draconic Evolution  
-❔ Gateways to Eternity  
 ❌ MadParticle  
 ⬜ ...
 
