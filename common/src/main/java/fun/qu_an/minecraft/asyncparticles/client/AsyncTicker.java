@@ -6,7 +6,6 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceC
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
-import fun.qu_an.minecraft.asyncparticles.client.mixin.a_good_place.InvokerBlocksParticlesManager;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -17,7 +16,6 @@ import net.minecraft.client.particle.TrackingEmitter;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
-import nl.enjarai.a_good_place.particles.BlocksParticlesManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -255,7 +253,8 @@ public class AsyncTicker {
 			throw toThrowDirectly(e);
 		}
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.level != null && mc.player != null) {
+		if (!isTolerable(e) &&
+			mc.level != null && mc.player != null) {
 			// FIXME: 更好的异常处理方案
 			throw toThrowDirectly(e);
 		}
@@ -278,7 +277,7 @@ public class AsyncTicker {
 		}
 		return e instanceof MissingPaletteEntryException
 			   || e instanceof NullPointerException
-			   || e instanceof ArrayIndexOutOfBoundsException;
+			   || e instanceof IndexOutOfBoundsException;
 	}
 
 	/* Sync Ticking */

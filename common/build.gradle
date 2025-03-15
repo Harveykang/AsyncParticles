@@ -73,4 +73,7 @@ dependencies {
 
     /* Physics Mod */
     modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171b-fabric-1.20.1.jar')
+
+    /* Gateways to Eternity */
+    modCompileOnly "curse.maven:gateway-to-eternity-417802:5703251"
 }

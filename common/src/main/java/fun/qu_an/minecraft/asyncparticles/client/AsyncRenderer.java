@@ -11,7 +11,11 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.TryAndStoreFakeBufferBuilder;
+import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
 import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
@@ -41,6 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 // TODO: 整理这一坨
+@Environment(EnvType.CLIENT)
 public class AsyncRenderer {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -86,7 +91,6 @@ public class AsyncRenderer {
 	//	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = new ConcurrentHashMap<>();
 	// some mod use zero content record class as particle render type, so we need to use IdentityHashMap to get rid of duplicated hashcode...
 	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = Collections.synchronizedMap(new IdentityHashMap<>());
-	private static final List<Runnable> ASYNC_QUEUE = new ArrayList<>();
 	public static final ForkJoinPool EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
 	public static final Set<Thread> PARTICLE_THREADS = Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
@@ -118,49 +122,81 @@ public class AsyncRenderer {
 	private static final Map<ParticleRenderType, BufferBuilder> BUFFER_BUILDERS = new IdentityHashMap<>();
 	public static Frustum frustum;
 	private static Consumer<String> debugConsumer;
-	public static boolean isStart;
 	private static CompletableFuture<Void> asyncTask;
+	private static boolean mixedParticleRenderingSetting = false;
+	private static int asyncTasksSize;
 
 	/* Renderer */
 
-	public static void add(Runnable task) {
-		ASYNC_QUEUE.add(task);
-	}
-
-	public static void start(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
+	public static void start(float f, Camera camera) {
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
 		profiler.popPush("async_particles");
-		isStart = true;
-		MultiBufferSource.BufferSource bufferSource = mc.levelRenderer.renderBuffers.bufferSource();
 		ParticleEngine particleEngine = mc.particleEngine;
 		if (ModListHelper.IRIS_LIKE_LOADED) {
-			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
+			mixedParticleRenderingSetting = IrisApi.getInstance().isShaderPackInUse() &&
+											getRenderingSettings() == ParticleRenderingSettings.MIXED;
+//			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
-		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
+		profiler.push("render_async");
+		TextureManager textureManager = particleEngine.textureManager;
+		ObjectArrayList<CompletableFuture<Void>> asyncTasks = new ObjectArrayList<>(asyncTasksSize);
+		for (Map.Entry<ParticleRenderType, Queue<Particle>> entry : particleEngine.particles.entrySet()) {
+			Queue<Particle> queue = entry.getValue();
+			if (queue.isEmpty()) {
+				continue;
+			}
+			ParticleRenderType particleRenderType = entry.getKey();
+			BufferBuilder bufferBuilder = beginBufferBuilder(particleRenderType, textureManager);
+			if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
+				continue;
+			}
+			asyncTasks.add(CompletableFuture.runAsync(() -> queue.forEach(particle ->
+					renderParticle(f, camera, particle, particleRenderType, bufferBuilder)), EXECUTOR)
+				.exceptionally(AsyncRenderer::renderAsyncExceptionally));
+		}
+		int size = asyncTasksSize = asyncTasks.size();
+		asyncTask = CompletableFuture.allOf(asyncTasks.toArray(new CompletableFuture[size]));
+		profiler.pop();
 		tryDebug();
 		clearSync();
-		profiler.push("schedule_tasks");
-		var futures = new CompletableFuture[ASYNC_QUEUE.size()];
-		for (int i = 0, asyncQueueSize = ASYNC_QUEUE.size(); i < asyncQueueSize; i++) {
-			Runnable runnable = ASYNC_QUEUE.get(i);
-			futures[i] = CompletableFuture.runAsync(runnable, EXECUTOR)
-				.exceptionally(e -> {
-					LOGGER.error("Error rendering particle", e);
-					Minecraft mc1 = Minecraft.getInstance();
-					if (mc1.level != null && mc1.player != null) {
-						throw new RuntimeException(e);
-					}
-					return null;
-				});
+	}
+
+	private static void renderParticle(float f, Camera camera, Particle particle, ParticleRenderType particleRenderType, BufferBuilder bufferBuilder) {
+		if (!particle.isAlive()) {
+			return;
 		}
-		ASYNC_QUEUE.clear();
-		asyncTask = CompletableFuture.allOf(futures);
-		profiler.pop();
+		if (((ParticleAddon) particle).shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
+			return;
+		}
+		if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
+			recordSync(particleRenderType, particle);
+			return;
+		}
+		float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
+		try {
+			particle.render(bufferBuilder, camera, g);
+		} catch (Throwable throwable) {
+			LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, throwable);
+			((ParticleAddon) particle).asyncedParticles$setRenderSync();
+			if (!AsyncTicker.isTolerable(throwable)) {
+				markAsSync(particle.getClass());
+			}
+			recordSync(particleRenderType, particle);
+		}
+	}
+
+	private static Void renderAsyncExceptionally(Throwable e) {
+		LOGGER.error("Error rendering particle", e);
+		Minecraft mc1 = Minecraft.getInstance();
+		if (mc1.level != null && mc1.player != null) {
+			throw new RuntimeException(e);
+		}
+		return null;
 	}
 
 	public static void join(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
-		if (isMixedRenderingSetting()) {
+		if (isMixedParticleRenderingSetting()) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -176,7 +212,6 @@ public class AsyncRenderer {
 		profiler.push("wait_for_async_tasks");
 		asyncTask.join();
 		profiler.pop();
-		isStart = false;
 
 		MultiBufferSource.BufferSource bufferSource = mc.levelRenderer.renderBuffers.bufferSource();
 		ParticleEngine particleEngine = mc.particleEngine;
@@ -191,7 +226,7 @@ public class AsyncRenderer {
 	}
 
 	public static void irisOpaque(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
-		if (!isMixedRenderingSetting()) {
+		if (!isMixedParticleRenderingSetting()) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -201,7 +236,6 @@ public class AsyncRenderer {
 		profiler.push("wait_for_async_tasks");
 		asyncTask.join();
 		profiler.pop();
-		isStart = false;
 		LevelRenderer levelRenderer = mc.levelRenderer;
 		MultiBufferSource.BufferSource bufferSource = levelRenderer.renderBuffers.bufferSource();
 
@@ -219,7 +253,7 @@ public class AsyncRenderer {
 	}
 
 	public static void irisTranslucent(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
-		if (!isMixedRenderingSetting()) {
+		if (!isMixedParticleRenderingSetting()) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -245,7 +279,7 @@ public class AsyncRenderer {
 
 	// FIXME: 这是个临时解决方案，最好找出 ModelMatrixStack 错乱的原因
 	public static void irisSync(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
-		if (!isMixedRenderingSetting()) {
+		if (!isMixedParticleRenderingSetting()) {
 			return;
 		}
 		PoseStack poseStack2 = null;
@@ -269,9 +303,38 @@ public class AsyncRenderer {
 				poseStack2.mulPoseMatrix(poseStack.last().pose());
 				RenderSystem.applyModelViewMatrix();
 			}
-			particleRenderType.begin(FakeBufferBuilder.INSTANCE, particleEngine.textureManager);
+			RenderSystem.setShader(GameRenderer::getParticleShader);
+			Tesselator tesselator = Tesselator.getInstance();
+			// Some mod begin/end the bufferBuilder in render() method...
+			// we need to provide one.
+			BufferBuilder bufferBuilder = tesselator.getBuilder();
+			boolean began = false;
 			for (Particle particle : queue) {
-				renderSync0(f, camera, particle, FakeBufferBuilder.INSTANCE, particleRenderType);
+				if (!particle.isAlive()) {
+					continue;
+				}
+				if (((ParticleAddon) particle).shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
+					continue;
+				}
+				if (!began) {
+					particleRenderType.begin(bufferBuilder, particleEngine.textureManager);
+					began = true;
+				}
+				float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
+				try {
+					particle.render(bufferBuilder, camera, g);
+				} catch (Throwable throwable) {
+					CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
+					CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
+					Objects.requireNonNull(particle);
+					crashReportCategory.setDetail("Particle", particle::toString);
+					Objects.requireNonNull(particleRenderType);
+					crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
+					throw new ReportedException(crashReport);
+				}
+			}
+			if (began) {
+				particleRenderType.end(tesselator);
 			}
 		}
 		if (poseStack2 != null) {
@@ -283,38 +346,19 @@ public class AsyncRenderer {
 		}
 	}
 
-	private static void renderSync0(float f, Camera camera, Particle particle, BufferBuilder bufferBuilder, ParticleRenderType particleRenderType) {
-		if (!particle.isAlive()) {
-			return;
-		}
-		if (((ParticleAddon) particle).shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
-			return;
-		}
-		float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
-		try {
-			particle.render(bufferBuilder, camera, g);
-		} catch (Throwable throwable) {
-			CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
-			CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
-			Objects.requireNonNull(particle);
-			crashReportCategory.setDetail("Particle", particle::toString);
-			Objects.requireNonNull(particleRenderType);
-			crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
-			throw new ReportedException(crashReport);
-		}
-	}
-
-	public static boolean isMixedRenderingSetting() {
-		return ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse() && getRenderingSettings() == ParticleRenderingSettings.MIXED;
+	public static boolean isMixedParticleRenderingSetting() {
+		return mixedParticleRenderingSetting;
 	}
 
 	private static ParticleRenderingSettings getRenderingSettings() {
-		return Iris.getPipelineManager().getPipeline().map(WorldRenderingPipeline::getParticleRenderingSettings).orElse(ParticleRenderingSettings.MIXED);
+		return Iris.getPipelineManager().getPipeline()
+			.map(WorldRenderingPipeline::getParticleRenderingSettings)
+			.orElse(ParticleRenderingSettings.MIXED);
 	}
 
 	private static BufferBuilder getBufferBuilder(ParticleRenderType particleRenderType) {
 		return BUFFER_BUILDERS.computeIfAbsent(particleRenderType,
-			k -> new BufferBuilder(RenderType.SMALL_BUFFER_SIZE / 2)); // 给多大好？
+			k -> new BufferBuilder(RenderType.TRANSIENT_BUFFER_SIZE)); // minimal size
 	}
 
 	/* BufferBuilder */
@@ -340,13 +384,13 @@ public class AsyncRenderer {
 		TryAndStoreFakeBufferBuilder fakeBufferBuilder = new TryAndStoreFakeBufferBuilder();
 		// compatibility shit...
 		k.begin(fakeBufferBuilder, textureManager);
-		RuntimeException exception = null;
+		Exception exception = null;
 		try {
 			k.end(FakeTesselator.INSTANCE); // we must call end since some mod may reset something in this method
 		} catch (Exception e) {
 			// pray it doesn't throw...
 			// this most breaks only one frame, so we can ignore it for now...
-			exception = new RuntimeException(e);
+			exception = e;
 			LOGGER.warn("Exception try&store-ing vertex format/mode for particle render type: {}", k, e);
 		}
 		VertexFormat.Mode mode = fakeBufferBuilder.getVertexFormatMode();
@@ -354,12 +398,12 @@ public class AsyncRenderer {
 		if (mode != null && format != null) {
 			return Pair.of(mode, format);
 		}
-		if (exception == null) {
-			return EMPTY_FORMAT;
+		if (exception != null) {
+			// this should never happen...
+			// custom particles should not throw any exception in end()...
+			throw Utils.toThrowDirectly(exception);
 		}
-		// this should never happen...
-		// because custom particles should not throw any exception in end()...
-		throw exception;
+		return EMPTY_FORMAT;
 	}
 
 	/* Sync Rendering */
@@ -404,10 +448,11 @@ public class AsyncRenderer {
 				sync particle count: %d,
 				sync particle types: %s,
 				iris particle state: %s"""
-				.formatted(ASYNC_QUEUE.size(),
+				.formatted(asyncTasksSize,
 					SYNC_PARTICLES.values().stream().mapToInt(List::size).sum(),
 					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList(),
-					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse() ? getRenderingSettings().name() : "disabled"));
+					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse()
+						? getRenderingSettings().name() : "disabled"));
 			debugConsumer = null;
 		}
 	}
@@ -420,7 +465,6 @@ public class AsyncRenderer {
 			asyncTask.join();
 //			asyncTask = null;
 		}
-		ASYNC_QUEUE.clear();
 		FORMATS.clear();
 		clearSync();
 	}

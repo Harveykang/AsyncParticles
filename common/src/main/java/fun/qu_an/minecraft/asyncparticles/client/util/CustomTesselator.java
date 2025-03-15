@@ -22,7 +22,6 @@ public class CustomTesselator extends FakeTesselator {
 	@Override
 	public void end() {
 		endConsumer.accept(bufferBuilder);
-		// do nothing
 	}
 
 	@Override

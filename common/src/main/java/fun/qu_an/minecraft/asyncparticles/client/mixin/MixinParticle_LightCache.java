@@ -36,8 +36,8 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 
 	@Override
 	public void asyncParticles$refresh() {
-		// for some particles, light is hard coded to 15, so this is not necessary for all particles
-		// do we need a better design?
+		// for some particles, light is hard coded, so this is not necessary for all particles
+		// TODO: do we need a better design?
 		BlockPos blockPos = BlockPos.containing(x, y, z);
 		int light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
 		asyncParticles$setLight(light);

@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MixinLevelRenderer {
 	@Inject(method = "renderLevel", at = @At(value = "HEAD"))
 	private void onRenderLevelHead(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-		AsyncRenderer.start(poseStack, f, camera, lightTexture);
+		AsyncRenderer.start(f, camera);
 	}
 
 	@Inject(method = "renderLevel",

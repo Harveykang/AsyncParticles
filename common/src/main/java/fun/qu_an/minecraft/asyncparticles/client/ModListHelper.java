@@ -40,18 +40,17 @@ public class ModListHelper {
 	/* Create */
 	public static final boolean CREATE_LOADED = isModLoaded("create");
 	public static final int CREATE_MAJOR_VERSION = versionMajor("create");
+	public static final boolean FABRIC_CREATE_LOADED = isFabricModLoaded("create");
+	public static final boolean FORGE_CREATE_LOADED = isForgeModLoaded("create");
 	/* Epic Fight */
 	public static final boolean EPICFIGHT_LOADED = isModLoaded("epicfight");
 	public static final boolean FORGE_EPICFIGHT_LOADED = isForgeModLoaded("epicfight");
+	/* Epic ACG */
+	public static final boolean FORGE_EPICACG_LOADED = isForgeModLoaded("epicacg");
 	/* A Good Place */
 	public static final boolean A_GOOD_PLACE_LOADED = isModLoaded("a_good_place");
-
-	static {
-		System.out.println("CREATE_MAJOR_VERSION: " + CREATE_MAJOR_VERSION);
-	}
-
-	public static final boolean FABRIC_CREATE_LOADED = isFabricModLoaded("create");
-	public static final boolean FORGE_CREATE_LOADED = isForgeModLoaded("create");
+	/* Gateways to Eternity */
+	public static final boolean FORGE_GATEWAYS_LOADED = isForgeModLoaded("gateways");
 	/* Tombstone */
 	public static final boolean TOMBSTONE_LOADED = isModLoaded("tombstone");
 	/* Particular */
@@ -60,6 +59,8 @@ public class ModListHelper {
 	public static final boolean PARTICLE_CORE_LOADED = isModLoaded("particle_core");
 	/* Physics Mod */
 	public static final boolean PHYSICSMOD_LOADED = isModLoaded("physicsmod");
+	/* Draconic Evolution */
+	public static final boolean FORGE_DRACONIC_EVOLUTION_LOADED = isForgeModLoaded("draconicevolution");
 
 	@ExpectPlatform
 	private static boolean isForge() {

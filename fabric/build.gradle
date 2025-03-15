@@ -103,6 +103,9 @@ dependencies {
 
     /* Carpet */
 //    modLocalRuntime "curse.maven:carpet-349239:4573334" // 1.4.112
+
+    /* Observable */
+    modLocalRuntime "maven.modrinth:observable:4.4.2+fabric"
 }
 
 processResources {

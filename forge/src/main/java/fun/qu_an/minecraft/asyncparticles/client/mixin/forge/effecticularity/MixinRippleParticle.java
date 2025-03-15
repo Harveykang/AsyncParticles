@@ -22,17 +22,17 @@ public abstract class MixinRippleParticle extends TextureSheetParticle {
 		super(level, x, y, z);
 	}
 
-	@Inject(method = "<init>", at = @At("RETURN"))
+	@Inject(method = "<init>", require = 0, at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
 		setSpriteFromAge(this.spriteProvider);
 	}
 
-	@Inject(method = "tick", at = @At("HEAD"))
+	@Inject(method = "tick", require = 0, at = @At("HEAD"))
 	private void onTick(CallbackInfo ci) {
 		setSpriteFromAge(this.spriteProvider);
 	}
 
-	@Redirect(method = "render", at = @At(value = "INVOKE",
+	@Redirect(method = "render", require = 0, at = @At(value = "INVOKE",
 		target = "Lconcerrox/effective/particle/RippleParticle;setSpriteFromAge(Lnet/minecraft/client/particle/SpriteSet;)V"))
 	private void onRender(RippleParticle particle, SpriteSet spriteProvider) {
 		// do nothing

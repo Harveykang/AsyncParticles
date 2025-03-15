@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.forge;
 
+import com.brandon3055.draconicevolution.api.DraconicAPI;
+import com.dfdyz.epicacg.client.particle.BloomTrailParticle;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
@@ -8,7 +10,10 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -53,8 +58,12 @@ public final class AsyncparticlesClientForge {
 			.then(literal("debug")
 				.executes(context -> {
 					CommandSourceStack source = context.getSource();
-					AsyncTicker.debugLater(s -> source.sendSystemMessage(Component.literal(s)));
-					AsyncRenderer.debugLater(s -> source.sendSystemMessage(Component.literal(s)));
+					AsyncTicker.debugLater(s -> source.sendSystemMessage(Component.literal(s)
+						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
+					AsyncRenderer.debugLater(s -> source.sendSystemMessage(Component.literal(s)
+						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
 					return 1;
 				}))
 			.then(literal("reload")

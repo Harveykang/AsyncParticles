@@ -5,12 +5,11 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
-import fun.qu_an.minecraft.asyncparticles.client.*;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.util.CustomTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
-import net.irisshaders.iris.shaderpack.properties.ParticleRenderingSettings;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -22,16 +21,13 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.joml.Matrix4f;
-import org.slf4j.Logger;
-import org.spongepowered.asm.mixin.*;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.*;
 
@@ -50,125 +46,93 @@ public abstract class MixinParticleEngine_Render {
 	@Final
 	private static List<ParticleRenderType> RENDER_ORDER;
 
-	@Shadow
-	@Final
-	private static Logger LOGGER;
-
 	/**
 	 * @author
 	 * @reason
 	 */
 	@Overwrite
 	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f) {
-		PoseStack poseStack2 = null;
-		Frustum frustum = AsyncRenderer.frustum;
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-		if (!AsyncRenderer.isStart) {
-			lightTexture.turnOnLightLayer();
-			RenderSystem.enableDepthTest();
-			poseStack2 = RenderSystem.getModelViewStack();
-			poseStack2.pushPose();
-			poseStack2.mulPoseMatrix(poseStack.last().pose());
-			RenderSystem.applyModelViewMatrix();
-		}
+		profiler.push("prepare");
+		Frustum frustum = AsyncRenderer.frustum;
+		lightTexture.turnOnLightLayer();
+		RenderSystem.enableDepthTest();
+		PoseStack poseStack2 = RenderSystem.getModelViewStack();
+		poseStack2.pushPose();
+		poseStack2.mulPoseMatrix(poseStack.last().pose());
+		RenderSystem.applyModelViewMatrix();
+		profiler.pop();
 		try {
 			for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 				// FABRIC skips NO_RENDER
-//			if (particleRenderType == ParticleRenderType.NO_RENDER) {
-//				continue;
-//			}
+//				if (particleRenderType == ParticleRenderType.NO_RENDER) {
+//					continue;
+//				}
 				Queue<Particle> iterable = this.particles.get(particleRenderType);
 				if (iterable == null || iterable.isEmpty()) {
 					continue;
 				}
 				BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
-				if (!AsyncRenderer.isStart) {
-					profiler.push("sync_particles");
-					Collection<? extends Particle> particles1;
-					if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
-						particles1 = AsyncRenderer.isMixedRenderingSetting() ? List.of() : iterable;
-					} else {
-						particles1 = AsyncRenderer.getSync(particleRenderType);
-					}
-					// begin before sync particles to be compatible with some mod
-					RenderSystem.setShader(GameRenderer::getParticleShader);
-					particleRenderType.begin(FakeBufferBuilder.INSTANCE, this.textureManager);
-					if (!particles1.isEmpty()) {
-						for (Particle particle : particles1) {
-							if (!particle.isAlive()) {
-								continue;
-							}
-							if (((ParticleAddon) particle).shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
-								continue;
-							}
-							float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
-							try {
-								particle.render(bufferBuilder, camera, g);
-							} catch (Throwable throwable) {
-								CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
-								CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
-								Objects.requireNonNull(particle);
-								crashReportCategory.setDetail("Particle", particle::toString);
-								Objects.requireNonNull(particleRenderType);
-								crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
-								throw new ReportedException(crashReport);
-							}
-						}
-					}
-					profiler.pop();
-					if (!bufferBuilder.building()) {
-						particleRenderType.end(FakeTesselator.INSTANCE);
-						// call end to be compatible with some mod
-						continue;
-					}
-					profiler.push("upload_particles");
-					// use fake, mod compatibility
-					particleRenderType.end(bufferBuilder == FakeBufferBuilder.INSTANCE
-						? FakeTesselator.INSTANCE
-						: CustomTesselator.of(bufferBuilder, b -> BufferUploader.drawWithShader(b.end())));
-					if (bufferBuilder.building()) {
-						bufferBuilder.end().release(); // release buffer manually if not released by particleRenderType.end()
-					}
-					profiler.pop();
+				profiler.push("render_sync");
+				Collection<? extends Particle> syncParticles;
+				Tesselator tesselator;
+				if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
+					syncParticles = AsyncRenderer.isMixedParticleRenderingSetting() ? List.of() : iterable;
+					tesselator = Tesselator.getInstance();
+					bufferBuilder = tesselator.getBuilder();
 				} else {
-					if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
-						continue;
-					}
-					profiler.push("async_particles");
-					Runnable runnable = () -> iterable.forEach(particle -> {
+					syncParticles = AsyncRenderer.getSync(particleRenderType);
+					tesselator = null;
+				}
+				// must set shader before begin
+				RenderSystem.setShader(GameRenderer::getParticleShader);
+				particleRenderType.begin(FakeBufferBuilder.INSTANCE, this.textureManager);
+				if (!syncParticles.isEmpty()) {
+					for (Particle particle : syncParticles) {
 						if (!particle.isAlive()) {
-							return;
+							continue;
 						}
 						if (((ParticleAddon) particle).shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
-							return;
-						}
-						if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
-							AsyncRenderer.recordSync(particleRenderType, particle);
-							return;
+							continue;
 						}
 						float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
 						try {
 							particle.render(bufferBuilder, camera, g);
 						} catch (Throwable throwable) {
-							LOGGER.error("Exception while rendering particle {}, marking as sync", particle, throwable);
-							((ParticleAddon) particle).asyncedParticles$setRenderSync();
-							AsyncRenderer.markAsSync(particle.getClass());
-							AsyncRenderer.recordSync(particleRenderType, particle);
+							CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
+							CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
+							Objects.requireNonNull(particle);
+							crashReportCategory.setDetail("Particle", particle::toString);
+							Objects.requireNonNull(particleRenderType);
+							crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
+							throw new ReportedException(crashReport);
 						}
-					});
-					AsyncRenderer.add(runnable);
-					profiler.pop();
+					}
 				}
+				profiler.pop();
+				if (!bufferBuilder.building()) {
+					particleRenderType.end(FakeTesselator.INSTANCE);
+					// call end to be compatible with some mod
+					continue;
+				}
+				profiler.push("upload_particles");
+				// use fake, mod compatibility
+				particleRenderType.end(tesselator != null
+					? tesselator : CustomTesselator.of(bufferBuilder, b -> BufferUploader.drawWithShader(b.end())));
+				if (bufferBuilder.building()) {
+					bufferBuilder.end().release(); // release buffer manually if not released by particleRenderType.end()
+				}
+				profiler.pop();
 			}
 		} finally {
 			// make sure poseStack2 is popped
-			if (!AsyncRenderer.isStart) {
-				poseStack2.popPose();
-				RenderSystem.applyModelViewMatrix();
-				RenderSystem.depthMask(true);
-				RenderSystem.disableBlend();
-				lightTexture.turnOffLightLayer();
-			}
+			profiler.push("cleanup");
+			poseStack2.popPose();
+			RenderSystem.applyModelViewMatrix();
+			RenderSystem.depthMask(true);
+			RenderSystem.disableBlend();
+			lightTexture.turnOffLightLayer();
+			profiler.pop();
 		}
 	}
 }

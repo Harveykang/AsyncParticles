@@ -1,11 +1,13 @@
 # AsyncParticles
 
+- [中文](./README_zh.md)|English
 - [Downloads](https://github.com/Harveykang/AsyncParticles/releases)
 
 ## Features
 
 - Minecraft
-  - Async particle ticking/rendering(buffer filling).  
+  - Async particle ticking/rendering(buffer filling).
+  - Async particle light cache.
   - Async client block entity ticking.
 - Valkyrien Skies + Pretty Rain/Particle Rain
   - Weather particles now collide with ships.
@@ -19,38 +21,42 @@
 - ModernFix
 - Sodium/Embeddium
 - Flerovium
-- Startlight
+- Startlight/ScalableLux
 
 ## Mod Compatability
 
+🔄️: Work in progress  
 ✅: Compatible  
 ❔: Works fine, but not fully tested  
 ⚠️: More testing needed  
-🔄️: Work in progress  
 ❌: Not Compatible
 
 ### Mods Tested
 
 ✅ Forge + Sinytra Connector  
 ✅ Fabric  
-✅ ModernFix (Fabric/Forge)  
-✅ Sodium/Embeddium (Fabric/Forge)  
-✅ Flerovium (Forge)  
-✅ Brute force Rendering Culling (Fabric/Forge)  
-✅ Iris/Oculus (Fabric/Forge)  
-✅ Startlight (Fabric/Forge)  
-⚠️ Create (Fabric/Forge)  
-✅ Valkyrien Skies (Fabric/Forge)  
-✅ Particle Rain/Pretty Rain (Fabric/Forge)  
-❔ Effectual (Fabric)  
-❔ Effective/Effecticularity (Fabric/Forge)  
-❔ Particular (Fabric/Forge)  
-✅ MmmMmmMmmMmm (Target Dummy) (Fabric/Forge)    
-✅ Hex Casting (Fabric/Forge)  
-❌ MadParticle (Forge)  
+✅ ModernFix  
+✅ Sodium/Embeddium  
+✅ Flerovium  
+✅ Brute force Rendering Culling  
+✅ Iris/Oculus  
+✅ Startlight  
+✅ Valkyrien Skies  
+✅ Particle Rain/Pretty Rain  
+✅ MmmMmmMmmMmm (Target Dummy)  
+✅ Hex Casting  
+⚠️ Create  
+❔ Effectual  
+❔ Effective/Effecticularity  
+❔ Particular  
+❔ Epic Fight  
+❔ Draconic Evolution  
+❔ Gateways to Eternity  
+❌ MadParticle  
 ⬜ ...
 
 ## Credits
 
 - [MixinSquared](https://github.com/Bawnorton/MixinSquared)
 - [MixinExtras](https://github.com/LlamaLad7/MixinExtras)
+- [MixinConstraints](https://github.com/Moulberry/MixinConstraints)
