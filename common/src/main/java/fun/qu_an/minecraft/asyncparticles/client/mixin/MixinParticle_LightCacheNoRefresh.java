@@ -1,24 +1,23 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
-import com.chailotl.particular.particles.FireflyParticle;
-import dev.shadowsoffire.gateways.client.GatewayParticle;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import net.minecraft.client.particle.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 
 @Pseudo
-@Mixin({
+@Mixin(value = {
 	HugeExplosionParticle.class,
 	AttackSweepParticle.class,
 	SculkChargeParticle.class,
 	SculkChargePopParticle.class,
 	SimpleAnimatedParticle.class,
 	ShriekParticle.class,
-	FireflyParticle.class,
-	VibrationSignalParticle.class,
-	GatewayParticle.class
+	VibrationSignalParticle.class
 	// Add more particle classes here if needed
+}, targets = {
+	"dev.shadowsoffire.gateways.client.GatewayParticle",
+	"com.chailotl.particular.particles.FireflyParticle",
 })
 public abstract class MixinParticle_LightCacheNoRefresh implements LightCachedParticleAddon {
 	@Override

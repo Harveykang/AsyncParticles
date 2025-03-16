@@ -74,6 +74,10 @@ subprojects {
         maven { url = "https://repo.spongepowered.org/repository/maven-public" } // Mixin
     }
 
+    loom {
+        silentMojangMappingsLicense()
+    }
+
     dependencies {
         minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
         mappings(loom.layered {

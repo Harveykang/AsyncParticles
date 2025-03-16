@@ -5,6 +5,7 @@ import com.simibubi.create.foundation.collision.ContinuousOBBCollider;
 import com.simibubi.create.foundation.collision.Matrix3d;
 import com.simibubi.create.foundation.collision.OrientedBB;
 import com.simibubi.create.foundation.utility.BlockHelper;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.create.InvokerContraptionCollider;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -69,7 +70,7 @@ public class CreateCompat {
 		// Transform entity position and motion to local space
 		float yawOffset = rotation.getYawOffset();
 		Vec3 anchorVec = contraptionEntity.getAnchorVec();
-		Vec3 position = getWorldToLocalTranslation(originalPosition, bounds, anchorVec, rotationMatrix, yawOffset);
+		Vec3 position = CreateCompat.getWorldToLocalTranslation(originalPosition, bounds, anchorVec, rotationMatrix, yawOffset);
 		motion = motion.subtract(contraptionMotion);
 		motion = rotationMatrix.transform(motion);
 
@@ -164,11 +165,11 @@ public class CreateCompat {
 		}
 	}
 
-	private static Vec3 getWorldToLocalTranslation(Vec3 entityPosition,
-												   AABB bounds,
-												   Vec3 anchorVec,
-												   Matrix3d rotationMatrix,
-												   float yawOffset) {
+	public static Vec3 getWorldToLocalTranslation(Vec3 entityPosition,
+												  AABB bounds,
+												  Vec3 anchorVec,
+												  Matrix3d rotationMatrix,
+												  float yawOffset) {
 		Vec3 centerY = new Vec3(0, bounds.getYsize() / 2, 0);
 		Vec3 position = entityPosition;
 		position = position.add(centerY);

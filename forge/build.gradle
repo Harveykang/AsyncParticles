@@ -55,10 +55,6 @@ dependencies {
 //    modLocalRuntime "org.sinytra:Connector:1.0.0-beta.46+1.20.1"
 //    modLocalRuntime "dev.su5ed.sinytra.fabric-api:fabric-api:0.92.2+1.11.9+1.20.1"
 
-    if (rootProject.vanilla == 'true') {
-        return
-    }
-
     /* APIs */
     modLocalRuntime 'maven.modrinth:architectury-api:9.2.14+forge'
     modLocalRuntime "me.shedaniel.cloth:cloth-config-forge:11.1.136"
