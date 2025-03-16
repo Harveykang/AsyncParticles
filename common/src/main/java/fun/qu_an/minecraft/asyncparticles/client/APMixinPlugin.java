@@ -71,6 +71,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				};
 			}
 			case "fake_renders" -> true;
+			case "modernui" -> ModListHelper.MODERN_UI_LOADED;
 			case "vs2" -> ModListHelper.VS_LOADED;
 			case "create" -> ModListHelper.CREATE_LOADED;
 			case "iris_like" -> ModListHelper.IRIS_LIKE_LOADED;

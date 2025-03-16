@@ -93,7 +93,6 @@ public class AsyncRenderer {
 	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = Collections.synchronizedMap(new IdentityHashMap<>());
 	public static final ForkJoinPool EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
-	public static final Set<Thread> PARTICLE_THREADS = Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
 
 	static {
 		AtomicInteger workerCount = new AtomicInteger(1);
@@ -112,7 +111,6 @@ public class AsyncRenderer {
 			};
 			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());
 			forkJoinWorkerThread.setDaemon(true);
-			PARTICLE_THREADS.add(forkJoinWorkerThread);
 			return forkJoinWorkerThread;
 		}, Util::onThreadException, true);
 	}

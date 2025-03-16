@@ -8,6 +8,7 @@
   "client": [
     "MixinActiveProfiler",
     "MixinChunkAccess",
+    "MixinClassInstanceMultiMap",
     "MixinClientChunkCache",
     "MixinClientLevel",
     "MixinFont",
@@ -24,7 +25,6 @@
     "MixinSoundEngine",
     "MixinTesselator",
     "MixinTextureManager",
-    "MixinClassInstanceMultiMap",
     "a_good_place.InvokerBlocksParticlesManager",
     "a_good_place.MixinBlocksParticlesManager",
     "create.InvokerContraptionCollider",
@@ -58,6 +58,7 @@
     "iris_like.MixinOldFullyBufferedMultiBufferSource",
     "legacy.flywheel.MixinClientLevelMixin",
     "lodestone.MixinLodestoneWorldParticle",
+    "modernui.MixinRenderSystem",
     "physicsmod.MixinWeatherParticle",
     "vs2.InvokerEntityShipCollisionUtils",
     "vs2.InvokerRaycastUtils",
