@@ -11,6 +11,7 @@
     "create.MixinDepotBehaviour",
     "create.MixinEjectorBlockEntity",
     "draconicevolution.MixinCrystalFXWireless",
+    "draconicevolution.MixinExplosionFX",
     "effecticularity.MixinRippleParticle",
     "epicacg.MixinAsyncRenderer",
     "epicacg.MixinBloomTrailParticle",
