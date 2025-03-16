@@ -86,6 +86,7 @@ dependencies {
     modLocalRuntime 'maven.modrinth:iris-flw-compat:1.1.4'
 
     // keep this line to compile properly
+    // 否则被模组重写的原版方法不会正确重映射...
     modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
 
     /* Effective */
@@ -122,9 +123,6 @@ dependencies {
 
     /* Observable */
     modLocalRuntime "maven.modrinth:observable:4.4.2+fabric"
-
-    /* Gateways to Eternity */
-    modCompileOnly "curse.maven:gateway-to-eternity-417802:5703251"
 }
 
 processResources {
