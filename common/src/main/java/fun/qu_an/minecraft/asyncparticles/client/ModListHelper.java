@@ -61,6 +61,8 @@ public class ModListHelper {
 	public static final boolean PHYSICSMOD_LOADED = isModLoaded("physicsmod");
 	/* Draconic Evolution */
 	public static final boolean FORGE_DRACONIC_EVOLUTION_LOADED = isForgeModLoaded("draconicevolution");
+	/* Modern UI */
+	public static final boolean MODERN_UI_LOADED = isModLoaded("modernui");
 
 	@ExpectPlatform
 	private static boolean isForge() {

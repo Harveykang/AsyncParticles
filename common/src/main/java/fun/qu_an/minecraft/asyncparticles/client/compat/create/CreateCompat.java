@@ -5,7 +5,6 @@ import com.simibubi.create.foundation.collision.ContinuousOBBCollider;
 import com.simibubi.create.foundation.collision.Matrix3d;
 import com.simibubi.create.foundation.collision.OrientedBB;
 import com.simibubi.create.foundation.utility.BlockHelper;
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.create.InvokerContraptionCollider;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -134,7 +133,7 @@ public class CreateCompat {
 	public static Vec3 collideMotionWithContraptions(ClientLevel level, Vec3 position, Vec3 motion, AABB bounds) {
 		AABB bounds1 = bounds.inflate(0.1).move(motion);
 		Vector3d result = new Vector3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-		forEachContraption(level, bounds1, contraptionEntity -> {
+		forEachContraption(level, contraptionEntity -> {
 			Vec3 vec3 = collideMotionWithContraption(level, position, motion, bounds1, contraptionEntity);
 			if (vec3 == null) {
 				return true;
@@ -149,7 +148,7 @@ public class CreateCompat {
 		return new Vec3(result.x, result.y, result.z);
 	}
 
-	public static void forEachContraption(ClientLevel level, AABB bounds1, Predicate<AbstractContraptionEntity> consumer) {
+	public static void forEachContraption(ClientLevel level, Predicate<AbstractContraptionEntity> consumer) {
 		try {
 			for (WeakReference<AbstractContraptionEntity> r : contraptions(level)) {
 				AbstractContraptionEntity contraptionEntity = r.get();
@@ -426,7 +425,7 @@ public class CreateCompat {
 		boolean[] b = {false};
 		Vec3 pos = new Vec3(x, y, z);
 		AABB bounds = new AABB(x - 1, y - 1, z - 1, x + 1, Math.max(y + 16, level.getMaxBuildHeight()), z + 1);
-		forEachContraption(level, bounds, contraptionEntity -> {
+		forEachContraption(level, contraptionEntity -> {
 			boolean b1 = collideWithContraption(level, pos, Vec3.ZERO, bounds, contraptionEntity, true);
 			// estimate = true for a better performance
 			if (!b1) {

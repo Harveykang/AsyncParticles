@@ -24,7 +24,6 @@
     "MixinSoundEngine",
     "MixinTesselator",
     "MixinTextureManager",
-    "MixinClassInstanceMultiMap",
     "a_good_place.InvokerBlocksParticlesManager",
     "a_good_place.MixinBlocksParticlesManager",
     "create.InvokerContraptionCollider",
@@ -58,6 +57,7 @@
     "iris_like.MixinOldFullyBufferedMultiBufferSource",
     "legacy.flywheel.MixinClientLevelMixin",
     "lodestone.MixinLodestoneWorldParticle",
+    "modernui.MixinRenderSystem",
     "physicsmod.MixinWeatherParticle",
     "vs2.InvokerEntityShipCollisionUtils",
     "vs2.InvokerRaycastUtils",
@@ -69,5 +69,7 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "off_thread_access.MixinClassInstanceMultiMap",
+    "off_thread_access.MixinLevelChunk"
   ]
 }

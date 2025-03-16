@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.gateways;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tesselator;
 import dev.shadowsoffire.gateways.client.GatewayParticle;
@@ -24,13 +26,13 @@ public abstract class MixinGatewayParticle extends TextureSheetParticle {
 		super(level, x, y, z);
 	}
 
-	@Redirect(method = "render", require = 0, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleRenderType;begin(Lcom/mojang/blaze3d/vertex/BufferBuilder;Lnet/minecraft/client/renderer/texture/TextureManager;)V"))
-	private void onBeginRender(ParticleRenderType instance, BufferBuilder builder, TextureManager textureManager) {
+	@WrapOperation(method = "render", require = 0, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleRenderType;begin(Lcom/mojang/blaze3d/vertex/BufferBuilder;Lnet/minecraft/client/renderer/texture/TextureManager;)V"))
+	private void onBeginRender(ParticleRenderType instance, BufferBuilder builder, TextureManager textureManager, Operation<Void> original) {
 		// do nothing
 	}
 
-	@Redirect(method = "render", require = 0, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleRenderType;end(Lcom/mojang/blaze3d/vertex/Tesselator;)V"))
-	private void onEndRender(ParticleRenderType instance, Tesselator tesselator) {
+	@WrapOperation(method = "render", require = 0, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleRenderType;end(Lcom/mojang/blaze3d/vertex/Tesselator;)V"))
+	private void onEndRender(ParticleRenderType instance, Tesselator tesselator, Operation<Void> original) {
 		// do nothing
 	}
 
