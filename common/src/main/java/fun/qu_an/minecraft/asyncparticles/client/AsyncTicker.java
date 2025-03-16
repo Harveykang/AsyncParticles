@@ -184,16 +184,10 @@ public class AsyncTicker {
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
 		profiler.push("async_particles");
-		boolean levelRunning = mc.level != null && !mc.isPaused();
+		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
 		if (levelRunning) {
 			profiler.push("particle_tick");
-			try {
-				mc.particleEngine.tick();
-			} catch (Exception e) {
-				if (mc.level != null && mc.player != null) {
-					throw e;
-				}
-			}
+			mc.particleEngine.tick();
 			profiler.pop();
 		}
 		if (i < to - 1) {
@@ -218,9 +212,9 @@ public class AsyncTicker {
 			AsyncTicker.blockEntityTickFuture = particleFuture;
 		}
 
-		// end tick operations/events
+		// end tick operations
 		List<Runnable> endTickOperations = END_TICK_OPERATIONS;
-		if (levelRunning || !endTickOperations.isEmpty()) {
+		if (!endTickOperations.isEmpty()) {
 			Runnable[] endTickTasks = endTickOperations.toArray(new Runnable[0]);
 			endTickOperations.clear();
 			particleFuture = particleFuture.thenRun(() -> {
@@ -228,9 +222,12 @@ public class AsyncTicker {
 				for (Runnable endTickTask : endTickTasks) {
 					endTickTask.run();
 				}
-				if (!levelRunning) {
-					return;
-				}
+			}).exceptionally(AsyncTicker::tickBeforeExceptionally);
+		}
+
+		// end tick events
+		if (levelRunning) {
+			particleFuture = particleFuture.thenRun(() -> {
 				// 每 tick 结束时都要执行的固定事件
 				for (Runnable endTickEvent : END_TICK_EVENTS) {
 					// FIXME 这个应该可以取消，防止卡死主线程
