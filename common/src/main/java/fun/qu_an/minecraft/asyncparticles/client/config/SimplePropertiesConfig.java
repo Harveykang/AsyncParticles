@@ -12,7 +12,7 @@ public class SimplePropertiesConfig {
 	public static final Path CONFIG_FILE = Paths.get("config", "asyncparticles.properties");
 	public static final int DEFAULT_LIMIT = 32768;
 	public static int limit = DEFAULT_LIMIT;
-	private static boolean asyncClientBlockEntityTick = true;
+	public static boolean asyncClientBlockEntityTick = true;
 	private static boolean greedyAsyncClientBlockEntityTick = false;
 	private static boolean asyncClientBlockEntityAnimate = true;
 	private static boolean forceSyncLevelRenderMarkDirty = false;

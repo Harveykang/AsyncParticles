@@ -121,20 +121,20 @@ public class AsyncTicker {
 		}
 	}
 
-	public static void onTickBefore(int j) {
+	public static void onTickBefore(int i, int to) {
+		// assert i < to;
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
 		profiler.push("async_particles");
-		if (j != 0) {
-			if (blockEntityTickFuture != null) {
-				blockEntityTickFuture.join();
-				blockEntityTickFuture = null;
-			}
-			shouldTickParticles = false;
+		if (blockEntityTickFuture != null &&
+			(i != 0 || SimplePropertiesConfig.greedyAsyncClientBlockEntityTick())) {
+			blockEntityTickFuture.join();
+			blockEntityTickFuture = null;
+		}
+		if (i != 0) {
+			// tick non-zero, do nothing
+			shouldTickParticles = i == to - 1; // tick particles only on last tick
 		} else {
-			if (blockEntityTickFuture != null && SimplePropertiesConfig.greedyAsyncClientBlockEntityTick()) {
-				blockEntityTickFuture.join();
-				blockEntityTickFuture = null;
-			}
+			// tick zero, wait for async tasks to complete, cleanup
 			cancelled = true;
 			debug_cancelled = false;
 			if (particleFuture != null) {
@@ -142,21 +142,20 @@ public class AsyncTicker {
 				particleFuture = null;
 			}
 			cancelled = false;
-			shouldTickParticles = true;
-
+			shouldTickParticles = i == to - 1;
 			Minecraft mc = Minecraft.getInstance();
 			ParticleEngine particleEngine = mc.particleEngine;
 
 			if (!mc.isPaused()) {
 				Collection<Queue<Particle>> values = particleEngine.particles.values();
-				var futures = new CompletableFuture[values.size()];
-				int i = 0;
+				CompletableFuture<?>[] futures = new CompletableFuture[values.size()];
+				int k = 0;
 				for (Queue<Particle> particles1 : values) {
 					if (particles1.isEmpty()) {
-						futures[i++] = CompletableFuture.completedFuture(null);
+						futures[k++] = CompletableFuture.completedFuture(null);
 						continue;
 					}
-					futures[i++] = CompletableFuture.runAsync(() -> {
+					futures[k++] = CompletableFuture.runAsync(() -> {
 						Queue<Particle> particles = (Queue<Particle>) EvictingQueue$delegate.get(particles1);
 						particles.removeIf(particle1 -> {
 							// JDK 并没有定义这个判断会对每个对象执行多少次，但目前没遇到例外情况
@@ -180,7 +179,8 @@ public class AsyncTicker {
 		profiler.pop();
 	}
 
-	public static void onTickAfter(int j) {
+	public static void onTickAfter(int i, int to) {
+		// assert i < to;
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
 		profiler.push("async_particles");
@@ -195,13 +195,14 @@ public class AsyncTicker {
 			}
 			profiler.pop();
 		}
-		if (j != 0) {
+		if (i < to - 1) {
 			return;
 		}
+		// tick last, schedule async tasks
 		tryReload();
 		tryDebug();
 		CompletableFuture<Void> blockEntityTickFuture;
-		if (!SimplePropertiesConfig.asyncBlockEntityTick()) {
+		if (mc.isPaused() || !SimplePropertiesConfig.asyncBlockEntityTick()) {
 			blockEntityTickFuture = CompletableFuture.runAsync(() -> {
 			}, EXECUTOR);
 		} else {
@@ -212,7 +213,19 @@ public class AsyncTicker {
 				for (Runnable blockEntityTask : blockEntityTasks) {
 					blockEntityTask.run();
 				}
-			}, EXECUTOR).exceptionally(AsyncTicker::tickBeforeExceptionally);
+			}, EXECUTOR).exceptionally(e -> {
+				if (!(e instanceof Exception)) {
+					throw toThrowDirectly(e);
+				}
+				Minecraft mc1 = Minecraft.getInstance();
+				if (!isTolerable(e) &&
+					mc1.level != null && mc1.player != null) {
+					// FIXME: 更好的异常处理方案
+					throw new RuntimeException("Try set asyncClientBlockEntityTick to false to fix this issue. (config/asyncparticles.properties)", toThrowDirectly(e));
+				}
+				LOGGER.warn("Exception while executing before particle operation", e);
+				return null;
+			});
 			AsyncTicker.blockEntityTickFuture = blockEntityTickFuture;
 		}
 
@@ -230,7 +243,6 @@ public class AsyncTicker {
 				}
 				// 每 tick 结束时都要执行的固定事件
 				for (Runnable endTickEvent : END_TICK_EVENTS) {
-					// FIXME 这个应该可以取消，防止卡死主线程
 					endTickEvent.run();
 				}
 			}).exceptionally(AsyncTicker::tickBeforeExceptionally)
@@ -278,6 +290,24 @@ public class AsyncTicker {
 		return e instanceof MissingPaletteEntryException
 			   || e instanceof NullPointerException
 			   || e instanceof IndexOutOfBoundsException;
+	}
+
+	public static void onParticleEngineClear() {
+		// this fix a good placement mod block invisible
+		if (ModListHelper.A_GOOD_PLACE_LOADED) {
+			AGoodPlaceCompat.onParticleEngineClear();
+		}
+		// this fix particlerain's particle count management bug
+		if (ModListHelper.PARTICLERAIN_LOADED) {
+			ParticleRainCompat.clearCounters();
+		}
+	}
+
+	public static void waitForCleanUp() {
+		if (AsyncTicker.particleCleanup != null) {
+			AsyncTicker.particleCleanup.join();
+			AsyncTicker.particleCleanup = null;
+		}
 	}
 
 	/* Sync Ticking */
@@ -381,6 +411,27 @@ public class AsyncTicker {
 		}
 	}
 
+	public static void destroy() {
+		cancelled = true;
+		if (particleCleanup != null) {
+			particleCleanup.join();
+			particleCleanup = null;
+		}
+		if (blockEntityTickFuture != null) {
+			blockEntityTickFuture.join();
+			blockEntityTickFuture = null;
+		}
+		if (particleFuture != null) {
+			particleFuture.join();
+			particleFuture = null;
+		}
+		BLOCK_ENTITY_OPERATIONS.clear();
+		PARTICLE_OPERATIONS.clear();
+		END_TICK_OPERATIONS.clear();
+		SYNC_PARTICLES.clear();
+		cancelled = false;
+	}
+
 	/* Events */
 
 	public static void registerEndTickEvent(MinecraftConsumer consumer) {
@@ -403,38 +454,6 @@ public class AsyncTicker {
 
 	public static void registerEndTickEvent(Runnable operation) {
 		AsyncTicker.END_TICK_EVENTS.add(operation);
-	}
-
-	public static void destroy() {
-		cancelled = true;
-		if (particleCleanup != null) {
-			particleCleanup.join();
-			particleCleanup = null;
-		}
-		if (blockEntityTickFuture != null) {
-			blockEntityTickFuture.join();
-			blockEntityTickFuture = null;
-		}
-		if (particleFuture != null) {
-			particleFuture.join();
-			particleFuture = null;
-		}
-		BLOCK_ENTITY_OPERATIONS.clear();
-		PARTICLE_OPERATIONS.clear();
-		END_TICK_OPERATIONS.clear();
-		SYNC_PARTICLES.clear();
-		cancelled = false;
-	}
-
-	public static void onParticleEngineClear() {
-		// this fix a good placement mod block invisible
-		if (ModListHelper.A_GOOD_PLACE_LOADED) {
-			AGoodPlaceCompat.onParticleEngineClear();
-		}
-		// this fix particlerain's particle count management bug
-		if (ModListHelper.PARTICLERAIN_LOADED) {
-			ParticleRainCompat.clearCounters();
-		}
 	}
 
 	@FunctionalInterface

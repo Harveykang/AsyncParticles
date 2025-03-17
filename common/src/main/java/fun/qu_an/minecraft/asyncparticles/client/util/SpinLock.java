@@ -2,8 +2,9 @@ package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
+import java.util.function.Supplier;
 
-public class SpinLock {
+public class SpinLock implements AutoCloseable {
 	private static final VarHandle VALUE;
 
 	static {
@@ -32,6 +33,34 @@ public class SpinLock {
 		Thread thread = Thread.currentThread();
 		if (!VALUE.compareAndSet(this, thread, null)) {
 			throw new IllegalMonitorStateException("Attempt to unlock an non-locked lock!");
+		}
+	}
+
+	@Override
+	public void close() {
+		unlock();
+	}
+
+	public SpinLock sugar() {
+		lock();
+		return this;
+	}
+
+	public void wrap(Runnable runnable) {
+		lock();
+		try {
+			runnable.run();
+		} finally {
+			unlock();
+		}
+	}
+
+	public <T> T wrap(Supplier<T> supplier) {
+		lock();
+		try {
+			return supplier.get();
+		} finally {
+			unlock();
 		}
 	}
 }
