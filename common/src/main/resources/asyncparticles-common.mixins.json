@@ -61,6 +61,7 @@
     "off_thread_access.MixinEntitySection",
     "off_thread_access.MixinEntitySectionStorage",
     "off_thread_access.MixinTransientEntitySectionManager",
+    "modernui.MixinRenderSystem",
     "physicsmod.MixinWeatherParticle",
     "vs2.InvokerEntityShipCollisionUtils",
     "vs2.InvokerRaycastUtils",
