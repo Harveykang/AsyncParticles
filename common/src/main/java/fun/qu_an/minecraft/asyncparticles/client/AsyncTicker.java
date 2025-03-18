@@ -218,6 +218,7 @@ public class AsyncTicker {
 			Runnable[] endTickTasks = endTickOperations.toArray(new Runnable[0]);
 			endTickOperations.clear();
 			particleFuture = particleFuture.thenRun(() -> {
+				assert shouldTickParticles;
 				// 每 tick 添加的不固定操作
 				for (Runnable endTickTask : endTickTasks) {
 					endTickTask.run();
@@ -228,6 +229,7 @@ public class AsyncTicker {
 		// end tick events
 		if (levelRunning) {
 			particleFuture = particleFuture.thenRun(() -> {
+				assert shouldTickParticles;
 				// 每 tick 结束时都要执行的固定事件
 				for (Runnable endTickEvent : END_TICK_EVENTS) {
 					// FIXME 这个应该可以取消，防止卡死主线程
@@ -434,21 +436,11 @@ public class AsyncTicker {
 	/* Events */
 
 	public static void registerEndTickEvent(MinecraftConsumer consumer) {
-		registerEndTickEvent(() -> {
-			Minecraft mc = Minecraft.getInstance();
-			if (AsyncTicker.shouldTickParticles && mc.level != null && mc.player != null) {
-				consumer.accept(mc);
-			}
-		});
+		registerEndTickEvent(() -> consumer.accept(Minecraft.getInstance()));
 	}
 
 	public static void registerEndTickEvent(ClientLevelConsumer consumer) {
-		registerEndTickEvent(() -> {
-			Minecraft mc = Minecraft.getInstance();
-			if (AsyncTicker.shouldTickParticles && mc.level != null && mc.player != null) {
-				consumer.accept(mc.level);
-			}
-		});
+		registerEndTickEvent(() -> consumer.accept(Minecraft.getInstance().level));
 	}
 
 	public static void registerEndTickEvent(Runnable operation) {
