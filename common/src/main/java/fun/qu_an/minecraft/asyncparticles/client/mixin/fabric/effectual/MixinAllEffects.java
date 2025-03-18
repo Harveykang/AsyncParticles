@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.effectual;
 
 import com.imeetake.effects.Bubbles.BubbleBreathEffect;
 import com.imeetake.effects.Bubbles.BubbleChestEffect;
+import com.imeetake.effects.Bubbles.BubblePotsEffect;
 import com.imeetake.effects.CaveDust.CaveDustEffect;
 import com.imeetake.effects.Firefly.FireflyEffect;
 import com.imeetake.effects.GoldGlow.LanternGlowEffect;
@@ -19,9 +20,11 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.Event;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
+@Pseudo
 @Mixin(value = {
 	SteamEffect.class,
 	WaterDripEffect.class,
@@ -38,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 	CaveDustEffect.class,
 	BubbleBreathEffect.class,
 	BubbleChestEffect.class,
+	BubblePotsEffect.class,
 })
 public abstract class MixinAllEffects {
 	@Redirect(method = "register", remap = false, at = @At(value = "INVOKE", remap = false, target = "Lnet/fabricmc/fabric/api/event/Event;register(Ljava/lang/Object;)V"))
