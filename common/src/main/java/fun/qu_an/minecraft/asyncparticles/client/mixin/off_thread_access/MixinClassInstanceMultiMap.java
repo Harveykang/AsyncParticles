@@ -1,11 +1,15 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 
-import fun.qu_an.minecraft.asyncparticles.client.addon.IsClientAddon;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeArrayList;
 import net.minecraft.util.ClassInstanceMultiMap;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +19,7 @@ import java.util.stream.Collectors;
 
 // some mod get entities when ticking particles, may cause a CME
 @Mixin(ClassInstanceMultiMap.class)
-public class MixinClassInstanceMultiMap implements IsClientAddon {
+public class MixinClassInstanceMultiMap {
 	@Final
 	@Mutable
 	@Shadow
@@ -26,25 +30,18 @@ public class MixinClassInstanceMultiMap implements IsClientAddon {
 	@Shadow
 	private List<?> allInstances;
 
-	@Shadow
-	@Final
-	private Class<?> baseClass;
-	@Unique
-	private boolean asyncparticles$isClientSide;
-
-	@Override
-	public boolean asyncparticles$isClientSide() {
-		return asyncparticles$isClientSide;
+	// FIXME: 这样不行啊，到处漏风
+	@Inject(method = "<init>", at = @At(value = "RETURN"))
+	private void newHashMap(Class<?> baseClass, CallbackInfo ci) {
+		byClass = new ConcurrentHashMap<>();
+		allInstances = new IterationSafeArrayList<>();
+		byClass.put(baseClass, allInstances);
 	}
 
-	@Override
-	public void asyncparticles$setClientSide() {
-		if (!asyncparticles$isClientSide) {
-			asyncparticles$isClientSide = true;
-			byClass = new ConcurrentHashMap<>(byClass);
-			allInstances = new IterationSafeArrayList<>(allInstances);
-			byClass.put(baseClass, allInstances);
-		}
+	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"))
+	private <K, V> V put(Map<K, V> map, K key, V value) {
+		// do nothing
+		return null;
 	}
 
 	@Redirect(method = "method_15217", at = @At(value = "INVOKE", target = "Ljava/util/stream/Collectors;toList()Ljava/util/stream/Collector;"))
