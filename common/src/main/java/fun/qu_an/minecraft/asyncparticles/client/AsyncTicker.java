@@ -184,7 +184,8 @@ public class AsyncTicker {
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
 		profiler.push("async_particles");
-		if (!mc.isPaused()){
+		boolean levelRunning = mc.level != null && !mc.isPaused();
+		if (levelRunning) {
 			profiler.push("particle_tick");
 			try {
 				mc.particleEngine.tick();
@@ -201,53 +202,51 @@ public class AsyncTicker {
 		// tick last, schedule async tasks
 		tryReload();
 		tryDebug();
-		CompletableFuture<Void> blockEntityTickFuture;
-		if (mc.isPaused() || !SimplePropertiesConfig.asyncBlockEntityTick()) {
-			blockEntityTickFuture = CompletableFuture.runAsync(() -> {
+		CompletableFuture<Void> particleFuture;
+		if (!levelRunning || !SimplePropertiesConfig.asyncBlockEntityTick()) {
+			particleFuture = CompletableFuture.runAsync(() -> {
 			}, EXECUTOR);
 		} else {
 			List<Runnable> blockEntityOperations = BLOCK_ENTITY_OPERATIONS;
 			Runnable[] blockEntityTasks = blockEntityOperations.toArray(new Runnable[0]);
 			blockEntityOperations.clear();
-			blockEntityTickFuture = CompletableFuture.runAsync(() -> {
+			particleFuture = CompletableFuture.runAsync(() -> {
 				for (Runnable blockEntityTask : blockEntityTasks) {
 					blockEntityTask.run();
 				}
-			}, EXECUTOR).exceptionally(e -> {
-				if (!(e instanceof Exception)) {
-					throw toThrowDirectly(e);
-				}
-				Minecraft mc1 = Minecraft.getInstance();
-				if (!isTolerable(e) &&
-					mc1.level != null && mc1.player != null) {
-					// FIXME: 更好的异常处理方案
-					throw new RuntimeException("Try set asyncClientBlockEntityTick to false to fix this issue. (config/asyncparticles.properties)", toThrowDirectly(e));
-				}
-				LOGGER.warn("Exception while executing before particle operation", e);
-				return null;
-			});
-			AsyncTicker.blockEntityTickFuture = blockEntityTickFuture;
+			}, EXECUTOR).exceptionally(AsyncTicker::tickBeforeExceptionally);
+			AsyncTicker.blockEntityTickFuture = particleFuture;
 		}
 
+		// end tick operations/events
 		List<Runnable> endTickOperations = END_TICK_OPERATIONS;
-		Runnable[] endTickTasks = endTickOperations.toArray(new Runnable[0]);
-		endTickOperations.clear();
-		List<Runnable> particleOperations = PARTICLE_OPERATIONS;
-		Runnable[] particleTasks = particleOperations.toArray(new Runnable[0]);
-		particleOperations.clear();
-		particleFuture = blockEntityTickFuture
-			.thenRun(() -> {
+		if (levelRunning || !endTickOperations.isEmpty()) {
+			Runnable[] endTickTasks = endTickOperations.toArray(new Runnable[0]);
+			endTickOperations.clear();
+			particleFuture = particleFuture.thenRun(() -> {
 				// 每 tick 添加的不固定操作
 				for (Runnable endTickTask : endTickTasks) {
 					endTickTask.run();
 				}
+				if (!levelRunning) {
+					return;
+				}
 				// 每 tick 结束时都要执行的固定事件
 				for (Runnable endTickEvent : END_TICK_EVENTS) {
+					// FIXME 这个应该可以取消，防止卡死主线程
 					endTickEvent.run();
 				}
-			}).exceptionally(AsyncTicker::tickBeforeExceptionally)
-			.thenCompose(v -> CompletableFuture.allOf(Arrays.stream(particleTasks)
-				.map(runnable -> CompletableFuture.runAsync(runnable, EXECUTOR)
+			}).exceptionally(AsyncTicker::tickBeforeExceptionally);
+		}
+
+		// particle ticking
+		List<Runnable> particleOperations = PARTICLE_OPERATIONS;
+		if (!particleOperations.isEmpty()) {
+			Runnable[] particleTasks = particleOperations.toArray(new Runnable[0]);
+			particleOperations.clear();
+			particleFuture = particleFuture.thenCompose(v -> CompletableFuture.allOf(Arrays.stream(particleTasks)
+				.map(runnable -> CompletableFuture
+					.runAsync(runnable, EXECUTOR)
 					.exceptionally(e -> {
 						if (!SimplePropertiesConfig.markSyncIfTickFailed()
 							&& isTolerable(e)) {
@@ -257,6 +256,9 @@ public class AsyncTicker {
 						throw toThrowDirectly(e);
 					}))
 				.toArray(CompletableFuture[]::new)));
+		}
+
+		AsyncTicker.particleFuture = particleFuture;
 		profiler.pop();
 	}
 

@@ -70,7 +70,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					default -> throw new IllegalArgumentException("Unknown legacy mod mixin: " + mixinClassName);
 				};
 			}
-			case "fake_renders" -> true;
+			case "fake_renders",
+				 "off_thread_access" -> true;
 			case "vs2" -> ModListHelper.VS_LOADED;
 			case "create" -> ModListHelper.CREATE_LOADED;
 			case "iris_like" -> ModListHelper.IRIS_LIKE_LOADED;
