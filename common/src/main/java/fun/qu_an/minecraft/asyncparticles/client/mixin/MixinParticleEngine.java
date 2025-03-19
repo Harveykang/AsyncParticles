@@ -67,20 +67,18 @@ public abstract class MixinParticleEngine {
 	@Overwrite
 	public void tick() {
 		if (!AsyncTicker.shouldTickParticles) {
-			if (!this.particlesToAdd.isEmpty()) {
-				particlesToAdd.forEach(p -> {
-					if (p == null) { // might be null because ArrayDeque is not thread-safe
-						return;
-					}
-					p.remove();
-					// this will fix some mod's particle count management bug
-				});
-				particlesToAdd.clear();
-			}
-			if (AsyncTicker.particleCleanup != null) {
-				AsyncTicker.particleCleanup.join();
-				AsyncTicker.particleCleanup = null;
-			}
+//			if (!this.particlesToAdd.isEmpty()) {
+//				particlesToAdd.forEach(p -> {
+//					if (p == null) { // might be null because ArrayDeque is not thread-safe
+//						return;
+//					}
+//					p.remove();
+//					// this will fix some mod's particle count management bug
+//				});
+//				particlesToAdd.clear();
+//			}
+			// TODO: 如果非粒子运算刻只需要执行这一行，要不要把它移出去？
+			AsyncTicker.waitForCleanUp();
 			return;
 		}
 
@@ -138,10 +136,7 @@ public abstract class MixinParticleEngine {
 			});
 		}
 
-		if (AsyncTicker.particleCleanup != null) {
-			AsyncTicker.particleCleanup.join();
-			AsyncTicker.particleCleanup = null;
-		}
+		AsyncTicker.waitForCleanUp();
 
 		if (!this.particlesToAdd.isEmpty()) {
 			particlesToAdd.forEach(p -> {

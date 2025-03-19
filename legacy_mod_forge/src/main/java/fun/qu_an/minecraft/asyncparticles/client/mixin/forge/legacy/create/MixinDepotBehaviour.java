@@ -3,7 +3,6 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.legacy.create;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.simibubi.create.content.kinetics.belt.transport.TransportedItemStack;
 import com.simibubi.create.content.logistics.depot.DepotBehaviour;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
@@ -74,7 +73,7 @@ public abstract class MixinDepotBehaviour extends BlockEntityBehaviour {
 		Level level = be.getLevel();
 		// 这个列表很小，不会过于影响性能
 		if (level == null) {
-			if (ThreadUtil.isOnClientTickThread()) {
+			if (ThreadUtil.isOnTickThread()) {
 				incoming = new CopyOnWriteArrayList<>(incoming);
 			}
 		} else if (level.isClientSide) {
@@ -87,7 +86,7 @@ public abstract class MixinDepotBehaviour extends BlockEntityBehaviour {
 		Level level = blockEntity.getLevel();
 		// 这个列表很小，不会过于影响性能
 		if (level == null) {
-			if (ThreadUtil.isOnClientTickThread()) {
+			if (ThreadUtil.isOnTickThread()) {
 				return new CopyOnWriteArrayList<>(original.call(listNBT, deserializer));
 			}
 		} else if (level.isClientSide) {

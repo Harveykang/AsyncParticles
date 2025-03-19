@@ -121,20 +121,20 @@ public class AsyncTicker {
 		}
 	}
 
-	public static void onTickBefore(int j) {
+	public static void onTickBefore(int i, int to) {
+		// assert i < to;
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
 		profiler.push("async_particles");
-		if (j != 0) {
-			if (blockEntityTickFuture != null) {
-				blockEntityTickFuture.join();
-				blockEntityTickFuture = null;
-			}
-			shouldTickParticles = false;
+		if (blockEntityTickFuture != null &&
+			(i != 0 || SimplePropertiesConfig.greedyAsyncClientBlockEntityTick())) {
+			blockEntityTickFuture.join();
+			blockEntityTickFuture = null;
+		}
+		if (i != 0) {
+			// tick non-zero, do nothing
+			shouldTickParticles = i == to - 1; // tick particles only on last tick
 		} else {
-			if (blockEntityTickFuture != null && SimplePropertiesConfig.greedyAsyncClientBlockEntityTick()) {
-				blockEntityTickFuture.join();
-				blockEntityTickFuture = null;
-			}
+			// tick zero, wait for async tasks to complete, cleanup
 			cancelled = true;
 			debug_cancelled = false;
 			if (particleFuture != null) {
@@ -142,21 +142,20 @@ public class AsyncTicker {
 				particleFuture = null;
 			}
 			cancelled = false;
-			shouldTickParticles = true;
-
+			shouldTickParticles = i == to - 1;
 			Minecraft mc = Minecraft.getInstance();
 			ParticleEngine particleEngine = mc.particleEngine;
 
 			if (!mc.isPaused()) {
 				Collection<Queue<Particle>> values = particleEngine.particles.values();
-				var futures = new CompletableFuture[values.size()];
-				int i = 0;
+				CompletableFuture<?>[] futures = new CompletableFuture[values.size()];
+				int k = 0;
 				for (Queue<Particle> particles1 : values) {
 					if (particles1.isEmpty()) {
-						futures[i++] = CompletableFuture.completedFuture(null);
+						futures[k++] = CompletableFuture.completedFuture(null);
 						continue;
 					}
-					futures[i++] = CompletableFuture.runAsync(() -> {
+					futures[k++] = CompletableFuture.runAsync(() -> {
 						Queue<Particle> particles = (Queue<Particle>) EvictingQueue$delegate.get(particles1);
 						particles.removeIf(particle1 -> {
 							// JDK 并没有定义这个判断会对每个对象执行多少次，但目前没遇到例外情况
@@ -180,62 +179,73 @@ public class AsyncTicker {
 		profiler.pop();
 	}
 
-	public static void onTickAfter(int j) {
+	public static void onTickAfter(int i, int to) {
+		// assert i < to;
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
 		profiler.push("async_particles");
-		if (!mc.isPaused()){
+		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
+		if (levelRunning) {
 			profiler.push("particle_tick");
-			try {
-				mc.particleEngine.tick();
-			} catch (Exception e) {
-				if (mc.level != null && mc.player != null) {
-					throw e;
-				}
-			}
+			mc.particleEngine.tick();
 			profiler.pop();
 		}
-		if (j != 0) {
+		if (i < to - 1) {
 			return;
 		}
+		// tick last, schedule async tasks
 		tryReload();
 		tryDebug();
-		CompletableFuture<Void> blockEntityTickFuture;
-		if (!SimplePropertiesConfig.asyncBlockEntityTick()) {
-			blockEntityTickFuture = CompletableFuture.runAsync(() -> {
+		CompletableFuture<Void> particleFuture;
+		if (!levelRunning || !SimplePropertiesConfig.asyncBlockEntityTick()) {
+			particleFuture = CompletableFuture.runAsync(() -> {
 			}, EXECUTOR);
 		} else {
 			List<Runnable> blockEntityOperations = BLOCK_ENTITY_OPERATIONS;
 			Runnable[] blockEntityTasks = blockEntityOperations.toArray(new Runnable[0]);
 			blockEntityOperations.clear();
-			blockEntityTickFuture = CompletableFuture.runAsync(() -> {
+			particleFuture = CompletableFuture.runAsync(() -> {
 				for (Runnable blockEntityTask : blockEntityTasks) {
 					blockEntityTask.run();
 				}
 			}, EXECUTOR).exceptionally(AsyncTicker::tickBeforeExceptionally);
-			AsyncTicker.blockEntityTickFuture = blockEntityTickFuture;
+			AsyncTicker.blockEntityTickFuture = particleFuture;
 		}
 
+		// end tick operations
 		List<Runnable> endTickOperations = END_TICK_OPERATIONS;
-		Runnable[] endTickTasks = endTickOperations.toArray(new Runnable[0]);
-		endTickOperations.clear();
-		List<Runnable> particleOperations = PARTICLE_OPERATIONS;
-		Runnable[] particleTasks = particleOperations.toArray(new Runnable[0]);
-		particleOperations.clear();
-		particleFuture = blockEntityTickFuture
-			.thenRun(() -> {
+		if (!endTickOperations.isEmpty()) {
+			Runnable[] endTickTasks = endTickOperations.toArray(new Runnable[0]);
+			endTickOperations.clear();
+			particleFuture = particleFuture.thenRun(() -> {
+				assert shouldTickParticles;
 				// 每 tick 添加的不固定操作
 				for (Runnable endTickTask : endTickTasks) {
 					endTickTask.run();
 				}
+			}).exceptionally(AsyncTicker::tickBeforeExceptionally);
+		}
+
+		// end tick events
+		if (levelRunning) {
+			particleFuture = particleFuture.thenRun(() -> {
+				assert shouldTickParticles;
 				// 每 tick 结束时都要执行的固定事件
 				for (Runnable endTickEvent : END_TICK_EVENTS) {
 					// FIXME 这个应该可以取消，防止卡死主线程
 					endTickEvent.run();
 				}
-			}).exceptionally(AsyncTicker::tickBeforeExceptionally)
-			.thenCompose(v -> CompletableFuture.allOf(Arrays.stream(particleTasks)
-				.map(runnable -> CompletableFuture.runAsync(runnable, EXECUTOR)
+			}).exceptionally(AsyncTicker::tickBeforeExceptionally);
+		}
+
+		// particle ticking
+		List<Runnable> particleOperations = PARTICLE_OPERATIONS;
+		if (!particleOperations.isEmpty()) {
+			Runnable[] particleTasks = particleOperations.toArray(new Runnable[0]);
+			particleOperations.clear();
+			particleFuture = particleFuture.thenCompose(v -> CompletableFuture.allOf(Arrays.stream(particleTasks)
+				.map(runnable -> CompletableFuture
+					.runAsync(runnable, EXECUTOR)
 					.exceptionally(e -> {
 						if (!SimplePropertiesConfig.markSyncIfTickFailed()
 							&& isTolerable(e)) {
@@ -245,6 +255,9 @@ public class AsyncTicker {
 						throw toThrowDirectly(e);
 					}))
 				.toArray(CompletableFuture[]::new)));
+		}
+
+		AsyncTicker.particleFuture = particleFuture;
 		profiler.pop();
 	}
 
@@ -278,6 +291,24 @@ public class AsyncTicker {
 		return e instanceof MissingPaletteEntryException
 			   || e instanceof NullPointerException
 			   || e instanceof IndexOutOfBoundsException;
+	}
+
+	public static void onParticleEngineClear() {
+		// this fix a good placement mod block invisible
+		if (ModListHelper.A_GOOD_PLACE_LOADED) {
+			AGoodPlaceCompat.onParticleEngineClear();
+		}
+		// this fix particlerain's particle count management bug
+		if (ModListHelper.PARTICLERAIN_LOADED) {
+			ParticleRainCompat.clearCounters();
+		}
+	}
+
+	public static void waitForCleanUp() {
+		if (AsyncTicker.particleCleanup != null) {
+			AsyncTicker.particleCleanup.join();
+			AsyncTicker.particleCleanup = null;
+		}
 	}
 
 	/* Sync Ticking */
@@ -381,30 +412,6 @@ public class AsyncTicker {
 		}
 	}
 
-	/* Events */
-
-	public static void registerEndTickEvent(MinecraftConsumer consumer) {
-		registerEndTickEvent(() -> {
-			Minecraft mc = Minecraft.getInstance();
-			if (AsyncTicker.shouldTickParticles && mc.level != null && mc.player != null) {
-				consumer.accept(mc);
-			}
-		});
-	}
-
-	public static void registerEndTickEvent(ClientLevelConsumer consumer) {
-		registerEndTickEvent(() -> {
-			Minecraft mc = Minecraft.getInstance();
-			if (AsyncTicker.shouldTickParticles && mc.level != null && mc.player != null) {
-				consumer.accept(mc.level);
-			}
-		});
-	}
-
-	public static void registerEndTickEvent(Runnable operation) {
-		AsyncTicker.END_TICK_EVENTS.add(operation);
-	}
-
 	public static void destroy() {
 		cancelled = true;
 		if (particleCleanup != null) {
@@ -426,15 +433,18 @@ public class AsyncTicker {
 		cancelled = false;
 	}
 
-	public static void onParticleEngineClear() {
-		// this fix a good placement mod block invisible
-		if (ModListHelper.A_GOOD_PLACE_LOADED) {
-			AGoodPlaceCompat.onParticleEngineClear();
-		}
-		// this fix particlerain's particle count management bug
-		if (ModListHelper.PARTICLERAIN_LOADED) {
-			ParticleRainCompat.clearCounters();
-		}
+	/* Events */
+
+	public static void registerEndTickEvent(MinecraftConsumer consumer) {
+		registerEndTickEvent(() -> consumer.accept(Minecraft.getInstance()));
+	}
+
+	public static void registerEndTickEvent(ClientLevelConsumer consumer) {
+		registerEndTickEvent(() -> consumer.accept(Minecraft.getInstance().level));
+	}
+
+	public static void registerEndTickEvent(Runnable operation) {
+		AsyncTicker.END_TICK_EVENTS.add(operation);
 	}
 
 	@FunctionalInterface

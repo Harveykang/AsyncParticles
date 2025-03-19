@@ -19,13 +19,13 @@ public class MixinMinecraft {
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
-	private void onRunTick(boolean bl, CallbackInfo ci, @Local(ordinal = 1) int k) {
-		AsyncTicker.onTickBefore(k);
+	private void onRunTick(boolean bl, CallbackInfo ci, @Local(ordinal = 0) int i, @Local(ordinal = 1) int j) {
+		AsyncTicker.onTickBefore(j, Math.min(10, i));
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/Minecraft;tick()V"))
-	private void onRunTickAfter(boolean bl, CallbackInfo ci, @Local(ordinal = 1) int k) {
-		AsyncTicker.onTickAfter(k);
+	private void onRunTickAfter(boolean bl, CallbackInfo ci, @Local(ordinal = 0) int i, @Local(ordinal = 1) int j) {
+		AsyncTicker.onTickAfter(j, Math.min(10, i));
 	}
 
 	@Inject(method = "setLevel", at = @At(value = "FIELD", ordinal = 0,

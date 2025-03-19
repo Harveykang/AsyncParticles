@@ -11,7 +11,6 @@
     "MixinClientLevel",
     "MixinFont",
     "MixinLevel",
-    "MixinLevelChunk",
     "MixinLevelRenderer",
     "MixinLevelRenderer_EarlyFrustum",
     "MixinMinecraft",
