@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
+import com.google.common.collect.EvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
@@ -24,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.valkyrienskies.core.impl.shadow.E;
 
 import java.util.*;
 
@@ -72,50 +74,49 @@ public abstract class MixinParticleEngine {
 	public void tick() {
 //		assert AsyncTicker.shouldTickParticles;
 		particles.forEach((particleRenderType, queue) -> {
-			if (queue.isEmpty()) {
-				return;
-			}
+			// submit this task even though the queue is empty
+			// we'll add particles later
 			ProfilerFiller profiler = this.level.getProfiler();
 			profiler.push(particleRenderType.toString());
 			AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue));
 			profiler.pop();
 		});
 
-		if (!this.trackingEmitters.isEmpty()) {
-			AsyncTicker.PARTICLE_OPERATIONS.add(() -> {
-				for (TrackingEmitter emitter : this.trackingEmitters) {
-					if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneParticleTick()) {
-						return;
+		AsyncTicker.PARTICLE_OPERATIONS.add(() -> {
+			// submit this task even though the queue is empty
+			// we'll add particles later
+			for (TrackingEmitter emitter : this.trackingEmitters) {
+				if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneParticleTick()) {
+					return;
+				}
+				if (!emitter.isAlive()) {
+					continue;
+				}
+				if (((ParticleAddon) emitter).asyncedParticles$isTickSync()) {
+					AsyncTicker.recordSync(emitter);
+					continue;
+				}
+				try {
+					emitter.tick();
+					if (ModListHelper.VS_LOADED) {
+						VSCompat.removeIfOutSight(emitter);
 					}
-					if (!emitter.isAlive()) {
+				} catch (Exception t) {
+					if (AsyncTicker.isTolerable(t)) {
+						LOGGER.warn("Exception ticking emitter particle {}, you can ignore it if it doesn't happen frequently.", emitter, t);
 						continue;
 					}
-					if (((ParticleAddon) emitter).asyncedParticles$isTickSync()) {
+					if (SimplePropertiesConfig.markSyncIfTickFailed()) {
+						LOGGER.warn("Exception ticking emitter particle {}, marking as sync", emitter, t);
+						((ParticleAddon) emitter).asyncedParticles$setTickSync();
+						AsyncTicker.markAsSync(emitter.getClass());
 						AsyncTicker.recordSync(emitter);
-						continue;
-					}
-					try {
-						emitter.tick();
-						if (ModListHelper.VS_LOADED) {
-							VSCompat.removeIfOutSight(emitter);
-						}
-					} catch (Exception t) {
-						if (AsyncTicker.isTolerable(t)) {
-							LOGGER.warn("Exception ticking emitter particle {}, you can ignore it if it doesn't happen frequently.", emitter, t);
-							continue;
-						}
-						if (SimplePropertiesConfig.markSyncIfTickFailed()) {
-							LOGGER.warn("Exception ticking emitter particle {}, marking as sync", emitter, t);
-							((ParticleAddon) emitter).asyncedParticles$setTickSync();
-							AsyncTicker.markAsSync(emitter.getClass());
-							AsyncTicker.recordSync(emitter);
-						} else {
-							throw t;
-						}
+					} else {
+						throw t;
 					}
 				}
-			});
-		}
+			}
+		});
 
 		AsyncTicker.waitForCleanUp();
 
@@ -124,6 +125,10 @@ public abstract class MixinParticleEngine {
 				if (p == null) {
 					// might be null because ArrayDeque is not thread-safe,
 					// but we can use it safely here because we clear it every tick
+					return;
+				}
+				if (p instanceof TrackingEmitter emitter) {
+					trackingEmitters.add(emitter);
 					return;
 				}
 				if (((ParticleAddon) p).asyncedParticles$isTickSync()) {
@@ -220,6 +225,14 @@ public abstract class MixinParticleEngine {
 	public void redirectUpdateCount(ParticleEngine instance, ParticleGroup group, int count) {
 		// do nothing
 		// we check this later in tick()
+	}
+
+	@Redirect(method = {
+		"createTrackingEmitter(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/particles/ParticleOptions;)V",
+		"createTrackingEmitter(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/particles/ParticleOptions;I)V"
+	}, at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
+	public boolean redirectAdd(Queue<?> instance, Object o) {
+		return particlesToAdd.add((Particle) o); // redirect to particlesToAdd
 	}
 
 	@Inject(method = "clearParticles", at = @At("HEAD"))

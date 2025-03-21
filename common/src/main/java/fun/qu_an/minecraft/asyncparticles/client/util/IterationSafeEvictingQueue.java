@@ -152,6 +152,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 					return true;
 				}
 			}
+			next = null;
 			return false;
 		}
 

@@ -136,9 +136,9 @@ public class AsyncTicker {
 			cancelled = false;
 			shouldTickParticles = i == to - 1;
 			Minecraft mc = Minecraft.getInstance();
-			ParticleEngine particleEngine = mc.particleEngine;
-
-			if (!mc.isPaused()) {
+			boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
+			if (levelRunning) {
+				ParticleEngine particleEngine = mc.particleEngine;
 				Collection<Queue<Particle>> values = particleEngine.particles.values();
 				CompletableFuture<?>[] futures = new CompletableFuture[values.size() + 1];
 				int k = 0;
@@ -155,7 +155,6 @@ public class AsyncTicker {
 						continue;
 					}
 					futures[k++] = CompletableFuture.runAsync(() -> {
-//						Queue<Particle> particles1 = (Queue<Particle>) EvictingQueue$delegate.get(particles);
 						particles.removeIf(particle1 -> {
 							// JDK 并没有定义这个判断会对每个对象执行多少次，但目前没遇到例外情况
 							// use ArrayDeque's removeIf to improve performance
@@ -191,16 +190,13 @@ public class AsyncTicker {
 		if (levelRunning) {
 			profiler.push("particle_tick");
 			if (i == to - 1) {
-				assert shouldTickParticles;
-				for (int j = 0; j < to; j++) {
-					mc.particleEngine.tick();
-				}
+				mc.particleEngine.tick();
 			} else {
 				waitForCleanUp();
 			}
 			profiler.pop();
 		}
-		if (i < to - 1) {
+		if (i != to - 1) {
 			return;
 		}
 		// tick last, schedule async tasks
@@ -228,7 +224,6 @@ public class AsyncTicker {
 			Runnable[] endTickTasks = endTickOperations.toArray(new Runnable[0]);
 			endTickOperations.clear();
 			particleFuture = particleFuture.thenRun(() -> {
-				assert shouldTickParticles;
 				// 每 tick 添加的不固定操作
 				for (Runnable endTickTask : endTickTasks) {
 					endTickTask.run();
@@ -239,7 +234,6 @@ public class AsyncTicker {
 		// end tick events
 		if (levelRunning) {
 			particleFuture = particleFuture.thenRun(() -> {
-				assert shouldTickParticles;
 				// 每 tick 结束时都要执行的固定事件
 				for (Runnable endTickEvent : END_TICK_EVENTS) {
 					// FIXME 这个应该可以取消，防止卡死主线程
@@ -325,7 +319,7 @@ public class AsyncTicker {
 	/* Sync Ticking */
 
 	public static void tickSync() {
-		if (SYNC_PARTICLES.isEmpty()) {
+		if (!shouldTickParticles || SYNC_PARTICLES.isEmpty()) {
 			return;
 		}
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;

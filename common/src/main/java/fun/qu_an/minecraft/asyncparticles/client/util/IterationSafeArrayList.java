@@ -186,12 +186,13 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 				return true;
 			}
 			final E e = curr;
-			while (--cursor >= 0) {
-				prev = a[cursor];
+			while (cursor > 0) {
+				prev = a[--cursor];
 				if (prev != null && prev != e) {
 					return true;
 				}
 			}
+			prev = null;
 			return false;
 		}
 
@@ -217,6 +218,7 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 					return true;
 				}
 			}
+			next = null;
 			return false;
 		}
 
