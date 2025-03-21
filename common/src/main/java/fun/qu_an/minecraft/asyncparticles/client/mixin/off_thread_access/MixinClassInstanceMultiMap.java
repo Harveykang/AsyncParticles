@@ -50,6 +50,7 @@ public class MixinClassInstanceMultiMap {
 	}
 
 	// FIXME: 这行吗？
+	@SuppressWarnings({"MixinAnnotationTarget", "UnresolvedMixinReference"})
 	@Redirect(method = "*", require = 0, at = @At(value = "NEW", remap = false, target = "Lit/unimi/dsi/fastutil/objects/ObjectArrayList;<init>()V"))
 	private <T> List<T> newArrayList() {
 		return new IterationSafeArrayList<>();
