@@ -44,7 +44,7 @@ public abstract class MixinParticleEngine {
 	@Mutable
 	@Shadow
 	@Final
-	private Queue<TrackingEmitter> trackingEmitters;
+	public Queue<TrackingEmitter> trackingEmitters;
 
 	@Mutable
 	@Shadow

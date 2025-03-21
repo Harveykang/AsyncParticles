@@ -140,8 +140,15 @@ public class AsyncTicker {
 
 			if (!mc.isPaused()) {
 				Collection<Queue<Particle>> values = particleEngine.particles.values();
-				CompletableFuture<?>[] futures = new CompletableFuture[values.size()];
+				CompletableFuture<?>[] futures = new CompletableFuture[values.size() + 1];
 				int k = 0;
+				Queue<TrackingEmitter> trackingEmitters = particleEngine.trackingEmitters;
+				if (trackingEmitters.isEmpty()) {
+					futures[k++] = CompletableFuture.completedFuture(null);
+				} else {
+					futures[k++] = CompletableFuture.runAsync(() ->
+						trackingEmitters.removeIf(trackingEmitter -> !trackingEmitter.isAlive()), EXECUTOR);
+				}
 				for (Queue<Particle> particles : values) {
 					if (particles.isEmpty()) {
 						futures[k++] = CompletableFuture.completedFuture(null);
