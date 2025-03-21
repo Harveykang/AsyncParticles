@@ -198,7 +198,7 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 
 		@Override
 		public int nextIndex() {
-			return index + 1;
+			return index;
 		}
 
 		@Override
@@ -261,12 +261,12 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 		for (int i = 0; i < 100000; i++) {
 			list.add(i);
 		}
-//		Thread thread0 = new Thread(() -> {
-//			list.removeIf(next -> next % 2 == 0);
-//		});
-//		thread0.setDaemon(true);
-//		thread0.start();
-//		thread0.join();
+		Thread thread0 = new Thread(() -> {
+			list.removeIf(next -> next % 2 == 0);
+		});
+		thread0.setDaemon(true);
+		thread0.start();
+		thread0.join();
 		// 多线程同时遍历测试
 		Thread[] threads = new Thread[10];
 		for (int i = 0; i < threads.length; i++) {
