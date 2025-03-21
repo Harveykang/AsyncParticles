@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Mixin(LevelChunk.class)
+@Mixin(value = LevelChunk.class, priority = 1010)
 public abstract class MixinLevelChunk extends ChunkAccess {
 	@Shadow
 	@Final

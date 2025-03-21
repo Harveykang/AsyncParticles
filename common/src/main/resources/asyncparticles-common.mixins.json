@@ -57,7 +57,6 @@
     "legacy.flywheel.MixinClientLevelMixin",
     "lodestone.MixinLodestoneWorldParticle",
     "modernui.MixinRenderSystem",
-    "off_thread_access.MixinChunkAccess",
     "off_thread_access.MixinClassInstanceMultiMap",
     "off_thread_access.MixinLevelChunk",
     "physicsmod.MixinWeatherParticle",

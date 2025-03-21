@@ -8,11 +8,6 @@ import fun.qu_an.minecraft.asyncparticles.client.util.SpinLock;
 import net.minecraft.client.Camera;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-
-import java.util.Iterator;
-import java.util.List;
 
 @Mixin(CrystalFXWireless.class)
 public class MixinCrystalFXWireless {
@@ -29,21 +24,11 @@ public class MixinCrystalFXWireless {
 		}
 	}
 
-	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
-	public boolean tick(List<Object> instance, Object e) {
+	@WrapMethod(method = "tick")
+	public void tick(Operation<Void> original) {
 		asyncParticles$lock.lock();
 		try {
-			return instance.add(e);
-		} finally {
-			asyncParticles$lock.unlock();
-		}
-	}
-
-	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;remove()V"))
-	public void tick(Iterator<?> instance) {
-		asyncParticles$lock.lock();
-		try {
-			instance.remove();
+			original.call();
 		} finally {
 			asyncParticles$lock.unlock();
 		}

@@ -4,7 +4,6 @@ import com.google.common.collect.EvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.TrackedParticleCountsMap;
@@ -21,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class MixinParticleEngine {
@@ -49,6 +49,7 @@ public abstract class MixinParticleEngine {
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	public void init(CallbackInfo ci) {
 		trackedParticleCounts = new TrackedParticleCountsMap();
+		trackingEmitters = new ConcurrentLinkedQueue<>();
 	}
 
 	@Shadow
