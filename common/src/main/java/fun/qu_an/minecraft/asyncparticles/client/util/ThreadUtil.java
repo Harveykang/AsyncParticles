@@ -4,9 +4,16 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 
 public class ThreadUtil {
+	public static void assertNotParticleThread() {
+		if (isOnParticleThread()) {
+			throw new IllegalStateException("Cannot call this method from particle thread");
+		}
+	}
+
 	public static void assertNotParticleRendererThread() {
 		if (isOnParticleRendererThread()) {
 			throw new IllegalStateException("Cannot call this method from particle renderer thread");
@@ -29,6 +36,12 @@ public class ThreadUtil {
 		if (!isOnParticleTickerThread()) {
 			throw new IllegalStateException("Cannot call this method from NON particle ticker thread");
 		}
+	}
+
+	public static boolean isOnParticleThread() {
+		ForkJoinPool pool;
+		return Thread.currentThread() instanceof ForkJoinWorkerThread t &&
+			   ((pool = t.getPool()) == AsyncRenderer.EXECUTOR || pool == AsyncTicker.EXECUTOR);
 	}
 
 	public static boolean isOnParticleRendererThread() {

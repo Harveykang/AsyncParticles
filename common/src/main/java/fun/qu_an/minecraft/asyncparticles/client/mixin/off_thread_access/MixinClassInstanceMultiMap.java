@@ -2,10 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeArrayList;
 import net.minecraft.util.ClassInstanceMultiMap;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -50,7 +47,7 @@ public class MixinClassInstanceMultiMap {
 	}
 
 	// FIXME: 这行吗？
-	@SuppressWarnings({"MixinAnnotationTarget", "UnresolvedMixinReference"})
+	@Dynamic
 	@Redirect(method = "*", require = 0, at = @At(value = "NEW", remap = false, target = "Lit/unimi/dsi/fastutil/objects/ObjectArrayList;<init>()V"))
 	private <T> List<T> newArrayList() {
 		return new IterationSafeArrayList<>();

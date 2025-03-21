@@ -35,9 +35,7 @@ public abstract class MixinLevelChunk extends ChunkAccess {
 	@Inject(method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/chunk/UpgradeData;Lnet/minecraft/world/ticks/LevelChunkTicks;Lnet/minecraft/world/ticks/LevelChunkTicks;J[Lnet/minecraft/world/level/chunk/LevelChunkSection;Lnet/minecraft/world/level/chunk/LevelChunk$PostLoadProcessor;Lnet/minecraft/world/level/levelgen/blending/BlendingData;)V", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
 		if (level.isClientSide) {
-			blockEntities = new ConcurrentHashMap<>();
-		} else {
-			blockEntities = new HashMap<>();
+			blockEntities = new ConcurrentHashMap<>(blockEntities);
 		}
 	}
 }
