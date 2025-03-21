@@ -1,14 +1,19 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
-import com.google.common.collect.EvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.util.BusyWaitEvictingQueue;
+import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.util.TrackedParticleCountsMap;
+import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.ParticleGroup;
@@ -49,6 +54,7 @@ public abstract class MixinParticleEngine {
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	public void init(CallbackInfo ci) {
 		trackedParticleCounts = new TrackedParticleCountsMap();
+		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, this::asyncParticles$onEvicted);
 	}
 
 	@Shadow
@@ -58,31 +64,17 @@ public abstract class MixinParticleEngine {
 	@Final
 	private static Logger LOGGER;
 
-	@Shadow public abstract void tickParticle(Particle particle);
-
 	/**
 	 * @author
 	 * @reason
 	 */
 	@Overwrite
 	public void tick() {
-		if (!AsyncTicker.shouldTickParticles) {
-//			if (!this.particlesToAdd.isEmpty()) {
-//				particlesToAdd.forEach(p -> {
-//					if (p == null) { // might be null because ArrayDeque is not thread-safe
-//						return;
-//					}
-//					p.remove();
-//					// this will fix some mod's particle count management bug
-//				});
-//				particlesToAdd.clear();
-//			}
-			// TODO: 如果非粒子运算刻只需要执行这一行，要不要把它移出去？
-			AsyncTicker.waitForCleanUp();
-			return;
-		}
-
+//		assert AsyncTicker.shouldTickParticles;
 		particles.forEach((particleRenderType, queue) -> {
+			if (queue.isEmpty()) {
+				return;
+			}
 			ProfilerFiller profiler = this.level.getProfiler();
 			profiler.push(particleRenderType.toString());
 			AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue));
@@ -91,19 +83,11 @@ public abstract class MixinParticleEngine {
 
 		if (!this.trackingEmitters.isEmpty()) {
 			AsyncTicker.PARTICLE_OPERATIONS.add(() -> {
-				HashSet<TrackingEmitter> set = null;
 				for (TrackingEmitter emitter : this.trackingEmitters) {
 					if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneParticleTick()) {
-						if (set != null) {
-							this.trackingEmitters.removeAll(set);
-						}
 						return;
 					}
 					if (!emitter.isAlive()) {
-						if (set == null) {
-							set = new HashSet<>();
-						}
-						set.add(emitter);
 						continue;
 					}
 					if (((ParticleAddon) emitter).asyncedParticles$isTickSync()) {
@@ -130,9 +114,6 @@ public abstract class MixinParticleEngine {
 						}
 					}
 				}
-				if (set != null) {
-					this.trackingEmitters.removeAll(set);
-				}
 			});
 		}
 
@@ -140,7 +121,9 @@ public abstract class MixinParticleEngine {
 
 		if (!this.particlesToAdd.isEmpty()) {
 			particlesToAdd.forEach(p -> {
-				if (p == null) { // might be null because ArrayDeque is not thread-safe
+				if (p == null) {
+					// might be null because ArrayDeque is not thread-safe,
+					// but we can use it safely here because we clear it every tick
 					return;
 				}
 				if (((ParticleAddon) p).asyncedParticles$isTickSync()) {
@@ -148,18 +131,15 @@ public abstract class MixinParticleEngine {
 				}
 				Queue<Particle> queue = this.particles.computeIfAbsent(p.getRenderType(),
 					(p_107347_) -> {
-						EvictingQueue<Particle> queue1 = EvictingQueue.create(SimplePropertiesConfig.limit);
+//						EvictingQueue<Particle> queue1 = EvictingQueue.create(SimplePropertiesConfig.limit);
+						Queue<Particle> queue1 = new IterationSafeEvictingQueue<>(
+							16,
+							SimplePropertiesConfig.limit,
+							this::asyncParticles$onEvicted);
 						// fix the first added particle not ticked.
 						AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue1));
 						return queue1;
 					});
-				while (queue.size() >= SimplePropertiesConfig.limit) {
-					Particle removed = queue.remove();
-					removed.remove(); // remove if the limit exceeded
-					removed.getParticleGroup().ifPresent(g -> updateCount(g, -1));
-					// this will fix some mod's particle count management bug
-					// TODO: 这样的话就不需要 EvictingQueue 了
-				}
 				p.getParticleGroup().ifPresent(g -> updateCount(g, 1));
 				queue.add(p);
 			});
@@ -178,20 +158,19 @@ public abstract class MixinParticleEngine {
 		if (collection.isEmpty()) {
 			return;
 		}
-		Iterator<Particle> iterator = collection.iterator();
-		//noinspection WhileLoopReplaceableByForEach
-		while (iterator.hasNext()) {
+		for (Particle particle : collection) {
 			if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneParticleTick()) {
 				return;
 			}
-			Particle particle = iterator.next();
+			if (!particle.isAlive()) {
+				continue;
+			}
 			if (((ParticleAddon) particle).asyncedParticles$isTickSync()) {
 				AsyncTicker.recordSync(particle);
 				continue;
 			}
 			try {
-				// keep this tick() to compatible with some mixins...
-				tickParticle(particle);
+				particle.tick();
 				if (particle instanceof LightCachedParticleAddon lightCachedParticle
 					&& SimplePropertiesConfig.particleLightCache()) {
 					lightCachedParticle.asyncParticles$refresh();
@@ -211,10 +190,19 @@ public abstract class MixinParticleEngine {
 					AsyncTicker.markAsSync(particle.getClass());
 					AsyncTicker.recordSync(particle);
 				} else {
-					throw t;
+					throw Utils.toThrowDirectly(asyncParticles$constructCrashReport(particle, t));
 				}
 			}
 		}
+	}
+
+	@Unique
+	private static Exception asyncParticles$constructCrashReport(Particle particle, Exception t) {
+		CrashReport crashReport = CrashReport.forThrowable(t, "Ticking Particle");
+		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being ticked");
+		crashReportCategory.setDetail("Particle", particle::toString);
+		crashReportCategory.setDetail("Particle Type", particle.getRenderType()::toString);
+		return new ReportedException(crashReport);
 	}
 
 	@Inject(method = "add", at = @At(value = "HEAD"), cancellable = true)
@@ -236,6 +224,17 @@ public abstract class MixinParticleEngine {
 
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void redirectClearParticles(CallbackInfo ci) {
+		particlesToAdd.forEach(this::asyncParticles$onEvicted);
+		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, this::asyncParticles$onEvicted);
+		particles.values().forEach(queue -> queue.forEach(this::asyncParticles$onEvicted));
 		AsyncTicker.onParticleEngineClear();
+	}
+
+	@Unique
+	private void asyncParticles$onEvicted(Particle particle) {
+		if (particle.isAlive()) {
+			particle.getParticleGroup().ifPresent(g -> updateCount(g, -1));
+			particle.remove();
+		}
 	}
 }

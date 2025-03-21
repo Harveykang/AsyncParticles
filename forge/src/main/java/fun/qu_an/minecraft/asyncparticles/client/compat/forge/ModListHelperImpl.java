@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.forge;
+package fun.qu_an.minecraft.asyncparticles.client.compat.forge;
 
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;

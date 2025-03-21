@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.fabric;
+package fun.qu_an.minecraft.asyncparticles.client.compat.fabric;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.SemanticVersion;

@@ -116,6 +116,7 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 	public boolean removeIf(final @NotNull Predicate<? super E> filter) {
 		final E[] a = this.a;
 		int i = 0;
+		int size = this.size;
 		for (; i < size; i++) {
 			if (filter.test(a[i])) {
 				break;
@@ -127,20 +128,20 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 		final E[] b = (E[]) Array.newInstance(a.getClass().getComponentType(), a.length);
 		System.arraycopy(a, 0, b, 0, i); // Copy the elements before the first removed one.
 		int j = i++; // Index of the next element to copy.
-		for (; i < size; i++) if (!filter.test(a[i])) b[j++] = a[i];
+		for (; i < size; i++) {
+			E e = a[i];
+			if (!filter.test(e)) {
+				b[j++] = e;
+			}
+		}
 		this.a = b;
-		final boolean modified = size != j;
-		size = j;
-		return modified;
+		this.size = j;
+		return true;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public @NotNull ObjectListIterator<E> listIterator(int i) {
-		final E[] es = this.a;
-		if (es.length == 0) {
-			return ObjectIterators.EMPTY_ITERATOR;
-		}
 		int s = size();
 		if (i < 0 || i > s) {
 			throw new IndexOutOfBoundsException("Index: " + i + ", Size: " + s);
@@ -148,100 +149,109 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 		if (s == 0) {
 			return ObjectIterators.EMPTY_ITERATOR;
 		}
-		return new ObjectListIterator<>() {
-			private final E[] a = es;
-			private int size = s;
-			private int cursor = i;
-			private int index = i;
-			private E curr;
-			private E prev;
-			private E next;
+		return new ListItr(a, s, i);
+	}
 
-			@Override
-			public E previous() {
-				if (!hasPrevious()) {
-					throw new NoSuchElementException();
-				}
-				E prev = this.prev;
-				this.next = null;
-				this.prev = null;
-				--index;
-				return curr = prev;
+	private class ListItr implements ObjectListIterator<E> {
+		private final E[] a;
+		private int size;
+		private int cursor;
+		private int index;
+		private E curr;
+		private E prev;
+		private E next;
+
+		public ListItr(E[] es, int size, int i) {
+			a = es;
+			this.size = size;
+			cursor = i;
+			index = i;
+		}
+
+		@Override
+		public E previous() {
+			if (!hasPrevious()) {
+				throw new NoSuchElementException();
 			}
+			E prev = this.prev;
+			this.next = null;
+			this.prev = null;
+			--index;
+			return curr = prev;
+		}
 
-			@Override
-			public boolean hasPrevious() {
-				if (prev != null) {
+		@Override
+		public boolean hasPrevious() {
+			if (prev != null) {
+				return true;
+			}
+			final E e = curr;
+			while (--cursor >= 0) {
+				prev = a[cursor];
+				if (prev != null && prev != e) {
 					return true;
 				}
-				final E e = curr;
-				while (--cursor > 0) {
-					prev = a[cursor];
-					if (prev != null && prev != e) {
-						return true;
-					}
-				}
-				return false;
 			}
+			return false;
+		}
 
-			@Override
-			public int nextIndex() {
-				return index + 1;
+		@Override
+		public int nextIndex() {
+			return index + 1;
+		}
+
+		@Override
+		public int previousIndex() {
+			return index - 1;
+		}
+
+		@Override
+		public boolean hasNext() {
+			if (next != null) {
+				return true;
 			}
-
-			@Override
-			public int previousIndex() {
-				return index - 1;
-			}
-
-			@Override
-			public boolean hasNext() {
-				if (next != null) {
+			final E e = curr;
+			while (cursor < size) {
+				next = a[cursor++];
+				if (next != null && next != e) {
 					return true;
 				}
-				final E e = curr;
-				while (cursor < size) {
-					next = a[cursor++];
-					if (next != null && next != e) {
-						return true;
-					}
-				}
-				return false;
 			}
+			return false;
+		}
 
-			@Override
-			public E next() {
-				if (!hasNext()) {
-					throw new NoSuchElementException();
-				}
-				E next = this.next;
-				this.next = null;
-				this.prev = null;
-				++index;
-				return curr = next;
+		@Override
+		public E next() {
+			if (!hasNext()) {
+				throw new NoSuchElementException();
 			}
+			E next = this.next;
+			this.next = null;
+			this.prev = null;
+			++index;
+			return curr = next;
+		}
 
-			/**
-			 * NOTE: This method is not thread-safe and should not be used concurrently.
-			 */
-			@Override
-			public void remove() {
-				// 实现删除元素，不抛异常
-				if (curr == null) {
-					throw new IllegalStateException();
-				}
-				int i = cursor - 1;
-				while (i >= 0 && a[i] == null) {
-					--i;
-				}
-				if (i < 0) {
-					throw new IllegalStateException();
-				}
-				IterationSafeArrayList.this.remove(i);
-				--size;
-				curr = null;
+		/**
+		 * NOTE: This method is not thread-safe and should not be used concurrently.
+		 */
+		@Override
+		public void remove() {
+			// 实现删除元素，不抛异常
+			if (curr == null) {
+				throw new IllegalStateException();
 			}
-		};
+			int i = cursor; // Do not subtract 1, as if we call previous() first, the cursor has already decremented.
+			while (i >= 0 && a[i] != curr) {
+				--i;
+			}
+			if (i < 0) {
+				throw new IllegalStateException();
+			}
+			IterationSafeArrayList.this.remove(i);
+			--size;
+			curr = null;
+		}
 	}
 
 	public static void main(String[] args) throws InterruptedException {
@@ -249,12 +259,12 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 		for (int i = 0; i < 100000; i++) {
 			list.add(i);
 		}
-		Thread thread0 = new Thread(() -> {
-			list.removeIf(next -> next % 2 == 0);
-		});
-		thread0.setDaemon(true);
-		thread0.start();
-		thread0.join();
+//		Thread thread0 = new Thread(() -> {
+//			list.removeIf(next -> next % 2 == 0);
+//		});
+//		thread0.setDaemon(true);
+//		thread0.start();
+//		thread0.join();
 		// 多线程同时遍历测试
 		Thread[] threads = new Thread[10];
 		for (int i = 0; i < threads.length; i++) {

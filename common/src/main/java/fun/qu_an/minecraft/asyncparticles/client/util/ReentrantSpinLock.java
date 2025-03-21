@@ -4,38 +4,42 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.function.Supplier;
 
-public class SpinLock implements AutoCloseable {
+public class ReentrantSpinLock implements AutoCloseable {
 	private static final VarHandle OWNER;
 
 	static {
 		try {
 			OWNER = MethodHandles.lookup()
-				.findVarHandle(SpinLock.class, "owner", Thread.class);
+				.findVarHandle(ReentrantSpinLock.class, "owner", Thread.class);
 		} catch (ReflectiveOperationException e) {
 			throw new ExceptionInInitializerError(e);
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private volatile Thread owner;
+	private int holdCount;
 
 	public void lock() {
-		Thread thread = Thread.currentThread();
-		if (OWNER.compareAndSet(this, null, thread)) {
-			return;
+		Thread currentThread = Thread.currentThread();
+		if (!OWNER.compareAndSet(this, null, currentThread)) {
+			if (currentThread == owner) {
+				holdCount++;
+				return;
+			}
+			while (!OWNER.compareAndSet(this, null, currentThread)) {
+				Thread.onSpinWait();
+			}
 		}
-		if (thread == this.owner) {
-			throw new IllegalMonitorStateException("Attempt to lock an already locked lock!");
-		}
-		while (!OWNER.compareAndSet(this, null, thread)) {
-			Thread.onSpinWait();
-		}
+		holdCount = 1;
 	}
 
 	public void unlock() {
-		Thread thread = Thread.currentThread();
-		if (!OWNER.compareAndSet(this, thread, null)) {
-			throw new IllegalMonitorStateException("Attempt to unlock an non-locked lock!");
+		Thread currentThread = Thread.currentThread();
+		if (currentThread != owner) {
+			throw new IllegalMonitorStateException("Attempt to unlock a lock held by another thread!");
+		}
+		if (--holdCount == 0) {
+			owner = null;
 		}
 	}
 
@@ -44,7 +48,7 @@ public class SpinLock implements AutoCloseable {
 		unlock();
 	}
 
-	public SpinLock sugar() {
+	public ReentrantSpinLock sugar() {
 		lock();
 		return this;
 	}

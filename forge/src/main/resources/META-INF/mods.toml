@@ -1,6 +1,6 @@
 modLoader = "javafml"
 loaderVersion = "[47,)"
-#issueTrackerURL = ""
+issueTrackerURL = "https://github.com/Harveykang/AsyncParticles/issues"
 license = "MIT"
 
 [[mods]]

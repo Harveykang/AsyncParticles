@@ -20,7 +20,7 @@ public class MixinCrystalFXWireless {
 	private final SpinLock asyncParticles$lock = new SpinLock();
 
 	@WrapMethod(method = "render")
-	public void render(VertexConsumer buffer, Camera renderInfo, float partialTicks, Operation<Void> original) {
+	public void wrapRender(VertexConsumer buffer, Camera renderInfo, float partialTicks, Operation<Void> original) {
 		asyncParticles$lock.lock();
 		try {
 			original.call(buffer, renderInfo, partialTicks);
@@ -30,7 +30,7 @@ public class MixinCrystalFXWireless {
 	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
-	public boolean tick(List<Object> instance, Object e) {
+	public boolean wrapAdd(List<Object> instance, Object e) {
 		asyncParticles$lock.lock();
 		try {
 			return instance.add(e);
@@ -40,7 +40,7 @@ public class MixinCrystalFXWireless {
 	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;remove()V"))
-	public void tick(Iterator<?> instance) {
+	public void wrapRemove(Iterator<?> instance) {
 		asyncParticles$lock.lock();
 		try {
 			instance.remove();

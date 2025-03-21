@@ -1,7 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.forge;
 
-import com.brandon3055.draconicevolution.api.DraconicAPI;
-import com.dfdyz.epicacg.client.particle.BloomTrailParticle;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
@@ -22,7 +20,7 @@ import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 
 import java.io.IOException;
 
-import static fun.qu_an.minecraft.asyncparticles.client.ModListHelper.*;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 

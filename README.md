@@ -9,10 +9,8 @@
   - Async particle ticking/rendering(buffer filling).
   - Async particle light cache.
   - Async client block entity ticking.
-- Valkyrien Skies + Pretty Rain/Particle Rain
-  - Weather particles now collide with ships.
-- Create + Pretty Rain/Particle Rain
-  - Weather particles now collide with contraptions.
+- Create/Valkyrien Skies + Pretty Rain/Particle Rain
+  - Weather particles now collide with contraptions/ships.
 - Pretty Rain/Particle Rain/Effectual/Particular
   - Async particle gen.
 
@@ -34,12 +32,8 @@
 ### Mods Tested
 
 ⚠️ Create  
-❔ Effectual  
-❔ Effective/Effecticularity  
-❔ Particular  
 ❔ Epic Fight  
 ❔ Draconic Evolution  
-❔ Gateways to Eternity  
 ✅ Forge + Sinytra Connector  
 ✅ Fabric  
 ✅ ModernFix  
@@ -52,6 +46,10 @@
 ✅ Particle Rain/Pretty Rain  
 ✅ MmmMmmMmmMmm (Target Dummy)  
 ✅ Hex Casting  
+✅ Gateways to Eternity  
+✅ Effectual  
+✅ Effective/Effecticularity  
+✅ Particular  
 ❌ MadParticle  
 ⬜ ...
 

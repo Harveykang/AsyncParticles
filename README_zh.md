@@ -31,12 +31,8 @@
 ### 已测试模组
 
 ⚠️ Create  
-❔ Effectual  
-❔ Effective/Effecticularity  
-❔ Particular  
 ❔ Epic Fight  
 ❔ Draconic Evolution  
-❔ Gateways to Eternity  
 ✅ Forge + Sinytra Connector  
 ✅ Fabric  
 ✅ ModernFix  
@@ -49,6 +45,10 @@
 ✅ Particle Rain/Pretty Rain  
 ✅ MmmMmmMmmMmm (Target Dummy)  
 ✅ Hex Casting  
+✅ Gateways to Eternity  
+✅ Effectual  
+✅ Effective/Effecticularity  
+✅ Particular  
 ❌ MadParticle  
 ⬜ ...
 

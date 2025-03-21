@@ -53,7 +53,7 @@ public class ThreadUtil {
 		return Thread.currentThread() instanceof ForkJoinWorkerThread t && t.getPool() == AsyncTicker.EXECUTOR;
 	}
 
-	public static boolean isOnTickThread() {
+	public static boolean isOnClientTickThread() {
 		return RenderSystem.isOnRenderThread() || isOnParticleTickerThread();
 	}
 

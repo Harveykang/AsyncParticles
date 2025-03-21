@@ -136,6 +136,10 @@ dependencies {
     /* Draconic Evolution */
     modCompileOnly "maven.modrinth:draconic-evolution:3.1.2.604"
     modLocalRuntime "maven.modrinth:draconic-evolution:3.1.2.604"
+
+    /* Iron's Spells and Spellbooks */
+    modCompileOnly "maven.modrinth:irons-spells-n-spellbooks:1.20.1-3.4.0.7"
+    modLocalRuntime "maven.modrinth:curios:5.12.1+1.20.1"
 }
 
 processResources {

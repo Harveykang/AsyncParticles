@@ -18,7 +18,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 // some mod get entities when ticking particles, may cause a CME
-@Mixin(ClassInstanceMultiMap.class)
+@Mixin(value = ClassInstanceMultiMap.class, priority = 1010) // higher priority to run after VMP's mixin
 public class MixinClassInstanceMultiMap {
 	@Final
 	@Mutable
@@ -33,8 +33,8 @@ public class MixinClassInstanceMultiMap {
 	// FIXME: 这样不行啊，到处漏风
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	private void newHashMap(Class<?> baseClass, CallbackInfo ci) {
-		byClass = new ConcurrentHashMap<>();
-		allInstances = new IterationSafeArrayList<>();
+		byClass = new ConcurrentHashMap<>(byClass);
+		allInstances = new IterationSafeArrayList<>(allInstances);
 		byClass.put(baseClass, allInstances);
 	}
 
@@ -47,5 +47,11 @@ public class MixinClassInstanceMultiMap {
 	@Redirect(method = "method_15217", at = @At(value = "INVOKE", target = "Ljava/util/stream/Collectors;toList()Ljava/util/stream/Collector;"))
 	private <T> Collector<T, ?, List<T>> collect() {
 		return Collectors.toCollection(IterationSafeArrayList::new);
+	}
+
+	// FIXME: 这行吗？
+	@Redirect(method = "*", require = 0, at = @At(value = "NEW", remap = false, target = "Lit/unimi/dsi/fastutil/objects/ObjectArrayList;<init>()V"))
+	private <T> List<T> newArrayList() {
+		return new IterationSafeArrayList<>();
 	}
 }

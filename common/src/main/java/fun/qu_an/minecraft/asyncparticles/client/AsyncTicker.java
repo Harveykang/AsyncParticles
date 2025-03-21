@@ -1,11 +1,13 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
-import com.google.common.collect.EvictingQueue;
+import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -20,8 +22,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,17 +33,6 @@ import static fun.qu_an.minecraft.asyncparticles.client.util.Utils.toThrowDirect
 // TODO: 整理这一坨
 public class AsyncTicker {
 	public static final Logger LOGGER = LogManager.getLogger();
-	private static final VarHandle EvictingQueue$delegate;
-
-	static {
-		try {
-			EvictingQueue$delegate = MethodHandles.privateLookupIn(EvictingQueue.class, MethodHandles.lookup())
-				.findVarHandle(EvictingQueue.class, "delegate", Queue.class);
-		} catch (NoSuchFieldException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 
 	static {
@@ -60,8 +49,7 @@ public class AsyncTicker {
 	public static final List<Runnable> BLOCK_ENTITY_OPERATIONS = new ArrayList<>();
 	public static final List<Runnable> PARTICLE_OPERATIONS = new ArrayList<>();
 	private static boolean cancelled = false;
-	private static boolean tickingSync;
-	public static boolean shouldTickParticles = true;
+	public static boolean shouldTickParticles = false;
 	public static CompletableFuture<Void> particleCleanup;
 	private final static List<Runnable> END_TICK_EVENTS = new ArrayList<>();
 	public final static List<Runnable> END_TICK_OPERATIONS = new ArrayList<>();
@@ -121,6 +109,10 @@ public class AsyncTicker {
 		}
 	}
 
+	/**
+	 * @param i Current index of tick loop
+	 * @param to Count of ticks to run
+	 */
 	public static void onTickBefore(int i, int to) {
 		// assert i < to;
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
@@ -150,13 +142,13 @@ public class AsyncTicker {
 				Collection<Queue<Particle>> values = particleEngine.particles.values();
 				CompletableFuture<?>[] futures = new CompletableFuture[values.size()];
 				int k = 0;
-				for (Queue<Particle> particles1 : values) {
-					if (particles1.isEmpty()) {
+				for (Queue<Particle> particles : values) {
+					if (particles.isEmpty()) {
 						futures[k++] = CompletableFuture.completedFuture(null);
 						continue;
 					}
 					futures[k++] = CompletableFuture.runAsync(() -> {
-						Queue<Particle> particles = (Queue<Particle>) EvictingQueue$delegate.get(particles1);
+//						Queue<Particle> particles1 = (Queue<Particle>) EvictingQueue$delegate.get(particles);
 						particles.removeIf(particle1 -> {
 							// JDK 并没有定义这个判断会对每个对象执行多少次，但目前没遇到例外情况
 							// use ArrayDeque's removeIf to improve performance
@@ -179,6 +171,10 @@ public class AsyncTicker {
 		profiler.pop();
 	}
 
+	/**
+	 * @param i Current index of tick loop
+	 * @param to Count of ticks to run
+	 */
 	public static void onTickAfter(int i, int to) {
 		// assert i < to;
 		Minecraft mc = Minecraft.getInstance();
@@ -187,7 +183,14 @@ public class AsyncTicker {
 		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
 		if (levelRunning) {
 			profiler.push("particle_tick");
-			mc.particleEngine.tick();
+			if (i == to - 1) {
+				assert shouldTickParticles;
+				for (int j = 0; j < to; j++) {
+					mc.particleEngine.tick();
+				}
+			} else {
+				waitForCleanUp();
+			}
 			profiler.pop();
 		}
 		if (i < to - 1) {
@@ -290,7 +293,8 @@ public class AsyncTicker {
 		}
 		return e instanceof MissingPaletteEntryException
 			   || e instanceof NullPointerException
-			   || e instanceof IndexOutOfBoundsException;
+			   || e instanceof IndexOutOfBoundsException
+			   || (SimplePropertiesConfig.suppressCME() && e instanceof ConcurrentModificationException);
 	}
 
 	public static void onParticleEngineClear() {
@@ -313,25 +317,19 @@ public class AsyncTicker {
 
 	/* Sync Ticking */
 
-	public static boolean isTickingSync() {
-		return tickingSync;
-	}
-
 	public static void tickSync() {
 		if (SYNC_PARTICLES.isEmpty()) {
 			return;
 		}
-		tickingSync = true;
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 		for (Iterator<Particle> iterator = SYNC_PARTICLES.iterator(); iterator.hasNext(); ) {
 			Particle particle = iterator.next();
 			particleEngine.tickParticle(particle);
-			// refresh light cache asynchronously
-//					if (particle instanceof LightCachedParticleAddon lightCachedParticle
-//						&& SimplePropertiesConfig.particleLightCache()) {
-//						lightCachedParticle.asyncParticles$refresh();
-//					}
 			if (!(particle instanceof TrackingEmitter)) {
+				if (particle instanceof LightCachedParticleAddon lightCachedParticle
+					&& SimplePropertiesConfig.particleLightCache()) {
+					lightCachedParticle.asyncParticles$refresh();
+				}
 				((ParticleAddon) particle).asyncParticles$setTicked();
 			}
 			if (ModListHelper.VS_LOADED) {
@@ -343,7 +341,6 @@ public class AsyncTicker {
 				iterator.remove();
 			}
 		}
-		tickingSync = false;
 	}
 
 	public static void markAsSync(Class<? extends Particle> aClass) {
@@ -378,7 +375,8 @@ public class AsyncTicker {
 			particle operations: %d,
 			end tick events: %d,
 			end tick operations: %d,
-			particles queue size: %s,
+			max particles queue size: %d,
+			particles queue size/allocated: %s,
 			particles to add size: %d
 			sync particle count: %d,
 			sync particle types: %s,"""
@@ -387,8 +385,12 @@ public class AsyncTicker {
 				PARTICLE_OPERATIONS.size(),
 				END_TICK_EVENTS.size(),
 				END_TICK_OPERATIONS.size(),
+				SimplePropertiesConfig.limit,
 				Minecraft.getInstance().particleEngine.particles.entrySet()
-					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().size())),
+					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
+						Queue<Particle> queue = e.getValue();
+						return queue.size() + "/" + ((IterationSafeEvictingQueue<Particle>) queue).arraySize();
+					})),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
 				SYNC_PARTICLES.size(),
 				SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList())));

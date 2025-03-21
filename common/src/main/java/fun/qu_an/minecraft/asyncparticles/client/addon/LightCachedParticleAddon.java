@@ -1,11 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.addon;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
-import fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticle_LightCache;
-import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
-import net.minecraft.client.particle.Particle;
-
 public interface LightCachedParticleAddon {
 	byte INITIAL_LIGHT_CACHE = 0;
 

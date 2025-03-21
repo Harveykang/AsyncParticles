@@ -73,7 +73,7 @@ public abstract class MixinDepotBehaviour extends BlockEntityBehaviour {
 		Level level = be.getLevel();
 		// 这个列表很小，不会过于影响性能
 		if (level == null) {
-			if (ThreadUtil.isOnTickThread()) {
+			if (ThreadUtil.isOnClientTickThread()) {
 				incoming = new CopyOnWriteArrayList<>(incoming);
 			}
 		} else if (level.isClientSide) {
@@ -87,7 +87,7 @@ public abstract class MixinDepotBehaviour extends BlockEntityBehaviour {
 		Level level = blockEntity.getLevel();
 		// 这个列表很小，不会过于影响性能
 		if (level == null) {
-			if (ThreadUtil.isOnTickThread()) {
+			if (ThreadUtil.isOnClientTickThread()) {
 				return new CopyOnWriteArrayList<>(original.call(listNBT, deserializer));
 			}
 		} else if (level.isClientSide) {

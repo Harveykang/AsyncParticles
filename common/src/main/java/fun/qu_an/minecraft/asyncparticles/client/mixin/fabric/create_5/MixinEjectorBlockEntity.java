@@ -78,7 +78,7 @@ public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 		Level level = getLevel();
 		// 这个列表很小，不会过于影响性能
 		if (level == null) {
-			if (ThreadUtil.isOnTickThread()) {
+			if (ThreadUtil.isOnClientTickThread()) {
 				launchedItems = new CopyOnWriteArrayList<>(launchedItems);
 			}
 		} else if (level.isClientSide) {
@@ -91,7 +91,7 @@ public abstract class MixinEjectorBlockEntity extends KineticBlockEntity {
 		Level level = getLevel();
 		// 这个列表很小，不会过于影响性能
 		if (level == null) {
-			if (ThreadUtil.isOnTickThread()) {
+			if (ThreadUtil.isOnClientTickThread()) {
 				return new CopyOnWriteArrayList<>(original.call(listNBT, deserializer));
 			}
 		} else if (level.isClientSide) {

@@ -20,7 +20,7 @@ public class MixinExplosionFX {
 	private final SpinLock asyncParticles$lock = new SpinLock();
 
 	@WrapMethod(method = "render")
-	public void render(VertexConsumer buffer, Camera renderInfo, float partialTicks, Operation<Void> original) {
+	public void wrapRender(VertexConsumer buffer, Camera renderInfo, float partialTicks, Operation<Void> original) {
 		asyncParticles$lock.lock();
 		try {
 			original.call(buffer, renderInfo, partialTicks);
@@ -30,7 +30,7 @@ public class MixinExplosionFX {
 	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/LinkedList;addFirst(Ljava/lang/Object;)V"))
-	public void addFirst(LinkedList<Object> list, Object fx) {
+	public void wrapAddFirst(LinkedList<Object> list, Object fx) {
 		asyncParticles$lock.lock();
 		try {
 			list.addFirst(fx);
@@ -40,7 +40,7 @@ public class MixinExplosionFX {
 	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;remove()V"))
-	public void tick(Iterator<?> instance) {
+	public void wrapRemove(Iterator<?> instance) {
 		asyncParticles$lock.lock();
 		try {
 			instance.remove();

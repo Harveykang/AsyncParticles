@@ -2,31 +2,32 @@ package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Queue;
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class EvictingQueue<E> implements Queue<E> {
+public class IterationSafeEvictingQueue<E> implements Queue<E> {
 	protected Object[] queue;
+	protected final int maxCapacity;
+	protected final int maxCapacityPowerOfTwo;
+	protected final Consumer<E> onEvict;
 	protected int head;
 	protected int size;
-	protected final int maxCapacity;
 
-	public EvictingQueue(int initialCapacity, int maxCapacity) {
+	public IterationSafeEvictingQueue(int initialCapacity, int maxCapacity, Consumer<E> onEvict) {
 		if (initialCapacity <= 0 || maxCapacity <= 0 || initialCapacity > maxCapacity) {
 			throw new IllegalArgumentException("Invalid capacities");
 		}
-		this.maxCapacity = roundUpToPowerOfTwo(maxCapacity);
 		this.queue = new Object[roundUpToPowerOfTwo(initialCapacity)];
+		this.maxCapacity = maxCapacity;
+		this.maxCapacityPowerOfTwo = roundUpToPowerOfTwo(maxCapacity);
+		this.onEvict = onEvict;
 		this.head = 0;
 		this.size = 0;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean offer(E item) {
 		if (item == null) {
@@ -35,18 +36,21 @@ public class EvictingQueue<E> implements Queue<E> {
 		Object[] q = queue;
 		int capacity = q.length;
 		int size = this.size;
-		if (capacity == size) {
-			if (capacity >= maxCapacity) {
-				// Remove the oldest element
-				int head = this.head;
-				this.head = (head + 1) & (capacity - 1);
-				q[head] = item; // head is now tail
-				return true;
+		if (size >= maxCapacity) {
+			// Remove the oldest element
+			int head = this.head;
+			this.head = (head + 1) & (capacity - 1);
+			onEvict.accept((E) q[head]);
+//			q[head] = item; // head is now tail
+			q[head] = null;
+			q[head + size & (capacity - 1)] = item;
+		} else {
+			if (capacity == size) {
+				q = resize(capacity = capacity << 1); // update capacity and q
 			}
-			resize(capacity << 1);
+			q[(head + size) & (capacity - 1)] = item;
+			this.size++;
 		}
-		q[(head + size) & (capacity - 1)] = item;
-		this.size++;
 		return true;
 	}
 
@@ -56,9 +60,11 @@ public class EvictingQueue<E> implements Queue<E> {
 		if (size == 0) {
 			return null;
 		}
-		E item = (E) queue[head];
-		queue[head] = null;
-		head = (head + 1) & (queue.length - 1);
+		Object[] q = queue;
+		int head = this.head;
+		E item = (E) q[head];
+		q[head] = null;
+		this.head = (head + 1) & (q.length - 1);
 		size--;
 		return item;
 	}
@@ -94,8 +100,14 @@ public class EvictingQueue<E> implements Queue<E> {
 		return new QueueIterator();
 	}
 
-	private void resize(int newCapacity) {
-		if (newCapacity > this.maxCapacity) {
+	@Override
+	public @NotNull Spliterator<E> spliterator() {
+		// FIXME: implement a Spliterator
+		throw new UnsupportedOperationException();
+	}
+
+	private Object[] resize(int newCapacity) {
+		if (newCapacity > this.maxCapacityPowerOfTwo) {
 			throw new IllegalStateException("Cannot increase capacity beyond max capacity");
 		}
 		Object[] q = this.queue;
@@ -103,62 +115,72 @@ public class EvictingQueue<E> implements Queue<E> {
 		int tail = head + this.size;
 		int capacity = q.length;
 		Object[] a = new Object[newCapacity];
-		// We don't organize the array,
-		// but we keep the position of the elements relative to the head and tail,
-		// which ensures that the other threads are correct when iterating
 		if (tail <= capacity) {
 			System.arraycopy(q, head, a, head, this.size);
 		} else {
 			int l = capacity - head;
-			System.arraycopy(q, 0, a, 0, tail - capacity);
-			System.arraycopy(q, head, a, head + newCapacity - capacity, l);
+			System.arraycopy(q, head, a, head, l);
+			System.arraycopy(q, 0, a, l, tail - capacity);
 		}
 		this.queue = a;
 		this.head = 0;
+		return a;
+	}
+
+	public int arraySize() {
+		return queue.length;
 	}
 
 	private class QueueIterator implements Iterator<E> {
-		private final Object[] queueSnapshot;
-		private final int snapshotHead;
-		private final int snapshotSize;
-		private int currentIndex;
+		private final Object[] a = queue;
+		private final int mask = a.length - 1;
+		private final int head = IterationSafeEvictingQueue.this.head;
+		private int tail = IterationSafeEvictingQueue.this.size + head;
+		private int cursor = head;
+		private Object curr;
 		private Object next;
-
-		public QueueIterator() {
-			this.queueSnapshot = queue;
-			this.snapshotHead = head;
-			this.snapshotSize = size;
-			this.currentIndex = 0;
-		}
 
 		@Override
 		public boolean hasNext() {
 			if (next != null) {
 				return true;
 			}
-			if (currentIndex >= snapshotSize) {
-				return false;
+			final Object e = curr;
+			while (cursor < tail) {
+				next = a[cursor++ & mask];
+				if (next != null && next != e) {
+					return true;
+				}
 			}
-			int index = (snapshotHead + currentIndex) & (queueSnapshot.length - 1);
-			++currentIndex;
-			next = queueSnapshot[index];
-			return next != null;
+			return false;
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
 		public E next() {
-			E next = (E) this.next;
-			if (next == null) {
+			if (!hasNext()) {
 				throw new NoSuchElementException();
 			}
+			Object next = this.next;
 			this.next = null;
-			return next;
+			return (E) (curr = next);
 		}
 
 		@Override
 		public void remove() {
-			throw new UnsupportedOperationException();
+			if (curr == null) {
+				throw new IllegalStateException();
+			}
+			int i = cursor - 1;
+			while (i >= head && a[i & mask] != curr) {
+				--i;
+			}
+			if (i < 0) {
+				throw new IllegalStateException();
+			}
+			IterationSafeEvictingQueue.this.removeIndex(a, i, tail);
+			tail--;
+			curr = null;
 		}
 	}
 
@@ -187,17 +209,8 @@ public class EvictingQueue<E> implements Queue<E> {
 
 	@Override
 	public boolean containsAll(@NotNull Collection<?> c) {
-		Object[] q = queue;
-		int head = this.head;
-		int size = this.size;
-		int mask = q.length - 1;
-		for (int i = head; i < size; i++) {
-			Object o = q[i & mask];
-			if (o == null) {
-				// thread safety
-				continue;
-			}
-			if (!c.contains(o)) {
+		for (Object e : c) {
+			if (!contains(e)) {
 				return false;
 			}
 		}
@@ -226,50 +239,50 @@ public class EvictingQueue<E> implements Queue<E> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean removeIf(@NotNull Predicate<? super E> condition) {
-		Object[] q = queue;
-		for (int i = this.head, to = i + this.size; i < to; i++) {
-			Object o = q[i & (q.length - 1)];
-			if (o == null) {
-				continue;
-			}
-			if (condition.test((E) o)) {
-				removeModified(condition, q, i, to);
-				return true;
+	public boolean removeIf(@NotNull Predicate<? super E> filter) {
+		final Object[] a = this.queue;
+		final int mask = a.length - 1;
+		int i = head;
+		int to = size + i;
+		for (; i < to; i++) {
+			if (filter.test((E) a[i & mask])) {
+				break;
 			}
 		}
-		return false;
-	}
-
-	@SuppressWarnings("unchecked")
-	private void removeModified(Predicate<? super E> condition, Object[] q, int from, int to) {
-		// assert from should be removed
-		int mask = q.length - 1;
-		BitSet bits = new BitSet(to - from - 1);
-		for (int i = from + 1; i < to; i++) {
-			if (condition.test((E) q[i & mask])) {
-				bits.set(i - from - 1);
+		if (i == to) {
+			return false;
+		}
+		final Object[] b = new Object[a.length];
+		if (i > a.length) { // Copy the elements before the first removed one.
+			System.arraycopy(a, head, b, head, a.length - head);
+			System.arraycopy(a, 0, b, 0, i - a.length);
+		} else {
+			System.arraycopy(a, head, b, head, i - head);
+		}
+		int j = i++; // Index of the next element to copy.
+		for (; i < to; i++) {
+			E e = (E) a[i & mask];
+			if (!filter.test(e)) {
+				b[j++ & mask] = e;
 			}
 		}
-		if (bits.isEmpty()) {
-			removeIndex(q, from, to);
-			return;
-		}
-		for (int write = from, read = from + 1; read < to; read++) {
-			if (!bits.get(read - from - 1)) {
-				q[write++ & mask] = q[read & mask];
-			}
-		}
-		q[to - 1 & mask] = null;
+		this.queue = b;
+		this.size = j - head;
+		return true;
 	}
 
 	private void removeIndex(Object[] q, int toRemove, int to) {
-		--to;
-		int mask = q.length - 1;
-		for (int j = toRemove; j < to; j++) {
-			q[j & mask] = q[j + 1 & mask];
+		int l = to - toRemove;
+		if (l > 0) {
+			if (to <= q.length) {
+				System.arraycopy(q, toRemove + 1, q, toRemove, l);
+			} else {
+				System.arraycopy(q, toRemove, q, toRemove + 1, q.length - toRemove);
+				q[q.length - 1] = q[0];
+				System.arraycopy(q, 1, q, 0, head + size - q.length);
+			}
 		}
-		q[to & mask] = null;
+		q[to - 1 & q.length - 1] = null;
 		size--;
 	}
 
@@ -295,8 +308,9 @@ public class EvictingQueue<E> implements Queue<E> {
 			return false;
 		}
 		Object[] q = queue;
-		for (int i = this.head, size = this.size; i < size; i++) {
-			if (o.equals(q[i & (q.length - 1)])) {
+		int mask = q.length - 1;
+		for (int i = head, to = i + size; i < to; i++) {
+			if (o.equals(q[i & mask])) {
 				return true;
 			}
 		}
@@ -313,7 +327,7 @@ public class EvictingQueue<E> implements Queue<E> {
 	public <T> T @NotNull [] toArray(T[] a) {
 		int size = this.size;
 		if (size > a.length) {
-			a = (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
+			a = (T[]) Array.newInstance(a.getClass().getComponentType(), size);
 		}
 		Object[] q = queue;
 		int head = this.head;
@@ -332,11 +346,6 @@ public class EvictingQueue<E> implements Queue<E> {
 		return a;
 	}
 
-	public static int sub(int i, int j, int modulus) {
-		if ((i -= j) < 0) i += modulus;
-		return i;
-	}
-
 	@Override
 	public boolean remove(Object o) {
 		if (o == null) {
@@ -345,7 +354,7 @@ public class EvictingQueue<E> implements Queue<E> {
 		Object[] q = queue;
 		int capacity = q.length;
 		for (int i = this.head, to = this.size + i; i < to; i++) {
-			int index = (head + i) & (capacity - 1);
+			int index = i & (capacity - 1);
 			if (!o.equals(q[index])) {
 				continue;
 			}
@@ -370,22 +379,31 @@ public class EvictingQueue<E> implements Queue<E> {
 	}
 
 	public static void main(String[] args) {
-		EvictingQueue<Integer> queue = new EvictingQueue<>(2, 5);
+		IterationSafeEvictingQueue<Integer> queue = new IterationSafeEvictingQueue<>(2,
+			32768,
+			x -> System.out.println("Evicted " + x));
 
 		queue.offer(1);
 		queue.offer(2);
 		System.out.println(queue.peek()); // 输出: 1
 
-		queue.offer(3); // 不需要扩容
+		queue.offer(3); // 扩容到 4
 		System.out.println(queue.peek()); // 输出: 1
 
-		queue.offer(4); // 扩容到 4
-		queue.offer(5); // 扩容到 8（超过最大容量 5，保持为 5）
-		queue.offer(6); // 移除 1
+		queue.offer(4);
+		queue.offer(5); // 扩容到 8
+		queue.offer(6);
+		queue.offer(7);
+		queue.offer(8);
+		queue.offer(9); // 移除 1
 		System.out.println(queue.peek()); // 输出: 2
+		for (int i = 10; i < 32768; i++) {
+			queue.offer(i);
+		}
 
 		queue.poll(); // 移除 2
 		queue.poll(); // 移除 3
+
 		try {
 			queue.remove(); // 移除 4
 		} catch (NoSuchElementException e) {
@@ -393,24 +411,26 @@ public class EvictingQueue<E> implements Queue<E> {
 		}
 
 		// 示例迭代器用法
-		for (Integer num : queue) {
-			System.out.println(num);
-		}
+		System.out.println("size: " + queue.size()); // 输出: 5
+
+		queue.removeIf(x -> x % 2 == 0); // 移除偶数
+
+		queue.removeIf(x -> x % 3 == 0); // 移除 3 的倍数
 
 		// 测试其他方法
-		queue.add(7);
-		queue.add(8);
+		queue.add(10);
+		queue.add(11);
 		System.out.println(queue.contains(7)); // 输出: true
-		System.out.println(queue.contains(9)); // 输出: false
+		System.out.println(queue.contains(12)); // 输出: false
 
-		Collection<Integer> collection = List.of(7, 8);
+		Collection<Integer> collection = List.of(10, 11);
 		System.out.println(queue.containsAll(collection)); // 输出: true
 
 		queue.addAll(List.of(9, 10));
-		System.out.println(queue.size()); // 输出: 5
+		System.out.println(queue.size()); // 输出: 7
 
 		queue.removeAll(List.of(7, 8));
-		System.out.println(queue.size()); // 输出: 3
+		System.out.println(queue.size()); // 输出: 5
 
 		queue.retainAll(List.of(9));
 		System.out.println(queue.size()); // 输出: 1
@@ -427,6 +447,3 @@ public class EvictingQueue<E> implements Queue<E> {
 		System.out.println(queue.peek()); // 输出: 1
 	}
 }
-
-
-

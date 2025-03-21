@@ -42,11 +42,9 @@ public abstract class MixinClientLevel extends Level {
 
 	@Override
 	protected void tickBlockEntities() {
-		if (!SimplePropertiesConfig.asyncBlockEntityTick()) {
+		if (!AsyncTicker.shouldTickParticles ||
+			!SimplePropertiesConfig.asyncBlockEntityTick()) {
 			super.tickBlockEntities();
-			return;
-		}
-		if (!AsyncTicker.shouldTickParticles) {
 			return;
 		}
 		ProfilerFiller profilerFiller = this.getProfiler();
@@ -67,11 +65,10 @@ public abstract class MixinClientLevel extends Level {
 
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int i, int j, int k, Operation<Void> original) {
-		if (AsyncTicker.shouldTickParticles) {
-			if (!SimplePropertiesConfig.asyncBlockEntityAnimate()) {
-				original.call(i, j, k);
-				return;
-			}
+		if (!AsyncTicker.shouldTickParticles ||
+			!SimplePropertiesConfig.asyncBlockEntityAnimate()) {
+			original.call(i, j, k);
+		} else {
 			AsyncTicker.BLOCK_ENTITY_OPERATIONS.add(() -> original.call(i, j, k));
 		}
 	}
