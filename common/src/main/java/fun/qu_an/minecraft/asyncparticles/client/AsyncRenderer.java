@@ -177,9 +177,7 @@ public class AsyncRenderer {
 		} catch (Throwable throwable) {
 			LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, throwable);
 			((ParticleAddon) particle).asyncedParticles$setRenderSync();
-			if (!AsyncTicker.isTolerable(throwable)) {
-				markAsSync(particle.getClass());
-			}
+			markAsSync(particle.getClass());
 			recordSync(particleRenderType, particle);
 		}
 	}
