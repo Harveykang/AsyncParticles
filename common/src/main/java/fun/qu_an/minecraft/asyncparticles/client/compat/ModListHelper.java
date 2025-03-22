@@ -63,6 +63,10 @@ public class ModListHelper {
 	public static final boolean FORGE_DRACONIC_EVOLUTION_LOADED = isForgeModLoaded("draconicevolution");
 	/* Modern UI */
 	public static final boolean MODERN_UI_LOADED = isModLoaded("modernui");
+	/* Subtle Effects */
+	public static final boolean SUBTLE_EFFECTS_LOADED = isModLoaded("subtle_effects");
+	public static final boolean FABRIC_SUBTLE_EFFECTS_LOADED = isFabricModLoaded("subtle_effects");
+	public static final boolean FORGE_SUBTLE_EFFECTS_LOADED = isForgeModLoaded("subtle_effects");
 
 	@ExpectPlatform
 	private static boolean isForge() {

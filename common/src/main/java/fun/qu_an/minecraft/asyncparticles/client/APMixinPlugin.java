@@ -2,16 +2,45 @@ package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.mixin_extension.ExtensionMixinMethodCanceller;
 import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.spongepowered.asm.service.MixinService;
 
 import java.util.List;
 import java.util.Set;
 
 public class APMixinPlugin implements IMixinConfigPlugin {
+	static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles:plugin");
+
 	@Override
 	public void onLoad(String mixinPackage) {
+		ExtensionMixinMethodCanceller.init();
+		ExtensionMixinMethodCanceller.register(new ExtensionMixinMethodCanceller.Canceller() {
+			@Override
+			public boolean preTest(String mixinClassName) {
+				return switch (mixinClassName) {
+					case "einstein.subtle_effects.mixin.client.particle.FabricParticleEngineMixin",
+						 "einstein.subtle_effects.mixin.client.particle.ForgeParticleEngineMixin" -> true;
+					default -> false;
+				};
+			}
+
+			@Override
+			public boolean test(String mixinClassName,
+								String mixinMethodName,
+								String mixinMethodDesc,
+								List<String> mixinParameterNames) {
+				return switch (mixinClassName) {
+					case "einstein.subtle_effects.mixin.client.particle.FabricParticleEngineMixin",
+						 "einstein.subtle_effects.mixin.client.particle.ForgeParticleEngineMixin" ->
+						mixinMethodName.equals("shouldRenderParticle");
+					default -> false;
+				};
+			}
+		});
 		MixinCancellerRegistrar.register((targetClassNames, mixinClassName)
 			-> switch (mixinClassName) {
 			case "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer",
@@ -24,6 +53,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				 "me.fzzyhmstrs.particle_core.mixins.ParticleMixin",
 				 "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
 				 "com.moepus.flerovium.mixins.Particle.ParticleMixin"
+//			, "einstein.subtle_effects.mixin.client.particle.FabricParticleEngineMixin",
+//				 "einstein.subtle_effects.mixin.client.particle.ForgeParticleEngineMixin"
 //				 , "net.diebuddies.mixins.ocean.MixinParticleEngine"
 				-> true;
 			default -> false;
@@ -35,6 +66,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		return null;
 	}
 
+	/// - mixin/fabric 包下位于根目录的mixin只在fabric环境下生效。除非另有说明，位于其他子目录的mixin在fabric或信雅互联环境下均生效
+	/// - mixin/<mod_id>/fabric 包下的mixin只在fabric环境下生效，其他mixin在任何环境下生效
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		String mixinPackageName = mixinClassName.substring("fun.qu_an.minecraft.asyncparticles.client.mixin.".length());
@@ -64,7 +97,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			}
 			case "legacy" -> {
 				if (split.length == 2) {
-					yield true;
+					throw new IllegalArgumentException("Unknown legacy mixin: " + mixinClassName);
 				}
 				yield switch (split[1]) {
 					case "flywheel" -> ModListHelper.FLYWHEEL_LOADED && ModListHelper.FLYWHEEL_MAJOR_VERSION < 1;
@@ -82,6 +115,15 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			case "particle_core" -> ModListHelper.PARTICLE_CORE_LOADED;
 			case "physicsmod" -> ModListHelper.PHYSICSMOD_LOADED;
 			case "a_good_place" -> ModListHelper.A_GOOD_PLACE_LOADED;
+			case "subtle_effects" -> {
+				if (split.length == 2) {
+					yield ModListHelper.SUBTLE_EFFECTS_LOADED;
+				}
+				yield switch (split[1]) {
+					case "fabric" -> !ModListHelper.IS_FORGE && ModListHelper.FABRIC_SUBTLE_EFFECTS_LOADED;
+					default -> ModListHelper.SUBTLE_EFFECTS_LOADED;
+				};
+			}
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

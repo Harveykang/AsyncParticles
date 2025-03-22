@@ -178,9 +178,7 @@ public class AsyncRenderer {
 		} catch (Throwable throwable) {
 			LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, throwable);
 			((ParticleAddon) particle).asyncedParticles$setRenderSync();
-			if (!AsyncTicker.isTolerable(throwable)) {
-				markAsSync(particle.getClass());
-			}
+			markAsSync(particle.getClass());
 			recordSync(particleRenderType, particle);
 		}
 	}
@@ -426,7 +424,7 @@ public class AsyncRenderer {
 
 	public static List<Particle> getSync(ParticleRenderType particleRenderType) {
 		List<Particle> list = SYNC_PARTICLES.get(particleRenderType);
-		return list == null ? List.of() : list;
+		return list == null ? Collections.emptyList() : list;
 	}
 
 	private static void clearSync() {

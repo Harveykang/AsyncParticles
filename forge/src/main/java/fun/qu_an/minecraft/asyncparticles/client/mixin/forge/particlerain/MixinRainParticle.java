@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.List;
+import java.util.Collections;
 
 @Mixin(RainParticle.class)
 public abstract class MixinRainParticle extends MixinWeatherParticle {
@@ -51,7 +51,7 @@ public abstract class MixinRainParticle extends MixinWeatherParticle {
 				apply,
 				asyncparticles$getWeatherAABB(), // It looks good that way
 				this.level,
-				List.of());
+				Collections.emptyList());
 			if (!apply.equals(originalMotion) && motion.equals(apply)) {
 				d = apply.x;
 				e = apply.y;

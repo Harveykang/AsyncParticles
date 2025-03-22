@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(ClientLevel.class)
+@Mixin(value = ClientLevel.class, priority = 1500)
 public class MixinClientLevelMixin {
 	@Dynamic
 	@TargetHandler(

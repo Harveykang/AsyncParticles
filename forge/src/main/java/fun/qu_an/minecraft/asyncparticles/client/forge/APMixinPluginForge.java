@@ -38,6 +38,7 @@ public class APMixinPluginForge implements IMixinConfigPlugin {
 			case "epicacg" -> ModListHelper.FORGE_EPICACG_LOADED;
 			case "gateways" -> ModListHelper.FORGE_GATEWAYS_LOADED;
 			case "draconicevolution" -> ModListHelper.FORGE_DRACONIC_EVOLUTION_LOADED;
+			case "subtle_effects" -> ModListHelper.FORGE_SUBTLE_EFFECTS_LOADED;
 			default -> throw new IllegalArgumentException("Unknown forge mixin: " + mixinClassName);
 		};
 	}

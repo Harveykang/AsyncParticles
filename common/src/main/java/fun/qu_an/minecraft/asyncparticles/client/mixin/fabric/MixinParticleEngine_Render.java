@@ -77,7 +77,7 @@ public abstract class MixinParticleEngine_Render {
 				Collection<? extends Particle> syncParticles;
 				Tesselator tesselator;
 				if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
-					syncParticles = AsyncRenderer.isMixedParticleRenderingSetting() ? List.of() : iterable;
+					syncParticles = AsyncRenderer.isMixedParticleRenderingSetting() ? Collections.emptyList() : iterable;
 					tesselator = Tesselator.getInstance();
 					bufferBuilder = tesselator.getBuilder();
 				} else {
