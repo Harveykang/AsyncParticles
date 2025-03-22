@@ -9,10 +9,8 @@
   - Async particle ticking/rendering(buffer filling).
   - Async particle light cache.
   - Async client block entity ticking.
-- Valkyrien Skies + Pretty Rain/Particle Rain
-  - Weather particles now collide with ships.
-- Create + Pretty Rain/Particle Rain
-  - Weather particles now collide with contraptions.
+- Create/Valkyrien Skies + Pretty Rain/Particle Rain
+  - Weather particles now collide with contraptions/ships.
 - Pretty Rain/Particle Rain/Effectual/Particular
   - Async particle gen.
 

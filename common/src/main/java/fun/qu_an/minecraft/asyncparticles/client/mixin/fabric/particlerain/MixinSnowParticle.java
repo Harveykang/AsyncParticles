@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pigcart.particlerain.particle.SnowParticle;
 
-import java.util.List;
+import java.util.Collections;
 
 @Mixin(SnowParticle.class)
 public abstract class MixinSnowParticle extends MixinWeatherParticle {
@@ -51,7 +51,7 @@ public abstract class MixinSnowParticle extends MixinWeatherParticle {
 				apply,
 				getBoundingBox().inflate(0, 1.3, 0), // It looks good that way
 				this.level,
-				List.of());
+				Collections.emptyList());
 			if (!apply.equals(originalMotion) && motion.equals(apply)) {
 				d = apply.x;
 				e = apply.y;

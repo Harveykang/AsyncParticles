@@ -1,6 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.mixin_extension.ExtensionMixinMethodCanceller;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -11,6 +13,28 @@ import java.util.Set;
 public class APMixinPlugin implements IMixinConfigPlugin {
 	@Override
 	public void onLoad(String mixinPackage) {
+		ExtensionMixinMethodCanceller.init();
+		ExtensionMixinMethodCanceller.register(new ExtensionMixinMethodCanceller.Canceller() {
+			@Override
+			public boolean preTest(String mixinClassName) {
+				return switch (mixinClassName) {
+					case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin" -> true;
+					default -> false;
+				};
+			}
+
+			@Override
+			public boolean test(String mixinClassName,
+								String mixinMethodName,
+								String mixinMethodDesc,
+								List<String> mixinParameterNames) {
+				return switch (mixinClassName) {
+					case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin" ->
+						mixinMethodName.equals("shouldRenderParticle");
+					default -> false;
+				};
+			}
+		});
 		MixinCancellerRegistrar.register((targetClassNames, mixinClassName)
 			-> switch (mixinClassName) {
 			case "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer",
@@ -49,6 +73,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					yield !ModListHelper.IS_FORGE;
 				}
 				yield switch (split[1]) {
+					case "off_thread_access" -> !ModListHelper.IS_FORGE;
 					case "particlerain_create" ->
 						ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_CREATE_LOADED;
 					case "particlerain" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED;
@@ -59,15 +84,26 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
-			case "fake_renders" -> true;
+			case "fake_renders",
+				 "off_thread_access" -> true;
+			case "modernui" -> ModListHelper.MODERN_UI_LOADED;
 			case "create" -> ModListHelper.CREATE_LOADED;
 			case "sodium_0_6" -> ModListHelper.SODIUM_LOADED
-							   && ModListHelper.versionCheck("sodium", "0.6", "0.7");
+								 && ModListHelper.versionCheck("sodium", "0.6", "0.7");
 			case "sodium_0_7" -> ModListHelper.SODIUM_LOADED
-							   && ModListHelper.versionCheck("sodium", "0.7", "0.8");
+								 && ModListHelper.versionCheck("sodium", "0.7", "0.8");
 			case "iris_like" -> ModListHelper.IRIS_LIKE_LOADED;
 			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
 			case "a_good_place" -> ModListHelper.A_GOOD_PLACE_LOADED;
+			case "subtle_effects" -> {
+				if (split.length == 2) {
+					yield ModListHelper.SUBTLE_EFFECTS_LOADED;
+				}
+				yield switch (split[1]) {
+					case "fabric" -> !ModListHelper.IS_FORGE && ModListHelper.FABRIC_SUBTLE_EFFECTS_LOADED;
+					default -> ModListHelper.SUBTLE_EFFECTS_LOADED;
+				};
+			}
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

@@ -1,10 +1,12 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import java.io.IOException;
 
 public class AsyncparticlesClient {
 	public static final String MOD_ID = "asyncparticles";
+	public static final String ISSUE_URL = "https://github.com/Harveykang/AsyncParticles/issues";
 
 	public static void init() {
 		try {

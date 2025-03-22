@@ -4,10 +4,13 @@
   "version": "${version}",
   "name": "AsyncParticles",
   "description": "",
-  "authors": ["Harvey_Husky"],
-  "sources": "https://github.com/Harveykang/AsyncParticles",
-  "issues": "https://github.com/Harveykang/AsyncParticles/issues",
-  "contact": {},
+  "authors": [
+    "Harvey_Husky"
+  ],
+  "contact": {
+    "sources": "https://github.com/Harveykang/AsyncParticles",
+    "issues": "https://github.com/Harveykang/AsyncParticles/issues"
+  },
   "license": "MIT",
   "icon": "assets/asyncparticles/icon.png",
   "accessWidener": "asyncparticles-common.accesswidener",

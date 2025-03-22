@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.neoforge;
 
-import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -26,6 +26,7 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 			return true;
 		}
 		return switch (split[0]) {
+			case "off_thread_access" -> true;
 			case "particlerain_create" -> ModListHelper.FORGE_PARTICLERAIN_LOADED && ModListHelper.FORGE_CREATE_LOADED;
 			case "particlerain" -> ModListHelper.FORGE_PARTICLERAIN_LOADED;
 			case "create" -> ModListHelper.FORGE_CREATE_LOADED;
@@ -33,6 +34,7 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 			case "effecticularity" -> ModListHelper.FORGE_EFFECTIVE_LOADED;
 			case "embeddium" -> ModListHelper.EMBEDDIUM_LOADED;
 //			case "flerovium" -> ModListHelper.FORGE_FLEROVIUM_LOADED;
+			case "subtle_effects" -> ModListHelper.FORGE_SUBTLE_EFFECTS_LOADED;
 			default -> throw new IllegalArgumentException("Unknown forge mixin: " + mixinClassName);
 		};
 	}

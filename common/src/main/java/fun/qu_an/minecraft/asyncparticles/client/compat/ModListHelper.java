@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client;
+package fun.qu_an.minecraft.asyncparticles.client.compat;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import org.sinytra.connector.loader.ConnectorEarlyLoader;
@@ -52,6 +52,12 @@ public class ModListHelper {
 	public static final boolean PHYSICSMOD_LOADED = isModLoaded("physicsmod");
 	/* A Good Place */
 	public static final boolean A_GOOD_PLACE_LOADED = isModLoaded("a_good_place");
+	/* Modern UI */
+	public static final boolean MODERN_UI_LOADED = isModLoaded("modernui");
+	/* Subtle Effects */
+	public static final boolean SUBTLE_EFFECTS_LOADED = isModLoaded("subtle_effects");
+	public static final boolean FABRIC_SUBTLE_EFFECTS_LOADED = isFabricModLoaded("subtle_effects");
+	public static final boolean FORGE_SUBTLE_EFFECTS_LOADED = isForgeModLoaded("subtle_effects");
 
 	@ExpectPlatform
 	private static boolean isForge() {

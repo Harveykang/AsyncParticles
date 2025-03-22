@@ -6,10 +6,15 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
+import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionTracker;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBeginTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
@@ -39,6 +44,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 // TODO: 整理这一坨
+@Environment(EnvType.CLIENT)
 public class AsyncRenderer {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -99,7 +105,7 @@ public class AsyncRenderer {
 
 	//	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = new ConcurrentHashMap<>();
 	// some mod use zero content record class as particle render type, so we need to use IdentityHashMap to get rid of duplicated hashcode...
-	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = Collections.synchronizedMap(new IdentityHashMap<>());
+	private static final Map<ParticleRenderType, Set<Particle>> SYNC_PARTICLES = Collections.synchronizedMap(new IdentityHashMap<>());
 	public static final ForkJoinPool EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
 	public static final Set<Thread> PARTICLE_THREADS = Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
@@ -131,6 +137,10 @@ public class AsyncRenderer {
 	public static CompletableFuture<Void> asyncTask;
 	private static boolean mixedParticleRenderingSetting = false;
 	private static int asyncTasksSize;
+	private static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
+		() -> 5000,
+		() -> SimplePropertiesConfig.renderFailurePerSecondThreshold
+	);
 
 	/* Renderer */
 
@@ -148,12 +158,12 @@ public class AsyncRenderer {
 		profiler.push("render_async");
 		TextureManager textureManager = particleEngine.textureManager;
 		ObjectArrayList<CompletableFuture<Void>> asyncTasks = new ObjectArrayList<>(asyncTasksSize);
-		for (Map.Entry<ParticleRenderType, Queue<Particle>> entry : particleEngine.particles.entrySet()) {
-			Queue<Particle> queue = entry.getValue();
-			if (queue.isEmpty()) {
+		Map<ParticleRenderType, Queue<Particle>> particles = particleEngine.particles;
+		for (ParticleRenderType particleRenderType : particles.keySet()) {
+			Queue<Particle> queue = particles.get(particleRenderType);
+			if (queue == null || queue.isEmpty()) {
 				continue;
 			}
-			ParticleRenderType particleRenderType = entry.getKey();
 			BufferBuilder bufferBuilder = beginBufferBuilder(particleRenderType, textureManager);
 			if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
 				continue;
@@ -183,13 +193,24 @@ public class AsyncRenderer {
 		float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
 		try {
 			particle.render(bufferBuilder, camera, g);
-		} catch (Throwable throwable) {
-			LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, throwable);
-			((ParticleAddon) particle).asyncedParticles$setRenderSync();
-			if (!AsyncTicker.isTolerable(throwable)) {
-				markAsSync(particle.getClass());
+		} catch (Throwable t) {
+			boolean tolerable = AsyncTicker.isTolerable(t);
+			if (!tolerable || AsyncTicker.EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
+				((ParticleAddon) particle).asyncedParticles$setRenderSync();
+				if (!shouldSync(particle.getClass())) {
+					if (!tolerable) {
+						LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, t);
+					} else {
+						LOGGER.warn("Exception {} thrown while rendering particle {} exceeds the threshold, please contact the author: {}",
+							t.getClass().getSimpleName(),
+							particle,
+							AsyncparticlesClient.ISSUE_URL,
+							t);
+					}
+					markAsSync(particle.getClass());
+				}
+				recordSync(particleRenderType, particle);
 			}
-			recordSync(particleRenderType, particle);
 		}
 	}
 
@@ -304,19 +325,20 @@ public class AsyncRenderer {
 	}
 
 	public static void recordSync(ParticleRenderType particleRenderType, Particle particle) {
-		List<Particle> particles = SYNC_PARTICLES.computeIfAbsent(particleRenderType, k -> new ArrayList<>());
+		Collection<Particle> particles = SYNC_PARTICLES.computeIfAbsent(particleRenderType,
+			k -> Collections.newSetFromMap(new IdentityHashMap<>()));
 		synchronized (particles) {
 			particles.add(particle);
 		}
 	}
 
-	public static List<? extends Particle> getSync(ParticleRenderType particleRenderType) {
-		List<Particle> list = SYNC_PARTICLES.get(particleRenderType);
-		return list == null ? List.of() : list;
+	public static Set<? extends Particle> getSync(ParticleRenderType particleRenderType) {
+		Set<Particle> set = SYNC_PARTICLES.get(particleRenderType);
+		return set == null ? Collections.emptySet() : set;
 	}
 
 	private static void clearSync() {
-		SYNC_PARTICLES.values().forEach(List::clear);
+		SYNC_PARTICLES.values().forEach(Set::clear);
 	}
 
 	/* Debug */
@@ -334,7 +356,7 @@ public class AsyncRenderer {
 				sync particle types: %s,
 				iris particle state: %s"""
 				.formatted(asyncTasksSize,
-					SYNC_PARTICLES.values().stream().mapToInt(List::size).sum(),
+					SYNC_PARTICLES.values().stream().mapToInt(Set::size).sum(),
 					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList(),
 					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse()
 						? getRenderingSettings().name() : "disabled"));

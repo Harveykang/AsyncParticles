@@ -2,37 +2,104 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import com.mojang.blaze3d.systems.RenderSystem;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
+import net.minecraft.client.resources.sounds.Sound;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.client.resources.sounds.TickableSoundInstance;
 import net.minecraft.client.sounds.SoundEngine;
-import org.slf4j.Logger;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.client.sounds.SoundEventListener;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Map;
 
 @Mixin(SoundEngine.class)
 public class MixinSoundEngine {
-	@Shadow
-	@Final
-	private static Logger LOGGER;
+	@Inject(method = "tick", at = @At("HEAD"))
+	public void injectTick(CallbackInfo ci) {
+		ThreadUtil.assertNotParticleThread();
+	}
 
-	@Inject(method = "tick", at = @At("HEAD"), cancellable = true)
-	private void onTick(boolean bl, CallbackInfo ci) {
-		// TODO: 是否可以异步？（一些 mod 频繁播放音效会导致卡顿）
-		if (!AsyncTicker.shouldTickParticles) {
-			ci.cancel();
+	@WrapMethod(method = {"reload", "stopAll", "destroy", "stopAll"})
+	public void wrapReload(Operation<Void> original) {
+		if (RenderSystem.isOnRenderThread()) {
+			original.call();
+		} else {
+			ThreadUtil.submitClientTask(original::call);
 		}
 	}
 
-	@WrapMethod(method = "tick")
-	private void wrapTick(boolean bl, Operation<Void> original) {
-		try {
-			// FIXME: 查明原因
-			original.call(bl);
-		} catch (NullPointerException e) {
-			LOGGER.error("Error while ticking sound engine", e);
+	@WrapMethod(method = "updateCategoryVolume")
+	public void wrapUpdateCategoryVolume(SoundSource category, float volume, Operation<Void> original) {
+		if (RenderSystem.isOnRenderThread()) {
+			original.call(category, volume);
+		} else {
+			ThreadUtil.submitClientTask(() -> original.call(category, volume));
+		}
+	}
+
+	@WrapMethod(method = "play")
+	public void wrapStop(SoundInstance soundInstance, Operation<Void> original) {
+		if (RenderSystem.isOnRenderThread()) {
+			original.call(soundInstance);
+		} else {
+			ThreadUtil.submitClientTask(() -> original.call(soundInstance));
+		}
+	}
+
+	@WrapMethod(method = {"addEventListener", "removeEventListener"})
+	public void wrapAddEventListener(SoundEventListener listener, Operation<Void> original) {
+		if (RenderSystem.isOnRenderThread()) {
+			original.call(listener);
+		} else {
+			ThreadUtil.submitClientTask(() -> original.call(listener));
+		}
+	}
+
+	@Redirect(method = "isActive", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"))
+	public Object redirectIsActive(Map<?, Integer> instance, Object o) {
+		return instance.getOrDefault(o, Integer.MAX_VALUE);
+	}
+
+	@WrapMethod(method = "queueTickingSound")
+	public void wrapQueueTickingSound(TickableSoundInstance tickableSound, Operation<Void> original) {
+		if (RenderSystem.isOnRenderThread()) {
+			original.call(tickableSound);
+		} else {
+			ThreadUtil.submitClientTask(() -> original.call(tickableSound));
+		}
+	}
+
+	@WrapMethod(method = "requestPreload")
+	public void wrapRequestPreload(Sound sound, Operation<Void> original) {
+		if (RenderSystem.isOnRenderThread()) {
+			original.call(sound);
+		} else {
+			ThreadUtil.submitClientTask(() -> original.call(sound));
+		}
+	}
+
+	@WrapMethod(method = "playDelayed")
+	public void wrapPlayDelayed(SoundInstance sound, int delay, Operation<Void> original) {
+		if (RenderSystem.isOnRenderThread()) {
+			original.call(sound, delay);
+		} else {
+			ThreadUtil.submitClientTask(() -> original.call(sound, delay));
+		}
+	}
+
+	@WrapMethod(method = "stop(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/sounds/SoundSource;)V")
+	public void wrapStop(ResourceLocation soundName, SoundSource category, Operation<Void> original) {
+		if (RenderSystem.isOnRenderThread()) {
+			original.call(soundName, category);
+		} else {
+			ThreadUtil.submitClientTask(() -> original.call(soundName, category));
 		}
 	}
 }

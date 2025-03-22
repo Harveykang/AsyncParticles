@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
-import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,21 +10,20 @@ import java.util.Properties;
 
 public class SimplePropertiesConfig {
 	public static final Path CONFIG_FILE = Paths.get("config", "asyncparticles.properties");
-	public static final int DEFAULT_LIMIT = 32768;
-	public static int limit = DEFAULT_LIMIT;
+	public static int limit = 32768;
+	public static int renderFailurePerSecondThreshold = 20;
+	public static int tickFailurePerSecondThreshold = 5;
 	private static boolean asyncClientBlockEntityTick = true;
 	private static boolean greedyAsyncClientBlockEntityTick = false;
 	private static boolean asyncClientBlockEntityAnimate = true;
-	private static boolean forceSyncLevelRenderMarkDirty = false;
 	private static boolean forceDoneBlockAnimateTick = false;
 	private static boolean forceDoneParticleTick = false;
 	private static boolean forceDoneTextureTick = false;
 	private static boolean markSyncIfTickFailed = false;
-	private static boolean ignoreParticleTickExceptions = false;
 	private static boolean particleLightCache = true;
+	private static boolean suppressCME = false;
 	private static boolean collideWithCreateModContraptions = true;
 	private static boolean collideWithVSModShips = true;
-
 
 	private static boolean shouldSave;
 
@@ -37,31 +36,34 @@ public class SimplePropertiesConfig {
 			properties.load(Files.newInputStream(CONFIG_FILE));
 		}
 
-		String limitStr = properties.getProperty("limit");
-		int limit;
-		try {
-			limit = Integer.parseInt(limitStr);
-		} catch (NumberFormatException e) {
-			properties.setProperty("limit", String.valueOf(DEFAULT_LIMIT));
-			shouldSave = true;
-			limit = DEFAULT_LIMIT;
-		}
-		SimplePropertiesConfig.limit = limit;
+		limit = getInt(properties, "limit", 32768);
+		renderFailurePerSecondThreshold = getInt(properties, "renderFailurePerSecondThreshold", 20);
+		tickFailurePerSecondThreshold = getInt(properties, "tickFailurePerSecondThreshold", 5);
 
 		asyncClientBlockEntityTick = getBoolean(properties, "asyncClientBlockEntityTick", true);
 		greedyAsyncClientBlockEntityTick = getBoolean(properties, "greedyAsyncClientBlockEntityTick", false);
 		asyncClientBlockEntityAnimate = getBoolean(properties, "asyncClientBlockEntityAnimate", true);
-		forceSyncLevelRenderMarkDirty = getBoolean(properties, "forceSyncLevelRenderMarkDirty", false);
 		forceDoneBlockAnimateTick = getBoolean(properties, "forceDoneBlockAnimateTick", false);
 		forceDoneParticleTick = getBoolean(properties, "forceDoneParticleTick", false);
 		forceDoneTextureTick = getBoolean(properties, "forceDoneTextureTick", false);
 		markSyncIfTickFailed = getBoolean(properties, "markSyncIfTickFailed", false);
-		ignoreParticleTickExceptions = getBoolean(properties, "ignoreParticleTickExceptions", false);
 		particleLightCache = getBoolean(properties, "particleLightCache", true);
+		suppressCME = getBoolean(properties, "particleLightCache", false);
 
 		if (shouldSave) {
 			properties.store(Files.newOutputStream(CONFIG_FILE), null);
 			shouldSave = false;
+		}
+	}
+
+	private static int getInt(Properties properties, String key, int defaultValue) {
+		String i = properties.getProperty(key);
+		try {
+			return Integer.parseInt(i);
+		} catch (NumberFormatException e) {
+			properties.setProperty(key, String.valueOf(defaultValue));
+			shouldSave = true;
+			return defaultValue;
 		}
 	}
 
@@ -77,21 +79,16 @@ public class SimplePropertiesConfig {
 		}
 	}
 
-	public static boolean forceSyncLevelRendererMarkDirty() {
-		return ModListHelper.SODIUM_LOADED // can't mark dirty asynchronously in sodium
-			   || forceSyncLevelRenderMarkDirty;
-	}
-
-	public static boolean asyncBlockEntityAnimate() {
-		return !ModListHelper.PHYSICSMOD_LOADED && asyncClientBlockEntityAnimate;
-	}
-
 	public static boolean asyncBlockEntityTick() {
 		return asyncClientBlockEntityTick;
 	}
 
 	public static boolean greedyAsyncClientBlockEntityTick() {
 		return greedyAsyncClientBlockEntityTick;
+	}
+
+	public static boolean asyncBlockEntityAnimate() {
+		return !ModListHelper.PHYSICSMOD_LOADED && asyncClientBlockEntityAnimate;
 	}
 
 	public static boolean forceDoneBlockAnimateTick() {
@@ -110,11 +107,11 @@ public class SimplePropertiesConfig {
 		return markSyncIfTickFailed;
 	}
 
-	public static boolean ignoreParticleTickExceptions() {
-		return ignoreParticleTickExceptions;
-	}
-
 	public static boolean particleLightCache() {
 		return particleLightCache;
+	}
+
+	public static boolean suppressCME() {
+		return suppressCME;
 	}
 }

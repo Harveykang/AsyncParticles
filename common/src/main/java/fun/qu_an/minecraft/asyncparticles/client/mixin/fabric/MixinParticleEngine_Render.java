@@ -92,9 +92,7 @@ public abstract class MixinParticleEngine_Render {
 						} catch (Throwable throwable) {
 							CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
 							CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
-							Objects.requireNonNull(particle);
 							crashReportCategory.setDetail("Particle", particle::toString);
-							Objects.requireNonNull(particleRenderType);
 							crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
 							throw new ReportedException(crashReport);
 						}

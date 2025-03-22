@@ -47,6 +47,7 @@ public abstract class MixinClientLevel extends Level {
 			return;
 		}
 		if (!AsyncTicker.shouldTickParticles) {
+			super.tickBlockEntities();
 			return;
 		}
 		ProfilerFiller profilerFiller = this.getProfiler();

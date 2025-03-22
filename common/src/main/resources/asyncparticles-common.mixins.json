@@ -5,7 +5,6 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.APMixinPlugin",
   "client": [
-    "MixinLevelChunk",
     "MixinActiveProfiler",
     "MixinClientChunkCache",
     "MixinClientLevel",
@@ -14,10 +13,10 @@
     "MixinLevelRenderer",
     "MixinLevelRenderer_EarlyFrustum",
     "MixinMinecraft",
-    "MixinParticle_LightCacheNoRefresh",
     "MixinMultiBufferSource$BufferSource",
     "MixinParticle",
     "MixinParticle_LightCache",
+    "MixinParticle_LightCacheNoRefresh",
     "MixinParticleEngine",
     "MixinSoundEngine",
     "MixinTesselator",
@@ -43,11 +42,17 @@
     "iris_like.MixinFullyBufferedMultiBufferSource",
     "iris_like.MixinIris",
     "iris_like.MixinOldFullyBufferedMultiBufferSource",
-    "lodestone.MixinLodestoneWorldParticle"
+    "lodestone.MixinLodestoneWorldParticle",
+    "modernui.MixinRenderSystem",
+    "off_thread_access.MixinClassInstanceMultiMap",
+    "off_thread_access.MixinLevelChunk",
+    "subtle_effects.MixinAsyncRenderer",
+    "subtle_effects.fabric.MixinParticleEngine"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
+    "fabric.off_thread_access.MixinClassInstanceMultiMap"
   ]
 }

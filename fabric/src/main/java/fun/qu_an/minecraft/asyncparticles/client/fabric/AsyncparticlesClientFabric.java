@@ -4,7 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -18,7 +18,7 @@ import net.minecraft.network.chat.Style;
 
 import java.io.IOException;
 
-import static fun.qu_an.minecraft.asyncparticles.client.ModListHelper.*;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
@@ -56,6 +56,13 @@ public final class AsyncparticlesClientFabric implements ClientModInitializer {
 							AsyncRenderer.debugLater(s -> source.sendFeedback(Component.literal(s)
 								.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
 									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
+							return 1;
+						}))
+					.then(literal("dump")
+						.executes(context -> {
+							FabricClientCommandSource source = context.getSource();
+							AsyncTicker.dumpParticles();
+							source.sendFeedback(Component.literal("Particles have been dumped to log."));
 							return 1;
 						}))
 					.then(literal("reload")

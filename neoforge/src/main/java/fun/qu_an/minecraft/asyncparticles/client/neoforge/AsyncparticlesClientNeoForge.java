@@ -5,7 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CreateCompatImpl;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
@@ -26,7 +26,7 @@ import net.neoforged.neoforge.common.NeoForge;
 
 import java.io.IOException;
 
-import static fun.qu_an.minecraft.asyncparticles.client.ModListHelper.*;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
@@ -85,6 +85,13 @@ public final class AsyncparticlesClientNeoForge {
 					AsyncRenderer.debugLater(s -> source.sendSystemMessage(Component.literal(s)
 						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
 							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
+					return 1;
+				}))
+			.then(literal("dump")
+				.executes(context -> {
+					CommandSourceStack source = context.getSource();
+					AsyncTicker.dumpParticles();
+					source.sendSystemMessage(Component.literal("Particles have been dumped to log."));
 					return 1;
 				}))
 			.then(literal("reload")

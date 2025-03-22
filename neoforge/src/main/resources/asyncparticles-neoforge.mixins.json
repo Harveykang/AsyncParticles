@@ -21,7 +21,9 @@
     "particlerain.MixinWeatherParticle",
     "particlerain.MixinWeatherParticles",
     "particlerain.MixinWeatherParticleSpawner",
-    "particlerain_create.MixinWeatherParticleSpawner"
+    "particlerain_create.MixinWeatherParticleSpawner",
+    "subtle_effects.MixinParticleEngine",
+    "off_thread_access.MixinClassInstanceMultiMap"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.neoforge;
+package fun.qu_an.minecraft.asyncparticles.client.compat.neoforge;
 
 
 import net.neoforged.fml.loading.FMLLoader;

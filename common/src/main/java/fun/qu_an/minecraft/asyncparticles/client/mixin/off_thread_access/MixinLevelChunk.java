@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.ChunkPos;
@@ -18,7 +18,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Mixin(LevelChunk.class)
@@ -35,9 +34,8 @@ public abstract class MixinLevelChunk extends ChunkAccess {
 	@Inject(method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/chunk/UpgradeData;Lnet/minecraft/world/ticks/LevelChunkTicks;Lnet/minecraft/world/ticks/LevelChunkTicks;J[Lnet/minecraft/world/level/chunk/LevelChunkSection;Lnet/minecraft/world/level/chunk/LevelChunk$PostLoadProcessor;Lnet/minecraft/world/level/levelgen/blending/BlendingData;)V", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
 		if (level.isClientSide) {
-			blockEntities = new ConcurrentHashMap<>();
-		} else {
-			blockEntities = new HashMap<>();
+			// sodium copy block entities in setupTerrain()
+			blockEntities = new ConcurrentHashMap<>(blockEntities);
 		}
 	}
 }
