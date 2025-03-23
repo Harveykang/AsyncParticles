@@ -43,6 +43,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 // TODO: 整理这一坨
 @Environment(EnvType.CLIENT)
@@ -139,12 +140,16 @@ public class AsyncRenderer {
 		profiler.push("render_async");
 		TextureManager textureManager = particleEngine.textureManager;
 		ObjectArrayList<CompletableFuture<Void>> asyncTasks = new ObjectArrayList<>(asyncTasksSize);
-		for (Map.Entry<ParticleRenderType, Queue<Particle>> entry : particleEngine.particles.entrySet()) {
-			Queue<Particle> queue = entry.getValue();
-			if (queue.isEmpty()) {
+		Map<ParticleRenderType, Queue<Particle>> particles = particleEngine.particles;
+		for (ParticleRenderType particleRenderType
+			: ModListHelper.IS_FORGE ? particles.keySet() : ParticleEngine.RENDER_ORDER) {
+			if (particleRenderType == ParticleRenderType.NO_RENDER) {
 				continue;
 			}
-			ParticleRenderType particleRenderType = entry.getKey();
+			Queue<Particle> queue = particles.get(particleRenderType);
+			if (queue == null || queue.isEmpty()) {
+				continue;
+			}
 			BufferBuilder bufferBuilder = beginBufferBuilder(particleRenderType, textureManager);
 			if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
 				continue;
@@ -177,6 +182,7 @@ public class AsyncRenderer {
 		} catch (Throwable throwable) {
 			LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, throwable);
 			((ParticleAddon) particle).asyncedParticles$setRenderSync();
+			// FIXME: 实现只有频繁报错才标记为同步渲染
 			markAsSync(particle.getClass());
 			recordSync(particleRenderType, particle);
 		}
@@ -352,24 +358,21 @@ public class AsyncRenderer {
 			.orElse(ParticleRenderingSettings.MIXED);
 	}
 
-	private static BufferBuilder getBufferBuilder(ParticleRenderType particleRenderType) {
-		return BUFFER_BUILDERS.computeIfAbsent(particleRenderType,
-			k -> new BufferBuilder(RenderType.TRANSIENT_BUFFER_SIZE)); // minimal size
-	}
-
 	/* BufferBuilder */
 
 	private static final Map<ParticleRenderType, Pair<VertexFormat.Mode, VertexFormat>> FORMATS = new IdentityHashMap<>();
 	private static final Pair<VertexFormat.Mode, VertexFormat> EMPTY_FORMAT = Pair.of(null, null);
 
 	public static BufferBuilder beginBufferBuilder(ParticleRenderType particleRenderType, TextureManager textureManager) {
-		BufferBuilder builder = getBufferBuilder(particleRenderType);
-		if (builder.building()) {
-			return builder;
-		}
-		Pair<VertexFormat.Mode, VertexFormat> pair = FORMATS.computeIfAbsent(particleRenderType, k -> computeVertexFormatPair(k, textureManager));
+		Pair<VertexFormat.Mode, VertexFormat> pair = FORMATS.computeIfAbsent(particleRenderType,
+			k -> computeVertexFormatPair(k, textureManager));
 		if (pair == EMPTY_FORMAT) {
 			return FakeBufferBuilder.INSTANCE;
+		}
+		BufferBuilder builder = BUFFER_BUILDERS.computeIfAbsent(particleRenderType,
+			k -> new BufferBuilder(256)); // minimal size
+		if (builder.building()) {
+			return builder;
 		}
 		builder.begin(pair.first(), pair.second());
 		return builder;
@@ -441,10 +444,20 @@ public class AsyncRenderer {
 			debugConsumer.accept("""
 				[Debug AsyncRenderer]
 				async queue size: %d,
+				buffer capacity: %s,
+				render order: %s,
 				sync particle count: %d,
 				sync particle types: %s,
 				iris particle state: %s"""
 				.formatted(asyncTasksSize,
+					BUFFER_BUILDERS.entrySet()
+						.stream()
+						.collect(Collectors.toMap(
+							Map.Entry::getKey,
+							e -> e.getValue() instanceof FakeBufferBuilder ? 0 : e.getValue().buffer.capacity())),
+					ModListHelper.IS_FORGE
+						? Minecraft.getInstance().particleEngine.particles.keySet()
+						: ParticleEngine.RENDER_ORDER,
 					SYNC_PARTICLES.values().stream().mapToInt(List::size).sum(),
 					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList(),
 					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse()

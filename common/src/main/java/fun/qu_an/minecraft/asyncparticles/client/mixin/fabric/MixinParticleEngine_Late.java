@@ -12,10 +12,10 @@ import java.util.*;
 
 @Mixin(value = ParticleEngine.class, priority = 9999)
 public abstract class MixinParticleEngine_Late {
+	@Shadow
 	@Mutable
 	@Final
-	@Shadow
-	private static List<ParticleRenderType> RENDER_ORDER;
+	public static List<ParticleRenderType> RENDER_ORDER;
 
 	// Some mod has duplicated render type (render twice), cause concurrent access to the same queue...
 	// Only necessary to fabric since forge use particles.keySet()

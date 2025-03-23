@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
 import com.google.common.collect.EvictingQueue;
+import com.google.common.collect.ImmutableList;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
@@ -58,6 +59,11 @@ public abstract class MixinParticleEngine {
 	@Shadow
 	@Final
 	private static Logger LOGGER;
+
+	@Shadow
+	@Mutable
+	@Final
+	public static List<ParticleRenderType> RENDER_ORDER;
 
 	@Shadow public abstract void tickParticle(Particle particle);
 
@@ -153,10 +159,20 @@ public abstract class MixinParticleEngine {
 					AsyncTicker.recordSync(p);
 				}
 				Queue<Particle> queue = this.particles.computeIfAbsent(p.getRenderType(),
-					(p_107347_) -> {
+					k -> {
 						EvictingQueue<Particle> queue1 = EvictingQueue.create(SimplePropertiesConfig.limit);
 						// fix the first added particle not ticked.
 						AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue1));
+						// fix not added to RENDER_ORDER
+						// e.g. LodestoneParticleRenderType#*#withDepthFade()
+						if (!ModListHelper.IS_FORGE &&
+							k != ParticleRenderType.NO_RENDER &&
+							!RENDER_ORDER.contains(k)) {
+							RENDER_ORDER = ImmutableList.<ParticleRenderType>builder()
+								.addAll(RENDER_ORDER)
+								.add(k)
+								.build();
+						}
 						return queue1;
 					});
 				while (queue.size() >= SimplePropertiesConfig.limit) {

@@ -24,10 +24,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 
 import java.util.*;
 
@@ -43,8 +40,9 @@ public abstract class MixinParticleEngine_Render {
 	public TextureManager textureManager;
 
 	@Shadow
+	@Mutable
 	@Final
-	private static List<ParticleRenderType> RENDER_ORDER;
+	public static List<ParticleRenderType> RENDER_ORDER;
 
 	/**
 	 * @author

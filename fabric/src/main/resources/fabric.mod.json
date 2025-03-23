@@ -26,5 +26,8 @@
   },
   "suggests": {
     "fabric": "*"
+  },
+  "breaks": {
+    "vulkanmod": "*"
   }
 }
