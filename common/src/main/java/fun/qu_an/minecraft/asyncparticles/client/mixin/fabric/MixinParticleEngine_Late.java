@@ -13,6 +13,8 @@ import java.util.*;
 @Mixin(value = ParticleEngine.class, priority = 9999)
 public abstract class MixinParticleEngine_Late {
 	@Shadow
+	@Mutable
+	@Final
 	public static List<ParticleRenderType> RENDER_ORDER;
 
 	// Some mod has duplicated render type (render twice), cause concurrent access to the same queue...

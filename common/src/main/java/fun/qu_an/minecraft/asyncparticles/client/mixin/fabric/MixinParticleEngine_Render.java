@@ -8,6 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
+import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -22,10 +23,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 
 import java.util.*;
 
@@ -42,8 +40,9 @@ public abstract class MixinParticleEngine_Render {
 	@Shadow
 	@Final
 	public TextureManager textureManager;
-
 	@Shadow
+	@Mutable
+	@Final
 	public static List<ParticleRenderType> RENDER_ORDER;
 
 	/**
@@ -89,11 +88,7 @@ public abstract class MixinParticleEngine_Render {
 						try {
 							particle.render(bufferBuilder, camera, g);
 						} catch (Throwable throwable) {
-							CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
-							CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
-							crashReportCategory.setDetail("Particle", particle::toString);
-							crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
-							throw new ReportedException(crashReport);
+							throw AsyncRenderer.constructCrashReport(particle, particleRenderType, throwable);
 						}
 					}
 				}

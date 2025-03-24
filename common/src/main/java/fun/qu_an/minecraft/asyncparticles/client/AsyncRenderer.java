@@ -21,6 +21,9 @@ import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
 import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
 import net.irisshaders.iris.shaderpack.properties.ParticleRenderingSettings;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -195,7 +198,7 @@ public class AsyncRenderer {
 			particle.render(bufferBuilder, camera, g);
 		} catch (Throwable t) {
 			boolean tolerable = AsyncTicker.isTolerable(t);
-			if (!tolerable || AsyncTicker.EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
+			if (!tolerable || EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
 				((ParticleAddon) particle).asyncedParticles$setRenderSync();
 				if (!shouldSync(particle.getClass())) {
 					if (!tolerable) {
@@ -262,6 +265,14 @@ public class AsyncRenderer {
 		if (levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();
 		}
+	}
+
+	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable throwable) {
+		CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
+		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
+		crashReportCategory.setDetail("Particle", particle::toString);
+		crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
+		return new ReportedException(crashReport);
 	}
 
 	public static boolean isMixedParticleRenderingSetting() {

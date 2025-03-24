@@ -71,7 +71,10 @@ public abstract class MixinParticleEngine {
 	@Shadow
 	public abstract void tickParticle(Particle particle);
 
-	@Shadow public static List<ParticleRenderType> RENDER_ORDER;
+	@Shadow
+	@Mutable
+	@Final
+	public static List<ParticleRenderType> RENDER_ORDER;
 
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
 	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {
@@ -155,9 +158,11 @@ public abstract class MixinParticleEngine {
 							AsyncTicker::onEvicted);
 						// fix the first added particle not ticked.
 						AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue1));
-						if (!ModListHelper.IS_FORGE && !RENDER_ORDER.contains(k)) {
-							// fix not added to RENDER_ORDER
-							// e.g. LodestoneParticleRenderType#*#withDepthFade()
+						// fix not added to RENDER_ORDER
+						// e.g. LodestoneParticleRenderType#*#withDepthFade()
+						if (!ModListHelper.IS_FORGE &&
+							k != ParticleRenderType.NO_RENDER &&
+							!RENDER_ORDER.contains(k)) {
 							RENDER_ORDER = ImmutableList.<ParticleRenderType>builder()
 								.addAll(RENDER_ORDER)
 								.add(k)
