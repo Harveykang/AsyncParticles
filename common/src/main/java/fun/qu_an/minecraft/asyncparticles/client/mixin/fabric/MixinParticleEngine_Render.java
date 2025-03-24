@@ -44,8 +44,7 @@ public abstract class MixinParticleEngine_Render {
 	public TextureManager textureManager;
 
 	@Shadow
-	@Final
-	private static List<ParticleRenderType> RENDER_ORDER;
+	public static List<ParticleRenderType> RENDER_ORDER;
 
 	/**
 	 * @author
