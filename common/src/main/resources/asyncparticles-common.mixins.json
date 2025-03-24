@@ -42,7 +42,6 @@
     "iris_like.MixinFullyBufferedMultiBufferSource",
     "iris_like.MixinIris",
     "iris_like.MixinOldFullyBufferedMultiBufferSource",
-    "lodestone.MixinLodestoneWorldParticleRenderType",
     "modernui.MixinRenderSystem",
     "off_thread_access.MixinClassInstanceMultiMap",
     "off_thread_access.MixinLevelChunk",

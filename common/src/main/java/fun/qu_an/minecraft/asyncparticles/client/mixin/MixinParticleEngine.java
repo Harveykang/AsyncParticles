@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
+import com.google.common.collect.ImmutableList;
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
@@ -69,6 +70,8 @@ public abstract class MixinParticleEngine {
 
 	@Shadow
 	public abstract void tickParticle(Particle particle);
+
+	@Shadow public static List<ParticleRenderType> RENDER_ORDER;
 
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
 	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {
@@ -144,7 +147,7 @@ public abstract class MixinParticleEngine {
 					AsyncTicker.recordSync(p);
 				}
 				Queue<Particle> queue = this.particles.computeIfAbsent(p.getRenderType(),
-					(p_107347_) -> {
+					k -> {
 //						EvictingQueue<Particle> queue1 = EvictingQueue.create(SimplePropertiesConfig.limit);
 						Queue<Particle> queue1 = new IterationSafeEvictingQueue<>(
 							16,
@@ -152,6 +155,14 @@ public abstract class MixinParticleEngine {
 							AsyncTicker::onEvicted);
 						// fix the first added particle not ticked.
 						AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue1));
+						if (!ModListHelper.IS_FORGE && !RENDER_ORDER.contains(k)) {
+							// fix not added to RENDER_ORDER
+							// e.g. LodestoneParticleRenderType#*#withDepthFade()
+							RENDER_ORDER = ImmutableList.<ParticleRenderType>builder()
+								.addAll(RENDER_ORDER)
+								.add(k)
+								.build();
+						}
 						return queue1;
 					});
 				p.getParticleGroup().ifPresent(g -> updateCount(g, 1));
