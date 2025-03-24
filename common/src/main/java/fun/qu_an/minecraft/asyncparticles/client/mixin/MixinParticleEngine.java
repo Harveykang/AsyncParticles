@@ -116,7 +116,7 @@ public abstract class MixinParticleEngine {
 					if (ModListHelper.VS_LOADED) {
 						VSCompat.removeIfOutSight(emitter);
 					}
-				} catch (Exception t) {
+				} catch (Throwable t) {
 					if (AsyncTicker.isTolerable(t)) {
 						LOGGER.warn("Exception ticking emitter particle {}, you can ignore it if it doesn't happen frequently.", emitter, t);
 						continue;
@@ -209,7 +209,7 @@ public abstract class MixinParticleEngine {
 				if (ModListHelper.VS_LOADED) {
 					VSCompat.removeIfOutSight(particle);
 				}
-			} catch (Exception t) {
+			} catch (Throwable t) {
 				boolean tolerable = AsyncTicker.isTolerable(t);
 				if (tolerable &&
 					!AsyncTicker.EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
@@ -236,7 +236,7 @@ public abstract class MixinParticleEngine {
 						AsyncparticlesClient.ISSUE_URL,
 						t);
 				} else {
-					throw Utils.toThrowDirectly(AsyncTicker.constructCrashReport(particle, t));
+					throw AsyncTicker.constructCrashReport(particle, t);
 				}
 			}
 		}

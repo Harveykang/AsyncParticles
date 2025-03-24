@@ -163,6 +163,9 @@ public class AsyncRenderer {
 		ObjectArrayList<CompletableFuture<Void>> asyncTasks = new ObjectArrayList<>(asyncTasksSize);
 		Map<ParticleRenderType, Queue<Particle>> particles = particleEngine.particles;
 		for (ParticleRenderType particleRenderType : particles.keySet()) {
+			if (particleRenderType == ParticleRenderType.NO_RENDER) {
+				continue;
+			}
 			Queue<Particle> queue = particles.get(particleRenderType);
 			if (queue == null || queue.isEmpty()) {
 				continue;
@@ -267,8 +270,11 @@ public class AsyncRenderer {
 		}
 	}
 
-	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable throwable) {
-		CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
+	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable t) {
+		if (t instanceof ReportedException re) {
+			return re;
+		}
+		CrashReport crashReport = CrashReport.forThrowable(t, "Rendering Particle");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
 		crashReportCategory.setDetail("Particle", particle::toString);
 		crashReportCategory.setDetail("Particle Type", particleRenderType::toString);

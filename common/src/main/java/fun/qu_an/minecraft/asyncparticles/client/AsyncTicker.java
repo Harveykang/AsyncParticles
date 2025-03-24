@@ -313,9 +313,9 @@ public class AsyncTicker {
 		}
 	}
 
-	public static Exception constructCrashReport(Particle particle, Exception t) {
-		if (t instanceof ReportedException) {
-			return t;
+	public static ReportedException constructCrashReport(Particle particle, Throwable t) {
+		if (t instanceof ReportedException re) {
+			return re;
 		}
 		CrashReport crashReport = CrashReport.forThrowable(t, "Ticking Particle");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being ticked");
@@ -345,8 +345,8 @@ public class AsyncTicker {
 				if (ModListHelper.VS_LOADED) {
 					VSCompat.removeIfOutSight(particle);
 				}
-			} catch (Exception e) {
-				throw toThrowDirectly(constructCrashReport(particle, e));
+			} catch (Throwable e) {
+				throw constructCrashReport(particle, e);
 			}
 			if (!particle.isAlive()) {
 				// we manage the count in cleanup task
