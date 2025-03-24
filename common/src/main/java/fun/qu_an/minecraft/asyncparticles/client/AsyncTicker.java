@@ -7,7 +7,10 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceC
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionTracker;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -60,6 +63,10 @@ public class AsyncTicker {
 	private static boolean shouldReload;
 	public static final ExecutorService EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleTicker";
+	public static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
+		() -> 5000,
+		() -> SimplePropertiesConfig.tickFailurePerSecondThreshold
+	);
 
 	static {
 		AtomicInteger workerCount = new AtomicInteger(1);
@@ -280,9 +287,6 @@ public class AsyncTicker {
 	}
 
 	public static boolean isTolerable(@NotNull Throwable e) {
-		if (SimplePropertiesConfig.ignoreParticleTickExceptions()) {
-			return true;
-		}
 		if (e instanceof ReportedException
 			|| e instanceof CompletionException
 			|| e.getClass() == RuntimeException.class) {
@@ -316,6 +320,17 @@ public class AsyncTicker {
 		}
 	}
 
+	public static Exception constructCrashReport(Particle particle, Exception t) {
+		if (t instanceof ReportedException) {
+			return t;
+		}
+		CrashReport crashReport = CrashReport.forThrowable(t, "Ticking Particle");
+		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being ticked");
+		crashReportCategory.setDetail("Particle", particle::toString);
+		crashReportCategory.setDetail("Particle Type", particle.getRenderType()::toString);
+		return new ReportedException(crashReport);
+	}
+
 	/* Sync Ticking */
 
 	public static void tickSync() {
@@ -325,16 +340,20 @@ public class AsyncTicker {
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 		for (Iterator<Particle> iterator = SYNC_PARTICLES.iterator(); iterator.hasNext(); ) {
 			Particle particle = iterator.next();
-			particleEngine.tickParticle(particle);
-			if (!(particle instanceof TrackingEmitter)) {
-				if (particle instanceof LightCachedParticleAddon lightCachedParticle
-					&& SimplePropertiesConfig.particleLightCache()) {
-					lightCachedParticle.asyncParticles$refresh();
+			try {
+				particleEngine.tickParticle(particle);
+				if (!(particle instanceof TrackingEmitter)) {
+					if (particle instanceof LightCachedParticleAddon lightCachedParticle
+						&& SimplePropertiesConfig.particleLightCache()) {
+						lightCachedParticle.asyncParticles$refresh();
+					}
+					((ParticleAddon) particle).asyncParticles$setTicked();
 				}
-				((ParticleAddon) particle).asyncParticles$setTicked();
-			}
-			if (ModListHelper.VS_LOADED) {
-				VSCompat.removeIfOutSight(particle);
+				if (ModListHelper.VS_LOADED) {
+					VSCompat.removeIfOutSight(particle);
+				}
+			} catch (Exception e) {
+				throw toThrowDirectly(constructCrashReport(particle, e));
 			}
 			if (!particle.isAlive()) {
 				// we manage the count in cleanup task
@@ -448,6 +467,10 @@ public class AsyncTicker {
 
 	public static void registerEndTickEvent(Runnable operation) {
 		AsyncTicker.END_TICK_EVENTS.add(operation);
+	}
+
+	public static void dumpParticles() {
+		LOGGER.info(Minecraft.getInstance().particleEngine.particles);
 	}
 
 	@FunctionalInterface

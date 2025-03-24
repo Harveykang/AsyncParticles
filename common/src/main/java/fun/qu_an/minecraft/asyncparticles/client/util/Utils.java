@@ -12,4 +12,16 @@ public class Utils {
 	private static <T extends Throwable> T toThrowDirectly0(Throwable t) throws T {
 		throw (T) t;
 	}
+
+	public static Throwable getRootCause(Throwable e) {
+		if (e == null) {
+			return null;
+		}
+		while (true) {
+			if (e.getCause() == null) {
+				return e;
+			}
+			e = e.getCause();
+		}
+	}
 }

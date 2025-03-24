@@ -100,11 +100,11 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		return new QueueIterator();
 	}
 
-	@Override
-	public @NotNull Spliterator<E> spliterator() {
-		// FIXME: implement a Spliterator
-		throw new UnsupportedOperationException();
-	}
+//	@Override
+//	public @NotNull Spliterator<E> spliterator() {
+//		// FIXME: implement a Spliterator
+//		throw new UnsupportedOperationException();
+//	}
 
 	private Object[] resize(int newCapacity) {
 		if (newCapacity > this.maxCapacityPowerOfTwo) {
@@ -377,6 +377,19 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		n |= n >> 8;
 		n |= n >> 16;
 		return n + 1;
+	}
+
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
+		for (E e : this) {
+			sb.append(e).append(", ");
+		}
+		if (sb.length() > 1) {
+			sb.setLength(sb.length() - 2);
+		}
+		sb.append("]");
+		return sb.toString();
 	}
 
 	public static void main(String[] args) {

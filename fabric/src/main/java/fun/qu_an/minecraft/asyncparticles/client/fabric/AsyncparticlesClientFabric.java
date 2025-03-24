@@ -59,6 +59,13 @@ public final class AsyncparticlesClientFabric implements ClientModInitializer {
 									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
 							return 1;
 						}))
+					.then(literal("dump")
+						.executes(context -> {
+							FabricClientCommandSource source = context.getSource();
+							AsyncTicker.dumpParticles();
+							source.sendFeedback(Component.literal("Particles have been dumped to log."));
+							return 1;
+						}))
 					.then(literal("reload")
 						.executes(context -> {
 							FabricClientCommandSource source = context.getSource();

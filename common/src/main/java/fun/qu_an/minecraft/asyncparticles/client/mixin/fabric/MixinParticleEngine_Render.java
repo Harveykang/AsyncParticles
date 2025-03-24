@@ -10,9 +10,6 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.util.CustomTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -43,8 +40,7 @@ public abstract class MixinParticleEngine_Render {
 	public TextureManager textureManager;
 
 	@Shadow
-	@Final
-	private static List<ParticleRenderType> RENDER_ORDER;
+	public static List<ParticleRenderType> RENDER_ORDER;
 
 	/**
 	 * @author
@@ -68,8 +64,8 @@ public abstract class MixinParticleEngine_Render {
 //				if (particleRenderType == ParticleRenderType.NO_RENDER) {
 //					continue;
 //				}
-				Queue<Particle> iterable = this.particles.get(particleRenderType);
-				if (iterable == null || iterable.isEmpty()) {
+				Queue<Particle> queue = this.particles.get(particleRenderType);
+				if (queue == null || queue.isEmpty()) {
 					continue;
 				}
 				BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
@@ -77,7 +73,7 @@ public abstract class MixinParticleEngine_Render {
 				Collection<? extends Particle> syncParticles;
 				Tesselator tesselator;
 				if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
-					syncParticles = AsyncRenderer.isMixedParticleRenderingSetting() ? Collections.emptyList() : iterable;
+					syncParticles = AsyncRenderer.isMixedParticleRenderingSetting() ? Collections.emptyList() : queue;
 					tesselator = Tesselator.getInstance();
 					bufferBuilder = tesselator.getBuilder();
 				} else {
@@ -99,13 +95,7 @@ public abstract class MixinParticleEngine_Render {
 						try {
 							particle.render(bufferBuilder, camera, g);
 						} catch (Throwable throwable) {
-							CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
-							CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
-							Objects.requireNonNull(particle);
-							crashReportCategory.setDetail("Particle", particle::toString);
-							Objects.requireNonNull(particleRenderType);
-							crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
-							throw new ReportedException(crashReport);
+							throw AsyncRenderer.constructCrashReport(particle, particleRenderType, throwable);
 						}
 					}
 				}

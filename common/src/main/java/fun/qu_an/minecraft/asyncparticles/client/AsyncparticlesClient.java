@@ -12,6 +12,7 @@ import java.io.IOException;
 
 public class AsyncparticlesClient {
 	public static final String MOD_ID = "asyncparticles";
+	public static final String ISSUE_URL = "https://github.com/Harveykang/AsyncParticles/issues";
 
 	public static void init() {
 		try {

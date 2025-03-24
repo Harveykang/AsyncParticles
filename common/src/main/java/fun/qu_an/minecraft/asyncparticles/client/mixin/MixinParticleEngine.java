@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
-import com.google.common.collect.EvictingQueue;
+import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
@@ -12,12 +12,14 @@ import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue
 import fun.qu_an.minecraft.asyncparticles.client.util.TrackedParticleCountsMap;
 import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.particles.ParticleGroup;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.*;
@@ -25,7 +27,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.valkyrienskies.core.impl.shadow.E;
 
 import java.util.*;
 
@@ -65,6 +66,14 @@ public abstract class MixinParticleEngine {
 	@Shadow
 	@Final
 	private static Logger LOGGER;
+
+	@Shadow
+	public abstract void tickParticle(Particle particle);
+
+	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
+	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {
+		throw Utils.toThrowDirectly(t);
+	}
 
 	/**
 	 * @author
@@ -175,7 +184,7 @@ public abstract class MixinParticleEngine {
 				continue;
 			}
 			try {
-				particle.tick();
+				tickParticle(particle);
 				if (particle instanceof LightCachedParticleAddon lightCachedParticle
 					&& SimplePropertiesConfig.particleLightCache()) {
 					lightCachedParticle.asyncParticles$refresh();
@@ -185,8 +194,9 @@ public abstract class MixinParticleEngine {
 					VSCompat.removeIfOutSight(particle);
 				}
 			} catch (Exception t) {
-				if (AsyncTicker.isTolerable(t)) {
-					LOGGER.warn("Exception ticking particle {}, you can ignore it if it doesn't happen frequently.", particle, t);
+				boolean tolerable = AsyncTicker.isTolerable(t);
+				if (tolerable &&
+					!AsyncTicker.EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
 					continue;
 				}
 				if (SimplePropertiesConfig.markSyncIfTickFailed()) {
@@ -194,20 +204,26 @@ public abstract class MixinParticleEngine {
 					((ParticleAddon) particle).asyncedParticles$setTickSync();
 					AsyncTicker.markAsSync(particle.getClass());
 					AsyncTicker.recordSync(particle);
+				} else if (tolerable) {
+					LocalPlayer player = Minecraft.getInstance().player;
+					if (player != null) {
+						player.sendSystemMessage(Component.literal(
+								"Exception %s thrown while ticking particle %s exceeds the threshold, please contact the author: "
+									.formatted(t.getClass().getSimpleName(), particle.getClass()))
+							.append(Component.literal(AsyncparticlesClient.ISSUE_URL)
+								.setStyle(Style.EMPTY.withClickEvent(
+									new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncparticlesClient.ISSUE_URL)))));
+					}
+					LOGGER.warn("Exception {} thrown while ticking particle {} exceeds the threshold, please contact the author: {}",
+						t.getClass().getSimpleName(),
+						particle,
+						AsyncparticlesClient.ISSUE_URL,
+						t);
 				} else {
-					throw Utils.toThrowDirectly(asyncParticles$constructCrashReport(particle, t));
+					throw Utils.toThrowDirectly(AsyncTicker.constructCrashReport(particle, t));
 				}
 			}
 		}
-	}
-
-	@Unique
-	private static Exception asyncParticles$constructCrashReport(Particle particle, Exception t) {
-		CrashReport crashReport = CrashReport.forThrowable(t, "Ticking Particle");
-		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being ticked");
-		crashReportCategory.setDetail("Particle", particle::toString);
-		crashReportCategory.setDetail("Particle Type", particle.getRenderType()::toString);
-		return new ReportedException(crashReport);
 	}
 
 	@Inject(method = "add", at = @At(value = "HEAD"), cancellable = true)

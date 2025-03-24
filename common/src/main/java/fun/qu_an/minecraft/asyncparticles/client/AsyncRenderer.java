@@ -9,10 +9,8 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
-import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
-import fun.qu_an.minecraft.asyncparticles.client.util.TryAndStoreFakeBufferBuilder;
-import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
+import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
@@ -33,17 +31,24 @@ import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.NotNull;
+import org.ladysnake.effective.core.particle.MistParticle;
+import org.ladysnake.effective.core.particle.WaterfallCloudParticle;
 import org.slf4j.Logger;
+import team.lodestar.lodestone.systems.particle.render_types.LodestoneWorldParticleRenderType;
+import team.lodestar.lodestone.systems.particle.world.LodestoneWorldParticle;
 
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 // TODO: 整理这一坨
 @Environment(EnvType.CLIENT)
@@ -91,7 +96,7 @@ public class AsyncRenderer {
 
 	//	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = new ConcurrentHashMap<>();
 	// some mod use zero content record class as particle render type, so we need to use IdentityHashMap to get rid of duplicated hashcode...
-	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = Collections.synchronizedMap(new IdentityHashMap<>());
+	private static final Map<ParticleRenderType, Set<Particle>> SYNC_PARTICLES = Collections.synchronizedMap(new IdentityHashMap<>());
 	public static final ForkJoinPool EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
 
@@ -124,6 +129,10 @@ public class AsyncRenderer {
 	private static CompletableFuture<Void> asyncTask;
 	private static boolean mixedParticleRenderingSetting = false;
 	private static int asyncTasksSize;
+	private static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
+		() -> 5000,
+		() -> SimplePropertiesConfig.renderFailurePerSecondThreshold
+	);
 
 	/* Renderer */
 
@@ -140,12 +149,12 @@ public class AsyncRenderer {
 		profiler.push("render_async");
 		TextureManager textureManager = particleEngine.textureManager;
 		ObjectArrayList<CompletableFuture<Void>> asyncTasks = new ObjectArrayList<>(asyncTasksSize);
-		for (Map.Entry<ParticleRenderType, Queue<Particle>> entry : particleEngine.particles.entrySet()) {
-			Queue<Particle> queue = entry.getValue();
-			if (queue.isEmpty()) {
+		for (ParticleRenderType particleRenderType
+			: ModListHelper.IS_FORGE ? particleEngine.particles.keySet() : ParticleEngine.RENDER_ORDER) {
+			Queue<Particle> queue = particleEngine.particles.get(particleRenderType);
+			if (queue == null || queue.isEmpty()) {
 				continue;
 			}
-			ParticleRenderType particleRenderType = entry.getKey();
 			BufferBuilder bufferBuilder = beginBufferBuilder(particleRenderType, textureManager);
 			if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
 				continue;
@@ -175,11 +184,24 @@ public class AsyncRenderer {
 		float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
 		try {
 			particle.render(bufferBuilder, camera, g);
-		} catch (Throwable throwable) {
-			LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, throwable);
-			((ParticleAddon) particle).asyncedParticles$setRenderSync();
-			markAsSync(particle.getClass());
-			recordSync(particleRenderType, particle);
+		} catch (Throwable t) {
+			boolean tolerable = AsyncTicker.isTolerable(t);
+			if (!tolerable || AsyncTicker.EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
+				((ParticleAddon) particle).asyncedParticles$setRenderSync();
+				if (!shouldSync(particle.getClass())) {
+					if (!tolerable) {
+						LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, t);
+					} else {
+						LOGGER.warn("Exception {} thrown while ticking particle {} exceeds the threshold, please contact the author: {}",
+							t.getClass().getSimpleName(),
+							particle,
+							AsyncparticlesClient.ISSUE_URL,
+							t);
+					}
+					markAsSync(particle.getClass());
+				}
+				recordSync(particleRenderType, particle);
+			}
 		}
 	}
 
@@ -187,7 +209,7 @@ public class AsyncRenderer {
 		LOGGER.error("Error rendering particle", e);
 		Minecraft mc1 = Minecraft.getInstance();
 		if (mc1.level != null && mc1.player != null) {
-			throw new RuntimeException(e);
+			throw Utils.toThrowDirectly(e);
 		}
 		return null;
 	}
@@ -274,7 +296,6 @@ public class AsyncRenderer {
 		}
 	}
 
-	// FIXME: 这是个临时解决方案，最好找出 ModelMatrixStack 错乱的原因
 	public static void irisSync(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
 		if (!isMixedParticleRenderingSetting()) {
 			return;
@@ -321,13 +342,7 @@ public class AsyncRenderer {
 				try {
 					particle.render(bufferBuilder, camera, g);
 				} catch (Throwable throwable) {
-					CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
-					CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
-					Objects.requireNonNull(particle);
-					crashReportCategory.setDetail("Particle", particle::toString);
-					Objects.requireNonNull(particleRenderType);
-					crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
-					throw new ReportedException(crashReport);
+					throw constructCrashReport(particle, particleRenderType, throwable);
 				}
 			}
 			if (began) {
@@ -343,6 +358,16 @@ public class AsyncRenderer {
 		}
 	}
 
+	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable throwable) {
+		CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
+		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
+		Objects.requireNonNull(particle);
+		crashReportCategory.setDetail("Particle", particle::toString);
+		Objects.requireNonNull(particleRenderType);
+		crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
+		return new ReportedException(crashReport);
+	}
+
 	public static boolean isMixedParticleRenderingSetting() {
 		return mixedParticleRenderingSetting;
 	}
@@ -353,24 +378,20 @@ public class AsyncRenderer {
 			.orElse(ParticleRenderingSettings.MIXED);
 	}
 
-	private static BufferBuilder getBufferBuilder(ParticleRenderType particleRenderType) {
-		return BUFFER_BUILDERS.computeIfAbsent(particleRenderType,
-			k -> new BufferBuilder(RenderType.TRANSIENT_BUFFER_SIZE)); // minimal size
-	}
-
 	/* BufferBuilder */
 
 	private static final Map<ParticleRenderType, Pair<VertexFormat.Mode, VertexFormat>> FORMATS = new IdentityHashMap<>();
 	private static final Pair<VertexFormat.Mode, VertexFormat> EMPTY_FORMAT = Pair.of(null, null);
 
 	public static BufferBuilder beginBufferBuilder(ParticleRenderType particleRenderType, TextureManager textureManager) {
-		BufferBuilder builder = getBufferBuilder(particleRenderType);
-		if (builder.building()) {
-			return builder;
-		}
 		Pair<VertexFormat.Mode, VertexFormat> pair = FORMATS.computeIfAbsent(particleRenderType, k -> computeVertexFormatPair(k, textureManager));
 		if (pair == EMPTY_FORMAT) {
 			return FakeBufferBuilder.INSTANCE;
+		}
+		BufferBuilder builder = BUFFER_BUILDERS.computeIfAbsent(particleRenderType,
+			k -> new BufferBuilder(RenderType.TRANSIENT_BUFFER_SIZE)); // minimal size
+		if (builder.building()) {
+			return builder;
 		}
 		builder.begin(pair.first(), pair.second());
 		return builder;
@@ -416,19 +437,20 @@ public class AsyncRenderer {
 	}
 
 	public static void recordSync(ParticleRenderType particleRenderType, Particle particle) {
-		List<Particle> particles = SYNC_PARTICLES.computeIfAbsent(particleRenderType, k -> new ArrayList<>());
+		Set<Particle> particles = SYNC_PARTICLES.computeIfAbsent(particleRenderType,
+			k -> Collections.newSetFromMap(new IdentityHashMap<>()));
 		synchronized (particles) {
 			particles.add(particle);
 		}
 	}
 
-	public static List<Particle> getSync(ParticleRenderType particleRenderType) {
-		List<Particle> list = SYNC_PARTICLES.get(particleRenderType);
-		return list == null ? Collections.emptyList() : list;
+	public static Set<Particle> getSync(ParticleRenderType particleRenderType) {
+		Set<Particle> set = SYNC_PARTICLES.get(particleRenderType);
+		return set == null ? Collections.emptySet() : set;
 	}
 
 	private static void clearSync() {
-		SYNC_PARTICLES.values().forEach(List::clear);
+		SYNC_PARTICLES.values().forEach(Set::clear);
 	}
 
 	/* Debug */
@@ -442,11 +464,21 @@ public class AsyncRenderer {
 			debugConsumer.accept("""
 				[Debug AsyncRenderer]
 				async queue size: %d,
+				buffer capacity: %s,
+				render order: %s,
 				sync particle count: %d,
 				sync particle types: %s,
 				iris particle state: %s"""
 				.formatted(asyncTasksSize,
-					SYNC_PARTICLES.values().stream().mapToInt(List::size).sum(),
+					BUFFER_BUILDERS.entrySet()
+						.stream()
+						.collect(Collectors.toMap(
+							Map.Entry::getKey,
+							e -> e.getValue() instanceof FakeBufferBuilder ? 0 : e.getValue().buffer.capacity())),
+					ModListHelper.IS_FORGE
+						? Minecraft.getInstance().particleEngine.particles.keySet()
+						: ParticleEngine.RENDER_ORDER,
+					SYNC_PARTICLES.values().stream().mapToInt(Set::size).sum(),
 					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList(),
 					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse()
 						? getRenderingSettings().name() : "disabled"));
