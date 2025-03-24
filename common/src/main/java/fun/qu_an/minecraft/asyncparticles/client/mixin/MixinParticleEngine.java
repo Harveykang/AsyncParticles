@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
+import com.google.common.collect.ImmutableList;
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
@@ -57,7 +58,7 @@ public abstract class MixinParticleEngine {
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	public void init(CallbackInfo ci) {
 		trackedParticleCounts = new TrackedParticleCountsMap();
-		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, this::asyncParticles$onEvicted);
+		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, AsyncTicker::onEvicted);
 	}
 
 	@Shadow
@@ -69,6 +70,11 @@ public abstract class MixinParticleEngine {
 
 	@Shadow
 	public abstract void tickParticle(Particle particle);
+
+	@Shadow
+	@Mutable
+	@Final
+	public static List<ParticleRenderType> RENDER_ORDER;
 
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
 	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {
@@ -110,7 +116,7 @@ public abstract class MixinParticleEngine {
 					if (ModListHelper.VS_LOADED) {
 						VSCompat.removeIfOutSight(emitter);
 					}
-				} catch (Exception t) {
+				} catch (Throwable t) {
 					if (AsyncTicker.isTolerable(t)) {
 						LOGGER.warn("Exception ticking emitter particle {}, you can ignore it if it doesn't happen frequently.", emitter, t);
 						continue;
@@ -144,14 +150,24 @@ public abstract class MixinParticleEngine {
 					AsyncTicker.recordSync(p);
 				}
 				Queue<Particle> queue = this.particles.computeIfAbsent(p.getRenderType(),
-					(p_107347_) -> {
+					k -> {
 //						EvictingQueue<Particle> queue1 = EvictingQueue.create(SimplePropertiesConfig.limit);
 						Queue<Particle> queue1 = new IterationSafeEvictingQueue<>(
 							16,
 							SimplePropertiesConfig.limit,
-							this::asyncParticles$onEvicted);
+							AsyncTicker::onEvicted);
 						// fix the first added particle not ticked.
 						AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue1));
+						// fix not added to RENDER_ORDER
+						// e.g. LodestoneParticleRenderType#*#withDepthFade()
+						if (!ModListHelper.IS_FORGE &&
+							k != ParticleRenderType.NO_RENDER &&
+							!RENDER_ORDER.contains(k)) {
+							RENDER_ORDER = ImmutableList.<ParticleRenderType>builder()
+								.addAll(RENDER_ORDER)
+								.add(k)
+								.build();
+						}
 						return queue1;
 					});
 				p.getParticleGroup().ifPresent(g -> updateCount(g, 1));
@@ -193,7 +209,7 @@ public abstract class MixinParticleEngine {
 				if (ModListHelper.VS_LOADED) {
 					VSCompat.removeIfOutSight(particle);
 				}
-			} catch (Exception t) {
+			} catch (Throwable t) {
 				boolean tolerable = AsyncTicker.isTolerable(t);
 				if (tolerable &&
 					!AsyncTicker.EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
@@ -220,7 +236,7 @@ public abstract class MixinParticleEngine {
 						AsyncparticlesClient.ISSUE_URL,
 						t);
 				} else {
-					throw Utils.toThrowDirectly(AsyncTicker.constructCrashReport(particle, t));
+					throw AsyncTicker.constructCrashReport(particle, t);
 				}
 			}
 		}
@@ -253,17 +269,9 @@ public abstract class MixinParticleEngine {
 
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void redirectClearParticles(CallbackInfo ci) {
-		particlesToAdd.forEach(this::asyncParticles$onEvicted);
-		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, this::asyncParticles$onEvicted);
-		particles.values().forEach(queue -> queue.forEach(this::asyncParticles$onEvicted));
+		particlesToAdd.forEach(AsyncTicker::onEvicted);
+		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, AsyncTicker::onEvicted);
+		particles.values().forEach(queue -> queue.forEach(AsyncTicker::onEvicted));
 		AsyncTicker.onParticleEngineClear();
-	}
-
-	@Unique
-	private void asyncParticles$onEvicted(Particle particle) {
-		if (particle.isAlive()) {
-			particle.getParticleGroup().ifPresent(g -> updateCount(g, -1));
-			particle.remove();
-		}
 	}
 }

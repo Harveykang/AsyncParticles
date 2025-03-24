@@ -97,8 +97,8 @@ public abstract class MixinParticleEngine_Render {
 						float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
 						try {
 							particle.render(bufferBuilder, camera, g);
-						} catch (Throwable throwable) {
-							throw AsyncRenderer.constructCrashReport(particle, particleRenderType, throwable);
+						} catch (Throwable t) {
+							throw AsyncRenderer.constructCrashReport(particle, particleRenderType, t);
 						}
 					}
 				}

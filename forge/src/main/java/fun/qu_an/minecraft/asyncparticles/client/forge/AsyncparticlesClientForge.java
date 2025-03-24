@@ -64,6 +64,13 @@ public final class AsyncparticlesClientForge {
 							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
 					return 1;
 				}))
+			.then(literal("dump")
+				.executes(context -> {
+					CommandSourceStack source = context.getSource();
+					AsyncTicker.dumpParticles();
+					source.sendSystemMessage(Component.literal("Particles have been dumped to log."));
+					return 1;
+				}))
 			.then(literal("reload")
 				.executes(context -> {
 					CommandSourceStack source = context.getSource();

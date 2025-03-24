@@ -21,10 +21,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 
 import java.util.*;
 
@@ -40,6 +37,8 @@ public abstract class MixinParticleEngine_Render {
 	public TextureManager textureManager;
 
 	@Shadow
+	@Mutable
+	@Final
 	public static List<ParticleRenderType> RENDER_ORDER;
 
 	/**
@@ -94,8 +93,8 @@ public abstract class MixinParticleEngine_Render {
 						float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
 						try {
 							particle.render(bufferBuilder, camera, g);
-						} catch (Throwable throwable) {
-							throw AsyncRenderer.constructCrashReport(particle, particleRenderType, throwable);
+						} catch (Throwable t) {
+							throw AsyncRenderer.constructCrashReport(particle, particleRenderType, t);
 						}
 					}
 				}

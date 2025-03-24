@@ -9,6 +9,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionTracker;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
+import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.asm.mixin.Unique;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -287,16 +289,7 @@ public class AsyncTicker {
 	}
 
 	public static boolean isTolerable(@NotNull Throwable e) {
-		if (e instanceof ReportedException
-			|| e instanceof CompletionException
-			|| e.getClass() == RuntimeException.class) {
-			Throwable t = e.getCause();
-			if (t == null) {
-				return false;
-			}
-			return isTolerable(t);
-		}
-		return e instanceof MissingPaletteEntryException
+		return Utils.getRootCause(e) instanceof MissingPaletteEntryException
 			   || e instanceof NullPointerException
 			   || e instanceof IndexOutOfBoundsException
 			   || (SimplePropertiesConfig.suppressCME() && e instanceof ConcurrentModificationException);
@@ -320,9 +313,9 @@ public class AsyncTicker {
 		}
 	}
 
-	public static Exception constructCrashReport(Particle particle, Exception t) {
-		if (t instanceof ReportedException) {
-			return t;
+	public static ReportedException constructCrashReport(Particle particle, Throwable t) {
+		if (t instanceof ReportedException re) {
+			return re;
 		}
 		CrashReport crashReport = CrashReport.forThrowable(t, "Ticking Particle");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being ticked");
@@ -353,7 +346,7 @@ public class AsyncTicker {
 					VSCompat.removeIfOutSight(particle);
 				}
 			} catch (Exception e) {
-				throw toThrowDirectly(constructCrashReport(particle, e));
+				throw constructCrashReport(particle, e);
 			}
 			if (!particle.isAlive()) {
 				// we manage the count in cleanup task
@@ -379,6 +372,13 @@ public class AsyncTicker {
 		}
 		synchronized (SYNC_PARTICLES) {
 			SYNC_PARTICLES.add(particle);
+		}
+	}
+
+	public static void onEvicted(Particle particle) {
+		if (particle.isAlive()) {
+			particle.getParticleGroup().ifPresent(g -> Minecraft.getInstance().particleEngine.updateCount(g, -1));
+			particle.remove();
 		}
 	}
 
@@ -419,6 +419,10 @@ public class AsyncTicker {
 
 	public static void debugLater(Consumer<String> consumer) {
 		debugConsumer = consumer;
+	}
+
+	public static void dumpParticles() {
+		LOGGER.info(Minecraft.getInstance().particleEngine.particles);
 	}
 
 	public static void reloadLater() {
@@ -467,10 +471,6 @@ public class AsyncTicker {
 
 	public static void registerEndTickEvent(Runnable operation) {
 		AsyncTicker.END_TICK_EVENTS.add(operation);
-	}
-
-	public static void dumpParticles() {
-		LOGGER.info(Minecraft.getInstance().particleEngine.particles);
 	}
 
 	@FunctionalInterface

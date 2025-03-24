@@ -186,13 +186,13 @@ public class AsyncRenderer {
 			particle.render(bufferBuilder, camera, g);
 		} catch (Throwable t) {
 			boolean tolerable = AsyncTicker.isTolerable(t);
-			if (!tolerable || AsyncTicker.EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
+			if (!tolerable || EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
 				((ParticleAddon) particle).asyncedParticles$setRenderSync();
 				if (!shouldSync(particle.getClass())) {
 					if (!tolerable) {
 						LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, t);
 					} else {
-						LOGGER.warn("Exception {} thrown while ticking particle {} exceeds the threshold, please contact the author: {}",
+						LOGGER.warn("Exception {} thrown while rendering particle {} exceeds the threshold, please contact the author: {}",
 							t.getClass().getSimpleName(),
 							particle,
 							AsyncparticlesClient.ISSUE_URL,
@@ -341,8 +341,8 @@ public class AsyncRenderer {
 				float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
 				try {
 					particle.render(bufferBuilder, camera, g);
-				} catch (Throwable throwable) {
-					throw constructCrashReport(particle, particleRenderType, throwable);
+				} catch (Throwable t) {
+					throw constructCrashReport(particle, particleRenderType, t);
 				}
 			}
 			if (began) {
@@ -361,9 +361,7 @@ public class AsyncRenderer {
 	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable throwable) {
 		CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
-		Objects.requireNonNull(particle);
 		crashReportCategory.setDetail("Particle", particle::toString);
-		Objects.requireNonNull(particleRenderType);
 		crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
 		return new ReportedException(crashReport);
 	}
