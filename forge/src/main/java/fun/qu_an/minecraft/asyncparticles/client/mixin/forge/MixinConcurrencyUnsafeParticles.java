@@ -19,6 +19,7 @@ import yesman.epicfight.client.particle.TrailParticle;
 	BloomTrailParticle.class,
 	ExplosionFX.class,
 	CrystalFXWireless.class,
+	// TODO: configurability
 })
 public class MixinConcurrencyUnsafeParticles {
 	@Unique

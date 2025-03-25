@@ -121,9 +121,13 @@ dependencies {
 //    modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.20.1+forge"
 //    modLocalRuntime "maven.modrinth:fzzy-config:0.6.4+1.20.1+forge"
 //    modLocalRuntime("com.github.Fallen-Breath.conditional-mixin:conditional-mixin-forge:0.6.2")
+
     /* Epic Fight */
     modCompileOnly "maven.modrinth:epic-fight:20.9.7"
     modLocalRuntime "maven.modrinth:epic-fight:20.9.7"
+    /* Weapons of Miracles */
+    modCompileOnly "maven.modrinth:weapons-of-miracles:20.1.8.5.6"
+    modLocalRuntime "maven.modrinth:weapons-of-miracles:20.1.8.5.6"
 
     /* Gateways to Eternity */
     modCompileOnly "curse.maven:gateway-to-eternity-417802:5703251"

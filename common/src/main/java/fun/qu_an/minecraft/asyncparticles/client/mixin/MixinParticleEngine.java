@@ -165,8 +165,8 @@ public abstract class MixinParticleEngine {
 							p1 -> {
 								if (p1.isAlive()){
 									p1.remove();
-									p1.getParticleGroup().ifPresent(g -> updateCount(g, -1));
 								}
+								p1.getParticleGroup().ifPresent(g -> updateCount(g, -1));
 							});
 						// fix the first added particle not ticked.
 						AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue1));

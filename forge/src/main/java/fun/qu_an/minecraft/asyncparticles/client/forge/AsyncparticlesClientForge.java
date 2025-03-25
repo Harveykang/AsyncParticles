@@ -1,7 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.forge;
 
-import com.brandon3055.draconicevolution.api.DraconicAPI;
-import com.dfdyz.epicacg.client.particle.BloomTrailParticle;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;

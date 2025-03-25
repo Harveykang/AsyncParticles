@@ -71,8 +71,8 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		Object[] q = queue;
 		int head = this.head;
 		E item = (E) q[head];
-		q[head] = null;
 		this.head = (head + 1) & (q.length - 1);
+		q[head] = null;
 		size--;
 		return item;
 	}
@@ -103,11 +103,6 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		return size == 0;
 	}
 
-	@Override
-	public @NotNull Iterator<E> iterator() {
-		return new QueueIterator();
-	}
-
 //	@Override
 //	public @NotNull Spliterator<E> spliterator() {
 //		// FIXME: implement a Spliterator
@@ -127,7 +122,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			System.arraycopy(q, head, a, head, this.size);
 		} else {
 			int l = capacity - head;
-			System.arraycopy(q, head, a, head, l);
+			System.arraycopy(q, head, a, 0, l);
 			System.arraycopy(q, 0, a, l, tail - capacity);
 		}
 		this.queue = a;
@@ -137,6 +132,11 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 
 	public int arraySize() {
 		return queue.length;
+	}
+
+	@Override
+	public @NotNull Iterator<E> iterator() {
+		return new QueueIterator();
 	}
 
 	private class QueueIterator implements Iterator<E> {
@@ -174,6 +174,9 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			return (E) (curr = next);
 		}
 
+		/**
+		 * NOTE: This method is not thread-safe and should not be used concurrently.
+		 */
 		@Override
 		public void remove() {
 			if (curr == null) {
