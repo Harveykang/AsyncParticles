@@ -15,6 +15,11 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 	protected int head;
 	protected int size;
 
+	public IterationSafeEvictingQueue(int initialCapacity, int maxCapacity) {
+		this(initialCapacity, maxCapacity, e -> {
+		});
+	}
+
 	public IterationSafeEvictingQueue(int initialCapacity, int maxCapacity, Consumer<E> onEvict) {
 		if (initialCapacity <= 0 || maxCapacity <= 0 || initialCapacity > maxCapacity) {
 			throw new IllegalArgumentException("Invalid capacities");
@@ -40,7 +45,10 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			// Remove the oldest element
 			int head = this.head;
 			this.head = (head + 1) & (capacity - 1);
-			onEvict.accept((E) q[head]);
+			E evicted = (E) q[head];
+			if (evicted != null) {
+				onEvict.accept(evicted);
+			}
 //			q[head] = item; // head is now tail
 			q[head] = null;
 			q[head + size & (capacity - 1)] = item;
@@ -100,11 +108,11 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		return new QueueIterator();
 	}
 
-	@Override
-	public @NotNull Spliterator<E> spliterator() {
-		// FIXME: implement a Spliterator
-		throw new UnsupportedOperationException();
-	}
+//	@Override
+//	public @NotNull Spliterator<E> spliterator() {
+//		// FIXME: implement a Spliterator
+//		throw new UnsupportedOperationException();
+//	}
 
 	private Object[] resize(int newCapacity) {
 		if (newCapacity > this.maxCapacityPowerOfTwo) {

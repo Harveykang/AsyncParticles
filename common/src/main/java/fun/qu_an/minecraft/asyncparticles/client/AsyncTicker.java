@@ -376,8 +376,8 @@ public class AsyncTicker {
 	}
 
 	public static void onEvicted(Particle particle) {
-		if (particle.isAlive()) {
-			particle.getParticleGroup().ifPresent(g -> Minecraft.getInstance().particleEngine.updateCount(g, -1));
+		particle.getParticleGroup().ifPresent(g -> Minecraft.getInstance().particleEngine.updateCount(g, -1));
+		if (particle.isAlive()){
 			particle.remove();
 		}
 	}
