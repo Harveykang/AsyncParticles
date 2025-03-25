@@ -266,7 +266,7 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 		});
 		thread0.setDaemon(true);
 		thread0.start();
-		thread0.join();
+//		thread0.join();
 		// 多线程同时遍历测试
 		Thread[] threads = new Thread[10];
 		for (int i = 0; i < threads.length; i++) {

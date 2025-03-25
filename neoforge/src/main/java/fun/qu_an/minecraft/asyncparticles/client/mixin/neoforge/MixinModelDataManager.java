@@ -22,8 +22,8 @@ public abstract class MixinModelDataManager {
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onStaticInit(CallbackInfo ci) {
-		needModelDataRefresh = new ConcurrentLong2ObjectMap<>();
-		modelDataCache = new ConcurrentLong2ObjectMap<>();
+		needModelDataRefresh = new ConcurrentLong2ObjectMap<>(needModelDataRefresh);
+		modelDataCache = new ConcurrentLong2ObjectMap<>(modelDataCache);
 	}
 
 	/**

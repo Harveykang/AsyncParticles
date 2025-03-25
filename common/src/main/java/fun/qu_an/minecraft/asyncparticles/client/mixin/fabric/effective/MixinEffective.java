@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 
-@Mixin(value = Effective.class)
+@Mixin(Effective.class)
 public class MixinEffective {
 	@Redirect(method = "onInitializeClient", remap = false,
 		slice = @Slice(from = @At(value = "FIELD", ordinal = 0, target = "Lnet/fabricmc/fabric/api/client/event/lifecycle/v1/ClientTickEvents;END_CLIENT_TICK:Lnet/fabricmc/fabric/api/event/Event;")),

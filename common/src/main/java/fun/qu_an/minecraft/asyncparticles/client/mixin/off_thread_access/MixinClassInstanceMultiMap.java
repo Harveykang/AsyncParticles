@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 // some mod get entities when ticking particles, may cause a CME
-@Mixin(ClassInstanceMultiMap.class)
+@Mixin(value = ClassInstanceMultiMap.class, priority = 1100) // higher priority to run after VMP's mixin
 public class MixinClassInstanceMultiMap {
 	@Final
 	@Mutable

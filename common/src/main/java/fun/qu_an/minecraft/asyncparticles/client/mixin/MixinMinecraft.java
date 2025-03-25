@@ -37,7 +37,7 @@ public class MixinMinecraft {
 	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;tick()V"))
-	private void wrapTick(ParticleEngine instance) {
+	private void redirectParticleEngineTick(ParticleEngine instance) {
 		AsyncTicker.tickSync();
 	}
 }

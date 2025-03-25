@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Map;
 
+// TODO: Any better way to handle this?
 @Mixin(SoundEngine.class)
 public class MixinSoundEngine {
 	@Inject(method = "tick", at = @At("HEAD"))

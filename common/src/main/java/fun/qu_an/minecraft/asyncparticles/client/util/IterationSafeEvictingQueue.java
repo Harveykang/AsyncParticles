@@ -71,8 +71,8 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		Object[] q = queue;
 		int head = this.head;
 		E item = (E) q[head];
-		q[head] = null;
 		this.head = (head + 1) & (q.length - 1);
+		q[head] = null;
 		size--;
 		return item;
 	}
@@ -127,7 +127,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			System.arraycopy(q, head, a, head, this.size);
 		} else {
 			int l = capacity - head;
-			System.arraycopy(q, head, a, head, l);
+			System.arraycopy(q, head, a, 0, l);
 			System.arraycopy(q, 0, a, l, tail - capacity);
 		}
 		this.queue = a;

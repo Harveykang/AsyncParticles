@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-
 public class FakeBufferBuilder extends BufferBuilder {
 	public static final FakeBufferBuilder INSTANCE = new FakeBufferBuilder();
 	private FakeBufferBuilder() {

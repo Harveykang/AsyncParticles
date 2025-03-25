@@ -50,8 +50,12 @@ public abstract class MixinParticle implements ParticleAddon {
 
 	@Inject(method = "<init>*", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
-		this.asyncParticles$renderSync = AsyncRenderer.shouldSync(((Particle) (Object) this).getClass());
-		this.asyncParticles$tickSync = AsyncTicker.shouldSync(((Particle) (Object) this).getClass());
+		if (AsyncRenderer.shouldSync(((Particle) (Object) this).getClass())) {
+			asyncedParticles$setRenderSync();
+		}
+		if (AsyncTicker.shouldSync(((Particle) (Object) this).getClass())) {
+			asyncedParticles$setTickSync();
+		}
 	}
 
 	@WrapOperation(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V",

@@ -47,7 +47,7 @@ public class MixinLevel {
 			return;
 		}
 		try {
-			instance.tick();
+			original.call(instance);
 		} catch (Exception e) {
 			if (!AsyncTicker.isTolerable(e)) {
 				throw e;

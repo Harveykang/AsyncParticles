@@ -8,10 +8,6 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
-import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -50,9 +46,9 @@ public abstract class MixinParticleEngine_Render {
 	 */
 	@Overwrite(remap = false)
 	public void render(LightTexture lightTexture, Camera camera, float f, @Nullable Frustum ignored, Predicate<ParticleRenderType> renderTypePredicate) {
-		Frustum frustum = AsyncRenderer.frustum;
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
 		profiler.push("prepare");
+		Frustum frustum = AsyncRenderer.frustum;
 		lightTexture.turnOnLightLayer();
 		RenderSystem.enableDepthTest();
 		RenderSystem.activeTexture(33986);
@@ -64,8 +60,8 @@ public abstract class MixinParticleEngine_Render {
 					|| !renderTypePredicate.test(particleRenderType)) {
 					continue;
 				}
-				Queue<Particle> iterable = this.particles.get(particleRenderType);
-				if (iterable == null || iterable.isEmpty()) {
+				Queue<Particle> queue = this.particles.get(particleRenderType);
+				if (queue == null || queue.isEmpty()) {
 					continue;
 				}
 				BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
@@ -74,11 +70,11 @@ public abstract class MixinParticleEngine_Render {
 				// begin before sync particles to be compatible with some mod
 				particleRenderType.begin(FakeTesselator.getFakeInstance(), this.textureManager);
 				profiler.push("render_sync");
-				Collection<? extends Particle> particles1 = bufferBuilder == FakeBufferBuilder.INSTANCE
-					? iterable
+				Collection<? extends Particle> syncParticles = bufferBuilder == FakeBufferBuilder.INSTANCE
+					? queue
 					: AsyncRenderer.getSync(particleRenderType);
-				if (!particles1.isEmpty()) {
-					for (Particle particle : particles1) {
+				if (!syncParticles.isEmpty()) {
+					for (Particle particle : syncParticles) {
 						if (!particle.isAlive()) {
 							continue;
 						}

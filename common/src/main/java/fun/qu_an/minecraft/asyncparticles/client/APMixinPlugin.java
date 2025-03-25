@@ -60,6 +60,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		return ModListHelper.IS_FORGE ? null : "fabric-asyncparticles-common-refmap.json";
 	}
 
+	/// - mixin/fabric 包下位于根目录的mixin只在fabric环境下生效。除非另有说明，位于其他子目录的mixin在fabric或信雅互联环境下均生效
+	/// - mixin/<mod_id>/fabric 包下的mixin只在fabric环境下生效，其他mixin在任何环境下生效
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		String mixinPackageName = mixinClassName.substring("fun.qu_an.minecraft.asyncparticles.client.mixin.".length());

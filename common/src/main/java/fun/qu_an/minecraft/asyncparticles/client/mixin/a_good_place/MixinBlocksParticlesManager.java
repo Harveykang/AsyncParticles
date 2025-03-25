@@ -1,4 +1,3 @@
-
 package fun.qu_an.minecraft.asyncparticles.client.mixin.a_good_place;
 
 import net.minecraft.core.BlockPos;

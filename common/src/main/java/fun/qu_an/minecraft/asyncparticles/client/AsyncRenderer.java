@@ -8,10 +8,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
-import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
-import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionTracker;
-import fun.qu_an.minecraft.asyncparticles.client.util.FakeBeginTesselator;
-import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
+import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -45,6 +42,7 @@ import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 // TODO: 整理这一坨
 @Environment(EnvType.CLIENT)
@@ -56,54 +54,38 @@ public class AsyncRenderer {
 		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
 		SYNC_PARTICLE_TYPES.add(MobAppearanceParticle.class);
 		if (ModListHelper.DUMMMMMMY_LOADED) {
-			try {
-				addSyncByClassName("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
-			} catch (Exception e) {
-				LOGGER.error("", e);
-			}
+			addSyncByClassName("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
 		}
 		if (ModListHelper.FABRIC_EFFECTIVE_LOADED) {
-			try {
-				addSyncByClassName("org.ladysnake.effective.particle.SplashParticle");
-			} catch (Exception e) {
-				LOGGER.error("", e);
-			}
+			addSyncByClassName("org.ladysnake.effective.core.particle.SplashParticle");
 		}
 		if (ModListHelper.FORGE_EFFECTIVE_LOADED) {
-			try {
-				addSyncByClassName("concerrox.effective.particle.SplashParticle");
-			} catch (Exception e) {
-				LOGGER.error("", e);
-			}
+			addSyncByClassName("concerrox.effective.particle.SplashParticle");
 		}
 		if (ModListHelper.TOMBSTONE_LOADED) {
 			// tomestone may have duplicate ids with other mods, so we need to check if these classes are present
-			try {
-				addSyncByClassName("ovh.corail.tombstone.particle.ParticleCasting");
-				addSyncByClassName("ovh.corail.tombstone.particle.ParticleGhost");
-				addSyncByClassName("ovh.corail.tombstone.particle.ParticleGraveSoul");
-				addSyncByClassName("ovh.corail.tombstone.particle.ParticleMagicCircle");
-				addSyncByClassName("ovh.corail.tombstone.particle.ParticleMarker");
-				addSyncByClassName("ovh.corail.tombstone.particle.ParticleRounding");
-			} catch (Exception e) {
-				LOGGER.error("", e);
-			}
+			addSyncByClassName("ovh.corail.tombstone.particle.ParticleCasting");
+			addSyncByClassName("ovh.corail.tombstone.particle.ParticleGhost");
+			addSyncByClassName("ovh.corail.tombstone.particle.ParticleGraveSoul");
+			addSyncByClassName("ovh.corail.tombstone.particle.ParticleMagicCircle");
+			addSyncByClassName("ovh.corail.tombstone.particle.ParticleMarker");
+			addSyncByClassName("ovh.corail.tombstone.particle.ParticleRounding");
 		}
 		if (ModListHelper.PHYSICSMOD_LOADED) {
-			try {
-				addSyncByClassName("net.diebuddies.minecraft.weather.RainParticle");
-				addSyncByClassName("net.diebuddies.minecraft.weather.DustParticle");
-				addSyncByClassName("net.diebuddies.minecraft.weather.SnowParticle");
-				addSyncByClassName("net.diebuddies.physics.ocean.RainParticle");
-			} catch (Exception e) {
-				LOGGER.error("", e);
-			}
+			addSyncByClassName("net.diebuddies.minecraft.weather.RainParticle");
+			addSyncByClassName("net.diebuddies.minecraft.weather.DustParticle");
+			addSyncByClassName("net.diebuddies.minecraft.weather.SnowParticle");
+			addSyncByClassName("net.diebuddies.physics.ocean.RainParticle");
 		}
 		// TODO: configure this set
 	}
 
-	private static void addSyncByClassName(String className) throws Exception {
-		SYNC_PARTICLE_TYPES.add((Class<? extends Particle>) Class.forName(className));
+	private static void addSyncByClassName(String className) {
+		try {
+			SYNC_PARTICLE_TYPES.add((Class<? extends Particle>) Class.forName(className));
+		} catch (Exception e) {
+			LOGGER.error("", e);
+		}
 	}
 
 	//	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = new ConcurrentHashMap<>();
@@ -111,7 +93,6 @@ public class AsyncRenderer {
 	private static final Map<ParticleRenderType, Set<Particle>> SYNC_PARTICLES = Collections.synchronizedMap(new IdentityHashMap<>());
 	public static final ForkJoinPool EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
-	public static final Set<Thread> PARTICLE_THREADS = Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
 
 	static {
 		AtomicInteger workerCount = new AtomicInteger(1);
@@ -130,7 +111,6 @@ public class AsyncRenderer {
 			};
 			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());
 			forkJoinWorkerThread.setDaemon(true);
-			PARTICLE_THREADS.add(forkJoinWorkerThread);
 			return forkJoinWorkerThread;
 		}, Util::onThreadException, true);
 	}
@@ -161,12 +141,9 @@ public class AsyncRenderer {
 		profiler.push("render_async");
 		TextureManager textureManager = particleEngine.textureManager;
 		ObjectArrayList<CompletableFuture<Void>> asyncTasks = new ObjectArrayList<>(asyncTasksSize);
-		Map<ParticleRenderType, Queue<Particle>> particles = particleEngine.particles;
-		for (ParticleRenderType particleRenderType : particles.keySet()) {
-			if (particleRenderType == ParticleRenderType.NO_RENDER) {
-				continue;
-			}
-			Queue<Particle> queue = particles.get(particleRenderType);
+		for (ParticleRenderType particleRenderType
+			: ModListHelper.IS_FORGE ? particleEngine.particles.keySet() : ParticleEngine.RENDER_ORDER) {
+			Queue<Particle> queue = particleEngine.particles.get(particleRenderType);
 			if (queue == null || queue.isEmpty()) {
 				continue;
 			}
@@ -224,7 +201,7 @@ public class AsyncRenderer {
 		LOGGER.error("Error rendering particle", e);
 		Minecraft mc1 = Minecraft.getInstance();
 		if (mc1.level != null && mc1.player != null) {
-			throw new RuntimeException(e);
+			throw Utils.toThrowDirectly(e);
 		}
 		return null;
 	}
@@ -342,14 +319,14 @@ public class AsyncRenderer {
 	}
 
 	public static void recordSync(ParticleRenderType particleRenderType, Particle particle) {
-		Collection<Particle> particles = SYNC_PARTICLES.computeIfAbsent(particleRenderType,
+		Set<Particle> particles = SYNC_PARTICLES.computeIfAbsent(particleRenderType,
 			k -> Collections.newSetFromMap(new IdentityHashMap<>()));
 		synchronized (particles) {
 			particles.add(particle);
 		}
 	}
 
-	public static Set<? extends Particle> getSync(ParticleRenderType particleRenderType) {
+	public static Set<Particle> getSync(ParticleRenderType particleRenderType) {
 		Set<Particle> set = SYNC_PARTICLES.get(particleRenderType);
 		return set == null ? Collections.emptySet() : set;
 	}
@@ -369,10 +346,20 @@ public class AsyncRenderer {
 			debugConsumer.accept("""
 				[Debug AsyncRenderer]
 				async queue size: %d,
+				buffer capacity: %s,
+				render order: %s,
 				sync particle count: %d,
 				sync particle types: %s,
 				iris particle state: %s"""
 				.formatted(asyncTasksSize,
+					BTESSELATORS.entrySet()
+						.stream()
+						.collect(Collectors.toMap(
+							Map.Entry::getKey,
+							e -> e.getValue().buffer.capacity)),
+					ModListHelper.IS_FORGE
+						? Minecraft.getInstance().particleEngine.particles.keySet()
+						: ParticleEngine.RENDER_ORDER,
 					SYNC_PARTICLES.values().stream().mapToInt(Set::size).sum(),
 					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList(),
 					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse()

@@ -15,6 +15,14 @@ import java.util.function.LongFunction;
 
 public class ConcurrentLong2ObjectMap<V> extends AbstractLong2ObjectMap<V> implements Long2ObjectMap<V> {
 	private final ConcurrentHashMap<Long, V> delegate = new ConcurrentHashMap<>();
+
+	public ConcurrentLong2ObjectMap() {
+	}
+
+	public ConcurrentLong2ObjectMap(Long2ObjectMap<V> needModelDataRefresh) {
+		putAll(needModelDataRefresh);
+	}
+
 	@Override
 	public int size() {
 		return delegate.size();

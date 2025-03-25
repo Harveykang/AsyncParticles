@@ -6,12 +6,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 public interface WeatherParticleAddon {
-	Map<Type, CollisionFunction> collisionFunctions = new ConcurrentHashMap<>();
-
 	AABB asyncparticles$getWeatherAABB();
 
 	void asyncparticles$setWeatherAABB(AABB aabb);
@@ -19,18 +14,6 @@ public interface WeatherParticleAddon {
 	boolean asyncparticles$invisible();
 
 	void asyncparticles$setInvisible(boolean visible);
-
-	static CollisionFunction asyncParticles$getCollisionFunction(Type type) {
-		return collisionFunctions.getOrDefault(type, (level, location, v, aabb) -> v);
-	}
-
-	static void asyncParticles$registerCollisionFunction(Type type, CollisionFunction function) {
-		CollisionFunction function1 = collisionFunctions.get(type);
-		if (function1 != null) {
-			function = function1.andThen(function);
-		}
-		collisionFunctions.put(type, function);
-	}
 
 	@FunctionalInterface
 	interface CollisionFunction {
@@ -63,7 +46,7 @@ public interface WeatherParticleAddon {
 			return function == null ? motion : function.apply(level, position, motion, aabb);
 		}
 
-		public void register(CollisionFunction function) {
+		public synchronized void register(CollisionFunction function) {
 			CollisionFunction function1 = this.function;
 			if (function1 == null) {
 				this.function = function;

@@ -12,5 +12,8 @@ public interface ParticleAddon {
 	void asyncedParticles$setTickSync();
 	boolean asyncedParticles$isTickSync();
 
+	/**
+	 * NeoForge getRenderBoundingBox()
+	 */
 	AABB getRenderBoundingBox(float partialTicks);
 }

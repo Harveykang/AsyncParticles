@@ -42,11 +42,8 @@ public abstract class MixinClientLevel extends Level {
 
 	@Override
 	protected void tickBlockEntities() {
-		if (!SimplePropertiesConfig.asyncBlockEntityTick()) {
-			super.tickBlockEntities();
-			return;
-		}
-		if (!AsyncTicker.shouldTickParticles) {
+		if (!AsyncTicker.shouldTickParticles ||
+			!SimplePropertiesConfig.asyncBlockEntityTick()) {
 			super.tickBlockEntities();
 			return;
 		}
