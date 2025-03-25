@@ -6,6 +6,7 @@
   "refmap": "asyncparticles-forge-refmap.json",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.forge.APMixinPluginForge",
   "client": [
+    "MixinConcurrencyUnsafeParticles",
     "MixinLevelRenderer",
     "MixinParticleEngine_Render",
     "create.MixinDepotBehaviour",
@@ -15,6 +16,7 @@
     "effecticularity.MixinRippleParticle",
     "epicacg.MixinAsyncRenderer",
     "epicacg.MixinBloomTrailParticle",
+    "epicfight.MixinEpicFightRenderTypes",
     "epicfight.MixinTexturedCustomModelParticle",
     "flerovium.MixinAsyncRenderer",
     "flerovium.MixinMixinParticleEngine",
