@@ -180,10 +180,12 @@ public class AsyncRenderer {
 		try {
 			particle.render(bufferBuilder, camera, g);
 		} catch (Throwable throwable) {
-			LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, throwable);
+			if (!shouldSync(particle.getClass())) {
+				LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, throwable);
+				// FIXME: 实现只有频繁报错才标记为同步渲染
+				markAsSync(particle.getClass());
+			}
 			((ParticleAddon) particle).asyncedParticles$setRenderSync();
-			// FIXME: 实现只有频繁报错才标记为同步渲染
-			markAsSync(particle.getClass());
 			recordSync(particleRenderType, particle);
 		}
 	}
@@ -418,6 +420,9 @@ public class AsyncRenderer {
 	}
 
 	public static void recordSync(ParticleRenderType particleRenderType, Particle particle) {
+		if (particle == null) {
+			return;
+		}
 		List<Particle> particles = SYNC_PARTICLES.computeIfAbsent(particleRenderType, k -> new ArrayList<>());
 		synchronized (particles) {
 			particles.add(particle);

@@ -7,6 +7,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.util.TrackedParticleCountsMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -160,7 +161,13 @@ public abstract class MixinParticleEngine {
 				}
 				Queue<Particle> queue = this.particles.computeIfAbsent(p.getRenderType(),
 					k -> {
-						EvictingQueue<Particle> queue1 = EvictingQueue.create(SimplePropertiesConfig.limit);
+						Queue<Particle> queue1 = new IterationSafeEvictingQueue<>(256, SimplePropertiesConfig.limit,
+							p1 -> {
+								if (p1.isAlive()){
+									p1.remove();
+									p1.getParticleGroup().ifPresent(g -> updateCount(g, -1));
+								}
+							});
 						// fix the first added particle not ticked.
 						AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue1));
 						// fix not added to RENDER_ORDER
@@ -175,13 +182,6 @@ public abstract class MixinParticleEngine {
 						}
 						return queue1;
 					});
-				while (queue.size() >= SimplePropertiesConfig.limit) {
-					Particle removed = queue.remove();
-					removed.remove(); // remove if the limit exceeded
-					removed.getParticleGroup().ifPresent(g -> updateCount(g, -1));
-					// this will fix some mod's particle count management bug
-					// TODO: 这样的话就不需要 EvictingQueue 了
-				}
 				p.getParticleGroup().ifPresent(g -> updateCount(g, 1));
 				queue.add(p);
 			});

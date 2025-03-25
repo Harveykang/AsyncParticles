@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
-import com.google.common.collect.EvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
@@ -20,8 +19,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,16 +30,6 @@ import static fun.qu_an.minecraft.asyncparticles.client.util.Utils.toThrowDirect
 // TODO: 整理这一坨
 public class AsyncTicker {
 	public static final Logger LOGGER = LogManager.getLogger();
-	private static final VarHandle EvictingQueue$delegate;
-
-	static {
-		try {
-			EvictingQueue$delegate = MethodHandles.privateLookupIn(EvictingQueue.class, MethodHandles.lookup())
-				.findVarHandle(EvictingQueue.class, "delegate", Queue.class);
-		} catch (NoSuchFieldException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 
@@ -151,13 +138,12 @@ public class AsyncTicker {
 				Collection<Queue<Particle>> values = particleEngine.particles.values();
 				var futures = new CompletableFuture[values.size()];
 				int i = 0;
-				for (Queue<Particle> particles1 : values) {
-					if (particles1.isEmpty()) {
+				for (Queue<Particle> particles : values) {
+					if (particles.isEmpty()) {
 						futures[i++] = CompletableFuture.completedFuture(null);
 						continue;
 					}
 					futures[i++] = CompletableFuture.runAsync(() -> {
-						Queue<Particle> particles = (Queue<Particle>) EvictingQueue$delegate.get(particles1);
 						particles.removeIf(particle1 -> {
 							// JDK 并没有定义这个判断会对每个对象执行多少次，但目前没遇到例外情况
 							// use ArrayDeque's removeIf to improve performance
