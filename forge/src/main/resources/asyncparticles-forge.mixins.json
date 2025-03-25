@@ -13,6 +13,7 @@
     "create.MixinEjectorBlockEntity",
     "effecticularity.MixinRippleParticle",
     "epicacg.MixinAsyncRenderer",
+    "epicfight.MixinEpicFightRenderTypes",
     "epicfight.MixinTexturedCustomModelParticle",
     "flerovium.MixinAsyncRenderer",
     "flerovium.MixinMixinParticleEngine",
