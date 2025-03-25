@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.stream.Stream;
 
-@Mixin(value = LightUpdater.class, remap = false)
+@Mixin(value = LightUpdater.class, remap = false, priority = 1500)
 public class MixinLightUpdater {
 	@WrapMethod(method = {"addListener", "removeListener"})
 	public void addListener(LightListener listener, Operation<Void> original) {

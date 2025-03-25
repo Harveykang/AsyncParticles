@@ -15,7 +15,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 // some mod get entities when ticking particles, may cause a CME
-@Mixin(value = ClassInstanceMultiMap.class, priority = 1010) // higher priority to run after VMP's mixin
+@Mixin(value = ClassInstanceMultiMap.class, priority = 1100) // higher priority to run after VMP's mixin
 public class MixinClassInstanceMultiMap {
 	@Final
 	@Mutable

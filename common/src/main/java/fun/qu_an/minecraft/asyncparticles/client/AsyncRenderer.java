@@ -358,8 +358,11 @@ public class AsyncRenderer {
 		}
 	}
 
-	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable throwable) {
-		CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
+	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable t) {
+		if (t instanceof ReportedException re) {
+			return re;
+		}
+		CrashReport crashReport = CrashReport.forThrowable(t, "Rendering Particle");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
 		crashReportCategory.setDetail("Particle", particle::toString);
 		crashReportCategory.setDetail("Particle Type", particleRenderType::toString);

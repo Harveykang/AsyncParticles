@@ -345,7 +345,7 @@ public class AsyncTicker {
 				if (ModListHelper.VS_LOADED) {
 					VSCompat.removeIfOutSight(particle);
 				}
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				throw constructCrashReport(particle, e);
 			}
 			if (!particle.isAlive()) {

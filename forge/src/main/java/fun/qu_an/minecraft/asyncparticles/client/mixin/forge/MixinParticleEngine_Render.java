@@ -67,8 +67,8 @@ public abstract class MixinParticleEngine_Render {
 				if (particleRenderType == ParticleRenderType.NO_RENDER) {
 					continue;
 				}
-				Queue<Particle> iterable = this.particles.get(particleRenderType);
-				if (iterable == null || iterable.isEmpty()) {
+				Queue<Particle> queue = this.particles.get(particleRenderType);
+				if (queue == null || queue.isEmpty()) {
 					continue;
 				}
 				BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
@@ -76,7 +76,7 @@ public abstract class MixinParticleEngine_Render {
 				Collection<? extends Particle> syncParticles;
 				Tesselator tesselator;
 				if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
-					syncParticles = AsyncRenderer.isMixedParticleRenderingSetting() ? Collections.emptyList() : iterable;
+					syncParticles = AsyncRenderer.isMixedParticleRenderingSetting() ? Collections.emptyList() : queue;
 					tesselator = Tesselator.getInstance();
 					bufferBuilder = tesselator.getBuilder();
 				} else {

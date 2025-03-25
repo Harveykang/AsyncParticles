@@ -11,7 +11,7 @@ authors = ""
 description = '''
 
 '''
-#logoFile = ""
+logoFile = "assets/asyncparticles/icon.png"
 
 [[dependencies.asyncparticles]]
 modId = "forge"
