@@ -15,6 +15,11 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 	protected int head;
 	protected int size;
 
+	public IterationSafeEvictingQueue(int initialCapacity, int maxCapacity) {
+		this(initialCapacity, maxCapacity, e -> {
+		});
+	}
+
 	public IterationSafeEvictingQueue(int initialCapacity, int maxCapacity, Consumer<E> onEvict) {
 		if (initialCapacity <= 0 || maxCapacity <= 0 || initialCapacity > maxCapacity) {
 			throw new IllegalArgumentException("Invalid capacities");
@@ -40,7 +45,10 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			// Remove the oldest element
 			int head = this.head;
 			this.head = (head + 1) & (capacity - 1);
-			onEvict.accept((E) q[head]);
+			E evicted = (E) q[head];
+			if (evicted != null) {
+				onEvict.accept(evicted);
+			}
 //			q[head] = item; // head is now tail
 			q[head] = null;
 			q[head + size & (capacity - 1)] = item;
@@ -152,7 +160,6 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 					return true;
 				}
 			}
-			next = null;
 			return false;
 		}
 
@@ -377,19 +384,6 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		n |= n >> 8;
 		n |= n >> 16;
 		return n + 1;
-	}
-
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("[");
-		for (E e : this) {
-			sb.append(e).append(", ");
-		}
-		if (sb.length() > 1) {
-			sb.setLength(sb.length() - 2);
-		}
-		sb.append("]");
-		return sb.toString();
 	}
 
 	public static void main(String[] args) {

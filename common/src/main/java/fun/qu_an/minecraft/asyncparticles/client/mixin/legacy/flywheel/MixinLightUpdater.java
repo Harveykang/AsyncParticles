@@ -46,6 +46,6 @@ public class MixinLightUpdater {
 
 	@Inject(method = "getAllBoxes", at = @At("HEAD"))
 	public void getAllBoxes(CallbackInfoReturnable<Stream<ImmutableBox>> cir) {
-		RenderSystem.assertOnRenderThread();
+		ThreadUtil.assertNotParticleThread();
 	}
 }

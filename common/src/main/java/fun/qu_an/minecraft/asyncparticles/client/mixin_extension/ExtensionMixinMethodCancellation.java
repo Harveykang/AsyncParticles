@@ -18,14 +18,14 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public final class ExtensionMixinMethodCanceller implements IExtension {
+public final class ExtensionMixinMethodCancellation implements IExtension {
 	private static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles:mixin_method_canceller");
 	private static final List<Canceller> CANCELLERS = new CopyOnWriteArrayList<>();
 	private static boolean init;
 
 	public static void init() {
 		if (!init) {
-			ExtensionRegistrar.register(new ExtensionMixinMethodCanceller());
+			ExtensionRegistrar.register(new ExtensionMixinMethodCancellation());
 			init = true;
 		}
 	}
@@ -34,7 +34,7 @@ public final class ExtensionMixinMethodCanceller implements IExtension {
 		CANCELLERS.add(canceller);
 	}
 
-	private ExtensionMixinMethodCanceller() {
+	private ExtensionMixinMethodCancellation() {
 	}
 
 	@Override
@@ -50,23 +50,26 @@ public final class ExtensionMixinMethodCanceller implements IExtension {
 		TargetClassContextExtension.tryAs(context).ifPresent(contextExtension -> {
 			SortedSet<IMixinInfo> mixins = contextExtension.getMixins();
 			mixins.forEach(mixin -> {
+				String mixinClassName = mixin.getClassName();
+
+				List<Canceller> cancellers = null;
+				for (Canceller canceller : CANCELLERS) {
+					if (canceller.preTest(mixinClassName)) {
+						if (cancellers == null) {
+							cancellers = new ArrayList<>(CANCELLERS.size());
+						}
+						cancellers.add(canceller);
+					}
+				}
+				if (cancellers == null) {
+					return;
+				}
+
 				ClassNode classNode = MixinUtils.getDirectClassNode(mixin);
 				List<MethodNode> mixinMethods = classNode.methods;
 				if (mixinMethods == null || mixinMethods.isEmpty()) {
 					return;
 				}
-				String mixinClassName = mixin.getClassName();
-
-				List<Canceller> cancellers = new ArrayList<>(CANCELLERS.size());
-				CANCELLERS.forEach(canceller -> {
-					if (canceller.preTest(mixinClassName)) {
-						cancellers.add(canceller);
-					}
-				});
-				if (cancellers.isEmpty()) {
-					return;
-				}
-
 				for (Iterator<MethodNode> iterator = mixinMethods.iterator(); iterator.hasNext(); ) {
 					MethodNode method = iterator.next();
 					List<String> parameterNames;
