@@ -174,8 +174,6 @@ public abstract class MixinParticleEngine {
 				queue.add(p);
 			});
 			particlesToAdd.clear();
-			// FIXME: 实现线程安全的低锁开销队列，目前会因为一些粒子在tick时添加新的粒子导致并发访问
-			//  不会抛异常，因为遍历的时候不会检查为空性，无明显影响，但可能导致一些模组的粒子计数出现偏差
 		}
 	}
 

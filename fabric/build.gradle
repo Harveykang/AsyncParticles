@@ -99,7 +99,7 @@ dependencies {
 
     /* Particle Core */
     modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.21"
-    modLocalRuntime "maven.modrinth:fzzy-config:0.6.4+1.21"
+    modLocalRuntime "maven.modrinth:fzzy-config:0.6.6+1.21"
     modLocalRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.2")
     modLocalRuntime("net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10") {
         exclude(group: "net.fabricmc.fabric-api")
@@ -110,6 +110,10 @@ dependencies {
 
     /* Physics Mod */
 //    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v171b-fabric-1.20.1.jar')
+
+    /* Subtle Effects */
+    localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"
+    modLocalRuntime "maven.modrinth:subtle-effects:1.9.3" // fabric 1.9.3
 }
 
 processResources {

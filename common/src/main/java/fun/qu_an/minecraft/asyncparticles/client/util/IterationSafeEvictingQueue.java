@@ -103,11 +103,6 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		return size == 0;
 	}
 
-	@Override
-	public @NotNull Iterator<E> iterator() {
-		return new QueueIterator();
-	}
-
 //	@Override
 //	public @NotNull Spliterator<E> spliterator() {
 //		// FIXME: implement a Spliterator
@@ -137,6 +132,11 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 
 	public int arraySize() {
 		return queue.length;
+	}
+
+	@Override
+	public @NotNull Iterator<E> iterator() {
+		return new QueueIterator();
 	}
 
 	private class QueueIterator implements Iterator<E> {
@@ -174,6 +174,9 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			return (E) (curr = next);
 		}
 
+		/**
+		 * NOTE: This method is not thread-safe and should not be used concurrently.
+		 */
 		@Override
 		public void remove() {
 			if (curr == null) {
