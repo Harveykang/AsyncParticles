@@ -247,11 +247,6 @@ public class AsyncRenderer {
 		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
 
-		if (levelRenderer.getItemEntityTarget() != null) {
-			levelRenderer.getItemEntityTarget().clear(Minecraft.ON_OSX);
-			levelRenderer.getItemEntityTarget().copyDepthFrom(mc.getMainRenderTarget());
-			mc.getMainRenderTarget().bindWrite(false);
-		}
 //		poseStack1.last().pose().set(pose);
 //		RenderSystem.applyModelViewMatrix();
 	}
@@ -302,6 +297,10 @@ public class AsyncRenderer {
 			if (poseStack2 == null) {
 				lightTexture.turnOnLightLayer();
 				RenderSystem.enableDepthTest();
+				if (ModListHelper.IS_FORGE) {
+					RenderSystem.activeTexture(33986);
+					RenderSystem.activeTexture(33984);
+				}
 				poseStack2 = RenderSystem.getModelViewStack();
 				poseStack2.pushPose();
 				poseStack2.mulPoseMatrix(poseStack.last().pose());

@@ -9,6 +9,7 @@
     "MixinActiveProfiler",
     "MixinClientChunkCache",
     "MixinClientLevel",
+    "MixinCustomParticleRenderType",
     "MixinFont",
     "MixinLevel",
     "MixinLevelChunk",
