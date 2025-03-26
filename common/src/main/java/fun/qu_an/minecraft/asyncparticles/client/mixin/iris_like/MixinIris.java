@@ -11,6 +11,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinIris {
 	@Inject(method = "reload", remap = false, at = @At("RETURN"))
 	private static void onReload(CallbackInfo ci) {
-		AsyncTicker.reloadLater();
+		AsyncTicker.reload(false);
 	}
 }

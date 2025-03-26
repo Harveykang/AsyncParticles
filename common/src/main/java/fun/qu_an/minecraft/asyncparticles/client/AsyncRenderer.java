@@ -332,7 +332,7 @@ public class AsyncRenderer {
 	}
 
 	private static void clearSync() {
-		SYNC_PARTICLES.values().forEach(Set::clear);
+		SYNC_PARTICLES.clear();
 	}
 
 	/* Debug */

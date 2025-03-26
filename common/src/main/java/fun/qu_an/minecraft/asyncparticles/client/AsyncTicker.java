@@ -431,19 +431,22 @@ public class AsyncTicker {
 
 	private static void tryReload() {
 		if (shouldReload) {
-			destroy();
-			AsyncRenderer.destroy();
-			Minecraft.getInstance().particleEngine.clearParticles();
+			reload(true);
 			shouldReload = false;
+		}
+	}
+
+	public static void reload(boolean clearParticles) {
+		destroy();
+		AsyncRenderer.destroy();
+		if (clearParticles){
+			Minecraft.getInstance().particleEngine.clearParticles();
 		}
 	}
 
 	public static void destroy() {
 		cancelled = true;
-		if (particleCleanup != null) {
-			particleCleanup.join();
-			particleCleanup = null;
-		}
+		waitForCleanUp();
 		if (blockEntityTickFuture != null) {
 			blockEntityTickFuture.join();
 			blockEntityTickFuture = null;
