@@ -6,6 +6,7 @@
 ## Features
 
 - Minecraft
+  - Particle culling.
   - Async particle ticking/rendering(buffer filling).
   - Async particle light cache.
   - Async client block entity ticking.
