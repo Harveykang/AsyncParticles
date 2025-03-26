@@ -31,17 +31,11 @@ import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.NotNull;
-import org.ladysnake.effective.core.particle.MistParticle;
-import org.ladysnake.effective.core.particle.WaterfallCloudParticle;
 import org.slf4j.Logger;
-import team.lodestar.lodestone.systems.particle.render_types.LodestoneWorldParticleRenderType;
-import team.lodestar.lodestone.systems.particle.world.LodestoneWorldParticle;
 
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
@@ -262,11 +256,6 @@ public class AsyncRenderer {
 		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
 
-		if (levelRenderer.getItemEntityTarget() != null) {
-			levelRenderer.getItemEntityTarget().clear(Minecraft.ON_OSX);
-			levelRenderer.getItemEntityTarget().copyDepthFrom(mc.getMainRenderTarget());
-			mc.getMainRenderTarget().bindWrite(false);
-		}
 //		poseStack1.last().pose().set(pose);
 //		RenderSystem.applyModelViewMatrix();
 	}
@@ -316,6 +305,10 @@ public class AsyncRenderer {
 			if (poseStack2 == null) {
 				lightTexture.turnOnLightLayer();
 				RenderSystem.enableDepthTest();
+				if (ModListHelper.IS_FORGE) {
+					RenderSystem.activeTexture(33986);
+					RenderSystem.activeTexture(33984);
+				}
 				poseStack2 = RenderSystem.getModelViewStack();
 				poseStack2.pushPose();
 				poseStack2.mulPoseMatrix(poseStack.last().pose());
