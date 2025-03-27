@@ -123,6 +123,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					default -> ModListHelper.SUBTLE_EFFECTS_LOADED;
 				};
 			}
+			case "watut" -> ModListHelper.WATUT_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

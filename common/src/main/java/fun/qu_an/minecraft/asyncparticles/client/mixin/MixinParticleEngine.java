@@ -21,7 +21,9 @@ import net.minecraft.core.particles.ParticleGroup;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,6 +32,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class MixinParticleEngine {
@@ -59,6 +62,7 @@ public abstract class MixinParticleEngine {
 	public void init(CallbackInfo ci) {
 		trackedParticleCounts = new TrackedParticleCountsMap();
 		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, AsyncTicker::onEvicted);
+		random = new SingleThreadedRandomSource(ThreadLocalRandom.current().nextInt());
 	}
 
 	@Shadow
@@ -73,8 +77,10 @@ public abstract class MixinParticleEngine {
 
 	@Shadow
 	@Mutable
-	@Final
 	public static List<ParticleRenderType> RENDER_ORDER;
+
+	@Mutable
+	@Shadow @Final private RandomSource random;
 
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
 	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {

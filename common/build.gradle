@@ -76,4 +76,7 @@ dependencies {
 
     /* Subtle Effects */
     modCompileOnly "maven.modrinth:subtle-effects:y7DGrtIb" // fabric 1.9.3
+
+    /* What Are They Up To */
+    modCompileOnly "maven.modrinth:what-are-they-up-to:1.20.1-1.2.3"
 }
