@@ -4,13 +4,17 @@ import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.mixin_extension.ExtensionMixinMethodCancellation;
 import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.spongepowered.asm.service.MixinService;
 
 import java.util.List;
 import java.util.Set;
 
 public class APMixinPlugin implements IMixinConfigPlugin {
+	static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles:plugin");
+
 	@Override
 	public void onLoad(String mixinPackage) {
 		ExtensionMixinMethodCancellation.init();
@@ -105,6 +109,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					default -> ModListHelper.SUBTLE_EFFECTS_LOADED;
 				};
 			}
+			case "watut" -> ModListHelper.WATUT_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

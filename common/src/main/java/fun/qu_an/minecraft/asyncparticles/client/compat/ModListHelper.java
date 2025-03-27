@@ -56,6 +56,8 @@ public class ModListHelper {
 	public static final boolean SUBTLE_EFFECTS_LOADED = isModLoaded("subtle_effects");
 	public static final boolean FABRIC_SUBTLE_EFFECTS_LOADED = isFabricModLoaded("subtle_effects");
 	public static final boolean FORGE_SUBTLE_EFFECTS_LOADED = isForgeModLoaded("subtle_effects");
+	/* What Are They Up To */
+	public static final boolean WATUT_LOADED = isModLoaded("watut");
 
 	@ExpectPlatform
 	private static boolean isForge() {

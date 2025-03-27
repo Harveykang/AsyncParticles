@@ -114,6 +114,10 @@ dependencies {
     /* Subtle Effects */
     localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"
     modLocalRuntime "maven.modrinth:subtle-effects:1.9.3" // fabric 1.9.3
+
+    /* What Are They Up To */
+    modCompileOnly "maven.modrinth:what-are-they-up-to:BecIHPxZ" // 1.2.3
+    modLocalRuntime "maven.modrinth:what-are-they-up-to:BecIHPxZ" // 1.2.3
 }
 
 processResources {

@@ -46,7 +46,8 @@
     "off_thread_access.MixinClassInstanceMultiMap",
     "off_thread_access.MixinLevelChunk",
     "subtle_effects.MixinAsyncRenderer",
-    "subtle_effects.fabric.MixinParticleEngine"
+    "subtle_effects.fabric.MixinParticleEngine",
+    "watut.MixinCustomParticleEngine"
   ],
   "injectors": {
     "defaultRequire": 1
