@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.mixin_extension.ExtensionMixinMethodCancellation;
+import fun.qu_an.minecraft.asyncparticles.client.mixin_extension.ExtensionCancelMixinMethod;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -17,8 +17,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public void onLoad(String mixinPackage) {
-		ExtensionMixinMethodCancellation.init();
-		ExtensionMixinMethodCancellation.register(new ExtensionMixinMethodCancellation.Canceller() {
+		ExtensionCancelMixinMethod.init();
+		ExtensionCancelMixinMethod.register(new ExtensionCancelMixinMethod.Canceller() {
 			@Override
 			public boolean preTest(String mixinClassName) {
 				return switch (mixinClassName) {
