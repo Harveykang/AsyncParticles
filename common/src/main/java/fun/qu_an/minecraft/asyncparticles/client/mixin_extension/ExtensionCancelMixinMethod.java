@@ -18,14 +18,14 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public final class ExtensionMixinMethodCancellation implements IExtension {
+public final class ExtensionCancelMixinMethod implements IExtension {
 	private static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles:mixin_method_canceller");
 	private static final List<Canceller> CANCELLERS = new CopyOnWriteArrayList<>();
 	private static boolean init;
 
 	public static void init() {
 		if (!init) {
-			ExtensionRegistrar.register(new ExtensionMixinMethodCancellation());
+			ExtensionRegistrar.register(new ExtensionCancelMixinMethod());
 			init = true;
 		}
 	}
@@ -34,7 +34,7 @@ public final class ExtensionMixinMethodCancellation implements IExtension {
 		CANCELLERS.add(canceller);
 	}
 
-	private ExtensionMixinMethodCancellation() {
+	private ExtensionCancelMixinMethod() {
 	}
 
 	@Override
