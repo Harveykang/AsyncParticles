@@ -83,7 +83,7 @@ subprojects {
         minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
         mappings(loom.layered {
             it.officialMojangMappings { nameSyntheticMembers = false }
-            it.parchment("org.parchmentmc.data:parchment-$minecraft_version:2024.11.17@zip")
+            it.parchment("org.parchmentmc.data:parchment-$minecraft_version:$parchment_version")
         })
     }
 

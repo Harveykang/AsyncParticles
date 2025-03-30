@@ -51,79 +51,79 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
 
     /* APIs */
-    modLocalRuntime 'maven.modrinth:architectury-api:13.0.8+neoforge'
-    modLocalRuntime "me.shedaniel.cloth:cloth-config-neoforge:15.0.140"
-//    if (rootProject.use_connector_mod == "true") {
-//        modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
-//    }
-
-    /* Performance */
-    modLocalRuntime "maven.modrinth:spark:1.10.124-neoforge-1.21.1"
-    modCompileOnly 'maven.modrinth:embeddium:1.0.15+mc1.21.1'
-    modCompileOnly 'maven.modrinth:sodium:mc1.21.1-0.6.9-neoforge'
-    modLocalRuntime 'maven.modrinth:embeddium:1.0.15+mc1.21.1'
-//    modLocalRuntime 'maven.modrinth:sodium:mc1.21.1-0.6.9-neoforge'
-    modCompileOnly "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
-    modLocalRuntime 'maven.modrinth:monocle-iris:0.1.8'
-//    modLocalRuntime "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
-    modLocalRuntime "maven.modrinth:iris:1.8.1+1.21.1-neoforge"
-    modLocalRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
-    localRuntime "org.antlr:antlr4-runtime:4.13.1"
-    localRuntime "io.github.douira:glsl-transformer:2.0.1"
-    localRuntime "org.anarres:jcpp:1.4.14"
-//    modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
-    modCompileOnly "curse.maven:flerovium-1142875:6258259"
-    modLocalRuntime "curse.maven:flerovium-1142875:6258259"
-
-    /* Valkyrien Skies */
-//    modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'
-//    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.5"
-//    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.5"
-//    modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.5.1-beta.3'
-
-    /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:pretty-rain:sqJTdAZN" // 1.1.2
-//    if (rootProject.use_connector_mod == "true") {
-    modLocalRuntime "maven.modrinth:pretty-rain:sqJTdAZN" // 1.1.2
-//    } else {
-//        modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
-//    }
-
-    /* Effectual */
-//    if (rootProject.use_connector_mod == "true") {
-//        modLocalRuntime 'maven.modrinth:effectual:0.5.0-1.20.1'
-//    }
-
-    /* Create */
-//    modLocalRuntime("com.simibubi.create:create-1.20.1:0.5.1.j-55:slim") { transitive = false }
-//    modCompileOnly("com.simibubi.create:create-1.20.1:0.5.1.j-55:slim") { transitive = false }
-//    modLocalRuntime "com.jozufozu.flywheel:flywheel-forge-1.20.1:0.6.11-13"
-//    modLocalRuntime "com.tterrag.registrate:Registrate:MC1.20-1.3.3"
-    modCompileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
-    modLocalRuntime("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
-    modCompileOnly("net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}")
-    modLocalRuntime("net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}")
-    modCompileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}")
-    modLocalRuntime("dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}")
-    modCompileOnly("com.tterrag.registrate:Registrate:${registrate_version}")
-    modLocalRuntime("com.tterrag.registrate:Registrate:${registrate_version}")
-
-    /* Effective */
-//    modLocalRuntime fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
-//    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
-//    modCompileOnly "com.github.ConcerroX:Effecticularity:31265b5750" // no they didn't publish 1.0.2 :(
-
-    /* Particle Core */
-//    modCompileOnly "maven.modrinth:particle-core:0.2.5+1.21+neoforge"
-//    modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.21+neoforge"
-//    modLocalRuntime "maven.modrinth:fzzy-config:0.6.4+1.21+neoforge"
-//    modLocalRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
-//    modLocalRuntime 'thedarkcolour:kfflang:5.6.0'
-//    modLocalRuntime 'thedarkcolour:kfflib:5.6.0'
-//    modLocalRuntime 'thedarkcolour:kffmod:5.6.0'
-//    modLocalRuntime('thedarkcolour:kotlinforforge-neoforge:5.6.0') {
-//        exclude(group: "net.neoforged.fancymodloader", module: "loader")
-//    }
+//    modLocalRuntime 'maven.modrinth:architectury-api:13.0.8+neoforge'
+//    modLocalRuntime "me.shedaniel.cloth:cloth-config-neoforge:15.0.140"
+////    if (rootProject.use_connector_mod == "true") {
+////        modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
+////    }
+//
+//    /* Performance */
+//    modLocalRuntime "maven.modrinth:spark:1.10.124-neoforge-1.21.1"
+//    modCompileOnly 'maven.modrinth:embeddium:1.0.15+mc1.21.1'
+//    modCompileOnly 'maven.modrinth:sodium:mc1.21.1-0.6.9-neoforge'
+//    modLocalRuntime 'maven.modrinth:embeddium:1.0.15+mc1.21.1'
+////    modLocalRuntime 'maven.modrinth:sodium:mc1.21.1-0.6.9-neoforge'
+//    modCompileOnly "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
+//    modLocalRuntime 'maven.modrinth:monocle-iris:0.1.8'
+////    modLocalRuntime "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
+//    modLocalRuntime "maven.modrinth:iris:1.8.1+1.21.1-neoforge"
+//    modLocalRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
+//    localRuntime "org.antlr:antlr4-runtime:4.13.1"
+//    localRuntime "io.github.douira:glsl-transformer:2.0.1"
+//    localRuntime "org.anarres:jcpp:1.4.14"
+////    modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
+//    modCompileOnly "curse.maven:flerovium-1142875:6258259"
+//    modLocalRuntime "curse.maven:flerovium-1142875:6258259"
+//
+//    /* Valkyrien Skies */
+////    modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'
+////    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.5"
+////    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.5"
+////    modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.5.1-beta.3'
+//
+//    /* Particle Rain/Pretty Rain */
+//    modCompileOnly "maven.modrinth:pretty-rain:sqJTdAZN" // 1.1.2
+////    if (rootProject.use_connector_mod == "true") {
+//    modLocalRuntime "maven.modrinth:pretty-rain:sqJTdAZN" // 1.1.2
+////    } else {
+////        modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
+////    }
+//
+//    /* Effectual */
+////    if (rootProject.use_connector_mod == "true") {
+////        modLocalRuntime 'maven.modrinth:effectual:0.5.0-1.20.1'
+////    }
+//
+//    /* Create */
+////    modLocalRuntime("com.simibubi.create:create-1.20.1:0.5.1.j-55:slim") { transitive = false }
+////    modCompileOnly("com.simibubi.create:create-1.20.1:0.5.1.j-55:slim") { transitive = false }
+////    modLocalRuntime "com.jozufozu.flywheel:flywheel-forge-1.20.1:0.6.11-13"
+////    modLocalRuntime "com.tterrag.registrate:Registrate:MC1.20-1.3.3"
+//    modCompileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
+//    modLocalRuntime("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
+//    modCompileOnly("net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}")
+//    modLocalRuntime("net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}")
+//    modCompileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}")
+//    modLocalRuntime("dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}")
+//    modCompileOnly("com.tterrag.registrate:Registrate:${registrate_version}")
+//    modLocalRuntime("com.tterrag.registrate:Registrate:${registrate_version}")
+//
+//    /* Effective */
+////    modLocalRuntime fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
+////    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
+////    modCompileOnly "com.github.ConcerroX:Effecticularity:31265b5750" // no they didn't publish 1.0.2 :(
+//
+//    /* Particle Core */
+////    modCompileOnly "maven.modrinth:particle-core:0.2.5+1.21+neoforge"
+////    modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.21+neoforge"
+////    modLocalRuntime "maven.modrinth:fzzy-config:0.6.4+1.21+neoforge"
+////    modLocalRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
+////    modLocalRuntime 'thedarkcolour:kfflang:5.6.0'
+////    modLocalRuntime 'thedarkcolour:kfflib:5.6.0'
+////    modLocalRuntime 'thedarkcolour:kffmod:5.6.0'
+////    modLocalRuntime('thedarkcolour:kotlinforforge-neoforge:5.6.0') {
+////        exclude(group: "net.neoforged.fancymodloader", module: "loader")
+////    }
 }
 
 processResources {
