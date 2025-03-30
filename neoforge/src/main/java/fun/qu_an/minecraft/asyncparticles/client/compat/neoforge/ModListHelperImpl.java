@@ -14,6 +14,10 @@ public class ModListHelperImpl {
 		return true;
 	}
 
+	public static boolean isClient() {
+		return FMLLoader.getDist().isClient();
+	}
+
 	public static boolean isModLoaded(String modId) {
 		return FMLLoader.getLoadingModList().getModFileById(modId) != null;
 	}

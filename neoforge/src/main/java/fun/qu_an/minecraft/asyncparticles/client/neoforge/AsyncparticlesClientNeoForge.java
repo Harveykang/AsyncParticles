@@ -33,6 +33,9 @@ import static net.minecraft.commands.Commands.literal;
 @Mod(AsyncparticlesClient.MOD_ID)
 public final class AsyncparticlesClientNeoForge {
 	public AsyncparticlesClientNeoForge(IEventBus modBus) {
+		if (!ModListHelper.IS_CLIENT) {
+			return;
+		}
 		// Run our common setup.
 		AsyncparticlesClient.init();
 

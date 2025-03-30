@@ -116,8 +116,8 @@ dependencies {
     modLocalRuntime "maven.modrinth:subtle-effects:1.9.3" // fabric 1.9.3
 
     /* What Are They Up To */
-    modCompileOnly "maven.modrinth:what-are-they-up-to:BecIHPxZ" // 1.2.3
-    modLocalRuntime "maven.modrinth:what-are-they-up-to:BecIHPxZ" // 1.2.3
+//    modCompileOnly "maven.modrinth:what-are-they-up-to:BecIHPxZ" // 1.2.3
+//    modLocalRuntime "maven.modrinth:what-are-they-up-to:BecIHPxZ" // 1.2.3
 }
 
 processResources {

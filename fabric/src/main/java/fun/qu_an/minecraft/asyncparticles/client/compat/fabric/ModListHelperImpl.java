@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.fabric;
 
+import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.VersionParsingException;
@@ -8,6 +9,10 @@ import net.fabricmc.loader.api.VersionParsingException;
 public class ModListHelperImpl {
 	public static boolean isForge() {
 		return false;
+	}
+
+	public static boolean isClient() {
+		return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
 	}
 
 	public static boolean isModLoaded(String modId) {

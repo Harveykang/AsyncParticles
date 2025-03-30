@@ -11,7 +11,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 // some mod get entities when ticking particles, may cause a CME
-@Mixin(ClassInstanceMultiMap.class)
+@Mixin(value = ClassInstanceMultiMap.class, priority = 1100)
 public class MixinClassInstanceMultiMap {
 	@Redirect(method = "method_15217", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;toMutableList()Ljava/util/stream/Collector;"))
 	private <T> Collector<T, ?, List<T>> collect() {

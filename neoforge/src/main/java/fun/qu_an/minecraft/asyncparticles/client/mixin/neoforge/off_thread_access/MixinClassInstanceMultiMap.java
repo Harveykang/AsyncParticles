@@ -12,7 +12,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 // some mod get entities when ticking particles, may cause a CME
-@Mixin(ClassInstanceMultiMap.class)
+@Mixin(value = ClassInstanceMultiMap.class, priority = 1100)
 public class MixinClassInstanceMultiMap {
 	// FIXME: can't remap lambda method_15217 properly, use * instead
 	@Dynamic

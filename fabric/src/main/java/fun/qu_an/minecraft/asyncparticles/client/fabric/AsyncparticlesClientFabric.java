@@ -25,6 +25,9 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 public final class AsyncparticlesClientFabric implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
+		if (!ModListHelper.IS_CLIENT) {
+			return;
+		}
 		AsyncparticlesClient.init();
 		if (ModListHelper.FABRIC_API_LOADED) {
 			ClientCommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
