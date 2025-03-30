@@ -131,7 +131,7 @@ public class AsyncRenderer {
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
 		profiler.popPush("async_particles");
-		resetBTesserators();
+		resetBTesselators();
 		ParticleEngine particleEngine = mc.particleEngine;
 		if (ModListHelper.FABRIC_IRIS_LOADED) {
 			mixedParticleRenderingSetting = IrisApi.getInstance().isShaderPackInUse() &&
@@ -273,12 +273,12 @@ public class AsyncRenderer {
 
 	private static final Map<ParticleRenderType, BindingTesselator> BTESSELATORS = new IdentityHashMap<>();
 
-	private static void resetBTesserators() {
+	private static void resetBTesselators() {
 		BTESSELATORS.values().forEach(BindingTesselator::clear);
 	}
 
 	private static void clearBTesselators() {
-		resetBTesserators();
+		resetBTesselators();
 		BTESSELATORS.clear();
 	}
 
