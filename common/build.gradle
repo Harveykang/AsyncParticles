@@ -20,7 +20,7 @@ dependencies {
 
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
     modCompileOnly "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
-    compileOnly "org.sinytra:Connector:1.0.0-beta.46+1.20.1"
+    compileOnly "org.sinytra:connector:2.0.0-beta.7+1.21.1"
 
     /* Performance */
     modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.6.9-fabric"

@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import org.sinytra.connector.loader.ConnectorEarlyLoader;
+import org.sinytra.connector.ConnectorEarlyLoader;
 
 public class ModListHelper {
 	public static final boolean IS_FORGE = isForge();
