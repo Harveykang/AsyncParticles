@@ -5,6 +5,7 @@ import org.sinytra.connector.loader.ConnectorEarlyLoader;
 
 public class ModListHelper {
 	public static final boolean IS_FORGE = isForge();
+	public static final boolean IS_CLIENT = isClient();
 	public static final boolean FABRIC_API_LOADED = isModLoaded("fabric");
 	public static final boolean CONNECTORMOD_LOADED = isModLoaded("connectormod");
 	/* Valkyrien Skies */
@@ -70,6 +71,11 @@ public class ModListHelper {
 
 	@ExpectPlatform
 	private static boolean isForge() {
+		throw new AssertionError();
+	}
+
+	@ExpectPlatform
+	private static boolean isClient() {
 		throw new AssertionError();
 	}
 

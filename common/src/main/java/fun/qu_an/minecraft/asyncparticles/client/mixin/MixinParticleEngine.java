@@ -217,8 +217,7 @@ public abstract class MixinParticleEngine {
 				}
 			} catch (Throwable t) {
 				boolean tolerable = AsyncTicker.isTolerable(t);
-				if (tolerable &&
-					!AsyncTicker.EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
+				if (tolerable && !AsyncTicker.EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
 					continue;
 				}
 				if (SimplePropertiesConfig.markSyncIfTickFailed()) {

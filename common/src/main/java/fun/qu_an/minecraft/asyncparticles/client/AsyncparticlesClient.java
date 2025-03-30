@@ -15,6 +15,9 @@ public class AsyncparticlesClient {
 	public static final String ISSUE_URL = "https://github.com/Harveykang/AsyncParticles/issues";
 
 	public static void init() {
+		if (!ModListHelper.IS_CLIENT) {
+			return;
+		}
 		try {
 			SimplePropertiesConfig.load();
 		} catch (IOException e) {

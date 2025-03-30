@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -28,6 +29,9 @@ import static net.minecraft.commands.Commands.literal;
 public final class AsyncparticlesClientForge {
 	public AsyncparticlesClientForge() {
 		// Run our common setup.
+		if (!ModListHelper.IS_CLIENT) {
+			return;
+		}
 		AsyncparticlesClient.init();
 		MinecraftForge.EVENT_BUS.addListener(this::registerClientCommands);
 	}

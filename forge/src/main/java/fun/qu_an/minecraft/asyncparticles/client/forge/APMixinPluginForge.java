@@ -20,6 +20,9 @@ public class APMixinPluginForge implements IMixinConfigPlugin {
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+		if (!ModListHelper.IS_CLIENT) {
+			return false;
+		}
 		String mixinPackageName = mixinClassName.substring("fun.qu_an.minecraft.asyncparticles.client.mixin.forge.".length());
 		String[] split = mixinPackageName.split("\\.");
 		if (split.length == 1) {

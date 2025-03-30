@@ -24,4 +24,8 @@ public class ModListHelperImpl {
 	public static boolean isDevelopmentEnvironment() {
 		return !FMLLoader.isProduction();
 	}
+
+	public static boolean isClient() {
+		return FMLLoader.getDist().isClient();
+	}
 }

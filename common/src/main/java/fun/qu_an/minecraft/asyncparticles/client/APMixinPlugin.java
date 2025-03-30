@@ -17,6 +17,9 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public void onLoad(String mixinPackage) {
+		if (!ModListHelper.IS_CLIENT) {
+			return;
+		}
 		ExtensionCancelMixinMethod.init();
 		ExtensionCancelMixinMethod.register(new ExtensionCancelMixinMethod.Canceller() {
 			@Override
@@ -70,6 +73,9 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 	/// - mixin/<mod_id>/fabric 包下的mixin只在fabric环境下生效，其他mixin在任何环境下生效
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+		if (!ModListHelper.IS_CLIENT) {
+			return false;
+		}
 		String mixinPackageName = mixinClassName.substring("fun.qu_an.minecraft.asyncparticles.client.mixin.".length());
 		String[] split = mixinPackageName.split("\\.");
 		if (split.length == 1) {
