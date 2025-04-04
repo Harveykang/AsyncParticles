@@ -436,4 +436,18 @@ public class CreateCompatImpl {
 		});
 		return b[0];
 	}
+
+	public static boolean isCollideWithContraption(ClientLevel level, Vec3 pos, Vec3 motion, AABB bb) {
+		boolean[] b = {false};
+		forEachContraption(level, contraptionEntity -> {
+			boolean b1 = collideWithContraption(level, pos, motion, bb, contraptionEntity, true);
+			// estimate = true for a better performance
+			if (!b1) {
+				return true;
+			}
+			b[0] = true;
+			return false;
+		});
+		return b[0];
+	}
 }

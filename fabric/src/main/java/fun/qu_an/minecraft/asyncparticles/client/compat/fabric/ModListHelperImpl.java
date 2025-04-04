@@ -43,4 +43,11 @@ public class ModListHelperImpl {
 		}
 		return (min == null || currentVersion.compareTo(min) >= 0) && (max == null || currentVersion.compareTo(max) < 0);
 	}
+
+	public static String versionToString(String modId) {
+		return FabricLoader.getInstance().getModContainer(modId)
+			.map(container -> container.getMetadata()
+				.getVersion().getFriendlyString())
+			.orElseThrow(() -> new IllegalArgumentException("Mod " + modId + " is not loaded."));
+	}
 }

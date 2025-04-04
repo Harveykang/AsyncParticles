@@ -57,7 +57,7 @@ public class AsyncRenderer {
 			addSyncByClassName("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
 		}
 		if (ModListHelper.FABRIC_EFFECTIVE_LOADED) {
-			addSyncByClassName("org.ladysnake.effective.core.particle.SplashParticle");
+			addSyncByClassName("org.ladysnake.effective.particle.SplashParticle");
 		}
 		if (ModListHelper.FORGE_EFFECTIVE_LOADED) {
 			addSyncByClassName("concerrox.effective.particle.SplashParticle");
@@ -84,7 +84,7 @@ public class AsyncRenderer {
 		try {
 			SYNC_PARTICLE_TYPES.add((Class<? extends Particle>) Class.forName(className));
 		} catch (Exception e) {
-			LOGGER.error("", e);
+			LOGGER.warn("", e);
 		}
 	}
 
@@ -143,6 +143,9 @@ public class AsyncRenderer {
 		ObjectArrayList<CompletableFuture<Void>> asyncTasks = new ObjectArrayList<>(asyncTasksSize);
 		for (ParticleRenderType particleRenderType
 			: ModListHelper.IS_FORGE ? particleEngine.particles.keySet() : ParticleEngine.RENDER_ORDER) {
+			if (particleRenderType == ParticleRenderType.NO_RENDER) {
+				continue;
+			}
 			Queue<Particle> queue = particleEngine.particles.get(particleRenderType);
 			if (queue == null || queue.isEmpty()) {
 				continue;
@@ -352,6 +355,7 @@ public class AsyncRenderer {
 				render order: %s,
 				sync particle count: %d,
 				sync particle types: %s,
+				sync particle render types: %s,
 				iris particle state: %s"""
 				.formatted(asyncTasksSize,
 					BTESSELATORS.entrySet()
@@ -365,6 +369,9 @@ public class AsyncRenderer {
 						: ParticleEngine.RENDER_ORDER,
 					SYNC_PARTICLES.values().stream().mapToInt(Set::size).sum(),
 					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList(),
+					BTESSELATORS.entrySet().stream()
+						.filter(e -> e.getValue() == BindingTesselator.EMPTY)
+						.map(Map.Entry::getKey).toList(),
 					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse()
 						? getRenderingSettings().name() : "disabled"));
 			debugConsumer = null;

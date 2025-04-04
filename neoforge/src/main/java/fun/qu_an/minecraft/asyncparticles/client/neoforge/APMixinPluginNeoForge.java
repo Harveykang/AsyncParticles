@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.neoforge;
 
+import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -18,12 +19,16 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 		return null;
 	}
 
+	//	private static final int L = "fun.qu_an.minecraft.asyncparticles.client.mixin.".length();
+	private static final int PACKAGE_LENGTH = AsyncparticlesClient.class.getPackage().getName().length() +
+											  ".mixin.neoforge.".length();
+
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		if (!ModListHelper.IS_CLIENT) {
 			return false;
 		}
-		String mixinPackageName = mixinClassName.substring("fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.".length());
+		String mixinPackageName = mixinClassName.substring(PACKAGE_LENGTH);
 		String[] split = mixinPackageName.split("\\.");
 		if (split.length == 1) {
 			return true;

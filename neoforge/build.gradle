@@ -82,9 +82,9 @@ dependencies {
 //    modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.5.1-beta.3'
 
     /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:pretty-rain:sqJTdAZN" // 1.1.2
+    modCompileOnly "maven.modrinth:pretty-rain:1.1.4"
 //    if (rootProject.use_connector_mod == "true") {
-    modLocalRuntime "maven.modrinth:pretty-rain:sqJTdAZN" // 1.1.2
+    modLocalRuntime "maven.modrinth:pretty-rain:1.1.4"
 //    } else {
 //        modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
 //    }

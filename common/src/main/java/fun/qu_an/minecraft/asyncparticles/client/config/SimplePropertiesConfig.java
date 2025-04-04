@@ -34,19 +34,18 @@ public class SimplePropertiesConfig {
 			Files.createFile(CONFIG_FILE);
 		} else {
 			properties.load(Files.newInputStream(CONFIG_FILE));
-		}
-
-		String verStr = properties.getProperty("version_doNotModify");
-		int ver = -1;
-		try {
-			ver = Integer.parseInt(verStr);
-		} catch (NumberFormatException ignored) {
-		}
-		if (ver < 0) {
-			properties.setProperty("version_doNotModify", "0");
-			asyncClientBlockEntityTick = false;
-			properties.setProperty("asyncClientBlockEntityTick", "false");
-			shouldSave = true;
+			String verStr = properties.getProperty("version_doNotModify");
+			int ver = -1;
+			try {
+				ver = Integer.parseInt(verStr);
+			} catch (NumberFormatException ignored) {
+			}
+			if (ver < 0) {
+				properties.setProperty("version_doNotModify", "0");
+				asyncClientBlockEntityTick = false;
+				properties.setProperty("asyncClientBlockEntityTick", "false");
+				shouldSave = true;
+			}
 		}
 
 		limit = getInt(properties, "limit", 32768);

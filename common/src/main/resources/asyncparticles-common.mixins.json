@@ -18,7 +18,7 @@
     "MixinParticle_LightCache",
     "MixinParticle_LightCacheNoRefresh",
     "MixinParticleEngine",
-    "MixinSoundEngine",
+    "off_thread_access.MixinSoundEngine",
     "MixinTesselator",
     "MixinTextureManager",
     "a_good_place.InvokerBlocksParticlesManager",
@@ -45,6 +45,7 @@
     "modernui.MixinRenderSystem",
     "off_thread_access.MixinClassInstanceMultiMap",
     "off_thread_access.MixinLevelChunk",
+    "off_thread_access.MixinLevelRenderer",
     "subtle_effects.MixinAsyncRenderer",
     "subtle_effects.fabric.MixinParticleEngine",
     "watut.MixinCustomParticleEngine"

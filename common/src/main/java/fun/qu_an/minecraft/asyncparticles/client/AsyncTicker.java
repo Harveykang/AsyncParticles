@@ -95,7 +95,7 @@ public class AsyncTicker {
 		try {
 			SYNC_PARTICLE_TYPES.add((Class<? extends Particle>) Class.forName(className));
 		} catch (Exception e) {
-			LOGGER.error("", e);
+			LOGGER.warn("", e);
 		}
 	}
 
