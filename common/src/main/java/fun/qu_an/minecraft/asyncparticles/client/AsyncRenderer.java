@@ -57,7 +57,7 @@ public class AsyncRenderer {
 			addSyncByClassName("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
 		}
 		if (ModListHelper.FABRIC_EFFECTIVE_LOADED) {
-			addSyncByClassName("org.ladysnake.effective.core.particle.SplashParticle");
+			addSyncByClassName("org.ladysnake.effective.particle.SplashParticle");
 		}
 		if (ModListHelper.FORGE_EFFECTIVE_LOADED) {
 			addSyncByClassName("concerrox.effective.particle.SplashParticle");
@@ -84,7 +84,7 @@ public class AsyncRenderer {
 		try {
 			SYNC_PARTICLE_TYPES.add((Class<? extends Particle>) Class.forName(className));
 		} catch (Exception e) {
-			LOGGER.error("", e);
+			LOGGER.warn("", e);
 		}
 	}
 
@@ -131,7 +131,7 @@ public class AsyncRenderer {
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
 		profiler.popPush("async_particles");
-		resetBTesserators();
+		resetBTesselators();
 		ParticleEngine particleEngine = mc.particleEngine;
 		if (ModListHelper.FABRIC_IRIS_LOADED) {
 			mixedParticleRenderingSetting = IrisApi.getInstance().isShaderPackInUse() &&
@@ -143,6 +143,9 @@ public class AsyncRenderer {
 		ObjectArrayList<CompletableFuture<Void>> asyncTasks = new ObjectArrayList<>(asyncTasksSize);
 		for (ParticleRenderType particleRenderType
 			: ModListHelper.IS_FORGE ? particleEngine.particles.keySet() : ParticleEngine.RENDER_ORDER) {
+			if (particleRenderType == ParticleRenderType.NO_RENDER) {
+				continue;
+			}
 			Queue<Particle> queue = particleEngine.particles.get(particleRenderType);
 			if (queue == null || queue.isEmpty()) {
 				continue;
@@ -178,24 +181,24 @@ public class AsyncRenderer {
 			particle.render(bufferBuilder, camera, g);
 		} catch (Throwable t) {
 			boolean tolerable = AsyncTicker.isTolerable(t);
-            if (tolerable && !EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
-                return;
-            }
-            ((ParticleAddon) particle).asyncedParticles$setRenderSync();
-            if (!shouldSync(particle.getClass())) {
-                if (!tolerable) {
-                    LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, t);
-                } else {
-                    LOGGER.warn("Exception {} thrown while rendering particle {} exceeds the threshold, please contact the author: {}",
-                        t.getClass().getSimpleName(),
-                        particle,
-                        AsyncparticlesClient.ISSUE_URL,
-                        t);
-                }
-                markAsSync(particle.getClass());
-            }
-            recordSync(particleRenderType, particle);
-        }
+			if (tolerable && !EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
+				return;
+			}
+			((ParticleAddon) particle).asyncedParticles$setRenderSync();
+			if (!shouldSync(particle.getClass())) {
+				if (!tolerable) {
+					LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, t);
+				} else {
+					LOGGER.warn("Exception {} thrown while rendering particle {} exceeds the threshold, please contact the author: {}",
+						t.getClass().getSimpleName(),
+						particle,
+						AsyncparticlesClient.ISSUE_URL,
+						t);
+				}
+				markAsSync(particle.getClass());
+			}
+			recordSync(particleRenderType, particle);
+		}
 	}
 
 	private static Void renderAsyncExceptionally(Throwable e) {
@@ -273,12 +276,12 @@ public class AsyncRenderer {
 
 	private static final Map<ParticleRenderType, BindingTesselator> BTESSELATORS = new IdentityHashMap<>();
 
-	private static void resetBTesserators() {
+	private static void resetBTesselators() {
 		BTESSELATORS.values().forEach(BindingTesselator::clear);
 	}
 
 	private static void clearBTesselators() {
-		resetBTesserators();
+		resetBTesselators();
 		BTESSELATORS.clear();
 	}
 
@@ -342,6 +345,7 @@ public class AsyncRenderer {
 		debugConsumer = consumer;
 	}
 
+	@SuppressWarnings("ConstantValue")
 	private static void tryDebug() {
 		if (debugConsumer != null) {
 			debugConsumer.accept("""
@@ -351,10 +355,12 @@ public class AsyncRenderer {
 				render order: %s,
 				sync particle count: %d,
 				sync particle types: %s,
+				sync particle render types: %s,
 				iris particle state: %s"""
 				.formatted(asyncTasksSize,
 					BTESSELATORS.entrySet()
 						.stream()
+						.filter(e -> e.getValue().buffer != null)
 						.collect(Collectors.toMap(
 							Map.Entry::getKey,
 							e -> e.getValue().buffer.capacity)),
@@ -363,6 +369,9 @@ public class AsyncRenderer {
 						: ParticleEngine.RENDER_ORDER,
 					SYNC_PARTICLES.values().stream().mapToInt(Set::size).sum(),
 					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList(),
+					BTESSELATORS.entrySet().stream()
+						.filter(e -> e.getValue() == BindingTesselator.EMPTY)
+						.map(Map.Entry::getKey).toList(),
 					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse()
 						? getRenderingSettings().name() : "disabled"));
 			debugConsumer = null;

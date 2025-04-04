@@ -37,7 +37,7 @@ public abstract class MixinParticle {
 	@WrapOperation(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;collideBoundingBox(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Lnet/minecraft/world/level/Level;Ljava/util/List;)Lnet/minecraft/world/phys/Vec3;"))
 	private Vec3 collideBoundingBox(Entity entity, Vec3 motion, AABB aABB, Level level, List<VoxelShape> list, Operation<Vec3> original) {
 		// we do it in another thread, so we don't need to worry about costly collision checks
-		Vec3 mov = CreateCompatImpl.collideMotionWithContraptions((ClientLevel) level, new Vec3(x, y, z), motion, getBoundingBox());
+		Vec3 mov = CreateCompatImpl.collideMotionWithContraptions((ClientLevel) level, new Vec3(x, y, z), motion, aABB);
 		return original.call(entity,
 			mov == null ? motion : mov,
 			aABB, level, list);

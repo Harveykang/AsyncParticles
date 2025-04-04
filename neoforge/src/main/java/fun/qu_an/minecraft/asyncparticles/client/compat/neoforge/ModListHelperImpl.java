@@ -48,4 +48,9 @@ public class ModListHelperImpl {
 		}
 		return new Restriction(min, true, max, false).containsVersion(currentVersion);
 	}
+
+	public static String versionToString(String modId) {
+		IModFileInfo info = LoadingModList.get().getModFileById(modId);
+		return info == null || info.getMods().isEmpty() ? null : info.versionString();
+	}
 }

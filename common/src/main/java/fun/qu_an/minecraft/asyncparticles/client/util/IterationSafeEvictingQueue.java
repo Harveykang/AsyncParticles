@@ -389,6 +389,21 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		return n + 1;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append('[');
+		Iterator<E> it = iterator();
+		while (it.hasNext()) {
+			sb.append(it.next());
+			if (it.hasNext()) {
+				sb.append(", ");
+			}
+		}
+		sb.append(']');
+		return sb.toString();
+	}
+
 	public static void main(String[] args) {
 		IterationSafeEvictingQueue<Integer> queue = new IterationSafeEvictingQueue<>(2,
 			32768,
