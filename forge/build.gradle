@@ -140,6 +140,13 @@ dependencies {
     /* Iron's Spells and Spellbooks */
     modCompileOnly "maven.modrinth:irons-spells-n-spellbooks:1.20.1-3.4.0.7"
     modLocalRuntime "maven.modrinth:curios:5.12.1+1.20.1"
+
+    /* Weather2 */
+    modCompileOnly "curse.maven:weather2-237746:5244118" // 2.8.3
+    modLocalRuntime "curse.maven:weather2-237746:5244118" // 2.8.3
+
+    /* Aquaculture */
+    modCompileOnly "maven.modrinth:aquamirae:7lX4KLFc"
 }
 
 processResources {

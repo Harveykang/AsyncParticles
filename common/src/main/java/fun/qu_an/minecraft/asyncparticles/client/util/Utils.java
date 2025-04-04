@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
+import net.minecraft.ReportedException;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.asm.mixin.Unique;
 
 public class Utils {
 	public static RuntimeException toThrowDirectly(@NotNull Throwable t) {
@@ -23,5 +23,13 @@ public class Utils {
 			}
 			e = e.getCause();
 		}
+	}
+
+	public static ReportedException getReportedException(Throwable t) {
+		if (t instanceof ReportedException re) {
+			return re;
+		}
+		Throwable cause = t.getCause();
+		return cause == null ? null : getReportedException(cause);
 	}
 }

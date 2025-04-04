@@ -69,6 +69,10 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		return null;
 	}
 
+//	private static final int L = "fun.qu_an.minecraft.asyncparticles.client.mixin.".length();
+	private static final int PACKAGE_LENGTH = AsyncparticlesClient.class.getPackage().getName().length() +
+											  ".mixin.".length();
+
 	/// - mixin/fabric 包下位于根目录的mixin只在fabric环境下生效。除非另有说明，位于其他子目录的mixin在fabric或信雅互联环境下均生效
 	/// - mixin/<mod_id>/fabric 包下的mixin只在fabric环境下生效，其他mixin在任何环境下生效
 	@Override
@@ -76,7 +80,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		if (!ModListHelper.IS_CLIENT) {
 			return false;
 		}
-		String mixinPackageName = mixinClassName.substring("fun.qu_an.minecraft.asyncparticles.client.mixin.".length());
+		String mixinPackageName = mixinClassName.substring(PACKAGE_LENGTH);
 		String[] split = mixinPackageName.split("\\.");
 		if (split.length == 1) {
 			return true;
@@ -92,8 +96,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					case "particlerain_create" ->
 						ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_CREATE_LOADED;
 					case "particlerain" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED;
-					case "create_5" -> ModListHelper.FABRIC_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION < 6;
-					case "create_6" -> ModListHelper.FABRIC_CREATE_LOADED && ModListHelper.CREATE_MAJOR_VERSION == 6;
+					case "create_5" -> ModListHelper.FABRIC_CREATE_LOADED && ModListHelper.IS_LEGACY_CREATE;
+					case "create_6" -> ModListHelper.FABRIC_CREATE_LOADED && !ModListHelper.IS_LEGACY_CREATE;
 					case "sodium" -> ModListHelper.FABRIC_SODIUM_LOADED;
 					case "effective" -> ModListHelper.FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> ModListHelper.FABRIC_EFFECTUAL_LOADED;
@@ -106,7 +110,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					throw new IllegalArgumentException("Unknown legacy mixin: " + mixinClassName);
 				}
 				yield switch (split[1]) {
-					case "flywheel" -> ModListHelper.FLYWHEEL_LOADED && ModListHelper.FLYWHEEL_MAJOR_VERSION < 1;
+					case "flywheel" -> ModListHelper.FLYWHEEL_LOADED &&
+									   ModListHelper.versionCheck("flywheel", "0.6", "1.0");
 					default -> throw new IllegalArgumentException("Unknown legacy mod mixin: " + mixinClassName);
 				};
 			}
@@ -116,7 +121,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			case "vs2" -> ModListHelper.VS_LOADED;
 			case "create" -> ModListHelper.CREATE_LOADED;
 			case "iris_like" -> ModListHelper.IRIS_LIKE_LOADED;
-			case "flywheel" -> ModListHelper.FLYWHEEL_LOADED && ModListHelper.FLYWHEEL_MAJOR_VERSION == 1;
+			case "flywheel" -> ModListHelper.FLYWHEEL_LOADED &&
+							   ModListHelper.versionCheck("flywheel", "1.0", "2.0");
 			case "particle_core" -> ModListHelper.PARTICLE_CORE_LOADED;
 			case "physicsmod" -> ModListHelper.PHYSICSMOD_LOADED;
 			case "a_good_place" -> ModListHelper.A_GOOD_PLACE_LOADED;

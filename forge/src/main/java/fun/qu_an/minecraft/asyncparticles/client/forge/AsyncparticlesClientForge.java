@@ -2,6 +2,9 @@ package fun.qu_an.minecraft.asyncparticles.client.forge;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
@@ -20,6 +23,7 @@ import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static net.minecraft.commands.Commands.argument;
@@ -36,13 +40,16 @@ public final class AsyncparticlesClientForge {
 		MinecraftForge.EVENT_BUS.addListener(this::registerClientCommands);
 	}
 
+	private static CompletableFuture<Suggestions> suggestModId(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
+		return SharedSuggestionProvider.suggest(FMLLoader.getLoadingModList().getMods().stream().map(ModInfo::getModId), builder);
+	}
+
 	private void registerClientCommands(RegisterClientCommandsEvent event) {
 		CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
 		dispatcher.register(literal(AsyncparticlesClient.MOD_ID)
 			.then(literal("isfabricmod")
 				.then(argument("modid", StringArgumentType.word())
-					.suggests((context, builder)
-						-> SharedSuggestionProvider.suggest(FMLLoader.getLoadingModList().getMods().stream().map(ModInfo::getModId), builder))
+					.suggests(AsyncparticlesClientForge::suggestModId)
 					.executes(context -> {
 						String modId = StringArgumentType.getString(context, "modid");
 						context.getSource().sendSystemMessage(Component.literal(modId + " is " + (isFabricModLoaded(modId) ? "fabric mod" : isModLoaded(modId) ? "not fabric mod" : "not loaded")));
@@ -50,8 +57,7 @@ public final class AsyncparticlesClientForge {
 					})))
 			.then(literal("isforgemod")
 				.then(argument("modid", StringArgumentType.word())
-					.suggests((context, builder)
-						-> SharedSuggestionProvider.suggest(FMLLoader.getLoadingModList().getMods().stream().map(ModInfo::getModId), builder))
+					.suggests(AsyncparticlesClientForge::suggestModId)
 					.executes(context -> {
 						String modId = StringArgumentType.getString(context, "modid");
 						context.getSource().sendSystemMessage(Component.literal(modId + " is " + (isForgeModLoaded(modId) ? "forge mod" : isModLoaded(modId) ? "not forge mod" : "not loaded")));
@@ -75,6 +81,45 @@ public final class AsyncparticlesClientForge {
 					source.sendSystemMessage(Component.literal("Particles have been dumped to log."));
 					return 1;
 				}))
+			.then(literal("class_exists")
+				.then(argument("className", StringArgumentType.string())
+					.executes(context -> {
+						String className = StringArgumentType.getString(context, "className");
+						Class<?> aClass = ModListHelper.getClass(className);
+						if (aClass == null) {
+							context.getSource().sendSystemMessage(Component.literal("Class " + className + " not found."));
+						} else {
+							context.getSource().sendSystemMessage(Component.literal("Class " + className + " found!"));
+						}
+						return 1;
+					})))
+			.then(literal("version_check")
+				.then(argument("modid", StringArgumentType.word())
+					.suggests(AsyncparticlesClientForge::suggestModId)
+					.executes(context -> {
+						String modId = StringArgumentType.getString(context, "modid");
+						if (isModLoaded(modId)) {
+							String version = versionToString(modId);
+							context.getSource().sendSystemMessage(Component.literal(modId + " version " + version));
+						} else {
+							context.getSource().sendSystemMessage(Component.literal(modId + " is not loaded"));
+						}
+						return 1;
+					})
+					.then(argument("min_inclusive", StringArgumentType.string())
+						.then(argument("max_exclusive", StringArgumentType.string())
+							.executes(context -> {
+								String modId = StringArgumentType.getString(context, "modid");
+								String minInclusive = StringArgumentType.getString(context, "min_inclusive");
+								String maxExclusive = StringArgumentType.getString(context, "max_exclusive");
+								if (isModLoaded(modId)) {
+									boolean b = versionCheck(modId, minInclusive, maxExclusive);
+									context.getSource().sendSystemMessage(Component.literal(modId + " version " + (b ? "is within" : "is not within") + " [" + minInclusive + ", " + maxExclusive + ")"));
+								} else {
+									context.getSource().sendSystemMessage(Component.literal(modId + " is not loaded"));
+								}
+								return 1;
+							})))))
 			.then(literal("reload")
 				.executes(context -> {
 					CommandSourceStack source = context.getSource();

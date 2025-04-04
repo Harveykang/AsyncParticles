@@ -138,16 +138,51 @@ public class VSClientUtils {
 	/**
 	 * No vanilla collision check.
 	 */
+	public static boolean isEntityMovColShipOnly(
+		@Nullable Entity entity,
+		Vec3 movement,
+		AABB entityBoundingBox,
+		ClientLevel world,
+		double inflation) {
+		double stepHeight = (entity != null) ? entity.maxUpStep() : 0.0;
+		double yMovement = movement.y() + Math.max(stepHeight - inflation, 0.0);
+		Vec3 movement1 = new Vec3(movement.x(), yMovement, movement.z());
+		AABB bb = entityBoundingBox.expandTowards(movement1).inflate(inflation);
+		List<ConvexPolygonc> collidingShipPolygons =
+			((InvokerEntityShipCollisionUtils) (Object) EntityShipCollisionUtils.INSTANCE).invoker_getShipPolygonsCollidingWithEntity(
+				entity, movement1,
+				bb, world);
+		return !collidingShipPolygons.isEmpty();
+	}
+
+	/**
+	 * No vanilla collision check.
+	 */
+	public static boolean isEntityMovColShipOnly(
+		@Nullable Entity entity,
+		Vec3 movement,
+		AABB entityBoundingBox,
+		ClientLevel world) {
+		double inflation = (entity instanceof Player) ? 0.5 : 0.1;
+		return isEntityMovColShipOnly(entity, movement, entityBoundingBox, world, inflation);
+	}
+
+	/**
+	 * No vanilla collision check.
+	 */
 	@Nullable
 	public static Vec3 entityMovColShipOnly(
 		@Nullable Entity entity,
 		Vec3 movement,
 		AABB entityBoundingBox,
 		ClientLevel world,
-		double inflation) {
+		double inflation,
+		double stepHeight) {
 		// Inflate the bounding box more for players than other entities, to give players a better collision result.
 		// Note that this increases the cost of doing collision, so we only do it for the players
-		double stepHeight = (entity != null) ? entity.maxUpStep() : 0.0;
+		if (entity != null) {
+			stepHeight = entity.maxUpStep();
+		}
 		// Add [max(stepHeight - inflation, 0.0)] to search for polygons we might collide with while stepping
 		double yMovement = movement.y() + Math.max(stepHeight - inflation, 0.0);
 		List<ConvexPolygonc> collidingShipPolygons =
@@ -183,7 +218,11 @@ public class VSClientUtils {
 		AABB entityBoundingBox,
 		ClientLevel world) {
 		double inflation = (entity instanceof Player) ? 0.5 : 0.1;
-		return entityMovColShipOnly(entity, movement, entityBoundingBox, world, inflation);
+		return entityMovColShipOnly(entity, movement, entityBoundingBox, world, inflation, 0.0);
+	}
+
+	public static Vec3 entityMovColShipOnly(Vec3 movement, AABB entityBoundingBox, ClientLevel world, double inflation, double stepHeight) {
+		return entityMovColShipOnly(null, movement, entityBoundingBox, world, inflation, stepHeight);
 	}
 
 	/**

@@ -80,7 +80,9 @@ public abstract class MixinParticleEngine {
 	public static List<ParticleRenderType> RENDER_ORDER;
 
 	@Mutable
-	@Shadow @Final private RandomSource random;
+	@Shadow
+	@Final
+	private RandomSource random;
 
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
 	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {

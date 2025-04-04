@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import org.jetbrains.annotations.Nullable;
 import org.sinytra.connector.loader.ConnectorEarlyLoader;
 
 public class ModListHelper {
@@ -27,18 +28,21 @@ public class ModListHelper {
 	/* Flerovium */
 	public static final boolean FORGE_FLEROVIUM_LOADED = isForgeModLoaded("flerovium");
 	/* Effective */
-	public static final boolean FORGE_EFFECTIVE_LOADED = isForgeModLoaded("effective");
-	public static final boolean FABRIC_EFFECTIVE_LOADED = isFabricModLoaded("effective");
+	public static final boolean FORGE_EFFECTICULARITY_LOADED = isForgeModLoaded("effective") &&
+															   getClass("concerrox.effective.Effective") != null;
+	public static final boolean FABRIC_EFFECTICULARITY_LOADED = isFabricModLoaded("effective") &&
+																getClass("concerrox.effective.Effective") != null;
+	public static final boolean FABRIC_EFFECTIVE_LOADED = isFabricModLoaded("effective") &&
+														  getClass("org.ladysnake.effective.core.Effective") != null;
 	/* Particle Rain */
 	public static final boolean PARTICLERAIN_LOADED = isModLoaded("particlerain");
 	public static final boolean FABRIC_PARTICLERAIN_LOADED = isFabricModLoaded("particlerain");
 	public static final boolean FORGE_PARTICLERAIN_LOADED = isForgeModLoaded("particlerain");
 	/* Flywheel */
 	public static final boolean FLYWHEEL_LOADED = isModLoaded("flywheel");
-	public static final int FLYWHEEL_MAJOR_VERSION = versionMajor("flywheel");
 	/* Create */
 	public static final boolean CREATE_LOADED = isModLoaded("create");
-	public static final int CREATE_MAJOR_VERSION = versionMajor("create");
+	public static final boolean IS_LEGACY_CREATE = CREATE_LOADED && versionCheck("create", "0.5", "6.0");
 	public static final boolean FABRIC_CREATE_LOADED = isFabricModLoaded("create");
 	public static final boolean FORGE_CREATE_LOADED = isForgeModLoaded("create");
 	/* Epic Fight */
@@ -68,6 +72,8 @@ public class ModListHelper {
 	public static final boolean FORGE_SUBTLE_EFFECTS_LOADED = isForgeModLoaded("subtle_effects");
 	/* What Are They Up To */
 	public static final boolean WATUT_LOADED = isModLoaded("watut");
+	/* Weather2 */
+	public static final boolean FORGE_WEATHER2_LOADED = isForgeModLoaded("weather2");
 
 	@ExpectPlatform
 	private static boolean isForge() {
@@ -85,7 +91,18 @@ public class ModListHelper {
 	}
 
 	@ExpectPlatform
-	public static int versionMajor(String modId) {
+	public static boolean versionCheck(String modId, String minInclusive, String maxExclusive) {
+		// Suppressing the ConstantValue check because this is a generated method.
+		throwAssertionError();
+		return true;
+	}
+
+	private static void throwAssertionError() {
+		throw new AssertionError();
+	}
+
+	@ExpectPlatform
+	public static String versionToString(String modId) {
 		throw new AssertionError();
 	}
 
@@ -101,5 +118,14 @@ public class ModListHelper {
 	@ExpectPlatform
 	public static boolean isDevelopmentEnvironment() {
 		throw new AssertionError();
+	}
+
+	@Nullable
+	public static Class<?> getClass(String className) {
+		try {
+			return Class.forName(className, false, ModListHelper.class.getClassLoader());
+		} catch (ClassNotFoundException e) {
+			return null;
+		}
 	}
 }

@@ -404,19 +404,19 @@ public class CreateCompat {
 	}
 
 	public static Vec3 rotate(Vec3 collisionLocation, float yawOffset, Direction.Axis axis) {
-		return ModListHelper.CREATE_MAJOR_VERSION < 6
+		return ModListHelper.IS_LEGACY_CREATE
 			? Create5Compat.rotate(collisionLocation, yawOffset, axis)
 			: Create6Compat.rotate(collisionLocation, yawOffset, axis);
 	}
 
 	public static Vec3 getCenterOf(BlockPos blockPos) {
-		return ModListHelper.CREATE_MAJOR_VERSION < 6
+		return ModListHelper.IS_LEGACY_CREATE
 			? Create5Compat.getCenterOf(blockPos)
 			: Create6Compat.getCenterOf(blockPos);
 	}
 
 	public static Map<Integer, WeakReference<AbstractContraptionEntity>> loadedContraptions(ClientLevel level) {
-		return ModListHelper.CREATE_MAJOR_VERSION < 6
+		return ModListHelper.IS_LEGACY_CREATE
 			? Create5Compat.loadedContraptions(level)
 			: Create6Compat.loadedContraptions(level);
 	}
@@ -427,6 +427,20 @@ public class CreateCompat {
 		AABB bounds = new AABB(x - 1, y - 1, z - 1, x + 1, Math.max(y + 16, level.getMaxBuildHeight()), z + 1);
 		forEachContraption(level, contraptionEntity -> {
 			boolean b1 = collideWithContraption(level, pos, Vec3.ZERO, bounds, contraptionEntity, true);
+			// estimate = true for a better performance
+			if (!b1) {
+				return true;
+			}
+			b[0] = true;
+			return false;
+		});
+		return b[0];
+	}
+
+	public static boolean isCollideWithContraption(ClientLevel level, Vec3 pos, Vec3 motion, AABB bb) {
+		boolean[] b = {false};
+		forEachContraption(level, contraptionEntity -> {
+			boolean b1 = collideWithContraption(level, pos, motion, bb, contraptionEntity, true);
 			// estimate = true for a better performance
 			if (!b1) {
 				return true;

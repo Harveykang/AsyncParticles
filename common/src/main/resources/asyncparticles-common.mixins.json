@@ -58,6 +58,7 @@
     "modernui.MixinRenderSystem",
     "off_thread_access.MixinClassInstanceMultiMap",
     "off_thread_access.MixinLevelChunk",
+    "off_thread_access.MixinLevelRenderer",
     "off_thread_access.MixinSoundEngine",
     "physicsmod.MixinWeatherParticle",
     "subtle_effects.MixinAsyncRenderer",

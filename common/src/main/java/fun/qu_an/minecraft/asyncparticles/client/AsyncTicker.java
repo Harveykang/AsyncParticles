@@ -95,7 +95,7 @@ public class AsyncTicker {
 		try {
 			SYNC_PARTICLE_TYPES.add((Class<? extends Particle>) Class.forName(className));
 		} catch (Exception e) {
-			LOGGER.error("", e);
+			LOGGER.warn("", e);
 		}
 	}
 
@@ -314,7 +314,8 @@ public class AsyncTicker {
 	}
 
 	public static ReportedException constructCrashReport(Particle particle, Throwable t) {
-		if (t instanceof ReportedException re) {
+		ReportedException re = Utils.getReportedException(t);
+		if (re != null) {
 			return re;
 		}
 		CrashReport crashReport = CrashReport.forThrowable(t, "Ticking Particle");

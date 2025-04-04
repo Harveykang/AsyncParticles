@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.effecticularity;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.effecticularity_v1_0_2;
 
 import concerrox.effective.particle.RippleParticle;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = RippleParticle.class)
+@Mixin(RippleParticle.class)
 public abstract class MixinRippleParticle extends TextureSheetParticle {
 	@Shadow(remap = false)
 	@Final

@@ -32,10 +32,18 @@ public class AsyncparticlesClient {
 					}
 					ParticleRainCompat.onShipCollision(level, location, shipMovement, aabb);
 					return shipMovement;
+//					boolean b = VSClientUtils.isEntityMovColShipOnly(null, v, aabb, level);
+//					if (!b) {
+//						return v;
+//					}
+//					ParticleRainCompat.onShipCollision(level, location, v, aabb);
+//					return null;
 				});
 				WeatherParticleAddon.CollisionFunction function = (level, location, v, aabb) -> {
 					Vec3 shipMovement = VSClientUtils.entityMovColShipOnly(null, v, aabb, level);
 					return shipMovement == null ? v : shipMovement;
+//					boolean b = VSClientUtils.isEntityMovColShipOnly(null, v, aabb, level);
+//					return b ? null : v;
 				};
 				WeatherParticleAddon.Type.SNOW.register(function);
 				WeatherParticleAddon.Type.OTHER.register(function);
