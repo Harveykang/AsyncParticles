@@ -212,11 +212,14 @@ public class AsyncTicker {
 		tryReload();
 		tryDebug();
 		CompletableFuture<Void> particleFuture;
+		List<Runnable> blockEntityOperations = BLOCK_ENTITY_OPERATIONS;
 		if (!levelRunning || !SimplePropertiesConfig.asyncBlockEntityTick()) {
 			particleFuture = CompletableFuture.runAsync(() -> {
 			}, EXECUTOR);
+			if (!blockEntityOperations.isEmpty()){
+				blockEntityOperations.clear();
+			}
 		} else {
-			List<Runnable> blockEntityOperations = BLOCK_ENTITY_OPERATIONS;
 			Runnable[] blockEntityTasks = blockEntityOperations.toArray(new Runnable[0]);
 			blockEntityOperations.clear();
 			particleFuture = CompletableFuture.runAsync(() -> {

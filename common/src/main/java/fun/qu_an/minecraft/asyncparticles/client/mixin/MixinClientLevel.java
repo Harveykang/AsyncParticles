@@ -69,7 +69,7 @@ public abstract class MixinClientLevel extends Level {
 			!SimplePropertiesConfig.asyncBlockEntityAnimate()) {
 			original.call(i, j, k);
 		} else {
-			AsyncTicker.BLOCK_ENTITY_OPERATIONS.add(() -> original.call(i, j, k));
+			AsyncTicker.END_TICK_OPERATIONS.add(() -> original.call(i, j, k));
 		}
 	}
 

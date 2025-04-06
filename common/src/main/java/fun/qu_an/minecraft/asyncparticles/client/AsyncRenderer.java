@@ -240,6 +240,9 @@ public class AsyncRenderer {
 		if (levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();
 		}
+
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.enableCull();
 	}
 
 	public static void irisOpaque(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
