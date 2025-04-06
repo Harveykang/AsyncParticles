@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.blaze3d.systems.RenderSystem;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +15,7 @@ public abstract class MixinLevelRenderer {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(x, y, z, reRenderOnMainThread);
 		} else {
-			RenderSystem.recordRenderCall(() -> original.call(x, y, z, reRenderOnMainThread));
+			ThreadUtil.submitClientTask(() -> original.call(x, y, z, reRenderOnMainThread));
 		}
 	}
 
@@ -23,7 +24,7 @@ public abstract class MixinLevelRenderer {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(pos, reRenderOnMainThread);
 		} else {
-			RenderSystem.recordRenderCall(() -> original.call(pos, reRenderOnMainThread));
+			ThreadUtil.submitClientTask(() -> original.call(pos, reRenderOnMainThread));
 		}
 	}
 
@@ -32,7 +33,7 @@ public abstract class MixinLevelRenderer {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(minX, minY, minZ, maxX, maxY, maxZ);
 		} else {
-			RenderSystem.recordRenderCall(() -> original.call(minX, minY, minZ, maxX, maxY, maxZ));
+			ThreadUtil.submitClientTask(() -> original.call(minX, minY, minZ, maxX, maxY, maxZ));
 		}
 	}
 
@@ -41,7 +42,7 @@ public abstract class MixinLevelRenderer {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(sectionX, sectionY, sectionZ);
 		} else {
-			RenderSystem.recordRenderCall(() -> original.call(sectionX, sectionY, sectionZ));
+			ThreadUtil.submitClientTask(() -> original.call(sectionX, sectionY, sectionZ));
 		}
 	}
 
@@ -50,7 +51,7 @@ public abstract class MixinLevelRenderer {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(breakerId, pos, progress);
 		} else {
-			RenderSystem.recordRenderCall(() -> original.call(breakerId, pos, progress));
+			ThreadUtil.submitClientTask(() -> original.call(breakerId, pos, progress));
 		}
 	}
 }

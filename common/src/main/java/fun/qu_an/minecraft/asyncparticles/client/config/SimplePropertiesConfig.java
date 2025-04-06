@@ -60,7 +60,7 @@ public class SimplePropertiesConfig {
 		forceDoneTextureTick = getBoolean(properties, "forceDoneTextureTick", false);
 		markSyncIfTickFailed = getBoolean(properties, "markSyncIfTickFailed", false);
 		particleLightCache = getBoolean(properties, "particleLightCache", true);
-		suppressCME = getBoolean(properties, "particleLightCache", false);
+		suppressCME = getBoolean(properties, "suppressCME", false);
 
 		if (shouldSave) {
 			properties.store(Files.newOutputStream(CONFIG_FILE), null);

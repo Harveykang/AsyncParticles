@@ -55,9 +55,6 @@ dependencies {
     /* Hex Casting */
 //    modCompileOnly "at.petra-k.hexcasting:hexcasting-fabric-1.20.1:0.11.2-pre-715"
 
-    /* Tombstone */
-//    modCompileOnly fileTree(dir: '../libs', include: 'tombstone-1.20.1-8.9.0.jar')
-
     /* Particular */
     modCompileOnly "maven.modrinth:particular:1.1.1+1.21"
 
@@ -74,5 +71,5 @@ dependencies {
     modCompileOnly "maven.modrinth:subtle-effects:1.9.3" // fabric 1.9.3
 
     /* What Are They Up To */
-    modCompileOnly "maven.modrinth:what-are-they-up-to:BecIHPxZ" // 1.2.3
+    modCompileOnly "maven.modrinth:what-are-they-up-to:y1ZYGDCs" // 1.2.6
 }

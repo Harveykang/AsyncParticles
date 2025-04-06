@@ -70,7 +70,7 @@ public abstract class MixinClientLevel extends Level {
 				original.call(i, j, k);
 				return;
 			}
-			AsyncTicker.BLOCK_ENTITY_OPERATIONS.add(() -> original.call(i, j, k));
+			AsyncTicker.END_TICK_OPERATIONS.add(() -> original.call(i, j, k));
 		}
 	}
 

@@ -22,7 +22,6 @@ public class MixinParticleRainClient {
 
 	@Inject(method = "onJoin", at = @At("HEAD"))
 	private void onJoin(CallbackInfo ci) {
-		ParticleRainCompat.asyncParticles$particleCount.set(0);
-		ParticleRainCompat.asyncParticles$fogCount.set(0);
+		ParticleRainCompat.clearCounters();
 	}
 }

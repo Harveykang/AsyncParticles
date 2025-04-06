@@ -6,7 +6,7 @@
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.APMixinPlugin",
   "client": [
     "MixinActiveProfiler",
-    "MixinClientChunkCache",
+    "off_thread_access.MixinClientChunkCache",
     "MixinClientLevel",
     "MixinFont",
     "MixinLevel",
@@ -29,6 +29,7 @@
     "fabric.effective.MixinEffective",
     "fabric.effectual.MixinAllEffects",
     "fabric.effectual.MixinWaterDripEffect",
+    "fabric.off_thread_access.MixinClassInstanceMultiMap",
     "fabric.particlerain.MixinGroundFogParticle",
     "fabric.particlerain.MixinParticleRainClient",
     "fabric.particlerain.MixinRainParticle",
@@ -54,6 +55,5 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "fabric.off_thread_access.MixinClassInstanceMultiMap"
   ]
 }
