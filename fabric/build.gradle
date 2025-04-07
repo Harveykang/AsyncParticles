@@ -59,7 +59,7 @@ dependencies {
     localRuntime "org.antlr:antlr4-runtime:4.13.1"
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
     localRuntime "org.anarres:jcpp:1.4.14"
-//    modLocalRuntime 'maven.modrinth:scalablelux:0.1.2+beta.1+fabric.6d46f24'
+    modLocalRuntime 'maven.modrinth:scalablelux:0.1.2+beta.1+fabric.6d46f24'
     modLocalRuntime 'maven.modrinth:spark:1.10.121-fabric'
 
     /* Particle Rain/Pretty Rain */

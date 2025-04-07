@@ -16,7 +16,6 @@ import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,6 +25,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.Set;
 import java.util.function.Predicate;
 
 // TODO: 分为两个 Mixin
@@ -122,10 +122,11 @@ public abstract class MixinParticleEngine_Render {
 		RenderSystem.activeTexture(33986);
 		RenderSystem.activeTexture(33984);
 
+		Set<ParticleRenderType> renderOrder = particles.keySet();
 		if (SimplePropertiesConfig.isRenderAsync()) {
-			AsyncRenderer.endAll(renderTypePredicate);
+			AsyncRenderer.endAll(renderTypePredicate, renderOrder);
 		} else {
-			for (ParticleRenderType particleRenderType : particles.keySet()) {
+			for (ParticleRenderType particleRenderType : renderOrder) {
 				if (particleRenderType.renderType() == null) {
 					continue;
 				}

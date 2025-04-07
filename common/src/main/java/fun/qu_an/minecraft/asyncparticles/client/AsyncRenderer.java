@@ -8,6 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.irisshaders.iris.Iris;
@@ -150,9 +151,11 @@ public class AsyncRenderer {
 		captureParticleRenderingSetting();
 		profiler.push("render_async");
 		TextureManager textureManager = particleEngine.textureManager;
-		IdentityHashMap<ParticleRenderType, CompletableFuture<Void>> asyncTasks = new IdentityHashMap<>();
-		for (ParticleRenderType particleRenderType
-			: ModListHelper.IS_FORGE ? particleEngine.particles.keySet() : ParticleEngine.RENDER_ORDER) {
+		Collection<ParticleRenderType> renderOrder = ModListHelper.IS_FORGE
+			? particleEngine.particles.keySet()
+			: ParticleEngine.RENDER_ORDER;
+		ObjectArrayList<CompletableFuture<Void>> asyncTasks = new ObjectArrayList<>(renderOrder.size());
+		for (ParticleRenderType particleRenderType : renderOrder) {
 			if (particleRenderType.renderType() == null) {
 				continue;
 			}
@@ -167,17 +170,17 @@ public class AsyncRenderer {
 			CompletableFuture<Void> future = CompletableFuture.runAsync(() ->
 					renderParticles(f, camera, queue, particleRenderType, bufferBuilder), EXECUTOR)
 				.exceptionally(AsyncRenderer::renderAsyncExceptionally);
-			asyncTasks.put(particleRenderType, future);
+			asyncTasks.add(future);
 		}
 		int size = asyncTasksSize = asyncTasks.size();
-		asyncTask = CompletableFuture.allOf(asyncTasks.values().toArray(new CompletableFuture[size]));
+		asyncTask = CompletableFuture.allOf(asyncTasks.toArray(new CompletableFuture[size]));
 		tryDebug();
 		clearSync();
 		profiler.pop();
 	}
 
 	public static void captureParticleRenderingSetting() {
-		if (ModListHelper.FABRIC_IRIS_LOADED && Iris.isPackInUseQuick()) {
+		if (ModListHelper.IRIS_LIKE_LOADED && Iris.isPackInUseQuick()) {
 			particleRenderingSettings = getParticleRenderingSettings0();
 		}
 	}
@@ -231,7 +234,8 @@ public class AsyncRenderer {
 		return null;
 	}
 
-	public static void endAll(List<ParticleRenderType> renderOrder) {
+	// Fabric
+	public static void endAll(Collection<ParticleRenderType> renderOrder) {
 		waitForAsyncTasks();
 		for (ParticleRenderType particleRenderType : renderOrder) {
 			BindingTesselator tesselator = BTESSELATORS.get(particleRenderType);
@@ -256,15 +260,18 @@ public class AsyncRenderer {
 		}
 	}
 
-	public static void endAll(Predicate<ParticleRenderType> renderTypePredicate) {
+	// Forge
+	public static void endAll(Predicate<ParticleRenderType> renderTypePredicate, Collection<ParticleRenderType> renderOrder) {
 		waitForAsyncTasks();
-		for (Map.Entry<ParticleRenderType, BindingTesselator> entry : BTESSELATORS.entrySet()) {
-			BindingTesselator tesselator = entry.getValue();
-			if (tesselator == BindingTesselator.EMPTY) {
+		for (ParticleRenderType particleRenderType : renderOrder) {
+			if (particleRenderType.renderType() == null) {
 				continue;
 			}
-			ParticleRenderType particleRenderType = entry.getKey();
 			if (!renderTypePredicate.test(particleRenderType)) {
+				continue;
+			}
+			BindingTesselator tesselator = BTESSELATORS.get(particleRenderType);
+			if (tesselator == null || tesselator == BindingTesselator.EMPTY) {
 				continue;
 			}
 			BufferBuilder builder = tesselator.getBuilder();
@@ -428,5 +435,9 @@ public class AsyncRenderer {
 
 	public static boolean isTranslucentPhase(Object phase) {
 		return phase == ParticleRenderingPhase.TRANSLUCENT;
+	}
+
+	public static boolean isOpaquePhase(Object phase) {
+		return phase == ParticleRenderingPhase.OPAQUE;
 	}
 }

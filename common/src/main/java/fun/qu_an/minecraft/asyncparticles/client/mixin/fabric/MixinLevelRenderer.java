@@ -39,25 +39,26 @@ public abstract class MixinLevelRenderer {
 	@Final
 	private LevelTargetBundle targets;
 
-	@Inject(method = "method_62214", at = @At(value = "INVOKE",
-		ordinal = 1,
-		target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V"))
-	private void onRenderMain(FogParameters fogParameters,
-												DeltaTracker deltaTracker,
-												Camera camera,
-												ProfilerFiller profilerFiller,
-												Matrix4f matrix4f,
-												Matrix4f matrix4f2,
-												ResourceHandle<?> resourceHandle,
-												ResourceHandle<?> resourceHandle2,
-												ResourceHandle<?> resourceHandle3,
-												ResourceHandle<?> resourceHandle4,
-												boolean bl,
-												Frustum frustum,
-												ResourceHandle<?> resourceHandle5,
-												CallbackInfo ci,
-												@Local(ordinal = 0) MultiBufferSource.BufferSource bufferSource,
-												@Local(ordinal = 0) float f) {
+	@Inject(method = "method_62214",
+		at = @At(value = "INVOKE", ordinal = 0, shift = At.Shift.AFTER,
+			// after crumbling buffer source endBatch()
+			target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V"))
+	private void onAddMain(FogParameters fogParameters,
+						   DeltaTracker deltaTracker,
+						   Camera camera,
+						   ProfilerFiller profilerFiller,
+						   Matrix4f matrix4f,
+						   Matrix4f matrix4f2,
+						   ResourceHandle<?> resourceHandle,
+						   ResourceHandle<?> resourceHandle2,
+						   ResourceHandle<?> resourceHandle3,
+						   ResourceHandle<?> resourceHandle4,
+						   boolean bl,
+						   Frustum frustum,
+						   ResourceHandle<?> resourceHandle5,
+						   CallbackInfo ci,
+						   @Local(ordinal = 0) MultiBufferSource.BufferSource bufferSource,
+						   @Local(ordinal = 0) float f) {
 		if (targets.particles == null && AsyncRenderer.isMixedParticleRenderingSetting()) {
 			Profiler.get().popPush("opaque_particles");
 			ParticleEngine particleEngine = this.minecraft.particleEngine;
@@ -68,12 +69,12 @@ public abstract class MixinLevelRenderer {
 
 	@Inject(method = "method_62213", at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V"))
-	private void onRenderParticles$setShaderFog(FogParameters fogParameters,
-												ResourceHandle<?> resourceHandle,
-												ResourceHandle<?> resourceHandle2,
-												Camera camera,
-												float f,
-												CallbackInfo ci) {
+	private void onRenderParticles(FogParameters fogParameters,
+								   ResourceHandle<?> resourceHandle,
+								   ResourceHandle<?> resourceHandle2,
+								   Camera camera,
+								   float f,
+								   CallbackInfo ci) {
 		if (AsyncRenderer.isMixedParticleRenderingSetting()) {
 			((PhasedParticleEngine) minecraft.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
 		} else {
@@ -116,7 +117,7 @@ public abstract class MixinLevelRenderer {
 								   @Share("asyncparticles$addParticlesPassOperation") LocalRef<Operation<Void>> originalRef) {
 		// as late as possible
 //		this.asyncparticles$addParticlesPassOperation.call(frameGraphBuilder, camera, f, fogParameters);
-		if (SimplePropertiesConfig.isRenderAsync()){
+		if (SimplePropertiesConfig.isRenderAsync()) {
 			originalRef.get().call(this, frameGraphBuilder, camera, f, fogParameters);
 		}
 	}

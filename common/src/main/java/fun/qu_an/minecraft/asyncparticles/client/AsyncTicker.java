@@ -202,6 +202,7 @@ public class AsyncTicker {
 			tryReload();
 			tryDebug();
 			END_TICK_OPERATIONS.forEach(Runnable::run);
+			END_TICK_OPERATIONS.clear();
 			END_TICK_EVENTS.forEach(Runnable::run);
 			return;
 		}
@@ -497,11 +498,11 @@ public class AsyncTicker {
 	}
 
 	public static void addEndTickTask(MinecraftConsumer consumer) {
-		registerEndTickEvent(() -> consumer.accept(Minecraft.getInstance()));
+		addEndTickTask(() -> consumer.accept(Minecraft.getInstance()));
 	}
 
 	public static void addEndTickTask(ClientLevelConsumer consumer) {
-		registerEndTickEvent(() -> consumer.accept(Minecraft.getInstance().level));
+		addEndTickTask(() -> consumer.accept(Minecraft.getInstance().level));
 	}
 
 	public static void addEndTickTask(Runnable operation) {
