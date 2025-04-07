@@ -1,8 +1,9 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.tick;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,12 +33,16 @@ public class MixinMinecraft {
 		target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;"))
 	private void onSetLevel(CallbackInfo ci) {
 		// TODO: 这玩意到底有没有用？？
-		AsyncTicker.destroy();
-		AsyncRenderer.destroy();
+		AsyncTicker.reset();
+		AsyncRenderer.reset();
 	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;tick()V"))
 	private void redirectParticleEngineTick(ParticleEngine instance) {
-		AsyncTicker.tickSync();
+		if (SimplePropertiesConfig.isTickAsync()) {
+			AsyncTicker.tickSyncParticles();
+		} else {
+			instance.tick();
+		}
 	}
 }

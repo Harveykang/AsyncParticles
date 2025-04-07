@@ -1,6 +1,5 @@
 accessWidener v2 named
 
-accessible field net/minecraft/Util BACKGROUND_EXECUTOR Ljava/util/concurrent/ExecutorService;
 transitive-mutable field net/minecraft/world/level/Level random Lnet/minecraft/util/RandomSource;
 accessible field net/minecraft/client/particle/ParticleEngine particles Ljava/util/Map;
 accessible field net/minecraft/client/particle/Particle x D
@@ -15,7 +14,6 @@ accessible field com/mojang/blaze3d/vertex/PoseStack poseStack Ljava/util/Deque;
 accessible method net/minecraft/client/renderer/RenderStateShard setupRenderState ()V
 accessible method net/minecraft/client/renderer/RenderStateShard clearRenderState ()V
 accessible class net/minecraft/client/renderer/RenderStateShard$OutputStateShard
-accessible field net/minecraft/client/renderer/LevelRenderer transparencyChain Lnet/minecraft/client/renderer/PostChain;
 accessible field net/minecraft/client/renderer/RenderStateShard PARTICLES_TARGET Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;
 accessible field net/minecraft/client/renderer/RenderStateShard CLOUDS_TARGET Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;
 accessible field net/minecraft/client/renderer/RenderStateShard WEATHER_TARGET Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;
@@ -24,7 +22,6 @@ accessible method net/minecraft/Util getMaxThreads ()I
 accessible field net/minecraft/client/particle/ParticleEngine particlesToAdd Ljava/util/Queue;
 accessible field net/minecraft/client/renderer/RenderType sortOnUpload Z
 accessible field net/minecraft/client/renderer/LevelRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
-accessible method net/minecraft/Util makeExecutor (Ljava/lang/String;)Ljava/util/concurrent/ExecutorService;
 accessible field net/minecraft/world/level/Level pendingBlockEntityTickers Ljava/util/List;
 accessible field net/minecraft/client/particle/Particle bbWidth F
 accessible field net/minecraft/client/particle/Particle bbHeight F
@@ -52,3 +49,8 @@ accessible field net/minecraft/client/particle/ParticleEngine textureManager Lne
 accessible field net/minecraft/client/particle/ParticleEngine trackingEmitters Ljava/util/Queue;
 accessible field net/minecraft/client/particle/ParticleEngine RENDER_ORDER Ljava/util/List;
 accessible field com/mojang/blaze3d/vertex/ByteBufferBuilder capacity I
+accessible method net/minecraft/client/renderer/LevelRenderer addParticlesPass (Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/FogParameters;)V
+accessible field net/minecraft/client/renderer/RenderStateShard name Ljava/lang/String;
+accessible field net/minecraft/client/renderer/LevelRenderer capturedFrustum Lnet/minecraft/client/renderer/culling/Frustum;
+accessible field net/minecraft/client/renderer/LevelRenderer cullingFrustum Lnet/minecraft/client/renderer/culling/Frustum;
+accessible field net/minecraft/client/renderer/LevelRenderer captureFrustum Z

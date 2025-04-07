@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric;
+package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.client.particle.ParticleEngine;
@@ -14,7 +14,6 @@ import java.util.*;
 public abstract class MixinParticleEngine_Late {
 	@Shadow
 	@Mutable
-	@Final
 	public static List<ParticleRenderType> RENDER_ORDER;
 
 	// Some mod has duplicated render type (render twice), cause concurrent access to the same queue...

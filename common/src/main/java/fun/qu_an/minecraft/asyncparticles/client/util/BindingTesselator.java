@@ -47,6 +47,10 @@ public class BindingTesselator {
 		return this.builder = new BufferBuilder(this.buffer, mode, format);
 	}
 
+	public BufferBuilder getBuilder() {
+		return this.builder;
+	}
+
 	public void clear() {
 		BufferBuilder builder = this.builder;
 		if (builder != null) {

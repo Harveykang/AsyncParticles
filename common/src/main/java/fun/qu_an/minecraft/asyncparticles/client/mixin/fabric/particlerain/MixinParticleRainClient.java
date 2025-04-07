@@ -10,19 +10,18 @@ import pigcart.particlerain.ParticleRainClient;
 
 @Mixin(value = ParticleRainClient.class, remap = false)
 public class MixinParticleRainClient {
-	@ModifyExpressionValue(method = "lambda$onInitializeClient$0", at = @At(value = "FIELD", target = "Lpigcart/particlerain/ParticleRainClient;particleCount:I"))
+	@ModifyExpressionValue(method = "lambda$onInitializeClient$2", at = @At(value = "FIELD", target = "Lpigcart/particlerain/WeatherParticleManager;particleCount:I"))
 	private static int modifyParticleCount(int original) {
 		return ParticleRainCompat.asyncParticles$particleCount.get();
 	}
 
-	@ModifyExpressionValue(method = "lambda$onInitializeClient$0", at = @At(value = "FIELD", target = "Lpigcart/particlerain/ParticleRainClient;fogCount:I"))
+	@ModifyExpressionValue(method = "lambda$onInitializeClient$2", at = @At(value = "FIELD", target = "Lpigcart/particlerain/WeatherParticleManager;fogCount:I"))
 	private static int modifyFogCount(int original) {
 		return ParticleRainCompat.asyncParticles$fogCount.get();
 	}
 
 	@Inject(method = "onJoin", at = @At("HEAD"))
 	private void onJoin(CallbackInfo ci) {
-		ParticleRainCompat.asyncParticles$particleCount.set(0);
-		ParticleRainCompat.asyncParticles$fogCount.set(0);
+		ParticleRainCompat.clearCounters();
 	}
 }

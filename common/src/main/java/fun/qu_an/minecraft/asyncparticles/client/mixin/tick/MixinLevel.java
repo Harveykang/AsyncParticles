@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.tick;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;

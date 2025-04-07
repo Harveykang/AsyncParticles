@@ -16,12 +16,12 @@ public class MixinParticleEngine {
 	@Shadow
 	protected ClientLevel level;
 
-	@WrapWithCondition(method = "render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V",
+	@WrapWithCondition(method = "renderParticleType",
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/Particle;render(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/Camera;F)V"))
-	private boolean shouldRenderParticle(Particle instance,
-										 VertexConsumer vertexConsumer,
-										 Camera camera,
-										 float v) {
-		return SubtleEffectsCompat.shouldRenderParticle(instance, camera, level);
+	private static boolean shouldRenderParticle(Particle instance,
+												VertexConsumer vertexConsumer,
+												Camera camera,
+												float v) {
+		return SubtleEffectsCompat.shouldRenderParticle(instance, camera);
 	}
 }

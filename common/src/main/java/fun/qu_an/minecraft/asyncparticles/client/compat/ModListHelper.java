@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.compat;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import org.jetbrains.annotations.Nullable;
-import org.sinytra.connector.ConnectorEarlyLoader;
+//import org.sinytra.connector.ConnectorEarlyLoader;
 
 public class ModListHelper {
 	public static final boolean IS_FORGE = isForge();
@@ -73,7 +73,8 @@ public class ModListHelper {
 
 	@ExpectPlatform
 	public static boolean isModLoaded(String modId) {
-		throw new AssertionError();
+		throwAssertionError();
+		return true;
 	}
 
 	@ExpectPlatform
@@ -92,13 +93,12 @@ public class ModListHelper {
 		throw new AssertionError();
 	}
 
-	@SuppressWarnings("ConstantValue")
 	public static boolean isForgeModLoaded(String modId) {
-		return IS_FORGE && isModLoaded(modId) && (!CONNECTORMOD_LOADED || !ConnectorEarlyLoader.isConnectorMod(modId));
+		return IS_FORGE && isModLoaded(modId);
 	}
 
 	public static boolean isFabricModLoaded(String modId) {
-		return IS_FORGE ? CONNECTORMOD_LOADED && ConnectorEarlyLoader.isConnectorMod(modId) : isModLoaded(modId);
+		return !IS_FORGE && isModLoaded(modId);
 	}
 
 	@Nullable

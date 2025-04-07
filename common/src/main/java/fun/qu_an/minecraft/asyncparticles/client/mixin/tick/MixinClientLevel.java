@@ -1,14 +1,16 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.tick;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
@@ -21,12 +23,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.function.Supplier;
-
 @Mixin(value = ClientLevel.class, priority = 1100)
 public abstract class MixinClientLevel extends Level {
-	protected MixinClientLevel(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, RegistryAccess registryAccess, Holder<DimensionType> holder, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l, int i) {
-		super(writableLevelData, resourceKey, registryAccess, holder, supplier, bl, bl2, l, i);
+	protected MixinClientLevel(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, boolean isClientSide, boolean isDebug, long biomeZoomSeed, int maxChainedNeighborUpdates) {
+		super(levelData, dimension, registryAccess, dimensionTypeRegistration, isClientSide, isDebug, biomeZoomSeed, maxChainedNeighborUpdates);
 	}
 
 	@Override
@@ -47,13 +47,13 @@ public abstract class MixinClientLevel extends Level {
 			super.tickBlockEntities();
 			return;
 		}
-		ProfilerFiller profilerFiller = this.getProfiler();
-		profilerFiller.push("blockEntities");
+		ProfilerFiller profiler = Profiler.get();
+		profiler.push("blockEntities");
 
 		// this is more compatible with mixins
 		// See MixinLevel.tickBlockEntities
 		AsyncTicker.BLOCK_ENTITY_OPERATIONS.add(super::tickBlockEntities);
-		profilerFiller.pop();
+		profiler.pop();
 	}
 
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
@@ -65,12 +65,15 @@ public abstract class MixinClientLevel extends Level {
 
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int i, int j, int k, Operation<Void> original) {
-		if (AsyncTicker.shouldTickParticles) {
-			if (!SimplePropertiesConfig.asyncBlockEntityAnimate()) {
-				original.call(i, j, k);
-				return;
-			}
-			AsyncTicker.BLOCK_ENTITY_OPERATIONS.add(() -> original.call(i, j, k));
+		if (!AsyncTicker.shouldTickParticles) {
+			// don't tick animate if the game is lagging
+			return;
+		}
+		if (!ModListHelper.PHYSICSMOD_LOADED &&
+			!SimplePropertiesConfig.asyncBlockEntityAnimate()) {
+			original.call(i, j, k);
+		} else {
+			AsyncTicker.END_TICK_OPERATIONS.add(() -> original.call(i, j, k));
 		}
 	}
 

@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 
 import net.minecraft.util.profiling.ActiveProfiler;
 import org.spongepowered.asm.mixin.Mixin;

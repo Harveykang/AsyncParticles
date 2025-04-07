@@ -77,6 +77,10 @@ subprojects {
             name = 'Kotlin for Forge'
             url = 'https://thedarkcolour.github.io/KotlinForForge/'
         }
+        maven {
+            url = "https://maven.isxander.dev/releases"
+            name = "Xander Maven"
+        }
     }
 
     dependencies {

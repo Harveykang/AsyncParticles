@@ -18,12 +18,12 @@ public abstract class MixinSnowParticle extends MixinWeatherParticle {
 		super(level, x, y, z);
 	}
 
-	@Inject(method = "tick", at = @At("TAIL"))
-	private void onTick(CallbackInfo ci) {
-		if (!level.getFluidState(pos).isEmpty()) {
-			asyncparticles$setInvisible(true);
-		}
-	}
+//	@Inject(method = "tick", at = @At("TAIL"))
+//	private void onTick(CallbackInfo ci) {
+//		if (!level.getFluidState(pos).isEmpty()) {
+//			asyncparticles$setInvisible(true);
+//		}
+//	}
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {

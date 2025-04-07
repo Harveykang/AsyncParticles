@@ -13,15 +13,12 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(ParticleEngine.class)
 public class MixinParticleEngine {
-	@Shadow
-	protected ClientLevel level;
-
-	@WrapWithCondition(method = "render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V",
+	@WrapWithCondition(method = "renderParticleType(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/particle/ParticleRenderType;Ljava/util/Queue;Lnet/minecraft/client/renderer/culling/Frustum;)V",
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/Particle;render(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/Camera;F)V"))
-	private boolean shouldRenderParticle(Particle instance,
-										 VertexConsumer vertexConsumer,
-										 Camera camera,
-										 float v) {
-		return SubtleEffectsCompat.shouldRenderParticle(instance, camera, level);
+	private static boolean shouldRenderParticle(Particle instance,
+												VertexConsumer vertexConsumer,
+												Camera camera,
+												float v) {
+		return SubtleEffectsCompat.shouldRenderParticle(instance, camera);
 	}
 }

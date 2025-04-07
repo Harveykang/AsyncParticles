@@ -24,8 +24,6 @@ import java.util.Collections;
 
 @Mixin(value = WeatherParticle.class)
 public abstract class MixinWeatherParticle extends TextureSheetParticle implements WeatherParticleAddon {
-	@Shadow
-	protected BlockPos.MutableBlockPos pos;
 	@Unique
 	private boolean asyncparticles$invisible;
 	@Unique
@@ -60,7 +58,7 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 		asyncparticles$setWeatherAABB(AABB.ofSize(new Vec3(x, y, z), 3.8, 3.8, 3.8));
 	}
 
-	@Inject(method = "remove", at = @At(value = "FIELD", remap = false, ordinal = 0, target = "Lpigcart/particlerain/ParticleRainClient;particleCount:I"))
+	@Inject(method = "remove", at = @At(value = "FIELD", remap = false, ordinal = 0, target = "Lpigcart/particlerain/WeatherParticleManager;particleCount:I"))
 	private void onRemove(CallbackInfo ci) {
 		ParticleRainCompat.asyncParticles$particleCount.getAndDecrement();
 	}

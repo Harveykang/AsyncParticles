@@ -25,7 +25,9 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			@Override
 			public boolean preTest(String mixinClassName) {
 				return switch (mixinClassName) {
-					case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin" -> true;
+					case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin",
+						 "net.irisshaders.iris.mixin.fabric.MixinParticleEngine",
+						 "net.irisshaders.iris.mixin.fabric.MixinLevelRenderer" -> true;
 					default -> false;
 				};
 			}
@@ -38,16 +40,18 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				return switch (mixinClassName) {
 					case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin" ->
 						mixinMethodName.equals("shouldRenderParticle");
+					case "net.irisshaders.iris.mixin.fabric.MixinParticleEngine" ->
+						mixinMethodName.equals("iris$cancel");
 					default -> false;
 				};
 			}
 		});
 		MixinCancellerRegistrar.register((targetClassNames, mixinClassName)
 			-> switch (mixinClassName) {
-			case "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer",
+			case "net.irisshaders.iris.mixin.forge.MixinLevelRenderer",
 				 "net.irisshaders.iris.mixin.fabric.MixinLevelRenderer",
 				 // disable this because our implementation is better
-				 "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin",
+//				 "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin",
 				 // o(≧口≦)o particle_core: These mixins not support async rendering
 				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerFrustumMixin",
 				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerRotationMixin",
@@ -100,8 +104,9 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
-			case "fake_renders",
-				 "off_thread_access" -> true;
+			case "off_thread_access",
+				 "tick",
+				 "render" -> true;
 			case "modernui" -> ModListHelper.MODERN_UI_LOADED;
 			case "create" -> ModListHelper.CREATE_LOADED;
 			case "sodium_0_6" -> ModListHelper.SODIUM_LOADED

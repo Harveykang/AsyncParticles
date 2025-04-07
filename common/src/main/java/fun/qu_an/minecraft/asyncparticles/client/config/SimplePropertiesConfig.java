@@ -22,6 +22,8 @@ public class SimplePropertiesConfig {
 	private static boolean markSyncIfTickFailed = false;
 	private static boolean particleLightCache = true;
 	private static boolean suppressCME = false;
+	private static boolean renderAsync = true;
+	private static boolean tickAsync = true;
 	private static boolean collideWithCreateModContraptions = true;
 	private static boolean collideWithVSModShips = true;
 
@@ -60,7 +62,9 @@ public class SimplePropertiesConfig {
 		forceDoneTextureTick = getBoolean(properties, "forceDoneTextureTick", false);
 		markSyncIfTickFailed = getBoolean(properties, "markSyncIfTickFailed", false);
 		particleLightCache = getBoolean(properties, "particleLightCache", true);
-		suppressCME = getBoolean(properties, "particleLightCache", false);
+		suppressCME = getBoolean(properties, "suppressCME", false);
+		renderAsync = getBoolean(properties, "renderAsync", true);
+		tickAsync = getBoolean(properties, "tickAsync", true);
 
 		if (shouldSave) {
 			properties.store(Files.newOutputStream(CONFIG_FILE), null);
@@ -100,7 +104,7 @@ public class SimplePropertiesConfig {
 	}
 
 	public static boolean asyncBlockEntityAnimate() {
-		return !ModListHelper.PHYSICSMOD_LOADED && asyncClientBlockEntityAnimate;
+		return asyncClientBlockEntityAnimate;
 	}
 
 	public static boolean forceDoneBlockAnimateTick() {
@@ -125,5 +129,13 @@ public class SimplePropertiesConfig {
 
 	public static boolean suppressCME() {
 		return suppressCME;
+	}
+
+	public static boolean isRenderAsync() {
+		return renderAsync;
+	}
+
+	public static boolean isTickAsync() {
+		return tickAsync;
 	}
 }

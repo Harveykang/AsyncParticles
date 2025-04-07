@@ -19,11 +19,6 @@ public abstract class MixinRainParticle extends MixinWeatherParticle {
 		super(clientLevel, d, e, f);
 	}
 
-	@Redirect(method = "tick", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/core/BlockPos$MutableBlockPos;below(I)Lnet/minecraft/core/BlockPos;"))
-	private BlockPos modifyMaxCount(BlockPos.MutableBlockPos instance, int i) {
-		return instance;
-	}
-
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
 		setSize(3.8F, 3.8F);
