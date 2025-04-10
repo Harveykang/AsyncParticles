@@ -20,7 +20,11 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		if (!ModListHelper.IS_CLIENT) {
 			return;
 		}
+		// init extensions
 		ExtensionCancelMixinMethod.init();
+//		ExtensionRegistrar.register(new ExtensionMemberCancelApplication());
+//		MixinTargetsModifierApplication.init(GeneratedImplDummy.LOOKUP, this);
+
 		ExtensionCancelMixinMethod.register(new ExtensionCancelMixinMethod.Canceller() {
 			@Override
 			public boolean preTest(String mixinClassName) {
@@ -63,6 +67,59 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				-> true;
 			default -> false;
 		});
+
+//			@Override
+//			public boolean preTest(List<String> targetClassNames, String mixinClassName) {
+//				return switch (mixinClassName) {
+//					case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin",
+//						 "net.irisshaders.iris.mixin.fabric.MixinParticleEngine",
+//						 "net.irisshaders.iris.mixin.fabric.MixinLevelRenderer" -> true;
+//					default -> false;
+//				};
+//			}
+
+//			@Override
+//			public boolean shouldCancelMethod(List<String> targetClassNames,
+//											  String mixinClassName,
+//											  List<String> targetMethodDescs,
+//											  String mixinMethodName,
+//											  String mixinMethodDesc) {
+//				return switch (mixinClassName) {
+//					case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin" ->
+//						mixinMethodName.equals("shouldRenderParticle");
+//					case "net.irisshaders.iris.mixin.fabric.MixinParticleEngine" ->
+//						mixinMethodName.equals("iris$cancel");
+//					default -> false;
+//				};
+//			}
+//		MixinTargetsModifierRegistrar.register(new MixinTargetModifier() {
+//			@Override
+//			public String getMixinClassName() {
+//				return "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinConcurrencyUnsafeParticles";
+//			}
+//
+//			@Override
+//			public List<String> getTargets(List<String> list) {
+//				System.out.println("TargetModifier.apply");
+//				for (String s : list) {
+//					System.out.println(s);
+//				}
+//				List<String> collect = list.stream()
+//					.filter(mixinClassName -> !"net.minecraft.client.particle.Particle".equals(mixinClassName))
+//					.collect(Util.toMutableList());
+//				collect.add("net.minecraft.client.particle.ItemPickupParticle");
+//				System.out.println("TargetModifier.apply.collect");
+//				for (String s : collect) {
+//					System.out.println(s);
+//				}
+//				return collect;
+//			}
+//
+//			@Override
+//			public boolean shouldApplyMixin(String s) {
+//				return true;
+//			}
+//		});
 	}
 
 	@Override

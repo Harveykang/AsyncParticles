@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -148,7 +147,7 @@ public abstract class MixinParticleEngine_Render {
 //			}
 //		}
 
-		if (!ModListHelper.IRIS_LIKE_LOADED || !AsyncRenderer.isTranslucentPhase(phase)) {
+		if (renderTypePredicate.test(ParticleRenderType.PARTICLE_SHEET_OPAQUE)) {
 			Queue<Particle> queue2 = this.particles.get(ParticleRenderType.CUSTOM);
 			if (queue2 != null && !queue2.isEmpty()) {
 				renderCustomParticles(camera, partialTick, bufferSource, queue2, frustum);
