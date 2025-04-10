@@ -118,7 +118,7 @@ public class AsyncRenderer {
 
 	public static Frustum frustum;
 	private static Consumer<String> debugConsumer;
-	public static CompletableFuture<Void> asyncTask;
+	private static CompletableFuture<Void> asyncTask;
 	private static boolean mixedParticleRenderingSetting = false;
 	private static int asyncTasksSize;
 	private static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
@@ -238,7 +238,7 @@ public class AsyncRenderer {
 			RenderStateShard.PARTICLES_TARGET.setupRenderState();
 		}
 		profiler.push("wait_for_async_tasks");
-		asyncTask.join();
+		waitForAsyncTasks();
 		profiler.pop();
 
 		ParticleEngine particleEngine = mc.particleEngine;
@@ -253,6 +253,13 @@ public class AsyncRenderer {
 
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.enableCull();
+	}
+
+	public static void waitForAsyncTasks() {
+		if (asyncTask != null) {
+			asyncTask.join();
+			asyncTask = null;
+		}
 	}
 
 	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable t) {
@@ -385,11 +392,7 @@ public class AsyncRenderer {
 	/* Destroy */
 
 	public static void destroy() {
-		if (asyncTask != null) {
-			// 应该不会到这里
-			asyncTask.join();
-//			asyncTask = null;
-		}
+		waitForAsyncTasks();
 		clearBTesselators();
 		clearSync();
 	}

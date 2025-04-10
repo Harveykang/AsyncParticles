@@ -24,7 +24,7 @@ public class AsyncRendererImpl {
 		profiler.popPush("async_particles");
 
 		profiler.push("wait_for_async_tasks");
-		AsyncRenderer.asyncTask.join();
+		AsyncRenderer.waitForAsyncTasks();
 		profiler.pop();
 
 		ParticleEngine particleEngine = mc.particleEngine;

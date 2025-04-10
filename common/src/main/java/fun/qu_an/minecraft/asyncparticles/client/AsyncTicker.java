@@ -7,6 +7,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceC
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.util.BusyWaitEvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionTracker;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
@@ -434,16 +435,28 @@ public class AsyncTicker {
 
 	private static void tryReload() {
 		if (shouldReload) {
-			reload(true);
+			reload(false);
 			shouldReload = false;
 		}
 	}
 
 	public static void reload(boolean clearParticles) {
-		destroy();
 		AsyncRenderer.destroy();
-		if (clearParticles){
-			Minecraft.getInstance().particleEngine.clearParticles();
+		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
+		if (clearParticles) {
+			destroy();
+			particleEngine.clearParticles();
+		} else {
+			Queue<Particle> toAdd = particleEngine.particlesToAdd;
+			BusyWaitEvictingQueue<Particle> newToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, AsyncTicker::onEvicted);
+			newToAdd.addAll(toAdd);
+			particleEngine.particlesToAdd = newToAdd;
+			particleEngine.particles.entrySet().forEach(entry -> {
+				Queue<Particle> queue = entry.getValue();
+				Queue<Particle> newQueue = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, AsyncTicker::onEvicted);
+				newQueue.addAll(queue);
+				entry.setValue(newQueue);
+			});
 		}
 	}
 

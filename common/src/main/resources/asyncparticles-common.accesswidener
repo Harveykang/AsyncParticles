@@ -52,3 +52,4 @@ accessible field net/minecraft/client/particle/ParticleEngine textureManager Lne
 accessible field net/minecraft/client/particle/ParticleEngine trackingEmitters Ljava/util/Queue;
 accessible field net/minecraft/client/particle/ParticleEngine RENDER_ORDER Ljava/util/List;
 accessible field com/mojang/blaze3d/vertex/ByteBufferBuilder capacity I
+transitive-mutable field net/minecraft/client/particle/ParticleEngine particlesToAdd Ljava/util/Queue;

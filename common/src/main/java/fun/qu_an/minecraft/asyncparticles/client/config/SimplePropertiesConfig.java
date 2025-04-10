@@ -100,7 +100,7 @@ public class SimplePropertiesConfig {
 	}
 
 	public static boolean asyncBlockEntityAnimate() {
-		return !ModListHelper.PHYSICSMOD_LOADED && asyncClientBlockEntityAnimate;
+		return asyncClientBlockEntityAnimate;
 	}
 
 	public static boolean forceDoneBlockAnimateTick() {

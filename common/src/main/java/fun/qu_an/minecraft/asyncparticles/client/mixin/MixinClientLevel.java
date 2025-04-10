@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -65,11 +66,14 @@ public abstract class MixinClientLevel extends Level {
 
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int i, int j, int k, Operation<Void> original) {
-		if (AsyncTicker.shouldTickParticles) {
-			if (!SimplePropertiesConfig.asyncBlockEntityAnimate()) {
-				original.call(i, j, k);
-				return;
-			}
+		if (!AsyncTicker.shouldTickParticles) {
+			// don't tick animate if the game is lagging
+			return;
+		}
+		if (!ModListHelper.PHYSICSMOD_LOADED &&
+			!SimplePropertiesConfig.asyncBlockEntityAnimate()) {
+			original.call(i, j, k);
+		} else {
 			AsyncTicker.END_TICK_OPERATIONS.add(() -> original.call(i, j, k));
 		}
 	}
