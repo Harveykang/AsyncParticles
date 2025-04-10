@@ -6,15 +6,16 @@
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.neoforge.APMixinPluginNeoForge",
   "client": [
     "MixinLevelRenderer",
-    "off_thread_access.MixinModelDataManager",
     "MixinParticleEngine_Render",
+    "iris.MixinLevelRenderer",
+    "off_thread_access.MixinClassInstanceMultiMap",
+    "off_thread_access.MixinModelDataManager",
     "particlerain.MixinGroundFogParticle",
     "particlerain.MixinModClientForgeEvents",
     "particlerain.MixinRippleParticle",
     "particlerain.MixinWeatherParticle",
     "particlerain.MixinWeatherParticleSpawner",
-    "subtle_effects.MixinParticleEngine",
-    "off_thread_access.MixinClassInstanceMultiMap"
+    "subtle_effects.MixinParticleEngine"
   ],
   "injectors": {
     "defaultRequire": 1

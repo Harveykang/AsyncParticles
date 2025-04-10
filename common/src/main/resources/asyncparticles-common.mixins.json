@@ -25,6 +25,7 @@
     "fabric.particular.MixinMain",
     "iris_like.MixinFullyBufferedMultiBufferSource",
     "iris_like.MixinIris",
+    "fabric.iris.MixinLevelRenderer",
     "iris_like.MixinOldFullyBufferedMultiBufferSource",
     "modernui.MixinRenderSystem",
     "off_thread_access.MixinActiveProfiler",

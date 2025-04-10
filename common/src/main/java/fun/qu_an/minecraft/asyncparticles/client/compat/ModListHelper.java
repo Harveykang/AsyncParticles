@@ -19,6 +19,7 @@ public class ModListHelper {
 	/* IRIS */
 	public static final boolean IRIS_LIKE_LOADED = isModLoaded("iris") || isModLoaded("oculus");
 	public static final boolean FABRIC_IRIS_LOADED = isFabricModLoaded("iris");
+	public static final boolean FORGE_IRIS_LIKE_LOADED = isForgeModLoaded("iris") || isForgeModLoaded("oculus");
 	/* Dummmmmmy */
 	public static final boolean DUMMMMMMY_LOADED = isModLoaded("dummmmmmy");
 	/* Effectual */
