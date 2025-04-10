@@ -25,11 +25,6 @@ public class MixinWeatherParticleManager {
 		return ParticleRainCompat.asyncParticles$fogCount.get();
 	}
 
-	@WrapMethod(method = "tick")
-	private static void wrapUpdate(ClientLevel level, Entity entity, Operation<Void> original) {
-		AsyncTicker.addEndTickTask((AsyncTicker.ClientLevelConsumer) level1 -> original.call(level1, entity));
-	}
-
 	@Inject(method = "resetParticleCount", at = @At("HEAD"))
 	private static void resetParticleCount(CallbackInfo ci) {
 		ParticleRainCompat.clearCounters();

@@ -4,6 +4,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,6 +18,8 @@ import pigcart.particlerain.particle.WeatherParticle;
 public abstract class MixinWeatherParticle extends TextureSheetParticle implements ParticleAddon {
 	@Shadow
 	public abstract void remove();
+
+	@Shadow(remap = false) protected BlockPos.MutableBlockPos pos;
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {

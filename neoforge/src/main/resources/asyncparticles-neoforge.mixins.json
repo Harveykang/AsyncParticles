@@ -12,7 +12,10 @@
     "off_thread_access.MixinModelDataManager",
     "particlerain.MixinGroundFogParticle",
     "particlerain.MixinModClientForgeEvents",
+    "particlerain.MixinParticleRainClient",
+    "particlerain.MixinRainParticle",
     "particlerain.MixinRippleParticle",
+    "particlerain.MixinSnowParticle",
     "particlerain.MixinWeatherParticle",
     "particlerain.MixinWeatherParticleSpawner",
     "subtle_effects.MixinParticleEngine"
