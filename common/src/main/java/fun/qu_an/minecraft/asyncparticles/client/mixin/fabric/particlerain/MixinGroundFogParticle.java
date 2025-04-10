@@ -4,6 +4,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -27,7 +28,7 @@ public abstract class MixinGroundFogParticle extends MixinWeatherParticle implem
 	}
 
 	@Override
-	public AABB getRenderBoundingBox(float partialTicks) {
+	public @NotNull AABB getRenderBoundingBox(float partialTicks) {
 		return this.getBoundingBox().inflate(4.0);
 	}
 }

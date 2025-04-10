@@ -30,8 +30,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			public boolean preTest(String mixinClassName) {
 				return switch (mixinClassName) {
 					case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin",
-						 "net.irisshaders.iris.mixin.fabric.MixinParticleEngine",
-						 "net.irisshaders.iris.mixin.fabric.MixinLevelRenderer" -> true;
+						 "net.irisshaders.iris.mixin.fabric.MixinParticleEngine" -> true;
 					default -> false;
 				};
 			}

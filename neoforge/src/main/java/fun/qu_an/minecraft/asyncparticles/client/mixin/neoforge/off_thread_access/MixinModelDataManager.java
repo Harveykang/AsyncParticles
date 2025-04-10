@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.off_thread_access;
 
 import fun.qu_an.minecraft.asyncparticles.client.util.ConcurrentLong2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;

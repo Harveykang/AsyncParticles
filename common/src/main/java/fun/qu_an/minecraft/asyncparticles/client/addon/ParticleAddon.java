@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.addon;
 
 
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.NotNull;
 
 public interface ParticleAddon {
 	boolean asyncParticles$shouldRemove();
@@ -15,5 +16,5 @@ public interface ParticleAddon {
 	/**
 	 * NeoForge getRenderBoundingBox()
 	 */
-	AABB getRenderBoundingBox(float partialTicks);
+	@NotNull AABB getRenderBoundingBox(float partialTicks);
 }

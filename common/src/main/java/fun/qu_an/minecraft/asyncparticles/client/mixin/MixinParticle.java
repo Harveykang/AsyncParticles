@@ -11,6 +11,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -103,7 +104,7 @@ public abstract class MixinParticle implements ParticleAddon {
 	}
 
 	@Override
-	public AABB getRenderBoundingBox(float partialTicks) {
+	public @NotNull AABB getRenderBoundingBox(float partialTicks) {
 		return this.getBoundingBox().inflate(1.0);
 	}
 }
