@@ -54,7 +54,7 @@ public class ModListHelperImpl {
 		return info == null || info.getMods().isEmpty() ? null : info.versionString();
 	}
 
-	public static boolean isDev() {
+	public static boolean isDevelopmentEnvironment() {
 		return !FMLLoader.isProduction();
 	}
 }

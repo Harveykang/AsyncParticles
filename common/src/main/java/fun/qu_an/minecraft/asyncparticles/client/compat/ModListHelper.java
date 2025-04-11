@@ -109,6 +109,11 @@ public class ModListHelper {
 		return IS_FORGE ? CONNECTORMOD_LOADED && ConnectorEarlyLoader.isConnectorMod(modId) : isModLoaded(modId);
 	}
 
+	@ExpectPlatform
+	public static boolean isDevelopmentEnvironment() {
+		throw new AssertionError();
+	}
+
 	@Nullable
 	public static Class<?> getClass(String className) {
 		try {
@@ -116,11 +121,5 @@ public class ModListHelper {
 		} catch (ClassNotFoundException e) {
 			return null;
 		}
-	}
-
-	@ExpectPlatform
-	public static boolean isDev() {
-		throwAssertionError();
-		return false;
 	}
 }
