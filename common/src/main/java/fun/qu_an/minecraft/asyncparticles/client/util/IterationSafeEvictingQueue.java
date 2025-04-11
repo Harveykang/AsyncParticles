@@ -230,6 +230,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 
 	@Override
 	public boolean addAll(@NotNull Collection<? extends E> c) {
+		// TODO: optimize this method
 		if (c.isEmpty()) {
 			return false;
 		}

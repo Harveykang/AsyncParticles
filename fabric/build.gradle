@@ -69,17 +69,11 @@ dependencies {
 
     /* Particle Rain/Pretty Rain */
     modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
-
     modCompileOnly "maven.modrinth:particle-rain:3.0.6-1.20"
 
     /* Mmmmmmmmmmmm */
     modLocalRuntime 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
     modLocalRuntime "maven.modrinth:moonlight:fabric_1.20-2.13.62"
-
-    /* Effectual */
-    modLocalRuntime 'maven.modrinth:effectual:0.6.0-1.20.1'
-
-    modCompileOnly 'maven.modrinth:effectual:0.6.0-1.20.1'
 
     /* Create */
     modLocalRuntime("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
@@ -88,6 +82,10 @@ dependencies {
     // keep this line to compile properly
     // 否则被模组重写的原版方法不会正确重映射...
     modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
+
+    /* Effectual */
+    modLocalRuntime 'maven.modrinth:effectual:0.6.0-1.20.1'
+    modCompileOnly 'maven.modrinth:effectual:0.6.0-1.20.1'
 
     /* Effective */
 //    modLocalRuntime "maven.modrinth:effective:2.3.2-1.20.1" // dependency hell

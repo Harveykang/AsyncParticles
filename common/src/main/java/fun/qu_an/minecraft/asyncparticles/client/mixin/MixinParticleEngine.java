@@ -36,9 +36,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class MixinParticleEngine {
-	@Mutable
 	@Shadow
-	@Final
 	public Queue<Particle> particlesToAdd;
 
 	@Shadow

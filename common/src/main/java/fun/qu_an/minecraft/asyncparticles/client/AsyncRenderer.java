@@ -227,7 +227,7 @@ public class AsyncRenderer {
 			RenderStateShard.PARTICLES_TARGET.setupRenderState();
 		}
 		profiler.push("wait_for_async_tasks");
-		asyncTask.join();
+		waitForAsyncTasks();
 		profiler.pop();
 
 		MultiBufferSource.BufferSource bufferSource = mc.levelRenderer.renderBuffers.bufferSource();
@@ -254,7 +254,7 @@ public class AsyncRenderer {
 		profiler.popPush("async_particles");
 
 		profiler.push("wait_for_async_tasks");
-		asyncTask.join();
+		waitForAsyncTasks();
 		profiler.pop();
 		LevelRenderer levelRenderer = mc.levelRenderer;
 		MultiBufferSource.BufferSource bufferSource = levelRenderer.renderBuffers.bufferSource();
@@ -355,6 +355,13 @@ public class AsyncRenderer {
 			RenderSystem.depthMask(true);
 			RenderSystem.disableBlend();
 			lightTexture.turnOffLightLayer();
+		}
+	}
+
+	private static void waitForAsyncTasks() {
+		if (asyncTask != null) {
+			asyncTask.join();
+			asyncTask = null;
 		}
 	}
 
@@ -495,11 +502,7 @@ public class AsyncRenderer {
 	/* Destroy */
 
 	public static void destroy() {
-		if (asyncTask != null) {
-			// 应该不会到这里
-			asyncTask.join();
-//			asyncTask = null;
-		}
+		waitForAsyncTasks();
 		FORMATS.clear();
 		clearSync();
 	}

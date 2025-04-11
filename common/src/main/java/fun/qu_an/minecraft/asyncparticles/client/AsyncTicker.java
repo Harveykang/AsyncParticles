@@ -7,6 +7,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceC
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.util.BusyWaitEvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionTracker;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
@@ -25,7 +26,6 @@ import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.asm.mixin.Unique;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -216,7 +216,7 @@ public class AsyncTicker {
 		if (!levelRunning || !SimplePropertiesConfig.asyncBlockEntityTick()) {
 			particleFuture = CompletableFuture.runAsync(() -> {
 			}, EXECUTOR);
-			if (!blockEntityOperations.isEmpty()){
+			if (!blockEntityOperations.isEmpty()) {
 				blockEntityOperations.clear();
 			}
 		} else {
@@ -435,16 +435,28 @@ public class AsyncTicker {
 
 	private static void tryReload() {
 		if (shouldReload) {
-			reload(true);
+			reload(false);
 			shouldReload = false;
 		}
 	}
 
 	public static void reload(boolean clearParticles) {
-		destroy();
 		AsyncRenderer.destroy();
+		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 		if (clearParticles) {
-			Minecraft.getInstance().particleEngine.clearParticles();
+			destroy();
+			particleEngine.clearParticles();
+		} else {
+			Queue<Particle> toAdd = particleEngine.particlesToAdd;
+			BusyWaitEvictingQueue<Particle> newToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, AsyncTicker::onEvicted);
+			newToAdd.addAll(toAdd);
+			particleEngine.particlesToAdd = newToAdd;
+			particleEngine.particles.entrySet().forEach(entry -> {
+				Queue<Particle> queue = entry.getValue();
+				Queue<Particle> newQueue = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, AsyncTicker::onEvicted);
+				newQueue.addAll(queue);
+				entry.setValue(newQueue);
+			});
 		}
 	}
 

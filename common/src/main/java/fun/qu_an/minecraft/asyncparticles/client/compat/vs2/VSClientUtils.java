@@ -147,7 +147,7 @@ public class VSClientUtils {
 		double stepHeight = (entity != null) ? entity.maxUpStep() : 0.0;
 		double yMovement = movement.y() + Math.max(stepHeight - inflation, 0.0);
 		Vec3 movement1 = new Vec3(movement.x(), yMovement, movement.z());
-		AABB bb = entityBoundingBox.expandTowards(movement1).inflate(inflation);
+		AABB bb = entityBoundingBox.inflate(inflation);
 		List<ConvexPolygonc> collidingShipPolygons =
 			((InvokerEntityShipCollisionUtils) (Object) EntityShipCollisionUtils.INSTANCE).invoker_getShipPolygonsCollidingWithEntity(
 				entity, movement1,
