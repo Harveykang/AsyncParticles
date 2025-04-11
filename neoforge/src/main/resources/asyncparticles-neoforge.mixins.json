@@ -13,6 +13,7 @@
     "create.MixinEjectorBlockEntity",
     "create.MixinParticle",
     "create.MixinParticle_LightCache",
+    "off_thread_access.MixinClassInstanceMultiMap",
     "particlerain.MixinGroundFogParticle",
     "particlerain.MixinModClientForgeEvents",
     "particlerain.MixinRainParticle",
@@ -22,8 +23,8 @@
     "particlerain.MixinWeatherParticles",
     "particlerain.MixinWeatherParticleSpawner",
     "particlerain_create.MixinWeatherParticleSpawner",
-    "subtle_effects.MixinParticleEngine",
-    "off_thread_access.MixinClassInstanceMultiMap"
+    "simple_weather.MixinSimpleWeather$NeoBus",
+    "subtle_effects.MixinParticleEngine"
   ],
   "injectors": {
     "defaultRequire": 1

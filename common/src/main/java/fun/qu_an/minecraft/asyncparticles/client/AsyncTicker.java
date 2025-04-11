@@ -58,7 +58,7 @@ public class AsyncTicker {
 	public static boolean shouldTickParticles = false;
 	public static CompletableFuture<Void> particleCleanup;
 	private final static List<Runnable> END_TICK_EVENTS = new ArrayList<>();
-	public final static List<Runnable> END_TICK_OPERATIONS = new ArrayList<>();
+	private final static List<Runnable> END_TICK_OPERATIONS = new ArrayList<>();
 	private static CompletableFuture<Void> particleFuture;
 	private static CompletableFuture<Void> blockEntityTickFuture;
 	private static boolean debug_cancelled = false;
@@ -490,6 +490,20 @@ public class AsyncTicker {
 
 	public static void registerEndTickEvent(Runnable operation) {
 		AsyncTicker.END_TICK_EVENTS.add(operation);
+	}
+
+	public static void addEndTickTask(MinecraftConsumer consumer) {
+		addEndTickTask(() -> consumer.accept(Minecraft.getInstance()));
+	}
+
+	public static void addEndTickTask(ClientLevelConsumer consumer) {
+		addEndTickTask(() -> consumer.accept(Minecraft.getInstance().level));
+	}
+
+	public static void addEndTickTask(Runnable operation) {
+		if (shouldTickParticles || !SimplePropertiesConfig.isTickAsync()){
+			AsyncTicker.END_TICK_OPERATIONS.add(operation);
+		}
 	}
 
 	@FunctionalInterface

@@ -50,7 +50,6 @@ subprojects {
             url = "https://jitpack.io/"
             content { includeGroupAndSubgroups("com.github") }
         }
-        maven { url = "https://maven.bawnorton.com/releases" } // Mixin Squared
         maven { url "https://maven.shedaniel.me/" }
         maven { url = "https://maven.blamejared.com/" } // Hex Casting
         maven { url = "https://mvn.devos.one/releases" } // Porting Lib releases
@@ -72,10 +71,15 @@ subprojects {
             url = uri("https://maven.fallenbreath.me/releases")
         }
         maven { url = "https://repo.spongepowered.org/repository/maven-public" } // Mixin
+        maven { url = "https://maven.bawnorton.com/releases" } // Mixin Squared
         maven { url 'https://maven.wispforest.io' } // owo lib
         maven {
             name = 'Kotlin for Forge'
             url = 'https://thedarkcolour.github.io/KotlinForForge/'
+        }
+        maven { // NeoOculus dependency
+            name = "TauMC"
+            url = "https://maven.taumc.org/releases"
         }
     }
 

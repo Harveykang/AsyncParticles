@@ -57,23 +57,47 @@ dependencies {
 //        modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
 //    }
 
-    /* Performance */
-    modLocalRuntime "maven.modrinth:spark:1.10.124-neoforge-1.21.1"
-    modCompileOnly 'maven.modrinth:embeddium:1.0.15+mc1.21.1'
-    modCompileOnly 'maven.modrinth:sodium:mc1.21.1-0.6.9-neoforge'
-    modLocalRuntime 'maven.modrinth:embeddium:1.0.15+mc1.21.1'
-//    modLocalRuntime 'maven.modrinth:sodium:mc1.21.1-0.6.9-neoforge'
+    /* ===Performance=== */
+    // Why no one works in dev environment?
+
+    /* Embeddium */
+//    localRuntime("org.taumc:glsl-transformation-lib:0.2.0-20.ge3cb096")
+//    localRuntime("io.github.douira:glsl-transformer:2.0.2") { transitive = false }
+//    localRuntime "org.anarres:jcpp:1.4.14" // Why NoClassDefFoundError?
+
+//    localRuntime "org.antlr:antlr4-runtime:4.13.1"
+//    localRuntime "io.github.douira:glsl-transformer:2.0.1"
+//    localRuntime "org.anarres:jcpp:1.4.14"
+
+//    modCompileOnly 'maven.modrinth:embeddium:1.0.15+mc1.21.1'
+//    modLocalRuntime 'maven.modrinth:embeddium:1.0.15+mc1.21.1'
+
+//    modLocalRuntime 'maven.modrinth:monocle-iris:0.1.8'
+//    modLocalRuntime "maven.modrinth:iris:1.8.1+1.21.1-neoforge"
+
+//    modLocalRuntime 'maven.modrinth:neoculus:WDZ0i0mz'
+
+    /* Sodium */
+    modCompileOnly 'maven.modrinth:sodium:mc1.21.1-0.6.13-neoforge'
+    modCompileOnly 'maven.modrinth:sodium:mc1.21.1-0.6.13-fabric'
     modCompileOnly "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
-    modLocalRuntime 'maven.modrinth:monocle-iris:0.1.8'
-//    modLocalRuntime "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
-    modLocalRuntime "maven.modrinth:iris:1.8.1+1.21.1-neoforge"
-    modLocalRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
-    localRuntime "org.antlr:antlr4-runtime:4.13.1"
-    localRuntime "io.github.douira:glsl-transformer:2.0.1"
-    localRuntime "org.anarres:jcpp:1.4.14"
-//    modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
     modCompileOnly "curse.maven:flerovium-1142875:6258259"
-    modLocalRuntime "curse.maven:flerovium-1142875:6258259"
+//    modLocalRuntime 'maven.modrinth:sodium:mc1.21.1-0.6.13-neoforge'
+//    modLocalRuntime 'maven.modrinth:sodium:mc1.21.1-0.6.13-fabric'
+//    localRuntime "org.antlr:antlr4-runtime:4.13.1"
+//    localRuntime "io.github.douira:glsl-transformer:2.0.1"
+//    localRuntime "org.anarres:jcpp:1.4.14"
+//    modLocalRuntime("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308ded19")
+//    modLocalRuntime("org.sinytra.forgified-fabric-api:fabric-renderer-api-v1:3.4.0+9c40919e19")
+//    modLocalRuntime("org.sinytra.forgified-fabric-api:fabric-rendering-data-attachment-v1:0.3.48+73761d2e19")
+//    modLocalRuntime("org.sinytra.forgified-fabric-api:fabric-block-view-api-v2:1.0.10+9afaaf8c19")
+//    modLocalRuntime "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
+//    modLocalRuntime "curse.maven:flerovium-1142875:6258259"
+
+    modLocalRuntime "maven.modrinth:spark:1.10.124-neoforge-1.21.1"
+    modLocalRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
+//    modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
+    /* ===End Performance=== */
 
     /* Valkyrien Skies */
 //    modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'
@@ -84,7 +108,7 @@ dependencies {
     /* Particle Rain/Pretty Rain */
     modCompileOnly "maven.modrinth:pretty-rain:1.1.4"
 //    if (rootProject.use_connector_mod == "true") {
-    modLocalRuntime "maven.modrinth:pretty-rain:1.1.4"
+//    modLocalRuntime "maven.modrinth:pretty-rain:1.1.4"
 //    } else {
 //        modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
 //    }

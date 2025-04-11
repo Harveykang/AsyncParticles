@@ -53,4 +53,8 @@ public class ModListHelperImpl {
 		IModFileInfo info = LoadingModList.get().getModFileById(modId);
 		return info == null || info.getMods().isEmpty() ? null : info.versionString();
 	}
+
+	public static boolean isDev() {
+		return !FMLLoader.isProduction();
+	}
 }

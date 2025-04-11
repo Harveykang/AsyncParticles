@@ -15,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -58,7 +59,7 @@ public class CreateCompatImpl {
 												 AABB bounds,
 												 AbstractContraptionEntity contraptionEntity,
 												 boolean estimate) {
-		if (!bounds.intersects(contraptionEntity.getBoundingBox())) {
+		if (!bounds.expandTowards(originalMotion).intersects(contraptionEntity.getBoundingBox())) {
 			return false;
 		}
 
@@ -102,12 +103,12 @@ public class CreateCompatImpl {
 
 		Vec3 obbCenter = obb.getCenter();
 		for (AABB bb : collidableBBs) {
-			if (Math.abs(obbCenter.x - bb.getCenter().x) - bounds.getXsize() - 1 > bb.getXsize() / 2)
+			Vec3 bbCenter = bb.getCenter();
+			if ((Math.abs(obbCenter.x - bbCenter.x) - bounds.getXsize() - 1) * 2 > bb.getXsize())
 				continue;
-			if (Math.abs((obbCenter.y + motion.y) - bb.getCenter().y) - bounds.getYsize()
-				- 1 > bb.getYsize() / 2)
+			if ((Math.abs((obbCenter.y + motion.y) - bbCenter.y) - bounds.getYsize() - 1) * 2 > bb.getYsize())
 				continue;
-			if (Math.abs(obbCenter.z - bb.getCenter().z) - bounds.getZsize() - 1 > bb.getZsize() / 2)
+			if ((Math.abs(obbCenter.z - bbCenter.z) - bounds.getZsize() - 1) * 2 > bb.getZsize())
 				continue;
 
 			obb.setCenter(obbCenter);
@@ -131,18 +132,16 @@ public class CreateCompatImpl {
 
 	/**
 	 * @return null if no collision
-	 * TODO 用一个假实体直接调用原函数？
 	 */
 	@Nullable
 	public static Vec3 collideMotionWithContraptions(ClientLevel level, Vec3 position, Vec3 motion, AABB bounds) {
-		AABB bounds1 = bounds.inflate(0.1).move(motion);
 		Vector3d result = new Vector3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+		AABB finalBounds = bounds.inflate(0.1);
 		forEachContraption(level, contraptionEntity -> {
-			Vec3 vec3 = collideMotionWithContraption(level, position, motion, bounds1, contraptionEntity);
-			if (vec3 == null) {
-				return true;
+			Vec3 vec3 = collideMotionWithContraption(level, position, motion, finalBounds, contraptionEntity);
+			if (vec3 != null) {
+				result.set(Math.min(result.x, vec3.x), Math.min(result.y, vec3.y), Math.min(result.z, vec3.z));
 			}
-			result.set(Math.min(result.x, vec3.x), Math.min(result.y, vec3.y), Math.min(result.z, vec3.z));
 			return true;
 		});
 		if (result.x == Double.MAX_VALUE
@@ -168,12 +167,12 @@ public class CreateCompatImpl {
 		}
 	}
 
-	private static Vec3 getWorldToLocalTranslation(Vec3 entityPosition,
-												   AABB bounds,
-												   Vec3 anchorVec,
-												   Matrix3d rotationMatrix,
-												   float yawOffset) {
-		Vec3 centerY = new Vec3(0, bounds.getYsize() / 2, 0);
+	public static Vec3 getWorldToLocalTranslation(Vec3 entityPosition,
+												  AABB bounds,
+												  Vec3 anchorVec,
+												  Matrix3d rotationMatrix,
+												  float yawOffset) {
+		Vec3 centerY = new Vec3(0, Mth.lerp(0.5, bounds.minY, bounds.maxY), 0);
 		Vec3 position = entityPosition;
 		position = position.add(centerY);
 		position = ContraptionCollider.worldToLocalPos(position, anchorVec, rotationMatrix, yawOffset);
@@ -204,7 +203,7 @@ public class CreateCompatImpl {
 													AABB bounds,
 													AbstractContraptionEntity contraptionEntity,
 													boolean estimate) {
-		if (!bounds.intersects(contraptionEntity.getBoundingBox())) {
+		if (!bounds.expandTowards(originalMotion).intersects(contraptionEntity.getBoundingBox())) {
 			return null;
 		}
 
@@ -261,12 +260,11 @@ public class CreateCompatImpl {
 				Vec3 currentResponse = collisionResponse.getValue();
 				Vec3 currentCenter = obbCenter.add(currentResponse);
 
-				if (Math.abs(currentCenter.x - bb.getCenter().x) - bounds.getXsize() - 1 > bb.getXsize() / 2)
+				if ((Math.abs(currentCenter.x - bb.getCenter().x) - bounds.getXsize() - 1) * 2 > bb.getXsize())
 					continue;
-				if (Math.abs((currentCenter.y + motion.y) - bb.getCenter().y) - bounds.getYsize()
-					- 1 > bb.getYsize() / 2)
+				if ((Math.abs((currentCenter.y + motion.y) - bb.getCenter().y) - bounds.getYsize() - 1) * 2 > bb.getYsize())
 					continue;
-				if (Math.abs(currentCenter.z - bb.getCenter().z) - bounds.getZsize() - 1 > bb.getZsize() / 2)
+				if ((Math.abs(currentCenter.z - bb.getCenter().z) - bounds.getZsize() - 1) * 2 > bb.getZsize())
 					continue;
 
 				obb.setCenter(currentCenter);
@@ -404,6 +402,9 @@ public class CreateCompatImpl {
 					.add(0, -.1f - collisionNormal.y * .125f, 0));
 		}
 
+		if (entityMotion.equals(originalMotion)) {
+			return null;
+		}
 		return entityMotion;
 	}
 
@@ -422,19 +423,14 @@ public class CreateCompatImpl {
 	}
 
 	public static boolean isUnderContraption(ClientLevel level, double x, double y, double z) {
-		boolean[] b = {false};
 		Vec3 pos = new Vec3(x, y, z);
 		AABB bounds = new AABB(x - 1, y - 1, z - 1, x + 1, Math.max(y + 16, level.getMaxBuildHeight()), z + 1);
-		forEachContraption(level, contraptionEntity -> {
-			boolean b1 = collideWithContraption(level, pos, Vec3.ZERO, bounds, contraptionEntity, true);
-			// estimate = true for a better performance
-			if (!b1) {
-				return true;
-			}
-			b[0] = true;
-			return false;
-		});
-		return b[0];
+		return isCollideWithContraption(level, pos, Vec3.ZERO, bounds);
+	}
+
+	public static boolean isUnderContraption(ClientLevel level, Vec3 pos) {
+		AABB bounds = new AABB(pos.x - 1, pos.y - 1, pos.z - 1, pos.x + 1, Math.max(pos.y + 16, level.getMaxBuildHeight()), pos.z + 1);
+		return isCollideWithContraption(level, pos, Vec3.ZERO, bounds);
 	}
 
 	public static boolean isCollideWithContraption(ClientLevel level, Vec3 pos, Vec3 motion, AABB bb) {

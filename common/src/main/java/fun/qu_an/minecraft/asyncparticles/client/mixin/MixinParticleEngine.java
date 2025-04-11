@@ -38,7 +38,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public abstract class MixinParticleEngine {
 	@Mutable
 	@Shadow
-	@Final
 	public Queue<Particle> particlesToAdd;
 
 	@Shadow
@@ -66,9 +65,6 @@ public abstract class MixinParticleEngine {
 	}
 
 	@Shadow
-	public abstract void updateCount(ParticleGroup group, int count);
-
-	@Shadow
 	@Final
 	private static Logger LOGGER;
 
@@ -84,7 +80,9 @@ public abstract class MixinParticleEngine {
 
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
 	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {
-		throw Utils.toThrowDirectly(t);
+		if (SimplePropertiesConfig.isTickAsync()){
+			throw Utils.toThrowDirectly(t);
+		}
 	}
 
 	/**
@@ -176,7 +174,6 @@ public abstract class MixinParticleEngine {
 						}
 						return queue1;
 					});
-				p.getParticleGroup().ifPresent(g -> updateCount(g, 1));
 				queue.add(p);
 			});
 			particlesToAdd.clear();
@@ -247,19 +244,13 @@ public abstract class MixinParticleEngine {
 
 	@Inject(method = "add", at = @At(value = "HEAD"), cancellable = true)
 	public void add(Particle particle, CallbackInfo ci) {
-		if (!AsyncTicker.shouldTickParticles) {
+		if (!AsyncTicker.shouldTickParticles && SimplePropertiesConfig.isTickAsync()) {
 			particle.remove(); // to compatible with some mods...
 			ci.cancel();
 		} else if (particle instanceof LightCachedParticleAddon lightCachedParticle
 				   && SimplePropertiesConfig.particleLightCache()) {
 			lightCachedParticle.asyncParticles$refresh();
 		}
-	}
-
-	@Redirect(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;updateCount(Lnet/minecraft/core/particles/ParticleGroup;I)V"))
-	public void redirectUpdateCount(ParticleEngine instance, ParticleGroup group, int count) {
-		// do nothing
-		// we check this later in tick()
 	}
 
 	@Redirect(method = {
