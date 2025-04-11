@@ -48,7 +48,7 @@ public abstract class MixinEntityRotFX extends TextureSheetParticle {
 		if ((Object) this instanceof ParticleTexExtraRender) {
 			return original.call(entity, vec3, aABB, level, list);
 		}
-		// we do it in another thread, so we don't need to worry about costly collision checks
+		// we do it in the other thread, so we don't need to worry about costly collision checks
 		AABB boundingBox = getBoundingBox();
 		double xsize = boundingBox.getXsize();
 		double ysize = boundingBox.getYsize();

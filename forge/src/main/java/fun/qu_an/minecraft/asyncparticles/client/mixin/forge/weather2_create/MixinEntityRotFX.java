@@ -26,9 +26,6 @@ public abstract class MixinEntityRotFX extends TextureSheetParticle {
 	@Shadow
 	public abstract void remove();
 
-	@Shadow(remap = false)
-	public abstract AABB getBoundingBoxForRender(float partialTicks);
-
 	protected MixinEntityRotFX(ClientLevel level, double x, double y, double z) {
 		super(level, x, y, z);
 	}
@@ -50,7 +47,7 @@ public abstract class MixinEntityRotFX extends TextureSheetParticle {
 		if ((Object) this instanceof ParticleTexExtraRender) {
 			return original.call(entity, vec3, aABB, level, list);
 		}
-		// we do it in another thread, so we don't need to worry about costly collision checks
+		// we do it in the other thread, so we don't need to worry about costly collision checks
 		Vec3 mov = CreateCompat.collideMotionWithContraptions(
 			(ClientLevel) level,
 			new Vec3(x, y, z),
