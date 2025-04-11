@@ -17,9 +17,12 @@ public class ModListHelper {
 	public static final boolean SODIUM_LOADED = isModLoaded("sodium");
 	public static final boolean EMBEDDIUM_LOADED = isModLoaded("embeddium");
 	/* IRIS */
+	// What the hell of compatibility is this!
 	public static final boolean IRIS_LIKE_LOADED = isModLoaded("iris") || isModLoaded("oculus");
 	public static final boolean FABRIC_IRIS_LOADED = isFabricModLoaded("iris");
 	public static final boolean FORGE_IRIS_LIKE_LOADED = isForgeModLoaded("iris") || isForgeModLoaded("oculus");
+	public static final boolean FORGE_IRIS_LOADED = isForgeModLoaded("iris");
+	public static final boolean FORGE_OCULUS_LOADED = isForgeModLoaded("oculus");
 	/* Dummmmmmy */
 	public static final boolean DUMMMMMMY_LOADED = isModLoaded("dummmmmmy");
 	/* Effectual */
@@ -61,6 +64,8 @@ public class ModListHelper {
 	public static final boolean FORGE_SUBTLE_EFFECTS_LOADED = isForgeModLoaded("subtle_effects");
 	/* What Are They Up To */
 	public static final boolean WATUT_LOADED = isModLoaded("watut");
+	/* Simple Weather */
+	public static final boolean FORGE_SIMPLE_WEATHER_LOADED = isForgeModLoaded("simple_weather");
 
 	@ExpectPlatform
 	private static boolean isForge() {

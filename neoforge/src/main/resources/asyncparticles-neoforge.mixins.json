@@ -7,7 +7,7 @@
   "client": [
     "MixinLevelRenderer",
     "MixinParticleEngine_Render",
-    "iris.MixinLevelRenderer",
+    "iris_like.MixinLevelRenderer",
     "off_thread_access.MixinClassInstanceMultiMap",
     "off_thread_access.MixinModelDataManager",
     "particlerain.MixinGroundFogParticle",

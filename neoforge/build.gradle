@@ -109,6 +109,10 @@ dependencies {
 //    modLocalRuntime('thedarkcolour:kotlinforforge-neoforge:5.7.0') {
 //        exclude(group: "net.neoforged.fancymodloader", module: "loader")
 //    }
+
+    /* Simple Weather */
+    modCompileOnly "curse.maven:simple-weather-983390:6037753" // 1.0.15
+    modLocalRuntime "curse.maven:simple-weather-983390:6037753" // 1.0.15
 }
 
 processResources {

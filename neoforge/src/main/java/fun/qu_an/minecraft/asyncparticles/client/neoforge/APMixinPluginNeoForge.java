@@ -41,7 +41,7 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 			// TODO: 下面这个 mod 没有正式发布，且不确定是否是唯一的 forge 移植版
 			case "effecticularity" -> ModListHelper.FORGE_EFFECTIVE_LOADED;
 			case "subtle_effects" -> ModListHelper.FORGE_SUBTLE_EFFECTS_LOADED;
-			case "iris" -> ModListHelper.FORGE_IRIS_LIKE_LOADED;
+			case "iris_like" -> ModListHelper.FORGE_IRIS_LIKE_LOADED;
 			default -> throw new IllegalArgumentException("Unknown forge mixin: " + mixinClassName);
 		};
 	}

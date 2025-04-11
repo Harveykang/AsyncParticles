@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.iris;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.iris_like;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.resource.ResourceHandle;
