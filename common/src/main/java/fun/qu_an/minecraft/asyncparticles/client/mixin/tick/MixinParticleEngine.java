@@ -87,7 +87,9 @@ public abstract class MixinParticleEngine {
 
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
 	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {
-		throw Utils.toThrowDirectly(t);
+		if (SimplePropertiesConfig.isTickAsync()){
+			throw Utils.toThrowDirectly(t);
+		}
 	}
 
 	/**
@@ -148,7 +150,14 @@ public abstract class MixinParticleEngine {
 			AsyncTicker.PARTICLE_OPERATIONS.forEach(Runnable::run);
 			AsyncTicker.PARTICLE_OPERATIONS.clear();
 			AsyncTicker.tickSyncParticles();
-			particles.values().forEach(q -> q.removeIf(p -> !p.isAlive()));
+			particles.values().forEach(q -> q.removeIf(p -> {
+				if (p.isAlive()) {
+					return false;
+				}
+				// make sure the tracked count is correct
+				p.getParticleGroup().ifPresent(group -> updateCount(group, -1));
+				return true;
+			}));
 		}
 
 		if (!this.particlesToAdd.isEmpty()) {
@@ -187,7 +196,6 @@ public abstract class MixinParticleEngine {
 						}
 						return queue1;
 					});
-				p.getParticleGroup().ifPresent(g -> updateCount(g, 1));
 				queue.add(p);
 			});
 			particlesToAdd.clear();
@@ -265,12 +273,6 @@ public abstract class MixinParticleEngine {
 				   && SimplePropertiesConfig.particleLightCache()) {
 			lightCachedParticle.asyncParticles$refresh();
 		}
-	}
-
-	@Redirect(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;updateCount(Lnet/minecraft/core/particles/ParticleGroup;I)V"))
-	public void redirectUpdateCount(ParticleEngine instance, ParticleGroup group, int count) {
-		// do nothing
-		// we check this later in tick()
 	}
 
 	@Redirect(method = {

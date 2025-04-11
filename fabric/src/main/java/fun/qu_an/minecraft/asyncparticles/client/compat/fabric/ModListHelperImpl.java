@@ -50,4 +50,8 @@ public class ModListHelperImpl {
 				.getVersion().getFriendlyString())
 			.orElseThrow(() -> new IllegalArgumentException("Mod " + modId + " is not loaded."));
 	}
+
+	public static boolean isDevelopmentEnvironment() {
+		return FabricLoader.getInstance().isDevelopmentEnvironment();
+	}
 }
