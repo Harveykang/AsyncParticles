@@ -126,4 +126,8 @@ public class SimplePropertiesConfig {
 	public static boolean suppressCME() {
 		return suppressCME;
 	}
+
+	public static boolean isTickAsync() {
+		return true;
+	}
 }

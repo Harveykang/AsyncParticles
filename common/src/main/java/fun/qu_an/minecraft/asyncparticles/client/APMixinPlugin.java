@@ -26,7 +26,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 			public boolean preTest(String mixinClassName) {
 				return switch (mixinClassName) {
 					case "einstein.subtle_effects.mixin.client.particle.FabricParticleEngineMixin",
-						 "einstein.subtle_effects.mixin.client.particle.ForgeParticleEngineMixin" -> true;
+						 "einstein.subtle_effects.mixin.client.particle.ForgeParticleEngineMixin",
+						 "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin" -> true;
 					default -> false;
 				};
 			}
@@ -40,6 +41,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					case "einstein.subtle_effects.mixin.client.particle.FabricParticleEngineMixin",
 						 "einstein.subtle_effects.mixin.client.particle.ForgeParticleEngineMixin" ->
 						mixinMethodName.equals("shouldRenderParticle");
+					case "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin" ->
+						mixinMethodName.equals("tick");
 					default -> false;
 				};
 			}
