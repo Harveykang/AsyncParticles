@@ -59,14 +59,14 @@ dependencies {
 //    modCompileOnly 'maven.modrinth:embeddium:1.0.12-beta.1+mc1.21.4'
     modCompileOnly 'maven.modrinth:sodium:mc1.21.4-0.6.13-neoforge'
 //    modLocalRuntime 'maven.modrinth:embeddium:1.0.12-beta.1+mc1.21.4'
-    modLocalRuntime 'maven.modrinth:sodium:mc1.21.4-0.6.13-neoforge'
+//    modLocalRuntime 'maven.modrinth:sodium:mc1.21.4-0.6.13-neoforge'
     modCompileOnly "maven.modrinth:iris:1.8.8+1.21.4-neoforge"
 //    modLocalRuntime 'maven.modrinth:monocle-iris:0.1.8' // no 1.21.4 version
-    modLocalRuntime "maven.modrinth:iris:1.8.8+1.21.4-neoforge"
+//    modLocalRuntime "maven.modrinth:iris:1.8.8+1.21.4-neoforge"
 //    modLocalRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
-    localRuntime "org.antlr:antlr4-runtime:4.13.1"
-    localRuntime "io.github.douira:glsl-transformer:2.0.1"
-    localRuntime "org.anarres:jcpp:1.4.14"
+//    localRuntime "org.antlr:antlr4-runtime:4.13.1"
+//    localRuntime "io.github.douira:glsl-transformer:2.0.1"
+//    localRuntime "org.anarres:jcpp:1.4.14"
 //    modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
 //    modCompileOnly "curse.maven:flerovium-1142875:6258259"
 //    modLocalRuntime "curse.maven:flerovium-1142875:6258259"
@@ -112,7 +112,7 @@ dependencies {
 
     /* Simple Weather */
     modCompileOnly "curse.maven:simple-weather-983390:6037753" // 1.0.15
-    modLocalRuntime "curse.maven:simple-weather-983390:6037753" // 1.0.15
+//    modLocalRuntime "curse.maven:simple-weather-983390:6037753" // 1.0.15
 }
 
 processResources {

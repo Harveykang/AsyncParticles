@@ -16,9 +16,12 @@ public abstract class MixinParticleRainClient {
 	@Shadow
 	protected abstract void onClientTick(ClientTickEvent.Post event);
 
-	@Redirect(method = "<init>",
-		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/neoforged/bus/api/IEventBus;addListener(Ljava/util/function/Consumer;)V"))
-	private void onInit(IEventBus bus, Consumer<IEventBus> listener) {
-		AsyncTicker.registerEndTickEvent(() -> onClientTick(null));
-	}
+	// This doesn't work, see
+	// fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.particlerain.MixinWeatherParticleSpawner.onUpdate
+	// instead.
+//	@Redirect(method = "<init>",
+//		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/neoforged/bus/api/IEventBus;addListener(Ljava/util/function/Consumer;)V"))
+//	private void onInit(IEventBus bus, Consumer<IEventBus> listener) {
+//		AsyncTicker.registerEndTickEvent(() -> onClientTick(null));
+//	}
 }
