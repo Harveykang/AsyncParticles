@@ -23,13 +23,13 @@ public class MixinModClientForgeEvents {
 
 	@Dynamic
 	@Inject(method = "onPlayerJoin", require = 0, at = @At("HEAD"))
-	private void onPlayerJoin(CallbackInfo ci) {
+	private void onClearCounters(CallbackInfo ci) {
 		ParticleRainCompat.clearCounters();
 	}
 
 	@Dynamic
-	@Inject(method = "onPlayerJoin", require = 0, at = @At("HEAD"))
-	private static void onPlayerJoin2(CallbackInfo ci) {
+	@Inject(method = {"onPlayerJoin", "onPlayerClone"}, require = 0, at = @At("HEAD"))
+	private static void onClearCounters2(CallbackInfo ci) {
 		ParticleRainCompat.clearCounters();
 	}
 }
