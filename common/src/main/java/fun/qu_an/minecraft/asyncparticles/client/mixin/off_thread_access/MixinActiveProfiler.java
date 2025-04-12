@@ -7,26 +7,29 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = ActiveProfiler.class, priority = 499)
+@Mixin(ActiveProfiler.class)
 public class MixinActiveProfiler {
 	@Unique
 	private Thread asyncparticles$thread;
 
-	@Inject(method = "<init>", at = @At("RETURN"))
-	private void init(CallbackInfo ci) {
+	@Inject(method = "startTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ActiveProfiler;push(Ljava/lang/String;)V"))
+	private void startTick(CallbackInfo ci) {
 		asyncparticles$thread = Thread.currentThread();
 	}
 
-	// TODO: 是否会破坏一些性能监测 mod？
-	@Inject(method = "push(Ljava/lang/String;)V", at = @At("HEAD"), cancellable = true)
-	private void push(String string, CallbackInfo ci) {
-		if (asyncparticles$thread != Thread.currentThread()) {
-			ci.cancel();
-		}
+	@Inject(method = "endTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ActiveProfiler;pop()V"))
+	private void endTick(CallbackInfo ci) {
+		asyncparticles$thread = null;
 	}
 
-	@Inject(method = "pop()V", at = @At("HEAD"), cancellable = true)
-	private void pop(CallbackInfo ci) {
+	// TODO: 是否会破坏一些性能监测 mod？
+	@Inject(method = {
+		"push(Ljava/lang/String;)V",
+		"pop()V",
+		"incrementCounter*",
+		"markForCharting"
+	}, at = @At("HEAD"), cancellable = true)
+	private void push(CallbackInfo ci) {
 		if (asyncparticles$thread != Thread.currentThread()) {
 			ci.cancel();
 		}
