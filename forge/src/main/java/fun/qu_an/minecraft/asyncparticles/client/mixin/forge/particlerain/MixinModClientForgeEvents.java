@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.particlerain;
 import com.leclowndu93150.particlerain.ClientStuff;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,9 +21,15 @@ public class MixinModClientForgeEvents {
 		return ParticleRainCompat.asyncParticles$fogCount.get();
 	}
 
-	@Inject(method = "onPlayerJoin", at = @At("HEAD"))
+	@Dynamic
+	@Inject(method = "onPlayerJoin", require = 0, at = @At("HEAD"))
 	private void onPlayerJoin(CallbackInfo ci) {
-		ParticleRainCompat.asyncParticles$particleCount.set(0);
-		ParticleRainCompat.asyncParticles$fogCount.set(0);
+		ParticleRainCompat.clearCounters();
+	}
+
+	@Dynamic
+	@Inject(method = "onPlayerJoin", require = 0, at = @At("HEAD"))
+	private static void onPlayerJoin2(CallbackInfo ci) {
+		ParticleRainCompat.clearCounters();
 	}
 }

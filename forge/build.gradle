@@ -84,10 +84,12 @@ dependencies {
 
     /* Particle Rain/Pretty Rain */
 //    modCompileOnly "maven.modrinth:pretty-rain:96kQ9rp3" // 1.0.8
-    modCompileOnly "maven.modrinth:pretty-rain:TGjK6ChS" // 1.1.0
+//    modCompileOnly "maven.modrinth:pretty-rain:TGjK6ChS" // 1.1.0
+    modCompileOnly "maven.modrinth:pretty-rain:yIvOKPKZ" // 1.1.3
 //    if (rootProject.use_connector_mod == "true") {
 //        modLocalRuntime "maven.modrinth:pretty-rain:96kQ9rp3" // 1.0.8
-    modLocalRuntime "maven.modrinth:pretty-rain:TGjK6ChS" // 1.1.0
+//    modLocalRuntime "maven.modrinth:pretty-rain:TGjK6ChS" // 1.1.0
+    modLocalRuntime "maven.modrinth:pretty-rain:yIvOKPKZ" // 1.1.3
 //    } else {
 //        modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
 //    }
