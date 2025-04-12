@@ -12,9 +12,14 @@ public class MixinActiveProfiler {
 	@Unique
 	private Thread asyncparticles$thread;
 
-	@Inject(method = "<init>", at = @At("RETURN"))
-	private void init(CallbackInfo ci) {
+	@Inject(method = "startTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ActiveProfiler;push(Ljava/lang/String;)V"))
+	private void startTick(CallbackInfo ci) {
 		asyncparticles$thread = Thread.currentThread();
+	}
+
+	@Inject(method = "endTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ActiveProfiler;pop()V"))
+	private void endTick(CallbackInfo ci) {
+		asyncparticles$thread = null;
 	}
 
 	// TODO: 是否会破坏一些性能监测 mod？
@@ -27,13 +32,6 @@ public class MixinActiveProfiler {
 	private void push(CallbackInfo ci) {
 		if (asyncparticles$thread != Thread.currentThread()) {
 			ci.cancel();
-		}
-	}
-
-	@Inject(method = {"startTick", "endTick"}, at = @At("HEAD"))
-	private void startTick(CallbackInfo ci) {
-		if (asyncparticles$thread != Thread.currentThread()) {
-			throw new IllegalStateException("AsyncParticles profiler should only be accessed from the main thread");
 		}
 	}
 }
