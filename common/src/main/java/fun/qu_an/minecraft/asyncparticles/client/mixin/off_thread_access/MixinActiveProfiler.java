@@ -17,7 +17,7 @@ public class MixinActiveProfiler {
 		asyncparticles$thread = Thread.currentThread();
 	}
 
-	@Inject(method = "endTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ActiveProfiler;pop()V"))
+	@Inject(method = "endTick", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/util/profiling/ActiveProfiler;pop()V"))
 	private void endTick(CallbackInfo ci) {
 		asyncparticles$thread = null;
 	}
