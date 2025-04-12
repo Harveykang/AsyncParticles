@@ -6,10 +6,10 @@
   "refmap": "asyncparticles-common-refmap.json",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.APMixinPlugin",
   "client": [
-    "MixinActiveProfiler",
+    "off_thread_access.MixinActiveProfiler",
     "MixinClientLevel",
     "MixinCustomParticleRenderType",
-    "MixinFont",
+    "off_thread_access.MixinFont",
     "MixinLevel",
     "MixinLevelRenderer",
     "MixinLevelRenderer_EarlyFrustum",

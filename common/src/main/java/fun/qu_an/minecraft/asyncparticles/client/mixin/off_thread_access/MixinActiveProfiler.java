@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 
 import net.minecraft.util.profiling.ActiveProfiler;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,17 +18,22 @@ public class MixinActiveProfiler {
 	}
 
 	// TODO: 是否会破坏一些性能监测 mod？
-	@Inject(method = "push(Ljava/lang/String;)V", at = @At("HEAD"), cancellable = true)
-	private void push(String string, CallbackInfo ci) {
+	@Inject(method = {
+		"push(Ljava/lang/String;)V",
+		"pop()V",
+		"incrementCounter*",
+		"markForCharting"
+	}, at = @At("HEAD"), cancellable = true)
+	private void push(CallbackInfo ci) {
 		if (asyncparticles$thread != Thread.currentThread()) {
 			ci.cancel();
 		}
 	}
 
-	@Inject(method = "pop()V", at = @At("HEAD"), cancellable = true)
-	private void pop(CallbackInfo ci) {
+	@Inject(method = {"startTick", "endTick"}, at = @At("HEAD"))
+	private void startTick(CallbackInfo ci) {
 		if (asyncparticles$thread != Thread.currentThread()) {
-			ci.cancel();
+			throw new IllegalStateException("AsyncParticles profiler should only be accessed from the main thread");
 		}
 	}
 }
