@@ -22,9 +22,4 @@ public class MixinWeatherParticleSpawner {
 	private static int modifyFogCount(int original) {
 		return ParticleRainCompat.asyncParticles$fogCount.get();
 	}
-
-	@WrapMethod(method = "update")
-	private static void onUpdate(ClientLevel level, Entity entity, float f, Operation<Void> original) {
-		AsyncTicker.addEndTickTask(() -> original.call(level, entity, f));
-	}
 }

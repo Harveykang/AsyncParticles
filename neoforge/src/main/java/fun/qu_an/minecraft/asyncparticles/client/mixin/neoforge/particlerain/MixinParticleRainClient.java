@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 
 import java.util.function.Consumer;
 
@@ -16,12 +17,11 @@ public abstract class MixinParticleRainClient {
 	@Shadow
 	protected abstract void onClientTick(ClientTickEvent.Post event);
 
-	// This doesn't work, see
-	// fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.particlerain.MixinWeatherParticleSpawner.onUpdate
-	// instead.
-//	@Redirect(method = "<init>",
-//		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/neoforged/bus/api/IEventBus;addListener(Ljava/util/function/Consumer;)V"))
-//	private void onInit(IEventBus bus, Consumer<IEventBus> listener) {
-//		AsyncTicker.registerEndTickEvent(() -> onClientTick(null));
-//	}
+	@Redirect(method = "<init>",
+		slice = @Slice(from = @At(value = "FIELD", ordinal = 0, target = "Lnet/neoforged/neoforge/common/NeoForge;EVENT_BUS:Lnet/neoforged/bus/api/IEventBus;")),
+		at = @At(value = "INVOKE", ordinal = 0,
+			target = "Lnet/neoforged/bus/api/IEventBus;addListener(Ljava/util/function/Consumer;)V"))
+	private void onInit(IEventBus bus, Consumer<IEventBus> listener) {
+		AsyncTicker.registerEndTickEvent(() -> onClientTick(null));
+	}
 }
