@@ -74,6 +74,7 @@ public class ModListHelper {
 	public static final boolean WATUT_LOADED = isModLoaded("watut");
 	/* Weather2 */
 	public static final boolean FORGE_WEATHER2_LOADED = isForgeModLoaded("weather2");
+	public static final boolean VULKAN_MOD_LOADED = isModLoaded("vulkanmod");
 
 	@ExpectPlatform
 	private static boolean isForge() {

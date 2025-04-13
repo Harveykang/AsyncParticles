@@ -24,7 +24,6 @@
 
 ## Mod Compatability
 
-🔄️: Work in progress  
 ✅: Compatible  
 ❔: Works fine, but not fully tested  
 ⚠️: More testing needed  
