@@ -141,7 +141,12 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		String mixinPackageName = mixinClassName.substring(PACKAGE_LENGTH);
 		String[] split = mixinPackageName.split("\\.");
 		if (split.length == 1) {
-			return true;
+			return switch (split[0]) {
+				// vulkan mod has a faster light cache implementation
+				case "MixinParticle_LightCache",
+					 "MixinParticle_LightCacheNoRefresh" -> !ModListHelper.VULKAN_MOD_LOADED;
+				default -> true;
+			};
 		}
 		return switch (split[0]) {
 			case "fabric" -> {
