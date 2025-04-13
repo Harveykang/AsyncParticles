@@ -22,11 +22,4 @@ public class MixinTextureManager {
 			original.call();
 		}
 	}
-
-	@Inject(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"), cancellable = true)
-	public void onTickIteratorNext(CallbackInfo ci) {
-		if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneTextureTick()) {
-			ci.cancel();
-		}
-	}
 }

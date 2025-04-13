@@ -27,6 +27,7 @@ import org.joml.Vector3d;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -165,6 +166,54 @@ public class CreateCompatImpl {
 		} catch (ConcurrentModificationException ignored) {
 			// Ignore as they are not critical
 		}
+	}
+
+	public static Iterator<AbstractContraptionEntity> forEachContraption(ClientLevel level) {
+		Iterator<WeakReference<AbstractContraptionEntity>> iterator = contraptions(level).iterator();
+		return new Iterator<>() {
+			private AbstractContraptionEntity next;
+
+			@Override
+			public boolean hasNext() {
+				if (next != null) {
+					return true;
+				}
+				while (iterator.hasNext()) {
+					try {
+						next = iterator.next().get();
+					} catch (ConcurrentModificationException ignored) {
+						// Ignore as they are not critical
+						return false;
+					}
+					if (next != null && next.isAliveOrStale()) {
+						break;
+					}
+				}
+				return next != null;
+			}
+
+			@Override
+			public AbstractContraptionEntity next() {
+				if (!hasNext()) {
+					throw new NoSuchElementException();
+				}
+				AbstractContraptionEntity result = next;
+				next = null;
+				return result;
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void forEachRemaining(Consumer<? super AbstractContraptionEntity> action) {
+				while (hasNext()) {
+					action.accept(next);
+				}
+			}
+		};
 	}
 
 	public static Vec3 getWorldToLocalTranslation(Vec3 entityPosition,
@@ -434,16 +483,17 @@ public class CreateCompatImpl {
 	}
 
 	public static boolean isCollideWithContraption(ClientLevel level, Vec3 pos, Vec3 motion, AABB bb) {
-		boolean[] b = {false};
-		forEachContraption(level, contraptionEntity -> {
-			boolean b1 = collideWithContraption(level, pos, motion, bb, contraptionEntity, true);
-			// estimate = true for a better performance
-			if (!b1) {
+		return isCollideWithContraption(level, pos, motion, bb, true);
+	}
+
+	public static boolean isCollideWithContraption(ClientLevel level, Vec3 pos, Vec3 motion, AABB bb, boolean estimate) {
+		for (Iterator<AbstractContraptionEntity> it = forEachContraption(level); it.hasNext(); ) {
+			AbstractContraptionEntity contraptionEntity = it.next();
+			boolean b1 = collideWithContraption(level, pos, motion, bb, contraptionEntity, estimate);
+			if (b1) {
 				return true;
 			}
-			b[0] = true;
-			return false;
-		});
-		return b[0];
+		}
+		return false;
 	}
 }
