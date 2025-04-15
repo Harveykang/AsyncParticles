@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.simibubi.create.content.kinetics.fan.AirFlowParticle;
 import com.simibubi.create.content.kinetics.steamEngine.SteamJetParticle;
 import com.simibubi.create.foundation.particle.AirParticle;
-import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;

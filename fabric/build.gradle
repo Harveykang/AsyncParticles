@@ -37,13 +37,25 @@ dependencies {
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 
+    modLocalRuntime 'maven.modrinth:modmenu:7.2.2'
+
+    if (rootProject.vulkan_enabled == 'true'){
+        modLocalRuntime 'maven.modrinth:vulkanmod:0.5.2'
+        localRuntime("org.lwjgl:lwjgl-glfw:3.3.3")
+        localRuntime("org.lwjgl:lwjgl-vulkan:3.3.3")
+        localRuntime("org.lwjgl:lwjgl-vma:3.3.3")
+        localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3")
+        localRuntime("org.lwjgl:lwjgl-vma:3.3.3:natives-windows")
+        localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3:natives-windows")
+        return
+    }
+
     /* APIs */
     modLocalRuntime 'maven.modrinth:architectury-api:9.2.14+fabric'
     modLocalRuntime("me.shedaniel.cloth:cloth-config-fabric:11.1.136") {
         exclude(group: "net.fabricmc.fabric-api")
     }
     modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
-    modLocalRuntime 'maven.modrinth:modmenu:7.2.2'
 
     /* Performance */
     modLocalRuntime "maven.modrinth:spark:1.10.53-fabric"
@@ -57,7 +69,6 @@ dependencies {
 
     modCompileOnly "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
     modCompileOnly 'maven.modrinth:iris:1.7.6+1.20.1'
-return
     /* Valkyrien Skies */
     modLocalRuntime "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
     modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.5"

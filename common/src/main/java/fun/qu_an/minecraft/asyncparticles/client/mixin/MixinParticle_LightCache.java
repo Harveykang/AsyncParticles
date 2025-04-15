@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
 import static fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon.*;
-import static net.minecraft.util.Mth.floor;
 
 @Mixin(Particle.class)
 public abstract class MixinParticle_LightCache implements LightCachedParticleAddon {
@@ -25,7 +24,9 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 	@Unique
 	private byte asyncParticles$lightCache = INITIAL_LIGHT_CACHE;
 	@Shadow
-	public abstract int getLightColor(float partialTick);
+	public int getLightColor(float partialTick) {
+		throw new AssertionError();
+	}
 
 	@WrapMethod(method = "getLightColor")
 	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {

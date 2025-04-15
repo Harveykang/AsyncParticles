@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import org.jetbrains.annotations.Nullable;
 import org.sinytra.connector.loader.ConnectorEarlyLoader;
 
 public class ModListHelper {
@@ -29,11 +28,11 @@ public class ModListHelper {
 	public static final boolean FORGE_FLEROVIUM_LOADED = isForgeModLoaded("flerovium");
 	/* Effective */
 	public static final boolean FORGE_EFFECTICULARITY_LOADED = isForgeModLoaded("effective") &&
-															   getClass("concerrox.effective.Effective") != null;
+															   classExists("concerrox.effective.Effective");
 	public static final boolean FABRIC_EFFECTICULARITY_LOADED = isFabricModLoaded("effective") &&
-																getClass("concerrox.effective.Effective") != null;
+																classExists("concerrox.effective.Effective");
 	public static final boolean FABRIC_EFFECTIVE_LOADED = isFabricModLoaded("effective") &&
-														  getClass("org.ladysnake.effective.core.Effective") != null;
+														  classExists("org.ladysnake.effective.core.Effective");
 	/* Particle Rain */
 	public static final boolean PARTICLERAIN_LOADED = isModLoaded("particlerain");
 	public static final boolean FABRIC_PARTICLERAIN_LOADED = isFabricModLoaded("particlerain");
@@ -75,6 +74,7 @@ public class ModListHelper {
 	/* Weather2 */
 	public static final boolean FORGE_WEATHER2_LOADED = isForgeModLoaded("weather2");
 	public static final boolean VULKAN_MOD_LOADED = isModLoaded("vulkanmod");
+	public static final boolean FABRIC_VULKAN_MOD_LOADED = isFabricModLoaded("vulkanmod");
 
 	@ExpectPlatform
 	private static boolean isForge() {
@@ -121,12 +121,7 @@ public class ModListHelper {
 		throw new AssertionError();
 	}
 
-	@Nullable
-	public static Class<?> getClass(String className) {
-		try {
-			return Class.forName(className, false, ModListHelper.class.getClassLoader());
-		} catch (ClassNotFoundException e) {
-			return null;
-		}
+	public static boolean classExists(String className) {
+		return ModListHelper.class.getClassLoader().getResource(className.replace(".", "/") + ".class") != null;
 	}
 }

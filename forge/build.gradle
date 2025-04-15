@@ -149,6 +149,9 @@ dependencies {
 
     /* Aquaculture */
     modCompileOnly "maven.modrinth:aquamirae:7lX4KLFc"
+
+    /* Subtle Effects */
+    modCompileOnly "maven.modrinth:subtle-effects:lCMnqufi"
 }
 
 processResources {

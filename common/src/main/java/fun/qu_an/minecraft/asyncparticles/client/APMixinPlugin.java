@@ -5,7 +5,9 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.mixin_extension.ExtensionCancelMixinMethod;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.logging.ILogger;
+import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
+import org.spongepowered.asm.mixin.extensibility.IMixinErrorHandler;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
 
@@ -109,6 +111,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					case "effective" -> ModListHelper.FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> ModListHelper.FABRIC_EFFECTUAL_LOADED;
 					case "particular" -> ModListHelper.FABRIC_PARTICULAR_LOADED;
+					case "vulkanmod" -> ModListHelper.FABRIC_VULKAN_MOD_LOADED;
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
