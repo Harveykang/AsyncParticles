@@ -29,6 +29,7 @@
     "particlerain.v1_1_2.MixinModClientForgeEvents",
     "particlerain.v1_1_3.MixinModClientForgeEvents",
     "particlerain_create.MixinWeatherParticleSpawner",
+    "particlerain_vs.MixinGroundFogParticle",
     "particlerain_vs.MixinRippleParticle",
     "particlerain_vs.MixinWeatherParticleSpawner",
     "physicsmod.MixinLevelRenderer",

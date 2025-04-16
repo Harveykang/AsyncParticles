@@ -1,7 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,6 +20,7 @@ public class SimplePropertiesConfig {
 	private static boolean markSyncIfTickFailed = false;
 	private static boolean particleLightCache = true;
 	private static boolean suppressCME = false;
+	private static boolean fixParticleLightOnVsShips = true;
 	private static boolean collideWithCreateModContraptions = true;
 	private static boolean collideWithVSModShips = true;
 
@@ -61,6 +60,7 @@ public class SimplePropertiesConfig {
 		markSyncIfTickFailed = getBoolean(properties, "markSyncIfTickFailed", false);
 		particleLightCache = getBoolean(properties, "particleLightCache", true);
 		suppressCME = getBoolean(properties, "suppressCME", false);
+		fixParticleLightOnVsShips = getBoolean(properties, "fixParticleLightOnVsShips", true);
 
 		if (shouldSave) {
 			properties.store(Files.newOutputStream(CONFIG_FILE), null);
@@ -129,5 +129,9 @@ public class SimplePropertiesConfig {
 
 	public static boolean isTickAsync() {
 		return true;
+	}
+
+	public static boolean fixParticleLightOnVsShips() {
+		return fixParticleLightOnVsShips;
 	}
 }

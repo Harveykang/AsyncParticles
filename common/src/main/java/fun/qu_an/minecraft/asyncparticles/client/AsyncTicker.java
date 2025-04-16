@@ -7,10 +7,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceC
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
-import fun.qu_an.minecraft.asyncparticles.client.util.BusyWaitEvictingQueue;
-import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionTracker;
-import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
-import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
+import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -30,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -58,6 +56,7 @@ public class AsyncTicker {
 		() -> 5000,
 		() -> SimplePropertiesConfig.tickFailurePerSecondThreshold
 	);
+	private static final LongRef timeUsageNano = new LongRef(0L);
 
 	static {
 		AtomicInteger workerCount = new AtomicInteger(1);
@@ -204,6 +203,7 @@ public class AsyncTicker {
 		List<Runnable> blockEntityOperations = BLOCK_ENTITY_OPERATIONS;
 		if (!levelRunning || !SimplePropertiesConfig.asyncBlockEntityTick()) {
 			particleFuture = CompletableFuture.runAsync(() -> {
+				timeUsageNano.set(System.nanoTime());
 			}, EXECUTOR);
 			if (!blockEntityOperations.isEmpty()) {
 				blockEntityOperations.clear();
@@ -212,6 +212,7 @@ public class AsyncTicker {
 			Runnable[] blockEntityTasks = blockEntityOperations.toArray(new Runnable[0]);
 			blockEntityOperations.clear();
 			particleFuture = CompletableFuture.runAsync(() -> {
+				timeUsageNano.set(System.nanoTime());
 				for (Runnable blockEntityTask : blockEntityTasks) {
 					blockEntityTask.run();
 				}
@@ -259,7 +260,8 @@ public class AsyncTicker {
 						}
 						throw toThrowDirectly(e);
 					}))
-				.toArray(CompletableFuture[]::new)));
+				.toArray(CompletableFuture[]::new)))
+				.thenRun(() -> timeUsageNano.set(System.nanoTime() - timeUsageNano.get()));
 		}
 
 		AsyncTicker.particleFuture = particleFuture;
@@ -380,6 +382,7 @@ public class AsyncTicker {
 		}
 		debugConsumer.accept(String.format("""
 			[Debug AsyncTicker]
+			last tick duration: %d ms,
 			interrupted: %s,
 			block entity operations: %d,
 			particle operations: %d,
@@ -390,7 +393,8 @@ public class AsyncTicker {
 			particles to add size: %d
 			sync particle count: %d,
 			sync particle types: %s,"""
-			.formatted(debug_cancelled,
+			.formatted(timeUsageNano.get() / 1000000,
+				debug_cancelled,
 				BLOCK_ENTITY_OPERATIONS.size(),
 				PARTICLE_OPERATIONS.size(),
 				END_TICK_EVENTS.size(),

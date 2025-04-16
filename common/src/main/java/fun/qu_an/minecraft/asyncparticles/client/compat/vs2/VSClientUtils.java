@@ -308,7 +308,7 @@ public class VSClientUtils {
 
 	public static boolean isUnderShipHeightMap(ClientLevel level, double x, double y, double z) {
 		var shipObjectWorld = VSGameUtilsKt.getShipObjectWorld(level);
-		for (var nearbyShip : shipObjectWorld.getAllShips().getIntersecting(
+		for (var nearbyShip : shipObjectWorld.getLoadedShips().getIntersecting(
 			new AABBd(x - 1, y - 1, z - 1, x + 1, Math.max(y + 16, level.getMaxBuildHeight()), z + 1))) {
 			var posInShip = nearbyShip.getWorldToShip().transformPosition(new Vector3d(x, y, z));
 			if (level.getHeight(Heightmap.Types.MOTION_BLOCKING, floor(posInShip.x), floor(posInShip.z)) + 1 >= posInShip.y) {
