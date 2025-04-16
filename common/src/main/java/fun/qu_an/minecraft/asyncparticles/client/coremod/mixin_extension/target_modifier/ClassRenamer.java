@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin_extension.target_modifier;
+package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier;
 
 import org.objectweb.asm.tree.*;
 

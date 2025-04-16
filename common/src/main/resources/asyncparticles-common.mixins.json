@@ -3,7 +3,7 @@
   "minVersion": "0.8",
   "package": "fun.qu_an.minecraft.asyncparticles.client.mixin",
   "compatibilityLevel": "JAVA_17",
-  "plugin": "fun.qu_an.minecraft.asyncparticles.client.APMixinPlugin",
+  "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.APMixinPlugin",
   "client": [
     "MixinConcurrencyUnsafeParticles",
     "MixinParticle",
@@ -26,6 +26,7 @@
     "fabric.particlerain.MixinWeatherParticle",
     "fabric.particlerain.MixinWeatherParticleManager",
     "fabric.particular.MixinMain",
+    "fabric.vulkanmod.MixinSingleQuadParticle",
     "iris_like.MixinFullyBufferedMultiBufferSource",
     "iris_like.MixinIris",
     "iris_like.MixinOldFullyBufferedMultiBufferSource",

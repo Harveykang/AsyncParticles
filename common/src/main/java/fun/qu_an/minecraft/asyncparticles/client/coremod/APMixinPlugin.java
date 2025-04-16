@@ -1,8 +1,9 @@
-package fun.qu_an.minecraft.asyncparticles.client;
+package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.mixin_extension.ExtensionCancelMixinMethod;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.ExtensionCancelMixinMethod;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -141,12 +142,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		String mixinPackageName = mixinClassName.substring(PACKAGE_LENGTH);
 		String[] split = mixinPackageName.split("\\.");
 		if (split.length == 1) {
-			return switch (split[0]) {
-				// vulkan mod has a faster light cache implementation
-				case "MixinParticle_LightCache",
-					 "MixinParticle_LightCacheNoRefresh" -> !ModListHelper.VULKAN_MOD_LOADED;
-				default -> true;
-			};
+			return true;
 		}
 		return switch (split[0]) {
 			case "fabric" -> {
@@ -158,11 +154,11 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					case "particlerain_create" ->
 						ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.CREATE_LOADED;
 					case "particlerain" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED;
-					case "create" -> ModListHelper.FABRIC_CREATE_LOADED;
 					case "effective" -> ModListHelper.FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> ModListHelper.FABRIC_EFFECTUAL_LOADED;
 					case "particular" -> ModListHelper.FABRIC_PARTICULAR_LOADED;
 					case "iris" -> ModListHelper.FABRIC_IRIS_LOADED;
+					case "vulkanmod" -> ModListHelper.FABRIC_VULKAN_MOD_LOADED;
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}

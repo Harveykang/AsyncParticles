@@ -307,6 +307,11 @@ public class AsyncRenderer {
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
 		crashReportCategory.setDetail("Particle", particle::toString);
 		crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
+		if (particleRenderType.renderType() != null) {
+			crashReportCategory.setDetail("Render Type", particleRenderType.renderType()::toString);
+		} else {
+			crashReportCategory.setDetail("Render Type", "Custom");
+		}
 		return new ReportedException(crashReport);
 	}
 

@@ -55,3 +55,5 @@ accessible field net/minecraft/client/renderer/LevelRenderer capturedFrustum Lne
 accessible field net/minecraft/client/renderer/LevelRenderer cullingFrustum Lnet/minecraft/client/renderer/culling/Frustum;
 accessible field net/minecraft/client/renderer/LevelRenderer captureFrustum Z
 transitive-mutable field net/minecraft/client/particle/ParticleEngine particlesToAdd Ljava/util/Queue;
+accessible method net/minecraft/client/particle/ParticleEngine renderCustomParticles (Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Ljava/util/Queue;)V
+accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;

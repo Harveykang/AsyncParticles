@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin_extension.target_modifier;
+package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier;
 
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.reflection.FieldReference;

@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin_extension;
+package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension;
 
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;

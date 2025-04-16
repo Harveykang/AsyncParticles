@@ -57,7 +57,11 @@ public class ThreadUtil {
 		return RenderSystem.isOnRenderThread() || isOnParticleTickerThread();
 	}
 
-	public static void submitClientTask(Runnable runnable) {
+	public static void runOnClient(Runnable runnable) {
 		Minecraft.getInstance().execute(runnable);
+	}
+
+	public static void enqueueClientTask(Runnable runnable) {
+		Minecraft.getInstance().pendingRunnables.add(runnable);
 	}
 }

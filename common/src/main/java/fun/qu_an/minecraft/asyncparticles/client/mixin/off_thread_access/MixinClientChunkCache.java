@@ -16,7 +16,7 @@ public abstract class MixinClientChunkCache {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(layer, pos);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(layer, pos));
+			ThreadUtil.enqueueClientTask(() -> original.call(layer, pos));
 		}
 	}
 }

@@ -66,7 +66,9 @@ public class ModListHelper {
 	public static final boolean WATUT_LOADED = isModLoaded("watut");
 	/* Simple Weather */
 	public static final boolean FORGE_SIMPLE_WEATHER_LOADED = isForgeModLoaded("simple_weather");
+	/* Vulkan Mod */
 	public static final boolean VULKAN_MOD_LOADED = isModLoaded("vulkanmod");
+	public static final boolean FABRIC_VULKAN_MOD_LOADED = isFabricModLoaded("vulkanmod");
 
 	@ExpectPlatform
 	private static boolean isForge() {
@@ -113,12 +115,7 @@ public class ModListHelper {
 		throw new AssertionError();
 	}
 
-	@Nullable
-	public static Class<?> getClass(String className) {
-		try {
-			return Class.forName(className, false, ModListHelper.class.getClassLoader());
-		} catch (ClassNotFoundException e) {
-			return null;
-		}
+	public static boolean classExists(String className) {
+		return ModListHelper.class.getClassLoader().getResource(className.replace(".", "/") + ".class") != null;
 	}
 }

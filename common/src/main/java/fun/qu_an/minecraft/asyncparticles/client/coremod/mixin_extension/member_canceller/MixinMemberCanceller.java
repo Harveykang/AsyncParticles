@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin_extension.member_canceller;
+package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller;
 
 import java.util.List;
 

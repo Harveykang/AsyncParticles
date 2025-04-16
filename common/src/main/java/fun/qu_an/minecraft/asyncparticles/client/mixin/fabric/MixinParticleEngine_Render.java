@@ -57,12 +57,8 @@ public abstract class MixinParticleEngine_Render {
 			}
 			try {
 				particle.render(vertexconsumer, camera, f3);
-			} catch (Throwable var12) {
-				CrashReport crashreport = CrashReport.forThrowable(var12, "Rendering Particle");
-				CrashReportCategory crashreportcategory = crashreport.addCategory("Particle being rendered");
-				crashreportcategory.setDetail("Particle", particle::toString);
-				crashreportcategory.setDetail("Particle Type", particleRenderType::toString);
-				throw new ReportedException(crashreport);
+			} catch (Throwable t) {
+				throw AsyncRenderer.constructCrashReport(particle, particleRenderType, t);
 			}
 		}
 	}
@@ -72,7 +68,9 @@ public abstract class MixinParticleEngine_Render {
 	 * @reason
 	 */
 	@Overwrite
-	private static void renderCustomParticles(Camera camera,
+	// let it be public to avoid mixin conflict
+	// other mods may call this method directly
+	public static void renderCustomParticles(Camera camera,
 											  float f,
 											  MultiBufferSource.BufferSource bufferSource,
 											  Queue<Particle> particles) {
@@ -89,12 +87,8 @@ public abstract class MixinParticleEngine_Render {
 			}
 			try {
 				particle.renderCustom(poseStack, bufferSource, camera, f3);
-			} catch (Throwable var10) {
-				CrashReport crashReport = CrashReport.forThrowable(var10, "Rendering Particle");
-				CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
-				crashReportCategory.setDetail("Particle", particle::toString);
-				crashReportCategory.setDetail("Particle Type", "Custom");
-				throw new ReportedException(crashReport);
+			} catch (Throwable t) {
+				throw AsyncRenderer.constructCrashReport(particle, particle.getRenderType(), t);
 			}
 		}
 	}
@@ -116,13 +110,6 @@ public abstract class MixinParticleEngine_Render {
 				}
 			}
 		}
-//		for (Map.Entry<ParticleRenderType, Queue<Particle>> entry : particles.entrySet()) {
-//			ParticleRenderType particleRenderType = entry.getKey();
-//			if (particleRenderType != ParticleRenderType.NO_RENDER &&
-//				particleRenderType.renderType() == null) {
-//				renderCustomParticles(camera, partialTick, bufferSource, entry.getValue());
-//			}
-//		}
 
 		if (!ModListHelper.IRIS_LIKE_LOADED || !AsyncRenderer.isTranslucentPhase(phase)) {
 			Queue<Particle> queue2 = this.particles.get(ParticleRenderType.CUSTOM);

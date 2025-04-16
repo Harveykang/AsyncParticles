@@ -19,7 +19,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = LevelRenderer.class, priority = 1500)
 public abstract class MixinLevelRenderer {
-
 	@WrapOperation(method = "renderLevel",
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;addParticlesPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/FogParameters;)V"))
 	private void redirectAddParticlesPass(LevelRenderer instance,
@@ -30,7 +29,7 @@ public abstract class MixinLevelRenderer {
 										  Operation<Void> original,
 										  @Share("asyncparticles$addParticlesPassOperation") LocalRef<Operation<Void>> originalRef) {
 //		this.asyncparticles$addParticlesPassOperation = original;
-		// do nothing, we'll call the original method later
+		// we'll call the original method later
 		if (!SimplePropertiesConfig.isRenderAsync()) {
 			original.call(instance, frameGraphBuilder, camera, partialTick, fog);
 		} else {

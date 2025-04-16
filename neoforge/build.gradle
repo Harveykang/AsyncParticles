@@ -4,6 +4,7 @@ plugins {
 
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
+    accessWidenerPath = file('src/main/resources/asyncparticles-neoforge.accesswidener')
 
     mixin {
         useLegacyMixinAp = true
@@ -132,4 +133,5 @@ remapJar {
     inputFile.set shadowJar.archiveFile
     injectAccessWidener = true
     atAccessWideners.add(project(":common").loom.accessWidenerPath.get().asFile.name)
+    atAccessWideners.add(loom.accessWidenerPath.get().asFile.name)
 }
