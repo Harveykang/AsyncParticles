@@ -152,6 +152,10 @@ dependencies {
 
     /* Subtle Effects */
     modCompileOnly "maven.modrinth:subtle-effects:lCMnqufi"
+
+    /* Physics Mod */
+//    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v171d-forge-1.20.1.jar')
+    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171d-forge-1.20.1.jar')
 }
 
 processResources {

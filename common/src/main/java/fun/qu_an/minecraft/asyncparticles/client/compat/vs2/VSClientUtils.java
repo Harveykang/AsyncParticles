@@ -6,34 +6,40 @@ import kotlin.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4dc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.primitives.AABBd;
+import org.joml.primitives.AABBdc;
 import org.valkyrienskies.core.api.ships.ClientShip;
+import org.valkyrienskies.core.api.ships.properties.ShipTransform;
 import org.valkyrienskies.core.apigame.collision.ConvexPolygonc;
 import org.valkyrienskies.core.apigame.collision.EntityPolygonCollider;
+import org.valkyrienskies.core.impl.game.ships.ShipObject;
 import org.valkyrienskies.core.impl.game.ships.ShipObjectClient;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.ValkyrienSkiesMod;
 import org.valkyrienskies.mod.common.util.EntityShipCollisionUtils;
 import org.valkyrienskies.mod.common.util.IEntityDraggingInformationProvider;
+import org.valkyrienskies.mod.util.BugFixUtil;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static net.minecraft.util.Mth.floor;
+import static org.valkyrienskies.core.util.AABBdUtilKt.extend;
 import static org.valkyrienskies.mod.common.util.VectorConversionsMCKt.toJOML;
 import static org.valkyrienskies.mod.common.util.VectorConversionsMCKt.toMinecraft;
 
@@ -148,11 +154,38 @@ public class VSClientUtils {
 		double yMovement = movement.y() + Math.max(stepHeight - inflation, 0.0);
 		Vec3 movement1 = new Vec3(movement.x(), yMovement, movement.z());
 		AABB bb = entityBoundingBox.inflate(inflation);
-		List<ConvexPolygonc> collidingShipPolygons =
-			((InvokerEntityShipCollisionUtils) (Object) EntityShipCollisionUtils.INSTANCE).invoker_getShipPolygonsCollidingWithEntity(
-				entity, movement1,
-				bb, world);
-		return !collidingShipPolygons.isEmpty();
+		return hasShipPolygonsCollidingWithEntity(entity, movement1, bb, world);
+	}
+
+	/**
+	 * @see EntityShipCollisionUtils#getShipPolygonsCollidingWithEntity
+	 */
+	public static boolean hasShipPolygonsCollidingWithEntity(Entity entity,
+													   Vec3 movement,
+													   AABB entityBoundingBox,
+													   ClientLevel world) {
+		AABB entityBoxWithMovement = entityBoundingBox.expandTowards(movement);
+		AABBdc entityBoundingBoxExtended = extend(toJOML(entityBoundingBox), toJOML(movement));
+
+		for (ClientShip shipObject : VSGameUtilsKt.getShipObjectWorld(world).getLoadedShips().getIntersecting(entityBoundingBoxExtended)) {
+			ShipTransform shipTransform = shipObject.getTransform();
+			ConvexPolygonc entityPolyInShipCoordinates = collider.createPolygonFromAABB(
+				toJOML(entityBoxWithMovement),
+				shipTransform.getWorldToShip(),
+				null
+			);
+			AABBdc entityBoundingBoxInShipCoordinates = entityPolyInShipCoordinates.getEnclosingAABB(new AABBd());
+			if (BugFixUtil.INSTANCE.isCollisionBoxToBig(toMinecraft(entityBoundingBoxInShipCoordinates))) {
+				// Box too large, skip it
+				continue;
+			}
+
+			Iterable<VoxelShape> shipBlockCollisionStream = world.getBlockCollisions(entity, toMinecraft(entityBoundingBoxInShipCoordinates));
+			if (shipBlockCollisionStream.iterator().hasNext()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

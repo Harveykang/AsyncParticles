@@ -60,9 +60,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				 "me.fzzyhmstrs.particle_core.mixins.ParticleMixin",
 				 "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
 				 "com.moepus.flerovium.mixins.Particle.ParticleMixin"
-//			, "einstein.subtle_effects.mixin.client.particle.FabricParticleEngineMixin",
-//				 "einstein.subtle_effects.mixin.client.particle.ForgeParticleEngineMixin"
-//				 , "net.diebuddies.mixins.ocean.MixinParticleEngine"
+//			,
+//				 "net.diebuddies.mixins.ocean.MixinParticleEngine"
 				-> true;
 			default -> false;
 		});
@@ -87,12 +86,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		String mixinPackageName = mixinClassName.substring(PACKAGE_LENGTH);
 		String[] split = mixinPackageName.split("\\.");
 		if (split.length == 1) {
-			return switch (split[0]) {
-				// vulkan mod has a faster light cache implementation
-				case "MixinParticle_LightCache",
-					 "MixinParticle_LightCacheNoRefresh" -> !ModListHelper.VULKAN_MOD_LOADED;
-				default -> true;
-			};
+			return true;
 		}
 		return switch (split[0]) {
 			case "fabric" -> {
@@ -112,6 +106,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					case "effectual" -> ModListHelper.FABRIC_EFFECTUAL_LOADED;
 					case "particular" -> ModListHelper.FABRIC_PARTICULAR_LOADED;
 					case "vulkanmod" -> ModListHelper.FABRIC_VULKAN_MOD_LOADED;
+					case "physicsmod" -> ModListHelper.FABRIC_PHYSICSMOD_LOADED;
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
@@ -129,15 +124,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				 "off_thread_access" -> true;
 			case "modernui" -> ModListHelper.MODERN_UI_LOADED;
 			case "vs2" -> ModListHelper.VS_LOADED;
-			case "create" -> {
-				if (!ModListHelper.CREATE_LOADED) {
-					yield false;
-				}
-				yield switch (split[1]) {
-					case "MixinParticle_LightCache" -> !ModListHelper.VULKAN_MOD_LOADED;
-					default -> true;
-				};
-			}
+			case "create" -> ModListHelper.CREATE_LOADED;
 			case "iris_like" -> ModListHelper.IRIS_LIKE_LOADED;
 			case "flywheel" -> ModListHelper.FLYWHEEL_LOADED &&
 							   ModListHelper.versionCheck("flywheel", "1.0", "2.0");

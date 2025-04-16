@@ -32,7 +32,7 @@ public class MixinSoundEngine {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call();
 		} else {
-			ThreadUtil.submitClientTask(original::call);
+			ThreadUtil.enqueueClientTask(original::call);
 		}
 	}
 
@@ -41,7 +41,7 @@ public class MixinSoundEngine {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(category, volume);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(category, volume));
+			ThreadUtil.enqueueClientTask(() -> original.call(category, volume));
 		}
 	}
 
@@ -50,7 +50,7 @@ public class MixinSoundEngine {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(soundInstance);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(soundInstance));
+			ThreadUtil.enqueueClientTask(() -> original.call(soundInstance));
 		}
 	}
 
@@ -59,7 +59,7 @@ public class MixinSoundEngine {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(listener);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(listener));
+			ThreadUtil.enqueueClientTask(() -> original.call(listener));
 		}
 	}
 
@@ -73,7 +73,7 @@ public class MixinSoundEngine {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(tickableSound);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(tickableSound));
+			ThreadUtil.enqueueClientTask(() -> original.call(tickableSound));
 		}
 	}
 
@@ -82,7 +82,7 @@ public class MixinSoundEngine {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(sound);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(sound));
+			ThreadUtil.enqueueClientTask(() -> original.call(sound));
 		}
 	}
 
@@ -91,7 +91,7 @@ public class MixinSoundEngine {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(sound, delay);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(sound, delay));
+			ThreadUtil.enqueueClientTask(() -> original.call(sound, delay));
 		}
 	}
 
@@ -100,7 +100,7 @@ public class MixinSoundEngine {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(soundName, category);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(soundName, category));
+			ThreadUtil.enqueueClientTask(() -> original.call(soundName, category));
 		}
 	}
 }

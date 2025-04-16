@@ -1,53 +1,48 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.physicsmod;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import net.diebuddies.physics.snow.math.AABB3D;
-import net.diebuddies.physics.vines.VineHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.shapes.VoxelShape;
-import org.joml.Matrix4dc;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
-import org.valkyrienskies.core.api.ships.ClientShip;
 
 public class PhysicsModCompat {
-	public static boolean collideWithShip(ClientLevel level, double x, double y, double z, AABB3D aabb) {
+	public static boolean isCollideWithShip(ClientLevel level, double xd, double yd, double zd, AABB3D aabb) {
 		Vector3d min = aabb.getMin();
 		Vector3d max = aabb.getMax();
-		BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos(0, 0, 0);
-		Iterable<ClientShip> iterable = VSClientUtils.getShipsInAABB(
-			level,
-			min.x - 0.09, min.y - 0.09, min.z - 0.09,
-			max.x + 0.09, max.y + 0.09, max.z + 0.09);
-		AABB3D toShipAABB = new AABB3D(0, 0, 0, 0, 0, 0);
-		for (ClientShip ship : iterable) {
-			Matrix4dc worldToShip = ship.getWorldToShip();
-			Vector3d toShipPos = worldToShip.transformPosition(new Vector3d(x, y, z));
-			blockPos.set(toShipPos.x, toShipPos.y, toShipPos.z);
-			BlockState state = level.getBlockState(blockPos);
-			if (state.isAir()) {
-				continue;
-			}
-			VoxelShape voxelShape = state.getCollisionShape(level, blockPos);
-			if (voxelShape.isEmpty() || VineHelper.getSetting(state) != null) {
-				continue;
-			}
-			toShipAABB.getMin().set(toShipPos.x - 0.05, toShipPos.y - 0.05, toShipPos.z - 0.05);
-			toShipAABB.getMax().set(toShipPos.x + 0.05, toShipPos.y + 0.05, toShipPos.z + 0.05);
-			for (AABB aabb1 : voxelShape.toAabbs()) {
-				if (toShipAABB.intersect(
-					aabb1.minX + blockPos.getX(),
-					aabb1.minY + blockPos.getY(),
-					aabb1.minZ + blockPos.getZ(),
-					aabb1.maxX + blockPos.getX(),
-					aabb1.maxY + blockPos.getY(),
-					aabb1.maxZ + blockPos.getZ())) {
-					return false;
-				}
+		return VSClientUtils.isEntityMovColShipOnly(null,
+			new Vec3(xd, yd, zd),
+			new AABB(min.x, min.y, min.z, max.x, max.y, max.z),
+			level);
+	}
+
+	public static void onShipCollide(ClientLevel level, Vec3 location, Vec3 movement) {
+		if (level.random.nextFloat() > 0.15) {
+			return;
+		}
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.player == null) {
+			return;
+		}
+		ShipHitResult hit = VSClientUtils.clipShip(level, new ClipContext(location,
+				location.add(movement.scale(2)),
+				ClipContext.Block.COLLIDER,
+				ClipContext.Fluid.ANY,
+				mc.player),
+			true);
+		if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
+			Vec3 spawnPos = hit.getLocation();
+			FluidState fluidState = level.getFluidState(hit.getBlockPos());
+			if (fluidState.isEmpty()) {
+				mc.particleEngine.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
 			}
 		}
-		return false;
 	}
 }

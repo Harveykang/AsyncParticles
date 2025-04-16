@@ -118,6 +118,15 @@ subprojects {
         }
     }
 
+    build.doFirst {
+        if (project.vulkan_enabled == 'true') {
+            throw new GradleException("Please disable vulkan_enabled in gradle.properties before building.")
+        }
+        if (project.physics_enabled == 'true') {
+            throw new GradleException("Please disable physics_enabled in gradle.properties before building.")
+        }
+    }
+
     build.finalizedBy(mergeJars)
     assemble.finalizedBy(mergeJars)
 }

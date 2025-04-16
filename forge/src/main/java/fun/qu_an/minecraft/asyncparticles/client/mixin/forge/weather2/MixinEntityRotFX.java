@@ -26,7 +26,7 @@ public class MixinEntityRotFX {
 		if (RenderSystem.isOnRenderThread()) {
 			return instance.remove(p_107347_);
 		}
-		ThreadUtil.submitClientTask(() -> instance.remove((Particle) p_107347_));
+		ThreadUtil.enqueueClientTask(() -> instance.remove((Particle) p_107347_));
 		return true;
 	}
 }

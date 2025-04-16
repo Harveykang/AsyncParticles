@@ -34,7 +34,7 @@ public class ParticleRainCompatImpl {
 			return;
 		}
 		ShipHitResult hit = VSClientUtils.clipShip(level, new ClipContext(location,
-				location.add(movement).add(movement.normalize().scale(aabb.getSize())),
+				location.add(movement.normalize().scale(aabb.getSize())),
 				ClipContext.Block.COLLIDER,
 				ClipContext.Fluid.ANY,
 				mc.player),

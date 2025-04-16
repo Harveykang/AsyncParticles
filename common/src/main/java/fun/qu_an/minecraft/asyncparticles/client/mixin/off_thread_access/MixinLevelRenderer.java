@@ -18,7 +18,7 @@ public abstract class MixinLevelRenderer {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(x, y, z, reRenderOnMainThread);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(x, y, z, reRenderOnMainThread));
+			ThreadUtil.enqueueClientTask(() -> original.call(x, y, z, reRenderOnMainThread));
 		}
 	}
 
@@ -27,7 +27,7 @@ public abstract class MixinLevelRenderer {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(pos, reRenderOnMainThread);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(pos, reRenderOnMainThread));
+			ThreadUtil.enqueueClientTask(() -> original.call(pos, reRenderOnMainThread));
 		}
 	}
 
@@ -36,7 +36,7 @@ public abstract class MixinLevelRenderer {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(minX, minY, minZ, maxX, maxY, maxZ);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(minX, minY, minZ, maxX, maxY, maxZ));
+			ThreadUtil.enqueueClientTask(() -> original.call(minX, minY, minZ, maxX, maxY, maxZ));
 		}
 	}
 
@@ -45,7 +45,7 @@ public abstract class MixinLevelRenderer {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(sectionX, sectionY, sectionZ);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(sectionX, sectionY, sectionZ));
+			ThreadUtil.enqueueClientTask(() -> original.call(sectionX, sectionY, sectionZ));
 		}
 	}
 
@@ -54,7 +54,7 @@ public abstract class MixinLevelRenderer {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(breakerId, pos, progress);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(breakerId, pos, progress));
+			ThreadUtil.enqueueClientTask(() -> original.call(breakerId, pos, progress));
 		}
 	}
 }

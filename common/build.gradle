@@ -73,7 +73,7 @@ dependencies {
     modCompileOnly "curse.maven:a-good-place-1020455:6277409" // 1.2.6
 
     /* Physics Mod */
-    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171b-fabric-1.20.1.jar')
+    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171c-fabric-1.20.1.jar')
 
     /* Subtle Effects */
     modCompileOnly "maven.modrinth:subtle-effects:y7DGrtIb" // fabric 1.9.3

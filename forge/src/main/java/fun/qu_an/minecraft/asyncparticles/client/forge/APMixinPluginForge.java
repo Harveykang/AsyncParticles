@@ -62,6 +62,7 @@ public class APMixinPluginForge implements IMixinConfigPlugin {
 			case "weather2" -> ModListHelper.FORGE_WEATHER2_LOADED;
 			case "weather2_vs" -> ModListHelper.FORGE_WEATHER2_LOADED && ModListHelper.VS_LOADED;
 			case "weather2_create" -> ModListHelper.FORGE_WEATHER2_LOADED && ModListHelper.CREATE_LOADED;
+			case "physicsmod" -> ModListHelper.FORGE_PHYSICSMOD_LOADED;
 			default -> throw new IllegalArgumentException("Unknown forge mixin: " + mixinClassName);
 		};
 	}

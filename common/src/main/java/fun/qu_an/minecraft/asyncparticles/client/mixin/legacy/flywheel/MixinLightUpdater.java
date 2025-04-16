@@ -22,7 +22,7 @@ public class MixinLightUpdater {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(listener);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(listener));
+			ThreadUtil.enqueueClientTask(() -> original.call(listener));
 		}
 	}
 
@@ -31,7 +31,7 @@ public class MixinLightUpdater {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(type, sectionPos);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(type, sectionPos));
+			ThreadUtil.enqueueClientTask(() -> original.call(type, sectionPos));
 		}
 	}
 
@@ -40,7 +40,7 @@ public class MixinLightUpdater {
 		if (RenderSystem.isOnRenderThread()) {
 			original.call(chunkX, chunkZ);
 		} else {
-			ThreadUtil.submitClientTask(() -> original.call(chunkX, chunkZ));
+			ThreadUtil.enqueueClientTask(() -> original.call(chunkX, chunkZ));
 		}
 	}
 

@@ -283,18 +283,23 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		return true;
 	}
 
-	private void removeIndex(Object[] q, int toRemove, int to) {
-		int l = to - toRemove;
+	private void removeIndex(Object[] q, int toRemove, int tail) {
+		int l = tail - toRemove;
+		int mask = q.length - 1;
 		if (l > 0) {
-			if (to <= q.length) {
-				System.arraycopy(q, toRemove + 1, q, toRemove, l);
+			if (tail <= q.length) {
+				System.arraycopy(q, toRemove + 1, q, toRemove, l - 1);
+			} else if (toRemove <= mask) {
+				if (toRemove < mask){
+					System.arraycopy(q, toRemove + 1, q, toRemove, q.length - toRemove - 1);
+				}
+				q[mask] = q[0];
+				System.arraycopy(q, 1, q, 0, tail - q.length - 1);
 			} else {
-				System.arraycopy(q, toRemove, q, toRemove + 1, q.length - toRemove);
-				q[q.length - 1] = q[0];
-				System.arraycopy(q, 1, q, 0, head + size - q.length);
+				System.arraycopy(q, (toRemove + 1) & mask, q, toRemove & mask, l - 1);
 			}
 		}
-		q[to - 1 & q.length - 1] = null;
+		q[tail - 1 & mask] = null;
 		size--;
 	}
 

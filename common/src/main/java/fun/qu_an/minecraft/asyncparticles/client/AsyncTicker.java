@@ -39,18 +39,7 @@ import static fun.qu_an.minecraft.asyncparticles.client.util.Utils.toThrowDirect
 public class AsyncTicker {
 	public static final Logger LOGGER = LogManager.getLogger();
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
-
-	static {
-		if (ModListHelper.PHYSICSMOD_LOADED) {
-			addSyncByClassName("net.diebuddies.minecraft.weather.RainParticle");
-			addSyncByClassName("net.diebuddies.minecraft.weather.DustParticle");
-			addSyncByClassName("net.diebuddies.minecraft.weather.SnowParticle");
-			addSyncByClassName("net.diebuddies.physics.ocean.RainParticle");
-		}
-	}
-
 	private static final Set<Particle> SYNC_PARTICLES = Collections.newSetFromMap(new IdentityHashMap<>());
-
 	public static final List<Runnable> BLOCK_ENTITY_OPERATIONS = new ArrayList<>();
 	public static final List<Runnable> PARTICLE_OPERATIONS = new ArrayList<>();
 	private static boolean cancelled = false;
@@ -371,9 +360,6 @@ public class AsyncTicker {
 	}
 
 	public static void recordSync(Particle particle) {
-		if (SYNC_PARTICLES.contains(particle)) {
-			return;
-		}
 		synchronized (SYNC_PARTICLES) {
 			SYNC_PARTICLES.add(particle);
 		}

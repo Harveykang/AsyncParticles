@@ -61,6 +61,8 @@ public class ModListHelper {
 	public static final boolean PARTICLE_CORE_LOADED = isModLoaded("particle_core");
 	/* Physics Mod */
 	public static final boolean PHYSICSMOD_LOADED = isModLoaded("physicsmod");
+	public static final boolean FABRIC_PHYSICSMOD_LOADED = isFabricModLoaded("physicsmod");
+	public static final boolean FORGE_PHYSICSMOD_LOADED = isForgeModLoaded("physicsmod");
 	/* Draconic Evolution */
 	public static final boolean FORGE_DRACONIC_EVOLUTION_LOADED = isForgeModLoaded("draconicevolution");
 	/* Modern UI */
@@ -73,6 +75,7 @@ public class ModListHelper {
 	public static final boolean WATUT_LOADED = isModLoaded("watut");
 	/* Weather2 */
 	public static final boolean FORGE_WEATHER2_LOADED = isForgeModLoaded("weather2");
+	/* Vulkan Mod */
 	public static final boolean VULKAN_MOD_LOADED = isModLoaded("vulkanmod");
 	public static final boolean FABRIC_VULKAN_MOD_LOADED = isFabricModLoaded("vulkanmod");
 

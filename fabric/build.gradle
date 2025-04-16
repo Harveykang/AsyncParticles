@@ -78,6 +78,13 @@ dependencies {
     modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.5"
     modCompileOnly 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
 
+    /* Physics Mod */
+    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171c-fabric-1.20.1.jar')
+    if (rootProject.physics_enabled == 'true'){
+        modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v171c-fabric-1.20.1.jar')
+        return
+    }
+
     /* Particle Rain/Pretty Rain */
     modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
     modCompileOnly "maven.modrinth:particle-rain:3.0.6-1.20"
@@ -122,14 +129,8 @@ dependencies {
     modLocalRuntime "maven.modrinth:subtle-effects:y7DGrtIb" // fabric 1.9.3
 
     /* A Good Place */
-    modLocalRuntime "curse.maven:a-good-placement-1020455:6277409" // 1.2.6
-
+    modLocalRuntime "curse.maven:a-good-place-1020455:6277409" // 1.2.6
     modCompileOnly "curse.maven:a-good-place-1020455:6277409" // 1.2.6
-
-    /* Physics Mod */
-//    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v171b-fabric-1.20.1.jar')
-
-    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171b-fabric-1.20.1.jar')
 
     /* Carpet */
 //    modLocalRuntime "curse.maven:carpet-349239:4573334" // 1.4.112

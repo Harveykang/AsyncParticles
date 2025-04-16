@@ -31,6 +31,7 @@
     "particlerain_create.MixinWeatherParticleSpawner",
     "particlerain_vs.MixinRippleParticle",
     "particlerain_vs.MixinWeatherParticleSpawner",
+    "physicsmod.MixinLevelRenderer",
     "subtle_effects.MixinParticleEngine",
     "weather2.MixinClientTickHandler",
     "weather2.MixinEntityRotFX",
