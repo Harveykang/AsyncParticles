@@ -32,12 +32,12 @@ public class MixinMinecraft {
 		target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;"))
 	private void onSetLevel(CallbackInfo ci) {
 		// TODO: 这玩意到底有没有用？？
-		AsyncTicker.destroy();
-		AsyncRenderer.destroy();
+		AsyncTicker.reset();
+		AsyncRenderer.reset();
 	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;tick()V"))
 	private void redirectParticleEngineTick(ParticleEngine instance) {
-		AsyncTicker.tickSync();
+		AsyncTicker.tickSyncParticles();
 	}
 }

@@ -33,13 +33,10 @@ public class MixinLevelRenderer {
 																			double vx,
 																			double vy,
 																			double vz,
-																			Operation<Particle> original,
-																			@Share("shouldAdd") LocalBooleanRef shouldAdd) {
+																			Operation<Particle> original) {
 		if (!VSClientUtils.isUnderShipHeightMap(level, x, y, z)) {
-			shouldAdd.set(true);
 			return original.call(instance, t, level, x, y, z, vx, vy, vz);
 		} else {
-			shouldAdd.set(false);
 			return null;
 		}
 	}
@@ -50,8 +47,7 @@ public class MixinLevelRenderer {
 	)
 	@WrapWithCondition(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;add(Lnet/minecraft/client/particle/Particle;)V"))
 	private <T extends ParticleOptions> boolean onAddAlwaysVisibleParticle(ParticleEngine instance,
-																		   Particle optional,
-																		   @Share("shouldAdd") LocalBooleanRef shouldAdd) {
-		return shouldAdd.get();
+																		   Particle particle) {
+		return particle != null;
 	}
 }

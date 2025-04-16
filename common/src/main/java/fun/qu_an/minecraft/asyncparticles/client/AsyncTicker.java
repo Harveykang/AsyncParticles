@@ -27,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -99,6 +98,9 @@ public class AsyncTicker {
 
 	// called per frame
 	public static void onRunAllTasks() {
+		if (!SimplePropertiesConfig.isTickAsync()) {
+			return;
+		}
 		// join before runAllTasks
 		if (blockEntityTickFuture != null && !SimplePropertiesConfig.greedyAsyncClientBlockEntityTick()) {
 			blockEntityTickFuture.join();
@@ -111,6 +113,9 @@ public class AsyncTicker {
 	 * @param to Count of ticks to run
 	 */
 	public static void onTickBefore(int i, int to) {
+		if (!SimplePropertiesConfig.isTickAsync()) {
+			return;
+		}
 		// assert i < to;
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
 		profiler.push("async_particles");
@@ -179,6 +184,14 @@ public class AsyncTicker {
 	 * @param to Count of ticks to run
 	 */
 	public static void onTickAfter(int i, int to) {
+		if (!SimplePropertiesConfig.isTickAsync()) {
+			tryReload();
+			tryDebug();
+			END_TICK_OPERATIONS.forEach(Runnable::run);
+			END_TICK_OPERATIONS.clear();
+			END_TICK_EVENTS.forEach(Runnable::run);
+			return;
+		}
 		// assert i < to;
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
@@ -250,17 +263,17 @@ public class AsyncTicker {
 			Runnable[] particleTasks = particleOperations.toArray(new Runnable[0]);
 			particleOperations.clear();
 			particleFuture = particleFuture.thenCompose(v -> CompletableFuture.allOf(Arrays.stream(particleTasks)
-				.map(runnable -> CompletableFuture
-					.runAsync(runnable, EXECUTOR)
-					.exceptionally(e -> {
-						if (!SimplePropertiesConfig.markSyncIfTickFailed()
-							&& isTolerable(e)) {
-							LOGGER.warn("Exception while executing particle operation, you can ignore it if it doesn't happen frequently.", e);
-							return null;
-						}
-						throw toThrowDirectly(e);
-					}))
-				.toArray(CompletableFuture[]::new)))
+					.map(runnable -> CompletableFuture
+						.runAsync(runnable, EXECUTOR)
+						.exceptionally(e -> {
+							if (!SimplePropertiesConfig.markSyncIfTickFailed()
+								&& isTolerable(e)) {
+								LOGGER.warn("Exception while executing particle operation, you can ignore it if it doesn't happen frequently.", e);
+								return null;
+							}
+							throw toThrowDirectly(e);
+						}))
+					.toArray(CompletableFuture[]::new)))
 				.thenRun(() -> timeUsageNano.set(System.nanoTime() - timeUsageNano.get()));
 		}
 
@@ -321,7 +334,7 @@ public class AsyncTicker {
 
 	/* Sync Ticking */
 
-	public static void tickSync() {
+	public static void tickSyncParticles() {
 		if (!shouldTickParticles || SYNC_PARTICLES.isEmpty()) {
 			return;
 		}
@@ -431,10 +444,10 @@ public class AsyncTicker {
 	}
 
 	public static void reload(boolean clearParticles) {
-		AsyncRenderer.destroy();
+		AsyncRenderer.reset();
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 		if (clearParticles) {
-			destroy();
+			reset();
 			particleEngine.clearParticles();
 		} else {
 			Queue<Particle> toAdd = particleEngine.particlesToAdd;
@@ -450,7 +463,7 @@ public class AsyncTicker {
 		}
 	}
 
-	public static void destroy() {
+	public static void reset() {
 		cancelled = true;
 		waitForCleanUp();
 		if (blockEntityTickFuture != null) {
