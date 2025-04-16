@@ -80,7 +80,7 @@ dependencies {
 
     /* Particle Rain/Pretty Rain */
     modCompileOnly "maven.modrinth:pretty-rain:Hp8eralZ" // 1.1.1
-    modLocalRuntime "maven.modrinth:pretty-rain:Hp8eralZ" // 1.1.1
+//    modLocalRuntime "maven.modrinth:pretty-rain:Hp8eralZ" // 1.1.1
 
     /* Create */
 //    modLocalRuntime("com.simibubi.create:create-1.20.1:0.5.1.j-55:slim") { transitive = false }
@@ -114,6 +114,10 @@ dependencies {
     /* Simple Weather */
     modCompileOnly "curse.maven:simple-weather-983390:6037753" // 1.0.15
 //    modLocalRuntime "curse.maven:simple-weather-983390:6037753" // 1.0.15
+
+    /* Physics Mod */
+    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v174c-neoforge-1.21.4.jar')
+//    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v174c-neoforge-1.21.4.jar')
 }
 
 processResources {

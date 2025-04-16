@@ -183,6 +183,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				};
 			}
 			case "watut" -> ModListHelper.WATUT_LOADED;
+			case "physicsmod" -> ModListHelper.PHYSICSMOD_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

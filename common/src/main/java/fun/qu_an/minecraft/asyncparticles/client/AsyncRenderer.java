@@ -70,12 +70,6 @@ public class AsyncRenderer {
 			addSyncByClassName("ovh.corail.tombstone.particle.ParticleMarker");
 			addSyncByClassName("ovh.corail.tombstone.particle.ParticleRounding");
 		}
-		if (ModListHelper.PHYSICSMOD_LOADED) {
-			addSyncByClassName("net.diebuddies.minecraft.weather.RainParticle");
-			addSyncByClassName("net.diebuddies.minecraft.weather.DustParticle");
-			addSyncByClassName("net.diebuddies.minecraft.weather.SnowParticle");
-			addSyncByClassName("net.diebuddies.physics.ocean.RainParticle");
-		}
 		// TODO: configure this set
 	}
 

@@ -38,6 +38,7 @@
     "off_thread_access.MixinLevelChunk",
     "off_thread_access.MixinLevelRenderer",
     "off_thread_access.MixinSoundEngine",
+    "physicsmod.MixinClientLevel",
     "render.MixinLevelRenderer",
     "render.MixinMultiBufferSource$BufferSource",
     "render.MixinTesselator",

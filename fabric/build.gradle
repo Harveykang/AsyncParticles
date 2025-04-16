@@ -112,7 +112,8 @@ dependencies {
     modLocalRuntime "maven.modrinth:a-good-place:kD90q4La" // 1.2.10
 
     /* Physics Mod */
-//    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v171b-fabric-1.20.1.jar')
+    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v174c-fabric-1.21.4.jar')
+    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v174c-fabric-1.21.4.jar')
 
     /* Subtle Effects */
     localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"
