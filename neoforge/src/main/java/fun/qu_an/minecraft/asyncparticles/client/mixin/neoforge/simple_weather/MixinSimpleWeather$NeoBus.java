@@ -15,7 +15,7 @@ import tv.soaryn.simpleweather.SimpleWeather;
 
 @Mixin(targets = "tv.soaryn.simpleweather.SimpleWeather$NeoBus", remap = false)
 public interface MixinSimpleWeather$NeoBus {
-	@Inject(method = "addRain", cancellable = true,
+	@Inject(method = {"addRain", "addSnowflake"}, cancellable = true,
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;addParticle(Lnet/minecraft/core/particles/ParticleOptions;ZDDDDDD)V"))
 	private static void onAddRain(ClientLevel level, int x, int y, int z, BlockPos.MutableBlockPos pos, int range, CallbackInfo ci) {
 		if (CreateCompatImpl.isUnderContraption(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5)) {
