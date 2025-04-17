@@ -1,3 +1,4 @@
 accessWidener v2 named
 
 accessible method net/minecraft/client/particle/ParticleEngine renderCustomParticles (Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Ljava/util/Queue;Lnet/minecraft/client/renderer/culling/Frustum;)V
+accessible field net/minecraft/client/particle/ParticleEngine particles Ljava/util/Map;

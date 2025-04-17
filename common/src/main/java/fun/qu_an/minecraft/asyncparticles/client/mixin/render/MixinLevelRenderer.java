@@ -34,11 +34,4 @@ public abstract class MixinLevelRenderer {
 		// as early as possible
 		AsyncRenderer.start(deltaTracker.getGameTimeDeltaPartialTick(false), camera, frustumMatrix, projectionMatrix);
 	}
-
-	@Inject(method = "renderLevel", at = @At(value = "CONSTANT", args = "stringValue=captureFrustum"))
-	private void renderLevel1(CallbackInfo ci, @Local Frustum frustum){
-		if (!SimplePropertiesConfig.isRenderAsync()) {
-			AsyncRenderer.frustum = frustum;
-		}
-	}
 }

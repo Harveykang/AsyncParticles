@@ -29,6 +29,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
@@ -346,7 +347,7 @@ public class AsyncRenderer {
 		if (renderType == null) { // special case
 			return BindingTesselator.EMPTY;
 		}
-		return new BindingTesselator(256, renderType.mode(), renderType.format()); // minimal size
+		return new BindingTesselator(RenderType.TRANSIENT_BUFFER_SIZE, renderType.mode(), renderType.format()); // minimal size
 	}
 
 	/* Sync Rendering */

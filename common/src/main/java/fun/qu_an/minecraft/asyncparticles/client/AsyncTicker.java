@@ -415,10 +415,11 @@ public class AsyncTicker {
 				END_TICK_OPERATIONS.size(),
 				SimplePropertiesConfig.limit,
 				Minecraft.getInstance().particleEngine.particles.entrySet()
-					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
-						Queue<Particle> queue = e.getValue();
-						return queue.size() + "/" + ((IterationSafeEvictingQueue<Particle>) queue).arraySize();
-					})),
+					.stream().collect(Collectors.toMap(e -> e.getKey().name(),
+						e -> {
+							Queue<Particle> queue = e.getValue();
+							return queue.size() + "/" + ((IterationSafeEvictingQueue<Particle>) queue).arraySize();
+						})),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
 				SYNC_PARTICLES.size(),
 				SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList())));
@@ -505,7 +506,7 @@ public class AsyncTicker {
 	}
 
 	public static void addEndTickTask(Runnable operation) {
-		if (shouldTickParticles || !SimplePropertiesConfig.isTickAsync()){
+		if (shouldTickParticles || !SimplePropertiesConfig.isTickAsync()) {
 			AsyncTicker.END_TICK_OPERATIONS.add(operation);
 		}
 	}

@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.physicsmod;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.diebuddies.minecraft.weather.FastTextureSheetParticle;
 import net.diebuddies.minecraft.weather.WeatherParticle;
@@ -13,13 +14,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(WeatherParticle.class)
-public abstract class MixinWeatherParticle extends FastTextureSheetParticle {
+public abstract class MixinWeatherParticle implements ParticleAddon {
 	@Shadow(remap = false)
 	protected AABB3D aabb;
-
-	protected MixinWeatherParticle(ClientLevel clientLevel, double d, double e, double f) {
-		super(clientLevel, d, e, f);
-	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", remap = false, target = "Lnet/diebuddies/physics/ocean/OceanWorld;spawnRainRipple(IFDDD)V"))
 	private void onSpawnRainRipple(OceanWorld instance, int lifetime, float scale, double x, double y, double z) {

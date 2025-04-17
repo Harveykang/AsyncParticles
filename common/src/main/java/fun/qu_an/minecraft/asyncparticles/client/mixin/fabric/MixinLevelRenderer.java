@@ -7,6 +7,8 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
+import com.mojang.blaze3d.resource.ResourceHandle;
+import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -27,7 +29,8 @@ public abstract class MixinLevelRenderer {
 										  float partialTick,
 										  FogParameters fog,
 										  Operation<Void> original,
-										  @Share("asyncparticles$addParticlesPassOperation") LocalRef<Operation<Void>> originalRef) {
+										  @Share("asyncparticles$addParticlesPassOperation")
+										  LocalRef<Operation<Void>> originalRef) {
 //		this.asyncparticles$addParticlesPassOperation = original;
 		// we'll call the original method later
 		if (!SimplePropertiesConfig.isRenderAsync()) {
@@ -50,11 +53,21 @@ public abstract class MixinLevelRenderer {
 								   @Local(ordinal = 0) FrameGraphBuilder frameGraphBuilder,
 								   @Local(ordinal = 0) float f,
 								   @Local(ordinal = 0) FogParameters fogParameters,
-								   @Share("asyncparticles$addParticlesPassOperation") LocalRef<Operation<Void>> originalRef) {
+								   @Share("asyncparticles$addParticlesPassOperation")
+								   LocalRef<Operation<Void>> originalRef) {
 		// as late as possible
 //		this.asyncparticles$addParticlesPassOperation.call(frameGraphBuilder, camera, f, fogParameters);
 		if (SimplePropertiesConfig.isRenderAsync()) {
 			originalRef.get().call(this, frameGraphBuilder, camera, f, fogParameters);
 		}
+	}
+
+	@Inject(method = "method_62213", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
+		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V"))
+	private void onRenderParticles(CallbackInfo ci) {
+		// reset blend func and culling state
+		// other mods may change them...
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.enableCull();
 	}
 }
