@@ -65,6 +65,7 @@
     "off_thread_access.MixinSoundEngine",
     "physicsmod.MixinClientLevel",
     "physicsmod.MixinRainParticle",
+    "physicsmod.MixinSnowParticle",
     "physicsmod.MixinWeatherParticle",
     "subtle_effects.MixinAsyncRenderer",
     "subtle_effects.fabric.MixinParticleEngine",

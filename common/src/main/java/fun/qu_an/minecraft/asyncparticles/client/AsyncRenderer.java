@@ -230,13 +230,14 @@ public class AsyncRenderer {
 			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
+		// reset blend func and culling state
+		// other mods may change them...
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.enableCull();
 
 		if (levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();
 		}
-
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.enableCull();
 	}
 
 	public static void irisOpaque(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
@@ -280,6 +281,10 @@ public class AsyncRenderer {
 		ParticleEngine particleEngine = mc.particleEngine;
 		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
+		// reset blend func and culling state
+		// other mods may change them...
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.enableCull();
 
 		if (levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();

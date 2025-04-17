@@ -1,7 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.physicsmod;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.physicsmod.PhysicsModCompat;
