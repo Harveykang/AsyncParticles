@@ -10,7 +10,6 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 
 public class PhysicsModCompat {
-
 	public static void onContraptionCollision(ClientLevel level, Vec3 pos, Vec3 movement, AABB3D aabb) {
 		if (level.random.nextFloat() > 0.1) {
 			return;
@@ -18,7 +17,6 @@ public class PhysicsModCompat {
 		Vector3d min = aabb.getMin();
 		Vector3d max = aabb.getMax();
 		Vec3 clipMotion = CreateCompat.collideMotionWithContraptions(level,
-			pos,
 			movement,
 			new AABB(min.x, min.y, min.z, max.x, max.y, max.z));
 		if (clipMotion == null) {
@@ -36,8 +34,8 @@ public class PhysicsModCompat {
 		Vector3d min = aabb.getMin();
 		Vector3d max = aabb.getMax();
 		return CreateCompat.isCollideWithContraption(level,
-			pos,
 			movement,
-			new AABB(min.x, min.y, min.z, max.x, max.y, max.z));
+			new AABB(min.x, min.y, min.z, max.x, max.y, max.z),
+			false);
 	}
 }

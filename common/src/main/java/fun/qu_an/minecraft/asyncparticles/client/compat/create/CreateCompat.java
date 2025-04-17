@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class CreateCompat {
 	@ExpectPlatform
-	public static Vec3 collideMotionWithContraptions(ClientLevel level, Vec3 position, Vec3 movement, AABB aabb) {
+	public static Vec3 collideMotionWithContraptions(ClientLevel level, Vec3 movement, AABB aabb) {
 		throw new AssertionError();
 	}
 
@@ -19,12 +19,12 @@ public class CreateCompat {
 		return false;
 	}
 
-	public static boolean isCollideWithContraption(@NotNull ClientLevel level, Vec3 startPos, Vec3 motion1, AABB aabb1) {
-		return isCollideWithContraption(level, startPos, motion1, aabb1, true);
+	public static boolean isCollideWithContraption(@NotNull ClientLevel level, Vec3 motion1, AABB aabb1) {
+		return isCollideWithContraption(level, motion1, aabb1, true);
 	}
 
 	@ExpectPlatform
-	public static boolean isCollideWithContraption(@NotNull ClientLevel level, Vec3 startPos, Vec3 motion1, AABB aabb1, boolean b) {
+	public static boolean isCollideWithContraption(@NotNull ClientLevel level, Vec3 motion1, AABB aabb1, boolean b) {
 		Utils.throwAssertionError();
 		return false;
 	}
