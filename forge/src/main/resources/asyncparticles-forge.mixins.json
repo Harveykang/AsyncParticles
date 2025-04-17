@@ -32,7 +32,7 @@
     "particlerain_vs.MixinGroundFogParticle",
     "particlerain_vs.MixinRippleParticle",
     "particlerain_vs.MixinWeatherParticleSpawner",
-    "physicsmod.MixinLevelRenderer",
+    "particular.MixinClientStuff",
     "subtle_effects.MixinParticleEngine",
     "weather2.MixinClientTickHandler",
     "weather2.MixinEntityRotFX",

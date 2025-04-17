@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.physicsmod;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import net.diebuddies.physics.snow.math.AABB3D;
@@ -14,17 +15,17 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 
 public class PhysicsModCompat {
-	public static boolean isCollideWithShip(ClientLevel level, double xd, double yd, double zd, AABB3D aabb) {
+	public static boolean isCollideWithShip(ClientLevel level, Vec3 movement, AABB3D aabb) {
 		Vector3d min = aabb.getMin();
 		Vector3d max = aabb.getMax();
 		return VSClientUtils.isEntityMovColShipOnly(null,
-			new Vec3(xd, yd, zd),
+			movement,
 			new AABB(min.x, min.y, min.z, max.x, max.y, max.z),
 			level);
 	}
 
 	public static void onShipCollide(ClientLevel level, Vec3 location, Vec3 movement) {
-		if (level.random.nextFloat() > 0.15) {
+		if (level.random.nextFloat() > 0.1) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -44,5 +45,35 @@ public class PhysicsModCompat {
 				mc.particleEngine.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
 			}
 		}
+	}
+
+	public static void onContraptionCollision(ClientLevel level, Vec3 pos, Vec3 movement, AABB3D aabb) {
+		if (level.random.nextFloat() > 0.1) {
+			return;
+		}
+		Vector3d min = aabb.getMin();
+		Vector3d max = aabb.getMax();
+		Vec3 clipMotion = CreateCompat.collideMotionWithContraptions(level,
+			pos,
+			movement,
+			new AABB(min.x, min.y, min.z, max.x, max.y, max.z));
+		if (clipMotion == null) {
+			return;
+		}
+		double centerX = min.x + aabb.getWidth() / 2;
+		double centerZ = min.z + aabb.getDepth() / 2;
+		Vec3 startPos = new Vec3(centerX, min.y, centerZ);
+		Vec3 spawnPos = startPos.add(clipMotion);
+		Minecraft.getInstance().particleEngine
+			.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
+	}
+
+	public static boolean isCollideWithContraptions(ClientLevel level, Vec3 pos, Vec3 movement, AABB3D aabb) {
+		Vector3d min = aabb.getMin();
+		Vector3d max = aabb.getMax();
+		return CreateCompat.isCollideWithContraption(level,
+			pos,
+			movement,
+			new AABB(min.x, min.y, min.z, max.x, max.y, max.z));
 	}
 }

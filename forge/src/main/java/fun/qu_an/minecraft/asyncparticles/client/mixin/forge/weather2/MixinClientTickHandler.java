@@ -21,8 +21,9 @@ public class MixinClientTickHandler {
 	 * @author
 	 * @reason
 	 */
+	@SuppressWarnings("OverwriteModifiers")
+	// Remove @SubscribeEvent annotation
 	@Overwrite
-	@SubscribeEvent
 	public static void tick(TickEvent.ClientTickEvent event) {
 		// do nothing
 	}

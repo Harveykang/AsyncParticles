@@ -20,7 +20,7 @@ public class MixinLevelRenderer {
 		name = "spawnParticleInWorld",
 		mixin = "org.valkyrienskies.mod.mixin.feature.transform_particles.MixinLevelRenderer"
 	)
-	@Group(name = "asyncParticles$spawnParticleInWorld", min = 1, max = 1)
+	@Group(name = "asyncParticles:vs2$spawnParticleInWorld", min = 1, max = 1)
 	@Redirect(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", remap = false,
 		target = "Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;setReturnValue(Ljava/lang/Object;)V"))
 	private <T> void onSpawnParticleInWorld(CallbackInfoReturnable<T> instance,
@@ -39,7 +39,7 @@ public class MixinLevelRenderer {
 		name = "spawnParticleInWorld",
 		mixin = "io.github.xiewuzhiying.vs_addition.mixin.valkyrienskies.client.MixinMixinLevelRenderer"
 	)
-	@Group(name = "asyncParticles$spawnParticleInWorld", min = 1, max = 1)
+	@Group(name = "asyncParticles:vs2$spawnParticleInWorld", min = 1, max = 1)
 	@Inject(method = "@MixinSquared:Handler", at = @At(value = "RETURN", ordinal = 2))
 	private <T> void onSpawnParticleInWorld(CallbackInfoReturnable<T> cir,
 											@SuppressWarnings("LocalMayBeArgsOnly")

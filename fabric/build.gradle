@@ -61,7 +61,9 @@ dependencies {
     modLocalRuntime "maven.modrinth:spark:1.10.53-fabric"
     modLocalRuntime "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
     modLocalRuntime 'maven.modrinth:iris:1.7.6+1.20.1'
-    modLocalRuntime 'maven.modrinth:starlight:1.1.2+1.20'
+    if (rootProject.physics_enabled != 'true'){
+        modLocalRuntime 'maven.modrinth:starlight:1.1.2+1.20'
+    }
     localRuntime "org.antlr:antlr4-runtime:4.13.1"
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
     localRuntime "org.anarres:jcpp:1.4.14"
@@ -78,6 +80,13 @@ dependencies {
     modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.5"
     modCompileOnly 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
 
+    /* Create */
+    modLocalRuntime("com.simibubi.create:create-fabric-1.20.1:0.5.1-f-build.1417+mc1.20.1")
+    modLocalRuntime 'maven.modrinth:iris-flw-compat:1.1.4'
+    // keep this line to compile properly
+    // 否则被模组重写的原版方法不会正确重映射...
+    modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
+
     /* Physics Mod */
     modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171c-fabric-1.20.1.jar')
     if (rootProject.physics_enabled == 'true'){
@@ -92,14 +101,6 @@ dependencies {
     /* Mmmmmmmmmmmm */
     modLocalRuntime 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
     modLocalRuntime "maven.modrinth:moonlight:fabric_1.20-2.13.62"
-
-    /* Create */
-    modLocalRuntime("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
-    modLocalRuntime 'maven.modrinth:iris-flw-compat:1.1.4'
-
-    // keep this line to compile properly
-    // 否则被模组重写的原版方法不会正确重映射...
-    modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
 
     /* Effectual */
     modLocalRuntime 'maven.modrinth:effectual:0.6.0-1.20.1'

@@ -124,7 +124,6 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 					case "effectual" -> ModListHelper.FABRIC_EFFECTUAL_LOADED;
 					case "particular" -> ModListHelper.FABRIC_PARTICULAR_LOADED;
 					case "vulkanmod" -> ModListHelper.FABRIC_VULKAN_MOD_LOADED;
-					case "physicsmod" -> ModListHelper.FABRIC_PHYSICSMOD_LOADED;
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
@@ -148,6 +147,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 							   ModListHelper.versionCheck("flywheel", "1.0", "2.0");
 			case "particle_core" -> ModListHelper.PARTICLE_CORE_LOADED;
 			case "physicsmod" -> ModListHelper.PHYSICSMOD_LOADED;
+			case "physicsmod_create" -> ModListHelper.PHYSICSMOD_LOADED && ModListHelper.CREATE_LOADED;
+			case "physicsmod_vs" -> ModListHelper.PHYSICSMOD_LOADED && ModListHelper.VS_LOADED;
 			case "a_good_place" -> ModListHelper.A_GOOD_PLACE_LOADED;
 			case "subtle_effects" -> {
 				if (split.length == 2) {
