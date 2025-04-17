@@ -4,7 +4,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.function.Supplier;
 
-public class SpinLock implements AutoCloseable {
+public class SpinLock {
 	private static final VarHandle OWNER;
 
 	static {
@@ -39,14 +39,9 @@ public class SpinLock implements AutoCloseable {
 		}
 	}
 
-	@Override
-	public void close() {
-		unlock();
-	}
-
-	public SpinLock sugar() {
+	public AutoCloseable sugar() {
 		lock();
-		return this;
+		return this::unlock;
 	}
 
 	public void wrap(Runnable runnable) {

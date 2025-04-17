@@ -107,11 +107,10 @@ public final class AsyncparticlesClientNeoForge {
 				.then(argument("className", StringArgumentType.string())
 					.executes(context -> {
 						String className = StringArgumentType.getString(context, "className");
-						Class<?> aClass = ModListHelper.getClass(className);
-						if (aClass == null) {
-							context.getSource().sendSystemMessage(Component.literal("Class " + className + " not found."));
-						} else {
+						if (ModListHelper.classExists(className)) {
 							context.getSource().sendSystemMessage(Component.literal("Class " + className + " found!"));
+						} else {
+							context.getSource().sendSystemMessage(Component.literal("Class " + className + " not found."));
 						}
 						return 1;
 					})))

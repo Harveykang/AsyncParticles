@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.neoforge;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -53,6 +54,10 @@ public class AsyncRendererImpl {
 //			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
 //		}
 		particleEngine.render(lightTexture, camera, f, null, predicate);
+		// reset blend func and culling state
+		// other mods may change them...
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.enableCull();
 
 		if (levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();

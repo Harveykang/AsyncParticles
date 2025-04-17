@@ -63,7 +63,7 @@ dependencies {
     modLocalRuntime 'maven.modrinth:spark:1.10.109-fabric'
 
     /* Particle Rain/Pretty Rain */
-    modLocalRuntime "maven.modrinth:particle-rain:3.0.5"
+//    modLocalRuntime "maven.modrinth:particle-rain:3.0.5"
 //    modLocalRuntime "maven.modrinth:pretty-rain:TGjK6ChS"
 
     /* Effectual */
@@ -109,7 +109,8 @@ dependencies {
     modLocalRuntime "maven.modrinth:a-good-place:fabric_1.21-1.2.6"
 
     /* Physics Mod */
-//    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v171b-fabric-1.20.1.jar')
+    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v172b-fabric-1.21.1.jar')
+    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v172b-fabric-1.21.1.jar')
 
     /* Subtle Effects */
     localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"

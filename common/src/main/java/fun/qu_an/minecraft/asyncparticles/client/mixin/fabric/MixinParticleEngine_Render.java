@@ -66,6 +66,8 @@ public abstract class MixinParticleEngine_Render {
 				BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
 				// set shader before begin
 				RenderSystem.setShader(GameRenderer::getParticleShader);
+				// why ParticleRenderType#end() removed?...
+				RenderSystem.enableCull();
 				// begin before sync particles to be compatible with some mod
 				particleRenderType.begin(FakeTesselator.getFakeInstance(), this.textureManager);
 				profiler.push("render_sync");
@@ -101,7 +103,6 @@ public abstract class MixinParticleEngine_Render {
 			RenderSystem.depthMask(true);
 			RenderSystem.disableBlend();
 			lightTexture.turnOffLightLayer();
-			RenderSystem.defaultBlendFunc();
 			profiler.pop();
 		}
 	}

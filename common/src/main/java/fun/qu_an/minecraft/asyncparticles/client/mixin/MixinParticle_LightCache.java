@@ -25,7 +25,9 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 	@Unique
 	private byte asyncParticles$lightCache = INITIAL_LIGHT_CACHE;
 	@Shadow
-	public abstract int getLightColor(float partialTick);
+	public int getLightColor(float partialTick) {
+		throw new AssertionError();
+	}
 
 	@WrapMethod(method = "getLightColor")
 	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {

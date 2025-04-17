@@ -14,7 +14,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.irisshaders.iris.Iris;
-import net.irisshaders.iris.api.v0.IrisApi;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
 import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
@@ -71,12 +70,6 @@ public class AsyncRenderer {
 			addSyncByClassName("ovh.corail.tombstone.particle.ParticleMagicCircle");
 			addSyncByClassName("ovh.corail.tombstone.particle.ParticleMarker");
 			addSyncByClassName("ovh.corail.tombstone.particle.ParticleRounding");
-		}
-		if (ModListHelper.PHYSICSMOD_LOADED) {
-			addSyncByClassName("net.diebuddies.minecraft.weather.RainParticle");
-			addSyncByClassName("net.diebuddies.minecraft.weather.DustParticle");
-			addSyncByClassName("net.diebuddies.minecraft.weather.SnowParticle");
-			addSyncByClassName("net.diebuddies.physics.ocean.RainParticle");
 		}
 		// TODO: configure this set
 	}
@@ -135,7 +128,7 @@ public class AsyncRenderer {
 		resetBTesselators();
 		ParticleEngine particleEngine = mc.particleEngine;
 		if (ModListHelper.FABRIC_IRIS_LOADED) {
-			mixedParticleRenderingSetting = IrisApi.getInstance().isShaderPackInUse() &&
+			mixedParticleRenderingSetting = Iris.isPackInUseQuick() &&
 											getRenderingSettings() == ParticleRenderingSettings.MIXED;
 //			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
@@ -246,13 +239,14 @@ public class AsyncRenderer {
 			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
 		particleEngine.render(lightTexture, camera, f);
+		// reset blend func and culling state
+		// other mods may change them...
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.enableCull();
 
 		if (levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();
 		}
-
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.enableCull();
 	}
 
 	public static void waitForAsyncTasks() {
@@ -383,7 +377,7 @@ public class AsyncRenderer {
 					BTESSELATORS.entrySet().stream()
 						.filter(e -> e.getValue() == BindingTesselator.EMPTY)
 						.map(Map.Entry::getKey).toList(),
-					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse()
+					ModListHelper.IRIS_LIKE_LOADED && Iris.isPackInUseQuick()
 						? getRenderingSettings().name() : "disabled"));
 			debugConsumer = null;
 		}
@@ -391,7 +385,7 @@ public class AsyncRenderer {
 
 	/* Destroy */
 
-	public static void destroy() {
+	public static void reset() {
 		waitForAsyncTasks();
 		clearBTesselators();
 		clearSync();

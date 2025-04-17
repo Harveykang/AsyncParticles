@@ -37,17 +37,9 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 			case "off_thread_access" -> true;
 			case "particlerain_create" -> ModListHelper.FORGE_PARTICLERAIN_LOADED && ModListHelper.FORGE_CREATE_LOADED;
 			case "particlerain" -> ModListHelper.FORGE_PARTICLERAIN_LOADED;
-			case "create" -> {
-				if (!ModListHelper.FORGE_CREATE_LOADED) {
-					yield false;
-				}
-				yield switch (split[1]) {
-					// vulkan mod has no forge version
-					// but to avoid I forgot to cancel this mixin when they support forge
-					case "MixinParticle_LightCache" -> !ModListHelper.VULKAN_MOD_LOADED;
-					default -> true;
-				};
-			}
+			case "create" -> // vulkan mod has no forge version
+				// but to avoid I forgot to cancel this mixin when they support forge
+				ModListHelper.FORGE_CREATE_LOADED;
 			// TODO: 下面这个 mod 没有正式发布，且不确定是否是唯一的 forge 移植版
 			case "effecticularity" -> ModListHelper.FORGE_EFFECTIVE_LOADED;
 			case "embeddium" -> ModListHelper.FORGE_EMBEDDIUM_LOADED;

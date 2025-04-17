@@ -42,7 +42,7 @@ public abstract class MixinParticle implements ParticleAddon {
 
 	// TODO: 换 byte?
 	@Unique
-	private boolean asyncParticles$ticked;
+	private boolean asyncParticles$ticked = true;
 	@Unique
 	private boolean asyncParticles$renderSync;
 	@Unique
