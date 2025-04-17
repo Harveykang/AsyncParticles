@@ -52,6 +52,8 @@
     "physicsmod.MixinRainParticle",
     "physicsmod.MixinSnowParticle",
     "physicsmod.MixinWeatherParticle",
+    "physicsmod_create.MixinLevelRenderer",
+    "physicsmod_create.MixinWeatherParticle",
     "subtle_effects.MixinAsyncRenderer",
     "subtle_effects.fabric.MixinParticleEngine",
     "watut.MixinCustomParticleEngine"

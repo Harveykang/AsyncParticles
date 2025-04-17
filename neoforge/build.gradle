@@ -62,12 +62,12 @@ dependencies {
 
     /* Embeddium */
 //    modCompileOnly 'maven.modrinth:embeddium:1.0.15+mc1.21.1'
-    modLocalRuntime 'maven.modrinth:embeddium:1.0.15+mc1.21.1'
-
-    localRuntime("io.github.douira:glsl-transformer:2.0.2")
-    localRuntime "org.anarres:jcpp:1.4.14" // Why NoClassDefFoundError?
-    localRuntime("org.taumc:glsl-transformation-lib:0.2.0-20.ge3cb096") { transitive = false }
-    modLocalRuntime 'maven.modrinth:neoculus:WDZ0i0mz'
+//    modLocalRuntime 'maven.modrinth:embeddium:1.0.15+mc1.21.1'
+//
+//    localRuntime("io.github.douira:glsl-transformer:2.0.2")
+//    localRuntime "org.anarres:jcpp:1.4.14" // Why NoClassDefFoundError?
+//    localRuntime("org.taumc:glsl-transformation-lib:0.2.0-20.ge3cb096") { transitive = false }
+//    modLocalRuntime 'maven.modrinth:neoculus:WDZ0i0mz'
 
 //    modLocalRuntime "maven.modrinth:iris:1.8.1+1.21.1-neoforge"
 //    modLocalRuntime 'maven.modrinth:monocle-iris:0.1.8'
@@ -79,7 +79,7 @@ dependencies {
     modCompileOnly 'maven.modrinth:sodium:mc1.21.1-0.6.13-neoforge'
     modCompileOnly 'maven.modrinth:sodium:mc1.21.1-0.6.13-fabric'
     modCompileOnly "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
-    modCompileOnly "curse.maven:flerovium-1142875:6258259"
+    modCompileOnly "curse.maven:flerovium-1142875:6359527" // 1.0.4
 //    modLocalRuntime('maven.modrinth:sodium:mc1.21.1-0.6.13-neoforge')
 //    localRuntime "org.antlr:antlr4-runtime:4.13.1"
 //    localRuntime "io.github.douira:glsl-transformer:2.0.1"
@@ -89,7 +89,7 @@ dependencies {
 //    modLocalRuntime("org.sinytra.forgified-fabric-api:fabric-rendering-data-attachment-v1:0.3.48+73761d2e19")
 //    modLocalRuntime("org.sinytra.forgified-fabric-api:fabric-block-view-api-v2:1.0.10+9afaaf8c19")
 //    modLocalRuntime "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
-//    modLocalRuntime "curse.maven:flerovium-1142875:6258259"
+//    modLocalRuntime "curse.maven:flerovium-1142875:6359527" // 1.0.4
 
     modLocalRuntime "maven.modrinth:spark:1.10.124-neoforge-1.21.1"
     modLocalRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
@@ -152,7 +152,11 @@ dependencies {
 
     /* Simple Weather */
     modCompileOnly "curse.maven:simple-weather-983390:5984086"
-    modLocalRuntime "curse.maven:simple-weather-983390:5984086"
+//    modLocalRuntime "curse.maven:simple-weather-983390:5984086"
+
+    /* Particular Reforged */
+    modCompileOnly "maven.modrinth:particular-reforged:1.21.1" // 1.1.0
+    modLocalRuntime "maven.modrinth:particular-reforged:1.21.1" // 1.1.0
 }
 
 processResources {

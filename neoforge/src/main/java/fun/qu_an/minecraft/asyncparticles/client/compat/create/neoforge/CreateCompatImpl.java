@@ -15,7 +15,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -75,7 +74,7 @@ public class CreateCompatImpl {
 		// Transform entity position and motion to local space
 		float yawOffset = rotation.getYawOffset();
 		Vec3 anchorVec = contraptionEntity.getAnchorVec();
-		Vec3 position = getWorldToLocalTranslation(originalPosition, bounds, anchorVec, rotationMatrix, yawOffset);
+		Vec3 position = getWorldToLocalTranslation(originalPosition, anchorVec, rotationMatrix, yawOffset);
 		motion = motion.subtract(contraptionMotion);
 		motion = rotationMatrix.transform(motion);
 
@@ -216,18 +215,12 @@ public class CreateCompatImpl {
 		};
 	}
 
-	public static Vec3 getWorldToLocalTranslation(Vec3 entityPosition,
-												  AABB bounds,
+	public static Vec3 getWorldToLocalTranslation(Vec3 entityCenter,
 												  Vec3 anchorVec,
 												  Matrix3d rotationMatrix,
 												  float yawOffset) {
-		Vec3 centerY = new Vec3(0, Mth.lerp(0.5, bounds.minY, bounds.maxY), 0);
-		Vec3 position = entityPosition;
-		position = position.add(centerY);
-		position = ContraptionCollider.worldToLocalPos(position, anchorVec, rotationMatrix, yawOffset);
-		position = position.subtract(centerY);
-		position = position.subtract(entityPosition);
-		return position;
+		Vec3 position = ContraptionCollider.worldToLocalPos(entityCenter, anchorVec, rotationMatrix, yawOffset);
+		return position.subtract(entityCenter);
 	}
 
 	/**
@@ -267,7 +260,7 @@ public class CreateCompatImpl {
 		// Transform entity position and motion to local space
 		float yawOffset = rotation.getYawOffset();
 		Vec3 anchorVec = contraptionEntity.getAnchorVec();
-		Vec3 position = getWorldToLocalTranslation(originalPosition, bounds, anchorVec, rotationMatrix, yawOffset);
+		Vec3 position = getWorldToLocalTranslation(originalPosition, anchorVec, rotationMatrix, yawOffset);
 		motion = motion.subtract(contraptionMotion);
 		motion = rotationMatrix.transform(motion);
 

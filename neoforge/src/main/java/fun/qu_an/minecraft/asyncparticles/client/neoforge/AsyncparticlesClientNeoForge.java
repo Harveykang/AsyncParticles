@@ -9,9 +9,6 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CreateCompatImpl;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -19,7 +16,6 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLLoader;
@@ -42,23 +38,6 @@ public final class AsyncparticlesClientNeoForge {
 		}
 		// Run our common setup.
 		AsyncparticlesClient.init();
-
-		if (ModListHelper.CREATE_LOADED) {
-			WeatherParticleAddon.Type.RAIN.register((level, position, motion, aabb) -> {
-				Vec3 collide = CreateCompatImpl.collideMotionWithContraptions(level, position, motion, aabb);
-				if (collide == null) {
-					return motion;
-				}
-				ParticleRainCompat.onCreateCollision(level, motion, collide, aabb);
-				return collide;
-			});
-			WeatherParticleAddon.CollisionFunction function = (level, position, motion, aabb) -> {
-				Vec3 collide = CreateCompatImpl.collideMotionWithContraptions(level, position, motion, aabb);
-				return collide == null ? motion : collide;
-			};
-			WeatherParticleAddon.Type.SNOW.register(function);
-			WeatherParticleAddon.Type.OTHER.register(function);
-		}
 		NeoForge.EVENT_BUS.addListener(this::registerClientCommands);
 	}
 

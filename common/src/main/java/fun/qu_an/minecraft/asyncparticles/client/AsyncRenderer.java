@@ -186,8 +186,8 @@ public class AsyncRenderer {
 					LOGGER.warn("Exception {} thrown while rendering particle {} exceeds the threshold, please contact the author: {}",
 						t.getClass().getSimpleName(),
 						particle,
-						AsyncparticlesClient.ISSUE_URL,
-						t);
+						AsyncparticlesClient.ISSUE_URL);
+					LOGGER.warn("", t);
 				}
 				markAsSync(particle.getClass());
 			}

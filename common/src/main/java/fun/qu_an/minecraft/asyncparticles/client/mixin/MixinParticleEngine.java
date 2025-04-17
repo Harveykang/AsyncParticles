@@ -76,11 +76,13 @@ public abstract class MixinParticleEngine {
 	public static List<ParticleRenderType> RENDER_ORDER;
 
 	@Mutable
-	@Shadow @Final private RandomSource random;
+	@Shadow
+	@Final
+	private RandomSource random;
 
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
 	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {
-		if (SimplePropertiesConfig.isTickAsync()){
+		if (SimplePropertiesConfig.isTickAsync()) {
 			throw Utils.toThrowDirectly(t);
 		}
 	}
@@ -227,8 +229,9 @@ public abstract class MixinParticleEngine {
 								"Exception %s thrown while ticking particle %s exceeds the threshold, please contact the author: "
 									.formatted(t.getClass().getSimpleName(), particle.getClass()))
 							.append(Component.literal(AsyncparticlesClient.ISSUE_URL)
-								.setStyle(Style.EMPTY.withClickEvent(
-									new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncparticlesClient.ISSUE_URL)))));
+								.setStyle(Style.EMPTY
+									.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncparticlesClient.ISSUE_URL))
+									.withUnderlined(true))));
 					}
 					LOGGER.warn("Exception {} thrown while ticking particle {} exceeds the threshold, please contact the author: {}",
 						t.getClass().getSimpleName(),

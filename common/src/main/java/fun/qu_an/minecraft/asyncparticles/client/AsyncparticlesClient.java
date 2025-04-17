@@ -1,7 +1,12 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import net.minecraft.world.phys.Vec3;
+
 import java.io.IOException;
 
 public class AsyncparticlesClient {
@@ -34,22 +39,22 @@ public class AsyncparticlesClient {
 //				WeatherParticleAddon.Type.SNOW.register(function);
 //				WeatherParticleAddon.Type.OTHER.register(function);
 //			}
-//			if (ModListHelper.CREATE_LOADED) {
-//				WeatherParticleAddon.Type.RAIN.register((level, position, motion, aabb) -> {
-//					Vec3 collide = CreateUtils.collideMotionWithContraptions(level, position, motion, aabb);
-//					if (collide == null) {
-//						return motion;
-//					}
-//					ParticleRainUtils.onCreateCollision(level, motion, collide, aabb);
-//					return collide;
-//				});
-//				WeatherParticleAddon.CollisionFunction function = (level, position, motion, aabb) -> {
-//					Vec3 collide = CreateUtils.collideMotionWithContraptions(level, position, motion, aabb);
-//					return collide == null ? motion : collide;
-//				};
-//				WeatherParticleAddon.Type.SNOW.register(function);
-//				WeatherParticleAddon.Type.OTHER.register(function);
-//			}
+			if (ModListHelper.CREATE_LOADED) {
+				WeatherParticleAddon.Type.RAIN.register((level, position, motion, aabb) -> {
+					Vec3 collide = CreateCompat.collideMotionWithContraptions(level, position, motion, aabb);
+					if (collide == null) {
+						return motion;
+					}
+					ParticleRainCompat.onCreateCollision(level, motion, collide, aabb);
+					return collide;
+				});
+				WeatherParticleAddon.CollisionFunction function = (level, position, motion, aabb) -> {
+					Vec3 collide = CreateCompat.collideMotionWithContraptions(level, position, motion, aabb);
+					return collide == null ? motion : collide;
+				};
+				WeatherParticleAddon.Type.SNOW.register(function);
+				WeatherParticleAddon.Type.OTHER.register(function);
+			}
 		}
 	}
 }

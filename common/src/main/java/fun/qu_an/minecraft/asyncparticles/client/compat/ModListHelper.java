@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import org.jetbrains.annotations.Nullable;
+import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
 import org.sinytra.connector.ConnectorEarlyLoader;
 
 public class ModListHelper {
@@ -52,6 +52,7 @@ public class ModListHelper {
 //	public static final boolean ENHANCEDBLOCKENTITIES_LOADED = isModLoaded("enhancedblockentities");
 	/* Particular */
 	public static final boolean FABRIC_PARTICULAR_LOADED = isFabricModLoaded("particular");
+	public static final boolean FORGE_PARTICULAR_LOADED = isForgeModLoaded("particular");
 	/* Particle Core */
 	public static final boolean PARTICLE_CORE_LOADED = isModLoaded("particle_core");
 	/* Physics Mod */
@@ -90,12 +91,8 @@ public class ModListHelper {
 	@ExpectPlatform
 	public static boolean versionCheck(String modId, String minInclusive, String maxExclusive) {
 		// Suppressing the ConstantValue check because this is a generated method.
-		throwAssertionError();
+		Utils.throwAssertionError();
 		return true;
-	}
-
-	private static void throwAssertionError() {
-		throw new AssertionError();
 	}
 
 	@ExpectPlatform

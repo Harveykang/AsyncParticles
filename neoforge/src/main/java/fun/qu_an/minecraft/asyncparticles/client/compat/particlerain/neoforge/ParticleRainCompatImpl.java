@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.neoforge;
 
 import com.leclowndu93150.particlerain.ParticleRainConfig;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CreateCompatImpl;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.ParticleTypes;
@@ -54,7 +54,7 @@ public class ParticleRainCompatImpl {
 		AABB aabb1 = new AABB(center.x, aabb.minY - 1, center.z, center.x, aabb.minY, center.z);
 		Vec3 startPos = new Vec3(center.x, aabb.minY, center.z);
 		Vec3 motion1 = originalMotion.scale(2);
-		if (CreateCompatImpl.isCollideWithContraption(level, startPos, motion1, aabb1, false)) {
+		if (CreateCompat.isCollideWithContraption(level, startPos, motion1, aabb1, false)) {
 			Vec3 spawnPos = startPos.add(clipMotion);
 			Minecraft.getInstance().particleEngine
 				.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);

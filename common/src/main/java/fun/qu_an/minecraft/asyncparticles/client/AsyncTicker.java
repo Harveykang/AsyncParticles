@@ -233,6 +233,16 @@ public class AsyncTicker {
 			AsyncTicker.blockEntityTickFuture = particleFuture;
 		}
 
+		// end tick events
+		if (levelRunning) {
+			particleFuture = particleFuture.thenRun(() -> {
+				// 每 tick 结束时都要执行的固定事件
+				for (Runnable endTickEvent : END_TICK_EVENTS) {
+					endTickEvent.run();
+				}
+			}).exceptionally(AsyncTicker::tickBeforeExceptionally);
+		}
+
 		// end tick operations
 		List<Runnable> endTickOperations = END_TICK_OPERATIONS;
 		if (!endTickOperations.isEmpty()) {
@@ -242,17 +252,6 @@ public class AsyncTicker {
 				// 每 tick 添加的不固定操作
 				for (Runnable endTickTask : endTickTasks) {
 					endTickTask.run();
-				}
-			}).exceptionally(AsyncTicker::tickBeforeExceptionally);
-		}
-
-		// end tick events
-		if (levelRunning) {
-			particleFuture = particleFuture.thenRun(() -> {
-				// 每 tick 结束时都要执行的固定事件
-				for (Runnable endTickEvent : END_TICK_EVENTS) {
-					// FIXME 这个应该可以取消，防止卡死主线程
-					endTickEvent.run();
 				}
 			}).exceptionally(AsyncTicker::tickBeforeExceptionally);
 		}
@@ -296,6 +295,9 @@ public class AsyncTicker {
 	}
 
 	public static boolean isTolerable(@NotNull Throwable e) {
+		if (!(e instanceof Exception)) {
+			return false;
+		}
 		return Utils.getRootCause(e) instanceof MissingPaletteEntryException
 			   || e instanceof NullPointerException
 			   || e instanceof IndexOutOfBoundsException
@@ -395,7 +397,7 @@ public class AsyncTicker {
 		}
 		debugConsumer.accept(String.format("""
 			[Debug AsyncTicker]
-			last tick duration: %d ms,
+			last tick duration: %.1f ms,
 			interrupted: %s,
 			block entity operations: %d,
 			particle operations: %d,
@@ -406,7 +408,7 @@ public class AsyncTicker {
 			particles to add size: %d
 			sync particle count: %d,
 			sync particle types: %s,"""
-			.formatted(timeUsageNano.get() / 1000000,
+			.formatted(timeUsageNano.get() / 1000000d,
 				debug_cancelled,
 				BLOCK_ENTITY_OPERATIONS.size(),
 				PARTICLE_OPERATIONS.size(),

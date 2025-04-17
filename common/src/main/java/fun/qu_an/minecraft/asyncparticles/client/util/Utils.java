@@ -32,4 +32,8 @@ public class Utils {
 		Throwable cause = t.getCause();
 		return cause == null ? null : getReportedException(cause);
 	}
+
+	public static void throwAssertionError() {
+		throw new AssertionError();
+	}
 }
