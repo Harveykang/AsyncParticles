@@ -13,12 +13,6 @@ public class CreateCompat {
 		throw new AssertionError();
 	}
 
-	@ExpectPlatform
-	public static boolean isUnderContraption(ClientLevel instance, double x, double y, double z) {
-		Utils.throwAssertionError();
-		return false;
-	}
-
 	public static boolean isCollideWithContraption(@NotNull ClientLevel level, Vec3 motion1, AABB aabb1) {
 		return isCollideWithContraption(level, motion1, aabb1, true);
 	}
@@ -27,5 +21,15 @@ public class CreateCompat {
 	public static boolean isCollideWithContraption(@NotNull ClientLevel level, Vec3 motion1, AABB aabb1, boolean b) {
 		Utils.throwAssertionError();
 		return false;
+	}
+
+	public static boolean isUnderContraption(ClientLevel level, double x, double y, double z) {
+		AABB bounds = new AABB(x - 0.5, y - 2, z - 0.5, x + 0.5, y - 1, z + 0.5);
+		return isCollideWithContraption(level, new Vec3(0, Math.max(16, level.getMaxBuildHeight() - y), 0), bounds);
+	}
+
+	public static boolean isUnderContraption(ClientLevel level, Vec3 pos) {
+		AABB bounds = new AABB(pos.x - 0.5, pos.y - 2, pos.z - 0.5, pos.x + 0.5, pos.y - 1, pos.z + 0.5);
+		return isCollideWithContraption(level, new Vec3(0, Math.max(16, level.getMaxBuildHeight() - pos.y), 0), bounds);
 	}
 }

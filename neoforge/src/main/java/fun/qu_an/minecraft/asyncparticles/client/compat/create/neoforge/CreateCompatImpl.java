@@ -465,17 +465,6 @@ public class CreateCompatImpl {
 		return ContraptionHandler.loadedContraptions.get(level);
 	}
 
-	public static boolean isUnderContraption(ClientLevel level, double x, double y, double z) {
-		Vec3 pos = new Vec3(x, y, z);
-		AABB bounds = new AABB(x - 1, y - 1, z - 1, x + 1, Math.max(y + 16, level.getMaxBuildHeight()), z + 1);
-		return isCollideWithContraption(level, Vec3.ZERO, bounds);
-	}
-
-	public static boolean isUnderContraption(ClientLevel level, Vec3 pos) {
-		AABB bounds = new AABB(pos.x - 1, pos.y - 1, pos.z - 1, pos.x + 1, Math.max(pos.y + 16, level.getMaxBuildHeight()), pos.z + 1);
-		return isCollideWithContraption(level, Vec3.ZERO, bounds);
-	}
-
 	public static boolean isCollideWithContraption(ClientLevel level, Vec3 motion, AABB bb) {
 		return isCollideWithContraption(level, motion, bb, true);
 	}

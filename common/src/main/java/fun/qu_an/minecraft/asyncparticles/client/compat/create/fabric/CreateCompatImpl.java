@@ -10,10 +10,6 @@ public class CreateCompatImpl {
 		throw new UnsupportedOperationException();
 	}
 
-	public static boolean isUnderContraption(ClientLevel instance, double x, double y, double z) {
-		throw new UnsupportedOperationException();
-	}
-
 	public static boolean isCollideWithContraption(@NotNull ClientLevel level, Vec3 motion1, AABB aabb1, boolean b) {
 		throw new UnsupportedOperationException();
 	}
