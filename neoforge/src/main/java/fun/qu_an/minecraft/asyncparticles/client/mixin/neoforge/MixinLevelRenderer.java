@@ -65,8 +65,9 @@ public abstract class MixinLevelRenderer {
 		}
 	}
 
-	@Inject(method = "lambda$addParticlesPass$5", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
-		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
+	@Inject(method = "lambda$addParticlesPass$5", remap = false,
+		at = @At(value = "INVOKE", shift = At.Shift.AFTER, remap = false,
+			target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
 	private void onRenderParticles(CallbackInfo ci) {
 		// reset blend func and culling state
 		// other mods may change them...
