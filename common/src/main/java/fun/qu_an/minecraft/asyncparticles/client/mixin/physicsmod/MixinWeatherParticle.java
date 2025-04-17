@@ -8,6 +8,9 @@ import net.diebuddies.minecraft.weather.WeatherParticle;
 import net.diebuddies.physics.ocean.OceanWorld;
 import net.diebuddies.physics.snow.math.AABB3D;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,5 +28,12 @@ public abstract class MixinWeatherParticle implements ParticleAddon {
 		} else {
 			ThreadUtil.enqueueClientTask(() -> instance.spawnRainRipple(lifetime, scale, x, y, z));
 		}
+	}
+
+	@Override
+	public @NotNull AABB getRenderBoundingBox(float partialTicks) {
+		Vector3d min = aabb.getMin();
+		Vector3d max = aabb.getMax();
+		return new AABB(min.x, min.y, min.z, max.x, max.y, max.z);
 	}
 }

@@ -3,8 +3,8 @@ plugins {
 }
 
 loom {
-    accessWidenerPath = project(":common").loom.accessWidenerPath
     accessWidenerPath = file('src/main/resources/asyncparticles-neoforge.accesswidener')
+    accessWidenerPath = project(":common").loom.accessWidenerPath
 
     mixin {
         useLegacyMixinAp = true
@@ -118,6 +118,10 @@ dependencies {
     /* Physics Mod */
     modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v174c-neoforge-1.21.4.jar')
 //    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v174c-neoforge-1.21.4.jar')
+
+    /* Particular Reforged */
+    modCompileOnly "maven.modrinth:particular-reforged:1.21.4" // 1.1.0
+    modLocalRuntime "maven.modrinth:particular-reforged:1.21.4" // 1.1.0
 }
 
 processResources {

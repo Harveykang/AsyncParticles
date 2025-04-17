@@ -12,6 +12,7 @@
     "MixinParticleEngine_Late",
     "a_good_place.InvokerBlocksParticlesManager",
     "a_good_place.MixinBlocksParticlesManager",
+    "a_good_place.MixinPlacingBlockParticle",
     "fabric.MixinLevelRenderer",
     "fabric.MixinParticleEngine_Render",
     "fabric.effectual.MixinAllEffects",

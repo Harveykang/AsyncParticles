@@ -50,6 +50,7 @@ public class ModListHelper {
 //	public static final boolean ENHANCEDBLOCKENTITIES_LOADED = isModLoaded("enhancedblockentities");
 	/* Particular */
 	public static final boolean FABRIC_PARTICULAR_LOADED = isFabricModLoaded("particular");
+	public static final boolean FORGE_PARTICULAR_LOADED = isForgeModLoaded("particular");
 	/* Particle Core */
 	public static final boolean PARTICLE_CORE_LOADED = isModLoaded("particle_core");
 	/* Physics Mod */
