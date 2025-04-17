@@ -1,13 +1,14 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
+import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.mixin_extension.ExtensionCancelMixinMethod;
+import fun.qu_an.minecraft.asyncparticles.client.mixin_extension.ExtensionMemberCancelApplication;
+import fun.qu_an.minecraft.asyncparticles.client.mixin_extension.MixinMemberCanceller;
+import fun.qu_an.minecraft.asyncparticles.client.mixin_extension.MixinMemberCancellerRegistrar;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.logging.ILogger;
-import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
-import org.spongepowered.asm.mixin.extensibility.IMixinErrorHandler;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
 
@@ -22,28 +23,39 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 		if (!ModListHelper.IS_CLIENT) {
 			return;
 		}
-		ExtensionCancelMixinMethod.init();
-		ExtensionCancelMixinMethod.register(new ExtensionCancelMixinMethod.Canceller() {
+		ExtensionRegistrar.register(new ExtensionMemberCancelApplication());
+		MixinMemberCancellerRegistrar.register(new MixinMemberCanceller() {
 			@Override
-			public boolean preTest(String mixinClassName) {
+			public boolean preCancel(List<String> targetClassNames, String mixinClassName) {
 				return switch (mixinClassName) {
 					case "einstein.subtle_effects.mixin.client.particle.FabricParticleEngineMixin",
 						 "einstein.subtle_effects.mixin.client.particle.ForgeParticleEngineMixin",
-						 "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin" -> true;
+						 "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin",
+						 "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin" -> true;
 					default -> false;
 				};
 			}
 
 			@Override
-			public boolean test(String mixinClassName,
-								String mixinMethodName,
-								String mixinMethodDesc,
-								List<String> mixinParameterNames) {
+			public boolean shouldCancelMethod(List<String> targetClassNames, String mixinClassName, List<String> targetMethodDescs, String mixinMethodName, String mixinMethodDesc) {
 				return switch (mixinClassName) {
 					case "einstein.subtle_effects.mixin.client.particle.FabricParticleEngineMixin",
 						 "einstein.subtle_effects.mixin.client.particle.ForgeParticleEngineMixin" ->
-						mixinMethodName.equals("shouldRenderParticle");
-					case "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin" -> mixinMethodName.equals("tick");
+						"shouldRenderParticle".equals(mixinMethodName);
+					case "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin" ->
+						"tick".equals(mixinMethodName);
+					case "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin" ->
+						"flerovium$getLightColorCached".equals(mixinMethodName);
+					default -> false;
+				};
+			}
+
+			@Override
+			public boolean shouldCancelField(List<String> targetClassNames, String mixinClassName, String mixinFieldName, String mixinFieldDesc) {
+				return switch (mixinClassName) {
+					case "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin" ->
+						"flerovium$lastTick".equals(mixinFieldName) ||
+						"flerovium$cachedLight".equals(mixinFieldName);
 					default -> false;
 				};
 			}
@@ -65,6 +77,12 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				-> true;
 			default -> false;
 		});
+//		MixinAnnotationAdjusterRegistrar.register((List<String> targetClassNames,
+//												   String mixinClassName,
+//												   MethodNode handlerNode,
+//												   AdjustableAnnotationNode annotationNode) -> {
+//			return annotationNode;
+//		});
 	}
 
 	@Override

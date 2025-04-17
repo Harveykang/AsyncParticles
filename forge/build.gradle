@@ -73,8 +73,10 @@ dependencies {
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
     localRuntime "org.anarres:jcpp:1.4.14"
     modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
-    modCompileOnly "curse.maven:flerovium-1142875:6203111"
-    modLocalRuntime "curse.maven:flerovium-1142875:6203111"
+//    modCompileOnly "curse.maven:flerovium-1142875:6203111" // 1.2.6
+//    modLocalRuntime "curse.maven:flerovium-1142875:6203111"
+    modCompileOnly "curse.maven:flerovium-1142875:6428986" // 1.2.9
+    modLocalRuntime "curse.maven:flerovium-1142875:6428986"
 
     /* Valkyrien Skies */
     modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'

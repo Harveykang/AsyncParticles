@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -19,7 +20,8 @@ public class MixinLevelRenderer {
 		name = "spawnParticleInWorld",
 		mixin = "org.valkyrienskies.mod.mixin.feature.transform_particles.MixinLevelRenderer"
 	)
-	@Redirect(method = "@MixinSquared:Handler", require = 0, at = @At(value = "INVOKE", remap = false,
+	@Group(name = "asyncParticles$spawnParticleInWorld", min = 1, max = 1)
+	@Redirect(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", remap = false,
 		target = "Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;setReturnValue(Ljava/lang/Object;)V"))
 	private <T> void onSpawnParticleInWorld(CallbackInfoReturnable<T> instance,
 											T particle,
@@ -37,7 +39,8 @@ public class MixinLevelRenderer {
 		name = "spawnParticleInWorld",
 		mixin = "io.github.xiewuzhiying.vs_addition.mixin.valkyrienskies.client.MixinMixinLevelRenderer"
 	)
-	@Inject(method = "@MixinSquared:Handler", require = 0, at = @At(value = "RETURN", ordinal = 2))
+	@Group(name = "asyncParticles$spawnParticleInWorld", min = 1, max = 1)
+	@Inject(method = "@MixinSquared:Handler", at = @At(value = "RETURN", ordinal = 2))
 	private <T> void onSpawnParticleInWorld(CallbackInfoReturnable<T> cir,
 											@SuppressWarnings("LocalMayBeArgsOnly")
 											@Local(ordinal = 0) ClientShip ship) {
