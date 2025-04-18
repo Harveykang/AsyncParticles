@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.create.fabric;
 
+import fun.qu_an.minecraft.asyncparticles.client.util.CollisionResult;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -11,6 +12,10 @@ public class CreateCompatImpl {
 	}
 
 	public static boolean isCollideWithContraption(@NotNull ClientLevel level, Vec3 motion1, AABB aabb1, boolean b) {
+		throw new UnsupportedOperationException();
+	}
+
+	public static CollisionResult collideWithContraptions(ClientLevel level, Vec3 movement, AABB aabb) {
 		throw new UnsupportedOperationException();
 	}
 }

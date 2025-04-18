@@ -6,6 +6,9 @@ accessible field net/minecraft/client/particle/ParticleEngine particles Ljava/ut
 accessible field net/minecraft/client/particle/Particle x D
 accessible field net/minecraft/client/particle/Particle y D
 accessible field net/minecraft/client/particle/Particle z D
+accessible field net/minecraft/client/particle/Particle xd D
+accessible field net/minecraft/client/particle/Particle yd D
+accessible field net/minecraft/client/particle/Particle zd D
 accessible field net/minecraft/client/particle/Particle level Lnet/minecraft/client/multiplayer/ClientLevel;
 accessible field net/minecraft/world/phys/HitResult location Lnet/minecraft/world/phys/Vec3;
 transitive-mutable field net/minecraft/world/phys/HitResult location Lnet/minecraft/world/phys/Vec3;
@@ -54,4 +57,4 @@ accessible field net/minecraft/client/particle/ParticleEngine RENDER_ORDER Ljava
 accessible field com/mojang/blaze3d/vertex/ByteBufferBuilder capacity I
 transitive-mutable field net/minecraft/client/particle/ParticleEngine particlesToAdd Ljava/util/Queue;
 accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;
-
+accessible method net/minecraft/world/entity/Entity collideWithShapes (Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/List;)Lnet/minecraft/world/phys/Vec3;

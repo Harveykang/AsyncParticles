@@ -1,15 +1,23 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.create;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import fun.qu_an.minecraft.asyncparticles.client.util.CollisionResult;
 import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class CreateCompat {
 	@ExpectPlatform
 	public static Vec3 collideMotionWithContraptions(ClientLevel level, Vec3 movement, AABB aabb) {
+		throw new AssertionError();
+	}
+
+	@ExpectPlatform
+	@Nullable
+	public static CollisionResult collideWithContraptions(ClientLevel level, Vec3 movement, AABB aabb) {
 		throw new AssertionError();
 	}
 

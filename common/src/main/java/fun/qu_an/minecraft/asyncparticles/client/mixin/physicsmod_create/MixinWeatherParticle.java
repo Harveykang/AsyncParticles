@@ -26,11 +26,10 @@ public abstract class MixinWeatherParticle extends FastTextureSheetParticle {
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getBlockState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;"),
 		cancellable = true)
 	private void onTick(CallbackInfo ci) {
-		Vec3 pos = new Vec3(x, y, z);
 		Vec3 movement = new Vec3(xd, yd, zd);
-		if (PhysicsModCompat.isCollideWithContraptions(level, pos, movement, aabb)) {
+		if (PhysicsModCompat.isCollideWithContraptions(level, movement, aabb)) {
 			if ((Object) this instanceof RainParticle) {
-				PhysicsModCompat.onContraptionCollision(level, pos, movement, aabb);
+				PhysicsModCompat.onContraptionCollision(level, movement, aabb);
 			}
 			remove();
 			ci.cancel();
