@@ -69,9 +69,9 @@ public class ParticleRainCompatImpl {
 		}
 		Vec3 center = aabb.getCenter();
 		AABB aabb1 = new AABB(center.x, aabb.minY - 1, center.z, center.x, aabb.minY, center.z);
-		Vec3 startPos = new Vec3(center.x, aabb.minY, center.z);
 		Vec3 motion1 = originalMotion.scale(2);
-		if (CreateCompat.isCollideWithContraption(level, startPos, motion1, aabb1, false)) {
+		if (CreateCompat.isCollideWithContraption(level, motion1, aabb1, false)) {
+			Vec3 startPos = new Vec3(center.x, aabb.minY, center.z);
 			Vec3 spawnPos = startPos.add(clipMotion);
 			Minecraft.getInstance().particleEngine
 				.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);

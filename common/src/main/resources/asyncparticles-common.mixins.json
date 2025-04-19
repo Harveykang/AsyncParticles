@@ -21,6 +21,7 @@
     "MixinTextureManager",
     "a_good_place.InvokerBlocksParticlesManager",
     "a_good_place.MixinBlocksParticlesManager",
+    "a_good_place.MixinPlacingBlockParticle",
     "create.InvokerContraptionCollider",
     "create.MixinParticle",
     "create.MixinParticle_LightCache",

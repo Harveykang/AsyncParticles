@@ -9,7 +9,6 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -17,16 +16,13 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4dc;
-import org.joml.Vector3d;
-import org.joml.Vector3dc;
+import org.joml.*;
 import org.joml.primitives.AABBd;
 import org.joml.primitives.AABBdc;
 import org.valkyrienskies.core.api.ships.ClientShip;
 import org.valkyrienskies.core.api.ships.properties.ShipTransform;
 import org.valkyrienskies.core.apigame.collision.ConvexPolygonc;
 import org.valkyrienskies.core.apigame.collision.EntityPolygonCollider;
-import org.valkyrienskies.core.impl.game.ships.ShipObject;
 import org.valkyrienskies.core.impl.game.ships.ShipObjectClient;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.ValkyrienSkiesMod;
@@ -34,10 +30,10 @@ import org.valkyrienskies.mod.common.util.EntityShipCollisionUtils;
 import org.valkyrienskies.mod.common.util.IEntityDraggingInformationProvider;
 import org.valkyrienskies.mod.util.BugFixUtil;
 
-import java.util.ArrayList;
+import java.lang.Math;
 import java.util.List;
-import java.util.stream.Stream;
 
+import static java.lang.Math.abs;
 import static net.minecraft.util.Mth.floor;
 import static org.valkyrienskies.core.util.AABBdUtilKt.extend;
 import static org.valkyrienskies.mod.common.util.VectorConversionsMCKt.toJOML;
@@ -231,14 +227,37 @@ public class VSClientUtils {
 		Vector3dc newMovement = pair.getFirst();
 		Long shipCollidingWith = pair.getSecond();
 
-		if (shipCollidingWith != null) {
-			if (entity != null) {
-				// Update the [IEntity.lastShipStoodOn]
-				((IEntityDraggingInformationProvider) entity).getDraggingInformation().setLastShipStoodOn(shipCollidingWith);
-			}
-			return toMinecraft(newMovement);
+		if (shipCollidingWith == null) {
+			return null;
 		}
-		return null;
+
+		if (entity != null) {
+			((IEntityDraggingInformationProvider) entity).getDraggingInformation().setLastShipStoodOn(shipCollidingWith);
+			return toMinecraft(newMovement);
+		} else {
+			ClientShip ship = VSGameUtilsKt.getShipObjectWorld(world).getLoadedShips().getById(shipCollidingWith);
+			Matrix4dc prevMatrix = ship.getPrevTickShipTransform().getWorldToShipMatrix();
+			Matrix4dc matrix = ship.getWorldToShip();
+			if (areAffineMatricesPositionClose(prevMatrix, matrix, 0.001f)) {
+				return toMinecraft(newMovement);
+			}
+			Vector3d center = toJOML(entityBoundingBox.getCenter());
+			Vector3d dragged = matrix.transformPosition(center, new Vector3d()).sub(prevMatrix.transformPosition(center));
+			ship.getShipToWorld().transformDirection(dragged);
+			return new Vec3(newMovement.x() + dragged.x, newMovement.y() + dragged.y, newMovement.z() + dragged.z);
+		}
+	}
+
+	public static boolean areAffineMatricesPositionClose(Matrix4dc matrixA, Matrix4dc matrixB, float epsilon) {
+		return abs(matrixA.m00() - matrixB.m00()) < epsilon &&
+			   abs(matrixA.m01() - matrixB.m01()) < epsilon &&
+			   abs(matrixA.m02() - matrixB.m02()) < epsilon &&
+			   abs(matrixA.m10() - matrixB.m10()) < epsilon &&
+			   abs(matrixA.m11() - matrixB.m11()) < epsilon &&
+			   abs(matrixA.m12() - matrixB.m12()) < epsilon &&
+			   abs(matrixA.m20() - matrixB.m20()) < epsilon &&
+			   abs(matrixA.m21() - matrixB.m21()) < epsilon &&
+			   abs(matrixA.m22() - matrixB.m22()) < epsilon;
 	}
 
 	/**
@@ -318,6 +337,15 @@ public class VSClientUtils {
 		return false;
 	}
 
+	public static boolean isUnderShipHeightMap(ClientLevel level, Vec3 pos) {
+		return isUnderShipHeightMap(level, pos.x, pos.y, pos.z);
+	}
+
+	public static boolean isUnderShipHeightMap(ClientLevel level, Vec3 pos, Matrix4dc worldToShip) {
+		var posInShip = worldToShip.transformPosition(toJOML(pos));
+		return level.getHeight(Heightmap.Types.MOTION_BLOCKING, floor(posInShip.x), floor(posInShip.z)) >= posInShip.y;
+	}
+
 	public static boolean isOutSight(Particle particle) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player == null) {
@@ -351,8 +379,8 @@ public class VSClientUtils {
 
 		int renderDistance = mc.levelRenderer.lastViewDistance << 4;
 
-		return Math.abs(inWorldX2 - inWorldX1) > renderDistance
-			   || Math.abs(inWorldY2 - inWorldY1) > renderDistance
-			   || Math.abs(inWorldZ2 - inWorldZ1) > renderDistance;
+		return abs(inWorldX2 - inWorldX1) > renderDistance
+			   || abs(inWorldY2 - inWorldY1) > renderDistance
+			   || abs(inWorldZ2 - inWorldZ1) > renderDistance;
 	}
 }

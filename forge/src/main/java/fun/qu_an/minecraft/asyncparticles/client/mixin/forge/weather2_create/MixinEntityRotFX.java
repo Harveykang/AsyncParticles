@@ -50,7 +50,6 @@ public abstract class MixinEntityRotFX extends TextureSheetParticle {
 		// we do it in the other thread, so we don't need to worry about costly collision checks
 		Vec3 mov = CreateCompat.collideMotionWithContraptions(
 			(ClientLevel) level,
-			new Vec3(x, y, z),
 			new Vec3(xd, yd, zd),
 			getBoundingBox()
 		);

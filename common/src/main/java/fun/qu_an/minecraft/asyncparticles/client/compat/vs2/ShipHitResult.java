@@ -5,6 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4dc;
+import org.valkyrienskies.core.api.ships.ClientShip;
 
 public class ShipHitResult extends BlockHitResult {
 	public final Matrix4dc worldToShip;

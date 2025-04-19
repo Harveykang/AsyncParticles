@@ -50,7 +50,7 @@ public class AsyncparticlesClient {
 			}
 			if (ModListHelper.CREATE_LOADED) {
 				WeatherParticleAddon.Type.RAIN.register((level, position, motion, aabb) -> {
-					Vec3 collide = CreateCompat.collideMotionWithContraptions(level, position, motion, aabb);
+					Vec3 collide = CreateCompat.collideMotionWithContraptions(level, motion, aabb);
 					if (collide == null) {
 						return motion;
 					}
@@ -58,7 +58,7 @@ public class AsyncparticlesClient {
 					return collide;
 				});
 				WeatherParticleAddon.CollisionFunction function = (level, position, motion, aabb) -> {
-					Vec3 collide = CreateCompat.collideMotionWithContraptions(level, position, motion, aabb);
+					Vec3 collide = CreateCompat.collideMotionWithContraptions(level, motion, aabb);
 					return collide == null ? motion : collide;
 				};
 				WeatherParticleAddon.Type.SNOW.register(function);

@@ -1,22 +1,20 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.create;
 
-import com.simibubi.create.content.contraptions.*;
-import com.simibubi.create.foundation.collision.ContinuousOBBCollider;
+import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
+import com.simibubi.create.content.contraptions.Contraption;
+import com.simibubi.create.content.contraptions.ContraptionCollider;
+import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import com.simibubi.create.foundation.collision.Matrix3d;
-import com.simibubi.create.foundation.collision.OrientedBB;
-import com.simibubi.create.foundation.utility.BlockHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.create.InvokerContraptionCollider;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.apache.commons.lang3.mutable.MutableFloat;
-import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
@@ -25,118 +23,29 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import static java.lang.Math.*;
+
 /**
  * See {@link ContraptionCollider}
  */
 public class CreateCompat {
-	public static final boolean[] trueAndFalse = {true, false};
-
-	public static Collection<WeakReference<AbstractContraptionEntity>> contraptions(ClientLevel level) {
+	public static Collection<WeakReference<AbstractContraptionEntity>> contraptions(LevelAccessor level) {
 		return loadedContraptions(level).values();
-	}
-
-	/**
-	 * 完全没搞懂，先能用，后面再优化吧
-	 */
-	public static boolean collideWithContraption(ClientLevel level,
-												 Vec3 originalPosition,
-												 Vec3 originalMotion,
-												 AABB bounds,
-												 AbstractContraptionEntity contraptionEntity) {
-		return collideWithContraption(level, originalPosition, originalMotion, bounds, contraptionEntity, false);
-	}
-
-	/**
-	 * 完全没搞懂，先能用，后面再优化吧
-	 */
-	public static boolean collideWithContraption(ClientLevel level,
-												 Vec3 originalPosition,
-												 Vec3 originalMotion,
-												 AABB bounds,
-												 AbstractContraptionEntity contraptionEntity,
-												 boolean estimate) {
-		if (!bounds.expandTowards(originalMotion).intersects(contraptionEntity.getBoundingBox())) {
-			return false;
-		}
-
-		Vec3 motion = originalMotion;
-		Contraption contraption = contraptionEntity.getContraption();
-		Vec3 contraptionPosition = contraptionEntity.position();
-		Vec3 contraptionMotion = contraptionPosition.subtract(contraptionEntity.getPrevPositionVec());
-		// Init matrix
-		AbstractContraptionEntity.ContraptionRotationState rotation = contraptionEntity.getRotationState();
-		Matrix3d rotationMatrix = rotation.asMatrix();
-
-		// Transform entity position and motion to local space
-		float yawOffset = rotation.getYawOffset();
-		Vec3 anchorVec = contraptionEntity.getAnchorVec();
-		Vec3 position = CreateCompat.getWorldToLocalTranslation(originalPosition, anchorVec, rotationMatrix, yawOffset);
-		motion = motion.subtract(contraptionMotion);
-		motion = rotationMatrix.transform(motion);
-
-		// Prepare entity bounds
-		AABB localBB = bounds.move(position)
-			.inflate(1.0E-7D);
-
-		OrientedBB obb = new OrientedBB(localBB);
-		obb.setRotation(rotationMatrix);
-
-		// Use simplified bbs when present
-		Optional<List<AABB>> optionalAABBList = contraption.getSimplifiedEntityColliders();
-		List<AABB> collidableBBs;
-		if (optionalAABBList.isPresent()) {
-			collidableBBs = optionalAABBList.get();
-		} else if (estimate) {
-			return true; // No simplified bbs, use full entity bounds, this is a fallback for better performance
-		} else {
-			collidableBBs = new ArrayList<>();
-			List<VoxelShape> potentialHits =
-				// TODO 这里完全不需要高精度形状，重写一个类似方法
-				InvokerContraptionCollider.invoker_getPotentiallyCollidedShapes(
-					level, contraption, localBB.expandTowards(motion));
-			potentialHits.forEach(shape -> collidableBBs.addAll(shape.toAabbs()));
-		}
-
-		Vec3 obbCenter = obb.getCenter();
-		for (AABB bb : collidableBBs) {
-			Vec3 bbCenter = bb.getCenter();
-			if ((Math.abs(obbCenter.x - bbCenter.x) - bounds.getXsize() - 1) * 2 > bb.getXsize())
-				continue;
-			if ((Math.abs((obbCenter.y + motion.y) - bbCenter.y) - bounds.getYsize() - 1) * 2 > bb.getYsize())
-				continue;
-			if ((Math.abs(obbCenter.z - bbCenter.z) - bounds.getZsize() - 1) * 2 > bb.getZsize())
-				continue;
-
-			obb.setCenter(obbCenter);
-			ContinuousOBBCollider.ContinuousSeparationManifold intersect = obb.intersect(bb, motion);
-
-			if (intersect == null)
-				continue;
-
-			double timeOfImpact = intersect.getTimeOfImpact();
-			if (timeOfImpact > 0 && timeOfImpact < 1) {
-				return true;
-			}
-
-			Vec3 separation = intersect.asSeparationVec(0);
-			if (separation != null && !separation.equals(Vec3.ZERO)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/**
 	 * @return null if no collision
 	 */
 	@Nullable
-	public static Vec3 collideMotionWithContraptions(ClientLevel level, Vec3 position, Vec3 motion, AABB bounds) {
+	public static Vec3 collideMotionWithContraptions(ClientLevel level, Vec3 motion, AABB bounds) {
 		Vector3d result = new Vector3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 		AABB finalBounds = bounds.inflate(0.1);
 		forEachContraption(level, contraptionEntity -> {
-			Vec3 vec3 = collideMotionWithContraption(level, position, motion, finalBounds, contraptionEntity);
+			Vec3 vec3 = collideMotionWithContraption(level, motion, finalBounds, contraptionEntity);
 			if (vec3 != null) {
-				result.set(Math.min(result.x, vec3.x), Math.min(result.y, vec3.y), Math.min(result.z, vec3.z));
+				result.set(abs(result.x) < abs(vec3.x) ? result.x : vec3.x,
+					abs(result.y) < abs(vec3.y) ? result.y : vec3.y,
+					abs(result.z) < abs(vec3.z) ? result.z : vec3.z);
 			}
 			return true;
 		});
@@ -147,7 +56,7 @@ public class CreateCompat {
 		return new Vec3(result.x, result.y, result.z);
 	}
 
-	public static void forEachContraption(ClientLevel level, Predicate<AbstractContraptionEntity> consumer) {
+	public static void forEachContraption(LevelAccessor level, Predicate<AbstractContraptionEntity> consumer) {
 		try {
 			for (WeakReference<AbstractContraptionEntity> r : contraptions(level)) {
 				AbstractContraptionEntity contraptionEntity = r.get();
@@ -163,7 +72,7 @@ public class CreateCompat {
 		}
 	}
 
-	public static Iterator<AbstractContraptionEntity> forEachContraption(ClientLevel level) {
+	public static Iterator<AbstractContraptionEntity> forEachContraption(LevelAccessor level) {
 		Iterator<WeakReference<AbstractContraptionEntity>> iterator = contraptions(level).iterator();
 		return new Iterator<>() {
 			private AbstractContraptionEntity next;
@@ -222,13 +131,77 @@ public class CreateCompat {
 	/**
 	 * 完全没搞懂，先能用，后面再优化吧
 	 */
-	@Nullable
-	public static Vec3 collideMotionWithContraption(ClientLevel level,
-													Vec3 originalPosition,
-													Vec3 originalMotion,
-													AABB bounds,
-													AbstractContraptionEntity contraptionEntity) {
-		return collideMotionWithContraption(level, originalPosition, originalMotion, bounds, contraptionEntity, false);
+	public static boolean isCollideWithContraption(ClientLevel level,
+												   Vec3 originalMotion,
+												   AABB bounds,
+												   AbstractContraptionEntity contraptionEntity) {
+		return isCollideWithContraption(level, originalMotion, bounds, contraptionEntity, false);
+	}
+
+	/**
+	 * 完全没搞懂，先能用，后面再优化吧
+	 */
+	public static boolean isCollideWithContraption(ClientLevel level,
+												   Vec3 originalMotion,
+												   AABB entityBounds,
+												   AbstractContraptionEntity contraptionEntity,
+												   boolean estimate) {
+		// bro why the train's contraption out of bounds?
+		AABB bb0;
+		AABB entityBoundingBox = contraptionEntity instanceof CarriageContraptionEntity
+			? (bb0 = contraptionEntity.getBoundingBox()).inflate(0, max(max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
+			: contraptionEntity.getBoundingBox();
+		if (!entityBounds.expandTowards(originalMotion).intersects(entityBoundingBox)) {
+			return false;
+		}
+
+		// Init matrix
+		AbstractContraptionEntity.ContraptionRotationState rotation = contraptionEntity.getRotationState();
+		Matrix3d rotationMatrix = rotation.asMatrix();
+
+		// Transform entity position and motion to local space
+		Vec3 center = entityBounds.getCenter();
+		Vec3 entityPosition = entityBounds.getCenter().add(0, entityBounds.getYsize() * 0.5, 0);
+		float yawOffset = rotation.getYawOffset();
+		Vec3 anchorVec = contraptionEntity.getAnchorVec();
+		Vec3 toLocalTranslation = getWorldToLocalTranslation(center, anchorVec, rotationMatrix, yawOffset);
+
+		Vec3 contactPointMotion = contraptionEntity.getContactPointMotion(entityPosition);
+		Vec3 localMotion = rotationMatrix.transform(originalMotion.subtract(contactPointMotion));
+
+		// Prepare entity bounds
+		AABB localBB = entityBounds.move(toLocalTranslation).inflate(1.0E-7D);
+
+		// Use simplified bbs when present
+//		final Vec3 motionCopy = motion;
+		Contraption contraption = contraptionEntity.getContraption();
+
+		// Use simplified bbs if present
+		AABB localExpanded = localBB.expandTowards(localMotion);
+		Optional<List<AABB>> collisionShapes = contraption.getSimplifiedEntityColliders();
+		List<AABB> collidableBBs;
+		if (collisionShapes.isPresent()) {
+			collidableBBs = collisionShapes.get();
+		} else if (estimate) {
+			return true; // No simplified bbs, use full entity bounds, this is a fallback for better performance
+		} else {
+			List<VoxelShape> shapes = InvokerContraptionCollider.invoker_getPotentiallyCollidedShapes(
+				level, contraption, localExpanded);
+			// TODO 这里完全不需要高精度形状，重写一个类似方法
+			collidableBBs = new ArrayList<>();
+			shapes.forEach(shape ->
+				shape.forAllBoxes((d, e, f, g, h, i) ->
+					collidableBBs.add(new AABB(d, e, f, g, h, i))));
+		}
+
+		// Incorrect but good performance
+		for (AABB bb : collidableBBs) {
+			if (localExpanded.intersects(bb)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -236,257 +209,242 @@ public class CreateCompat {
 	 */
 	@Nullable
 	public static Vec3 collideMotionWithContraption(ClientLevel level,
-													Vec3 originalPosition,
 													Vec3 originalMotion,
 													AABB bounds,
+													AbstractContraptionEntity contraptionEntity) {
+		return collideMotionWithContraption(level, originalMotion, bounds, contraptionEntity, false);
+	}
+
+	/**
+	 * 完全没搞懂，先能用，后面再优化吧
+	 */
+	@Nullable
+	public static Vec3 collideMotionWithContraption(ClientLevel level,
+													Vec3 originalMotion,
+													AABB entityBounds,
 													AbstractContraptionEntity contraptionEntity,
 													boolean estimate) {
-		if (!bounds.expandTowards(originalMotion).intersects(contraptionEntity.getBoundingBox())) {
+		// bro why the train's contraption out of bounds?
+		AABB bb0;
+		AABB entityBoundingBox = contraptionEntity instanceof CarriageContraptionEntity
+			? (bb0 = contraptionEntity.getBoundingBox()).inflate(0, max(max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
+			: contraptionEntity.getBoundingBox();
+		if (!entityBounds.expandTowards(originalMotion).intersects(entityBoundingBox)) {
 			return null;
 		}
 
-		Vec3 motion = originalMotion;
-		Contraption contraption = contraptionEntity.getContraption();
-		Vec3 contraptionPosition = contraptionEntity.position();
-		Vec3 contraptionMotion = contraptionPosition.subtract(contraptionEntity.getPrevPositionVec());
 		// Init matrix
 		AbstractContraptionEntity.ContraptionRotationState rotation = contraptionEntity.getRotationState();
 		Matrix3d rotationMatrix = rotation.asMatrix();
 
 		// Transform entity position and motion to local space
+		Vec3 center = entityBounds.getCenter();
+		Vec3 entityPosition = entityBounds.getCenter().add(0, entityBounds.getYsize() * 0.5, 0);
 		float yawOffset = rotation.getYawOffset();
 		Vec3 anchorVec = contraptionEntity.getAnchorVec();
-		Vec3 position = getWorldToLocalTranslation(originalPosition, anchorVec, rotationMatrix, yawOffset);
-		motion = motion.subtract(contraptionMotion);
-		motion = rotationMatrix.transform(motion);
+		Vec3 toLocalTranslation = getWorldToLocalTranslation(center, anchorVec, rotationMatrix, yawOffset);
+
+		Vec3 contactPointMotion = contraptionEntity.getContactPointMotion(entityPosition);
+		Vec3 localMotion = rotationMatrix.transform(originalMotion.subtract(contactPointMotion));
 
 		// Prepare entity bounds
-		AABB localBB = bounds.move(position)
-			.inflate(1.0E-7D);
-
-		OrientedBB obb = new OrientedBB(localBB);
-		obb.setRotation(rotationMatrix);
+		AABB localBB = entityBounds.move(toLocalTranslation).inflate(1.0E-7D);
 
 		// Use simplified bbs when present
-		Optional<List<AABB>> optionalAABBList = contraption.getSimplifiedEntityColliders();
+//		final Vec3 motionCopy = motion;
+		Contraption contraption = contraptionEntity.getContraption();
+
+		// Use simplified bbs if present
+		AABB localExpanded = localBB.expandTowards(localMotion);
+		Optional<List<AABB>> collisionShapes = contraption.getSimplifiedEntityColliders();
 		List<AABB> collidableBBs;
-		if (optionalAABBList.isPresent()) {
-			collidableBBs = optionalAABBList.get();
+		if (collisionShapes.isPresent()) {
+			collidableBBs = collisionShapes.get();
 		} else if (estimate) {
 			return Vec3.ZERO; // No simplified bbs, use full entity bounds, this is a fallback for better performance
 		} else {
+			List<VoxelShape> shapes = InvokerContraptionCollider.invoker_getPotentiallyCollidedShapes(
+				level, contraption, localExpanded);
+			// TODO 这里完全不需要高精度形状，重写一个类似方法
 			collidableBBs = new ArrayList<>();
-			List<VoxelShape> potentialHits =
-				// TODO 这里完全不需要高精度形状，重写一个类似方法
-				InvokerContraptionCollider.invoker_getPotentiallyCollidedShapes(
-					level, contraption, localBB.expandTowards(motion));
-			potentialHits.forEach(shape -> collidableBBs.addAll(shape.toAabbs()));
+			shapes.forEach(shape ->
+				shape.forAllBoxes((d, e, f, g, h, i) ->
+					collidableBBs.add(new AABB(d, e, f, g, h, i))));
 		}
 
-		MutableObject<Vec3> collisionResponse = new MutableObject<>(Vec3.ZERO);
-		MutableObject<Vec3> normal = new MutableObject<>(Vec3.ZERO);
-		MutableObject<Vec3> location = new MutableObject<>(Vec3.ZERO);
-		MutableFloat temporalResponse = new MutableFloat(1);
-		Vec3 obbCenter = obb.getCenter();
+		Vec3 localCenter = localBB.getCenter();
+		double cx = localMotion.x;
+		double cy = localMotion.y;
+		double cz = localMotion.z;
+		double sx = 0;
+		double sy = 0;
+		double sz = 0;
+		boolean squeezed = false;
+		double localXsize = localBB.getXsize();
+		double localYsize = localBB.getYsize();
+		double localZsize = localBB.getZsize();
+		// this is buggy, but works
+		for (AABB bb : collidableBBs) {
+			if (!localExpanded.intersects(bb)) {
+				continue;
+			}
 
-		// Apply separation maths
-		boolean doHorizontalPass = !rotation.hasVerticalRotation();
-		for (boolean horizontalPass : trueAndFalse) {
-			boolean verticalPass = !horizontalPass || !doHorizontalPass;
+			if (localBB.intersects(bb)) {
+				Vec3 bbCenter = bb.getCenter();
+				squeezed = true;
+				AABB intersect = localBB.intersect(bb);
 
-			for (AABB bb : collidableBBs) {
-				Vec3 currentResponse = collisionResponse.getValue();
-				Vec3 currentCenter = obbCenter.add(currentResponse);
+				double intersectXsize = intersect.getXsize();
+				double intersectYsize = intersect.getYsize();
+				double intersectZsize = intersect.getZsize();
+				Direction.Axis squeezedAxis = getSqueezedAxis(intersectXsize, intersectYsize, intersectZsize);
 
-				if ((Math.abs(currentCenter.x - bb.getCenter().x) - bounds.getXsize() - 1) * 2 > bb.getXsize())
-					continue;
-				if ((Math.abs((currentCenter.y + motion.y) - bb.getCenter().y) - bounds.getYsize() - 1) * 2 > bb.getYsize())
-					continue;
-				if ((Math.abs(currentCenter.z - bb.getCenter().z) - bounds.getZsize() - 1) * 2 > bb.getZsize())
-					continue;
-
-				obb.setCenter(currentCenter);
-				ContinuousOBBCollider.ContinuousSeparationManifold intersect = obb.intersect(bb, motion);
-
-				if (intersect == null)
-					continue;
-
-				double timeOfImpact = intersect.getTimeOfImpact();
-				boolean isTemporal = timeOfImpact > 0 && timeOfImpact < 1;
-				Vec3 collidingNormal = intersect.getCollisionNormal();
-				Vec3 collisionPosition = intersect.getCollisionPosition();
-
-				if (!isTemporal) {
-					Vec3 separation = intersect.asSeparationVec(0);
-					if (separation != null && !separation.equals(Vec3.ZERO)) {
-						collisionResponse.setValue(currentResponse.add(separation));
-						timeOfImpact = 0;
-					}
+				switch (squeezedAxis) {
+					case X -> sx = getSqueezed(localCenter.x, bbCenter.x, intersectXsize, sx);
+					case Y -> sy = getSqueezed(localCenter.y, bbCenter.y, intersectYsize, cy > 0 ? cy : sy); // fix stuck on roof
+					case Z -> sz = getSqueezed(localCenter.z, bbCenter.z, intersectZsize, sz);
 				}
+			} else if (!squeezed) {
+				Vec3 bbCenter = bb.getCenter();
+				Vec3 relative = bbCenter.subtract(localCenter);
 
-				boolean nearest = timeOfImpact >= 0 && temporalResponse.getValue() > timeOfImpact;
-				if (collidingNormal != null && nearest)
-					normal.setValue(collidingNormal);
-				if (collisionPosition != null && nearest)
-					location.setValue(collisionPosition);
+				double halfXsum = (bb.getXsize() + localXsize) * 0.5;
+				double halfYsum = (bb.getYsize() + localYsize) * 0.5;
+				double halfZsum = (bb.getZsize() + localZsize) * 0.5;
+				Direction.Axis collidedAxis = getCollideAxis(halfXsum, halfYsum, halfZsum, relative);
 
-				if (isTemporal) {
-					if (temporalResponse.getValue() > timeOfImpact)
-						temporalResponse.setValue(timeOfImpact);
+				switch (collidedAxis) {
+					case X -> cx = getCollided(relative.x, halfXsum, cx);
+					case Y -> cy = getCollided(relative.y, halfYsum, cy);
+					case Z -> cz = getCollided(relative.z, halfZsum, cz);
 				}
 			}
-
-			if (verticalPass)
-				break;
-
-			boolean noVerticalMotionResponse = temporalResponse.getValue() == 1;
-			boolean noVerticalCollision = collisionResponse.getValue().y == 0;
-			if (noVerticalCollision && noVerticalMotionResponse)
-				break;
-
-			// Re-run collisions with horizontal offset
-			collisionResponse.setValue(collisionResponse.getValue()
-				.multiply(129 / 128f, 0, 129 / 128f));
 		}
 
-		// Resolve collision
-		Vec3 entityMotion = originalMotion;
-		Vec3 entityMotionNoTemporal = entityMotion;
-		Vec3 collisionNormal = normal.getValue();
-		Vec3 collisionLocation = location.getValue();
-		Vec3 totalResponse = collisionResponse.getValue();
-		boolean hardCollision = !totalResponse.equals(Vec3.ZERO);
-		boolean temporalCollision = temporalResponse.getValue() != 1;
-		Vec3 motionResponse = !temporalCollision ? motion
-			: motion.normalize()
-			.scale(motion.length() * temporalResponse.getValue());
-
-		rotationMatrix.transpose();
-		motionResponse = rotationMatrix.transform(motionResponse)
-			.add(contraptionMotion);
-		totalResponse = rotationMatrix.transform(totalResponse);
-		totalResponse = rotate(totalResponse, yawOffset, Direction.Axis.Y);
-		collisionNormal = rotationMatrix.transform(collisionNormal);
-		collisionNormal = rotate(collisionNormal, yawOffset, Direction.Axis.Y);
-		collisionNormal = collisionNormal.normalize();
-		collisionLocation = rotationMatrix.transform(collisionLocation);
-		collisionLocation = rotate(collisionLocation, yawOffset, Direction.Axis.Y);
-		rotationMatrix.transpose();
-
-		double bounce = 0;
-		double slide = 0;
-
-		if (!collisionLocation.equals(Vec3.ZERO)) {
-			BlockPos pos = BlockPos.containing(contraptionEntity.toLocalVector(originalPosition, 0));
-			if (contraption.getBlocks()
-				.containsKey(pos)) {
-				BlockState blockState = contraption.getBlocks()
-					.get(pos).state();
-				if (blockState.is(BlockTags.CLIMBABLE)) {
-					totalResponse = totalResponse.add(0, .1f, 0);
-				}
-			}
-
-			pos = BlockPos.containing(contraptionEntity.toLocalVector(collisionLocation, 0));
-			if (contraption.getBlocks()
-				.containsKey(pos)) {
-				BlockState blockState = contraption.getBlocks()
-					.get(pos).state();
-
-				bounce = BlockHelper.getBounceMultiplier(blockState.getBlock());
-				slide = Math.max(0, blockState.getBlock().getFriction()) - .6f;
+		Vec3 clippedLocal;
+		if (squeezed) {
+			clippedLocal = new Vec3(sx, sy, sz);
+		} else {
+			clippedLocal = new Vec3(cx, cy, cz);
+			if (localMotion.equals(clippedLocal)) {
+				return null;
 			}
 		}
+		Vec3 clipped = rotationMatrix.transpose().transform(clippedLocal);
+		return clipped.add(contactPointMotion.scale(3));
+//			.add(contraptionMotion.scale(2));
+	}
 
-		boolean hasNormal = !collisionNormal.equals(Vec3.ZERO);
-		boolean anyCollision = hardCollision || temporalCollision;
+	private static double getCollided(double relative, double halfXsum, double mx) {
+		double dx = relative > 0 ? relative - halfXsum : relative + halfXsum;
+		if (abs(mx) > abs(dx)) {
+			mx = dx;
+		}
+		return mx;
+	}
 
-		if (temporalCollision) {
-			double idealVerticalMotion = motionResponse.y;
-			if (idealVerticalMotion != entityMotion.y) {
-				entityMotion = entityMotion.multiply(1, 0, 1)
-					.add(0, idealVerticalMotion, 0);
+	private static double getSqueezed(double localCenter, double bbCenter, double intersectSize, double currentSqueezed) {
+		double diff = localCenter - bbCenter;
+		double halfIntersectSize = intersectSize * 0.5;
+		if (diff < -halfIntersectSize) {
+			return min(currentSqueezed, -halfIntersectSize - diff);
+		} else if (diff > halfIntersectSize) {
+			return max(currentSqueezed, halfIntersectSize - diff);
+		} else {
+			return currentSqueezed;
+		}
+	}
+
+	private static Direction.Axis getSqueezedAxis(double xsize, double ysize, double zsize) {
+		if (xsize < ysize) {
+			if (xsize < zsize) {
+				return Direction.Axis.X;
+			} else {
+				return Direction.Axis.Z;
+			}
+		} else {
+			if (ysize < zsize) {
+				return Direction.Axis.Y;
+			} else {
+				return Direction.Axis.Z;
 			}
 		}
+	}
 
-		if (hardCollision) {
-			double motionX = entityMotion.x();
-			double motionY = entityMotion.y();
-			double motionZ = entityMotion.z();
-			double intersectX = totalResponse.x();
-			double intersectY = totalResponse.y();
-			double intersectZ = totalResponse.z();
-
-			double horizonalEpsilon = 1 / 128f;
-			if (motionX != 0 && Math.abs(intersectX) > horizonalEpsilon && motionX > 0 == intersectX < 0)
-				entityMotion = entityMotion.multiply(0, 1, 1);
-			if (motionY != 0 && intersectY != 0 && motionY > 0 == intersectY < 0)
-				entityMotion = entityMotion.multiply(1, 0, 1)
-					.add(0, contraptionMotion.y, 0);
-			if (motionZ != 0 && Math.abs(intersectZ) > horizonalEpsilon && motionZ > 0 == intersectZ < 0)
-				entityMotion = entityMotion.multiply(1, 1, 0);
-
+	private static Direction.@NotNull Axis getCollideAxis(double halfXsum, double halfYsum, double halfZsum, Vec3 relative) {
+		double sx = halfXsum - abs(relative.x);
+		double sy = halfYsum - abs(relative.y);
+		double sz = halfZsum - abs(relative.z);
+		if (sx < sy) {
+			if (sx < sz) {
+				return Direction.Axis.X;
+			} else {
+				return Direction.Axis.Z;
+			}
+		} else {
+			if (sy < sz) {
+				return Direction.Axis.Y;
+			} else {
+				return Direction.Axis.Z;
+			}
 		}
+	}
 
-		if (bounce == 0 && slide > 0 && hasNormal && anyCollision && rotation.hasVerticalRotation()) {
-			double slideFactor = collisionNormal.multiply(1, 0, 1)
-									 .length() * 1.25f;
-			Vec3 motionIn = entityMotionNoTemporal.multiply(0, .9, 0)
-				.add(0, -.01f, 0);
-			Vec3 slideNormal = collisionNormal.cross(motionIn.cross(collisionNormal))
-				.normalize();
-			entityMotion = entityMotion.multiply(.85, 0, .85)
-				.add(slideNormal.scale((.2f + slide) * motionIn.length() * slideFactor)
-					.add(0, -.1f - collisionNormal.y * .125f, 0));
-		}
-
-		if (entityMotion.equals(originalMotion)) {
+	public static Vec3 bounceEntity(Vec3 originalMotion, Vec3 contactPointMotion, Vec3 normal, double factor) {
+		if (factor == 0) {
 			return null;
 		}
-		return entityMotion;
+		Vec3 motion = originalMotion.subtract(contactPointMotion);
+		Vec3 deltav = normal.scale(factor * 2 * motion.dot(normal));
+		if (deltav.dot(deltav) < 0.1f) {
+			return null;
+		}
+		return originalMotion.subtract(deltav);
 	}
 
-	public static Vec3 rotate(Vec3 collisionLocation, float yawOffset, Direction.Axis axis) {
-		return ModListHelper.IS_LEGACY_CREATE
-			? Create5Compat.rotate(collisionLocation, yawOffset, axis)
-			: Create6Compat.rotate(collisionLocation, yawOffset, axis);
-	}
-
-	public static Vec3 getCenterOf(BlockPos blockPos) {
-		return ModListHelper.IS_LEGACY_CREATE
-			? Create5Compat.getCenterOf(blockPos)
-			: Create6Compat.getCenterOf(blockPos);
-	}
-
-	public static Map<Integer, WeakReference<AbstractContraptionEntity>> loadedContraptions(ClientLevel level) {
+	public static Map<Integer, WeakReference<AbstractContraptionEntity>> loadedContraptions(LevelAccessor level) {
 		return ModListHelper.IS_LEGACY_CREATE
 			? Create5Compat.loadedContraptions(level)
 			: Create6Compat.loadedContraptions(level);
 	}
 
 	public static boolean isUnderContraption(ClientLevel level, double x, double y, double z) {
-		Vec3 pos = new Vec3(x, y, z);
-		AABB bounds = new AABB(x - 1, y - 1, z - 1, x + 1, Math.max(y + 16, level.getMaxBuildHeight()), z + 1);
-		return isCollideWithContraption(level, pos, Vec3.ZERO, bounds);
+		AABB bounds = new AABB(x - 0.5, y - 2, z - 0.5, x + 0.5, y - 1, z + 0.5);
+		return isCollideWithContraption(level, new Vec3(0, Math.max(16, level.getMaxBuildHeight() - y), 0), bounds);
 	}
 
 	public static boolean isUnderContraption(ClientLevel level, Vec3 pos) {
-		AABB bounds = new AABB(pos.x - 1, pos.y - 1, pos.z - 1, pos.x + 1, Math.max(pos.y + 16, level.getMaxBuildHeight()), pos.z + 1);
-		return isCollideWithContraption(level, pos, Vec3.ZERO, bounds);
+		AABB bounds = new AABB(pos.x - 0.5, pos.y - 2, pos.z - 0.5, pos.x + 0.5, pos.y - 1, pos.z + 0.5);
+		return isCollideWithContraption(level, new Vec3(0, Math.max(16, level.getMaxBuildHeight() - pos.y), 0), bounds);
 	}
 
-	public static boolean isCollideWithContraption(ClientLevel level, Vec3 pos, Vec3 motion, AABB bb) {
-		return isCollideWithContraption(level, pos, motion, bb, true);
+	public static boolean isCollideWithContraption(ClientLevel level, Vec3 motion, AABB bb) {
+		return isCollideWithContraption(level, motion, bb, true);
 	}
 
-	public static boolean isCollideWithContraption(ClientLevel level, Vec3 pos, Vec3 motion, AABB bb, boolean estimate) {
+	public static boolean isCollideWithContraption(ClientLevel level, Vec3 motion, AABB bb, boolean estimate) {
 		for (Iterator<AbstractContraptionEntity> it = forEachContraption(level); it.hasNext(); ) {
 			AbstractContraptionEntity contraptionEntity = it.next();
-			boolean b1 = collideWithContraption(level, pos, motion, bb, contraptionEntity, estimate);
+			boolean b1 = isCollideWithContraption(level, motion, bb, contraptionEntity, estimate);
 			if (b1) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	@Nullable
+	public static Vec3 getContraptionDeltaMovement(Entity entity) {
+		Entity rootEntity = entity.getRootVehicle();
+		if (rootEntity instanceof AbstractContraptionEntity ace) {
+			return ace.getContactPointMotion(entity.position());
+		}
+		for (Iterator<AbstractContraptionEntity> iterator = forEachContraption(rootEntity.level()); iterator.hasNext(); ) {
+			AbstractContraptionEntity contraptionEntity = iterator.next();
+			if (contraptionEntity.collidingEntities.containsKey(rootEntity)) {
+				return contraptionEntity.getContactPointMotion(entity.position());
+			}
+		}
+		return null;
 	}
 }
