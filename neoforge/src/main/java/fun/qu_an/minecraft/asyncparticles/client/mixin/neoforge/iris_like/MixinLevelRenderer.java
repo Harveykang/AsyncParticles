@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.iris_like;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
@@ -55,29 +57,13 @@ public abstract class MixinLevelRenderer {
 						   CallbackInfo ci,
 						   @Local(ordinal = 0) MultiBufferSource.BufferSource bufferSource,
 						   @Local(ordinal = 0) float f) {
-		// this fixes Iris bug:
+		// this fixes Iris's bug:
 		// - spam logs with some shader pack (e.g. photon shader)
 		// - player model (or something else) are invisible
 		if (targets.particles == null && AsyncRenderer.isMixedParticleRenderingSetting()) {
 			Profiler.get().popPush("solid_particles");
 			minecraft.particleEngine.render(camera, f, bufferSource, frustum, p -> !p.translucent());
 		}
-	}
-
-	@Redirect(method = "lambda$addMainPass$2", remap = false,
-		at = @At(value = "INVOKE", remap = false,
-			target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
-	private void onAddMain(ParticleEngine instance,
-						   Camera camera,
-						   float v,
-						   MultiBufferSource.BufferSource bufferSource1,
-						   Frustum frustum,
-						   Predicate<ParticleRenderType> predicate) {
-		// do nothing
-//		if (ModListHelper.IRIS_LIKE_LOADED &&
-//			AsyncRenderer.isMixedParticleRenderingSetting()) {
-//			original.call(instance, camera, v, bufferSource1, frustum, (Predicate<ParticleRenderType>) p -> !p.translucent());
-//		}
 	}
 
 	@ModifyArg(method = "lambda$addParticlesPass$5", remap = false, index = 4,

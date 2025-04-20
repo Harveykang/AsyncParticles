@@ -3,7 +3,8 @@ plugins {
 }
 
 loom {
-    accessWidenerPath = file('src/main/resources/asyncparticles-neoforge.accesswidener')
+//    accessWidenerPath = file('src/main/resources/asyncparticles-neoforge.accesswidener')
+    // how to set the second accessWidenerPath?
     accessWidenerPath = project(":common").loom.accessWidenerPath
 
     mixin {
@@ -80,7 +81,7 @@ dependencies {
 
     /* Particle Rain/Pretty Rain */
     modCompileOnly "maven.modrinth:pretty-rain:Hp8eralZ" // 1.1.1
-//    modLocalRuntime "maven.modrinth:pretty-rain:Hp8eralZ" // 1.1.1
+    modLocalRuntime "maven.modrinth:pretty-rain:Hp8eralZ" // 1.1.1
 
     /* Create */
 //    modLocalRuntime("com.simibubi.create:create-1.20.1:0.5.1.j-55:slim") { transitive = false }
@@ -121,7 +122,7 @@ dependencies {
 
     /* Particular Reforged */
     modCompileOnly "maven.modrinth:particular-reforged:1.21.4" // 1.1.0
-    modLocalRuntime "maven.modrinth:particular-reforged:1.21.4" // 1.1.0
+//    modLocalRuntime "maven.modrinth:particular-reforged:1.21.4" // 1.1.0
 }
 
 processResources {
@@ -141,5 +142,5 @@ remapJar {
     inputFile.set shadowJar.archiveFile
     injectAccessWidener = true
     atAccessWideners.add(project(":common").loom.accessWidenerPath.get().asFile.name)
-    atAccessWideners.add(loom.accessWidenerPath.get().asFile.name)
+//    atAccessWideners.add(loom.accessWidenerPath.get().asFile.name)
 }

@@ -347,7 +347,7 @@ public class AsyncRenderer {
 		if (renderType == null) { // special case
 			return BindingTesselator.EMPTY;
 		}
-		return new BindingTesselator(RenderType.TRANSIENT_BUFFER_SIZE, renderType.mode(), renderType.format()); // minimal size
+		return new BindingTesselator(256, renderType.mode(), renderType.format()); // minimal size
 	}
 
 	/* Sync Rendering */

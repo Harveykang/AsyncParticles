@@ -317,9 +317,9 @@ public class AsyncTicker {
 	}
 
 	public static void waitForCleanUp() {
-		if (AsyncTicker.particleCleanup != null) {
-			AsyncTicker.particleCleanup.join();
-			AsyncTicker.particleCleanup = null;
+		if (particleCleanup != null) {
+			particleCleanup.join();
+			particleCleanup = null;
 		}
 	}
 
@@ -338,7 +338,7 @@ public class AsyncTicker {
 	/* Sync Ticking */
 
 	public static void tickSyncParticles() {
-		if (!shouldTickParticles || SYNC_PARTICLES.isEmpty()) {
+		if ((!shouldTickParticles && SimplePropertiesConfig.isTickAsync()) || SYNC_PARTICLES.isEmpty()) {
 			return;
 		}
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
