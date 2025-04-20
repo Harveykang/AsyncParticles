@@ -151,7 +151,7 @@ dependencies {
 //    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v172b-neoforge-1.21.1.jar')
 
     /* Simple Weather */
-    modCompileOnly "curse.maven:simple-weather-983390:5984086"
+    modCompileOnly "curse.maven:simple-weather-983390:5984086" // 1.0.13
     modLocalRuntime "curse.maven:simple-weather-983390:5984086"
 
     /* Particular Reforged */
