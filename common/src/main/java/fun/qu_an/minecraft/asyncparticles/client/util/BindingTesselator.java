@@ -14,7 +14,17 @@ public class BindingTesselator {
 		}
 
 		@Override
+		public BufferBuilder getBuilder() {
+			return FakeBufferBuilder.INSTANCE;
+		}
+
+		@Override
 		public void clear() {
+			// do nothing
+		}
+
+		@Override
+		public void close() {
 			// do nothing
 		}
 	};
