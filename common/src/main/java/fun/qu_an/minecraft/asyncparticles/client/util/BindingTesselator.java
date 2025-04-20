@@ -50,10 +50,13 @@ public class BindingTesselator {
 	public void clear() {
 		BufferBuilder builder = this.builder;
 		if (builder != null) {
-			if (buffer.pointer != 0L) {
-				buffer.clear();
-			}
+			buffer.discard();
 			this.builder = null;
 		}
+	}
+
+	public void close() {
+		buffer.close();
+		this.builder = null;
 	}
 }

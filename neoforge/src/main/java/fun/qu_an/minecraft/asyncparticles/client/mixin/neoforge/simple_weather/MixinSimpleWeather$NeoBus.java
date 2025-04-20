@@ -33,7 +33,7 @@ public interface MixinSimpleWeather$NeoBus {
 		}
 	}
 
-	@Redirect(method = "renderWeather", require = 0,
+	@Redirect(method = "renderWeather",
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getDeltaMovement()Lnet/minecraft/world/phys/Vec3;"))
 	private static Vec3 getDeltaMovement(LocalPlayer player) {
 		Vec3 contraptionMotion = CreateCompat.getContraptionDeltaMovement(player);

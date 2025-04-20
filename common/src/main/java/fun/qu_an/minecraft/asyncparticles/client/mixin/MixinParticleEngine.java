@@ -98,7 +98,7 @@ public abstract class MixinParticleEngine {
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
 	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {
 		if (SimplePropertiesConfig.isTickAsync()) {
-			throw Utils.toThrowDirectly(t);
+			throw ExceptionUtil.toThrowDirectly(t);
 		}
 	}
 

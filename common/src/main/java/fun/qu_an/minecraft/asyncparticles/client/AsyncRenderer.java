@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -130,7 +131,6 @@ public class AsyncRenderer {
 		if (ModListHelper.FABRIC_IRIS_LOADED) {
 			mixedParticleRenderingSetting = Iris.isPackInUseQuick() &&
 											getRenderingSettings() == ParticleRenderingSettings.MIXED;
-//			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
 		profiler.push("render_async");
 		TextureManager textureManager = particleEngine.textureManager;
@@ -199,7 +199,7 @@ public class AsyncRenderer {
 		LOGGER.error("Error rendering particle", e);
 		Minecraft mc1 = Minecraft.getInstance();
 		if (mc1.level != null && mc1.player != null) {
-			throw Utils.toThrowDirectly(e);
+			throw ExceptionUtil.toThrowDirectly(e);
 		}
 		return null;
 	}
@@ -272,6 +272,9 @@ public class AsyncRenderer {
 	}
 
 	private static ParticleRenderingSettings getRenderingSettings() {
+		if (!Iris.isPackInUseQuick()) {
+			return ParticleRenderingSettings.UNSET;
+		}
 		return Iris.getPipelineManager().getPipeline()
 			.map(WorldRenderingPipeline::getParticleRenderingSettings)
 			.orElse(ParticleRenderingSettings.MIXED);
@@ -279,15 +282,17 @@ public class AsyncRenderer {
 
 	/* BufferBuilder */
 
-	private static final Map<ParticleRenderType, BindingTesselator> BTESSELATORS = new IdentityHashMap<>();
+	private static final Map<ParticleRenderType, BindingTesselator> BTESSELATORS = new ConcurrentHashMap<>();
 
 	private static void resetBTesselators() {
 		BTESSELATORS.values().forEach(BindingTesselator::clear);
 	}
 
-	private static void clearBTesselators() {
-		resetBTesselators();
-		BTESSELATORS.clear();
+	private static void closeBTesselators() {
+		for (Iterator<BindingTesselator> iterator = BTESSELATORS.values().iterator(); iterator.hasNext(); ) {
+			iterator.next().close();
+			iterator.remove();
+		}
 	}
 
 	public static @NotNull BufferBuilder beginBufferBuilder(ParticleRenderType particleRenderType, TextureManager textureManager) {
@@ -390,7 +395,7 @@ public class AsyncRenderer {
 
 	public static void reset() {
 		waitForAsyncTasks();
-		clearBTesselators();
+		closeBTesselators();
 		clearSync();
 	}
 }

@@ -1,14 +1,12 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.create;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import fun.qu_an.minecraft.asyncparticles.client.util.CollisionResult;
-import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
+import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class CreateCompat {
 	@ExpectPlatform
@@ -22,7 +20,7 @@ public class CreateCompat {
 
 	@ExpectPlatform
 	public static boolean isCollideWithContraption(@NotNull ClientLevel level, Vec3 motion1, AABB aabb1, boolean b) {
-		Utils.throwAssertionError();
+		ExceptionUtil.throwAssertionError();
 		return false;
 	}
 

@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
+import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import org.sinytra.connector.ConnectorEarlyLoader;
 
 public class ModListHelper {
@@ -91,7 +91,7 @@ public class ModListHelper {
 	@ExpectPlatform
 	public static boolean versionCheck(String modId, String minInclusive, String maxExclusive) {
 		// Suppressing the ConstantValue check because this is a generated method.
-		Utils.throwAssertionError();
+		ExceptionUtil.throwAssertionError();
 		return true;
 	}
 

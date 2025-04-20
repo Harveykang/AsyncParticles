@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -15,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 // TODO: 分为两个 Mixin
 @Mixin(value = ParticleEngine.class)
@@ -30,13 +30,11 @@ public class MixinParticleEngine {
 	@Inject(method = "<init>", order = 9500, at = @At("RETURN"))
 	public void onInit(ClientLevel level, TextureManager textureManager, CallbackInfo ci) {
 		List<ParticleRenderType> renderOrder = List.copyOf(RENDER_ORDER);
-		Comparator<ParticleRenderType> vanillaComparator = Comparator.comparingInt(renderOrder::indexOf);
-		int[] orderGenerator = new int[1]; // single-threaded
-		Map<ParticleRenderType, Integer> insertionOrder = new IdentityHashMap<>();
+		AtomicInteger orderGenerator = new AtomicInteger(); // single-threaded
+		Map<ParticleRenderType, Integer> insertionOrder = Collections.synchronizedMap(new IdentityHashMap<>(0));
 		Map<ParticleRenderType, Queue<Particle>> newTreeMap =
 			Maps.newTreeMap((o1, o2) -> {
 				// FIXME: why i have to write this shit?
-				RenderSystem.assertOnRenderThread();
 				if (o1 == o2) {
 					return 0;
 				}
@@ -51,16 +49,25 @@ public class MixinParticleEngine {
 				if (bTesselator1 == BindingTesselator.EMPTY) {
 					return 1;
 				}
-				boolean vanillaOne = renderOrder.contains(o1);
-				boolean vanillaTwo = renderOrder.contains(o2);
 
-				if (vanillaOne && vanillaTwo) {
-					return vanillaComparator.compare(o1, o2);
+				int vanillaOne = -1;
+				int vanillaTwo = -1;
+				for (int i = 0; i < renderOrder.size(); i++) {
+					ParticleRenderType geti = renderOrder.get(i);
+					if (geti == o1) {
+						vanillaOne = i;
+					} else if (geti == o2) {
+						vanillaTwo = i;
+					}
 				}
-				if (!vanillaOne && !vanillaTwo) {
+
+				if (vanillaOne >= 0 && vanillaTwo >= 0) {
+					return Integer.compare(vanillaOne, vanillaTwo);
+				}
+				if (vanillaOne == -1 && vanillaTwo == -1) {
 					return asyncParticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
 				}
-				return vanillaOne ? -1 : 1;
+				return vanillaOne >= 0 ? -1 : 1;
 			});
 		newTreeMap.putAll(particles);
 		particles = newTreeMap;
@@ -68,12 +75,12 @@ public class MixinParticleEngine {
 	}
 
 	@Unique
-	private static int asyncParticles$compareWithIdentityHashCode(ParticleRenderType o1, ParticleRenderType o2, Map<ParticleRenderType, Integer> insertionOrder, int[] orderGenerator) {
+	private static int asyncParticles$compareWithIdentityHashCode(ParticleRenderType o1, ParticleRenderType o2, Map<ParticleRenderType, Integer> insertionOrder, AtomicInteger orderGenerator) {
 		int hashCompare = Integer.compare(System.identityHashCode(o1), System.identityHashCode(o2));
 		if (hashCompare != 0) {
 			return hashCompare;
 		}
-		return Integer.compare(insertionOrder.computeIfAbsent(o1, k -> orderGenerator[0]++),
-			insertionOrder.computeIfAbsent(o2, k -> orderGenerator[0]++));
+		return Integer.compare(insertionOrder.computeIfAbsent(o1, k -> orderGenerator.getAndIncrement()),
+			insertionOrder.computeIfAbsent(o2, k -> orderGenerator.getAndIncrement()));
 	}
 }
