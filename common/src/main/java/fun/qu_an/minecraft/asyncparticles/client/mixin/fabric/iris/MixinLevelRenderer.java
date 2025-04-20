@@ -2,7 +2,6 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.iris;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.resource.ResourceHandle;
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;

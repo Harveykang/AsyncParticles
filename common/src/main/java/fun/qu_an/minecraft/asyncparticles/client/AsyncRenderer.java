@@ -111,7 +111,7 @@ public class AsyncRenderer {
 	public static Frustum frustum;
 	private static Consumer<String> debugConsumer;
 	public static CompletableFuture<Void> asyncTask;
-	private static ParticleRenderingSettings particleRenderingSettings;
+	private static boolean mixedParticleRenderingSetting;
 	private static int asyncTasksSize;
 	private static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
@@ -171,12 +171,6 @@ public class AsyncRenderer {
 		tryDebug();
 		clearSync();
 		profiler.pop();
-	}
-
-	public static void captureParticleRenderingSetting() {
-		if (ModListHelper.IRIS_LIKE_LOADED && Iris.isPackInUseQuick()) {
-			particleRenderingSettings = getParticleRenderingSettings0();
-		}
 	}
 
 	private static void renderParticles(float f, Camera camera, Queue<Particle> particles, ParticleRenderType particleRenderType, BufferBuilder bufferBuilder) {
@@ -309,12 +303,15 @@ public class AsyncRenderer {
 		return new ReportedException(crashReport);
 	}
 
-	public static boolean isMixedParticleRenderingSetting() {
-		return particleRenderingSettings == ParticleRenderingSettings.MIXED;
+	public static void captureParticleRenderingSetting() {
+		if (ModListHelper.IRIS_LIKE_LOADED) {
+			mixedParticleRenderingSetting = Iris.isPackInUseQuick() &&
+											getParticleRenderingSettings0() == ParticleRenderingSettings.MIXED;
+		}
 	}
 
-	public static ParticleRenderingSettings getParticleRenderingSettings() {
-		return particleRenderingSettings;
+	public static boolean isMixedParticleRenderingSetting() {
+		return mixedParticleRenderingSetting;
 	}
 
 	private static ParticleRenderingSettings getParticleRenderingSettings0() {
