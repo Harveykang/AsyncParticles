@@ -10,7 +10,7 @@
     "MixinCustomParticleRenderType",
     "MixinLevel",
     "MixinLevelRenderer",
-    "MixinLevelRenderer_EarlyFrustum",
+    "MixinLevelRenderer_Late",
     "MixinMinecraft",
     "MixinMultiBufferSource$BufferSource",
     "MixinParticle",

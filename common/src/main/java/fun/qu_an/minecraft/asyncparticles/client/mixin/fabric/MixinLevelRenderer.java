@@ -7,7 +7,9 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.*;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(value = LevelRenderer.class, priority = 499)
