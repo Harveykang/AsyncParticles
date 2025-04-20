@@ -27,7 +27,7 @@ public class ExceptionTracker<T> {
 	public boolean addException(T obj, Throwable t) {
 		return exceptions
 			.computeIfAbsent(obj, k -> new ConcurrentHashMap<>())
-			.computeIfAbsent(Utils.getRootCause(t).getClass(), k -> new ExceptionQueue())
+			.computeIfAbsent(ExceptionUtil.getRootCause(t).getClass(), k -> new ExceptionQueue())
 			.push();
 	}
 

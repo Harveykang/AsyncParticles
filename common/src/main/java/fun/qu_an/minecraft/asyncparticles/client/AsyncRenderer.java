@@ -29,7 +29,6 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
@@ -188,7 +187,7 @@ public class AsyncRenderer {
 				continue;
 			}
 			float f3 = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f2;
-			if (!frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(f3))) {
+			if (SimplePropertiesConfig.isCullParticles() && !FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
 				continue;
 			}
 			if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
@@ -224,7 +223,7 @@ public class AsyncRenderer {
 		LOGGER.error("Error rendering particle", e);
 		Minecraft mc1 = Minecraft.getInstance();
 		if (mc1.level != null && mc1.player != null) {
-			throw Utils.toThrowDirectly(e);
+			throw ExceptionUtil.toThrowDirectly(e);
 		}
 		return null;
 	}
@@ -332,12 +331,15 @@ public class AsyncRenderer {
 		BTESSELATORS.values().forEach(BindingTesselator::clear);
 	}
 
-	private static void clearBTesselators() {
-		resetBTesselators();
-		BTESSELATORS.clear();
+	private static void closeBTesselators() {
+		for (Iterator<BindingTesselator> iterator = BTESSELATORS.values().iterator(); iterator.hasNext(); ) {
+			iterator.next().close();
+			iterator.remove();
+		}
 	}
 
 	public static @NotNull BufferBuilder beginBufferBuilder(ParticleRenderType particleRenderType, TextureManager textureManager) {
+		// assert main thread
 		return BTESSELATORS.computeIfAbsent(particleRenderType,
 			k -> computeBTesselator(k, textureManager)).begin();
 	}
@@ -429,7 +431,7 @@ public class AsyncRenderer {
 
 	public static void reset() {
 		waitForAsyncTasks();
-		clearBTesselators();
+		closeBTesselators();
 		clearSync();
 	}
 

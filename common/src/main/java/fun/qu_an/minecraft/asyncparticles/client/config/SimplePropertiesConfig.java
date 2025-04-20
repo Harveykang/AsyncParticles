@@ -1,7 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,7 +24,7 @@ public class SimplePropertiesConfig {
 	private static boolean tickAsync = true;
 	private static boolean collideWithCreateModContraptions = true;
 	private static boolean collideWithVSModShips = true;
-
+	private static boolean cullParticles = true;
 	private static boolean shouldSave;
 
 	public static void load() throws IOException {
@@ -65,6 +63,7 @@ public class SimplePropertiesConfig {
 		suppressCME = getBoolean(properties, "suppressCME", false);
 		renderAsync = getBoolean(properties, "renderAsync", true);
 		tickAsync = getBoolean(properties, "tickAsync", true);
+		cullParticles = getBoolean(properties, "cullParticles", true);
 
 		if (shouldSave) {
 			properties.store(Files.newOutputStream(CONFIG_FILE), null);
@@ -137,5 +136,9 @@ public class SimplePropertiesConfig {
 
 	public static boolean isTickAsync() {
 		return tickAsync;
+	}
+
+	public static boolean isCullParticles() {
+		return cullParticles;
 	}
 }

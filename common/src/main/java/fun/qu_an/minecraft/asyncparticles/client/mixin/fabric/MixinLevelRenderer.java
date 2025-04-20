@@ -55,7 +55,6 @@ public abstract class MixinLevelRenderer {
 									@Local(ordinal = 0) FrameGraphBuilder frameGraphBuilder,
 									@Local(ordinal = 0) float f,
 									@Local(ordinal = 0) FogParameters fogParameters,
-									@Local(ordinal = 0) PostChain postChain, // first one
 									@Share("asyncparticles$addParticlesPassOperation")
 									LocalRef<Operation<Void>> originalRef) {
 		// Fabulous graphics

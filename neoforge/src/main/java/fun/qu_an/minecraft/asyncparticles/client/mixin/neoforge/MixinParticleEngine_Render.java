@@ -6,9 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
+import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
@@ -57,7 +55,7 @@ public abstract class MixinParticleEngine_Render {
 				continue;
 			}
 			float f3 = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f2;
-			if (!frustum.isVisible(particle.getRenderBoundingBox(f3))) {
+			if (SimplePropertiesConfig.isCullParticles() && !FrustumUtil.isVisible(frustum, particle.getRenderBoundingBox(f3))) {
 				continue;
 			}
 			if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
@@ -92,7 +90,7 @@ public abstract class MixinParticleEngine_Render {
 				continue;
 			}
 			float f3 = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f2;
-			if (!frustum.isVisible(particle.getRenderBoundingBox(f3))) {
+			if (SimplePropertiesConfig.isCullParticles() && !FrustumUtil.isVisible(frustum, particle.getRenderBoundingBox(f3))) {
 				continue;
 			}
 			try {
