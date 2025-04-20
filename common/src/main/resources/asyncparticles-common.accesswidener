@@ -57,4 +57,3 @@ accessible field net/minecraft/client/particle/ParticleEngine RENDER_ORDER Ljava
 accessible field com/mojang/blaze3d/vertex/ByteBufferBuilder capacity I
 transitive-mutable field net/minecraft/client/particle/ParticleEngine particlesToAdd Ljava/util/Queue;
 accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;
-accessible method net/minecraft/world/entity/Entity collideWithShapes (Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/List;)Lnet/minecraft/world/phys/Vec3;

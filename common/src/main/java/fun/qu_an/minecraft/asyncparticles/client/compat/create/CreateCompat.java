@@ -4,6 +4,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.util.CollisionResult;
 import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -12,12 +13,6 @@ import org.jetbrains.annotations.Nullable;
 public class CreateCompat {
 	@ExpectPlatform
 	public static Vec3 collideMotionWithContraptions(ClientLevel level, Vec3 movement, AABB aabb) {
-		throw new AssertionError();
-	}
-
-	@ExpectPlatform
-	@Nullable
-	public static CollisionResult collideWithContraptions(ClientLevel level, Vec3 movement, AABB aabb) {
 		throw new AssertionError();
 	}
 
@@ -39,5 +34,10 @@ public class CreateCompat {
 	public static boolean isUnderContraption(ClientLevel level, Vec3 pos) {
 		AABB bounds = new AABB(pos.x - 0.5, pos.y - 2, pos.z - 0.5, pos.x + 0.5, pos.y - 1, pos.z + 0.5);
 		return isCollideWithContraption(level, new Vec3(0, Math.max(16, level.getMaxBuildHeight() - pos.y), 0), bounds);
+	}
+
+	@ExpectPlatform
+	public static Vec3 getContraptionDeltaMovement(Entity entity) {
+		throw new AssertionError();
 	}
 }

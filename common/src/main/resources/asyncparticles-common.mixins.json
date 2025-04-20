@@ -20,7 +20,6 @@
     "a_good_place.InvokerBlocksParticlesManager",
     "a_good_place.MixinBlocksParticlesManager",
     "fabric.MixinLevelRenderer",
-    "fabric.MixinParticleEngine_Late",
     "fabric.MixinParticleEngine_Render",
     "fabric.effective.MixinEffective",
     "fabric.effectual.MixinAllEffects",

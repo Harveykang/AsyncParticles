@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.physicsmod_create;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.physicsmod.PhysicsModCompat;
 import net.diebuddies.minecraft.weather.FastTextureSheetParticle;
 import net.diebuddies.minecraft.weather.RainParticle;
@@ -27,12 +28,9 @@ public abstract class MixinWeatherParticle extends FastTextureSheetParticle {
 		cancellable = true)
 	private void onTick(CallbackInfo ci) {
 		Vec3 movement = new Vec3(xd, yd, zd);
-		if (PhysicsModCompat.isCollideWithContraptions(level, movement, aabb)) {
-			if ((Object) this instanceof RainParticle) {
-				PhysicsModCompat.onContraptionCollision(level, movement, aabb);
-			}
-			remove();
+		if (PhysicsModCompat.collideWithContraptions(level, movement, aabb, (Object) this instanceof RainParticle)) {
 			ci.cancel();
+			remove();
 		}
 	}
 }

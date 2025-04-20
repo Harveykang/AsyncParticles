@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
-import com.google.common.collect.ImmutableList;
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
@@ -8,15 +7,13 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
-import fun.qu_an.minecraft.asyncparticles.client.util.BusyWaitEvictingQueue;
-import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
-import fun.qu_an.minecraft.asyncparticles.client.util.TrackedParticleCountsMap;
-import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
+import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.particles.ParticleGroup;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -64,6 +61,22 @@ public abstract class MixinParticleEngine {
 		random = new SingleThreadedRandomSource(ThreadLocalRandom.current().nextInt());
 	}
 
+	@Inject(method = "<init>", order = 9000, at = @At(value = "RETURN"))
+	public void initTail(CallbackInfo ci) {
+		List<ParticleRenderType> renderTypes = new ArrayList<>(RENDER_ORDER.size());
+		for (ParticleRenderType type : RENDER_ORDER) {
+			if (AsyncRenderer.getBTesselator(type, textureManager) != BindingTesselator.EMPTY) {
+				renderTypes.add(type);
+			}
+		}
+		for (ParticleRenderType type : RENDER_ORDER) {
+			if (AsyncRenderer.getBTesselator(type, textureManager) == BindingTesselator.EMPTY) {
+				renderTypes.add(type);
+			}
+		}
+		RENDER_ORDER = renderTypes;
+	}
+
 	@Shadow
 	@Final
 	private static Logger LOGGER;
@@ -79,6 +92,8 @@ public abstract class MixinParticleEngine {
 	@Shadow
 	@Final
 	private RandomSource random;
+
+	@Shadow @Final public TextureManager textureManager;
 
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
 	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {
@@ -169,10 +184,8 @@ public abstract class MixinParticleEngine {
 						if (!ModListHelper.IS_FORGE &&
 							k != ParticleRenderType.NO_RENDER &&
 							!RENDER_ORDER.contains(k)) {
-							RENDER_ORDER = ImmutableList.<ParticleRenderType>builder()
-								.addAll(RENDER_ORDER)
-								.add(k)
-								.build();
+							// holy shit, this is definitely a piece of shit
+							asyncParticles_Neo$addToOrderList(k);
 						}
 						return queue1;
 					});
@@ -180,6 +193,30 @@ public abstract class MixinParticleEngine {
 			});
 			particlesToAdd.clear();
 		}
+	}
+
+	@Unique
+	public void asyncParticles_Neo$addToOrderList(ParticleRenderType k) {
+		// must treat as ImmutableList. forge will use this to order treemap
+		List<ParticleRenderType> list = new ArrayList<>(RENDER_ORDER.size() + 1);
+		for (ParticleRenderType type : RENDER_ORDER) {
+			if (AsyncRenderer.getBTesselator(type, textureManager) != BindingTesselator.EMPTY) {
+				list.add(type);
+			}
+		}
+		BindingTesselator bTesselator = AsyncRenderer.getBTesselator(k, textureManager);
+		if (bTesselator != BindingTesselator.EMPTY) {
+			list.add(k);
+		}
+		for (ParticleRenderType type : RENDER_ORDER) {
+			if (AsyncRenderer.getBTesselator(type, textureManager) == BindingTesselator.EMPTY) {
+				list.add(type);
+			}
+		}
+		if (bTesselator == BindingTesselator.EMPTY) {
+			list.add(k);
+		}
+		RENDER_ORDER = list;
 	}
 
 	/**

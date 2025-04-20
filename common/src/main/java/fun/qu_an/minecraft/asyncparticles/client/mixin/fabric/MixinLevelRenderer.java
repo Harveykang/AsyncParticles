@@ -32,7 +32,8 @@ public abstract class MixinLevelRenderer {
 		AsyncRenderer.irisOpaque(f, camera, lightTexture, null);
 	}
 
-	@WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V"))
+	@WrapOperation(method = "renderLevel", at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V"))
 	private void redirectRenderParticles(ParticleEngine instance,
 										 LightTexture lightTexture,
 										 Camera camera,

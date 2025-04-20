@@ -291,8 +291,11 @@ public class AsyncRenderer {
 	}
 
 	public static @NotNull BufferBuilder beginBufferBuilder(ParticleRenderType particleRenderType, TextureManager textureManager) {
-		return BTESSELATORS.computeIfAbsent(particleRenderType,
-			k -> computeBTesselator(k, textureManager)).begin();
+		return getBTesselator(particleRenderType, textureManager).begin();
+	}
+
+	public static BindingTesselator getBTesselator(ParticleRenderType particleRenderType, TextureManager textureManager) {
+		return BTESSELATORS.computeIfAbsent(particleRenderType, k -> computeBTesselator(k, textureManager));
 	}
 
 	private static @NotNull BindingTesselator computeBTesselator(ParticleRenderType particleRenderType, TextureManager textureManager) {

@@ -7,6 +7,7 @@
   "client": [
     "MixinLevelRenderer",
     "MixinModelDataManager",
+    "MixinParticleEngine",
     "MixinParticleEngine_Render",
     "create.InvokerContraptionCollider",
     "create.MixinDepotBehaviour",
@@ -24,6 +25,7 @@
     "particlerain.MixinWeatherParticleSpawner",
     "particlerain_create.MixinWeatherParticleSpawner",
     "particular.MixinClientStuff",
+    "simple_weather.MixinRainParticle",
     "simple_weather.MixinSimpleWeather$NeoBus",
     "subtle_effects.MixinParticleEngine"
   ],

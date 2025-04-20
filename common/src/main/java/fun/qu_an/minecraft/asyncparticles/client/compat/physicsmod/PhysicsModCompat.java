@@ -10,17 +10,17 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 
 public class PhysicsModCompat {
-	public static void onContraptionCollision(ClientLevel level, Vec3 movement, AABB3D aabb) {
-		if (level.random.nextFloat() > 0.1) {
-			return;
-		}
+	public static boolean collideWithContraptions(ClientLevel level, Vec3 movement, AABB3D aabb, boolean rain) {
 		Vector3d min = aabb.getMin();
 		Vector3d max = aabb.getMax();
 		Vec3 clipMotion = CreateCompat.collideMotionWithContraptions(level,
 			movement,
-			new AABB(min.x, min.y, min.z, max.x, max.y, max.z));
+			new AABB(min.x - 0.1, min.y - 0.1, min.z - 0.1, max.x + 0.1, max.y + 0.1, max.z + 0.1));
 		if (clipMotion == null) {
-			return;
+			return false;
+		}
+		if (!rain || level.random.nextFloat() > 0.1) {
+			return true;
 		}
 		double centerX = min.x + aabb.getWidth() / 2;
 		double centerZ = min.z + aabb.getDepth() / 2;
@@ -34,14 +34,6 @@ public class PhysicsModCompat {
 			0,
 			0,
 			0);
-	}
-
-	public static boolean isCollideWithContraptions(ClientLevel level, Vec3 movement, AABB3D aabb) {
-		Vector3d min = aabb.getMin();
-		Vector3d max = aabb.getMax();
-		return CreateCompat.isCollideWithContraption(level,
-			movement,
-			new AABB(min.x, min.y, min.z, max.x, max.y, max.z),
-			false);
+		return true;
 	}
 }
