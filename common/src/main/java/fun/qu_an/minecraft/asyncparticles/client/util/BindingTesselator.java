@@ -17,6 +17,11 @@ public class BindingTesselator {
 		public void clear() {
 			// do nothing
 		}
+
+		@Override
+		public void close() {
+			// do nothing
+		}
 	};
 	@NotNull
 	private final VertexFormat.Mode mode;
