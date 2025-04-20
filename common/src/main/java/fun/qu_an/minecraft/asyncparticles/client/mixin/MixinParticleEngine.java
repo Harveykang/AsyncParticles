@@ -2,21 +2,21 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
 import com.google.common.collect.ImmutableList;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
-import fun.qu_an.minecraft.asyncparticles.client.util.BusyWaitEvictingQueue;
-import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
-import fun.qu_an.minecraft.asyncparticles.client.util.TrackedParticleCountsMap;
-import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
+import fun.qu_an.minecraft.asyncparticles.client.util.*;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.particles.ParticleGroup;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -64,9 +64,6 @@ public abstract class MixinParticleEngine {
 	}
 
 	@Shadow
-	public abstract void updateCount(ParticleGroup group, int count);
-
-	@Shadow
 	@Final
 	private static Logger LOGGER;
 
@@ -81,6 +78,8 @@ public abstract class MixinParticleEngine {
 	@Shadow
 	@Final
 	private RandomSource random;
+
+	@Shadow @Final public TextureManager textureManager;
 
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
 	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {
@@ -171,19 +170,39 @@ public abstract class MixinParticleEngine {
 						if (!ModListHelper.IS_FORGE &&
 							k != ParticleRenderType.NO_RENDER &&
 							!RENDER_ORDER.contains(k)) {
-							RENDER_ORDER = ImmutableList.<ParticleRenderType>builder()
-								.addAll(RENDER_ORDER)
-								.add(k)
-								.build();
+							// holy shit, this is definitely a giant of shit
+							asyncParticles_Neo$addToOrderList(k);
 						}
 						return queue1;
 					});
 				queue.add(p);
 			});
 			particlesToAdd.clear();
-			// FIXME: 实现线程安全的低锁开销队列，目前会因为一些粒子在tick时添加新的粒子导致并发访问
-			//  不会抛异常，因为遍历的时候不会检查为空性，无明显影响，但可能导致一些模组的粒子计数出现偏差
 		}
+	}
+
+	@Unique
+	private void asyncParticles_Neo$addToOrderList(ParticleRenderType k) {
+		// must treat as ImmutableList. forge will use this to order treemap
+		List<ParticleRenderType> list = new ArrayList<>(RENDER_ORDER.size() + 1);
+		for (ParticleRenderType type : RENDER_ORDER) {
+			if (AsyncRenderer.getVertexFormatPair(type, textureManager) != AsyncRenderer.EMPTY_FORMAT) {
+				list.add(type);
+			}
+		}
+		Pair<VertexFormat.Mode, VertexFormat> pair = AsyncRenderer.getVertexFormatPair(k, textureManager);
+		if (pair != AsyncRenderer.EMPTY_FORMAT) {
+			list.add(k);
+		}
+		for (ParticleRenderType type : RENDER_ORDER) {
+			if (AsyncRenderer.getVertexFormatPair(type, textureManager) == AsyncRenderer.EMPTY_FORMAT) {
+				list.add(type);
+			}
+		}
+		if (pair == AsyncRenderer.EMPTY_FORMAT) {
+			list.add(k);
+		}
+		RENDER_ORDER = list;
 	}
 
 	/**

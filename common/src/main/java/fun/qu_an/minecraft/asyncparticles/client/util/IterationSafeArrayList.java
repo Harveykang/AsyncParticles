@@ -18,6 +18,10 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 		super(c);
 	}
 
+	public IterationSafeArrayList(int i) {
+		super(i);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void removeElements(final int from, final int to) {

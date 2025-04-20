@@ -40,7 +40,7 @@ public class ParticleRainCompatImpl {
 				mc.player),
 			true);
 		if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
-			Vec3 spawnPos = hit.getLocation();
+			Vec3 spawnPos = hit.getLocation().add(hit.shipMotion);
 			FluidState fluidState = level.getFluidState(hit.getBlockPos());
 			if (config.doRippleParticles && fluidState.isSourceOfType(Fluids.WATER)) {
 				Particle particle = mc.particleEngine.createParticle(ParticleRainClient.RIPPLE,

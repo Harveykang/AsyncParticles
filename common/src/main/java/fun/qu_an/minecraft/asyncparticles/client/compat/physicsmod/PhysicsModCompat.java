@@ -39,7 +39,7 @@ public class PhysicsModCompat {
 				mc.player),
 			true);
 		if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
-			Vec3 spawnPos = hit.getLocation();
+			Vec3 spawnPos = hit.getLocation().add(hit.shipMotion);
 			FluidState fluidState = level.getFluidState(hit.getBlockPos());
 			if (fluidState.isEmpty()) {
 				mc.particleEngine.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);

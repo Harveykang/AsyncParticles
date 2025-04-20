@@ -19,6 +19,6 @@ public class MixinWeatherParticleSpawner {
 										   double xSpeed,
 										   double ySpeed,
 										   double zSpeed) {
-		return !VSClientUtils.isUnderHeightMapIncludeShips(instance, x, y, z);
+		return !VSClientUtils.isUnderShipHeightMap(instance, x, y, z);
 	}
 }

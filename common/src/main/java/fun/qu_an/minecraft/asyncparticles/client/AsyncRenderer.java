@@ -389,10 +389,10 @@ public class AsyncRenderer {
 	/* BufferBuilder */
 
 	private static final Map<ParticleRenderType, Pair<VertexFormat.Mode, VertexFormat>> FORMATS = new IdentityHashMap<>();
-	private static final Pair<VertexFormat.Mode, VertexFormat> EMPTY_FORMAT = Pair.of(null, null);
+	public static final Pair<VertexFormat.Mode, VertexFormat> EMPTY_FORMAT = Pair.of(null, null);
 
 	public static BufferBuilder beginBufferBuilder(ParticleRenderType particleRenderType, TextureManager textureManager) {
-		Pair<VertexFormat.Mode, VertexFormat> pair = FORMATS.computeIfAbsent(particleRenderType, k -> computeVertexFormatPair(k, textureManager));
+		Pair<VertexFormat.Mode, VertexFormat> pair = getVertexFormatPair(particleRenderType, textureManager);
 		if (pair == EMPTY_FORMAT) {
 			return FakeBufferBuilder.INSTANCE;
 		}
@@ -403,6 +403,10 @@ public class AsyncRenderer {
 		}
 		builder.begin(pair.first(), pair.second());
 		return builder;
+	}
+
+	public static @NotNull Pair<VertexFormat.Mode, VertexFormat> getVertexFormatPair(ParticleRenderType particleRenderType, TextureManager textureManager) {
+		return FORMATS.computeIfAbsent(particleRenderType, k -> computeVertexFormatPair(k, textureManager));
 	}
 
 	private static @NotNull Pair<VertexFormat.Mode, VertexFormat> computeVertexFormatPair(ParticleRenderType k, TextureManager textureManager) {

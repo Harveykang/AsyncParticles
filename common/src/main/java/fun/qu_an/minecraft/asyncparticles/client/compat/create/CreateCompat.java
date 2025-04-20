@@ -331,8 +331,16 @@ public class CreateCompat {
 			}
 		}
 		Vec3 clipped = rotationMatrix.transpose().transform(clippedLocal);
-		return clipped.add(contactPointMotion.scale(3));
-//			.add(contraptionMotion.scale(2));
+		double x = signum(contactPointMotion.x) != signum(originalMotion.x) ||
+				   abs(clipped.x) < abs(contactPointMotion.x) ?
+			contactPointMotion.x * 3 : contactPointMotion.x;
+		double y = signum(contactPointMotion.y) != signum(originalMotion.y) ||
+				   abs(clipped.y) < abs(contactPointMotion.y) ?
+			contactPointMotion.y * 3 : contactPointMotion.y;
+		double z = signum(contactPointMotion.z) != signum(originalMotion.z) ||
+				   abs(clipped.z) < abs(contactPointMotion.z) ?
+			contactPointMotion.z * 3 : contactPointMotion.z;
+		return clipped.add(x, y, z);
 	}
 
 	private static double getCollided(double relative, double halfXsum, double mx) {

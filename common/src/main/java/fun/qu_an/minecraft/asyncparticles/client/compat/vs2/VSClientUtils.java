@@ -34,6 +34,7 @@ import java.lang.Math;
 import java.util.List;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.fma;
 import static net.minecraft.util.Mth.floor;
 import static org.valkyrienskies.core.util.AABBdUtilKt.extend;
 import static org.valkyrienskies.mod.common.util.VectorConversionsMCKt.toJOML;
@@ -55,46 +56,6 @@ public class VSClientUtils {
 
 	public static Iterable<ClientShip> getShipsInAABB(ClientLevel world, AABBd aabb) {
 		return VSGameUtilsKt.getShipObjectWorld(world).getLoadedShips().getIntersecting(aabb.correctBounds());
-	}
-
-	/**
-	 * include matrices in hit result.
-	 */
-	public static BlockHitResult clipIncludeShips(ClientLevel level, ClipContext ctx, boolean shouldTransformHitPos) {
-		var vanillaHit = InvokerRaycastUtils.invoker_vanillaClip(level, ctx);
-		var shipObjectWorld = VSGameUtilsKt.getShipObjectWorld(level);
-		var closestHit = vanillaHit;
-		var closestHitPos = vanillaHit.getLocation();
-		var closestHitDist = closestHitPos.distanceToSqr(ctx.getFrom());
-		AABBd clipAABB = new AABBd(toJOML(ctx.getFrom()), toJOML(ctx.getTo())).correctBounds();
-		for (var ship : shipObjectWorld.getLoadedShips().getIntersecting(clipAABB)) {
-			Matrix4dc worldToShip;
-			Matrix4dc shipToWorld;
-			if (ship instanceof ShipObjectClient soc) {
-				worldToShip = soc.getRenderTransform().getWorldToShipMatrix();
-				shipToWorld = soc.getRenderTransform().getShipToWorldMatrix();
-			} else {
-				worldToShip = ship.getWorldToShip();
-				shipToWorld = ship.getShipToWorld();
-			}
-
-			var shipStart = toMinecraft(worldToShip.transformPosition(toJOML(ctx.getFrom())));
-			var shipEnd = toMinecraft(worldToShip.transformPosition(toJOML(ctx.getTo())));
-
-			var shipHit = InvokerRaycastUtils.invoker_clip(level, ctx, shipStart, shipEnd);
-			var shipHitPos = toMinecraft(shipToWorld.transformPosition(toJOML(shipHit.getLocation())));
-			var shipHitDist = shipHitPos.distanceToSqr(ctx.getFrom());
-
-			if (shipHitDist < closestHitDist && shipHit.getType() != HitResult.Type.MISS) {
-				closestHit = ShipHitResult.of(shipHit, worldToShip, shipToWorld);
-				closestHitPos = shipHitPos;
-				closestHitDist = shipHitDist;
-			}
-		}
-		if (shouldTransformHitPos) {
-			closestHit.location = closestHitPos;
-		}
-		return closestHit;
 	}
 
 	private static final EntityPolygonCollider collider = ValkyrienSkiesMod.vsCore.getEntityPolygonCollider();
@@ -236,15 +197,13 @@ public class VSClientUtils {
 			return toMinecraft(newMovement);
 		} else {
 			ClientShip ship = VSGameUtilsKt.getShipObjectWorld(world).getLoadedShips().getById(shipCollidingWith);
-			Matrix4dc prevMatrix = ship.getPrevTickShipTransform().getWorldToShipMatrix();
-			Matrix4dc matrix = ship.getWorldToShip();
-			if (areAffineMatricesPositionClose(prevMatrix, matrix, 0.001f)) {
-				return toMinecraft(newMovement);
+			if (ship == null) {
+				return null;
 			}
-			Vector3d center = toJOML(entityBoundingBox.getCenter());
-			Vector3d dragged = matrix.transformPosition(center, new Vector3d()).sub(prevMatrix.transformPosition(center));
-			ship.getShipToWorld().transformDirection(dragged);
-			return new Vec3(newMovement.x() + dragged.x, newMovement.y() + dragged.y, newMovement.z() + dragged.z);
+			Vector3dc velocity = ship.getVelocity();
+			return new Vec3(fma(0.05, velocity.x(), newMovement.x()),
+				fma(0.05, velocity.y(), newMovement.y()),
+				fma(0.05, velocity.z(), newMovement.z()));
 		}
 	}
 
@@ -288,25 +247,21 @@ public class VSClientUtils {
 		double closestHitDist = Double.MAX_VALUE;
 		AABBd clipAABB = new AABBd(toJOML(ctx.getFrom()), toJOML(ctx.getTo())).correctBounds();
 		for (var ship : shipObjectWorld.getLoadedShips().getIntersecting(clipAABB)) {
-			Matrix4dc worldToShip;
-			Matrix4dc shipToWorld;
-			if (ship instanceof ShipObjectClient soc) {
-				worldToShip = soc.getRenderTransform().getWorldToShipMatrix();
-				shipToWorld = soc.getRenderTransform().getShipToWorldMatrix();
-			} else {
-				worldToShip = ship.getWorldToShip();
-				shipToWorld = ship.getShipToWorld();
-			}
-
+			Matrix4dc worldToShip = ship.getWorldToShip();
+			Matrix4dc shipToWorld = ship.getShipToWorld();
 			var shipStart = toMinecraft(worldToShip.transformPosition(toJOML(ctx.getFrom())));
 			var shipEnd = toMinecraft(worldToShip.transformPosition(toJOML(ctx.getTo())));
 
 			var shipHit = InvokerRaycastUtils.invoker_clip(level, ctx, shipStart, shipEnd);
-			var shipHitPos = toMinecraft(shipToWorld.transformPosition(toJOML(shipHit.getLocation())));
+			Vector3d worldPos = shipToWorld.transformPosition(toJOML(shipHit.getLocation()));
+			var shipHitPos = toMinecraft(worldPos);
+
 			var shipHitDist = shipHitPos.distanceToSqr(ctx.getFrom());
 
 			if (shipHitDist < closestHitDist && shipHit.getType() != HitResult.Type.MISS) {
-				closestHit = ShipHitResult.of(shipHit, worldToShip, shipToWorld);
+				Vector3dc velocity = ship.getVelocity();
+				closestHit = ShipHitResult.of(shipHit, worldToShip, shipToWorld,
+					new Vec3(velocity.x() * 0.05, velocity.y() * 0.05, velocity.z() * 0.05));
 				closestHitPos = shipHitPos;
 				closestHitDist = shipHitDist;
 			}
