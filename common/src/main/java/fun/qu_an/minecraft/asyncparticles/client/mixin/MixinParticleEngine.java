@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
-import com.google.common.collect.ImmutableList;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.*;
@@ -84,7 +83,7 @@ public abstract class MixinParticleEngine {
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
 	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {
 		if (SimplePropertiesConfig.isTickAsync()){
-			throw Utils.toThrowDirectly(t);
+			throw ExceptionUtil.toThrowDirectly(t);
 		}
 	}
 

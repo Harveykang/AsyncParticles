@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -201,7 +202,7 @@ public class AsyncRenderer {
 		LOGGER.error("Error rendering particle", e);
 		Minecraft mc1 = Minecraft.getInstance();
 		if (mc1.level != null && mc1.player != null) {
-			throw Utils.toThrowDirectly(e);
+			throw ExceptionUtil.toThrowDirectly(e);
 		}
 		return null;
 	}
@@ -365,7 +366,7 @@ public class AsyncRenderer {
 	}
 
 	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable t) {
-		ReportedException re = Utils.getReportedException(t);
+		ReportedException re = ExceptionUtil.getReportedException(t);
 		if (re != null) {
 			return re;
 		}
@@ -388,7 +389,7 @@ public class AsyncRenderer {
 
 	/* BufferBuilder */
 
-	private static final Map<ParticleRenderType, Pair<VertexFormat.Mode, VertexFormat>> FORMATS = new IdentityHashMap<>();
+	private static final Map<ParticleRenderType, Pair<VertexFormat.Mode, VertexFormat>> FORMATS = new ConcurrentHashMap<>();
 	public static final Pair<VertexFormat.Mode, VertexFormat> EMPTY_FORMAT = Pair.of(null, null);
 
 	public static BufferBuilder beginBufferBuilder(ParticleRenderType particleRenderType, TextureManager textureManager) {
@@ -397,7 +398,7 @@ public class AsyncRenderer {
 			return FakeBufferBuilder.INSTANCE;
 		}
 		BufferBuilder builder = BUFFER_BUILDERS.computeIfAbsent(particleRenderType,
-			k -> new BufferBuilder(RenderType.TRANSIENT_BUFFER_SIZE)); // minimal size
+			k -> new BufferBuilder(256)); // minimal size
 		if (builder.building()) {
 			return builder;
 		}
@@ -431,7 +432,7 @@ public class AsyncRenderer {
 		if (exception != null) {
 			// this should never happen...
 			// custom particles should not throw any exception in end()...
-			throw Utils.toThrowDirectly(exception);
+			throw ExceptionUtil.toThrowDirectly(exception);
 		}
 		return EMPTY_FORMAT;
 	}

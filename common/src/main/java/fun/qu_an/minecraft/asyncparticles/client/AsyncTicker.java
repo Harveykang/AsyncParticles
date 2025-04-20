@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static fun.qu_an.minecraft.asyncparticles.client.util.Utils.toThrowDirectly;
+import static fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil.toThrowDirectly;
 
 // TODO: 整理这一坨
 public class AsyncTicker {
@@ -298,7 +298,7 @@ public class AsyncTicker {
 		if (!(e instanceof Exception)) {
 			return false;
 		}
-		return Utils.getRootCause(e) instanceof MissingPaletteEntryException
+		return ExceptionUtil.getRootCause(e) instanceof MissingPaletteEntryException
 			   || e instanceof NullPointerException
 			   || e instanceof IndexOutOfBoundsException
 			   || (SimplePropertiesConfig.suppressCME() && e instanceof ConcurrentModificationException);
@@ -323,7 +323,7 @@ public class AsyncTicker {
 	}
 
 	public static ReportedException constructCrashReport(Particle particle, Throwable t) {
-		ReportedException re = Utils.getReportedException(t);
+		ReportedException re = ExceptionUtil.getReportedException(t);
 		if (re != null) {
 			return re;
 		}

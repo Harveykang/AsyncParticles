@@ -118,9 +118,9 @@ public class VSClientUtils {
 	 * @see EntityShipCollisionUtils#getShipPolygonsCollidingWithEntity
 	 */
 	public static boolean hasShipPolygonsCollidingWithEntity(Entity entity,
-													   Vec3 movement,
-													   AABB entityBoundingBox,
-													   ClientLevel world) {
+															 Vec3 movement,
+															 AABB entityBoundingBox,
+															 ClientLevel world) {
 		AABB entityBoxWithMovement = entityBoundingBox.expandTowards(movement);
 		AABBdc entityBoundingBoxExtended = extend(toJOML(entityBoundingBox), toJOML(movement));
 
@@ -201,9 +201,9 @@ public class VSClientUtils {
 				return null;
 			}
 			Vector3dc velocity = ship.getVelocity();
-			return new Vec3(fma(0.05, velocity.x(), newMovement.x()),
-				fma(0.05, velocity.y(), newMovement.y()),
-				fma(0.05, velocity.z(), newMovement.z()));
+			return new Vec3(0.05 * velocity.x() + newMovement.x(),
+				0.05 * velocity.y() + newMovement.y(),
+				0.05 * velocity.z() + newMovement.z());
 		}
 	}
 
