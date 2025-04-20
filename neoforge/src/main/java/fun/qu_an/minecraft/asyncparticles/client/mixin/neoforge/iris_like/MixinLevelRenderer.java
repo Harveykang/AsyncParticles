@@ -65,15 +65,4 @@ public abstract class MixinLevelRenderer {
 			minecraft.particleEngine.render(camera, f, bufferSource, frustum, p -> !p.translucent());
 		}
 	}
-
-	@ModifyArg(method = "lambda$addParticlesPass$5", remap = false, index = 4,
-		at = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
-	private Predicate<ParticleRenderType> shouldRenderParticles(Predicate<ParticleRenderType> predicate) {
-		if (ModListHelper.IRIS_LIKE_LOADED &&
-			AsyncRenderer.isMixedParticleRenderingSetting()) {
-			return ParticleRenderType::translucent;
-		} else {
-			return p -> true;
-		}
-	}
 }

@@ -34,10 +34,10 @@ public abstract class MixinLevelRenderer {
 										  LocalRef<Operation<Void>> originalRef) {
 //		this.asyncparticles$addParticlesPassOperation = original;
 		// we'll call the original method later
-		if (!SimplePropertiesConfig.isRenderAsync()) {
-			original.call(instance, frameGraphBuilder, camera, partialTick, fog);
-		} else {
+		if (SimplePropertiesConfig.isRenderAsync()) {
 			originalRef.set(original);
+		} else {
+			original.call(instance, frameGraphBuilder, camera, partialTick, fog);
 		}
 	}
 
@@ -84,9 +84,15 @@ public abstract class MixinLevelRenderer {
 		}
 	}
 
+	@Inject(method = "method_62213", at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V"))
+	private void onRenderParticles1(CallbackInfo ci) {
+		RenderSystem.enableDepthTest(); // This fixes the issue with particles not being rendered properly
+	}
+
 	@Inject(method = "method_62213", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
 		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V"))
-	private void onRenderParticles(CallbackInfo ci) {
+	private void onRenderParticles2(CallbackInfo ci) {
 		// reset blend func and culling state
 		// other mods may change them...
 		RenderSystem.defaultBlendFunc();

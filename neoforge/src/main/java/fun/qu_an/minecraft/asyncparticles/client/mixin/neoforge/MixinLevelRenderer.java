@@ -8,6 +8,8 @@ import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import com.mojang.blaze3d.systems.RenderSystem;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -19,6 +21,7 @@ import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -108,10 +111,21 @@ public abstract class MixinLevelRenderer {
 	@Inject(method = "lambda$addParticlesPass$5", remap = false,
 		at = @At(value = "INVOKE", shift = At.Shift.AFTER, remap = false,
 			target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
-	private void onRenderParticles(CallbackInfo ci) {
+	private void onRenderParticles1(CallbackInfo ci) {
 		// reset blend func and culling state
 		// other mods may change them...
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.enableCull();
+	}
+
+	@ModifyArg(method = "lambda$addParticlesPass$5", remap = false, index = 4,
+		at = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
+	private Predicate<ParticleRenderType> shouldRenderParticles(Predicate<ParticleRenderType> predicate) {
+		if (ModListHelper.IRIS_LIKE_LOADED &&
+			AsyncRenderer.isMixedParticleRenderingSetting()) {
+			return ParticleRenderType::translucent;
+		} else {
+			return p -> true;
+		}
 	}
 }

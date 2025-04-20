@@ -72,6 +72,5 @@ public abstract class MixinLevelRenderer {
 		} else {
 			((PhasedParticleEngine) minecraft.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
-		RenderSystem.enableDepthTest(); // This fixes the issue with particles not being rendered properly
 	}
 }
