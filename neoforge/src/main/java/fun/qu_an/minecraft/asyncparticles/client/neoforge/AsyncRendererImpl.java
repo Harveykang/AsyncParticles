@@ -29,9 +29,6 @@ public class AsyncRendererImpl {
 		profiler.pop();
 
 		ParticleEngine particleEngine = mc.particleEngine;
-//		if (ModListHelper.FABRIC_IRIS_LOADED) {
-//			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
-//		}
 		particleEngine.render(lightTexture, camera, f, null, predicate);
 	}
 
@@ -50,9 +47,6 @@ public class AsyncRendererImpl {
 			RenderStateShard.PARTICLES_TARGET.setupRenderState();
 		}
 		ParticleEngine particleEngine = mc.particleEngine;
-//		if (ModListHelper.FABRIC_IRIS_LOADED) {
-//			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
-//		}
 		particleEngine.render(lightTexture, camera, f, null, predicate);
 		// reset blend func and culling state
 		// other mods may change them...

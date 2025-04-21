@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.neoforge;
 
 import com.leclowndu93150.particlerain.ParticleRainConfig;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -47,6 +48,11 @@ public class ParticleRainCompatImpl {
 //	}
 
 	public static void onCreateCollision(@NotNull ClientLevel level, Vec3 originalMotion, @NotNull Vec3 clipMotion, @NotNull AABB aabb) {
+		if (ModListHelper.FABRIC_PARTICLERAIN_LOADED) {
+			fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.fabric.ParticleRainCompatImpl
+				.onCreateCollision(level, originalMotion, clipMotion, aabb);
+			return;
+		}
 		if (!ParticleRainConfig.doSplashParticles) {
 			return;
 		}

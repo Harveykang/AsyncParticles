@@ -8,6 +8,7 @@ public class FakeBufferBuilder extends BufferBuilder {
 	public static final FakeBufferBuilder INSTANCE = new FakeBufferBuilder();
 	private FakeBufferBuilder() {
 		super(null, VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+		building = false;
 	}
 
 	@Override
