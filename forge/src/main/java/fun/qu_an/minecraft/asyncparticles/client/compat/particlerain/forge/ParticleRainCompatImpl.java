@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.forge;
 
 import com.leclowndu93150.particlerain.ParticleRegistry;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.RippleParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
@@ -24,6 +25,11 @@ import static com.leclowndu93150.particlerain.ParticleRainClient.config;
 @SuppressWarnings("unused")
 public class ParticleRainCompatImpl {
 	public static void onShipCollision(ClientLevel level, Vec3 location, Vec3 movement, AABB aabb) {
+		if (ModListHelper.FABRIC_PARTICLERAIN_LOADED) {
+			fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.fabric.ParticleRainCompatImpl
+				.onShipCollision(level, location, movement, aabb);
+			return;
+		}
 		if (!config.doRippleParticles && !config.doSplashParticles) {
 			return;
 		}
@@ -59,6 +65,11 @@ public class ParticleRainCompatImpl {
 	}
 
 	public static void onCreateCollision(@NotNull ClientLevel level, Vec3 originalMotion, @NotNull Vec3 clipMotion, @NotNull AABB aabb) {
+		if (ModListHelper.FABRIC_PARTICLERAIN_LOADED) {
+			fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.fabric.ParticleRainCompatImpl
+				.onCreateCollision(level, originalMotion, clipMotion, aabb);
+			return;
+		}
 		if (!config.doSplashParticles) {
 			return;
 		}

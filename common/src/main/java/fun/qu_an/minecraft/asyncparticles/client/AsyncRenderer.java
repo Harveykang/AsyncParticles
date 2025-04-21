@@ -133,7 +133,6 @@ public class AsyncRenderer {
 		if (ModListHelper.IRIS_LIKE_LOADED) {
 			mixedParticleRenderingSetting = IrisApi.getInstance().isShaderPackInUse() &&
 											getRenderingSettings() == ParticleRenderingSettings.MIXED;
-//			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
 		profiler.push("render_async");
 		TextureManager textureManager = particleEngine.textureManager;

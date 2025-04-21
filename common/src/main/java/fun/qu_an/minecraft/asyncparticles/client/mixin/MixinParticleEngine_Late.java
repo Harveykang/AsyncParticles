@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
+import com.google.common.collect.ImmutableList;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -21,7 +22,9 @@ public abstract class MixinParticleEngine_Late {
 
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	public void initTail(CallbackInfo ci) {
-		List<ParticleRenderType> renderTypes = new ArrayList<>(RENDER_ORDER.size());
+		// make custom types render after non-customs
+		// Remove duplicated render types, (e.g. Hex Casting mod's bug)
+		Set<ParticleRenderType> renderTypes = new LinkedHashSet<>((int) (RENDER_ORDER.size() * 1.34 + 1));
 		for (ParticleRenderType type : RENDER_ORDER) {
 			if (AsyncRenderer.getVertexFormatPair(type, textureManager) != AsyncRenderer.EMPTY_FORMAT) {
 				renderTypes.add(type);
@@ -32,6 +35,6 @@ public abstract class MixinParticleEngine_Late {
 				renderTypes.add(type);
 			}
 		}
-		RENDER_ORDER = renderTypes;
+		RENDER_ORDER = ImmutableList.copyOf(renderTypes);
 	}
 }
