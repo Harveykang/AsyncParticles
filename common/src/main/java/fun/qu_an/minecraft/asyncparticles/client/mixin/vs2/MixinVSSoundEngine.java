@@ -19,7 +19,7 @@ public class MixinVSSoundEngine {
 		name = "redirectGet"
 	)
 	@Inject(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/ChannelAccess$ChannelHandle;execute(Ljava/util/function/Consumer;)V"), cancellable = true)
-	private void redirectGet1(Map<?, ?> instance, Object obj, Operation<Object> get, CallbackInfoReturnable<Object> cir, @Local(name = "handle") ChannelAccess.ChannelHandle handle) {
+	private void redirectGet1(CallbackInfoReturnable<Object> cir, @Local(name = "handle") ChannelAccess.ChannelHandle handle) {
 		if (handle == null) {
 			cir.setReturnValue(null);
 		}

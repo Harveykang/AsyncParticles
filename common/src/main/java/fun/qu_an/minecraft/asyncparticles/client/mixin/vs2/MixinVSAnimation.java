@@ -20,7 +20,7 @@ public class MixinVSAnimation {
 	@Inject(method = "@MixinSquared:Handler",
 		at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"),
 		cancellable = true) // two injections with the same mixin
-	private void afterAnimatedTick1(int posX, int posY, int posZ, CallbackInfo ignored, CallbackInfo ci) {
+	private void afterAnimatedTick1(CallbackInfo ci) {
 		if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneBlockAnimateTick()) {
 			ci.cancel();
 		}
