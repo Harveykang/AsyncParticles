@@ -7,7 +7,7 @@ import net.minecraft.world.level.LevelAccessor;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
-public class Create5Util {
+class Create5Util {
 	static Map<Integer, WeakReference<AbstractContraptionEntity>> loadedContraptions(LevelAccessor level) {
 		return ContraptionHandler.loadedContraptions.get(level);
 	}

@@ -113,9 +113,9 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				}
 				yield switch (split[1]) {
 					case "particlerain_vs" ->
-						ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_VS_LOADED;
+						ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.VS_LOADED;
 					case "particlerain_create" ->
-						ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_CREATE_LOADED;
+						ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.CREATE_LOADED;
 					case "particlerain" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED;
 					case "create_5" -> ModListHelper.FABRIC_CREATE_LOADED && ModListHelper.IS_LEGACY_CREATE;
 					case "create_6" -> ModListHelper.FABRIC_CREATE_LOADED && !ModListHelper.IS_LEGACY_CREATE;
