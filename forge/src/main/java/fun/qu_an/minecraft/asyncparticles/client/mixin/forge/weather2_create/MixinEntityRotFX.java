@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import extendedrenderer.particle.entity.EntityRotFX;
 import extendedrenderer.particle.entity.ParticleTexExtraRender;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
-import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.world.entity.Entity;
@@ -32,7 +32,7 @@ public abstract class MixinEntityRotFX extends TextureSheetParticle {
 
 	@Inject(method = "spawnAsWeatherEffect", remap = false, at = @At(value = "HEAD"), cancellable = true)
 	private void spawnAsWeatherEffect(CallbackInfo ci) {
-		if (CreateCompat.isUnderContraption(level, x, y, z)) {
+		if (!CreateCompat.canSpawnWeatherParticle(level, x, y, z)) {
 			remove();
 			ci.cancel();
 		}
@@ -48,7 +48,7 @@ public abstract class MixinEntityRotFX extends TextureSheetParticle {
 			return original.call(entity, vec3, aABB, level, list);
 		}
 		// we do it in the other thread, so we don't need to worry about costly collision checks
-		Vec3 mov = CreateCompat.collideMotionWithContraptions(
+		Vec3 mov = CreateUtil.collideMotionWithContraptions(
 			(ClientLevel) level,
 			new Vec3(xd, yd, zd),
 			getBoundingBox()

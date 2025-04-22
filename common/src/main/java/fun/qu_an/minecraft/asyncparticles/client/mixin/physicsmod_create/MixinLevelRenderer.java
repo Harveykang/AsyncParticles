@@ -26,7 +26,7 @@ public class MixinLevelRenderer {
 	@Group(name = "asyncparticles:physicsmod_create$shouldTickRain", min = 3, max = 6)
 	@WrapWithCondition(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;addAlwaysVisibleParticle(Lnet/minecraft/core/particles/ParticleOptions;ZDDDDDD)V"))
 	private boolean onAddAlwaysVisibleParticle(ClientLevel instance, ParticleOptions particleData, boolean ignoreRange, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-		return !CreateCompat.isUnderContraption(instance, x, y, z);
+		return CreateCompat.canSpawnWeatherParticle(instance, x, y, z);
 	}
 
 	// Forge
@@ -46,7 +46,7 @@ public class MixinLevelRenderer {
 																			double vx,
 																			double vy,
 																			double vz) {
-		if (!CreateCompat.isUnderContraption(level, x, y, z)) {
+		if (CreateCompat.canSpawnWeatherParticle(level, x, y, z)) {
 			return instance.createParticle(t, level, x, y, z, vx, vy, vz);
 		} else {
 			return null;

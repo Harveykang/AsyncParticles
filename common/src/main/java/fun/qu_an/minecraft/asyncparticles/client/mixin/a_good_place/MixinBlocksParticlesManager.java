@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MixinBlocksParticlesManager {
 	@Mutable
 	@Shadow(remap = false) @Final protected static Map<BlockPos, PlacingBlockParticle> PARTICLES;
-	// TODO: 移除粒子时清理对应坐标
 	@Inject(method = "<clinit>", at = @At("RETURN"))
 	private static void onInit(CallbackInfo ci) {
 		PARTICLES = new ConcurrentHashMap<>();

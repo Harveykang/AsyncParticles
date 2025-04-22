@@ -61,6 +61,7 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 
 	@TargetHandler(
 		name = "checkShipCoords",
+		// FIXME: This is unstable
 		mixin = "org.valkyrienskies.mod.mixin.feature.transform_particles.MixinParticle"
 	)
 	@Inject(method = "@MixinSquared:Handler", at = @At("TAIL"))

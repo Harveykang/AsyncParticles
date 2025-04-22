@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.forge;
 
 import com.leclowndu93150.particlerain.ParticleRegistry;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.RippleParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
@@ -76,7 +76,7 @@ public class ParticleRainCompatImpl {
 		Vec3 center = aabb.getCenter();
 		AABB aabb1 = new AABB(center.x, aabb.minY - 1, center.z, center.x, aabb.minY, center.z);
 		Vec3 motion1 = originalMotion.scale(2);
-		if (CreateCompat.isCollideWithContraption(level, motion1, aabb1, false)) {
+		if (CreateUtil.isCollideWithContraption(level, motion1, aabb1, false)) {
 			Vec3 startPos = new Vec3(center.x, aabb.minY, center.z);
 			Vec3 spawnPos = startPos.add(clipMotion);
 			Minecraft.getInstance().particleEngine

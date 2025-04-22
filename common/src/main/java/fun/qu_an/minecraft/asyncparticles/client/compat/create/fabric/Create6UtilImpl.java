@@ -7,7 +7,7 @@ import java.lang.ref.WeakReference;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public class Create6CompatImpl {
+public class Create6UtilImpl {
 	public static Map<Integer, WeakReference<AbstractContraptionEntity>> loadedContraptions(LevelAccessor level) {
 		throw new UnsupportedOperationException("Create 6 is not supported");
 	}

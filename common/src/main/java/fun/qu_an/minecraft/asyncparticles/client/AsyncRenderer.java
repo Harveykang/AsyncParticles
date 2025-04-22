@@ -257,9 +257,6 @@ public class AsyncRenderer {
 		ParticleEngine particleEngine = mc.particleEngine;
 		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
-
-//		poseStack1.last().pose().set(pose);
-//		RenderSystem.applyModelViewMatrix();
 	}
 
 	public static void irisTranslucent(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {

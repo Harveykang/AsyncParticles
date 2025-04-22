@@ -17,7 +17,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-// TODO: 分为两个 Mixin
 @Mixin(value = ParticleEngine.class, priority = 9500) // after common:MixinParticleEngine_Late
 public class MixinParticleEngine_Late {
 	@Mutable

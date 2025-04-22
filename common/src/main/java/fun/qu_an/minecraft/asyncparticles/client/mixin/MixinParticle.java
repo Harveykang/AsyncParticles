@@ -32,7 +32,6 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Shadow
 	@Final
 	public ClientLevel level;
-	// TODO: 换 byte?
 	@Unique
 	private boolean asyncParticles$ticked = true;
 	@Unique

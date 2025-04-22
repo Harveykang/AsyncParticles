@@ -31,7 +31,6 @@ public class MixinMinecraft {
 	@Inject(method = "setLevel", at = @At(value = "FIELD", ordinal = 0,
 		target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;"))
 	private void onSetLevel(CallbackInfo ci) {
-		// TODO: 这玩意到底有没有用？？
 		AsyncTicker.reset();
 		AsyncRenderer.reset();
 	}

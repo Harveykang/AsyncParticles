@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import extendedrenderer.particle.entity.EntityRotFX;
 import extendedrenderer.particle.entity.ParticleTexExtraRender;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
+import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.world.entity.Entity;
@@ -33,7 +34,7 @@ public abstract class MixinEntityRotFX extends TextureSheetParticle {
 
 	@Inject(method = "spawnAsWeatherEffect", remap = false, at = @At(value = "HEAD"), cancellable = true)
 	private void spawnAsWeatherEffect(CallbackInfo ci) {
-		if (VSClientUtils.isUnderShipHeightMap(level, x, y, z)) {
+		if (!VSCompat.canCreateWeatherParticle(level, x, y, z)) {
 			remove();
 			ci.cancel();
 		}

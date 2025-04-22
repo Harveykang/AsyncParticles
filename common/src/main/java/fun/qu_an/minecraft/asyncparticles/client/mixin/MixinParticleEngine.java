@@ -58,7 +58,7 @@ public abstract class MixinParticleEngine {
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	public void init(CallbackInfo ci) {
 		trackedParticleCounts = new TrackedParticleCountsMap();
-		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, AsyncTicker::onEvicted);
+		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 		random = new SingleThreadedRandomSource(ThreadLocalRandom.current().nextInt());
 	}
 
@@ -160,7 +160,7 @@ public abstract class MixinParticleEngine {
 //						EvictingQueue<Particle> queue1 = EvictingQueue.create(SimplePropertiesConfig.limit);
 						Queue<Particle> queue1 = new IterationSafeEvictingQueue<>(
 							16,
-							SimplePropertiesConfig.limit,
+							SimplePropertiesConfig.getLimit(),
 							AsyncTicker::onEvicted);
 						// fix the first added particle not ticked.
 						AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue1));
@@ -289,8 +289,25 @@ public abstract class MixinParticleEngine {
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void redirectClearParticles(CallbackInfo ci) {
 		particlesToAdd.forEach(AsyncTicker::onEvicted);
-		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, AsyncTicker::onEvicted);
+		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 		particles.values().forEach(queue -> queue.forEach(AsyncTicker::onEvicted));
 		AsyncTicker.onParticleEngineClear();
 	}
+
+//	@Inject(method = "createParticle", at = @At("HEAD"), cancellable = true)
+//	public void onCreateParticle(ParticleOptions particleType, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, CallbackInfoReturnable<Particle> cir) {
+//		if (!ModListHelper.CREATE_LOADED && !ModListHelper.VS_LOADED) {
+//			return;
+//		}
+//		ResourceLocation key = BuiltInRegistries.PARTICLE_TYPE.getKey(particleType.getType());
+//		if (!SimplePropertiesConfig.getWeatherParticles().contains(key)) {
+//			return;
+//		}
+//		if (ModListHelper.CREATE_LOADED && !CreateCompat.canSpawnWeatherParticle(level, x, y, z)) {
+//			cir.setReturnValue(null);
+//		}
+//		if (ModListHelper.VS_LOADED && !VSCompat.canCreateWeatherParticle(level, x, y, z)) {
+//			cir.setReturnValue(null);
+//		}
+//	}
 }

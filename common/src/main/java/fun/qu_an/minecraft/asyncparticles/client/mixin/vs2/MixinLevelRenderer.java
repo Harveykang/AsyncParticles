@@ -13,11 +13,13 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.valkyrienskies.core.api.ships.ClientShip;
 
+// FIXME: This is unstable
 @Mixin(value = LevelRenderer.class, priority = 1500)
 public class MixinLevelRenderer {
 	// VS2
 	@TargetHandler(
 		name = "spawnParticleInWorld",
+		// this mixin will be cancelled by vs_addition
 		mixin = "org.valkyrienskies.mod.mixin.feature.transform_particles.MixinLevelRenderer"
 	)
 	@Group(name = "asyncParticles:vs2$spawnParticleInWorld", min = 1, max = 1)
@@ -37,11 +39,29 @@ public class MixinLevelRenderer {
 	@Dynamic
 	@TargetHandler(
 		name = "spawnParticleInWorld",
-		mixin = "io.github.xiewuzhiying.vs_addition.mixin.valkyrienskies.client.MixinMixinLevelRenderer"
+		// forgix modifies the package name
+		mixin = "fabric.io.github.xiewuzhiying.vs_addition.mixin.valkyrienskies.client.MixinMixinLevelRenderer"
 	)
 	@Group(name = "asyncParticles:vs2$spawnParticleInWorld", min = 1, max = 1)
 	@Inject(method = "@MixinSquared:Handler", at = @At(value = "RETURN", ordinal = 2))
-	private <T> void onSpawnParticleInWorld(CallbackInfoReturnable<T> cir,
+	private <T> void onSpawnParticleInWorld1(CallbackInfoReturnable<T> cir,
+											@SuppressWarnings("LocalMayBeArgsOnly")
+											@Local(ordinal = 0) ClientShip ship) {
+		T particle = cir.getReturnValue();
+		if (particle != null) {
+			((VSParticleAddon) particle).asyncParticles$setShip(ship);
+		}
+	}
+
+	@Dynamic
+	@TargetHandler(
+		name = "spawnParticleInWorld",
+		// forgix modifies the package name
+		mixin = "forge.io.github.xiewuzhiying.vs_addition.mixin.valkyrienskies.client.MixinMixinLevelRenderer"
+	)
+	@Group(name = "asyncParticles:vs2$spawnParticleInWorld", min = 1, max = 1)
+	@Inject(method = "@MixinSquared:Handler", at = @At(value = "RETURN", ordinal = 2))
+	private <T> void onSpawnParticleInWorld2(CallbackInfoReturnable<T> cir,
 											@SuppressWarnings("LocalMayBeArgsOnly")
 											@Local(ordinal = 0) ClientShip ship) {
 		T particle = cir.getReturnValue();

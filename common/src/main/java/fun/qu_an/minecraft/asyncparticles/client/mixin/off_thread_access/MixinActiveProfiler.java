@@ -22,7 +22,6 @@ public class MixinActiveProfiler {
 		asyncparticles$thread = null;
 	}
 
-	// TODO: 是否会破坏一些性能监测 mod？
 	@Inject(method = {
 		"push(Ljava/lang/String;)V",
 		"pop()V",

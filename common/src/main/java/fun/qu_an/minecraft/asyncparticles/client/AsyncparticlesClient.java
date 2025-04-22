@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
@@ -50,7 +50,7 @@ public class AsyncparticlesClient {
 			}
 			if (ModListHelper.CREATE_LOADED) {
 				WeatherParticleAddon.Type.RAIN.register((level, position, motion, aabb) -> {
-					Vec3 collide = CreateCompat.collideMotionWithContraptions(level, motion, aabb);
+					Vec3 collide = CreateUtil.collideMotionWithContraptions(level, motion, aabb);
 					if (collide == null) {
 						return motion;
 					}
@@ -58,7 +58,7 @@ public class AsyncparticlesClient {
 					return collide;
 				});
 				WeatherParticleAddon.CollisionFunction function = (level, position, motion, aabb) -> {
-					Vec3 collide = CreateCompat.collideMotionWithContraptions(level, motion, aabb);
+					Vec3 collide = CreateUtil.collideMotionWithContraptions(level, motion, aabb);
 					return collide == null ? motion : collide;
 				};
 				WeatherParticleAddon.Type.SNOW.register(function);

@@ -7,7 +7,7 @@ import net.minecraft.world.level.LevelAccessor;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
-public class Create6Compat {
+public class Create6Util {
 	@ExpectPlatform
 	public static Map<Integer, WeakReference<AbstractContraptionEntity>> loadedContraptions(LevelAccessor level) {
 		throw new AssertionError();

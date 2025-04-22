@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.physicsmod;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import net.diebuddies.physics.snow.math.AABB3D;
@@ -50,7 +50,7 @@ public class PhysicsModCompat {
 	public static boolean collideWithContraptions(ClientLevel level, Vec3 movement, AABB3D aabb, boolean rain) {
 		Vector3d min = aabb.getMin();
 		Vector3d max = aabb.getMax();
-		Vec3 clipMotion = CreateCompat.collideMotionWithContraptions(level,
+		Vec3 clipMotion = CreateUtil.collideMotionWithContraptions(level,
 			movement,
 			new AABB(min.x - 0.1, min.y - 0.1, min.z - 0.1, max.x + 0.1, max.y + 0.1, max.z + 0.1));
 		if (clipMotion == null) {

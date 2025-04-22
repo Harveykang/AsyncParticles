@@ -287,7 +287,6 @@ public class AsyncTicker {
 		Minecraft mc = Minecraft.getInstance();
 		if (!isTolerable(e) &&
 			mc.level != null && mc.player != null) {
-			// FIXME: 更好的异常处理方案
 			throw toThrowDirectly(e);
 		}
 		LOGGER.warn("Exception while executing before particle operation", e);
@@ -414,7 +413,7 @@ public class AsyncTicker {
 				PARTICLE_OPERATIONS.size(),
 				END_TICK_EVENTS.size(),
 				END_TICK_OPERATIONS.size(),
-				SimplePropertiesConfig.limit,
+				SimplePropertiesConfig.getLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
 					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
 						Queue<Particle> queue = e.getValue();
@@ -453,12 +452,12 @@ public class AsyncTicker {
 			particleEngine.clearParticles();
 		} else {
 			Queue<Particle> toAdd = particleEngine.particlesToAdd;
-			BusyWaitEvictingQueue<Particle> newToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, AsyncTicker::onEvicted);
+			BusyWaitEvictingQueue<Particle> newToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 			newToAdd.addAll(toAdd);
 			particleEngine.particlesToAdd = newToAdd;
 			particleEngine.particles.entrySet().forEach(entry -> {
 				Queue<Particle> queue = entry.getValue();
-				Queue<Particle> newQueue = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, AsyncTicker::onEvicted);
+				Queue<Particle> newQueue = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 				newQueue.addAll(queue);
 				entry.setValue(newQueue);
 			});

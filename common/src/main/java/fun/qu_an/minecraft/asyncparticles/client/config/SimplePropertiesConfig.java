@@ -1,14 +1,17 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
+import net.minecraft.resources.ResourceLocation;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.Set;
 
 public class SimplePropertiesConfig {
 	public static final Path CONFIG_FILE = Paths.get("config", "asyncparticles.properties");
-	public static int limit = 32768;
+	private static int limit = 32768;
 	public static int renderFailurePerSecondThreshold = 20;
 	public static int tickFailurePerSecondThreshold = 5;
 	private static boolean asyncClientBlockEntityTick = false;
@@ -23,7 +26,6 @@ public class SimplePropertiesConfig {
 	private static boolean fixParticleLightOnVsShips = true;
 	private static boolean collideWithCreateModContraptions = true;
 	private static boolean collideWithVSModShips = true;
-
 	private static boolean shouldSave;
 
 	public static void load() throws IOException {
@@ -133,5 +135,14 @@ public class SimplePropertiesConfig {
 
 	public static boolean fixParticleLightOnVsShips() {
 		return fixParticleLightOnVsShips;
+	}
+
+	// TODO: implement weather particle config, which will not be spawn into physics structures
+	public static Set<ResourceLocation> getWeatherParticles() {
+		return Set.of();
+	}
+
+	public static int getLimit() {
+		return limit;
 	}
 }
