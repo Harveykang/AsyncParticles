@@ -24,6 +24,9 @@ accessible field net/minecraft/client/renderer/RenderStateShard WEATHER_TARGET L
 accessible method net/minecraft/Util onThreadException (Ljava/lang/Thread;Ljava/lang/Throwable;)V
 accessible method net/minecraft/Util getMaxThreads ()I
 accessible field net/minecraft/client/particle/ParticleEngine particlesToAdd Ljava/util/Queue;
+accessible field net/minecraft/client/particle/ParticleEngine trackingEmitters Ljava/util/Queue;
+transitive-mutable field net/minecraft/client/particle/ParticleEngine particlesToAdd Ljava/util/Queue;
+transitive-mutable field net/minecraft/client/particle/ParticleEngine trackingEmitters Ljava/util/Queue;
 accessible field net/minecraft/client/renderer/RenderType sortOnUpload Z
 accessible field net/minecraft/client/renderer/LevelRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
 accessible method net/minecraft/Util makeExecutor (Ljava/lang/String;)Ljava/util/concurrent/ExecutorService;
@@ -50,7 +53,5 @@ transitive-mutable field net/minecraft/world/level/chunk/ChunkAccess blockEntiti
 accessible method net/minecraft/client/particle/Particle getLightColor (F)I
 accessible method com/mojang/blaze3d/vertex/PoseStack$Pose <init> (Lorg/joml/Matrix4f;Lorg/joml/Matrix3f;)V
 accessible field net/minecraft/client/particle/ParticleEngine textureManager Lnet/minecraft/client/renderer/texture/TextureManager;
-accessible field net/minecraft/client/particle/ParticleEngine trackingEmitters Ljava/util/Queue;
 accessible field net/minecraft/client/particle/ParticleEngine RENDER_ORDER Ljava/util/List;
-transitive-mutable field net/minecraft/client/particle/ParticleEngine particlesToAdd Ljava/util/Queue;
 accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;

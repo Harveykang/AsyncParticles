@@ -10,9 +10,6 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.util.CustomTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -94,7 +91,7 @@ public abstract class MixinParticleEngine_Render {
 					if (particle.shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
 						continue;
 					}
-					float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
+					float g = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f + 1f;
 					try {
 						particle.render(bufferBuilder, camera, g);
 					} catch (Throwable t) {
@@ -123,6 +120,10 @@ public abstract class MixinParticleEngine_Render {
 		RenderSystem.applyModelViewMatrix();
 		RenderSystem.depthMask(true);
 		RenderSystem.disableBlend();
+		// reset blend func and culling state
+		// other mods may change them...
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.enableCull();
 		lightTexture.turnOffLightLayer();
 		profiler.pop();
 	}

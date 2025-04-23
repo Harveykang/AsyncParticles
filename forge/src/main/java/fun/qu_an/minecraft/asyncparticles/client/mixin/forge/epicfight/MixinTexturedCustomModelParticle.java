@@ -13,7 +13,7 @@ import yesman.epicfight.client.particle.TexturedCustomModelParticle;
 public abstract class MixinTexturedCustomModelParticle implements ParticleAddon {
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
-		asyncedParticles$setRenderSync();
+		asyncparticles$setRenderSync();
 		Class<? extends Particle> clazz = ((Particle) (Object) this).getClass();
 		if (!AsyncRenderer.shouldSync(clazz)) {
 			AsyncRenderer.markAsSync(clazz);
