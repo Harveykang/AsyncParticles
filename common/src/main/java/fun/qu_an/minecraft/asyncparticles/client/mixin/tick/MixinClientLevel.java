@@ -70,8 +70,7 @@ public abstract class MixinClientLevel extends Level {
 			// don't tick animate if the game is lagging
 			return;
 		}
-		if (!ModListHelper.PHYSICSMOD_LOADED &&
-			!SimplePropertiesConfig.asyncBlockEntityAnimate()) {
+		if (!SimplePropertiesConfig.asyncBlockEntityAnimate()) {
 			original.call(i, j, k);
 		} else {
 			AsyncTicker.addEndTickTask(() -> original.call(i, j, k));

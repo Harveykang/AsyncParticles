@@ -1,16 +1,11 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.iris_like;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.util.profiling.Profiler;
@@ -21,11 +16,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.function.Predicate;
 
 @Mixin(value = LevelRenderer.class, priority = 1500)
 public abstract class MixinLevelRenderer {

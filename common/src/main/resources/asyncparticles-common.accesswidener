@@ -20,6 +20,9 @@ accessible field net/minecraft/client/renderer/RenderStateShard WEATHER_TARGET L
 accessible method net/minecraft/Util onThreadException (Ljava/lang/Thread;Ljava/lang/Throwable;)V
 accessible method net/minecraft/Util getMaxThreads ()I
 accessible field net/minecraft/client/particle/ParticleEngine particlesToAdd Ljava/util/Queue;
+accessible field net/minecraft/client/particle/ParticleEngine trackingEmitters Ljava/util/Queue;
+transitive-mutable field net/minecraft/client/particle/ParticleEngine particlesToAdd Ljava/util/Queue;
+transitive-mutable field net/minecraft/client/particle/ParticleEngine trackingEmitters Ljava/util/Queue;
 accessible field net/minecraft/client/renderer/RenderType sortOnUpload Z
 accessible field net/minecraft/client/renderer/LevelRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
 accessible field net/minecraft/world/level/Level pendingBlockEntityTickers Ljava/util/List;
@@ -46,7 +49,6 @@ accessible field com/mojang/blaze3d/vertex/ByteBufferBuilder pointer J
 accessible field com/mojang/blaze3d/vertex/BufferBuilder building Z
 accessible method net/minecraft/client/particle/Particle getLightColor (F)I
 accessible field net/minecraft/client/particle/ParticleEngine textureManager Lnet/minecraft/client/renderer/texture/TextureManager;
-accessible field net/minecraft/client/particle/ParticleEngine trackingEmitters Ljava/util/Queue;
 accessible field net/minecraft/client/particle/ParticleEngine RENDER_ORDER Ljava/util/List;
 accessible field com/mojang/blaze3d/vertex/ByteBufferBuilder capacity I
 accessible method net/minecraft/client/renderer/LevelRenderer addParticlesPass (Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/FogParameters;)V
@@ -54,6 +56,5 @@ accessible field net/minecraft/client/renderer/RenderStateShard name Ljava/lang/
 accessible field net/minecraft/client/renderer/LevelRenderer capturedFrustum Lnet/minecraft/client/renderer/culling/Frustum;
 accessible field net/minecraft/client/renderer/LevelRenderer cullingFrustum Lnet/minecraft/client/renderer/culling/Frustum;
 accessible field net/minecraft/client/renderer/LevelRenderer captureFrustum Z
-transitive-mutable field net/minecraft/client/particle/ParticleEngine particlesToAdd Ljava/util/Queue;
 accessible method net/minecraft/client/particle/ParticleEngine renderCustomParticles (Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Ljava/util/Queue;)V
 accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;

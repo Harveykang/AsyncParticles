@@ -180,11 +180,11 @@ public class AsyncRenderer {
 			if (!particle.isAlive()) {
 				continue;
 			}
-			float f3 = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f2;
+			float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
 			if (SimplePropertiesConfig.isCullParticles() && !FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
 				continue;
 			}
-			if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
+			if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
 				recordSync(particleRenderType, particle);
 				continue;
 			}
@@ -195,7 +195,7 @@ public class AsyncRenderer {
 				if (tolerable && !EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
 					continue;
 				}
-				((ParticleAddon) particle).asyncedParticles$setRenderSync();
+				((ParticleAddon) particle).asyncparticles$setRenderSync();
 				if (!shouldSync(particle.getClass())) {
 					if (!tolerable) {
 						LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, t);
@@ -223,24 +223,50 @@ public class AsyncRenderer {
 	}
 
 	// Fabric
-	public static void endAll(Collection<ParticleRenderType> renderOrder) {
+	public static void endAll(Camera camera, float f, Collection<ParticleRenderType> renderOrder) {
 		waitForAsyncTasks();
 		for (ParticleRenderType particleRenderType : renderOrder) {
 			BindingTesselator tesselator = BTESSELATORS.get(particleRenderType);
 			if (tesselator == null || tesselator == BindingTesselator.EMPTY) {
 				continue;
 			}
-			BufferBuilder builder = tesselator.getBuilder();
-			if (builder == null ||
-				!builder.building) {
-				continue;
+			BufferBuilder builder;
+			Set<Particle> sync = getSync(particleRenderType);
+			if (sync.isEmpty()) {
+				builder = tesselator.getBuilder();
+				if (builder == null ||
+					!builder.building) {
+					continue;
+				}
+			} else {
+				builder = tesselator.begin();
+				Frustum frustum = AsyncRenderer.frustum;
+				float f2 = f + 1f;
+				for (Particle particle : sync) {
+					if (!particle.isAlive()) {
+						continue;
+					}
+					float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
+					if (SimplePropertiesConfig.isCullParticles() && !FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
+						continue;
+					}
+					if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
+						AsyncRenderer.recordSync(particleRenderType, particle);
+						continue;
+					}
+					try {
+						particle.render(builder, camera, f3);
+					} catch (Throwable t) {
+						throw AsyncRenderer.constructCrashReport(particle, particleRenderType, t);
+					}
+				}
 			}
 			MeshData meshData = builder.build();
 			if (meshData == null) {
 				continue;
 			}
 			RenderType renderType = particleRenderType.renderType();
-			assert renderType != null;
+//			assert renderType != null;
 			if (renderType.sortOnUpload()) {
 				meshData.sortQuads(tesselator.buffer, RenderSystem.getProjectionType().vertexSorting());
 			}
@@ -249,7 +275,7 @@ public class AsyncRenderer {
 	}
 
 	// Forge
-	public static void endAll(Predicate<ParticleRenderType> renderTypePredicate, Collection<ParticleRenderType> renderOrder) {
+	public static void endAll(Camera camera, float f, Predicate<ParticleRenderType> renderTypePredicate, Collection<ParticleRenderType> renderOrder) {
 		waitForAsyncTasks();
 		for (ParticleRenderType particleRenderType : renderOrder) {
 			if (particleRenderType.renderType() == null) {
@@ -262,17 +288,43 @@ public class AsyncRenderer {
 			if (tesselator == null || tesselator == BindingTesselator.EMPTY) {
 				continue;
 			}
-			BufferBuilder builder = tesselator.getBuilder();
-			if (builder == null ||
-				!builder.building) {
-				continue;
+			BufferBuilder builder;
+			Set<Particle> sync = getSync(particleRenderType);
+			if (sync.isEmpty()) {
+				builder = tesselator.getBuilder();
+				if (builder == null ||
+					!builder.building) {
+					continue;
+				}
+			} else {
+				builder = tesselator.begin();
+				Frustum frustum = AsyncRenderer.frustum;
+				float f2 = f + 1f;
+				for (Particle particle : sync) {
+					if (!particle.isAlive()) {
+						continue;
+					}
+					float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
+					if (SimplePropertiesConfig.isCullParticles() && !FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
+						continue;
+					}
+					if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
+						AsyncRenderer.recordSync(particleRenderType, particle);
+						continue;
+					}
+					try {
+						particle.render(builder, camera, f3);
+					} catch (Throwable t) {
+						throw AsyncRenderer.constructCrashReport(particle, particleRenderType, t);
+					}
+				}
 			}
 			MeshData meshData = builder.build();
 			if (meshData == null) {
 				continue;
 			}
 			RenderType renderType = particleRenderType.renderType();
-			assert renderType != null;
+//			assert renderType != null;
 			if (renderType.sortOnUpload()) {
 				meshData.sortQuads(tesselator.buffer, RenderSystem.getProjectionType().vertexSorting());
 			}

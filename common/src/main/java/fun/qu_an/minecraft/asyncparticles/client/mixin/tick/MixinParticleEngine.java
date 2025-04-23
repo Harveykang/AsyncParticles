@@ -6,21 +6,12 @@ import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
-import fun.qu_an.minecraft.asyncparticles.client.util.BusyWaitEvictingQueue;
-import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
-import fun.qu_an.minecraft.asyncparticles.client.util.TrackedParticleCountsMap;
-import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
+import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.particles.ParticleGroup;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -29,7 +20,6 @@ import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
@@ -39,7 +29,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public abstract class MixinParticleEngine {
 	@Mutable
 	@Shadow
-	@Final
 	public Queue<Particle> particlesToAdd;
 
 	@Shadow
@@ -59,19 +48,16 @@ public abstract class MixinParticleEngine {
 	@Final
 	private Object2IntOpenHashMap<ParticleGroup> trackedParticleCounts;
 
-	@Inject(method = "<init>", at = @At(value = "RETURN"))
+	@Inject(method = "<init>", order = 9000, at = @At(value = "RETURN"))
 	public void init(CallbackInfo ci) {
 		trackedParticleCounts = new TrackedParticleCountsMap();
-		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, AsyncTicker::onEvicted);
+		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+		trackingEmitters = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 		random = new SingleThreadedRandomSource(ThreadLocalRandom.current().nextInt());
 	}
 
 	@Shadow
 	public abstract void updateCount(ParticleGroup group, int count);
-
-	@Shadow
-	@Final
-	private static Logger LOGGER;
 
 	@Shadow
 	public abstract void tickParticle(Particle particle);
@@ -118,28 +104,14 @@ public abstract class MixinParticleEngine {
 				if (!emitter.isAlive()) {
 					continue;
 				}
-				if (((ParticleAddon) emitter).asyncedParticles$isTickSync()) {
+				if (((ParticleAddon) emitter).asyncparticles$isTickSync()) {
 					AsyncTicker.recordSync(emitter);
 					continue;
 				}
 				try {
 					emitter.tick();
-					if (ModListHelper.VS_LOADED) {
-						VSCompat.removeIfOutSight(emitter);
-					}
 				} catch (Throwable t) {
-					if (AsyncTicker.isTolerable(t)) {
-						LOGGER.warn("Exception ticking emitter particle {}, you can ignore it if it doesn't happen frequently.", emitter, t);
-						continue;
-					}
-					if (SimplePropertiesConfig.markSyncIfTickFailed()) {
-						LOGGER.warn("Exception ticking emitter particle {}, marking as sync", emitter, t);
-						((ParticleAddon) emitter).asyncedParticles$setTickSync();
-						AsyncTicker.markAsSync(emitter.getClass());
-						AsyncTicker.recordSync(emitter);
-					} else {
-						throw t;
-					}
+					AsyncTicker.onTickingParticleException(emitter, t);
 				}
 			}
 		});
@@ -161,24 +133,19 @@ public abstract class MixinParticleEngine {
 		}
 
 		if (!this.particlesToAdd.isEmpty()) {
-			particlesToAdd.forEach(p -> {
-				if (p == null) {
-					// might be null because ArrayDeque is not thread-safe,
-					// but we can use it safely here because we clear it every tick
-					return;
+			// Write like this to be compatible with e.g. Spectrum mod
+			Particle particle;
+			//noinspection ForLoopReplaceableByForEach
+			for (Iterator<Particle> iterator = particlesToAdd.iterator(); iterator.hasNext(); ) {
+				particle = iterator.next();
+				if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
+					AsyncTicker.recordSync(particle);
 				}
-				if (p instanceof TrackingEmitter emitter) {
-					trackingEmitters.add(emitter);
-					return;
-				}
-				if (((ParticleAddon) p).asyncedParticles$isTickSync()) {
-					AsyncTicker.recordSync(p);
-				}
-				Queue<Particle> queue = this.particles.computeIfAbsent(p.getRenderType(),
+				Queue<Particle> queue = this.particles.computeIfAbsent(particle.getRenderType(),
 					k -> {
 						Queue<Particle> queue1 = new IterationSafeEvictingQueue<>(
 							16,
-							SimplePropertiesConfig.limit,
+							SimplePropertiesConfig.getLimit(),
 							AsyncTicker::onEvicted);
 						// fix the first added particle not ticked.
 						if (SimplePropertiesConfig.isTickAsync()) {
@@ -196,8 +163,8 @@ public abstract class MixinParticleEngine {
 						}
 						return queue1;
 					});
-				queue.add(p);
-			});
+				queue.add(particle);
+			}
 			particlesToAdd.clear();
 		}
 	}
@@ -216,9 +183,12 @@ public abstract class MixinParticleEngine {
 				return;
 			}
 			if (!particle.isAlive()) {
+				// This is to be compatible with e.g. Figura mod
+				// Trust JIT
+				Utils.DUMMY_ITERATOR.remove();
 				continue;
 			}
-			if (((ParticleAddon) particle).asyncedParticles$isTickSync()) {
+			if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
 				AsyncTicker.recordSync(particle);
 				continue;
 			}
@@ -228,39 +198,9 @@ public abstract class MixinParticleEngine {
 					&& SimplePropertiesConfig.particleLightCache()) {
 					lightCachedParticle.asyncParticles$refresh();
 				}
-				((ParticleAddon) particle).asyncParticles$setTicked();
-				if (ModListHelper.VS_LOADED) {
-					VSCompat.removeIfOutSight(particle);
-				}
+				((ParticleAddon) particle).asyncparticles$setTicked();
 			} catch (Throwable t) {
-				boolean tolerable = AsyncTicker.isTolerable(t);
-				if (tolerable && !AsyncTicker.EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
-					continue;
-				}
-				if (SimplePropertiesConfig.markSyncIfTickFailed()) {
-					LOGGER.warn("Exception ticking particle {}, marking as sync", particle, t);
-					((ParticleAddon) particle).asyncedParticles$setTickSync();
-					AsyncTicker.markAsSync(particle.getClass());
-					AsyncTicker.recordSync(particle);
-				} else if (tolerable) {
-					LocalPlayer player = Minecraft.getInstance().player;
-					if (player != null) {
-						player.displayClientMessage(Component.literal(
-								"Exception %s thrown while ticking particle %s exceeds the threshold, please contact the author: "
-									.formatted(t.getClass().getSimpleName(), particle.getClass()))
-							.append(Component.literal(AsyncparticlesClient.ISSUE_URL)
-								.setStyle(Style.EMPTY
-										.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncparticlesClient.ISSUE_URL))
-										.withUnderlined(true))), false);
-					}
-					LOGGER.warn("Exception {} thrown while ticking particle {} exceeds the threshold, please contact the author: {}",
-						t.getClass().getSimpleName(),
-						particle,
-						AsyncparticlesClient.ISSUE_URL,
-						t);
-				} else {
-					throw AsyncTicker.constructCrashReport(particle, t);
-				}
+				AsyncTicker.onTickingParticleException(particle, t);
 			}
 		}
 	}
@@ -276,18 +216,12 @@ public abstract class MixinParticleEngine {
 		}
 	}
 
-	@Redirect(method = {
-		"createTrackingEmitter(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/particles/ParticleOptions;)V",
-		"createTrackingEmitter(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/particles/ParticleOptions;I)V"
-	}, at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
-	public boolean redirectAdd(Queue<?> instance, Object o) {
-		return particlesToAdd.add((Particle) o); // redirect to particlesToAdd
-	}
-
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void onClearParticles(CallbackInfo ci) {
 		particlesToAdd.forEach(AsyncTicker::onEvicted);
-		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.limit, AsyncTicker::onEvicted);
+		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+		trackingEmitters.forEach(AsyncTicker::onEvicted);
+		trackingEmitters = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 		particles.values().forEach(queue -> queue.forEach(AsyncTicker::onEvicted));
 		AsyncTicker.onParticleEngineClear();
 	}

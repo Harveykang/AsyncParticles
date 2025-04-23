@@ -54,11 +54,11 @@ public abstract class MixinParticleEngine_Render {
 			if (!particle.isAlive()) {
 				continue;
 			}
-			float f3 = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f2;
+			float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
 			if (SimplePropertiesConfig.isCullParticles() && !FrustumUtil.isVisible(frustum, particle.getRenderBoundingBox(f3))) {
 				continue;
 			}
-			if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
+			if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
 				AsyncRenderer.recordSync(particleRenderType, particle);
 				continue;
 			}
@@ -89,7 +89,7 @@ public abstract class MixinParticleEngine_Render {
 			if (!particle.isAlive()) {
 				continue;
 			}
-			float f3 = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f2;
+			float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
 			if (SimplePropertiesConfig.isCullParticles() && !FrustumUtil.isVisible(frustum, particle.getRenderBoundingBox(f3))) {
 				continue;
 			}
@@ -116,7 +116,7 @@ public abstract class MixinParticleEngine_Render {
 
 		Set<ParticleRenderType> renderOrder = particles.keySet();
 		if (SimplePropertiesConfig.isRenderAsync()) {
-			AsyncRenderer.endAll(renderTypePredicate, renderOrder);
+			AsyncRenderer.endAll(camera, partialTick, renderTypePredicate, renderOrder);
 		} else {
 			for (ParticleRenderType particleRenderType : renderOrder) {
 				if (particleRenderType.renderType() == null) {

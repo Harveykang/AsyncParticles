@@ -45,11 +45,11 @@ public abstract class MixinParticleEngine_Render {
 			if (!particle.isAlive()) {
 				continue;
 			}
-			float f3 = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f2;
+			float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
 			if (SimplePropertiesConfig.isCullParticles() && !FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
 				continue;
 			}
-			if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
+			if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
 				AsyncRenderer.recordSync(particleRenderType, particle);
 				continue;
 			}
@@ -79,7 +79,7 @@ public abstract class MixinParticleEngine_Render {
 			if (!particle.isAlive()) {
 				continue;
 			}
-			float f3 = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f2;
+			float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
 			if (SimplePropertiesConfig.isCullParticles() && !FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
 				continue;
 			}
@@ -99,7 +99,7 @@ public abstract class MixinParticleEngine_Render {
 	public void render(Camera camera, float partialTick, MultiBufferSource.BufferSource bufferSource) {
 		List<ParticleRenderType> renderOrder = RENDER_ORDER;
 		if (SimplePropertiesConfig.isRenderAsync()) {
-			AsyncRenderer.endAll(renderOrder);
+			AsyncRenderer.endAll(camera, partialTick, renderOrder);
 		} else {
 			for (ParticleRenderType particleRenderType : renderOrder) {
 				Queue<Particle> queue = this.particles.get(particleRenderType);

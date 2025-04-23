@@ -9,7 +9,7 @@
     "MixinParticle",
     "MixinParticle_LightCache",
     "MixinParticle_LightCacheNoRefresh",
-    "MixinParticleEngine_Late",
+    "render.MixinParticleEngine_Late",
     "a_good_place.InvokerBlocksParticlesManager",
     "a_good_place.MixinBlocksParticlesManager",
     "a_good_place.MixinPlacingBlockParticle",

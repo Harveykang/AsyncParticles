@@ -84,12 +84,6 @@ public abstract class MixinLevelRenderer {
 		}
 	}
 
-	@Inject(method = "method_62213", at = @At(value = "INVOKE",
-		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V"))
-	private void onRenderParticles1(CallbackInfo ci) {
-		RenderSystem.enableDepthTest(); // This fixes the issue with particles not being rendered properly
-	}
-
 	@Inject(method = "method_62213", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
 		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V"))
 	private void onRenderParticles2(CallbackInfo ci) {

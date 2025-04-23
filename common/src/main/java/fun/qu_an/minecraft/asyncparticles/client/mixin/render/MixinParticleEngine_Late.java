@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.render;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.client.particle.ParticleEngine;
@@ -20,6 +20,6 @@ public abstract class MixinParticleEngine_Late {
 	// Only necessary to fabric since forge use particles.keySet()
 	@Inject(at = @At("RETURN"), method = "<clinit>")
 	private static void addTypes(CallbackInfo ci) {
-		RENDER_ORDER = ImmutableList.<ParticleRenderType>builder().addAll(new LinkedHashSet<>(RENDER_ORDER)).build();
+		RENDER_ORDER = ImmutableList.copyOf(new LinkedHashSet<>(RENDER_ORDER));
 	}
 }

@@ -8,7 +8,7 @@ import java.util.Properties;
 
 public class SimplePropertiesConfig {
 	public static final Path CONFIG_FILE = Paths.get("config", "asyncparticles.properties");
-	public static int limit = 32768;
+	private static int limit = 32768;
 	public static int renderFailurePerSecondThreshold = 20;
 	public static int tickFailurePerSecondThreshold = 5;
 	private static boolean asyncClientBlockEntityTick = true;
@@ -140,5 +140,9 @@ public class SimplePropertiesConfig {
 
 	public static boolean isCullParticles() {
 		return cullParticles;
+	}
+
+	public static int getLimit() {
+		return limit;
 	}
 }
