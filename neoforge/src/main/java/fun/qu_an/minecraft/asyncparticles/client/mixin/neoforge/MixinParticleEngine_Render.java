@@ -80,7 +80,7 @@ public abstract class MixinParticleEngine_Render {
 					if (!particle.isAlive()) {
 						continue;
 					}
-					float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
+					float g = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f + 1f;
 					if (!frustum.isVisible(particle.getRenderBoundingBox(g))) {
 						continue;
 					}
@@ -103,6 +103,10 @@ public abstract class MixinParticleEngine_Render {
 		profiler.push("cleanup");
 		RenderSystem.depthMask(true);
 		RenderSystem.disableBlend();
+		// reset blend func and culling state
+		// other mods may change them...
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.enableCull();
 		lightTexture.turnOffLightLayer();
 		profiler.pop();
 	}

@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
@@ -166,11 +165,11 @@ public class AsyncRenderer {
 		if (!frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(f))) {
 			return;
 		}
-		if (((ParticleAddon) particle).asyncedParticles$isRenderSync()) {
+		if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
 			recordSync(particleRenderType, particle);
 			return;
 		}
-		float g = ((ParticleAddon) particle).asyncParticles$isTicked() ? f : f + 1f;
+		float g = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f + 1f;
 		try {
 			particle.render(bufferBuilder, camera, g);
 		} catch (Throwable t) {
@@ -178,7 +177,7 @@ public class AsyncRenderer {
 			if (tolerable && !EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
 				return;
 			}
-			((ParticleAddon) particle).asyncedParticles$setRenderSync();
+			((ParticleAddon) particle).asyncparticles$setRenderSync();
 			if (!shouldSync(particle.getClass())) {
 				if (!tolerable) {
 					LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, t);
@@ -239,10 +238,6 @@ public class AsyncRenderer {
 			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
 		particleEngine.render(lightTexture, camera, f);
-		// reset blend func and culling state
-		// other mods may change them...
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.enableCull();
 
 		if (levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();

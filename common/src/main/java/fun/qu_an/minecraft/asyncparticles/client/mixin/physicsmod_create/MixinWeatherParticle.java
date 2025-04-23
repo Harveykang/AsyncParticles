@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.physicsmod_create;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.physicsmod.PhysicsModCompat;
 import net.diebuddies.minecraft.weather.FastTextureSheetParticle;
 import net.diebuddies.minecraft.weather.RainParticle;

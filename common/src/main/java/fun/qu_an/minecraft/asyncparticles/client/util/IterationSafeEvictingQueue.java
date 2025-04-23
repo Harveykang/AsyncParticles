@@ -230,6 +230,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 
 	@Override
 	public boolean addAll(@NotNull Collection<? extends E> c) {
+		// TODO: optimize this method
 		if (c.isEmpty()) {
 			return false;
 		}
@@ -347,10 +348,10 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		}
 		Object[] q = queue;
 		int head = this.head;
-		int tail = head + this.size;
+		int tail = head + size;
 		int capacity = q.length;
 		if (tail <= capacity) {
-			System.arraycopy(q, head, a, 0, this.size);
+			System.arraycopy(q, head, a, 0, size);
 		} else {
 			int l = capacity - head;
 			System.arraycopy(q, head, a, 0, l);

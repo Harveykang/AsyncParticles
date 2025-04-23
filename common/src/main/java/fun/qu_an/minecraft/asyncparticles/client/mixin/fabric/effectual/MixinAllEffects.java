@@ -10,6 +10,7 @@ import com.imeetake.effects.MouthSteam.MouthSteamEffect;
 import com.imeetake.effects.PlayerRunEffect.PlayerRunEffect;
 import com.imeetake.effects.SoulGlow.SoulLanternGlowEffect;
 import com.imeetake.effects.Sparks.CampfireImprovements;
+import com.imeetake.effects.Sparks.FireEntitySparks;
 import com.imeetake.effects.Sparks.FireImprovements;
 import com.imeetake.effects.SparksCart.SparksCartEffect;
 import com.imeetake.effects.SparksSoul.SoulCampfireImprovements;
@@ -32,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 	SoulFireImprovements.class,
 	SparksCartEffect.class,
 	FireImprovements.class,
+	FireEntitySparks.class,
 	CampfireImprovements.class,
 	SoulLanternGlowEffect.class,
 	PlayerRunEffect.class,

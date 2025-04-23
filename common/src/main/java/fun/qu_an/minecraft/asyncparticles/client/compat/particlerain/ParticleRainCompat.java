@@ -21,8 +21,19 @@ public class ParticleRainCompat {
 //		throw new AssertionError();
 //	}
 
-	@ExpectPlatform
 	public static void onCreateCollision(@NotNull ClientLevel level, Vec3 originalMotion, @NotNull Vec3 clipMotion, @NotNull AABB aabb) {
+		if (onCreateCollision0()) {
+			onCreateCollision1(level, originalMotion, clipMotion, aabb);
+		}
+	}
+
+	@ExpectPlatform
+	private static boolean onCreateCollision0() {
+		throw new AssertionError();
+	}
+
+	@ExpectPlatform
+	private static void onCreateCollision1(@NotNull ClientLevel level, Vec3 originalMotion, @NotNull Vec3 clipMotion, @NotNull AABB aabb) {
 		throw new AssertionError();
 	}
 }

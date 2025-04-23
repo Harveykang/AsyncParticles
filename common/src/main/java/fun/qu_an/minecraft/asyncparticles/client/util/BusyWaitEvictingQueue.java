@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -13,33 +14,8 @@ public class BusyWaitEvictingQueue<E> extends IterationSafeEvictingQueue<E> {
 	}
 
 	@Override
-	public boolean offer(E e) {
-		return lock.wrap(() -> super.offer(e));
-	}
-
-	@Override
-	public E poll() {
-		return lock.wrap(super::poll);
-	}
-
-	@Override
-	public E peek() {
-		return lock.wrap(super::peek);
-	}
-
-	@Override
-	public int size() {
-		return lock.wrap(super::size);
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return lock.wrap(super::isEmpty);
-	}
-
-	@Override
-	public void clear() {
-		lock.wrap(super::clear);
+	public boolean add(E e) {
+		return lock.wrap(() -> super.add(e));
 	}
 
 	@Override
@@ -48,42 +24,42 @@ public class BusyWaitEvictingQueue<E> extends IterationSafeEvictingQueue<E> {
 	}
 
 	@Override
-	public boolean contains(Object o) {
-		return lock.wrap(() -> super.contains(o));
+	public boolean addAll(@NotNull Collection<? extends E> c) {
+		return lock.wrap(() -> super.addAll(c));
 	}
 
 	@Override
-	public Object @NotNull [] toArray() {
-		return lock.wrap(() -> super.toArray());
-	}
-
-	@Override
-	public <T> T @NotNull [] toArray(T[] a) {
-		return lock.wrap(() -> super.toArray(a));
-	}
-
-	@Override
-	public String toString() {
-		return lock.wrap(super::toString);
-	}
-
-	@Override
-	public int hashCode() {
-		return lock.wrap(super::hashCode);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return lock.wrap(() -> super.equals(obj));
-	}
-
-	@Override
-	public void forEach(@NotNull Consumer<? super E> action) {
-		lock.wrap(() -> super.forEach(action));
+	public boolean removeAll(@NotNull Collection<?> c) {
+		return lock.wrap(() -> super.removeAll(c));
 	}
 
 	@Override
 	public boolean removeIf(@NotNull Predicate<? super E> filter) {
 		return lock.wrap(() -> super.removeIf(filter));
+	}
+
+	@Override
+	public boolean retainAll(@NotNull Collection<?> c) {
+		return lock.wrap(() -> super.retainAll(c));
+	}
+
+	@Override
+	public void clear() {
+		lock.wrap(super::clear);
+	}
+
+	@Override
+	public boolean offer(E e) {
+		return lock.wrap(() -> super.offer(e));
+	}
+
+	@Override
+	public E remove() {
+		return lock.wrap(() -> super.remove());
+	}
+
+	@Override
+	public E poll() {
+		return lock.wrap(super::poll);
 	}
 }

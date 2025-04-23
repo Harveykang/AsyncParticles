@@ -6,7 +6,6 @@ import com.simibubi.create.content.contraptions.ContraptionCollider;
 import com.simibubi.create.content.contraptions.ContraptionHandler;
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import com.simibubi.create.foundation.collision.Matrix3d;
-import fun.qu_an.minecraft.asyncparticles.client.util.CollisionResult;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.create.InvokerContraptionCollider;
 import net.createmod.catnip.math.VecHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -32,7 +31,7 @@ import static java.lang.Math.*;
 /**
  * See {@link ContraptionCollider}
  */
-public class CreateCompatImpl {
+public class CreateUtilImpl {
 	public static Collection<WeakReference<AbstractContraptionEntity>> contraptions(LevelAccessor level) {
 		return loadedContraptions(level).values();
 	}

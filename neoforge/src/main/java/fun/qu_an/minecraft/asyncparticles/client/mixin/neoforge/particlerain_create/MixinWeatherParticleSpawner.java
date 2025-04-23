@@ -19,6 +19,6 @@ public class MixinWeatherParticleSpawner {
 										   double xSpeed,
 										   double ySpeed,
 										   double zSpeed) {
-		return !CreateCompat.isUnderContraption(instance, x, y, z);
+		return CreateCompat.canSpawnWeatherParticle(instance, x, y, z);
 	}
 }

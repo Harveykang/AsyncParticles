@@ -51,10 +51,10 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Inject(method = "<init>*", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
 		if (AsyncRenderer.shouldSync(((Particle) (Object) this).getClass())) {
-			asyncedParticles$setRenderSync();
+			asyncparticles$setRenderSync();
 		}
 		if (AsyncTicker.shouldSync(((Particle) (Object) this).getClass())) {
-			asyncedParticles$setTickSync();
+			asyncparticles$setTickSync();
 		}
 	}
 
@@ -65,7 +65,7 @@ public abstract class MixinParticle implements ParticleAddon {
 	}
 
 	@Override
-	public boolean asyncParticles$shouldRemove() {
+	public boolean asyncparticles$shouldRemove() {
 		if (!isAlive()) return true;
 		if (asyncParticles$ticked) return asyncParticles$ticked = false;
 		remove();
@@ -73,32 +73,32 @@ public abstract class MixinParticle implements ParticleAddon {
 	}
 
 	@Override
-	public void asyncParticles$setTicked() {
+	public void asyncparticles$setTicked() {
 		this.asyncParticles$ticked = true;
 	}
 
 	@Override
-	public boolean asyncParticles$isTicked() {
+	public boolean asyncparticles$isTicked() {
 		return this.asyncParticles$ticked;
 	}
 
 	@Override
-	public void asyncedParticles$setRenderSync() {
+	public void asyncparticles$setRenderSync() {
 		asyncParticles$renderSync = true;
 	}
 
 	@Override
-	public boolean asyncedParticles$isRenderSync() {
+	public boolean asyncparticles$isRenderSync() {
 		return asyncParticles$renderSync;
 	}
 
 	@Override
-	public void asyncedParticles$setTickSync() {
+	public void asyncparticles$setTickSync() {
 		asyncParticles$tickSync = true;
 	}
 
 	@Override
-	public boolean asyncedParticles$isTickSync() {
+	public boolean asyncparticles$isTickSync() {
 		return asyncParticles$tickSync;
 	}
 

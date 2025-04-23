@@ -52,10 +52,6 @@ public class AsyncRendererImpl {
 		ParticleEngine particleEngine = mc.particleEngine;
 		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
 		particleEngine.render(lightTexture, camera, f);
-		// reset blend func and culling state
-		// other mods may change them...
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.enableCull();
 
 		if (levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();

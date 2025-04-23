@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.neoforge;
 
 import com.leclowndu93150.particlerain.ParticleRainConfig;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.ParticleTypes;
@@ -12,55 +12,20 @@ import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
 public class ParticleRainCompatImpl {
-//	public static void onShipCollision(ClientLevel level, Vec3 location, Vec3 movement, AABB aabb) {
-//		if (!config.doRippleParticles && !config.doSplashParticles) {
-//			return;
-//		}
-//		Minecraft mc = Minecraft.getInstance();
-//		ShipHitResult hit = VSClientUtils.clipShip(level, new ClipContext(location,
-//				location.add(movement).add(movement.normalize().scale(aabb.getSize())),
-//				ClipContext.Block.COLLIDER,
-//				ClipContext.Fluid.ANY,
-//				mc.player),
-//			true);
-//		if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
-//			Vec3 spawnPos = hit.getLocation();
-//			FluidState fluidState = level.getFluidState(hit.getBlockPos());
-//			if (config.doRippleParticles && fluidState.isSourceOfType(Fluids.WATER)) {
-//				Particle particle = mc.particleEngine.createParticle(ParticleRegistry.RIPPLE.get(),
-//					spawnPos.x,
-//					spawnPos.y,
-//					spawnPos.z,
-//					0,
-//					0,
-//					0);
-//				if (particle != null) {
-//					Vec3i normal = hit.getDirection().getNormal();
-//					Vector3f normal1 = hit.shipToWorld.transformDirection(new Vector3f(normal.getX(), normal.getY(), normal.getZ())).normalize();
-//					((RippleParticleAddon) particle).asyncedParticles$setNormal(normal1);
-//				}
-//				if (level.isThundering() && config.doSplashParticles)
-//					mc.particleEngine.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
-//			} else if (config.doSplashParticles && fluidState.isEmpty()) {
-//				mc.particleEngine.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
-//			}
-//		}
-//	}
-
-	public static void onCreateCollision(@NotNull ClientLevel level, Vec3 originalMotion, @NotNull Vec3 clipMotion, @NotNull AABB aabb) {
+	public static boolean onCreateCollision0() {
 		if (ModListHelper.FABRIC_PARTICLERAIN_LOADED) {
-			fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.fabric.ParticleRainCompatImpl
-				.onCreateCollision(level, originalMotion, clipMotion, aabb);
-			return;
+			return fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.fabric.ParticleRainCompatImpl
+				.onCreateCollision0();
 		}
-		if (!ParticleRainConfig.doSplashParticles) {
-			return;
-		}
+		return ParticleRainConfig.doSplashParticles;
+	}
+
+	public static void onCreateCollision1(@NotNull ClientLevel level, Vec3 originalMotion, @NotNull Vec3 clipMotion, @NotNull AABB aabb) {
 		Vec3 center = aabb.getCenter();
 		AABB aabb1 = new AABB(center.x, aabb.minY - 1, center.z, center.x, aabb.minY, center.z);
 		Vec3 startPos = new Vec3(center.x, aabb.minY, center.z);
 		Vec3 motion1 = originalMotion.scale(2);
-		if (CreateCompat.isCollideWithContraption(level, motion1, aabb1, false)) {
+		if (CreateUtil.isCollideWithContraption(level, motion1, aabb1, false)) {
 			Vec3 spawnPos = startPos.add(clipMotion);
 			Minecraft.getInstance().particleEngine
 				.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
