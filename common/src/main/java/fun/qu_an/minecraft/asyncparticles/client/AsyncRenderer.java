@@ -163,7 +163,7 @@ public class AsyncRenderer {
 		if (!particle.isAlive()) {
 			return;
 		}
-		if (!frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(f))) {
+		if (SimplePropertiesConfig.isCullParticles() && !frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(f))) {
 			return;
 		}
 		if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {

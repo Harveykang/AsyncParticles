@@ -105,8 +105,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				 "off_thread_access" -> true;
 			case "modernui" -> ModListHelper.MODERN_UI_LOADED;
 			case "create" -> ModListHelper.CREATE_LOADED;
-			case "sodium_0_6" -> ModListHelper.SODIUM_LOADED
-								 && ModListHelper.versionCheck("sodium", "0.6", "0.7");
+//			case "sodium_0_6" -> ModListHelper.SODIUM_LOADED
+//								 && ModListHelper.versionCheck("sodium", "0.6", "0.7");
 			case "sodium_0_7" -> ModListHelper.SODIUM_LOADED
 								 && ModListHelper.versionCheck("sodium", "0.7", "0.8");
 			case "iris_like" -> ModListHelper.IRIS_LIKE_LOADED;

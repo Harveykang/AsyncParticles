@@ -344,6 +344,7 @@ public class AsyncTicker {
 		if (!(e instanceof Exception)) {
 			return false;
 		}
+		// TODO: 是否要对链上的每个异常都进行判断
 		return ExceptionUtil.getRootCause(e) instanceof MissingPaletteEntryException
 			   || e instanceof NullPointerException
 			   || e instanceof IndexOutOfBoundsException
@@ -498,7 +499,7 @@ public class AsyncTicker {
 			Queue<Particle> newToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 			newToAdd.addAll(particleEngine.particlesToAdd);
 			particleEngine.particlesToAdd = newToAdd;
-			Queue<TrackingEmitter> newEmitters = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+			Queue<TrackingEmitter> newEmitters = new BusyWaitEvictingQueue<>(256, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 			newEmitters.addAll(particleEngine.trackingEmitters);
 			particleEngine.trackingEmitters = newEmitters;
 			particleEngine.particles.entrySet().forEach(entry -> {

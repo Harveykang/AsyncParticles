@@ -20,9 +20,7 @@ public class SimplePropertiesConfig {
 	private static boolean markSyncIfTickFailed = false;
 	private static boolean particleLightCache = true;
 	private static boolean suppressCME = false;
-	private static boolean collideWithCreateModContraptions = true;
-	private static boolean collideWithVSModShips = true;
-
+	private static boolean cullParticles = true;
 	private static boolean shouldSave;
 
 	public static void load() throws IOException {
@@ -59,6 +57,7 @@ public class SimplePropertiesConfig {
 		markSyncIfTickFailed = getBoolean(properties, "markSyncIfTickFailed", false);
 		particleLightCache = getBoolean(properties, "particleLightCache", true);
 		suppressCME = getBoolean(properties, "suppressCME", false);
+		cullParticles = getBoolean(properties, "cullParticles", true);
 
 		if (shouldSave) {
 			properties.store(Files.newOutputStream(CONFIG_FILE), null);
@@ -127,6 +126,10 @@ public class SimplePropertiesConfig {
 
 	public static boolean isTickAsync() {
 		return true;
+	}
+
+	public static boolean isCullParticles() {
+		return cullParticles;
 	}
 
 	public static int getLimit() {

@@ -53,6 +53,7 @@
     "physicsmod.MixinWeatherParticle",
     "physicsmod_create.MixinLevelRenderer",
     "physicsmod_create.MixinWeatherParticle",
+    "sodium_0_7.MixinSingleQuadParticle",
     "subtle_effects.MixinAsyncRenderer",
     "subtle_effects.fabric.MixinParticleEngine",
     "watut.MixinCustomParticleEngine"

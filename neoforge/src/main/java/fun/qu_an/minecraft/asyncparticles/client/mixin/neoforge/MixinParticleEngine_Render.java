@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.MeshData;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
 import net.minecraft.client.Camera;
@@ -50,7 +51,7 @@ public abstract class MixinParticleEngine_Render {
 		profiler.push("prepare");
 		Frustum frustum = AsyncRenderer.frustum;
 		lightTexture.turnOnLightLayer();
-		RenderSystem.enableDepthTest();
+//		RenderSystem.enableDepthTest();
 		RenderSystem.activeTexture(33986);
 		RenderSystem.activeTexture(33984);
 		profiler.pop();
@@ -69,6 +70,7 @@ public abstract class MixinParticleEngine_Render {
 			RenderSystem.setShader(GameRenderer::getParticleShader);
 			// why ParticleRenderType#end() removed?...
 			RenderSystem.enableCull();
+			RenderSystem.enableDepthTest();
 			// begin before sync particles to be compatible with some mod
 			particleRenderType.begin(FakeTesselator.getFakeInstance(), this.textureManager);
 			profiler.push("render_sync");
@@ -81,7 +83,7 @@ public abstract class MixinParticleEngine_Render {
 						continue;
 					}
 					float g = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f + 1f;
-					if (!frustum.isVisible(particle.getRenderBoundingBox(g))) {
+					if (SimplePropertiesConfig.isCullParticles() && !frustum.isVisible(particle.getRenderBoundingBox(g))) {
 						continue;
 					}
 					try {
