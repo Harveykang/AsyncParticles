@@ -43,8 +43,6 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 				ModListHelper.FORGE_CREATE_LOADED;
 			// TODO: 下面这个 mod 没有正式发布，且不确定是否是唯一的 forge 移植版
 			case "effecticularity" -> ModListHelper.FORGE_EFFECTIVE_LOADED;
-			case "embeddium" -> ModListHelper.FORGE_EMBEDDIUM_LOADED;
-//			case "flerovium" -> ModListHelper.FORGE_FLEROVIUM_LOADED;
 			case "subtle_effects" -> ModListHelper.FORGE_SUBTLE_EFFECTS_LOADED;
 			case "simple_weather" -> ModListHelper.FORGE_SIMPLE_WEATHER_LOADED;
 			case "simple_weather_create" -> ModListHelper.FORGE_SIMPLE_WEATHER_LOADED &&

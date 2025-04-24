@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
@@ -304,7 +305,17 @@ public class AsyncRenderer {
 		}
 
 		FakeBeginTesselator fakeBeginTesselator = FakeBeginTesselator.newFakeBeginTesselator();
+
+		// FIXME: This will mess up the title screen render state
+		//  because in 1.21.1 the ParticleRenderType#end method is removed
 		BufferBuilder builder = particleRenderType.begin(fakeBeginTesselator, textureManager);
+
+		RenderSystem.disableBlend();
+		RenderSystem.depthMask(true);
+		RenderSystem.enableDepthTest();
+		RenderSystem.enableCull();
+		RenderSystem.defaultBlendFunc();
+
 		if (builder == null) {
 			return BindingTesselator.EMPTY;
 		}
@@ -368,7 +379,7 @@ public class AsyncRenderer {
 				.formatted(asyncTasksSize,
 					BTESSELATORS.entrySet()
 						.stream()
-						.filter(e -> e.getValue().buffer != null)
+						.filter(e -> e.getValue() != BindingTesselator.EMPTY)
 						.collect(Collectors.toMap(
 							Map.Entry::getKey,
 							e -> e.getValue().buffer.capacity)),

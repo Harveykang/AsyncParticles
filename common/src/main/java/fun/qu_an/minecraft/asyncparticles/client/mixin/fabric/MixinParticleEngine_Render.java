@@ -105,6 +105,7 @@ public abstract class MixinParticleEngine_Render {
 		// reset blend func and culling state
 		// other mods may change them...
 		RenderSystem.defaultBlendFunc();
+		RenderSystem.enableDepthTest();
 		RenderSystem.enableCull();
 		lightTexture.turnOffLightLayer();
 		profiler.pop();

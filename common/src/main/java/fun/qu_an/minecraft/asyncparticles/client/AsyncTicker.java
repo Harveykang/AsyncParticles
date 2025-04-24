@@ -131,6 +131,7 @@ public class AsyncTicker {
 		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
 		if (i != 0) {
 			// tick non-zero, do nothing
+			// To make sure we don't run anything async accidentally
 			shouldTickParticles = i == to - 1 && levelRunning; // tick particles only on last tick
 		} else {
 			// tick zero, wait for async tasks to complete, cleanup
@@ -141,6 +142,7 @@ public class AsyncTicker {
 				particleFuture = null;
 			}
 			cancelled = false;
+			// To make sure we don't run anything async accidentally
 			shouldTickParticles = i == to - 1 && levelRunning;
 			if (levelRunning) {
 				ParticleEngine particleEngine = mc.particleEngine;
@@ -493,10 +495,10 @@ public class AsyncTicker {
 			reset();
 			particleEngine.clearParticles();
 		} else {
-			BusyWaitEvictingQueue<Particle> newToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+			Queue<Particle> newToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 			newToAdd.addAll(particleEngine.particlesToAdd);
 			particleEngine.particlesToAdd = newToAdd;
-			BusyWaitEvictingQueue<TrackingEmitter> newEmitters = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+			Queue<TrackingEmitter> newEmitters = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 			newEmitters.addAll(particleEngine.trackingEmitters);
 			particleEngine.trackingEmitters = newEmitters;
 			particleEngine.particles.entrySet().forEach(entry -> {

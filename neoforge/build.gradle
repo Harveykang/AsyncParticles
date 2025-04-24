@@ -80,7 +80,15 @@ dependencies {
     modCompileOnly 'maven.modrinth:sodium:mc1.21.1-0.6.13-fabric'
     modCompileOnly "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
     modCompileOnly "curse.maven:flerovium-1142875:6359527" // 1.0.4
-//    modLocalRuntime('maven.modrinth:sodium:mc1.21.1-0.6.13-neoforge')
+
+    modLocalRuntime('maven.modrinth:sodium:mc1.21.1-0.6.13-neoforge')
+    // decompressed jarjars
+    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-api-base-0.4.42+d1308ded19.jar')
+    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-rendering-data-attachment-v1-0.3.48+73761d2e19.jar')
+    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-renderer-api-v1-3.4.0+9c40919e19.jar')
+    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-block-view-api-v2-1.0.10+9afaaf8c19.jar')
+    modLocalRuntime fileTree(dir: '../libs', include: 'net.caffeinemc.sodium-neoforge-0.6.13+mc1.21.1-service.jar')
+
 //    localRuntime "org.antlr:antlr4-runtime:4.13.1"
 //    localRuntime "io.github.douira:glsl-transformer:2.0.1"
 //    localRuntime "org.anarres:jcpp:1.4.14"
