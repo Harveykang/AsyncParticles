@@ -35,7 +35,8 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 		}
 		return switch (split[0]) {
 			case "off_thread_access" -> true;
-			case "particlerain_create" -> ModListHelper.FORGE_PARTICLERAIN_LOADED && ModListHelper.FORGE_CREATE_LOADED;
+			case "particlerain_create" -> ModListHelper.FORGE_PARTICLERAIN_LOADED &&
+										  ModListHelper.CREATE_LOADED;
 			case "particlerain" -> ModListHelper.FORGE_PARTICLERAIN_LOADED;
 			case "create" -> // vulkan mod has no forge version
 				// but to avoid I forgot to cancel this mixin when they support forge
@@ -46,6 +47,8 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 //			case "flerovium" -> ModListHelper.FORGE_FLEROVIUM_LOADED;
 			case "subtle_effects" -> ModListHelper.FORGE_SUBTLE_EFFECTS_LOADED;
 			case "simple_weather" -> ModListHelper.FORGE_SIMPLE_WEATHER_LOADED;
+			case "simple_weather_create" -> ModListHelper.FORGE_SIMPLE_WEATHER_LOADED &&
+											ModListHelper.CREATE_LOADED;
 			case "particular" -> ModListHelper.FORGE_PARTICULAR_LOADED;
 			default -> throw new IllegalArgumentException("Unknown forge mixin: " + mixinClassName);
 		};

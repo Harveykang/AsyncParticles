@@ -27,6 +27,7 @@
     "particular.MixinClientStuff",
     "simple_weather.MixinRainParticle",
     "simple_weather.MixinSimpleWeather$NeoBus",
+    "simple_weather_create.MixinSimpleWeather$NeoBus",
     "subtle_effects.MixinParticleEngine"
   ],
   "injectors": {

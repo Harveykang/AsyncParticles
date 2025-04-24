@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge;
 
 import fun.qu_an.minecraft.asyncparticles.client.util.ConcurrentLong2ObjectMap;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.core.BlockPos;
 import net.neoforged.neoforge.client.model.data.ModelData;
@@ -20,6 +21,8 @@ public abstract class MixinModelDataManager {
 	@Mutable
 	@Shadow(remap = false) @Final private Long2ObjectMap<Long2ObjectMap<ModelData>> modelDataCache;
 
+	@Shadow(remap = false) @Final private Thread owningThread;
+
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onStaticInit(CallbackInfo ci) {
 		needModelDataRefresh = new ConcurrentLong2ObjectMap<>(needModelDataRefresh);
@@ -32,6 +35,7 @@ public abstract class MixinModelDataManager {
 	 */
 	@Overwrite(remap = false)
 	private boolean isOtherThread() {
-		return false;
+		return Thread.currentThread() != owningThread &&
+			   !ThreadUtil.isOnParticleTickerThread();
 	}
 }

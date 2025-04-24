@@ -90,8 +90,8 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				}
 				yield switch (split[1]) {
 					case "off_thread_access" -> !ModListHelper.IS_FORGE;
-					case "particlerain_create" ->
-						ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.FABRIC_CREATE_LOADED;
+					case "particlerain_create" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED &&
+												  ModListHelper.CREATE_LOADED;
 					case "particlerain" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED;
 					case "create" -> ModListHelper.FABRIC_CREATE_LOADED;
 					case "effective" -> ModListHelper.FABRIC_EFFECTIVE_LOADED;

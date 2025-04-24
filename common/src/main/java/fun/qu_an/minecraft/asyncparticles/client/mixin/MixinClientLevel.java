@@ -3,7 +3,6 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -70,8 +69,7 @@ public abstract class MixinClientLevel extends Level {
 			// don't tick animate if the game is lagging
 			return;
 		}
-		if (!ModListHelper.PHYSICSMOD_LOADED &&
-			!SimplePropertiesConfig.asyncBlockEntityAnimate()) {
+		if (!SimplePropertiesConfig.asyncBlockEntityAnimate()) {
 			original.call(i, j, k);
 		} else {
 			AsyncTicker.addEndTickTask(() -> original.call(i, j, k));
