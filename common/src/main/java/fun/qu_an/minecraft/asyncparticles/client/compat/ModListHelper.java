@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import org.jetbrains.annotations.Nullable;
 //import org.sinytra.connector.ConnectorEarlyLoader;
 
 public class ModListHelper {

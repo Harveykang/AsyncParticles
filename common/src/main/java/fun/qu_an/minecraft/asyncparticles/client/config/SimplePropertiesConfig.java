@@ -22,8 +22,6 @@ public class SimplePropertiesConfig {
 	private static boolean suppressCME = false;
 	private static boolean renderAsync = true;
 	private static boolean tickAsync = true;
-	private static boolean collideWithCreateModContraptions = true;
-	private static boolean collideWithVSModShips = true;
 	private static boolean cullParticles = true;
 	private static boolean shouldSave;
 
