@@ -14,7 +14,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -36,7 +35,6 @@ public abstract class MixinParticleEngine {
 
 	@Mutable
 	@Shadow
-	@Final
 	public Queue<TrackingEmitter> trackingEmitters;
 
 	@Shadow
@@ -212,7 +210,7 @@ public abstract class MixinParticleEngine {
 		particlesToAdd.forEach(AsyncTicker::onEvicted);
 		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 		trackingEmitters.forEach(AsyncTicker::onEvicted);
-		trackingEmitters = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+		trackingEmitters = new BusyWaitEvictingQueue<>(256, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 		particles.values().forEach(queue -> queue.forEach(AsyncTicker::onEvicted));
 		AsyncTicker.onParticleEngineClear();
 	}

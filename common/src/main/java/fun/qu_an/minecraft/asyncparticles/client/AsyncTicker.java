@@ -128,9 +128,11 @@ public class AsyncTicker {
 			blockEntityTickFuture.join();
 			blockEntityTickFuture = null;
 		}
+		Minecraft mc = Minecraft.getInstance();
+		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
 		if (i != 0) {
 			// tick non-zero, do nothing
-			shouldTickParticles = i == to - 1; // tick particles only on last tick
+			shouldTickParticles = i == to - 1 && levelRunning; // tick particles only on last tick
 		} else {
 			// tick zero, wait for async tasks to complete, cleanup
 			cancelled = true;
@@ -140,9 +142,7 @@ public class AsyncTicker {
 				particleFuture = null;
 			}
 			cancelled = false;
-			shouldTickParticles = i == to - 1;
-			Minecraft mc = Minecraft.getInstance();
-			boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
+			shouldTickParticles = i == to - 1 && levelRunning;
 			if (levelRunning) {
 				ParticleEngine particleEngine = mc.particleEngine;
 				Collection<Queue<Particle>> values = particleEngine.particles.values();
@@ -496,10 +496,10 @@ public class AsyncTicker {
 			reset();
 			particleEngine.clearParticles();
 		} else {
-			BusyWaitEvictingQueue<Particle> newToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+			Queue<Particle> newToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 			newToAdd.addAll(particleEngine.particlesToAdd);
 			particleEngine.particlesToAdd = newToAdd;
-			BusyWaitEvictingQueue<TrackingEmitter> newEmitters = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+			Queue<TrackingEmitter> newEmitters = new BusyWaitEvictingQueue<>(256, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 			newEmitters.addAll(particleEngine.trackingEmitters);
 			particleEngine.trackingEmitters = newEmitters;
 			particleEngine.particles.entrySet().forEach(entry -> {

@@ -53,7 +53,7 @@ public abstract class MixinParticleEngine_Late {
 	public void initTail(CallbackInfo ci) {
 		trackedParticleCounts = new TrackedParticleCountsMap();
 		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
-		trackingEmitters = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+		trackingEmitters = new BusyWaitEvictingQueue<>(256, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 		random = new SingleThreadedRandomSource(ThreadLocalRandom.current().nextInt());
 		// make custom types render after non-customs
 		// Remove duplicated render types, (e.g. Hex Casting mod's bug)

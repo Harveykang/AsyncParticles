@@ -37,7 +37,6 @@ public abstract class MixinParticleEngine_Render {
 
 	@Shadow
 	@Mutable
-	@Final
 	public static List<ParticleRenderType> RENDER_ORDER;
 
 	/**

@@ -411,6 +411,11 @@ public class AsyncRenderer {
 			// this most breaks only one frame, so we can ignore it for now...
 			exception = e;
 			LOGGER.warn("Exception try&store-ing vertex format/mode for particle render type: {}", k, e);
+			RenderSystem.disableBlend();
+			RenderSystem.depthMask(true);
+			RenderSystem.enableDepthTest();
+			RenderSystem.enableCull();
+			RenderSystem.defaultBlendFunc();
 		}
 		VertexFormat.Mode mode = fakeBufferBuilder.getVertexFormatMode();
 		VertexFormat format = fakeBufferBuilder.getFormat();
