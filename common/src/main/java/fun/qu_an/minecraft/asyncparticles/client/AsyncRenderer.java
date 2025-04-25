@@ -135,15 +135,17 @@ public class AsyncRenderer {
 			levelRenderer.captureFrustum = false;
 		}
 		if (!SimplePropertiesConfig.isRenderAsync()) {
-			AsyncRenderer.captureParticleRenderingSetting();
+			captureParticleRenderingSetting();
 			AsyncRenderer.tryDebug();
 			return;
 		}
 		profiler.popPush("async_particles");
+		tryDebug();
+		clearSync();
 		resetBTesselators();
-		ParticleEngine particleEngine = mc.particleEngine;
 		captureParticleRenderingSetting();
 		profiler.push("render_async");
+		ParticleEngine particleEngine = mc.particleEngine;
 		TextureManager textureManager = particleEngine.textureManager;
 		Collection<ParticleRenderType> renderOrder = ModListHelper.IS_FORGE
 			? particleEngine.particles.keySet()
@@ -168,8 +170,6 @@ public class AsyncRenderer {
 		}
 		int size = asyncTasksSize = asyncTasks.size();
 		asyncTask = CompletableFuture.allOf(asyncTasks.toArray(new CompletableFuture[size]));
-		tryDebug();
-		clearSync();
 		profiler.pop();
 	}
 
@@ -240,20 +240,12 @@ public class AsyncRenderer {
 				}
 			} else {
 				builder = tesselator.begin();
-				Frustum frustum = AsyncRenderer.frustum;
 				float f2 = f + 1f;
 				for (Particle particle : sync) {
 					if (!particle.isAlive()) {
 						continue;
 					}
 					float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
-					if (SimplePropertiesConfig.isCullParticles() && !FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
-						continue;
-					}
-					if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
-						AsyncRenderer.recordSync(particleRenderType, particle);
-						continue;
-					}
 					try {
 						particle.render(builder, camera, f3);
 					} catch (Throwable t) {
@@ -298,20 +290,12 @@ public class AsyncRenderer {
 				}
 			} else {
 				builder = tesselator.begin();
-				Frustum frustum = AsyncRenderer.frustum;
 				float f2 = f + 1f;
 				for (Particle particle : sync) {
 					if (!particle.isAlive()) {
 						continue;
 					}
 					float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
-					if (SimplePropertiesConfig.isCullParticles() && !FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
-						continue;
-					}
-					if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
-						AsyncRenderer.recordSync(particleRenderType, particle);
-						continue;
-					}
 					try {
 						particle.render(builder, camera, f3);
 					} catch (Throwable t) {
@@ -340,9 +324,6 @@ public class AsyncRenderer {
 	}
 
 	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable t) {
-		if (t instanceof ReportedException re) {
-			return re;
-		}
 		CrashReport crashReport = CrashReport.forThrowable(t, "Rendering Particle");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
 		crashReportCategory.setDetail("Particle", particle::toString);
@@ -355,7 +336,7 @@ public class AsyncRenderer {
 		return new ReportedException(crashReport);
 	}
 
-	public static void captureParticleRenderingSetting() {
+	private static void captureParticleRenderingSetting() {
 		if (ModListHelper.IRIS_LIKE_LOADED) {
 			mixedParticleRenderingSetting = Iris.isPackInUseQuick() &&
 											getParticleRenderingSettings0() == ParticleRenderingSettings.MIXED;
