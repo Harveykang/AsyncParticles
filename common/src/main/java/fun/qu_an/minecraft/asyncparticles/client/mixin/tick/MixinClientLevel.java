@@ -10,6 +10,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.Level;
@@ -19,6 +20,7 @@ import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.level.storage.WritableLevelData;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -63,6 +65,9 @@ public abstract class MixinClientLevel extends Level {
 		}
 	}
 
+	@Unique
+	private static final ResourceLocation asyncparticles$ANIMATE_TICK =
+		ResourceLocation.tryBuild("asyncparticles", "animate_tick");
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int i, int j, int k, Operation<Void> original) {
 		if (!AsyncTicker.shouldTickParticles &&
@@ -73,7 +78,7 @@ public abstract class MixinClientLevel extends Level {
 		if (!SimplePropertiesConfig.asyncBlockEntityAnimate()) {
 			original.call(i, j, k);
 		} else {
-			AsyncTicker.addEndTickTask(() -> original.call(i, j, k));
+			AsyncTicker.addEndTickTask(asyncparticles$ANIMATE_TICK, () -> original.call(i, j, k));
 		}
 	}
 

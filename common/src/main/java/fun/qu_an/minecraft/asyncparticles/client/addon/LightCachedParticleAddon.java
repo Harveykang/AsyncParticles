@@ -11,11 +11,11 @@ public interface LightCachedParticleAddon {
 		return (lightCache & 0xF) << 4 | (lightCache & 0xF0) << 16;
 	}
 
-	void asyncParticles$setLight(int light);
+	void asyncparticles$setLight(int light);
 
-	byte asyncParticles$getCompressedLight();
+	byte asyncparticles$getCompressedLight();
 
-	void asyncParticles$refresh();
+	void asyncparticles$refresh();
 
-	int asyncParticles$invoke_getLightColor(float partialTick);
+	int asyncparticles$invoke_getLightColor(float partialTick);
 }

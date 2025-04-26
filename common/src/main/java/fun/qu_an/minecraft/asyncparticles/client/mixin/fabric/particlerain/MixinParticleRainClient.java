@@ -19,12 +19,12 @@ import pigcart.particlerain.ParticleRainClient;
 public class MixinParticleRainClient {
 	@ModifyExpressionValue(method = "lambda$onInitializeClient$2", at = @At(value = "FIELD", target = "Lpigcart/particlerain/WeatherParticleManager;particleCount:I"))
 	private static int modifyParticleCount(int original) {
-		return ParticleRainCompat.asyncParticles$particleCount.get();
+		return ParticleRainCompat.asyncparticles$particleCount.get();
 	}
 
 	@ModifyExpressionValue(method = "lambda$onInitializeClient$2", at = @At(value = "FIELD", target = "Lpigcart/particlerain/WeatherParticleManager;fogCount:I"))
 	private static int modifyFogCount(int original) {
-		return ParticleRainCompat.asyncParticles$fogCount.get();
+		return ParticleRainCompat.asyncparticles$fogCount.get();
 	}
 
 	@Inject(method = "onJoin", at = @At("HEAD"))

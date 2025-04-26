@@ -24,6 +24,6 @@ import org.spongepowered.asm.mixin.Pseudo;
 })
 public abstract class MixinParticle_LightCacheNoRefresh implements LightCachedParticleAddon {
 	@Override
-	public void asyncParticles$refresh() {
+	public void asyncparticles$refresh() {
 	}
 }

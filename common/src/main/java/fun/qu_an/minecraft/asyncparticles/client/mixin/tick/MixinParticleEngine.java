@@ -195,7 +195,7 @@ public abstract class MixinParticleEngine {
 				tickParticle(particle);
 				if (particle instanceof LightCachedParticleAddon lightCachedParticle
 					&& SimplePropertiesConfig.particleLightCache()) {
-					lightCachedParticle.asyncParticles$refresh();
+					lightCachedParticle.asyncparticles$refresh();
 				}
 				((ParticleAddon) particle).asyncparticles$setTicked();
 			} catch (Throwable t) {
@@ -211,7 +211,7 @@ public abstract class MixinParticleEngine {
 			ci.cancel();
 		} else if (particle instanceof LightCachedParticleAddon lightCachedParticle
 				   && SimplePropertiesConfig.particleLightCache()) {
-			lightCachedParticle.asyncParticles$refresh();
+			lightCachedParticle.asyncparticles$refresh();
 		}
 	}
 

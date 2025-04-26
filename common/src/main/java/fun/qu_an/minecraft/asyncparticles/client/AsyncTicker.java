@@ -7,6 +7,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceC
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
+import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -20,6 +21,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -47,7 +49,7 @@ public class AsyncTicker {
 	public static boolean shouldTickParticles = false;
 	public static CompletableFuture<Void> particleCleanup;
 	private final static List<Runnable> END_TICK_EVENTS = new ArrayList<>();
-	private final static List<Runnable> END_TICK_OPERATIONS = new ArrayList<>();
+	private final static List<Pair<ResourceLocation, Runnable>> END_TICK_OPERATIONS = new ArrayList<>();
 	private static CompletableFuture<Void> particleFuture;
 	private static CompletableFuture<Void> blockEntityTickFuture;
 	private static boolean debug_cancelled = false;
@@ -55,7 +57,7 @@ public class AsyncTicker {
 	private static boolean shouldReload;
 	public static final ExecutorService EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleTicker";
-	public static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
+	private static final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
 		() -> SimplePropertiesConfig.tickFailurePerSecondThreshold
 	);
@@ -132,6 +134,7 @@ public class AsyncTicker {
 		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
 		if (i != 0) {
 			// tick non-zero, do nothing
+			// To make sure we don't run anything async accidentally
 			shouldTickParticles = i == to - 1 && levelRunning; // tick particles only on last tick
 		} else {
 			// tick zero, wait for async tasks to complete, cleanup
@@ -142,6 +145,7 @@ public class AsyncTicker {
 				particleFuture = null;
 			}
 			cancelled = false;
+			// To make sure we don't run anything async accidentally
 			shouldTickParticles = i == to - 1 && levelRunning;
 			if (levelRunning) {
 				ParticleEngine particleEngine = mc.particleEngine;
@@ -191,7 +195,7 @@ public class AsyncTicker {
 		if (!SimplePropertiesConfig.isTickAsync()) {
 			tryReload();
 			tryDebug();
-			END_TICK_OPERATIONS.forEach(Runnable::run);
+			END_TICK_OPERATIONS.forEach(p -> p.second().run());
 			END_TICK_OPERATIONS.clear();
 			END_TICK_EVENTS.forEach(Runnable::run);
 			return;
@@ -233,7 +237,7 @@ public class AsyncTicker {
 				for (Runnable blockEntityTask : blockEntityTasks) {
 					blockEntityTask.run();
 				}
-			}, EXECUTOR).exceptionally(AsyncTicker::tickBeforeExceptionally);
+			}, EXECUTOR).exceptionally(AsyncTicker::tickExceptionally);
 			AsyncTicker.blockEntityTickFuture = particleFuture;
 		}
 
@@ -242,22 +246,35 @@ public class AsyncTicker {
 			particleFuture = particleFuture.thenRun(() -> {
 				// 每 tick 结束时都要执行的固定事件
 				for (Runnable endTickEvent : END_TICK_EVENTS) {
-					endTickEvent.run();
+					try {
+						endTickEvent.run();
+					} catch (Exception e) {
+						if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickEvent, e)) {
+							throw e;
+						}
+					}
 				}
-			}).exceptionally(AsyncTicker::tickBeforeExceptionally);
+			}).exceptionally(AsyncTicker::tickExceptionally);
 		}
 
 		// end tick operations
-		List<Runnable> endTickOperations = END_TICK_OPERATIONS;
+		List<Pair<ResourceLocation, Runnable>> endTickOperations = END_TICK_OPERATIONS;
 		if (!endTickOperations.isEmpty()) {
-			Runnable[] endTickTasks = endTickOperations.toArray(new Runnable[0]);
+			@SuppressWarnings("unchecked")
+			Pair<ResourceLocation, Runnable>[] endTickTasks = endTickOperations.toArray(new Pair[0]);
 			endTickOperations.clear();
 			particleFuture = particleFuture.thenRun(() -> {
 				// 每 tick 添加的不固定操作
-				for (Runnable endTickTask : endTickTasks) {
-					endTickTask.run();
+				for (Pair<ResourceLocation, Runnable> endTickTask : endTickTasks) {
+					try {
+						endTickTask.second().run();
+					} catch (Exception e) {
+						if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickTask.first(), e)) {
+							throw e;
+						}
+					}
 				}
-			}).exceptionally(AsyncTicker::tickBeforeExceptionally);
+			}).exceptionally(AsyncTicker::tickExceptionally);
 		}
 
 		// particle ticking
@@ -284,7 +301,7 @@ public class AsyncTicker {
 		profiler.pop();
 	}
 
-	private static Void tickBeforeExceptionally(Throwable e) {
+	private static Void tickExceptionally(Throwable e) {
 		if (!(e instanceof Exception)) {
 			throw toThrowDirectly(e);
 		}
@@ -344,10 +361,13 @@ public class AsyncTicker {
 		if (!(e instanceof Exception)) {
 			return false;
 		}
-		return ExceptionUtil.getRootCause(e) instanceof MissingPaletteEntryException
-			   || e instanceof NullPointerException
-			   || e instanceof IndexOutOfBoundsException
-			   || (SimplePropertiesConfig.suppressCME() && e instanceof ConcurrentModificationException);
+		// TODO: 是否要对链上的每个异常都进行判断
+		Throwable rootCause = ExceptionUtil.getRootCause(e);
+		return rootCause instanceof MissingPaletteEntryException
+			   || rootCause instanceof NullPointerException
+			   || rootCause instanceof IndexOutOfBoundsException
+			   || rootCause instanceof ArrayIndexOutOfBoundsException
+			   || (rootCause instanceof ConcurrentModificationException && SimplePropertiesConfig.suppressCME());
 	}
 
 	public static void onParticleEngineClear() {
@@ -390,7 +410,7 @@ public class AsyncTicker {
 				if (!(particle instanceof TrackingEmitter)) {
 					if (particle instanceof LightCachedParticleAddon lightCachedParticle
 						&& SimplePropertiesConfig.particleLightCache()) {
-						lightCachedParticle.asyncParticles$refresh();
+						lightCachedParticle.asyncparticles$refresh();
 					}
 					((ParticleAddon) particle).asyncparticles$setTicked();
 				}
@@ -539,17 +559,17 @@ public class AsyncTicker {
 		AsyncTicker.END_TICK_EVENTS.add(operation);
 	}
 
-	public static void addEndTickTask(MinecraftConsumer consumer) {
-		addEndTickTask(() -> consumer.accept(Minecraft.getInstance()));
+	public static void addEndTickTask(ResourceLocation resourceLocation, MinecraftConsumer consumer) {
+		addEndTickTask(resourceLocation, () -> consumer.accept(Minecraft.getInstance()));
 	}
 
-	public static void addEndTickTask(ClientLevelConsumer consumer) {
-		addEndTickTask(() -> consumer.accept(Minecraft.getInstance().level));
+	public static void addEndTickTask(ResourceLocation resourceLocation, ClientLevelConsumer consumer) {
+		addEndTickTask(resourceLocation, () -> consumer.accept(Minecraft.getInstance().level));
 	}
 
-	public static void addEndTickTask(Runnable operation) {
+	public static void addEndTickTask(ResourceLocation resourceLocation, Runnable operation) {
 		if (shouldTickParticles || !SimplePropertiesConfig.isTickAsync()) {
-			AsyncTicker.END_TICK_OPERATIONS.add(operation);
+			AsyncTicker.END_TICK_OPERATIONS.add(Pair.of(resourceLocation, operation));
 		}
 	}
 
