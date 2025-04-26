@@ -117,7 +117,7 @@ dependencies {
 
     /* Subtle Effects */
     localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"
-//    modLocalRuntime "maven.modrinth:subtle-effects:NA1rBYFJ" // fabric 1.9.4-hf.1
+    modLocalRuntime "maven.modrinth:subtle-effects:NA1rBYFJ" // fabric 1.9.4-hf.1
 
     /* What Are They Up To */
 //    modCompileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5

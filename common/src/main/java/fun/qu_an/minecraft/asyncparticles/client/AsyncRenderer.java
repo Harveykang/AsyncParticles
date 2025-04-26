@@ -142,7 +142,7 @@ public class AsyncRenderer {
 		profiler.popPush("async_particles");
 		tryDebug();
 		clearSync();
-		resetBTesselators();
+//		resetBTesselators();
 		captureParticleRenderingSetting();
 		profiler.push("render_async");
 		ParticleEngine particleEngine = mc.particleEngine;
@@ -242,9 +242,6 @@ public class AsyncRenderer {
 				builder = tesselator.begin();
 				float f2 = f + 1f;
 				for (Particle particle : sync) {
-					if (!particle.isAlive()) {
-						continue;
-					}
 					float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
 					try {
 						particle.render(builder, camera, f3);
@@ -292,9 +289,6 @@ public class AsyncRenderer {
 				builder = tesselator.begin();
 				float f2 = f + 1f;
 				for (Particle particle : sync) {
-					if (!particle.isAlive()) {
-						continue;
-					}
 					float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
 					try {
 						particle.render(builder, camera, f3);

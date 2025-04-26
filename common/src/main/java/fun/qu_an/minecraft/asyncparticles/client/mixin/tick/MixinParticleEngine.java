@@ -187,6 +187,10 @@ public abstract class MixinParticleEngine {
 				Utils.DUMMY_ITERATOR.remove();
 				continue;
 			}
+			if (((ParticleAddon) particle).asyncparticles$isTicked()) {
+				// Skip the first tick that the particle is added to the queue.
+				continue;
+			}
 			if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
 				AsyncTicker.recordSync(particle);
 				continue;
@@ -208,7 +212,8 @@ public abstract class MixinParticleEngine {
 	public void add(Particle particle, CallbackInfo ci) {
 		if (!AsyncTicker.shouldTickParticles && SimplePropertiesConfig.isTickAsync()) {
 			particle.remove(); // to compatible with some mods...
-			ci.cancel();
+			// don't cancel it,
+			// otherwise it may cause memory leak with some mods
 		} else if (particle instanceof LightCachedParticleAddon lightCachedParticle
 				   && SimplePropertiesConfig.particleLightCache()) {
 			lightCachedParticle.asyncparticles$refresh();

@@ -49,10 +49,6 @@ public abstract class MixinParticleEngine_Render {
 			if (SimplePropertiesConfig.isCullParticles() && !FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
 				continue;
 			}
-			if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
-				AsyncRenderer.recordSync(particleRenderType, particle);
-				continue;
-			}
 			try {
 				particle.render(vertexconsumer, camera, f3);
 			} catch (Throwable t) {
