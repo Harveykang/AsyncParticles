@@ -70,7 +70,7 @@ public abstract class MixinParticleEngine {
 
 		// submit this task even though the queue is empty
 		// we'll add particles later
-		AsyncTicker.PARTICLE_OPERATIONS.add(this::asyncParticles$tickEmitters);
+		AsyncTicker.PARTICLE_OPERATIONS.add(this::asyncparticles$tickEmitters);
 
 		AsyncTicker.waitForCleanUp();
 
@@ -98,7 +98,7 @@ public abstract class MixinParticleEngine {
 							k != ParticleRenderType.NO_RENDER &&
 							!RENDER_ORDER.contains(k)) {
 							// holy shit, this is definitely a giant of shit
-							asyncParticles_Neo$addToOrderList(k);
+							asyncparticles_Neo$addToOrderList(k);
 						}
 						return queue1;
 					});
@@ -109,7 +109,7 @@ public abstract class MixinParticleEngine {
 	}
 
 	@Unique
-	private void asyncParticles$tickEmitters() {
+	private void asyncparticles$tickEmitters() {
 		for (TrackingEmitter emitter : this.trackingEmitters) {
 			if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneParticleTick()) {
 				return;
@@ -130,7 +130,7 @@ public abstract class MixinParticleEngine {
 	}
 
 	@Unique
-	private void asyncParticles_Neo$addToOrderList(ParticleRenderType k) {
+	private void asyncparticles_Neo$addToOrderList(ParticleRenderType k) {
 		// must treat as ImmutableList. forge will use this to order treemap
 		List<ParticleRenderType> list = new ArrayList<>(RENDER_ORDER.size() + 1);
 		for (ParticleRenderType type : RENDER_ORDER) {
@@ -180,7 +180,7 @@ public abstract class MixinParticleEngine {
 				tickParticle(particle);
 				if (particle instanceof LightCachedParticleAddon lightCachedParticle
 					&& SimplePropertiesConfig.particleLightCache()) {
-					lightCachedParticle.asyncParticles$refresh();
+					lightCachedParticle.asyncparticles$refresh();
 				}
 				((ParticleAddon) particle).asyncparticles$setTicked();
 			} catch (Throwable t) {
@@ -197,7 +197,7 @@ public abstract class MixinParticleEngine {
 			// otherwise it may cause memory leak with some mods
 		} else if (particle instanceof LightCachedParticleAddon lightCachedParticle
 				   && SimplePropertiesConfig.particleLightCache()) {
-			lightCachedParticle.asyncParticles$refresh();
+			lightCachedParticle.asyncparticles$refresh();
 		}
 	}
 

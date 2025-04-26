@@ -12,12 +12,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinModClientForgeEvents {
 	@ModifyExpressionValue(method = "lambda$registerClientCommands$0", at = @At(value = "FIELD", target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;particleCount:I"))
 	private static int modifyParticleCount(int original) {
-		return ParticleRainCompat.asyncParticles$particleCount.get();
+		return ParticleRainCompat.asyncparticles$particleCount.get();
 	}
 
 	@ModifyExpressionValue(method = "lambda$registerClientCommands$0", at = @At(value = "FIELD", target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;fogCount:I"))
 	private static int modifyFogCount(int original) {
-		return ParticleRainCompat.asyncParticles$fogCount.get();
+		return ParticleRainCompat.asyncparticles$fogCount.get();
 	}
 
 	@Inject(method = {"onPlayerJoin", "onPlayerClone"}, at = @At("HEAD"))

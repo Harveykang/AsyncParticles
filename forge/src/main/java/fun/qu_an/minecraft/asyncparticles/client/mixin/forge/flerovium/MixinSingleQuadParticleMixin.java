@@ -20,6 +20,6 @@ public abstract class MixinSingleQuadParticleMixin implements LightCachedParticl
 		at = @At(value = "INVOKE", remap = false,
 			target = "Lnet/minecraft/client/particle/SingleQuadParticle;flerovium$getLightColorCached(FLnet/minecraft/client/Camera;)I"))
 	private int redirectGetLightColor(SingleQuadParticle particle, float pt, Camera camera) {
-		return asyncParticles$invoke_getLightColor(pt);
+		return asyncparticles$invoke_getLightColor(pt);
 	}
 }

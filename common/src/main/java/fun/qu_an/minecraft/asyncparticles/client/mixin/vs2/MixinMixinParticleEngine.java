@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinMixinParticleEngine {
 	@TargetHandler(
 		mixin = "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticleEngine",
-		name = "asyncParticles$tickEmitters"
+		name = "asyncparticles$tickEmitters"
 	)
 	@Inject(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
 		target = "Lnet/minecraft/client/particle/TrackingEmitter;tick()V"))

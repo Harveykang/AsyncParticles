@@ -42,7 +42,7 @@ public class MixinParticleEngine_Late {
 				Pair<VertexFormat.Mode, VertexFormat> bTesselator1 = AsyncRenderer.getVertexFormatPair(o1, textureManager);
 				Pair<VertexFormat.Mode, VertexFormat> bTesselator2 = AsyncRenderer.getVertexFormatPair(o2, textureManager);
 				if (bTesselator1 == AsyncRenderer.EMPTY_FORMAT && bTesselator2 == AsyncRenderer.EMPTY_FORMAT) {
-					return asyncParticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
+					return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
 				}
 				if (bTesselator2 == AsyncRenderer.EMPTY_FORMAT) {
 					return -1;
@@ -66,7 +66,7 @@ public class MixinParticleEngine_Late {
 					return Integer.compare(vanillaOne, vanillaTwo);
 				}
 				if (vanillaOne == -1 && vanillaTwo == -1) {
-					return asyncParticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
+					return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
 				}
 				return vanillaOne >= 0 ? -1 : 1;
 			});
@@ -76,7 +76,7 @@ public class MixinParticleEngine_Late {
 	}
 
 	@Unique
-	private static int asyncParticles$compareWithIdentityHashCode(ParticleRenderType o1, ParticleRenderType o2, Map<ParticleRenderType, Integer> insertionOrder, AtomicInteger orderGenerator) {
+	private static int asyncparticles$compareWithIdentityHashCode(ParticleRenderType o1, ParticleRenderType o2, Map<ParticleRenderType, Integer> insertionOrder, AtomicInteger orderGenerator) {
 		int hashCompare = Integer.compare(System.identityHashCode(o1), System.identityHashCode(o2));
 		if (hashCompare != 0) {
 			return hashCompare;

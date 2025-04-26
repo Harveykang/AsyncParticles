@@ -38,7 +38,7 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 	@Shadow
 	public double z;
 	@Unique
-	private ClientShip asyncParticles$vsShip;
+	private ClientShip asyncparticles$vsShip;
 
 	/**
 	 * See {@link fun.qu_an.minecraft.asyncparticles.client.mixin.create.MixinParticle#collideBoundingBox}
@@ -69,27 +69,27 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 								 @SuppressWarnings("LocalMayBeArgsOnly")
 								 @Local(ordinal = 0)
 								 ClientShip ship) {
-		asyncParticles$setShip(ship);
+		asyncparticles$setShip(ship);
 	}
 
 	@Override // inject after MixinParticle_LightCache to override
-	public void asyncParticles$refresh() {
+	public void asyncparticles$refresh() {
 		BlockPos blockPos = BlockPos.containing(x, y, z);
 		int light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
-		if (asyncParticles$vsShip == null || !SimplePropertiesConfig.fixParticleLightOnVsShips()) {
-			asyncParticles$setLight(light);
+		if (asyncparticles$vsShip == null || !SimplePropertiesConfig.fixParticleLightOnVsShips()) {
+			asyncparticles$setLight(light);
 		} else {
-			Vector3d transformed = asyncParticles$vsShip.getWorldToShip().transformPosition(x, y, z, new Vector3d());
+			Vector3d transformed = asyncparticles$vsShip.getWorldToShip().transformPosition(x, y, z, new Vector3d());
 			BlockPos pos = BlockPos.containing(transformed.x, transformed.y, transformed.z);
 			int shipLight = level.hasChunkAt(pos) ? LevelRenderer.getLightColor(level, pos) : 0;
 			int finalLight = Math.max(light & 0xFFFF, shipLight & 0xFFFF) | // max for block, min for sky
 					Math.min(light & 0xFFFF0000, shipLight & 0xFFFF0000);
-			asyncParticles$setLight(finalLight);
+			asyncparticles$setLight(finalLight);
 		}
 	}
 
 	@Override
-	public void asyncParticles$setShip(ClientShip ship) {
-		asyncParticles$vsShip = ship;
+	public void asyncparticles$setShip(ClientShip ship) {
+		asyncparticles$vsShip = ship;
 	}
 }

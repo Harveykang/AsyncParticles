@@ -15,7 +15,7 @@ import com.leclowndu93150.particlerain.particle.RippleParticle;
 @Mixin(value = RippleParticle.class)
 public abstract class MixinRippleParticle extends MixinWeatherParticle implements RippleParticleAddon {
 	@Unique
-	private Vector3f asyncParticles$normal;
+	private Vector3f asyncparticles$normal;
 
 	protected MixinRippleParticle(ClientLevel level, double x, double y, double z) {
 		super(level, x, y, z);
@@ -23,7 +23,7 @@ public abstract class MixinRippleParticle extends MixinWeatherParticle implement
 
 	@Redirect(method = "render", at = @At(value = "NEW", remap = false, target = "(Lorg/joml/AxisAngle4d;)Lorg/joml/Quaternionf;"))
 	private Quaternionf redirectNewQuaternionf(AxisAngle4d axisAngle) {
-		Vector3f normal = this.asyncParticles$normal;
+		Vector3f normal = this.asyncparticles$normal;
 		if (normal == null) {
 			return new Quaternionf(axisAngle);
 		}
@@ -32,6 +32,6 @@ public abstract class MixinRippleParticle extends MixinWeatherParticle implement
 
 	@Override
 	public void asyncedParticles$setNormal(Vector3f normal) {
-		this.asyncParticles$normal = normal;
+		this.asyncparticles$normal = normal;
 	}
 }

@@ -23,25 +23,25 @@ import yesman.epicfight.client.particle.TrailParticle;
 })
 public class MixinConcurrencyUnsafeParticles {
 	@Unique
-	private final SpinLock asyncParticles$lock = new SpinLock();
+	private final SpinLock asyncparticles$lock = new SpinLock();
 
 	@WrapMethod(method = "render")
 	public void render(VertexConsumer buffer, Camera renderInfo, float partialTicks, Operation<Void> original) {
-		asyncParticles$lock.lock();
+		asyncparticles$lock.lock();
 		try {
 			original.call(buffer, renderInfo, partialTicks);
 		} finally {
-			asyncParticles$lock.unlock();
+			asyncparticles$lock.unlock();
 		}
 	}
 
 	@WrapMethod(method = "tick")
 	public void tick(Operation<Void> original) {
-		asyncParticles$lock.lock();
+		asyncparticles$lock.lock();
 		try {
 			original.call();
 		} finally {
-			asyncParticles$lock.unlock();
+			asyncparticles$lock.unlock();
 		}
 	}
 }

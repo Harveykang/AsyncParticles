@@ -22,7 +22,7 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 	@Shadow public double y;
 	@Shadow public double z;
 	@Unique
-	private byte asyncParticles$lightCache = INITIAL_LIGHT_CACHE;
+	private byte asyncparticles$lightCache = INITIAL_LIGHT_CACHE;
 	@Shadow
 	public int getLightColor(float partialTick) {
 		throw new AssertionError();
@@ -31,30 +31,30 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 	@WrapMethod(method = "getLightColor")
 	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {
 		return SimplePropertiesConfig.particleLightCache()
-			? decompress(asyncParticles$getCompressedLight())
+			? decompress(asyncparticles$getCompressedLight())
 			: original.call(partialTick);
 	}
 
 	@Override
-	public void asyncParticles$refresh() {
+	public void asyncparticles$refresh() {
 		// for some particles, light is hard coded, so this is not necessary for all particles
 		BlockPos blockPos = BlockPos.containing(x, y, z);
 		int light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
-		asyncParticles$setLight(light);
+		asyncparticles$setLight(light);
 	}
 
 	@Override
-	public void asyncParticles$setLight(int light) {
-		asyncParticles$lightCache = compress(light);
+	public void asyncparticles$setLight(int light) {
+		asyncparticles$lightCache = compress(light);
 	}
 
 	@Override
-	public byte asyncParticles$getCompressedLight() {
-		return asyncParticles$lightCache;
+	public byte asyncparticles$getCompressedLight() {
+		return asyncparticles$lightCache;
 	}
 
 	@Override
-	public int asyncParticles$invoke_getLightColor(float partialTick) {
+	public int asyncparticles$invoke_getLightColor(float partialTick) {
 		return getLightColor(partialTick);
 	}
 }

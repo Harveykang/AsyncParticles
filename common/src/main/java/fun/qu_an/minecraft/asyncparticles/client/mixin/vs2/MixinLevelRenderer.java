@@ -22,7 +22,7 @@ public class MixinLevelRenderer {
 		// this mixin will be cancelled by vs_addition
 		mixin = "org.valkyrienskies.mod.mixin.feature.transform_particles.MixinLevelRenderer"
 	)
-	@Group(name = "asyncParticles:vs2$spawnParticleInWorld", min = 1, max = 1)
+	@Group(name = "asyncparticles:vs2$spawnParticleInWorld", min = 1, max = 1)
 	@Redirect(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", remap = false,
 		target = "Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;setReturnValue(Ljava/lang/Object;)V"))
 	private <T> void onSpawnParticleInWorld(CallbackInfoReturnable<T> instance,
@@ -31,7 +31,7 @@ public class MixinLevelRenderer {
 											@Local(ordinal = 0) ClientShip ship) {
 		instance.setReturnValue(particle);
 		if (particle != null) {
-			((VSParticleAddon) particle).asyncParticles$setShip(ship);
+			((VSParticleAddon) particle).asyncparticles$setShip(ship);
 		}
 	}
 
@@ -42,14 +42,14 @@ public class MixinLevelRenderer {
 		// forgix modifies the package name
 		mixin = "fabric.io.github.xiewuzhiying.vs_addition.mixin.valkyrienskies.client.MixinMixinLevelRenderer"
 	)
-	@Group(name = "asyncParticles:vs2$spawnParticleInWorld", min = 1, max = 1)
+	@Group(name = "asyncparticles:vs2$spawnParticleInWorld", min = 1, max = 1)
 	@Inject(method = "@MixinSquared:Handler", at = @At(value = "RETURN", ordinal = 2))
 	private <T> void onSpawnParticleInWorld1(CallbackInfoReturnable<T> cir,
 											@SuppressWarnings("LocalMayBeArgsOnly")
 											@Local(ordinal = 0) ClientShip ship) {
 		T particle = cir.getReturnValue();
 		if (particle != null) {
-			((VSParticleAddon) particle).asyncParticles$setShip(ship);
+			((VSParticleAddon) particle).asyncparticles$setShip(ship);
 		}
 	}
 
@@ -59,14 +59,14 @@ public class MixinLevelRenderer {
 		// forgix modifies the package name
 		mixin = "forge.io.github.xiewuzhiying.vs_addition.mixin.valkyrienskies.client.MixinMixinLevelRenderer"
 	)
-	@Group(name = "asyncParticles:vs2$spawnParticleInWorld", min = 1, max = 1)
+	@Group(name = "asyncparticles:vs2$spawnParticleInWorld", min = 1, max = 1)
 	@Inject(method = "@MixinSquared:Handler", at = @At(value = "RETURN", ordinal = 2))
 	private <T> void onSpawnParticleInWorld2(CallbackInfoReturnable<T> cir,
 											@SuppressWarnings("LocalMayBeArgsOnly")
 											@Local(ordinal = 0) ClientShip ship) {
 		T particle = cir.getReturnValue();
 		if (particle != null) {
-			((VSParticleAddon) particle).asyncParticles$setShip(ship);
+			((VSParticleAddon) particle).asyncparticles$setShip(ship);
 		}
 	}
 }
