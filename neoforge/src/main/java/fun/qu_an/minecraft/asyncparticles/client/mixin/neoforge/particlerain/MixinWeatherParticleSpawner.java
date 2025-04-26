@@ -17,12 +17,12 @@ import org.spongepowered.asm.mixin.injection.At;
 public class MixinWeatherParticleSpawner {
 	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", remap = false, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;particleCount:I"))
 	private static int modifyParticleCount(int original) {
-		return ParticleRainCompat.asyncParticles$particleCount.get();
+		return ParticleRainCompat.asyncparticles$particleCount.get();
 	}
 
 	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", remap = false, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;fogCount:I"))
 	private static int modifyFogCount(int original) {
-		return ParticleRainCompat.asyncParticles$fogCount.get();
+		return ParticleRainCompat.asyncparticles$fogCount.get();
 	}
 
 	@Unique

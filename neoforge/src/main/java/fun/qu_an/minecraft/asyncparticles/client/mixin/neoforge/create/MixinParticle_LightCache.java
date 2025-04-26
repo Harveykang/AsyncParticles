@@ -18,14 +18,14 @@ public abstract class MixinParticle_LightCache
 	@WrapMethod(method = "getLightColor")
 	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {
 		return SimplePropertiesConfig.particleLightCache()
-			? decompress(asyncParticles$getCompressedLight())
+			? decompress(asyncparticles$getCompressedLight())
 			: original.call(partialTick);
 	}
 
 	@Override
-	public void asyncParticles$refresh() {
+	public void asyncparticles$refresh() {
 		BlockPos blockpos = BlockPos.containing(x, y, z);
 		int light = level.isLoaded(blockpos) ? LevelRenderer.getLightColor(level, blockpos) : 0;
-		asyncParticles$setLight(light);
+		asyncparticles$setLight(light);
 	}
 }

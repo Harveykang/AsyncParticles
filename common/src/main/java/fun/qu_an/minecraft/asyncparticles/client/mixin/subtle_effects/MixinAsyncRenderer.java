@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(AsyncRenderer.class)
 public class MixinAsyncRenderer {
-	@WrapWithCondition(method = "renderParticle",
+	@WrapWithCondition(method = "renderParticles",
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/Particle;render(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/Camera;F)V"))
 	private static boolean shouldRenderParticle(Particle instance,
 												VertexConsumer vertexConsumer,

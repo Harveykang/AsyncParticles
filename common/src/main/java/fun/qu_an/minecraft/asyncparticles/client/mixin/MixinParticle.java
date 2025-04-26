@@ -42,11 +42,11 @@ public abstract class MixinParticle implements ParticleAddon {
 
 	// TODO: 换 byte?
 	@Unique
-	private boolean asyncParticles$ticked = true;
+	private boolean asyncparticles$ticked = true;
 	@Unique
-	private boolean asyncParticles$renderSync;
+	private boolean asyncparticles$renderSync;
 	@Unique
-	private boolean asyncParticles$tickSync;
+	private boolean asyncparticles$tickSync;
 
 	@Inject(method = "<init>*", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
@@ -67,39 +67,39 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Override
 	public boolean asyncparticles$shouldRemove() {
 		if (!isAlive()) return true;
-		if (asyncParticles$ticked) return asyncParticles$ticked = false;
+		if (asyncparticles$ticked) return asyncparticles$ticked = false;
 		remove();
 		return true;
 	}
 
 	@Override
 	public void asyncparticles$setTicked() {
-		this.asyncParticles$ticked = true;
+		this.asyncparticles$ticked = true;
 	}
 
 	@Override
 	public boolean asyncparticles$isTicked() {
-		return this.asyncParticles$ticked;
+		return this.asyncparticles$ticked;
 	}
 
 	@Override
 	public void asyncparticles$setRenderSync() {
-		asyncParticles$renderSync = true;
+		asyncparticles$renderSync = true;
 	}
 
 	@Override
 	public boolean asyncparticles$isRenderSync() {
-		return asyncParticles$renderSync;
+		return asyncparticles$renderSync;
 	}
 
 	@Override
 	public void asyncparticles$setTickSync() {
-		asyncParticles$tickSync = true;
+		asyncparticles$tickSync = true;
 	}
 
 	@Override
 	public boolean asyncparticles$isTickSync() {
-		return asyncParticles$tickSync;
+		return asyncparticles$tickSync;
 	}
 
 	@Override

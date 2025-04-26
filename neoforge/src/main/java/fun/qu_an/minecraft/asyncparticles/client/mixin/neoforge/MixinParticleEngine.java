@@ -41,7 +41,7 @@ public class MixinParticleEngine {
 				BindingTesselator bTesselator1 = AsyncRenderer.getBTesselator(o1, textureManager);
 				BindingTesselator bTesselator2 = AsyncRenderer.getBTesselator(o2, textureManager);
 				if (bTesselator1 == BindingTesselator.EMPTY && bTesselator2 == BindingTesselator.EMPTY) {
-					return asyncParticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
+					return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
 				}
 				if (bTesselator2 == BindingTesselator.EMPTY) {
 					return -1;
@@ -65,7 +65,7 @@ public class MixinParticleEngine {
 					return Integer.compare(vanillaOne, vanillaTwo);
 				}
 				if (vanillaOne == -1 && vanillaTwo == -1) {
-					return asyncParticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
+					return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
 				}
 				return vanillaOne >= 0 ? -1 : 1;
 			});
@@ -75,7 +75,7 @@ public class MixinParticleEngine {
 	}
 
 	@Unique
-	private static int asyncParticles$compareWithIdentityHashCode(ParticleRenderType o1, ParticleRenderType o2, Map<ParticleRenderType, Integer> insertionOrder, AtomicInteger orderGenerator) {
+	private static int asyncparticles$compareWithIdentityHashCode(ParticleRenderType o1, ParticleRenderType o2, Map<ParticleRenderType, Integer> insertionOrder, AtomicInteger orderGenerator) {
 		int hashCompare = Integer.compare(System.identityHashCode(o1), System.identityHashCode(o2));
 		if (hashCompare != 0) {
 			return hashCompare;

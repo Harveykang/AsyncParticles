@@ -11,11 +11,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinGroundFogParticle {
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
-		ParticleRainCompat.asyncParticles$fogCount.getAndIncrement();
+		ParticleRainCompat.asyncparticles$fogCount.getAndIncrement();
 	}
 
 	@Inject(method = "remove", at = @At(value = "FIELD", remap = false, ordinal = 0, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;fogCount:I"))
 	private void onRemove(CallbackInfo ci) {
-		ParticleRainCompat.asyncParticles$fogCount.getAndDecrement();
+		ParticleRainCompat.asyncparticles$fogCount.getAndDecrement();
 	}
 }

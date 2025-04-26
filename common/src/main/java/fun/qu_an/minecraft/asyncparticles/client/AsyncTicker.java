@@ -387,6 +387,10 @@ public class AsyncTicker {
 	}
 
 	public static ReportedException constructCrashReport(Particle particle, Throwable t) {
+		debugLater(LOGGER::info);
+		tryDebug();
+		AsyncRenderer.debugLater(LOGGER::info);
+		AsyncRenderer.tryDebug();
 		CrashReport crashReport = CrashReport.forThrowable(t, "Ticking Particle");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being ticked");
 		crashReportCategory.setDetail("Particle", particle::toString);
@@ -408,7 +412,7 @@ public class AsyncTicker {
 				if (!(particle instanceof TrackingEmitter)) {
 					if (particle instanceof LightCachedParticleAddon lightCachedParticle
 						&& SimplePropertiesConfig.particleLightCache()) {
-						lightCachedParticle.asyncParticles$refresh();
+						lightCachedParticle.asyncparticles$refresh();
 					}
 					((ParticleAddon) particle).asyncparticles$setTicked();
 				}
@@ -448,7 +452,7 @@ public class AsyncTicker {
 
 	/* Debug/Reload */
 
-	private static void tryDebug() {
+	static void tryDebug() {
 		if (debugConsumer == null) {
 			return;
 		}

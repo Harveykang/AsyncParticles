@@ -17,7 +17,7 @@ public class MixinCustomParticleEngine {
 	@WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
 	private boolean onAdd(Queue<Particle> instance, Object e, Operation<Boolean> original) {
 		if (e instanceof LightCachedParticleAddon lp) {
-			lp.asyncParticles$refresh();
+			lp.asyncparticles$refresh();
 		}
 		return original.call(instance, e);
 	}
@@ -25,7 +25,7 @@ public class MixinCustomParticleEngine {
 	@Inject(method = "tickParticle", at = @At(value = "HEAD"))
 	private void onTickParticle(Particle particle, CallbackInfo ci) {
 		if (particle instanceof LightCachedParticleAddon lp) {
-			lp.asyncParticles$refresh();
+			lp.asyncparticles$refresh();
 		}
 	}
 }

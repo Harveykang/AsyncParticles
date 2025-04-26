@@ -9,11 +9,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ParticleRainCompat {
-	public static final AtomicInteger asyncParticles$particleCount = new AtomicInteger(0);
-	public static final AtomicInteger asyncParticles$fogCount = new AtomicInteger(0);
+	public static final AtomicInteger asyncparticles$particleCount = new AtomicInteger(0);
+	public static final AtomicInteger asyncparticles$fogCount = new AtomicInteger(0);
 	public static void clearCounters() {
-		asyncParticles$particleCount.set(0);
-		asyncParticles$fogCount.set(0);
+		asyncparticles$particleCount.set(0);
+		asyncparticles$fogCount.set(0);
 	}
 
 //	@ExpectPlatform
