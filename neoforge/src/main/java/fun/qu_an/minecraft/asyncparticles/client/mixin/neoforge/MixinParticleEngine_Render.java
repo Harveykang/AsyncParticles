@@ -87,7 +87,7 @@ public abstract class MixinParticleEngine_Render {
 						continue;
 					}
 					float g = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f + 1f;
-					if (SimplePropertiesConfig.isCullParticles() && !frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(g))) {
+					if (SimplePropertiesConfig.isCullParticles() && !frustum.isVisible(particle.getRenderBoundingBox(g))) {
 						continue;
 					}
 					try {

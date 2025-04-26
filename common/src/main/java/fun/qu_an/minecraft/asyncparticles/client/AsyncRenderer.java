@@ -375,7 +375,6 @@ public class AsyncRenderer {
 		debugConsumer = consumer;
 	}
 
-	@SuppressWarnings("ConstantValue")
 	static void tryDebug() {
 		if (debugConsumer != null) {
 			debugConsumer.accept("""
