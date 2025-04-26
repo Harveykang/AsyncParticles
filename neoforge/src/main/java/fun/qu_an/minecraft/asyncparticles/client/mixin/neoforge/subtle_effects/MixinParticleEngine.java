@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.subtle_effects;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.compat.subtle_effects.SubtleEffectsCompat;
 import net.minecraft.client.Camera;
@@ -21,7 +22,10 @@ public class MixinParticleEngine {
 	private boolean shouldRenderParticle(Particle instance,
 										 VertexConsumer vertexConsumer,
 										 Camera camera,
-										 float v) {
-		return SubtleEffectsCompat.shouldRenderParticle(instance, camera, level);
+										 float v,
+										 @SuppressWarnings("UnresolvedLocalCapture")
+										 @Local(ordinal = 0) boolean shouldSync) {
+		// if shouldSync is false, the particles are already culled.
+		return !shouldSync || SubtleEffectsCompat.shouldRenderParticle(instance, camera, level);
 	}
 }

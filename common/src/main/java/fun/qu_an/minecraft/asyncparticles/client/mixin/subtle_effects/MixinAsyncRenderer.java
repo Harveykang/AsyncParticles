@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.subtle_effects;
 
-import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.compat.subtle_effects.SubtleEffectsCompat;
 import net.minecraft.client.Camera;
@@ -9,15 +8,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(AsyncRenderer.class)
 public class MixinAsyncRenderer {
-	@WrapWithCondition(method = "renderParticles",
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/Particle;render(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/Camera;F)V"))
-	private static boolean shouldRenderParticle(Particle instance,
-												VertexConsumer vertexConsumer,
-												Camera camera,
-												float v) {
-		return SubtleEffectsCompat.shouldRenderParticle(instance, camera, Minecraft.getInstance().level);
+	@Redirect(method = "renderParticles",
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/Particle;isAlive()Z"))
+	private static boolean shouldRenderParticle(Particle instance, @Local(argsOnly = true) Camera camera) {
+		// To make sure if shouldSync is false, the particles are all culled.
+		return instance.isAlive() && SubtleEffectsCompat.shouldRenderParticle(instance, camera, Minecraft.getInstance().level);
 	}
 }

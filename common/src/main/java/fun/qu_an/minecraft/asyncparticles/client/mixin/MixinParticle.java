@@ -101,9 +101,4 @@ public abstract class MixinParticle implements ParticleAddon {
 	public boolean asyncparticles$isTickSync() {
 		return asyncparticles$tickSync;
 	}
-
-	@Override
-	public AABB getRenderBoundingBox(float partialTicks) {
-		return this.getBoundingBox().inflate(1.0);
-	}
 }

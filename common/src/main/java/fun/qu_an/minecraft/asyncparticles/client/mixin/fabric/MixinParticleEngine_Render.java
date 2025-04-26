@@ -78,10 +78,8 @@ public abstract class MixinParticleEngine_Render {
 				? queue
 				: AsyncRenderer.getSync(particleRenderType);
 			BufferBuilder bufferBuilder;
-			if (syncParticles.isEmpty()) {
-				bufferBuilder = tesselator.getBuilder();
-			} else {
-				bufferBuilder = tesselator.begin();
+			bufferBuilder = tesselator.begin();
+			if (!syncParticles.isEmpty()) {
 				float f2 = f + 1f;
 				for (Particle particle : syncParticles) {
 					if (!particle.isAlive()) {
@@ -99,13 +97,11 @@ public abstract class MixinParticleEngine_Render {
 					}
 				}
 			}
-			if (bufferBuilder.building) {
-				profiler.popPush("build_buffer");
-				MeshData meshData = bufferBuilder.build();
-				if (meshData != null) {
-					profiler.popPush("upload_particles");
-					BufferUploader.drawWithShader(meshData);
-				}
+			profiler.popPush("build_buffer");
+			MeshData meshData = bufferBuilder.build();
+			if (meshData != null) {
+				profiler.popPush("upload_particles");
+				BufferUploader.drawWithShader(meshData);
 			}
 			profiler.pop();
 		}
