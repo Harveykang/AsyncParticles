@@ -172,6 +172,10 @@ public abstract class MixinParticleEngine {
 				Utils.DUMMY_ITERATOR.remove();
 				continue;
 			}
+			if (((ParticleAddon) particle).asyncparticles$isTicked()) {
+				// Skip the first tick that the particle is added to the queue.
+				continue;
+			}
 			if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
 				AsyncTicker.recordSync(particle);
 				continue;
