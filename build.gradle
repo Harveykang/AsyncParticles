@@ -29,6 +29,16 @@ subprojects {
         archivesName = "$rootProject.archives_name-$project.name"
     }
 
+    loom {
+        runs {
+            configureEach {
+                vmArg("-Dmixin.debug.export=true")
+//              vmArg("-Dmixin.env.remapRefMap=true")
+//              vmArg("-Dmixin.env.refMapRemappingFile=${projectDir}/build/createSrgToMcp/output.srg")
+            }
+        }
+    }
+
     repositories {
         // Add repositories to retrieve artifacts from in here.
         // You should only use this when depending on other mods because

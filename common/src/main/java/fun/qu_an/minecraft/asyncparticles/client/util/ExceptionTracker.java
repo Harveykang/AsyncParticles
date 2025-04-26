@@ -32,6 +32,14 @@ public class ExceptionTracker<T> {
 			.push();
 	}
 
+	public String toString() {
+		return "ExceptionTracker{" +
+			   "exceptions=" + exceptions +
+			   ", duration=" + duration.getAsInt() +
+			   ", failurePerSecThreshold=" + failurePerSecThreshold.getAsInt() +
+			   '}';
+	}
+
 	private class ExceptionQueue {
 		private final LongPriorityQueue queue = new LongArrayFIFOQueue();
 
@@ -44,6 +52,10 @@ public class ExceptionTracker<T> {
 				queue.dequeueLong();
 			}
 			return queue.size() / (duration.getAsInt() * 0.001) >= failurePerSecThreshold.getAsInt();
+		}
+
+		public String toString() {
+			return "Exception queue size: " + queue.size();
 		}
 	}
 }

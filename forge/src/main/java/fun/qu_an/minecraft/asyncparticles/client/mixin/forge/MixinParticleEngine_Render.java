@@ -72,7 +72,8 @@ public abstract class MixinParticleEngine_Render {
 			profiler.push("render_sync");
 			Collection<? extends Particle> syncParticles;
 			Tesselator tesselator;
-			if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
+			boolean shouldSync = bufferBuilder == FakeBufferBuilder.INSTANCE;
+			if (shouldSync) {
 				syncParticles = AsyncRenderer.isMixedParticleRenderingSetting() ? Collections.emptyList() : queue;
 				tesselator = Tesselator.getInstance();
 				bufferBuilder = tesselator.getBuilder();
@@ -88,7 +89,8 @@ public abstract class MixinParticleEngine_Render {
 					if (!particle.isAlive()) {
 						continue;
 					}
-					if (particle.shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
+					if (shouldSync && particle.shouldCull() &&
+						!frustum.isVisible(particle.getBoundingBox())) {
 						continue;
 					}
 					float g = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f + 1f;

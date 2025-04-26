@@ -92,9 +92,4 @@ public abstract class MixinParticle implements ParticleAddon {
 	public boolean asyncparticles$isTickSync() {
 		return asyncparticles$tickSync;
 	}
-
-	@Override
-	public boolean shouldCull() {
-		return true;
-	}
 }

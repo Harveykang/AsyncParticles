@@ -398,6 +398,7 @@ public class AsyncRenderer {
 		return FORMATS.computeIfAbsent(particleRenderType, k -> computeVertexFormatPair(k, textureManager));
 	}
 
+	@SuppressWarnings("ConstantValue")
 	private static @NotNull Pair<VertexFormat.Mode, VertexFormat> computeVertexFormatPair(ParticleRenderType k, TextureManager textureManager) {
 		// we try and store the vertex format/mode to avoid call begin() twice per frame...
 		TryAndStoreFakeBufferBuilder fakeBufferBuilder = new TryAndStoreFakeBufferBuilder();
@@ -410,7 +411,7 @@ public class AsyncRenderer {
 			// pray it doesn't throw...
 			// this most breaks only one frame, so we can ignore it for now...
 			exception = e;
-			LOGGER.warn("Exception try&store-ing vertex format/mode for particle render type: {}", k, e);
+			LOGGER.error("Exception try&store-ing vertex format/mode for particle render type: {}", k, e);
 			RenderSystem.disableBlend();
 			RenderSystem.depthMask(true);
 			RenderSystem.enableDepthTest();

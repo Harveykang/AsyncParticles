@@ -27,6 +27,7 @@
     "create.MixinParticle",
     "create.MixinParticle_LightCache",
     "fabric.MixinLevelRenderer",
+    "fabric.MixinParticle",
     "fabric.MixinParticleEngine_Render",
     "fabric.create_5.MixinDepotBehaviour",
     "fabric.create_5.MixinEjectorBlockEntity",
@@ -77,8 +78,8 @@
     "vs2.InvokerRaycastUtils",
     "vs2.MixinAsyncTicker",
     "vs2.MixinLevelRenderer",
-    "vs2.MixinParticle",
     "vs2.MixinMixinParticleEngine",
+    "vs2.MixinParticle",
     "vs2.MixinVSAnimation",
     "vs2.MixinVSSoundEngine",
     "watut.MixinCustomParticleEngine"
