@@ -5,7 +5,7 @@ import net.minecraft.client.particle.Particle;
 
 public class VSCompat {
 	public static void removeIfOutSight(Particle particle) {
-		if (VSClientUtils.isOutSight(particle)) {
+		if (particle.isAlive() && VSClientUtils.isOutSight(particle)) {
 			particle.remove();
 		}
 	}

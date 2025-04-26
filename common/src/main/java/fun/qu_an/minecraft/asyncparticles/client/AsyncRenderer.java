@@ -129,11 +129,10 @@ public class AsyncRenderer {
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
 		profiler.popPush("async_particles");
+		tryDebug();
+		clearSync();
+		captureParticleRenderingSetting();
 		ParticleEngine particleEngine = mc.particleEngine;
-		if (ModListHelper.IRIS_LIKE_LOADED) {
-			mixedParticleRenderingSetting = IrisApi.getInstance().isShaderPackInUse() &&
-											getRenderingSettings() == ParticleRenderingSettings.MIXED;
-		}
 		profiler.push("render_async");
 		TextureManager textureManager = particleEngine.textureManager;
 		ObjectArrayList<CompletableFuture<Void>> asyncTasks = new ObjectArrayList<>(asyncTasksSize);
@@ -157,8 +156,6 @@ public class AsyncRenderer {
 		int size = asyncTasksSize = asyncTasks.size();
 		asyncTask = CompletableFuture.allOf(asyncTasks.toArray(new CompletableFuture[size]));
 		profiler.pop();
-		tryDebug();
-		clearSync();
 	}
 
 	private static void renderParticle(float f, Camera camera, Particle particle, ParticleRenderType particleRenderType, BufferBuilder bufferBuilder) {
@@ -354,10 +351,6 @@ public class AsyncRenderer {
 	}
 
 	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable t) {
-		ReportedException re = ExceptionUtil.getReportedException(t);
-		if (re != null) {
-			return re;
-		}
 		CrashReport crashReport = CrashReport.forThrowable(t, "Rendering Particle");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
 		crashReportCategory.setDetail("Particle", particle::toString);
@@ -365,11 +358,18 @@ public class AsyncRenderer {
 		return new ReportedException(crashReport);
 	}
 
+	private static void captureParticleRenderingSetting() {
+		if (ModListHelper.IRIS_LIKE_LOADED) {
+			mixedParticleRenderingSetting = Iris.isPackInUseQuick() &&
+											getParticleRenderingSettings0() == ParticleRenderingSettings.MIXED;
+		}
+	}
+
 	public static boolean isMixedParticleRenderingSetting() {
 		return mixedParticleRenderingSetting;
 	}
 
-	private static ParticleRenderingSettings getRenderingSettings() {
+	private static ParticleRenderingSettings getParticleRenderingSettings0() {
 		return Iris.getPipelineManager().getPipeline()
 			.map(WorldRenderingPipeline::getParticleRenderingSettings)
 			.orElse(ParticleRenderingSettings.MIXED);
@@ -491,7 +491,7 @@ public class AsyncRenderer {
 						.filter(e -> e.getValue() == EMPTY_FORMAT)
 						.map(Map.Entry::getKey).toList(),
 					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse()
-						? getRenderingSettings().name() : "disabled"));
+						? getParticleRenderingSettings0().name() : "disabled"));
 			debugConsumer = null;
 		}
 	}
