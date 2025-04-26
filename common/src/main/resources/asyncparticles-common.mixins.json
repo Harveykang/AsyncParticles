@@ -13,6 +13,7 @@
     "a_good_place.MixinBlocksParticlesManager",
     "a_good_place.MixinPlacingBlockParticle",
     "fabric.MixinLevelRenderer",
+    "fabric.MixinParticle",
     "fabric.MixinParticleEngine_Render",
     "fabric.effectual.MixinAllEffects",
     "fabric.effectual.MixinWaterDripEffect",

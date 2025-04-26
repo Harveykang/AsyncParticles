@@ -23,7 +23,7 @@ side = "CLIENT"
 [[dependencies.asyncparticles]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21,)"
+versionRange = "[1.21.4,)"
 ordering = "NONE"
 side = "CLIENT"
 
