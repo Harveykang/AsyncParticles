@@ -23,6 +23,7 @@ public class ExceptionTracker<T> {
 
 	/**
 	 * @return true if the exception rate exceeds the threshold for the given object and type of exception
+	 * @apiNote MUST pay attention to memory leak, cause the obj will be KEPT IN MEMORY
 	 */
 	public boolean addException(T obj, Throwable t) {
 		return exceptions
@@ -31,8 +32,16 @@ public class ExceptionTracker<T> {
 			.push();
 	}
 
+	public String toString() {
+		return "ExceptionTracker{" +
+			"exceptions=" + exceptions +
+			", duration=" + duration.getAsInt() +
+			", failurePerSecThreshold=" + failurePerSecThreshold.getAsInt() +
+			'}';
+	}
+
 	private class ExceptionQueue {
-		LongPriorityQueue queue = new LongArrayFIFOQueue();
+		private final LongPriorityQueue queue = new LongArrayFIFOQueue();
 
 		public boolean push() {
 			long time = System.currentTimeMillis();
@@ -43,6 +52,10 @@ public class ExceptionTracker<T> {
 				queue.dequeueLong();
 			}
 			return queue.size() / (duration.getAsInt() * 0.001) >= failurePerSecThreshold.getAsInt();
+		}
+
+		public String toString() {
+			return "Exception queue size: " + queue.size();
 		}
 	}
 }
