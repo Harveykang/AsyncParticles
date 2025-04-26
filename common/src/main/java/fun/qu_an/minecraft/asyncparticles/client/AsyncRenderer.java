@@ -128,7 +128,7 @@ public class AsyncRenderer {
 		profiler.popPush("async_particles");
 		tryDebug();
 		clearSync();
-		resetBTesselators();
+//		resetBTesselators();
 		captureParticleRenderingSetting();
 		profiler.push("render_async");
 		ParticleEngine particleEngine = mc.particleEngine;

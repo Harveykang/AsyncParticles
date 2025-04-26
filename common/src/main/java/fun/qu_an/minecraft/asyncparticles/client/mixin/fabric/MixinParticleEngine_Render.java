@@ -73,7 +73,8 @@ public abstract class MixinParticleEngine_Render {
 			// begin before sync particles to be compatible with some mod
 			particleRenderType.begin(FakeTesselator.getFakeInstance(), this.textureManager);
 			profiler.push("render_sync");
-			Collection<? extends Particle> syncParticles = tesselator.shouldSync
+			boolean shouldSync = tesselator.shouldSync;
+			Collection<? extends Particle> syncParticles = shouldSync
 				? queue
 				: AsyncRenderer.getSync(particleRenderType);
 			BufferBuilder bufferBuilder;
@@ -81,16 +82,18 @@ public abstract class MixinParticleEngine_Render {
 				bufferBuilder = tesselator.getBuilder();
 			} else {
 				bufferBuilder = tesselator.begin();
+				float f2 = f + 1f;
 				for (Particle particle : syncParticles) {
 					if (!particle.isAlive()) {
 						continue;
 					}
-					float g = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f + 1f;
-					if (SimplePropertiesConfig.isCullParticles() && !frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(g))) {
+					float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
+					if (shouldSync && SimplePropertiesConfig.isCullParticles() &&
+						!frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(f3))) {
 						continue;
 					}
 					try {
-						particle.render(bufferBuilder, camera, g);
+						particle.render(bufferBuilder, camera, f3);
 					} catch (Throwable t) {
 						throw AsyncRenderer.constructCrashReport(particle, particleRenderType, t);
 					}
