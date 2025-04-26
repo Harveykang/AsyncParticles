@@ -143,12 +143,12 @@ public class AsyncRenderer {
 			if (queue == null || queue.isEmpty()) {
 				continue;
 			}
-			BufferBuilder bufferBuilder = beginBufferBuilder(particleRenderType, textureManager);
-			if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
+			BindingTesselator bTesselator = getBTesselator(particleRenderType, textureManager);
+			if (bTesselator.shouldSync) {
 				continue;
 			}
 			asyncTasks.add(CompletableFuture.runAsync(
-					() -> renderParticles(f, camera, queue, particleRenderType, bufferBuilder),
+					() -> renderParticles(f, camera, queue, particleRenderType, bTesselator.begin()),
 					EXECUTOR)
 				.exceptionally(AsyncRenderer::renderAsyncExceptionally));
 		}
@@ -157,7 +157,11 @@ public class AsyncRenderer {
 		profiler.pop();
 	}
 
-	private static void renderParticles(float f, Camera camera, Queue<Particle> particles, ParticleRenderType particleRenderType, BufferBuilder bufferBuilder) {
+	private static void renderParticles(float f,
+										Camera camera,
+										Queue<Particle> particles,
+										ParticleRenderType particleRenderType,
+										BufferBuilder bufferBuilder) {
 		Frustum frustum = AsyncRenderer.frustum;
 		float f2 = f + 1;
 		for (Particle particle : particles) {
@@ -302,10 +306,6 @@ public class AsyncRenderer {
 		}
 	}
 
-	public static @NotNull BufferBuilder beginBufferBuilder(ParticleRenderType particleRenderType, TextureManager textureManager) {
-		return getBTesselator(particleRenderType, textureManager).begin();
-	}
-
 	public static BindingTesselator getBTesselator(ParticleRenderType particleRenderType, TextureManager textureManager) {
 		return BTESSELATORS.computeIfAbsent(particleRenderType, k -> computeBTesselator(k, textureManager));
 	}
@@ -390,7 +390,7 @@ public class AsyncRenderer {
 				.formatted(asyncTasksSize,
 					BTESSELATORS.entrySet()
 						.stream()
-						.filter(e -> e.getValue() != BindingTesselator.EMPTY)
+						.filter(e -> !e.getValue().shouldSync)
 						.collect(Collectors.toMap(
 							Map.Entry::getKey,
 							e -> e.getValue().buffer.capacity)),
@@ -400,7 +400,7 @@ public class AsyncRenderer {
 					SYNC_PARTICLES.values().stream().mapToInt(Set::size).sum(),
 					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList(),
 					BTESSELATORS.entrySet().stream()
-						.filter(e -> e.getValue() == BindingTesselator.EMPTY)
+						.filter(e -> e.getValue().shouldSync)
 						.map(Map.Entry::getKey).toList(),
 					ModListHelper.IRIS_LIKE_LOADED && Iris.isPackInUseQuick()
 						? getParticleRenderingSettings0().name() : "disabled"));

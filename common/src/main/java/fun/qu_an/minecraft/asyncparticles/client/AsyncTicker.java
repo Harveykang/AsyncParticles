@@ -166,7 +166,6 @@ public class AsyncTicker {
 					futures[k++] = CompletableFuture.runAsync(() -> {
 						particles.removeIf(particle1 -> {
 							// JDK 并没有定义这个判断会对每个对象执行多少次，但目前没遇到例外情况
-							// use ArrayDeque's removeIf to improve performance
 							boolean b = ((ParticleAddon) particle1).asyncparticles$isTickSync()
 								? !particle1.isAlive()
 								: ((ParticleAddon) particle1).asyncparticles$shouldRemove();

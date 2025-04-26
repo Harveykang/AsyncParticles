@@ -19,7 +19,7 @@ public class FakeBufferBuilder extends BufferBuilder {
 
 	@Override
 	public @NotNull MeshData buildOrThrow() {
-		throw new UnsupportedOperationException("Cannot build mesh or throw in FakeBufferBuilder");
+		throw new IllegalStateException("FakeBufferBuilder is always empty!");
 	}
 
 	@Override

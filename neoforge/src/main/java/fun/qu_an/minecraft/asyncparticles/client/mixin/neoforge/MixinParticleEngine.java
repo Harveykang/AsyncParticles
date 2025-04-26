@@ -40,13 +40,13 @@ public class MixinParticleEngine {
 				}
 				BindingTesselator bTesselator1 = AsyncRenderer.getBTesselator(o1, textureManager);
 				BindingTesselator bTesselator2 = AsyncRenderer.getBTesselator(o2, textureManager);
-				if (bTesselator1 == BindingTesselator.EMPTY && bTesselator2 == BindingTesselator.EMPTY) {
+				if (bTesselator1.shouldSync && bTesselator2.shouldSync) {
 					return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
 				}
-				if (bTesselator2 == BindingTesselator.EMPTY) {
+				if (bTesselator2.shouldSync) {
 					return -1;
 				}
-				if (bTesselator1 == BindingTesselator.EMPTY) {
+				if (bTesselator1.shouldSync) {
 					return 1;
 				}
 

@@ -73,7 +73,7 @@ public abstract class MixinParticleEngine_Render {
 			// begin before sync particles to be compatible with some mod
 			particleRenderType.begin(FakeTesselator.getFakeInstance(), this.textureManager);
 			profiler.push("render_sync");
-			Collection<? extends Particle> syncParticles = tesselator.custom
+			Collection<? extends Particle> syncParticles = tesselator.shouldSync
 				? queue
 				: AsyncRenderer.getSync(particleRenderType);
 			BufferBuilder bufferBuilder;

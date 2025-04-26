@@ -54,12 +54,12 @@ public abstract class MixinParticleEngine {
 		// Remove duplicated render types, (e.g. Hex Casting mod's bug)
 		Set<ParticleRenderType> renderTypes = new LinkedHashSet<>((int) (RENDER_ORDER.size() * 1.34 + 1));
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderer.getBTesselator(type, textureManager) != BindingTesselator.EMPTY) {
+			if (!AsyncRenderer.getBTesselator(type, textureManager).shouldSync) {
 				renderTypes.add(type);
 			}
 		}
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderer.getBTesselator(type, textureManager) == BindingTesselator.EMPTY) {
+			if (AsyncRenderer.getBTesselator(type, textureManager).shouldSync) {
 				renderTypes.add(type);
 			}
 		}
@@ -138,7 +138,6 @@ public abstract class MixinParticleEngine {
 				}
 				Queue<Particle> queue = this.particles.computeIfAbsent(particle.getRenderType(),
 					k -> {
-//						EvictingQueue<Particle> queue1 = EvictingQueue.create(SimplePropertiesConfig.limit);
 						Queue<Particle> queue1 = new IterationSafeEvictingQueue<>(
 							16,
 							SimplePropertiesConfig.getLimit(),
@@ -166,20 +165,20 @@ public abstract class MixinParticleEngine {
 		// must treat as ImmutableList. forge will use this to order treemap
 		List<ParticleRenderType> list = new ArrayList<>(RENDER_ORDER.size() + 1);
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderer.getBTesselator(type, textureManager) != BindingTesselator.EMPTY) {
+			if (!AsyncRenderer.getBTesselator(type, textureManager).shouldSync) {
 				list.add(type);
 			}
 		}
 		BindingTesselator bTesselator = AsyncRenderer.getBTesselator(k, textureManager);
-		if (bTesselator != BindingTesselator.EMPTY) {
+		if (!bTesselator.shouldSync) {
 			list.add(k);
 		}
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderer.getBTesselator(type, textureManager) == BindingTesselator.EMPTY) {
+			if (AsyncRenderer.getBTesselator(type, textureManager).shouldSync) {
 				list.add(type);
 			}
 		}
-		if (bTesselator == BindingTesselator.EMPTY) {
+		if (bTesselator.shouldSync) {
 			list.add(k);
 		}
 		RENDER_ORDER = list;

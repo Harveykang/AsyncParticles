@@ -32,16 +32,16 @@ public class BindingTesselator {
 	public final VertexFormat.Mode mode;
 	@NotNull
 	public final VertexFormat format;
-	public final boolean custom;
+	public final boolean shouldSync;
 	private BufferBuilder builder;
 	@NotNull
 	public final ByteBufferBuilder buffer;
 
-	public BindingTesselator(int capacity, @NotNull VertexFormat.Mode mode, @NotNull VertexFormat format, boolean custom) {
+	public BindingTesselator(int capacity, @NotNull VertexFormat.Mode mode, @NotNull VertexFormat format, boolean shouldSync) {
 		this.buffer = new ByteBufferBuilder(capacity);
 		this.mode = mode;
 		this.format = format;
-		this.custom = custom;
+		this.shouldSync = shouldSync;
 	}
 
 	@SuppressWarnings("DataFlowIssue")
@@ -49,7 +49,7 @@ public class BindingTesselator {
 		this.buffer = null;
 		this.mode = null;
 		this.format = null;
-		this.custom = true;
+		this.shouldSync = true;
 	}
 
 	public @NotNull BufferBuilder begin() {
