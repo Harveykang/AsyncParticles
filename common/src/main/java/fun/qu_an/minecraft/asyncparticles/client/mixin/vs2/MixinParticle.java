@@ -69,7 +69,10 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 								 @SuppressWarnings("LocalMayBeArgsOnly")
 								 @Local(ordinal = 0)
 								 ClientShip ship) {
-		asyncparticles$setShip(ship);
+		if (!asyncparticles$isOnShip()) {
+			asyncparticles$setShip(ship);
+			asyncparticles$refresh();
+		}
 	}
 
 	@Override // inject after MixinParticle_LightCache to override
@@ -83,7 +86,7 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 			BlockPos pos = BlockPos.containing(transformed.x, transformed.y, transformed.z);
 			int shipLight = level.hasChunkAt(pos) ? LevelRenderer.getLightColor(level, pos) : 0;
 			int finalLight = Math.max(light & 0xFFFF, shipLight & 0xFFFF) | // max for block, min for sky
-					Math.min(light & 0xFFFF0000, shipLight & 0xFFFF0000);
+							 Math.min(light & 0xFFFF0000, shipLight & 0xFFFF0000);
 			asyncparticles$setLight(finalLight);
 		}
 	}
@@ -91,5 +94,10 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 	@Override
 	public void asyncparticles$setShip(ClientShip ship) {
 		asyncparticles$vsShip = ship;
+	}
+
+	@Override
+	public boolean asyncparticles$isOnShip() {
+		return asyncparticles$vsShip != null;
 	}
 }

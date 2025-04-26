@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.vs2;
 
 import com.bawnorton.mixinsquared.TargetHandler;
 import com.llamalad7.mixinextras.sugar.Local;
+import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSParticleAddon;
 import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Dynamic;
@@ -30,8 +31,13 @@ public class MixinLevelRenderer {
 											@SuppressWarnings("LocalMayBeArgsOnly")
 											@Local(ordinal = 0) ClientShip ship) {
 		instance.setReturnValue(particle);
-		if (particle != null) {
-			((VSParticleAddon) particle).asyncparticles$setShip(ship);
+		if (!(particle instanceof VSParticleAddon vsp) ||
+			vsp.asyncparticles$isOnShip()) {
+			return;
+		}
+		vsp.asyncparticles$setShip(ship);
+		if (vsp instanceof LightCachedParticleAddon lp) {
+			lp.asyncparticles$refresh();
 		}
 	}
 
@@ -45,11 +51,16 @@ public class MixinLevelRenderer {
 	@Group(name = "asyncparticles:vs2$spawnParticleInWorld", min = 1, max = 1)
 	@Inject(method = "@MixinSquared:Handler", at = @At(value = "RETURN", ordinal = 2))
 	private <T> void onSpawnParticleInWorld1(CallbackInfoReturnable<T> cir,
-											@SuppressWarnings("LocalMayBeArgsOnly")
-											@Local(ordinal = 0) ClientShip ship) {
+											 @SuppressWarnings("LocalMayBeArgsOnly")
+											 @Local(ordinal = 0) ClientShip ship) {
 		T particle = cir.getReturnValue();
-		if (particle != null) {
-			((VSParticleAddon) particle).asyncparticles$setShip(ship);
+		if (!(particle instanceof VSParticleAddon vsp) ||
+			vsp.asyncparticles$isOnShip()) {
+			return;
+		}
+		vsp.asyncparticles$setShip(ship);
+		if (vsp instanceof LightCachedParticleAddon lp) {
+			lp.asyncparticles$refresh();
 		}
 	}
 
@@ -62,11 +73,16 @@ public class MixinLevelRenderer {
 	@Group(name = "asyncparticles:vs2$spawnParticleInWorld", min = 1, max = 1)
 	@Inject(method = "@MixinSquared:Handler", at = @At(value = "RETURN", ordinal = 2))
 	private <T> void onSpawnParticleInWorld2(CallbackInfoReturnable<T> cir,
-											@SuppressWarnings("LocalMayBeArgsOnly")
-											@Local(ordinal = 0) ClientShip ship) {
+											 @SuppressWarnings("LocalMayBeArgsOnly")
+											 @Local(ordinal = 0) ClientShip ship) {
 		T particle = cir.getReturnValue();
-		if (particle != null) {
-			((VSParticleAddon) particle).asyncparticles$setShip(ship);
+		if (!(particle instanceof VSParticleAddon vsp) ||
+			vsp.asyncparticles$isOnShip()) {
+			return;
+		}
+		vsp.asyncparticles$setShip(ship);
+		if (vsp instanceof LightCachedParticleAddon lp) {
+			lp.asyncparticles$refresh();
 		}
 	}
 }

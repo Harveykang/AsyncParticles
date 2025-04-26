@@ -4,4 +4,5 @@ import org.valkyrienskies.core.api.ships.ClientShip;
 
 public interface VSParticleAddon {
 	void asyncparticles$setShip(ClientShip ship);
+	boolean asyncparticles$isOnShip();
 }
