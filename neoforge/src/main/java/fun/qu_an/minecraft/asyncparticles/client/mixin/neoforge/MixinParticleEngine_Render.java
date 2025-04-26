@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.MeshData;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
 import net.minecraft.client.Camera;
@@ -65,7 +66,7 @@ public abstract class MixinParticleEngine_Render {
 			if (queue == null || queue.isEmpty()) {
 				continue;
 			}
-			BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
+			BindingTesselator tesselator = AsyncRenderer.getBTesselator(particleRenderType, textureManager);
 			// set shader before begin
 			RenderSystem.setShader(GameRenderer::getParticleShader);
 			// why ParticleRenderType#end() removed?...
@@ -74,30 +75,36 @@ public abstract class MixinParticleEngine_Render {
 			// begin before sync particles to be compatible with some mod
 			particleRenderType.begin(FakeTesselator.getFakeInstance(), this.textureManager);
 			profiler.push("render_sync");
-			Collection<? extends Particle> syncParticles = bufferBuilder == FakeBufferBuilder.INSTANCE
+			Collection<? extends Particle> syncParticles = tesselator.custom
 				? queue
 				: AsyncRenderer.getSync(particleRenderType);
-			if (!syncParticles.isEmpty()) {
+			BufferBuilder bufferBuilder;
+			if (syncParticles.isEmpty()) {
+				bufferBuilder = tesselator.getBuilder();
+			} else {
+				bufferBuilder = tesselator.begin();
 				for (Particle particle : syncParticles) {
 					if (!particle.isAlive()) {
 						continue;
 					}
 					float g = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f + 1f;
-					if (SimplePropertiesConfig.isCullParticles() && !frustum.isVisible(particle.getRenderBoundingBox(g))) {
+					if (SimplePropertiesConfig.isCullParticles() && !frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(g))) {
 						continue;
 					}
 					try {
 						particle.render(bufferBuilder, camera, g);
-					} catch (Throwable throwable) {
-						throw AsyncRenderer.constructCrashReport(particle, particleRenderType, throwable);
+					} catch (Throwable t) {
+						throw AsyncRenderer.constructCrashReport(particle, particleRenderType, t);
 					}
 				}
 			}
-			profiler.popPush("build_buffer");
-			MeshData meshData = bufferBuilder.build();
-			if (meshData != null) {
-				profiler.popPush("upload_particles");
-				BufferUploader.drawWithShader(meshData);
+			if (bufferBuilder.building) {
+				profiler.popPush("build_buffer");
+				MeshData meshData = bufferBuilder.build();
+				if (meshData != null) {
+					profiler.popPush("upload_particles");
+					BufferUploader.drawWithShader(meshData);
+				}
 			}
 			profiler.pop();
 		}

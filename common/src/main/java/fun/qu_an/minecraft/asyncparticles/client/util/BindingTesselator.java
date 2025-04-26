@@ -14,6 +14,11 @@ public class BindingTesselator {
 		}
 
 		@Override
+		public BufferBuilder getBuilder() {
+			return FakeBufferBuilder.INSTANCE;
+		}
+
+		@Override
 		public void clear() {
 			// do nothing
 		}
@@ -24,17 +29,19 @@ public class BindingTesselator {
 		}
 	};
 	@NotNull
-	private final VertexFormat.Mode mode;
+	public final VertexFormat.Mode mode;
 	@NotNull
-	private final VertexFormat format;
+	public final VertexFormat format;
+	public final boolean custom;
 	private BufferBuilder builder;
 	@NotNull
 	public final ByteBufferBuilder buffer;
 
-	public BindingTesselator(int capacity, @NotNull VertexFormat.Mode mode, @NotNull VertexFormat format) {
+	public BindingTesselator(int capacity, @NotNull VertexFormat.Mode mode, @NotNull VertexFormat format, boolean custom) {
 		this.buffer = new ByteBufferBuilder(capacity);
 		this.mode = mode;
 		this.format = format;
+		this.custom = custom;
 	}
 
 	@SuppressWarnings("DataFlowIssue")
@@ -42,6 +49,7 @@ public class BindingTesselator {
 		this.buffer = null;
 		this.mode = null;
 		this.format = null;
+		this.custom = true;
 	}
 
 	public @NotNull BufferBuilder begin() {
@@ -50,6 +58,10 @@ public class BindingTesselator {
 			return builder;
 		}
 		return this.builder = new BufferBuilder(this.buffer, mode, format);
+	}
+
+	public BufferBuilder getBuilder() {
+		return builder;
 	}
 
 	public void clear() {

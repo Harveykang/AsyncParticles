@@ -147,8 +147,9 @@ public class AsyncRenderer {
 			if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
 				continue;
 			}
-			asyncTasks.add(CompletableFuture.runAsync(() -> queue.forEach(particle ->
-					renderParticle(f, camera, particle, particleRenderType, bufferBuilder)), EXECUTOR)
+			asyncTasks.add(CompletableFuture.runAsync(
+					() -> renderParticles(f, camera, queue, particleRenderType, bufferBuilder),
+					EXECUTOR)
 				.exceptionally(AsyncRenderer::renderAsyncExceptionally));
 		}
 		int size = asyncTasksSize = asyncTasks.size();
@@ -156,39 +157,44 @@ public class AsyncRenderer {
 		profiler.pop();
 	}
 
-	private static void renderParticle(float f, Camera camera, Particle particle, ParticleRenderType particleRenderType, BufferBuilder bufferBuilder) {
-		if (!particle.isAlive()) {
-			return;
-		}
-		if (SimplePropertiesConfig.isCullParticles() && !frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(f))) {
-			return;
-		}
-		if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
-			recordSync(particleRenderType, particle);
-			return;
-		}
-		float g = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f + 1f;
-		try {
-			particle.render(bufferBuilder, camera, g);
-		} catch (Throwable t) {
-			boolean tolerable = AsyncTicker.isTolerable(t);
-			if (tolerable && !EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
-				return;
+	private static void renderParticles(float f, Camera camera, Queue<Particle> particles, ParticleRenderType particleRenderType, BufferBuilder bufferBuilder) {
+		Frustum frustum = AsyncRenderer.frustum;
+		float f2 = f + 1;
+		for (Particle particle : particles) {
+			if (!particle.isAlive()) {
+				continue;
 			}
-			((ParticleAddon) particle).asyncparticles$setRenderSync();
-			if (!shouldSync(particle.getClass())) {
-				if (!tolerable) {
-					LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, t);
-				} else {
-					LOGGER.warn("Exception {} thrown while rendering particle {} exceeds the threshold, please contact the author: {}",
-						t.getClass().getSimpleName(),
-						particle,
-						AsyncparticlesClient.ISSUE_URL);
-					LOGGER.warn("", t);
+			float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
+			if (SimplePropertiesConfig.isCullParticles() &&
+				!frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(f3))) {
+				continue;
+			}
+			if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
+				recordSync(particleRenderType, particle);
+				continue;
+			}
+			try {
+				particle.render(bufferBuilder, camera, f3);
+			} catch (Throwable t) {
+				boolean tolerable = AsyncTicker.isTolerable(t);
+				if (tolerable && !EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
+					continue;
 				}
-				markAsSync(particle.getClass());
+				((ParticleAddon) particle).asyncparticles$setRenderSync();
+				if (!shouldSync(particle.getClass())) {
+					if (!tolerable) {
+						LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, t);
+					} else {
+						LOGGER.warn("Exception {} thrown while rendering particle {} exceeds the threshold, please contact the author: {}",
+							t.getClass().getSimpleName(),
+							particle,
+							AsyncparticlesClient.ISSUE_URL);
+						LOGGER.warn("", t);
+					}
+					markAsSync(particle.getClass());
+				}
+				recordSync(particleRenderType, particle);
 			}
-			recordSync(particleRenderType, particle);
 		}
 	}
 
@@ -250,6 +256,10 @@ public class AsyncRenderer {
 	}
 
 	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable t) {
+		AsyncTicker.debugLater(LOGGER::info);
+		AsyncTicker.tryDebug();
+		debugLater(LOGGER::info);
+		tryDebug();
 		CrashReport crashReport = CrashReport.forThrowable(t, "Rendering Particle");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
 		crashReportCategory.setDetail("Particle", particle::toString);
@@ -301,9 +311,9 @@ public class AsyncRenderer {
 	}
 
 	private static @NotNull BindingTesselator computeBTesselator(ParticleRenderType particleRenderType, TextureManager textureManager) {
-		if (particleRenderType == ParticleRenderType.CUSTOM) { // special case
-			return BindingTesselator.EMPTY;
-		}
+//		if (particleRenderType == ParticleRenderType.CUSTOM) { // special case
+//			return BindingTesselator.EMPTY;
+//		}
 
 		FakeBeginTesselator fakeBeginTesselator = FakeBeginTesselator.newFakeBeginTesselator();
 
@@ -327,7 +337,7 @@ public class AsyncRenderer {
 			return BindingTesselator.EMPTY;
 		}
 
-		return new BindingTesselator(256, mode, format); // minimal size
+		return new BindingTesselator(256, mode, format, particleRenderType == ParticleRenderType.CUSTOM); // minimal size
 	}
 
 	/* Sync Rendering */
@@ -366,7 +376,7 @@ public class AsyncRenderer {
 	}
 
 	@SuppressWarnings("ConstantValue")
-	private static void tryDebug() {
+	static void tryDebug() {
 		if (debugConsumer != null) {
 			debugConsumer.accept("""
 				[Debug AsyncRenderer]
