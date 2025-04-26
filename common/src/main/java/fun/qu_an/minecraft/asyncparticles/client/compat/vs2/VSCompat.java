@@ -4,8 +4,8 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 
 public class VSCompat {
-	public static void removeIfOutSight(Particle particle) {
-		if (particle.isAlive() && VSClientUtils.isOutSight(particle)) {
+	public static void removeIfOutOfSight(Particle particle) {
+		if (VSClientUtils.isOutOfSight(particle)) {
 			particle.remove();
 		}
 	}

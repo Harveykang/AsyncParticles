@@ -6,7 +6,6 @@ import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.Pair;
@@ -69,30 +68,9 @@ public abstract class MixinParticleEngine {
 			profiler.pop();
 		});
 
-		AsyncTicker.PARTICLE_OPERATIONS.add(() -> {
-			// submit this task even though the queue is empty
-			// we'll add particles later
-			for (TrackingEmitter emitter : this.trackingEmitters) {
-				if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneParticleTick()) {
-					return;
-				}
-				if (!emitter.isAlive()) {
-					continue;
-				}
-				if (((ParticleAddon) emitter).asyncparticles$isTickSync()) {
-					AsyncTicker.recordSync(emitter);
-					continue;
-				}
-				try {
-					emitter.tick();
-					if (ModListHelper.VS_LOADED) {
-						VSCompat.removeIfOutSight(emitter);
-					}
-				} catch (Throwable t) {
-					AsyncTicker.onTickingParticleException(emitter, t);
-				}
-			}
-		});
+		// submit this task even though the queue is empty
+		// we'll add particles later
+		AsyncTicker.PARTICLE_OPERATIONS.add(this::asyncParticles$tickEmitters);
 
 		AsyncTicker.waitForCleanUp();
 
@@ -127,6 +105,27 @@ public abstract class MixinParticleEngine {
 				queue.add(particle);
 			}
 			particlesToAdd.clear();
+		}
+	}
+
+	@Unique
+	private void asyncParticles$tickEmitters() {
+		for (TrackingEmitter emitter : this.trackingEmitters) {
+			if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneParticleTick()) {
+				return;
+			}
+			if (!emitter.isAlive()) {
+				continue;
+			}
+			if (((ParticleAddon) emitter).asyncparticles$isTickSync()) {
+				AsyncTicker.recordSync(emitter);
+				continue;
+			}
+			try {
+				emitter.tick();
+			} catch (Throwable t) {
+				AsyncTicker.onTickingParticleException(emitter, t);
+			}
 		}
 	}
 
@@ -184,9 +183,6 @@ public abstract class MixinParticleEngine {
 					lightCachedParticle.asyncParticles$refresh();
 				}
 				((ParticleAddon) particle).asyncparticles$setTicked();
-				if (ModListHelper.VS_LOADED) {
-					VSCompat.removeIfOutSight(particle);
-				}
 			} catch (Throwable t) {
 				AsyncTicker.onTickingParticleException(particle, t);
 			}

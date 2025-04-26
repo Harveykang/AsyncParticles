@@ -5,10 +5,11 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
-import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.Pair;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
 import static fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil.toThrowDirectly;
 
 // TODO: 整理这一坨
+@Environment(EnvType.CLIENT)
 public class AsyncTicker {
 	public static final Logger LOGGER = LogManager.getLogger();
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -408,9 +410,6 @@ public class AsyncTicker {
 						lightCachedParticle.asyncParticles$refresh();
 					}
 					((ParticleAddon) particle).asyncparticles$setTicked();
-				}
-				if (ModListHelper.VS_LOADED) {
-					VSCompat.removeIfOutSight(particle);
 				}
 			} catch (Throwable e) {
 				throw constructCrashReport(particle, e);

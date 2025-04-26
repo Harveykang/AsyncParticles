@@ -298,20 +298,19 @@ public class VSClientUtils {
 		return level.getHeight(Heightmap.Types.MOTION_BLOCKING, floor(posInShip.x), floor(posInShip.z)) >= posInShip.y;
 	}
 
-	public static boolean isOutSight(Particle particle) {
+	public static boolean isOutOfSight(Particle particle) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player == null) {
 			return true;
 		}
 
-		double x1 = particle.x, y1 = particle.y, z1 = particle.z, x2 = mc.player.getX(), y2 = mc.player.getY(), z2 = mc.player.getZ();
+		double x1 = particle.x;
+		double y1 = particle.y;
+		double z1 = particle.z;
 
 		var inWorldX1 = x1;
 		var inWorldY1 = y1;
 		var inWorldZ1 = z1;
-		var inWorldX2 = x2;
-		var inWorldY2 = y2;
-		var inWorldZ2 = z2;
 
 		var ship1 = VSGameUtilsKt.getShipManagingPos(particle.level, x1, y1, z1);
 		if (ship1 != null) {
@@ -321,18 +320,14 @@ public class VSClientUtils {
 			inWorldZ1 = m.m02() * x1 + m.m12() * y1 + m.m22() * z1 + m.m32();
 		}
 
-		var ship2 = VSGameUtilsKt.getShipManagingPos(particle.level, x2, y2, z2);
-		if (ship2 != null) {
-			Matrix4dc m = ship2.getShipToWorld();
-			inWorldX2 = m.m00() * x2 + m.m10() * y2 + m.m20() * z2 + m.m30();
-			inWorldY2 = m.m01() * x2 + m.m11() * y2 + m.m21() * z2 + m.m31();
-			inWorldZ2 = m.m02() * x2 + m.m12() * y2 + m.m22() * z2 + m.m32();
-		}
-
 		int renderDistance = mc.levelRenderer.lastViewDistance << 4;
 
-		return abs(inWorldX2 - inWorldX1) > renderDistance
-			   || abs(inWorldY2 - inWorldY1) > renderDistance
-			   || abs(inWorldZ2 - inWorldZ1) > renderDistance;
+		Vec3 playerPos = mc.player.position();
+		double x2 = playerPos.x;
+		double y2 = playerPos.y;
+		double z2 = playerPos.z;
+		return abs(x2 - inWorldX1) > renderDistance
+			   || abs(y2 - inWorldY1) > renderDistance
+			   || abs(z2 - inWorldZ1) > renderDistance;
 	}
 }

@@ -6,10 +6,13 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRai
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.world.phys.Vec3;
 
 import java.io.IOException;
 
+@Environment(EnvType.CLIENT)
 public class AsyncparticlesClient {
 	public static final String MOD_ID = "asyncparticles";
 	public static final String ISSUE_URL = "https://github.com/Harveykang/AsyncParticles/issues";
