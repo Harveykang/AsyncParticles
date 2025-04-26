@@ -76,7 +76,6 @@
     "subtle_effects.fabric.MixinParticleEngine",
     "vs2.InvokerEntityShipCollisionUtils",
     "vs2.InvokerRaycastUtils",
-    "vs2.MixinAsyncTicker",
     "vs2.MixinLevelRenderer",
     "vs2.MixinMixinParticleEngine",
     "vs2.MixinParticle",

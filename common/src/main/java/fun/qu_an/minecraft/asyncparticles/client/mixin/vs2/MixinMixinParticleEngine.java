@@ -23,9 +23,9 @@ public class MixinMixinParticleEngine {
 		VSCompat.removeIfOutOfSight(emitter);
 	}
 
-	@Inject(method = "tickParticleList", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
-		target = "Lnet/minecraft/client/particle/ParticleEngine;tickParticle(Lnet/minecraft/client/particle/Particle;)V"))
-	private void onTickParticleList(CallbackInfo ci, @Local(ordinal = 0) Particle particle) {
+	@Inject(method = "tickParticle", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
+		target = "Lnet/minecraft/client/particle/Particle;tick()V"))
+	private void onTickParticleList(Particle particle, CallbackInfo ci) {
 		VSCompat.removeIfOutOfSight(particle);
 	}
 }
