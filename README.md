@@ -1,7 +1,7 @@
 # AsyncParticles
 
 - [中文](./README_zh.md)|English
-- [Downloads](https://github.com/Harveykang/AsyncParticles/releases)
+- [Modrinth](https://modrinth.com/mod/asyncparticles)|[CurseForge](https://www.curseforge.com/minecraft/mc-mods/asyncparticles)
 
 ## Features
 
@@ -9,8 +9,10 @@
   - Particle culling.
   - Async particle ticking/rendering(buffer filling).
   - Async particle light cache.
-- Create/Valkyrien Skies + Pretty Rain/Particle Rain
-  - Weather particles can now collide with contraptions/ships.
+- Create + Simple Weather/Pretty Rain/Particle Rain
+  - Weather particles can now collide with contraptions.
+- Valkyrien Skies + Pretty Rain/Particle Rain
+  - Weather particles can now collide with ships.
 - Pretty Rain/Particle Rain/Effectual/Particular
   - Async particle gen.
 
@@ -23,34 +25,27 @@
 
 ## Mod Compatability
 
-✅: Compatible  
-❔: Works fine, but not fully tested  
-⚠️: More testing needed  
-❌: Not Compatible
+### ✅ Compatible (Proactively)
 
-### Mods Tested
+- Sodium/Embeddium
+- Flerovium
+- Iris/Oculus
+- Create
+- Valkyrien Skies
+- Particle Rain/Pretty Rain
+- Simple Weather
+- Effectual
+- Effective
+- Particular
+- ...
 
-⚠️ Create  
-❔ Epic Fight  
-❔ Draconic Evolution  
-✅ Forge + Sinytra Connector  
-✅ Fabric  
-✅ ModernFix  
-✅ Sodium/Embeddium  
-✅ Flerovium  
-✅ Brute force Rendering Culling  
-✅ Iris/Oculus  
-✅ Startlight  
-✅ Valkyrien Skies  
-✅ Particle Rain/Pretty Rain  
-✅ MmmMmmMmmMmm (Target Dummy)  
-✅ Hex Casting  
-✅ Gateways to Eternity  
-✅ Effectual  
-✅ Effective/Effecticularity  
-✅ Particular  
-❌ MadParticle  
-⬜ ...
+### ❔ Works fine, but not fully tested
+- Epic Fight
+- Draconic Evolution
+
+### ❌ Incompatible
+- OptiFine
+- MadParticle  
 
 ## Credits
 
