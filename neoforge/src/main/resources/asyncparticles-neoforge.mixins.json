@@ -18,9 +18,9 @@
     "particlerain.MixinSnowParticle",
     "particlerain.MixinWeatherParticle",
     "particlerain.MixinWeatherParticleSpawner",
-    "particular.MixinClientStuff",
     "simple_weather.MixinSimpleWeather$GameBus",
-    "subtle_effects.MixinParticleEngine"
+    "subtle_effects.MixinParticleEngine",
+    "particular.MixinClientStuff"
   ],
   "injectors": {
     "defaultRequire": 1

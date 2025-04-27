@@ -111,9 +111,6 @@ public abstract class MixinParticleEngine_Render {
 					   MultiBufferSource.BufferSource bufferSource,
 					   @Nullable Frustum frustum,
 					   Predicate<ParticleRenderType> renderTypePredicate) {
-		RenderSystem.activeTexture(33986);
-		RenderSystem.activeTexture(33984);
-
 		Set<ParticleRenderType> renderOrder = particles.keySet();
 		if (SimplePropertiesConfig.isRenderAsync()) {
 			AsyncRenderer.endAll(camera, partialTick, renderTypePredicate, renderOrder);

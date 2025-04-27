@@ -73,7 +73,7 @@ public abstract class MixinParticleEngine {
 
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
 	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {
-		if (SimplePropertiesConfig.isTickAsync()){
+		if (SimplePropertiesConfig.isTickAsync()) {
 			throw ExceptionUtil.toThrowDirectly(t);
 		}
 	}
@@ -190,6 +190,10 @@ public abstract class MixinParticleEngine {
 			}
 			if (((ParticleAddon) particle).asyncparticles$isTicked()) {
 				// Skip the first tick that the particle is added to the queue.
+				if (particle instanceof LightCachedParticleAddon lightCachedParticle
+					&& SimplePropertiesConfig.particleLightCache()) {
+					lightCachedParticle.asyncparticles$refresh();
+				}
 				continue;
 			}
 			if (((ParticleAddon) particle).asyncparticles$isTickSync()) {

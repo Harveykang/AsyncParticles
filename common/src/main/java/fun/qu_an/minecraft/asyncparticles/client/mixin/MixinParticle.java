@@ -33,11 +33,6 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Shadow
 	@Final
 	public ClientLevel level;
-
-	@Shadow
-	public abstract AABB getBoundingBox();
-
-	// TODO: 换 byte?
 	@Unique
 	private boolean asyncparticles$ticked = true;
 	@Unique

@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Pseudo;
 	Particle.class,
 	// TODO: configurability
 })
-public class MixinConcurrencyUnsafeParticles {
+public class MixinConcurrentParticles {
 //	@Unique
 //	private final SpinLock asyncparticles$lock = new SpinLock();
 //

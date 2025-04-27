@@ -27,19 +27,19 @@ versionRange = "[1.21.4,)"
 ordering = "NONE"
 side = "CLIENT"
 
-[[dependencies.asyncparticles]]
-modId = "mixinextras"
-mandatory = true
-versionRange = "[0.4.1,)"
-ordering = "NONE"
-side = "CLIENT"
-
-[[dependencies.asyncparticles]]
-modId = "mixinsquared"
-mandatory = true
-versionRange = "(0.1.999,)"
-ordering = "NONE"
-side = "CLIENT"
+#[[dependencies.asyncparticles]]
+#modId = "mixinextras"
+#mandatory = true
+#versionRange = "[0.4.1,)"
+#ordering = "NONE"
+#side = "CLIENT"
+#
+#[[dependencies.asyncparticles]]
+#modId = "mixinsquared"
+#mandatory = true
+#versionRange = "(0.1.999,)"
+#ordering = "NONE"
+#side = "CLIENT"
 
 [[mixins]]
 config = "asyncparticles-neoforge.mixins.json"

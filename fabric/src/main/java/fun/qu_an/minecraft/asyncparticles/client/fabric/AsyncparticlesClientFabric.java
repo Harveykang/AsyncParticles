@@ -60,11 +60,11 @@ public final class AsyncparticlesClientFabric implements ClientModInitializer {
 						.executes(context -> {
 							FabricClientCommandSource source = context.getSource();
 							AsyncTicker.debugLater(s -> source.sendFeedback(Component.literal(s)
-								.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
-									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
+								.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(s))
+									.withHoverEvent(new HoverEvent.ShowText(Component.literal("Copy to clipboard"))))));
 							AsyncRenderer.debugLater(s -> source.sendFeedback(Component.literal(s)
-								.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
-									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
+								.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(s))
+									.withHoverEvent(new HoverEvent.ShowText(Component.literal("Copy to clipboard"))))));
 							return 1;
 						}))
 					.then(literal("dump")

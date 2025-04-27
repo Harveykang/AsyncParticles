@@ -1,19 +1,19 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.simple_weather;
 
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
-import fun.qu_an.minecraft.asyncparticles.client.compat.simpleweather.neoforge.SimpleWeatherCompat;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import tv.soaryn.simpleweather.SimpleWeather;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import tv.soaryn.simpleweather.SimpleWeatherClient;
 
-@Mixin(targets = "tv.soaryn.simpleweather.SimpleWeather$GameBus", remap = false)
-public interface MixinSimpleWeather$GameBus {
-	@WrapMethod(method = "renderWeather")
-	private static void renderWeather(ClientTickEvent.Pre event, Operation<Void> original) {
-		if (SimpleWeather.ClientConfig.OverrideWeather.get()) {
-			AsyncTicker.addEndTickTask(SimpleWeatherCompat.SIMPLE_WEATHER$RENDER_WEATHER, () -> original.call((Object) null));
-		}
+import java.util.function.Consumer;
+
+@Mixin(value = SimpleWeatherClient.class, remap = false)
+public class MixinSimpleWeather$GameBus {
+	@Redirect(method = "<init>", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/neoforged/bus/api/IEventBus;addListener(Ljava/util/function/Consumer;)V"))
+	private void renderWeather(IEventBus instance, Consumer<ClientTickEvent.Pre> tConsumer) {
+		AsyncTicker.registerEndTickEvent(() -> tConsumer.accept(null));
 	}
 }

@@ -40,13 +40,13 @@ dependencies {
 //    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
 
     /* Particular */
-//    modCompileOnly "maven.modrinth:particular:1.1.1+1.21.4"
+    modCompileOnly "maven.modrinth:particular:1.1.1+1.21.4" // TODO:this is a 1.21.4 version
 
     /* Particle Core */
     modCompileOnly "maven.modrinth:particle-core:0.2.6+1.21.5"
 
     /* A Good Place */
-//    modCompileOnly "maven.modrinth:a-good-place:kD90q4La" // 1.2.10
+    modCompileOnly "maven.modrinth:a-good-place:kD90q4La" // 1.2.10 // TODO:this is a 1.21.4 version
 
     /* Physics Mod */
     modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v176f-fabric-1.21.5.jar')
@@ -55,5 +55,5 @@ dependencies {
     modCompileOnly "maven.modrinth:subtle-effects:J9hrPl1c" // fabric 1.9.4-hf.1
 
     /* What Are They Up To */
-//    modCompileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5
+    modCompileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5 // TODO:this is a 1.21.4 version
 }
