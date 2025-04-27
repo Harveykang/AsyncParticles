@@ -1,5 +1,5 @@
 plugins {
-    id 'dev.architectury.loom' version '1.9-SNAPSHOT' apply false
+    id 'dev.architectury.loom' version '1.10-SNAPSHOT' apply false
     id 'architectury-plugin' version '3.4-SNAPSHOT'
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
     id "io.github.pacifistmc.forgix" version "1.2.9"
@@ -62,32 +62,21 @@ subprojects {
         }
         maven { url = "https://maven.bawnorton.com/releases" } // Mixin Squared
         maven { url "https://maven.shedaniel.me/" }
-        maven { url = "https://maven.blamejared.com/" } // Hex Casting
-        maven { url = "https://mvn.devos.one/releases" } // Porting Lib releases
-        maven { url = "https://mvn.devos.one/snapshots" } // Create and several dependencies
-        maven { url = "https://maven.createmod.net" } // Create, Ponder, Flywheel
-        maven { url = "https://mvn.devos.one/snapshots" } // Registrate
-        maven { url = "https://maven.jamieswhiteshirt.com/libs-release" } // Reach Entity Attributes
-        maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven" } // Forge Config API Port
+        maven { url 'https://maven.wispforest.io' } // owo lib
         maven {
             name = "Sinytra"
             url = "https://maven.su5ed.dev/releases"
-        }
-        maven { // Cardinal-Components-API
-            name = "Ladysnake Mods"
-            url = 'https://maven.ladysnake.org/releases'
         }
         maven { // conditional-mixin (particlecore)
             name = "FallenBreath"
             url = uri("https://maven.fallenbreath.me/releases")
         }
         maven { url = "https://repo.spongepowered.org/repository/maven-public" } // Mixin
-        maven { url 'https://maven.wispforest.io' } // owo lib
         maven {
             name = 'Kotlin for Forge'
             url = 'https://thedarkcolour.github.io/KotlinForForge/'
         }
-        maven {
+        maven { // YetAnotherConfigLib
             url = "https://maven.isxander.dev/releases"
             name = "Xander Maven"
         }

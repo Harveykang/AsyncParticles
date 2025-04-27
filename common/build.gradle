@@ -23,26 +23,14 @@ dependencies {
 //    compileOnly "org.sinytra:connector:2.0.0-beta.7+1.21.1"
 
     /* Performance */
-    modCompileOnly "maven.modrinth:sodium:mc1.21.4-0.6.13-fabric"
-    modCompileOnly 'maven.modrinth:iris:1.8.8+1.21.4-fabric'
+    modCompileOnly "maven.modrinth:sodium:mc1.21.5-0.6.13-fabric"
+    modCompileOnly 'maven.modrinth:iris:1.8.11+1.21.5-fabric'
 
     /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:particle-rain:3.3.3"
+    modCompileOnly "maven.modrinth:particle-rain:3.3.4"
 
     /* Effectual */
-    modCompileOnly 'maven.modrinth:effectual:0.7.0-1.21.4'
-
-    /* Mmmmmmmmmmmm */
-//    modCompileOnly 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
-
-    /* Create */
-    // 6.0.0
-//    modCompileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}") { transitive = false }
-//    modCompileOnly("net.createmod.ponder:Ponder-Fabric-${minecraft_version}:${ponder_version}")
-//    modCompileOnly("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}")
-//    modCompileOnly("com.tterrag.registrate:Registrate:${registrate_version}")
-    // 0.5.0
-//    modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
+    modCompileOnly 'maven.modrinth:effectual:0.7.0-1.21.5'
 
     /* Lodestone */
 //    modCompileOnly "maven.modrinth:lodestonelib:1.21.1-1.7.0.5-fabric" // no 1.21.4 version
@@ -51,24 +39,21 @@ dependencies {
 //    modCompileOnly "maven.modrinth:effective:2.4.8-1.21.1" // no 1.21.4 version
 //    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
 
-    /* Hex Casting */
-//    modCompileOnly "at.petra-k.hexcasting:hexcasting-fabric-1.20.1:0.11.2-pre-715"
-
     /* Particular */
-    modCompileOnly "maven.modrinth:particular:1.1.1+1.21.4"
+//    modCompileOnly "maven.modrinth:particular:1.1.1+1.21.4"
 
     /* Particle Core */
-    modCompileOnly "maven.modrinth:particle-core:0.2.5+1.21.4"
+    modCompileOnly "maven.modrinth:particle-core:0.2.6+1.21.5"
 
     /* A Good Place */
-    modCompileOnly "maven.modrinth:a-good-place:kD90q4La" // 1.2.10
+//    modCompileOnly "maven.modrinth:a-good-place:kD90q4La" // 1.2.10
 
     /* Physics Mod */
-    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v174c-fabric-1.21.4.jar')
+    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v176f-fabric-1.21.5.jar')
 
     /* Subtle Effects */
-    modCompileOnly "maven.modrinth:subtle-effects:NA1rBYFJ" // fabric 1.9.4-hf.1
+    modCompileOnly "maven.modrinth:subtle-effects:J9hrPl1c" // fabric 1.9.4-hf.1
 
     /* What Are They Up To */
-    modCompileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5
+//    modCompileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5
 }
