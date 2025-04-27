@@ -1,8 +1,9 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.physicsmod;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -10,25 +11,28 @@ import net.minecraft.util.TriState;
 
 import static net.minecraft.client.renderer.RenderStateShard.*;
 
+// TODO: 这样行吗？
 public class PhysicsModParticleRenderType {
+	public static final RenderPipeline NO_CULL_TRANSLUCENT_PARTICLE = RenderPipelines.register(
+		RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET)
+			.withCull(false)
+			.withLocation("pipeline/translucent_particle")
+			.withBlend(BlendFunction.TRANSLUCENT)
+			.build()
+	);
+
 	public static final ParticleRenderType NO_CULL_TRANSLUCENT =
 		new ParticleRenderType("asyncparticles:PHYSICS_MOD_NO_CULL_TRANSLUCENT",
-			RenderType.create("translucent_particle",
-				DefaultVertexFormat.PARTICLE,
-				VertexFormat.Mode.QUADS,
+			RenderType.create(
+				"translucent_particle",
 				1536,
 				false,
 				false,
+				NO_CULL_TRANSLUCENT_PARTICLE,
 				RenderType.CompositeState.builder()
-					.setCullState(NO_CULL)
-					.setShaderState(PARTICLE_SHADER)
-					.setTextureState(new RenderStateShard.TextureStateShard(
-						TextureAtlas.LOCATION_PARTICLES,
-						TriState.FALSE,
-						false))
-					.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+					.setTextureState(new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_PARTICLES, TriState.FALSE, false))
 					.setOutputState(PARTICLES_TARGET)
 					.setLightmapState(LIGHTMAP)
-					.setWriteMaskState(COLOR_DEPTH_WRITE)
-					.createCompositeState(false)));
+					.createCompositeState(false)
+			));
 }

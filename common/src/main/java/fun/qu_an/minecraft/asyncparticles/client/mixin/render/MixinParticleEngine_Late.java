@@ -12,6 +12,7 @@ import java.util.*;
 
 @Mixin(value = ParticleEngine.class, priority = 9999)
 public abstract class MixinParticleEngine_Late {
+	@Final
 	@Shadow
 	@Mutable
 	public static List<ParticleRenderType> RENDER_ORDER;

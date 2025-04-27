@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.effectual;
 
-import com.imeetake.effects.WaterDrip.WaterDripEffect;
+import com.imeetake.effectual.effects.WaterDrip.WaterDripEffect;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

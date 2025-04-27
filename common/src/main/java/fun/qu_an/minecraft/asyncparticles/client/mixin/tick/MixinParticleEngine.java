@@ -61,6 +61,7 @@ public abstract class MixinParticleEngine {
 	@Shadow
 	public abstract void tickParticle(Particle particle);
 
+	@Final
 	@Shadow
 	@Mutable
 	public static List<ParticleRenderType> RENDER_ORDER;

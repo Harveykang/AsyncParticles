@@ -7,7 +7,6 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -43,7 +42,7 @@ public abstract class MixinLevelRenderer {
 
 	@Inject(method = "renderLevel", order = 1500,
 		slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;FLnet/minecraft/client/renderer/FogParameters;)V")),
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;addToFrame(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;IILnet/minecraft/client/renderer/PostChain$TargetBundle;)V"))
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;addToFrame(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;IILnet/minecraft/client/renderer/PostChain$TargetBundle;Ljava/util/function/Consumer;)V"))
 	private void onRenderLevelTail1(GraphicsResourceAllocator graphicsResourceAllocator,
 									DeltaTracker deltaTracker,
 									boolean renderBlockOutline,
@@ -84,12 +83,12 @@ public abstract class MixinLevelRenderer {
 		}
 	}
 
-	@Inject(method = "method_62213", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
-		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V"))
-	private void onRenderParticles2(CallbackInfo ci) {
-		// reset blend func and culling state
-		// other mods may change them...
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.enableCull();
-	}
+//	@Inject(method = "method_62213", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
+//		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V"))
+//	private void onRenderParticles2(CallbackInfo ci) {
+//		// reset blend func and culling state
+//		// other mods may change them...
+//		RenderSystem.defaultBlendFunc();
+//		RenderSystem.enableCull();
+//	}
 }

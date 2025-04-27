@@ -151,8 +151,6 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				}
 				yield switch (split[1]) {
 					case "off_thread_access" -> !ModListHelper.IS_FORGE;
-					case "particlerain_create" ->
-						ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.CREATE_LOADED;
 					case "particlerain" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED;
 					case "effective" -> ModListHelper.FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> ModListHelper.FABRIC_EFFECTUAL_LOADED;
@@ -166,7 +164,6 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				 "tick",
 				 "render" -> true;
 			case "modernui" -> ModListHelper.MODERN_UI_LOADED;
-			case "create" -> ModListHelper.CREATE_LOADED;
 //			case "sodium_0_6" -> ModListHelper.SODIUM_LOADED
 //								 && ModListHelper.versionCheck("sodium", "0.6", "0.7");
 			case "sodium_0_7" -> ModListHelper.SODIUM_LOADED

@@ -35,12 +35,6 @@ public class ModListHelper {
 	public static final boolean PARTICLERAIN_LOADED = isModLoaded("particlerain");
 	public static final boolean FABRIC_PARTICLERAIN_LOADED = isFabricModLoaded("particlerain");
 	public static final boolean FORGE_PARTICLERAIN_LOADED = isForgeModLoaded("particlerain");
-	/* Flywheel */
-	public static final boolean FLYWHEEL_LOADED = isModLoaded("flywheel");
-	/* Create */
-	public static final boolean CREATE_LOADED = isModLoaded("create");
-	public static final boolean FABRIC_CREATE_LOADED = isFabricModLoaded("create");
-	public static final boolean FORGE_CREATE_LOADED = isForgeModLoaded("create");
 	/* Tombstone */
 	public static final boolean TOMBSTONE_LOADED = isModLoaded("tombstone");
 	/* Hexcasting */

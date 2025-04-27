@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(RainParticle.class)
 public class MixinRainParticle {
-	@Redirect(method = "render", at = @At(value = "INVOKE", remap = false, target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableCull()V"))
+	@Redirect(method = "render", at = @At(value = "INVOKE", remap = false, target = "Lcom/mojang/blaze3d/opengl/GlStateManager;_disableCull()V"))
 	private void redirectDisableCull() {
 		// do nothing
 	}

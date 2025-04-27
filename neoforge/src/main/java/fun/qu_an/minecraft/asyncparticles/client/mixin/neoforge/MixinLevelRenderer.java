@@ -7,7 +7,6 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
@@ -66,7 +65,7 @@ public abstract class MixinLevelRenderer {
 
 	@Inject(method = "renderLevel", order = 1500,
 		slice = @Slice(from = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/client/renderer/LevelRenderer;addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;FLnet/minecraft/client/renderer/FogParameters;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/Camera;)V")),
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;addToFrame(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;IILnet/minecraft/client/renderer/PostChain$TargetBundle;)V"))
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;addToFrame(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;IILnet/minecraft/client/renderer/PostChain$TargetBundle;Ljava/util/function/Consumer;)V"))
 	private void onRenderLevelTail1(GraphicsResourceAllocator graphicsResourceAllocator,
 									DeltaTracker deltaTracker,
 									boolean renderBlockOutline,
@@ -108,15 +107,15 @@ public abstract class MixinLevelRenderer {
 		}
 	}
 
-	@Inject(method = "lambda$addParticlesPass$5", remap = false,
-		at = @At(value = "INVOKE", shift = At.Shift.AFTER, remap = false,
-			target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
-	private void onRenderParticles1(CallbackInfo ci) {
-		// reset blend func and culling state
-		// other mods may change them...
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.enableCull();
-	}
+//	@Inject(method = "lambda$addParticlesPass$5", remap = false,
+//		at = @At(value = "INVOKE", shift = At.Shift.AFTER, remap = false,
+//			target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
+//	private void onRenderParticles1(CallbackInfo ci) {
+//		// reset blend func and culling state
+//		// other mods may change them...
+//		RenderSystem.defaultBlendFunc();
+//		RenderSystem.enableCull();
+//	}
 
 	@ModifyArg(method = "lambda$addParticlesPass$5", remap = false, index = 4,
 		at = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))

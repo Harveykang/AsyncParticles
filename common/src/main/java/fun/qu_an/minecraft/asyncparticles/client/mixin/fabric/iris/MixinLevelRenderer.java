@@ -42,11 +42,10 @@ public abstract class MixinLevelRenderer {
 						   Matrix4f matrix4f2,
 						   ResourceHandle<?> resourceHandle,
 						   ResourceHandle<?> resourceHandle2,
-						   ResourceHandle<?> resourceHandle3,
-						   ResourceHandle<?> resourceHandle4,
 						   boolean bl,
 						   Frustum frustum,
-						   ResourceHandle<?> resourceHandle5,
+						   ResourceHandle<?> resourceHandle3,
+						   ResourceHandle<?> resourceHandle4,
 						   CallbackInfo ci,
 						   @Local(ordinal = 0) MultiBufferSource.BufferSource bufferSource,
 						   @Local(ordinal = 0) float f) {

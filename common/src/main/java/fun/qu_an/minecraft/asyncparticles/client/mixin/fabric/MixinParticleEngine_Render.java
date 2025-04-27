@@ -23,6 +23,7 @@ public abstract class MixinParticleEngine_Render {
 	@Shadow
 	@Final
 	public Map<ParticleRenderType, Queue<Particle>> particles;
+	@Final
 	@Shadow
 	public static List<ParticleRenderType> RENDER_ORDER;
 	@SuppressWarnings({"unused", "AddedMixinMembersNamePattern", "MissingUnique"})
