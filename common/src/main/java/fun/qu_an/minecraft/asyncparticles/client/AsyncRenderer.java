@@ -146,7 +146,6 @@ public class AsyncRenderer {
 		captureParticleRenderingSetting();
 		profiler.push("render_async");
 		ParticleEngine particleEngine = mc.particleEngine;
-		TextureManager textureManager = particleEngine.textureManager;
 		Collection<ParticleRenderType> renderOrder = ModListHelper.IS_FORGE
 			? particleEngine.particles.keySet()
 			: ParticleEngine.RENDER_ORDER;
@@ -159,7 +158,7 @@ public class AsyncRenderer {
 			if (queue == null || queue.isEmpty()) {
 				continue;
 			}
-			BufferBuilder bufferBuilder = beginBufferBuilder(particleRenderType, textureManager);
+			BufferBuilder bufferBuilder = beginBufferBuilder(particleRenderType);
 			if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
 				continue;
 			}
@@ -370,13 +369,12 @@ public class AsyncRenderer {
 		}
 	}
 
-	public static @NotNull BufferBuilder beginBufferBuilder(ParticleRenderType particleRenderType, TextureManager textureManager) {
+	public static @NotNull BufferBuilder beginBufferBuilder(ParticleRenderType particleRenderType) {
 		// assert main thread
-		return BTESSELATORS.computeIfAbsent(particleRenderType,
-			k -> computeBTesselator(k, textureManager)).begin();
+		return BTESSELATORS.computeIfAbsent(particleRenderType, AsyncRenderer::computeBTesselator).begin();
 	}
 
-	private static @NotNull BindingTesselator computeBTesselator(ParticleRenderType particleRenderType, TextureManager textureManager) {
+	private static @NotNull BindingTesselator computeBTesselator(ParticleRenderType particleRenderType) {
 		RenderType renderType = particleRenderType.renderType();
 		if (renderType == null) { // special case
 			return BindingTesselator.EMPTY;
