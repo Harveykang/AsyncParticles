@@ -13,19 +13,19 @@ This is an example description! Tell everyone what your mod is about!
 '''
 logoFile = "assets/asyncparticles/icon.png"
 
-[[dependencies.asyncparticles]]
-modId = "neoforge"
-type = "required"
-versionRange = "[21,)"
-ordering = "NONE"
-side = "CLIENT"
-
-[[dependencies.asyncparticles]]
-modId = "minecraft"
-type = "required"
-versionRange = "[1.21.4,)"
-ordering = "NONE"
-side = "CLIENT"
+#[[dependencies.asyncparticles]]
+#modId = "neoforge"
+#type = "required"
+#versionRange = "[21,)"
+#ordering = "NONE"
+#side = "CLIENT"
+#
+#[[dependencies.asyncparticles]]
+#modId = "minecraft"
+#type = "required"
+#versionRange = "[1.21.4,)"
+#ordering = "NONE"
+#side = "CLIENT"
 
 #[[dependencies.asyncparticles]]
 #modId = "mixinextras"

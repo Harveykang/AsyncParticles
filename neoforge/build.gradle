@@ -101,7 +101,7 @@ dependencies {
     // or effecticularity
 
     /* Particle Core */
-//    modCompileOnly "maven.modrinth:particle-core:0.2.5+1.21.4+neoforge"
+    modCompileOnly "maven.modrinth:particle-core:0.2.5+1.21.4+neoforge"
 //    modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.21.4+neoforge"
 //    modLocalRuntime "maven.modrinth:fzzy-config:0.6.8+1.21.3+neoforge"
 //    modLocalRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')

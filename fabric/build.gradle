@@ -98,7 +98,7 @@ dependencies {
 //    modLocalRuntime fileTree(dir: '../libs', include: 'tombstone-1.20.1-8.9.0.jar')
 
     /* Particular */
-//    modLocalRuntime "maven.modrinth:particular:1.1.1+1.21"
+    modLocalRuntime "maven.modrinth:particular:1.1.1+1.21.4"
 
     /* Particle Core */
     modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.21.4"

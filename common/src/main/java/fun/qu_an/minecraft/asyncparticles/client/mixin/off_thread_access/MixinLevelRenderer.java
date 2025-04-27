@@ -37,12 +37,12 @@ public abstract class MixinLevelRenderer {
 		}
 	}
 
-	@WrapMethod(method = "setSectionDirtyWithNeighbors")
-	public void setSectionDirtyWithNeighbors(int sectionX, int sectionY, int sectionZ, Operation<Void> original) {
+	@WrapMethod(method = "setSectionRangeDirty")
+	public void setSectionRangeDirty(int minY, int minX, int minZ, int maxY, int maxX, int maxZ, Operation<Void> original) {
 		if (RenderSystem.isOnRenderThread()) {
-			original.call(sectionX, sectionY, sectionZ);
+			original.call(minY, minX, minZ, maxY, maxX, maxZ);
 		} else {
-			ThreadUtil.enqueueClientTask(() -> original.call(sectionX, sectionY, sectionZ));
+			ThreadUtil.enqueueClientTask(() -> original.call(minY, minX, minZ, maxY, maxX, maxZ));
 		}
 	}
 
