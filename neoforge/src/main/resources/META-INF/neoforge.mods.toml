@@ -37,7 +37,7 @@ side = "CLIENT"
 #[[dependencies.asyncparticles]]
 #modId = "mixinsquared"
 #mandatory = true
-#versionRange = "[0.1.999,)"
+#versionRange = "(0.1.999,)"
 #ordering = "NONE"
 #side = "CLIENT"
 

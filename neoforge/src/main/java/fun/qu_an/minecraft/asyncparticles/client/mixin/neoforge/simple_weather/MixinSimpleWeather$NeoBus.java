@@ -8,9 +8,9 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import tv.soaryn.simpleweather.SimpleWeather;
 
-@Mixin(targets = "tv.soaryn.simpleweather.SimpleWeather$NeoBus", remap = false)
+@Mixin(targets = "tv.soaryn.simpleweather.SimpleWeather$NeoBus")
 public interface MixinSimpleWeather$NeoBus {
-	@WrapMethod(method = "renderWeather")
+	@WrapMethod(method = "renderWeather", remap = false)
 	private static void renderWeather(ClientTickEvent.Pre event, Operation<Void> original) {
 		if (SimpleWeather.ClientConfig.OverrideWeather.get()) {
 			AsyncTicker.addEndTickTask(SimpleWeatherCompat.SIMPLE_WEATHER$RENDER_WEATHER, () -> original.call((Object) null));
