@@ -1,56 +1,54 @@
 # 异步粒子
 
 - 中文|[English](./README.md)
-- [下载](https://github.com/Harveykang/AsyncParticles/releases)
+- [Modrinth](https://modrinth.com/mod/asyncparticles)|[CurseForge](https://www.curseforge.com/minecraft/mc-mods/asyncparticles)
 
 ## 特性
 
 - Minecraft
-  - 异步粒子刻/渲染
-  - 异步客户端方块实体刻
-- 瓦尔基里天空/机械动力 + Pretty Rain/粒子雨
-  - 天气粒子不会穿过船只/动态结构
-- Pretty Rain/粒子雨/Effectual/Particular
+  - 粒子剔除
+  - 异步粒子刻/渲染（缓冲区填充）
+  - 异步粒子光照缓存
+- 机械动力 + Simple Weather/Pretty Rain/粒子雨
+  - 天气粒子不会穿过动态结构
+- 瓦尔基里天空 + Pretty Rain/粒子雨
+  - 天气粒子不会穿过船只
+- Pretty Rain/粒子雨/Effectual/Particular/Simple Weather
   - 异步粒子生成
 
 ## 推荐模组
 
-- ModernFix
-- Sodium/Embeddium
-- Flerovium
+- 现代化修复
+- 钠/Embeddium
+- 鈇
 - 星光/ScalableLux
 
 ## 模组兼容性
 
-✅: 兼容  
-⚠️: 需要更多测试  
-❔: 看起来没问题，但没有完全测试  
-🔄️: 正在尝试兼容  
-❌: 不兼容
+### ✅ 主动兼容
 
-### 已测试模组
+- 钠/Embeddium
+- 鈇
+- Iris/Oculus
+- 机械动力
+- 瓦尔基里天空
+- 粒子雨/Pretty Rain
+- Simple Weather
+- Effectual
+- Effective
+- Particular
+- Particle Core
+  - 会取消 Particle Core 的大部分优化  
+    (不兼容异步化)
+- ...
 
-⚠️ Create  
-❔ Epic Fight  
-❔ Draconic Evolution  
-✅ Forge + Sinytra Connector  
-✅ Fabric  
-✅ ModernFix  
-✅ Sodium/Embeddium  
-✅ Flerovium  
-✅ Brute force Rendering Culling  
-✅ Iris/Oculus  
-✅ Startlight  
-✅ Valkyrien Skies  
-✅ Particle Rain/Pretty Rain  
-✅ MmmMmmMmmMmm (Target Dummy)  
-✅ Hex Casting  
-✅ Gateways to Eternity  
-✅ Effectual  
-✅ Effective/Effecticularity  
-✅ Particular  
-❌ MadParticle  
-⬜ ...
+### ❔ 看起来没问题
+- Epic Fight
+- Draconic Evolution
+
+### ❌ 不兼容
+- 高清修复
+- 疯狂粒子
 
 ## 致谢
 

@@ -13,7 +13,7 @@
   - Weather particles can now collide with contraptions.
 - Valkyrien Skies + Pretty Rain/Particle Rain
   - Weather particles can now collide with ships.
-- Pretty Rain/Particle Rain/Effectual/Particular
+- Pretty Rain/Particle Rain/Effectual/Particular/Simple Weather
   - Async particle gen.
 
 ## Mods Recommended
