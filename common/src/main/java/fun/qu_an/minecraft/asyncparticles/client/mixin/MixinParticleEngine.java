@@ -174,6 +174,10 @@ public abstract class MixinParticleEngine {
 			}
 			if (((ParticleAddon) particle).asyncparticles$isTicked()) {
 				// Skip the first tick that the particle is added to the queue.
+				if (particle instanceof LightCachedParticleAddon lightCachedParticle
+					&& SimplePropertiesConfig.particleLightCache()) {
+					lightCachedParticle.asyncparticles$refresh();
+				}
 				continue;
 			}
 			if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
