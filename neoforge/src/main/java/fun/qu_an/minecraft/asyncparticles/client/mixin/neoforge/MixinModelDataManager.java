@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.util.ConcurrentLong2ObjectMap;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -29,13 +31,8 @@ public abstract class MixinModelDataManager {
 		modelDataCache = new ConcurrentLong2ObjectMap<>(modelDataCache);
 	}
 
-	/**
-	 * @author
-	 * @reason
-	 */
-	@Overwrite(remap = false)
-	private boolean isOtherThread() {
-		return Thread.currentThread() != owningThread &&
-			   !ThreadUtil.isOnParticleTickerThread();
+	@WrapMethod(method = "isOtherThread", remap = false)
+	private boolean wrapIsOtherThread(Operation<Boolean> original) {
+		return original.call() && !ThreadUtil.isOnParticleTickerThread();
 	}
 }

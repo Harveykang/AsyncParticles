@@ -3,6 +3,7 @@ accessWidener v2 named
 accessible field net/minecraft/Util BACKGROUND_EXECUTOR Ljava/util/concurrent/ExecutorService;
 transitive-mutable field net/minecraft/world/level/Level random Lnet/minecraft/util/RandomSource;
 accessible field net/minecraft/client/particle/ParticleEngine particles Ljava/util/Map;
+transitive-mutable field net/minecraft/client/particle/ParticleEngine particles Ljava/util/Map;
 accessible field net/minecraft/client/particle/Particle x D
 accessible field net/minecraft/client/particle/Particle y D
 accessible field net/minecraft/client/particle/Particle z D
@@ -56,5 +57,6 @@ accessible field com/mojang/blaze3d/vertex/BufferBuilder building Z
 accessible method net/minecraft/client/particle/Particle getLightColor (F)I
 accessible field net/minecraft/client/particle/ParticleEngine textureManager Lnet/minecraft/client/renderer/texture/TextureManager;
 accessible field net/minecraft/client/particle/ParticleEngine RENDER_ORDER Ljava/util/List;
+transitive-mutable field net/minecraft/client/particle/ParticleEngine RENDER_ORDER Ljava/util/List;
 accessible field com/mojang/blaze3d/vertex/ByteBufferBuilder capacity I
 accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;

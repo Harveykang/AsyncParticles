@@ -163,7 +163,7 @@ public class AsyncRenderer {
 										ParticleRenderType particleRenderType,
 										BufferBuilder bufferBuilder) {
 		Frustum frustum = AsyncRenderer.frustum;
-		float f2 = f + 1;
+		float f2 = f + 1f;
 		for (Particle particle : particles) {
 			if (!particle.isAlive()) {
 				continue;

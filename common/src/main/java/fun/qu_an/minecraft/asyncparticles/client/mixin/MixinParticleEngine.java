@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
-import com.google.common.collect.ImmutableList;
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
@@ -50,20 +49,6 @@ public abstract class MixinParticleEngine {
 		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 		trackingEmitters = new BusyWaitEvictingQueue<>(256, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 		random = new SingleThreadedRandomSource(ThreadLocalRandom.current().nextInt());
-		// make custom types render after non-customs
-		// Remove duplicated render types, (e.g. Hex Casting mod's bug)
-		Set<ParticleRenderType> renderTypes = new LinkedHashSet<>((int) (RENDER_ORDER.size() * 1.34 + 1));
-		for (ParticleRenderType type : RENDER_ORDER) {
-			if (!AsyncRenderer.getBTesselator(type, textureManager).shouldSync) {
-				renderTypes.add(type);
-			}
-		}
-		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderer.getBTesselator(type, textureManager).shouldSync) {
-				renderTypes.add(type);
-			}
-		}
-		RENDER_ORDER = ImmutableList.copyOf(renderTypes);
 	}
 
 	@Shadow

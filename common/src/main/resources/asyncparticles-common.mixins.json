@@ -40,6 +40,7 @@
     "iris_like.MixinFullyBufferedMultiBufferSource",
     "iris_like.MixinIris",
     "iris_like.MixinOldFullyBufferedMultiBufferSource",
+    "lodestone.MixinRenderHandler",
     "modernui.MixinRenderSystem",
     "off_thread_access.MixinActiveProfiler",
     "off_thread_access.MixinClassInstanceMultiMap",

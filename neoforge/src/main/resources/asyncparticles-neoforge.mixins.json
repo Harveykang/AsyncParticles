@@ -6,8 +6,8 @@
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.neoforge.APMixinPluginNeoForge",
   "client": [
     "MixinLevelRenderer",
+    "MixinMinecraft",
     "MixinModelDataManager",
-    "MixinParticleEngine",
     "MixinParticleEngine_Render",
     "create.InvokerContraptionCollider",
     "create.MixinDepotBehaviour",
