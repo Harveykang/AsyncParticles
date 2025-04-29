@@ -149,8 +149,7 @@ public class AsyncRenderer {
 			if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
 				continue;
 			}
-			asyncTasks.add(CompletableFuture.runAsync(() -> queue.forEach(particle ->
-					renderParticle(f, camera, particle, particleRenderType, bufferBuilder)), EXECUTOR)
+			asyncTasks.add(CompletableFuture.runAsync(() -> renderParticles(f, camera, queue, particleRenderType, bufferBuilder), EXECUTOR)
 				.exceptionally(AsyncRenderer::renderAsyncExceptionally));
 		}
 		int size = asyncTasksSize = asyncTasks.size();
@@ -158,40 +157,48 @@ public class AsyncRenderer {
 		profiler.pop();
 	}
 
-	private static void renderParticle(float f, Camera camera, Particle particle, ParticleRenderType particleRenderType, BufferBuilder bufferBuilder) {
-		if (!particle.isAlive()) {
-			return;
+	private static void renderParticles(float f,
+										Camera camera,
+										Queue<Particle> particles,
+										ParticleRenderType particleRenderType,
+										BufferBuilder bufferBuilder) {
+		Frustum frustum = AsyncRenderer.frustum;
+		float f2 = f + 1f;
+		for (Particle particle : particles) {
+			if (!particle.isAlive()) {
+				continue;
+			}
+			if (((ParticleAddon) particle).shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
+				continue;
+			}
+			if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
+				recordSync(particleRenderType, particle);
+				continue;
+			}
+			float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
+			try {
+				particle.render(bufferBuilder, camera, f3);
+			} catch (Throwable t) {
+				boolean tolerable = AsyncTicker.isTolerable(t);
+				if (tolerable && !EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
+					continue;
+				}
+				((ParticleAddon) particle).asyncparticles$setRenderSync();
+				if (!shouldSync(particle.getClass())) {
+					if (!tolerable) {
+						LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, t);
+					} else {
+						LOGGER.warn("Exception {} thrown while rendering particle {} exceeds the threshold, please contact the author: {}",
+							t.getClass().getSimpleName(),
+							particle,
+							AsyncparticlesClient.ISSUE_URL,
+							t);
+					}
+					markAsSync(particle.getClass());
+				}
+				recordSync(particleRenderType, particle);
+			}
 		}
-		if (((ParticleAddon) particle).shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
-			return;
-		}
-		if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
-			recordSync(particleRenderType, particle);
-			return;
-		}
-		float g = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f + 1f;
-		try {
-			particle.render(bufferBuilder, camera, g);
-		} catch (Throwable t) {
-			boolean tolerable = AsyncTicker.isTolerable(t);
-            if (tolerable && !EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
-                return;
-            }
-            ((ParticleAddon) particle).asyncparticles$setRenderSync();
-            if (!shouldSync(particle.getClass())) {
-                if (!tolerable) {
-                    LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, t);
-                } else {
-                    LOGGER.warn("Exception {} thrown while rendering particle {} exceeds the threshold, please contact the author: {}",
-                        t.getClass().getSimpleName(),
-                        particle,
-                        AsyncparticlesClient.ISSUE_URL,
-                        t);
-                }
-                markAsSync(particle.getClass());
-            }
-            recordSync(particleRenderType, particle);
-        }
 	}
 
 	private static Void renderAsyncExceptionally(Throwable e) {

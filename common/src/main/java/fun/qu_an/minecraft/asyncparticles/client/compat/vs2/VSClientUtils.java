@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.compat.vs2;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.vs2.InvokerEntityShipCollisionUtils;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.vs2.InvokerRaycastUtils;
 import kotlin.Pair;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -299,35 +300,26 @@ public class VSClientUtils {
 	}
 
 	public static boolean isOutOfSight(Particle particle) {
-		Minecraft mc = Minecraft.getInstance();
-		if (mc.player == null) {
-			return true;
-		}
-
 		double x1 = particle.x;
 		double y1 = particle.y;
 		double z1 = particle.z;
 
-		var inWorldX1 = x1;
-		var inWorldY1 = y1;
-		var inWorldZ1 = z1;
+		double inWorldX1 = x1;
+		double inWorldZ1 = z1;
 
 		var ship1 = VSGameUtilsKt.getShipManagingPos(particle.level, x1, y1, z1);
 		if (ship1 != null) {
 			Matrix4dc m = ship1.getShipToWorld();
 			inWorldX1 = m.m00() * x1 + m.m10() * y1 + m.m20() * z1 + m.m30();
-			inWorldY1 = m.m01() * x1 + m.m11() * y1 + m.m21() * z1 + m.m31();
 			inWorldZ1 = m.m02() * x1 + m.m12() * y1 + m.m22() * z1 + m.m32();
 		}
 
+		Minecraft mc = Minecraft.getInstance();
 		int renderDistance = mc.levelRenderer.lastViewDistance << 4;
+		Camera camera = mc.gameRenderer.getMainCamera();
 
-		Vec3 playerPos = mc.player.position();
-		double x2 = playerPos.x;
-		double y2 = playerPos.y;
-		double z2 = playerPos.z;
-		return abs(x2 - inWorldX1) > renderDistance
-			   || abs(y2 - inWorldY1) > renderDistance
-			   || abs(z2 - inWorldZ1) > renderDistance;
+		Vec3 pos = camera.getPosition();
+		return abs(pos.x - inWorldX1) > renderDistance
+			   || abs(pos.z - inWorldZ1) > renderDistance;
 	}
 }

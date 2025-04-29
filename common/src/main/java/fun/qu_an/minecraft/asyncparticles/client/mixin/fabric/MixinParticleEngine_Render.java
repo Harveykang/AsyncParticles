@@ -82,6 +82,7 @@ public abstract class MixinParticleEngine_Render {
 			RenderSystem.setShader(GameRenderer::getParticleShader);
 			particleRenderType.begin(FakeBufferBuilder.INSTANCE, this.textureManager);
 			if (!syncParticles.isEmpty()) {
+				float f2 = f + 1f;
 				for (Particle particle : syncParticles) {
 					if (!particle.isAlive()) {
 						continue;
@@ -90,9 +91,9 @@ public abstract class MixinParticleEngine_Render {
 						!frustum.isVisible(particle.getBoundingBox())) {
 						continue;
 					}
-					float g = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f + 1f;
+					float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
 					try {
-						particle.render(bufferBuilder, camera, g);
+						particle.render(bufferBuilder, camera, f3);
 					} catch (Throwable t) {
 						throw AsyncRenderer.constructCrashReport(particle, particleRenderType, t);
 					}

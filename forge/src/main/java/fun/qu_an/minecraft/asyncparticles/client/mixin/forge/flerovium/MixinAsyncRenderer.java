@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(AsyncRenderer.class)
 public class MixinAsyncRenderer {
-	@Redirect(method = "renderParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;isVisible(Lnet/minecraft/world/phys/AABB;)Z"))
-	private static boolean isVisible(Frustum frustum, AABB aabb, @Local(argsOnly = true) Particle particle) {
+	@Redirect(method = "renderParticles", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;isVisible(Lnet/minecraft/world/phys/AABB;)Z"))
+	private static boolean isVisible(Frustum frustum, AABB aabb, @Local(ordinal = 0) Particle particle) {
 		return flerovium$FastFrustumCheck(frustum, aabb, particle);
 	}
 

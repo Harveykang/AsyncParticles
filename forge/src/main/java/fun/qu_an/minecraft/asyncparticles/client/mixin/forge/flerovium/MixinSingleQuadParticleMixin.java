@@ -14,6 +14,7 @@ public abstract class MixinSingleQuadParticleMixin implements LightCachedParticl
 	@Dynamic
 	@TargetHandler(
 		mixin = "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin",
+		// The two fields added by the mixin will be cancelled by APMixinPlugin.
 		name = "renderFast"
 	)
 	@Redirect(method = "@MixinSquared:Handler",

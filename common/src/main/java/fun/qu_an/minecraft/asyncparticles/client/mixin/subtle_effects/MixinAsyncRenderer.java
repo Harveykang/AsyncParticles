@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(AsyncRenderer.class)
 public class MixinAsyncRenderer {
-	@Redirect(method = "renderParticle",
+	@Redirect(method = "renderParticles",
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/Particle;isAlive()Z"))
 	private static boolean shouldRenderParticle(Particle instance, @Local(argsOnly = true) Camera camera) {
 		return instance.isAlive() && SubtleEffectsCompat.shouldRenderParticle(instance, camera, Minecraft.getInstance().level);
