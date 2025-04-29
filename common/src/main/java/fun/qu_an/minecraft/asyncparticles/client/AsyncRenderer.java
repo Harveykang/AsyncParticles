@@ -358,6 +358,10 @@ public class AsyncRenderer {
 	}
 
 	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable t) {
+		AsyncTicker.debugLater(LOGGER::info);
+		AsyncTicker.tryDebug();
+		debugLater(LOGGER::info);
+		tryDebug();
 		CrashReport crashReport = CrashReport.forThrowable(t, "Rendering Particle");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
 		crashReportCategory.setDetail("Particle", particle::toString);
@@ -473,7 +477,7 @@ public class AsyncRenderer {
 		debugConsumer = consumer;
 	}
 
-	private static void tryDebug() {
+	static void tryDebug() {
 		if (debugConsumer != null) {
 			debugConsumer.accept("""
 				[Debug AsyncRenderer]

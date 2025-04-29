@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.compat.physicsmod;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
+import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.diebuddies.physics.snow.math.AABB3D;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -13,6 +14,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
+
+import static java.lang.Math.abs;
 
 public class PhysicsModCompat {
 	public static boolean isCollideWithShip(ClientLevel level, Vec3 movement, AABB3D aabb) {
@@ -38,12 +41,17 @@ public class PhysicsModCompat {
 				ClipContext.Fluid.ANY,
 				mc.player),
 			true);
-		if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
-			Vec3 spawnPos = hit.getLocation().add(hit.shipMotion);
-			FluidState fluidState = level.getFluidState(hit.getBlockPos());
-			if (fluidState.isEmpty()) {
-				mc.particleEngine.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
-			}
+		if (hit == null || hit.getType() != HitResult.Type.BLOCK) {
+			return;
+		}
+		Vec3 shipMotion = hit.shipMotion;
+		if (!SimplePropertiesConfig.doVsShipRainEffectsIfMoving() && abs(shipMotion.lengthSqr()) > 0.01) {
+			return;
+		}
+		Vec3 spawnPos = hit.getLocation().add(shipMotion);
+		FluidState fluidState = level.getFluidState(hit.getBlockPos());
+		if (fluidState.isEmpty()) {
+			mc.particleEngine.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
 		}
 	}
 

@@ -80,6 +80,8 @@ public class ModListHelper {
 	/* Vulkan Mod */
 	public static final boolean VULKAN_MOD_LOADED = isModLoaded("vulkanmod");
 	public static final boolean FABRIC_VULKAN_MOD_LOADED = isFabricModLoaded("vulkanmod");
+	/* Lodestone */
+	public static final boolean LODESTONE_LOADED = isModLoaded("lodestone");
 
 	@ExpectPlatform
 	private static boolean isForge() {

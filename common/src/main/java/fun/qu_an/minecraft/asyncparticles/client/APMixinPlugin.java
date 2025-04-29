@@ -160,6 +160,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				};
 			}
 			case "watut" -> ModListHelper.WATUT_LOADED;
+			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

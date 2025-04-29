@@ -8,7 +8,7 @@
   "client": [
     "MixinConcurrencyUnsafeParticles",
     "MixinLevelRenderer",
-    "MixinParticleEngine_Late",
+    "MixinMinecraft",
     "MixinParticleEngine_Render",
     "create.MixinDepotBehaviour",
     "create.MixinEjectorBlockEntity",

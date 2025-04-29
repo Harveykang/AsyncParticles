@@ -24,8 +24,8 @@ public class SimplePropertiesConfig {
 	private static boolean particleLightCache = true;
 	private static boolean suppressCME = false;
 	private static boolean fixParticleLightOnVsShips = true;
-	private static boolean collideWithCreateModContraptions = true;
-	private static boolean collideWithVSModShips = true;
+	private static boolean doVsShipRainEffectsIfMoving = false;
+//	private static boolean doCreateRainEffectsIfMoving = true;
 	private static boolean shouldSave;
 
 	public static void load() throws IOException {
@@ -63,6 +63,8 @@ public class SimplePropertiesConfig {
 		particleLightCache = getBoolean(properties, "particleLightCache", true);
 		suppressCME = getBoolean(properties, "suppressCME", false);
 		fixParticleLightOnVsShips = getBoolean(properties, "fixParticleLightOnVsShips", true);
+		doVsShipRainEffectsIfMoving = getBoolean(properties, "doVsShipRainEffectsIfMoving", false);
+//		doCreateRainEffectsIfMoving = getBoolean(properties, "doCreateRainEffectsIfMoving", true);
 
 		if (shouldSave) {
 			properties.store(Files.newOutputStream(CONFIG_FILE), null);
@@ -144,5 +146,13 @@ public class SimplePropertiesConfig {
 
 	public static int getLimit() {
 		return limit;
+	}
+
+	public static boolean doVsShipRainEffectsIfMoving() {
+		return doVsShipRainEffectsIfMoving;
+	}
+
+	public static boolean doCreateRainEffectsIfMoving() {
+		return true;
 	}
 }

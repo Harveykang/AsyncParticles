@@ -33,6 +33,7 @@ subprojects {
         runs {
             configureEach {
                 vmArg("-Dmixin.debug.export=true")
+                vmArg("-Dsodium.checks.issue2561=false")
 //              vmArg("-Dmixin.env.remapRefMap=true")
 //              vmArg("-Dmixin.env.refMapRemappingFile=${projectDir}/build/createSrgToMcp/output.srg")
             }

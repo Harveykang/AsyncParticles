@@ -205,18 +205,6 @@ public class VSClientUtils {
 		}
 	}
 
-	public static boolean areAffineMatricesPositionClose(Matrix4dc matrixA, Matrix4dc matrixB, float epsilon) {
-		return abs(matrixA.m00() - matrixB.m00()) < epsilon &&
-			   abs(matrixA.m01() - matrixB.m01()) < epsilon &&
-			   abs(matrixA.m02() - matrixB.m02()) < epsilon &&
-			   abs(matrixA.m10() - matrixB.m10()) < epsilon &&
-			   abs(matrixA.m11() - matrixB.m11()) < epsilon &&
-			   abs(matrixA.m12() - matrixB.m12()) < epsilon &&
-			   abs(matrixA.m20() - matrixB.m20()) < epsilon &&
-			   abs(matrixA.m21() - matrixB.m21()) < epsilon &&
-			   abs(matrixA.m22() - matrixB.m22()) < epsilon;
-	}
-
 	/**
 	 * No vanilla collision check.
 	 */
@@ -257,9 +245,13 @@ public class VSClientUtils {
 			var shipHitDist = shipHitPos.distanceToSqr(ctx.getFrom());
 
 			if (shipHitDist < closestHitDist && shipHit.getType() != HitResult.Type.MISS) {
-				Vector3dc velocity = ship.getVelocity();
+				var newPosInShipLocal = worldPos
+					.sub(ship.getTransform().getPositionInWorld());
+				var shipVelocity = new Vector3d(ship.getVelocity())
+					.add(new Vector3d(ship.getOmega()).cross(newPosInShipLocal))
+					.mul(0.05);
 				closestHit = ShipHitResult.of(shipHit, worldToShip, shipToWorld,
-					new Vec3(velocity.x() * 0.05, velocity.y() * 0.05, velocity.z() * 0.05));
+					new Vec3(shipVelocity.x(), shipVelocity.y(), shipVelocity.z()));
 				closestHitPos = shipHitPos;
 				closestHitDist = shipHitDist;
 			}
