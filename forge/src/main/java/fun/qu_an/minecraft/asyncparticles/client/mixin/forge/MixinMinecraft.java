@@ -52,16 +52,16 @@ public class MixinMinecraft {
 					int vanillaTwo = -1;
 					for (int i = 0; i < renderOrder.size(); i++) {
 						ParticleRenderType geti = renderOrder.get(i);
-						if (geti == o1) {
+						if (vanillaOne == -1 && geti == o1) {
 							vanillaOne = i;
-						} else if (geti == o2) {
+						} else if (vanillaTwo == -1 && geti == o2) {
 							vanillaTwo = i;
+						}
+						if (vanillaOne >= 0 && vanillaTwo >= 0) {
+							return Integer.compare(vanillaOne, vanillaTwo);
 						}
 					}
 
-					if (vanillaOne >= 0 && vanillaTwo >= 0) {
-						return Integer.compare(vanillaOne, vanillaTwo);
-					}
 					if (vanillaOne == -1 && vanillaTwo == -1) {
 						return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
 					}
