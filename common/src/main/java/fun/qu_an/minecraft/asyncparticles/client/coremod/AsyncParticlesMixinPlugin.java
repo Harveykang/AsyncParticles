@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.ExtensionMemberCancelApplication;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.MixinMemberCanceller;
@@ -16,7 +16,7 @@ import org.spongepowered.asm.service.MixinService;
 import java.util.List;
 import java.util.Set;
 
-public class APMixinPlugin implements IMixinConfigPlugin {
+public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 	static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles:plugin");
 
 	@Override
@@ -92,7 +92,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 	}
 
 	//	private static final int L = "fun.qu_an.minecraft.asyncparticles.client.mixin.".length();
-	private static final int PACKAGE_LENGTH = AsyncparticlesClient.class.getPackage().getName().length() +
+	private static final int PACKAGE_LENGTH = AsyncParticlesClient.class.getPackage().getName().length() +
 											  ".mixin.".length();
 
 	/// - mixin/fabric 包下位于根目录的mixin只在fabric环境下生效。除非另有说明，位于其他子目录的mixin在fabric或信雅互联环境下均生效
@@ -144,6 +144,7 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				 "render" -> true;
 			case "modernui" -> ModListHelper.MODERN_UI_LOADED;
 			case "vs2" -> ModListHelper.VS_LOADED;
+			case "vs2_create" -> ModListHelper.VS_LOADED && ModListHelper.CREATE_LOADED;
 			case "create" -> ModListHelper.CREATE_LOADED;
 			case "iris_like" -> ModListHelper.IRIS_LIKE_LOADED;
 			case "flywheel" -> ModListHelper.FLYWHEEL_LOADED &&

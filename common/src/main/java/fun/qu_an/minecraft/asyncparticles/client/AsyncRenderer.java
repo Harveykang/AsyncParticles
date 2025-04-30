@@ -120,7 +120,7 @@ public class AsyncRenderer {
 	private static int asyncTasksSize;
 	private static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
-		() -> SimplePropertiesConfig.renderFailurePerSecondThreshold
+		() -> SimplePropertiesConfig.getRenderFailurePerSecondThreshold()
 	);
 
 	/* Renderer */
@@ -191,7 +191,7 @@ public class AsyncRenderer {
 						LOGGER.warn("Exception {} thrown while rendering particle {} exceeds the threshold, please contact the author: {}",
 							t.getClass().getSimpleName(),
 							particle,
-							AsyncparticlesClient.ISSUE_URL,
+							AsyncParticlesClient.ISSUE_URL,
 							t);
 					}
 					markAsSync(particle.getClass());

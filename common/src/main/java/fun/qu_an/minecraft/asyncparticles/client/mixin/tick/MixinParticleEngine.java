@@ -84,7 +84,6 @@ public abstract class MixinParticleEngine {
 				}
 				Queue<Particle> queue = this.particles.computeIfAbsent(particle.getRenderType(),
 					k -> {
-//						EvictingQueue<Particle> queue1 = EvictingQueue.create(SimplePropertiesConfig.limit);
 						Queue<Particle> queue1 = new IterationSafeEvictingQueue<>(
 							16,
 							SimplePropertiesConfig.getLimit(),

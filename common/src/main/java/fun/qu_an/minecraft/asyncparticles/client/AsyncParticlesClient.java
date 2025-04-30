@@ -9,11 +9,12 @@ import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.phys.Vec3;
+import org.valkyrienskies.core.impl.shadow.E;
 
 import java.io.IOException;
 
 @Environment(EnvType.CLIENT)
-public class AsyncparticlesClient {
+public class AsyncParticlesClient {
 	public static final String MOD_ID = "asyncparticles";
 	public static final String ISSUE_URL = "https://github.com/Harveykang/AsyncParticles/issues";
 
@@ -23,7 +24,7 @@ public class AsyncparticlesClient {
 		}
 		try {
 			SimplePropertiesConfig.load();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 		if (ModListHelper.PARTICLERAIN_LOADED) {

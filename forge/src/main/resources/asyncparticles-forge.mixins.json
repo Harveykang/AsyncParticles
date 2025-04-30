@@ -4,7 +4,7 @@
   "package": "fun.qu_an.minecraft.asyncparticles.client.mixin.forge",
   "compatibilityLevel": "JAVA_17",
   "refmap": "asyncparticles-forge-refmap.json",
-  "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.forge.APMixinPluginForge",
+  "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.forge.AsyncParticlesMixinPluginForge",
   "client": [
     "MixinConcurrencyUnsafeParticles",
     "MixinLevelRenderer",

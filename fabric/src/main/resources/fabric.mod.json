@@ -17,7 +17,10 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "fun.qu_an.minecraft.asyncparticles.client.fabric.AsyncparticlesClientFabric"
+      "fun.qu_an.minecraft.asyncparticles.client.fabric.AsyncParticlesClientFabric"
+    ],
+    "modmenu": [
+      "fun.qu_an.minecraft.asyncparticles.client.config.fabric.AsyncParticlesModMenu"
     ]
   },
   "mixins": [

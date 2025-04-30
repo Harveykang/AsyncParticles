@@ -7,18 +7,24 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
+import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 
@@ -29,15 +35,30 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
-@Mod(AsyncparticlesClient.MOD_ID)
-public final class AsyncparticlesClientForge {
-	public AsyncparticlesClientForge() {
+@Mod(AsyncParticlesClient.MOD_ID)
+public final class AsyncParticlesClientForge {
+	public AsyncParticlesClientForge() {
 		// Run our common setup.
 		if (!ModListHelper.IS_CLIENT) {
 			return;
 		}
-		AsyncparticlesClient.init();
+		AsyncParticlesClient.init();
 		MinecraftForge.EVENT_BUS.addListener(this::registerClientCommands);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener((FMLClientSetupEvent event) -> {
+			ModLoadingContext.get().registerExtensionPoint(
+				ConfigScreenHandler.ConfigScreenFactory.class,
+				() -> new ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> {
+					if (ModListHelper.CLOTH_CONFIG_LOADED) {
+						return AsyncParticlesConfig.screenBuilder(parent).build();
+					} else {
+						return new DisconnectedScreen(parent,
+							Component.translatable("config.asyncparticles.error.menu_unavailable"),
+							Component.translatable("config.asyncparticles.error.cloth_config_required"),
+							Component.translatable("gui.back"));
+					}
+				})
+			);
+		});
 	}
 
 	private static CompletableFuture<Suggestions> suggestModId(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
@@ -46,10 +67,10 @@ public final class AsyncparticlesClientForge {
 
 	private void registerClientCommands(RegisterClientCommandsEvent event) {
 		CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-		dispatcher.register(literal(AsyncparticlesClient.MOD_ID)
+		dispatcher.register(literal(AsyncParticlesClient.MOD_ID)
 			.then(literal("isfabricmod")
 				.then(argument("modid", StringArgumentType.word())
-					.suggests(AsyncparticlesClientForge::suggestModId)
+					.suggests(AsyncParticlesClientForge::suggestModId)
 					.executes(context -> {
 						String modId = StringArgumentType.getString(context, "modid");
 						context.getSource().sendSystemMessage(Component.literal(modId + " is " + (isFabricModLoaded(modId) ? "fabric mod" : isModLoaded(modId) ? "not fabric mod" : "not loaded")));
@@ -57,7 +78,7 @@ public final class AsyncparticlesClientForge {
 					})))
 			.then(literal("isforgemod")
 				.then(argument("modid", StringArgumentType.word())
-					.suggests(AsyncparticlesClientForge::suggestModId)
+					.suggests(AsyncParticlesClientForge::suggestModId)
 					.executes(context -> {
 						String modId = StringArgumentType.getString(context, "modid");
 						context.getSource().sendSystemMessage(Component.literal(modId + " is " + (isForgeModLoaded(modId) ? "forge mod" : isModLoaded(modId) ? "not forge mod" : "not loaded")));
@@ -94,7 +115,7 @@ public final class AsyncparticlesClientForge {
 					})))
 			.then(literal("version_check")
 				.then(argument("modid", StringArgumentType.word())
-					.suggests(AsyncparticlesClientForge::suggestModId)
+					.suggests(AsyncParticlesClientForge::suggestModId)
 					.executes(context -> {
 						String modId = StringArgumentType.getString(context, "modid");
 						if (isModLoaded(modId)) {
@@ -124,8 +145,9 @@ public final class AsyncparticlesClientForge {
 					CommandSourceStack source = context.getSource();
 					try {
 						SimplePropertiesConfig.load();
-					} catch (IOException e) {
-						source.sendSystemMessage(Component.literal("Failed to reload config"));
+					} catch (Exception e) {
+						source.sendSystemMessage(Component.literal("Failed to reload config")
+							.append(e.getMessage()));
 						return 1;
 					}
 					AsyncTicker.reloadLater();

@@ -4,7 +4,7 @@
   "package": "fun.qu_an.minecraft.asyncparticles.client.mixin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "asyncparticles-common-refmap.json",
-  "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.APMixinPlugin",
+  "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin",
   "client": [
     "MixinParticle",
     "MixinParticle_LightCache",
@@ -79,6 +79,7 @@
     "vs2.MixinParticle",
     "vs2.MixinVSAnimation",
     "vs2.MixinVSSoundEngine",
+    "vs2_create.MixinParticle_LightCache",
     "watut.MixinCustomParticleEngine"
   ],
   "injectors": {

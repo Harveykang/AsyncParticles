@@ -60,7 +60,7 @@ public class AsyncTicker {
 	public static final String THREAD_PREFIX = "AsyncParticleTicker";
 	private static final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
-		() -> SimplePropertiesConfig.tickFailurePerSecondThreshold
+		() -> SimplePropertiesConfig.getTickFailurePerSecondThreshold()
 	);
 	private static final LongRef timeUsageNano = new LongRef(0L);
 
@@ -316,7 +316,7 @@ public class AsyncTicker {
 					LOGGER.warn("Exception {} thrown while ticking particle {} exceeds the threshold, please contact the author: {}",
 						t.getClass().getSimpleName(),
 						particle,
-						AsyncparticlesClient.ISSUE_URL,
+						AsyncParticlesClient.ISSUE_URL,
 						t);
 				}
 				markAsSync(particle.getClass());
@@ -328,15 +328,15 @@ public class AsyncTicker {
 				player.sendSystemMessage(Component.literal(
 						"Exception %s thrown while ticking particle %s exceeds the threshold, please contact the author: "
 							.formatted(t.getClass().getSimpleName(), particle.getClass()))
-					.append(Component.literal(AsyncparticlesClient.ISSUE_URL)
+					.append(Component.literal(AsyncParticlesClient.ISSUE_URL)
 						.setStyle(Style.EMPTY
-							.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncparticlesClient.ISSUE_URL))
+							.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncParticlesClient.ISSUE_URL))
 							.withUnderlined(true))));
 			}
 			LOGGER.warn("Exception {} thrown while ticking particle {} exceeds the threshold, please contact the author: {}",
 				t.getClass().getSimpleName(),
 				particle,
-				AsyncparticlesClient.ISSUE_URL,
+				AsyncParticlesClient.ISSUE_URL,
 				t);
 		} else {
 			throw constructCrashReport(particle, t);

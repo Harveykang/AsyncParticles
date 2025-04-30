@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.forge;
 
-import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import java.util.List;
 import java.util.Set;
 
-public class APMixinPluginForge implements IMixinConfigPlugin {
+public class AsyncParticlesMixinPluginForge implements IMixinConfigPlugin {
 	@Override
 	public void onLoad(String mixinPackage) {
 	}
@@ -20,7 +20,7 @@ public class APMixinPluginForge implements IMixinConfigPlugin {
 	}
 
 	//	private static final int L = "fun.qu_an.minecraft.asyncparticles.client.mixin.".length();
-	private static final int PACKAGE_LENGTH = AsyncparticlesClient.class.getPackage().getName().length() +
+	private static final int PACKAGE_LENGTH = AsyncParticlesClient.class.getPackage().getName().length() +
 											  ".mixin.forge.".length();
 
 	@Override

@@ -6,7 +6,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.fabricmc.api.ClientModInitializer;
@@ -26,7 +26,7 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
-public final class AsyncparticlesClientFabric implements ClientModInitializer {
+public final class AsyncParticlesClientFabric implements ClientModInitializer {
 	private static CompletableFuture<Suggestions> suggestModId(CommandContext<FabricClientCommandSource> context, SuggestionsBuilder builder) {
 		return SharedSuggestionProvider.suggest(FabricLoader.getInstance().getAllMods().stream().map(modContainer -> modContainer.getMetadata().getId()), builder);
 	}
@@ -36,13 +36,13 @@ public final class AsyncparticlesClientFabric implements ClientModInitializer {
 		if (!ModListHelper.IS_CLIENT) {
 			return;
 		}
-		AsyncparticlesClient.init();
+		AsyncParticlesClient.init();
 		if (ModListHelper.FABRIC_API_LOADED) {
 			ClientCommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-				dispatcher.register(literal(AsyncparticlesClient.MOD_ID)
+				dispatcher.register(literal(AsyncParticlesClient.MOD_ID)
 					.then(literal("isfabricmod")
 						.then(argument("modid", StringArgumentType.word())
-							.suggests(AsyncparticlesClientFabric::suggestModId)
+							.suggests(AsyncParticlesClientFabric::suggestModId)
 							.executes(context -> {
 								String modId = StringArgumentType.getString(context, "modid");
 								context.getSource().sendFeedback(Component.literal(modId + " is " + (isFabricModLoaded(modId) ? "fabric mod" : isModLoaded(modId) ? "not fabric mod" : "not loaded")));
@@ -50,7 +50,7 @@ public final class AsyncparticlesClientFabric implements ClientModInitializer {
 							})))
 					.then(literal("isforgemod")
 						.then(argument("modid", StringArgumentType.word())
-							.suggests(AsyncparticlesClientFabric::suggestModId)
+							.suggests(AsyncParticlesClientFabric::suggestModId)
 							.executes(context -> {
 								String modId = StringArgumentType.getString(context, "modid");
 								context.getSource().sendFeedback(Component.literal(modId + " is " + (isForgeModLoaded(modId) ? "forge mod" : isModLoaded(modId) ? "not forge mod" : "not loaded")));
@@ -87,7 +87,7 @@ public final class AsyncparticlesClientFabric implements ClientModInitializer {
 							})))
 					.then(literal("version_check")
 						.then(argument("modid", StringArgumentType.word())
-							.suggests(AsyncparticlesClientFabric::suggestModId)
+							.suggests(AsyncParticlesClientFabric::suggestModId)
 							.executes(context -> {
 								String modId = StringArgumentType.getString(context, "modid");
 								if (isModLoaded(modId)) {
@@ -117,8 +117,9 @@ public final class AsyncparticlesClientFabric implements ClientModInitializer {
 							FabricClientCommandSource source = context.getSource();
 							try {
 								SimplePropertiesConfig.load();
-							} catch (IOException e) {
-								source.sendFeedback(Component.literal("Failed to reload config"));
+							} catch (Exception e) {
+								source.sendFeedback(Component.literal("Failed to reload config")
+									.append(e.getMessage()));
 								return 1;
 							}
 							AsyncTicker.reloadLater();

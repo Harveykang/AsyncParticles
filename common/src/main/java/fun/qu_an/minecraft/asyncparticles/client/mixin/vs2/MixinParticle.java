@@ -38,7 +38,7 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 	@Shadow
 	public double z;
 	@Unique
-	private ClientShip asyncparticles$vsShip;
+	protected ClientShip asyncparticles$vsShip;
 
 	/**
 	 * See {@link fun.qu_an.minecraft.asyncparticles.client.mixin.create.MixinParticle#collideBoundingBox}

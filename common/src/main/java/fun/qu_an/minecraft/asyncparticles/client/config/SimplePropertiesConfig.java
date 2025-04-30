@@ -3,144 +3,82 @@ package fun.qu_an.minecraft.asyncparticles.client.config;
 import net.minecraft.resources.ResourceLocation;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Properties;
 import java.util.Set;
 
 public class SimplePropertiesConfig {
-	public static final Path CONFIG_FILE = Paths.get("config", "asyncparticles.properties");
-	private static int limit = 32768;
-	public static int renderFailurePerSecondThreshold = 20;
-	public static int tickFailurePerSecondThreshold = 5;
-	private static boolean asyncClientBlockEntityAnimate = true;
-	private static boolean forceDoneBlockAnimateTick = false;
-	private static boolean forceDoneParticleTick = false;
-	private static boolean forceDoneTextureTick = false;
-	private static boolean markSyncIfTickFailed = false;
-	private static boolean particleLightCache = true;
-	private static boolean suppressCME = false;
-	private static boolean fixParticleLightOnVsShips = true;
-	private static boolean doVsShipRainEffectsIfMoving = false;
-//	private static boolean doCreateRainEffectsIfMoving = true;
-	private static boolean shouldSave;
-
+	@Deprecated(forRemoval = true)
 	public static void load() throws IOException {
-		Properties properties = new Properties();
-		if (!Files.exists(CONFIG_FILE)) {
-			Files.createDirectories(CONFIG_FILE.getParent());
-			Files.createFile(CONFIG_FILE);
-		} else {
-			properties.load(Files.newInputStream(CONFIG_FILE));
-			String verStr = properties.getProperty("version_doNotModify");
-			int ver = -1;
-			try {
-				ver = Integer.parseInt(verStr);
-			} catch (NumberFormatException ignored) {
-			}
-//			if (ver < 0) {
-//				properties.setProperty("version_doNotModify", "0");
-//				asyncClientBlockEntityTick = false;
-//				properties.setProperty("asyncClientBlockEntityTick", "false");
-//				shouldSave = true;
-//			}
-		}
-
-		limit = getInt(properties, "limit", 32768);
-		renderFailurePerSecondThreshold = getInt(properties, "renderFailurePerSecondThreshold", 20);
-		tickFailurePerSecondThreshold = getInt(properties, "tickFailurePerSecondThreshold", 5);
-
-		asyncClientBlockEntityAnimate = getBoolean(properties, "asyncClientBlockEntityAnimate", true);
-		forceDoneBlockAnimateTick = getBoolean(properties, "forceDoneBlockAnimateTick", false);
-		forceDoneParticleTick = getBoolean(properties, "forceDoneParticleTick", false);
-		forceDoneTextureTick = getBoolean(properties, "forceDoneTextureTick", false);
-		markSyncIfTickFailed = getBoolean(properties, "markSyncIfTickFailed", false);
-		particleLightCache = getBoolean(properties, "particleLightCache", true);
-		suppressCME = getBoolean(properties, "suppressCME", false);
-		fixParticleLightOnVsShips = getBoolean(properties, "fixParticleLightOnVsShips", true);
-		doVsShipRainEffectsIfMoving = getBoolean(properties, "doVsShipRainEffectsIfMoving", false);
-//		doCreateRainEffectsIfMoving = getBoolean(properties, "doCreateRainEffectsIfMoving", true);
-
-		if (shouldSave) {
-			properties.store(Files.newOutputStream(CONFIG_FILE), null);
-			shouldSave = false;
-		}
+		AsyncParticlesConfig.reload();
 	}
 
-	private static int getInt(Properties properties, String key, int defaultValue) {
-		String i = properties.getProperty(key);
-		try {
-			return Integer.parseInt(i);
-		} catch (NumberFormatException e) {
-			properties.setProperty(key, String.valueOf(defaultValue));
-			shouldSave = true;
-			return defaultValue;
-		}
-	}
-
-	private static boolean getBoolean(Properties properties, String key, boolean defaultValue) {
-		String b = properties.getProperty(key);
-		if (b != null) {
-			// !Boolean.toString(!defaultValue).equalsIgnoreCase(b) ? defaultValue : !defaultValue;
-			return Boolean.toString(!defaultValue).equalsIgnoreCase(b) != defaultValue;
-		} else {
-			properties.setProperty(key, String.valueOf(defaultValue));
-			shouldSave = true;
-			return defaultValue;
-		}
-	}
-
+	@Deprecated(forRemoval = true)
 	public static boolean asyncBlockEntityAnimate() {
-		return asyncClientBlockEntityAnimate;
+		return AsyncParticlesConfig.tick$asyncAnimationTickBehavior != AsyncTickBehavior.DISABLED;
 	}
 
+	@Deprecated(forRemoval = true)
 	public static boolean forceDoneBlockAnimateTick() {
-		return forceDoneBlockAnimateTick;
+		return AsyncParticlesConfig.tick$asyncAnimationTickBehavior == AsyncTickBehavior.FORCE_COMPLETE;
 	}
 
-	public static boolean forceDoneParticleTick() {
-		return forceDoneParticleTick;
-	}
-
-	public static boolean forceDoneTextureTick() {
-		return forceDoneTextureTick;
-	}
-
+	@Deprecated(forRemoval = true)
 	public static boolean markSyncIfTickFailed() {
-		return markSyncIfTickFailed;
+		return AsyncParticlesConfig.tick$failBehavior == FailBehavior.MARK_AS_SYNC;
 	}
 
+	@Deprecated(forRemoval = true)
 	public static boolean particleLightCache() {
-		return particleLightCache;
+		return AsyncParticlesConfig.tick$particleLightCache;
 	}
 
+	@Deprecated(forRemoval = true)
 	public static boolean suppressCME() {
-		return suppressCME;
+		return AsyncParticlesConfig.tick$suppressCME;
 	}
 
+	@Deprecated(forRemoval = true)
 	public static boolean isTickAsync() {
-		return true;
+		return AsyncParticlesConfig.tick$asyncParticleTickBehavior != AsyncTickBehavior.DISABLED;
 	}
 
+	@Deprecated(forRemoval = true)
+	public static boolean forceDoneParticleTick() {
+		return AsyncParticlesConfig.tick$asyncParticleTickBehavior == AsyncTickBehavior.FORCE_COMPLETE;
+	}
+
+	@Deprecated(forRemoval = true)
 	public static boolean fixParticleLightOnVsShips() {
-		return fixParticleLightOnVsShips;
+		return AsyncParticlesConfig.valkyrienSkies$fixParticleLights;
 	}
 
 	// TODO: implement weather particle config, which will not be spawn into physics structures
+	@Deprecated(forRemoval = true)
 	public static Set<ResourceLocation> getWeatherParticles() {
 		return Set.of();
 	}
 
+	@Deprecated(forRemoval = true)
 	public static int getLimit() {
-		return limit;
+		return AsyncParticlesConfig.tick$particleLimit;
 	}
 
+	@Deprecated(forRemoval = true)
 	public static boolean doVsShipRainEffectsIfMoving() {
-		return doVsShipRainEffectsIfMoving;
+		return AsyncParticlesConfig.valkyrienSkies$rainEffect == RainEffect.STATIONARY;
 	}
 
+	@Deprecated(forRemoval = true)
 	public static boolean doCreateRainEffectsIfMoving() {
 		return true;
+	}
+
+	@Deprecated(forRemoval = true)
+	public static int getRenderFailurePerSecondThreshold() {
+		return AsyncParticlesConfig.rendering$failPerSecLimit;
+	}
+
+	@Deprecated(forRemoval = true)
+	public static int getTickFailurePerSecondThreshold() {
+		return AsyncParticlesConfig.tick$failPerSecLimit;
 	}
 }
