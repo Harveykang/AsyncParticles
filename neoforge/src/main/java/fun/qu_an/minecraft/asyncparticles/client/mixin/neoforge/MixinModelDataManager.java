@@ -23,8 +23,6 @@ public abstract class MixinModelDataManager {
 	@Mutable
 	@Shadow(remap = false) @Final private Long2ObjectMap<Long2ObjectMap<ModelData>> modelDataCache;
 
-	@Shadow(remap = false) @Final private Thread owningThread;
-
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onStaticInit(CallbackInfo ci) {
 		needModelDataRefresh = new ConcurrentLong2ObjectMap<>(needModelDataRefresh);

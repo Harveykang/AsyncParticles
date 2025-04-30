@@ -78,8 +78,7 @@ public abstract class MixinParticleEngine_Render {
 			Collection<? extends Particle> syncParticles = shouldSync
 				? queue
 				: AsyncRenderer.getSync(particleRenderType);
-			BufferBuilder bufferBuilder;
-			bufferBuilder = tesselator.begin();
+			BufferBuilder bufferBuilder = tesselator.begin();
 			if (!syncParticles.isEmpty()) {
 				float f2 = f + 1f;
 				for (Particle particle : syncParticles) {

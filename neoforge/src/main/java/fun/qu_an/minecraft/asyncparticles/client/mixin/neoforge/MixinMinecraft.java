@@ -28,7 +28,7 @@ public class MixinMinecraft {
 	@Inject(method = "run", at = @At("HEAD"))
 	private void onRun(CallbackInfo ci) { // Later than mixin.MixinMinecraft
 		ThreadUtil.enqueueClientTask(() -> { // Do it later.
-			List<ParticleRenderType> renderOrder = List.copyOf(ParticleEngine.RENDER_ORDER);
+			List<ParticleRenderType> renderOrder = ParticleEngine.RENDER_ORDER;
 			AtomicInteger orderGenerator = new AtomicInteger();
 			Map<ParticleRenderType, Integer> insertionOrder = Collections.synchronizedMap(new IdentityHashMap<>(0));
 			Map<ParticleRenderType, Queue<Particle>> newTreeMap =
@@ -53,16 +53,16 @@ public class MixinMinecraft {
 					int vanillaTwo = -1;
 					for (int i = 0; i < renderOrder.size(); i++) {
 						ParticleRenderType geti = renderOrder.get(i);
-						if (geti == o1) {
+						if (vanillaOne == -1 && geti == o1) {
 							vanillaOne = i;
-						} else if (geti == o2) {
+						} else if (vanillaTwo == -1 && geti == o2) {
 							vanillaTwo = i;
+						}
+						if (vanillaOne >= 0 && vanillaTwo >= 0) {
+							return Integer.compare(vanillaOne, vanillaTwo);
 						}
 					}
 
-					if (vanillaOne >= 0 && vanillaTwo >= 0) {
-						return Integer.compare(vanillaOne, vanillaTwo);
-					}
 					if (vanillaOne == -1 && vanillaTwo == -1) {
 						return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
 					}
