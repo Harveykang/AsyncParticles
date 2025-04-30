@@ -79,7 +79,8 @@ public abstract class MixinLevelRenderer {
 									@Share("asyncparticles$addParticlesPassOperation")
 									LocalRef<Operation<Void>> originalRef) {
 		// non-Fabulous graphics
-		if (!Minecraft.useShaderTransparency() && SimplePropertiesConfig.isRenderAsync()) {
+		if (!Minecraft.useShaderTransparency() // assert @Local.postChain == null
+			&& SimplePropertiesConfig.isRenderAsync()) {
 			originalRef.get().call(this, frameGraphBuilder, camera, f, fogParameters);
 		}
 	}

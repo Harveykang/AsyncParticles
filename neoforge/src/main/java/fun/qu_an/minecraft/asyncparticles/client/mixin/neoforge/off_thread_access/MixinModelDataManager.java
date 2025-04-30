@@ -30,10 +30,6 @@ public abstract class MixinModelDataManager {
 		modelDataCache = new ConcurrentLong2ObjectMap<>(modelDataCache);
 	}
 
-	/**
-	 * @author
-	 * @reason
-	 */
 	@WrapMethod(method = "isOtherThread", remap = false)
 	private boolean wrapIsOtherThread(Operation<Boolean> original) {
 		return original.call() && !ThreadUtil.isOnParticleThread();
