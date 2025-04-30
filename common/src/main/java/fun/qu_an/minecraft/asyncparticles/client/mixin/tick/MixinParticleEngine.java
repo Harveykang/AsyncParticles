@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.tick;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -26,7 +26,6 @@ public abstract class MixinParticleEngine {
 	public Queue<Particle> particlesToAdd;
 
 	@Shadow
-	@Final
 	public Map<ParticleRenderType, Queue<Particle>> particles;
 
 	@Shadow

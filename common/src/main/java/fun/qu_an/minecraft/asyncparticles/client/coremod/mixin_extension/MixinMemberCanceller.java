@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin_extension;
+package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension;
 
 import java.util.List;
 

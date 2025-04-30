@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.tick;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -12,11 +12,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.level.storage.WritableLevelData;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,33 +27,6 @@ import java.util.function.Supplier;
 public abstract class MixinClientLevel extends Level {
 	protected MixinClientLevel(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, RegistryAccess registryAccess, Holder<DimensionType> holder, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l, int i) {
 		super(writableLevelData, resourceKey, registryAccess, holder, supplier, bl, bl2, l, i);
-	}
-
-	@Override
-	public void addBlockEntityTicker(@NotNull TickingBlockEntity tickingBlockEntity) {
-		if (!SimplePropertiesConfig.asyncBlockEntityTick()) {
-			super.addBlockEntityTicker(tickingBlockEntity);
-			return;
-		}
-		synchronized (pendingBlockEntityTickers) {
-			this.pendingBlockEntityTickers.add(tickingBlockEntity);
-		}
-	}
-
-	@Override
-	protected void tickBlockEntities() {
-		if (!AsyncTicker.shouldTickParticles ||
-			!SimplePropertiesConfig.asyncBlockEntityTick()) {
-			super.tickBlockEntities();
-			return;
-		}
-		ProfilerFiller profilerFiller = this.getProfiler();
-		profilerFiller.push("blockEntities");
-
-		// this is more compatible with mixins
-		// See MixinLevel.tickBlockEntities
-		AsyncTicker.BLOCK_ENTITY_OPERATIONS.add(super::tickBlockEntities);
-		profilerFiller.pop();
 	}
 
 	@Inject(method = "<init>", at = @At(value = "RETURN"))

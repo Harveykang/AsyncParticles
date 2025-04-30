@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.forge;
+package fun.qu_an.minecraft.asyncparticles.client.coremod.forge;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;

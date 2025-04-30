@@ -1,11 +1,12 @@
-package fun.qu_an.minecraft.asyncparticles.client;
+package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncparticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.mixin_extension.ExtensionMemberCancelApplication;
-import fun.qu_an.minecraft.asyncparticles.client.mixin_extension.MixinMemberCanceller;
-import fun.qu_an.minecraft.asyncparticles.client.mixin_extension.MixinMemberCancellerRegistrar;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.ExtensionMemberCancelApplication;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.MixinMemberCanceller;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.MixinMemberCancellerRegistrar;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -138,7 +139,9 @@ public class APMixinPlugin implements IMixinConfigPlugin {
 				};
 			}
 			case "fake_renders",
-				 "off_thread_access" -> true;
+				 "off_thread_access",
+				 "tick",
+				 "render" -> true;
 			case "modernui" -> ModListHelper.MODERN_UI_LOADED;
 			case "vs2" -> ModListHelper.VS_LOADED;
 			case "create" -> ModListHelper.CREATE_LOADED;

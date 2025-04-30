@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 
+// Why some of the particles call these methods?
 @Mixin(value = LevelRenderer.class, priority = 1100)
 @Environment(EnvType.CLIENT)
 public abstract class MixinLevelRenderer {

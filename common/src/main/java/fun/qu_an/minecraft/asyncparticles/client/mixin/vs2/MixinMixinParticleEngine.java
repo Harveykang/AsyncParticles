@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = ParticleEngine.class, priority = 1500)
 public class MixinMixinParticleEngine {
 	@TargetHandler(
-		mixin = "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticleEngine",
+		mixin = "fun.qu_an.minecraft.asyncparticles.client.mixin.tick.MixinParticleEngine",
 		name = "asyncparticles$tickEmitters"
 	)
 	@Inject(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", shift = At.Shift.AFTER,

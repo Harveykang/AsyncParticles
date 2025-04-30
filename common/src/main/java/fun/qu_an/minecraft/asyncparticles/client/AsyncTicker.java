@@ -35,6 +35,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil.toThrowDirectly;
@@ -45,7 +46,6 @@ public class AsyncTicker {
 	public static final Logger LOGGER = LogManager.getLogger();
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 	private static final Set<Particle> SYNC_PARTICLES = Collections.newSetFromMap(new IdentityHashMap<>());
-	public static final List<Runnable> BLOCK_ENTITY_OPERATIONS = new ArrayList<>();
 	public static final List<Runnable> PARTICLE_OPERATIONS = new ArrayList<>();
 	private static boolean cancelled = false;
 	public static boolean shouldTickParticles = false;
@@ -53,7 +53,6 @@ public class AsyncTicker {
 	private final static List<Runnable> END_TICK_EVENTS = new ArrayList<>();
 	private final static List<Pair<ResourceLocation, Runnable>> END_TICK_OPERATIONS = new ArrayList<>();
 	private static CompletableFuture<Void> particleFuture;
-	private static CompletableFuture<Void> blockEntityTickFuture;
 	private static boolean debug_cancelled = false;
 	private static Consumer<String> debugConsumer;
 	private static boolean shouldReload;
@@ -104,20 +103,8 @@ public class AsyncTicker {
 		return true;
 	}
 
-	// called per frame
-	public static void onRunAllTasks() {
-		if (!SimplePropertiesConfig.isTickAsync()) {
-			return;
-		}
-		// join before runAllTasks
-		if (blockEntityTickFuture != null && !SimplePropertiesConfig.greedyAsyncClientBlockEntityTick()) {
-			blockEntityTickFuture.join();
-			blockEntityTickFuture = null;
-		}
-	}
-
 	/**
-	 * @param i Current index of tick loop
+	 * @param i  Current index of tick loop
 	 * @param to Count of ticks to run
 	 */
 	public static void onTickBefore(int i, int to) {
@@ -127,11 +114,6 @@ public class AsyncTicker {
 		// assert i < to;
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
 		profiler.push("async_particles");
-		if (blockEntityTickFuture != null &&
-			(i != 0 || SimplePropertiesConfig.greedyAsyncClientBlockEntityTick())) {
-			blockEntityTickFuture.join();
-			blockEntityTickFuture = null;
-		}
 		Minecraft mc = Minecraft.getInstance();
 		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
 		if (i != 0) {
@@ -188,7 +170,7 @@ public class AsyncTicker {
 	}
 
 	/**
-	 * @param i Current index of tick loop
+	 * @param i  Current index of tick loop
 	 * @param to Count of ticks to run
 	 */
 	public static void onTickAfter(int i, int to) {
@@ -220,30 +202,10 @@ public class AsyncTicker {
 		// tick last, schedule async tasks
 		tryReload();
 		tryDebug();
-		CompletableFuture<Void> particleFuture;
-		List<Runnable> blockEntityOperations = BLOCK_ENTITY_OPERATIONS;
-		if (!levelRunning || !SimplePropertiesConfig.asyncBlockEntityTick()) {
-			particleFuture = CompletableFuture.runAsync(() -> {
-				timeUsageNano.set(System.nanoTime());
-			}, EXECUTOR);
-			if (!blockEntityOperations.isEmpty()) {
-				blockEntityOperations.clear();
-			}
-		} else {
-			Runnable[] blockEntityTasks = blockEntityOperations.toArray(new Runnable[0]);
-			blockEntityOperations.clear();
-			particleFuture = CompletableFuture.runAsync(() -> {
-				timeUsageNano.set(System.nanoTime());
-				for (Runnable blockEntityTask : blockEntityTasks) {
-					blockEntityTask.run();
-				}
-			}, EXECUTOR).exceptionally(AsyncTicker::tickExceptionally);
-			AsyncTicker.blockEntityTickFuture = particleFuture;
-		}
-
+		CompletableFuture<Void> particleFuture = null;
 		// end tick events
 		if (levelRunning) {
-			particleFuture = particleFuture.thenRun(() -> {
+			particleFuture = CompletableFuture.runAsync(() -> {
 				// 每 tick 结束时都要执行的固定事件
 				for (Runnable endTickEvent : END_TICK_EVENTS) {
 					try {
@@ -254,7 +216,7 @@ public class AsyncTicker {
 						}
 					}
 				}
-			}).exceptionally(AsyncTicker::tickExceptionally);
+			}, EXECUTOR).exceptionally(AsyncTicker::tickExceptionally);
 		}
 
 		// end tick operations
@@ -263,7 +225,7 @@ public class AsyncTicker {
 			@SuppressWarnings("unchecked")
 			Pair<ResourceLocation, Runnable>[] endTickTasks = endTickOperations.toArray(new Pair[0]);
 			endTickOperations.clear();
-			particleFuture = particleFuture.thenRun(() -> {
+			Runnable runnable = () -> {
 				// 每 tick 添加的不固定操作
 				for (Pair<ResourceLocation, Runnable> endTickTask : endTickTasks) {
 					try {
@@ -274,15 +236,25 @@ public class AsyncTicker {
 						}
 					}
 				}
-			}).exceptionally(AsyncTicker::tickExceptionally);
+			};
+			if (particleFuture == null) {
+				particleFuture = CompletableFuture.runAsync(runnable, EXECUTOR)
+					.exceptionally(AsyncTicker::tickExceptionally);
+			} else {
+				particleFuture = particleFuture.thenRun(runnable)
+					.exceptionally(AsyncTicker::tickExceptionally);
+			}
 		}
 
-		// particle ticking
+		// tick particles
 		List<Runnable> particleOperations = PARTICLE_OPERATIONS;
 		if (!particleOperations.isEmpty()) {
-			Runnable[] particleTasks = particleOperations.toArray(new Runnable[0]);
-			particleOperations.clear();
-			particleFuture = particleFuture.thenCompose(v -> CompletableFuture.allOf(Arrays.stream(particleTasks)
+			if (!levelRunning) {
+				particleOperations.clear();
+			} else {
+				Runnable[] particleTasks = particleOperations.toArray(new Runnable[0]);
+				particleOperations.clear();
+				Function<Void, CompletableFuture<Void>> function = v -> CompletableFuture.allOf(Arrays.stream(particleTasks)
 					.map(runnable -> CompletableFuture
 						.runAsync(runnable, EXECUTOR)
 						.exceptionally(e -> {
@@ -293,11 +265,15 @@ public class AsyncTicker {
 							}
 							throw toThrowDirectly(e);
 						}))
-					.toArray(CompletableFuture[]::new)))
-				.thenRun(() -> timeUsageNano.set(System.nanoTime() - timeUsageNano.get()));
+					.toArray(CompletableFuture[]::new));
+				particleFuture = particleFuture.thenCompose(function)
+					.thenRun(() -> timeUsageNano.set(System.nanoTime() - timeUsageNano.get()));
+			}
 		}
 
-		AsyncTicker.particleFuture = particleFuture;
+		if (particleFuture != null) {
+			AsyncTicker.particleFuture = particleFuture;
+		}
 		profiler.pop();
 	}
 
@@ -459,7 +435,6 @@ public class AsyncTicker {
 			[Debug AsyncTicker]
 			last tick duration: %.1f ms,
 			interrupted: %s,
-			block entity operations: %d,
 			particle operations: %d,
 			end tick events: %d,
 			end tick operations: %d,
@@ -470,7 +445,6 @@ public class AsyncTicker {
 			sync particle types: %s,"""
 			.formatted(SimplePropertiesConfig.isTickAsync() ? timeUsageNano.get() / 1000000d : Double.NaN,
 				debug_cancelled,
-				BLOCK_ENTITY_OPERATIONS.size(),
 				PARTICLE_OPERATIONS.size(),
 				END_TICK_EVENTS.size(),
 				END_TICK_OPERATIONS.size(),
@@ -530,15 +504,10 @@ public class AsyncTicker {
 	public static void reset() {
 		cancelled = true;
 		waitForCleanUp();
-		if (blockEntityTickFuture != null) {
-			blockEntityTickFuture.join();
-			blockEntityTickFuture = null;
-		}
 		if (particleFuture != null) {
 			particleFuture.join();
 			particleFuture = null;
 		}
-		BLOCK_ENTITY_OPERATIONS.clear();
 		PARTICLE_OPERATIONS.clear();
 		END_TICK_OPERATIONS.clear();
 		SYNC_PARTICLES.clear();

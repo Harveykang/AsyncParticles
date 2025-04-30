@@ -49,8 +49,6 @@ dependencies {
     forge "net.minecraftforge:forge:$rootProject.forge_version"
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')
-    compileOnly(project(':legacy_mod_forge')) { transitive false }
-    shadowBundle(project(path: ':legacy_mod_forge', configuration: 'transformProductionForge'))
 
 //    modLocalRuntime "org.sinytra:Connector:1.0.0-beta.46+1.20.1"
 //    modLocalRuntime "dev.su5ed.sinytra.fabric-api:fabric-api:0.92.2+1.11.9+1.20.1"

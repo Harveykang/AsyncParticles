@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.tick;
 
 import com.google.common.collect.ImmutableList;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -43,11 +43,6 @@ public class MixinMinecraft {
 			}
 			ParticleEngine.RENDER_ORDER = ImmutableList.copyOf(renderTypes);
 		});
-	}
-
-	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;runAllTasks()V"))
-	private void onRunAllTasks(boolean bl, CallbackInfo ci) {
-		AsyncTicker.onRunAllTasks();
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))

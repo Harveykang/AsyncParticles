@@ -14,8 +14,6 @@ public class SimplePropertiesConfig {
 	private static int limit = 32768;
 	public static int renderFailurePerSecondThreshold = 20;
 	public static int tickFailurePerSecondThreshold = 5;
-	private static boolean asyncClientBlockEntityTick = false;
-	private static boolean greedyAsyncClientBlockEntityTick = false;
 	private static boolean asyncClientBlockEntityAnimate = true;
 	private static boolean forceDoneBlockAnimateTick = false;
 	private static boolean forceDoneParticleTick = false;
@@ -41,20 +39,18 @@ public class SimplePropertiesConfig {
 				ver = Integer.parseInt(verStr);
 			} catch (NumberFormatException ignored) {
 			}
-			if (ver < 0) {
-				properties.setProperty("version_doNotModify", "0");
-				asyncClientBlockEntityTick = false;
-				properties.setProperty("asyncClientBlockEntityTick", "false");
-				shouldSave = true;
-			}
+//			if (ver < 0) {
+//				properties.setProperty("version_doNotModify", "0");
+//				asyncClientBlockEntityTick = false;
+//				properties.setProperty("asyncClientBlockEntityTick", "false");
+//				shouldSave = true;
+//			}
 		}
 
 		limit = getInt(properties, "limit", 32768);
 		renderFailurePerSecondThreshold = getInt(properties, "renderFailurePerSecondThreshold", 20);
 		tickFailurePerSecondThreshold = getInt(properties, "tickFailurePerSecondThreshold", 5);
 
-		asyncClientBlockEntityTick = getBoolean(properties, "asyncClientBlockEntityTick", false);
-		greedyAsyncClientBlockEntityTick = getBoolean(properties, "greedyAsyncClientBlockEntityTick", false);
 		asyncClientBlockEntityAnimate = getBoolean(properties, "asyncClientBlockEntityAnimate", true);
 		forceDoneBlockAnimateTick = getBoolean(properties, "forceDoneBlockAnimateTick", false);
 		forceDoneParticleTick = getBoolean(properties, "forceDoneParticleTick", false);
@@ -93,14 +89,6 @@ public class SimplePropertiesConfig {
 			shouldSave = true;
 			return defaultValue;
 		}
-	}
-
-	public static boolean asyncBlockEntityTick() {
-		return asyncClientBlockEntityTick;
-	}
-
-	public static boolean greedyAsyncClientBlockEntityTick() {
-		return greedyAsyncClientBlockEntityTick;
 	}
 
 	public static boolean asyncBlockEntityAnimate() {
