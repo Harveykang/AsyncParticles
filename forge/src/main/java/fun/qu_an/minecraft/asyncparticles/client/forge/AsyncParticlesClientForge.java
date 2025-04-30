@@ -28,7 +28,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
@@ -52,8 +51,8 @@ public final class AsyncParticlesClientForge {
 						return AsyncParticlesConfig.screenBuilder(parent).build();
 					} else {
 						return new DisconnectedScreen(parent,
-							Component.translatable("config.asyncparticles.error.menu_unavailable"),
-							Component.translatable("config.asyncparticles.error.cloth_config_required"),
+							Component.translatable("config.asyncparticles.error.menu-unavailable"),
+							Component.translatable("config.asyncparticles.error.cloth-config-required"),
 							Component.translatable("gui.back"));
 					}
 				})

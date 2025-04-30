@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.util.TranslatableEnum;
 import me.shedaniel.clothconfig2.api.*;
 import me.shedaniel.clothconfig2.gui.entries.SubCategoryListEntry;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
@@ -70,6 +71,7 @@ public class AsyncParticlesConfig {
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.tick.asyncAnimationTickBehavior"),
 					AsyncTickBehavior.class, tick$asyncAnimationTickBehavior)
+				.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
 				.setDefaultValue(defaultConfig.tick.asyncAnimationTickBehavior)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.asyncAnimationTickBehavior.tooltip"))
 				.setSaveConsumer(newValue -> tick$asyncAnimationTickBehavior = newValue)
@@ -77,6 +79,7 @@ public class AsyncParticlesConfig {
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.tick.asyncParticleTickBehavior"),
 					AsyncTickBehavior.class, tick$asyncParticleTickBehavior)
+				.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
 				.setDefaultValue(defaultConfig.tick.asyncParticleTickBehavior)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.asyncParticleTickBehavior.tooltip"))
 				.setSaveConsumer(newValue -> tick$asyncParticleTickBehavior = newValue)
@@ -91,11 +94,13 @@ public class AsyncParticlesConfig {
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.tick.failBehavior"),
 					FailBehavior.class, tick$failBehavior)
+				.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
 				.setDefaultValue(defaultConfig.tick.failBehavior)
-				.setTooltip(Component.translatable("config.asyncparticles.tick.failBehavior.tooltip")
-					.setStyle(Style.EMPTY.withStrikethrough(true))
-					.append(Component.translatable("config.asyncparticles.not-implemented")
-						.setStyle(Style.EMPTY)))
+				.setTooltip(Component.empty()
+					.append(Component.translatable("config.asyncparticles.tick.failBehavior.tooltip")
+						.setStyle(Style.EMPTY.withStrikethrough(true)))
+					.append("\n")
+					.append(Component.translatable("config.asyncparticles.not-implemented")))
 				.setSaveConsumer(newValue -> tick$failBehavior = newValue)
 				.setRequirement(() -> false)
 				.build())
@@ -127,6 +132,7 @@ public class AsyncParticlesConfig {
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.failBehavior"),
 					FailBehavior.class, rendering$failBehavior)
+				.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
 				.setDefaultValue(defaultConfig.rendering.failBehavior)
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.failBehavior.tooltip"))
 				.setSaveConsumer(newValue -> rendering$failBehavior = newValue)
@@ -142,6 +148,7 @@ public class AsyncParticlesConfig {
 						// 	RainEffect.class, valkyrienSkies$rainEffect)
 						.startSelector(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect"),
 							new RainEffect[]{RainEffect.ALWAYS, RainEffect.STATIONARY}, valkyrienSkies$rainEffect)
+						.setNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
 						.setDefaultValue(defaultConfig.valkyrienSkies.rainEffect)
 						.setTooltip(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect.tooltip"))
 						.setSaveConsumer(newValue -> valkyrienSkies$rainEffect = newValue)
@@ -161,11 +168,13 @@ public class AsyncParticlesConfig {
 					List.of(entryBuilder
 						.startEnumSelector(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect"),
 							RainEffect.class, create$rainEffect)
+						.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
 						.setDefaultValue(defaultConfig.create.rainEffect)
-						.setTooltip(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect.tooltip")
-							.setStyle(Style.EMPTY.withStrikethrough(true))
-							.append(Component.translatable("config.asyncparticles.not-implemented")
-								.setStyle(Style.EMPTY)))
+						.setTooltip(Component.empty()
+							.append(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect.tooltip")
+								.setStyle(Style.EMPTY.withStrikethrough(true)))
+							.append("\n")
+							.append(Component.translatable("config.asyncparticles.not-implemented")))
 						.setSaveConsumer(newValue -> create$rainEffect = newValue)
 						// .setRequirement(() -> ModListHelper.CREATE_LOADED)
 						.setRequirement(() -> false)

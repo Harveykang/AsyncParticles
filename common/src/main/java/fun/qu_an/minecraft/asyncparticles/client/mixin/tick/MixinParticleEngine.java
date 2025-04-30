@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.core.particles.ParticleGroup;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,6 +45,8 @@ public abstract class MixinParticleEngine {
 
 	@Shadow @Final public TextureManager textureManager;
 
+	@Shadow public abstract void updateCount(ParticleGroup group, int count);
+
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
 	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {
 		if (SimplePropertiesConfig.isTickAsync()){
@@ -71,7 +74,21 @@ public abstract class MixinParticleEngine {
 		// we'll add particles later
 		AsyncTicker.PARTICLE_OPERATIONS.add(this::asyncparticles$tickEmitters);
 
-		AsyncTicker.waitForCleanUp();
+		if (SimplePropertiesConfig.isTickAsync()) {
+			AsyncTicker.waitForCleanUp();
+		} else {
+			AsyncTicker.PARTICLE_OPERATIONS.forEach(Runnable::run);
+			AsyncTicker.PARTICLE_OPERATIONS.clear();
+			AsyncTicker.tickSyncParticles();
+			particles.values().forEach(q -> q.removeIf(p -> {
+				if (p.isAlive()) {
+					return false;
+				}
+				// make sure the tracked count is correct
+				p.getParticleGroup().ifPresent(group -> updateCount(group, -1));
+				return true;
+			}));
+		}
 
 		if (!this.particlesToAdd.isEmpty()) {
 			// Write like this to be compatible with e.g. Spectrum mod
@@ -89,7 +106,9 @@ public abstract class MixinParticleEngine {
 							SimplePropertiesConfig.getLimit(),
 							AsyncTicker::onEvicted);
 						// fix the first added particle not ticked.
-						AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue1));
+						if (SimplePropertiesConfig.isTickAsync()) {
+							AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue1));
+						}
 						// fix not added to RENDER_ORDER
 						// e.g. LodestoneParticleRenderType#*#withDepthFade()
 						if (!ModListHelper.IS_FORGE &&

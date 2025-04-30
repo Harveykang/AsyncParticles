@@ -376,7 +376,7 @@ public class AsyncTicker {
 	/* Sync Ticking */
 
 	public static void tickSyncParticles() {
-		if (!shouldTickParticles || SYNC_PARTICLES.isEmpty()) {
+		if ((!shouldTickParticles && SimplePropertiesConfig.isTickAsync()) || SYNC_PARTICLES.isEmpty()) {
 			return;
 		}
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;

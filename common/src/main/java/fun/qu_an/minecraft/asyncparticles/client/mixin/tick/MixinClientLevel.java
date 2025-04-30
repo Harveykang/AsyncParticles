@@ -41,7 +41,8 @@ public abstract class MixinClientLevel extends Level {
 		ResourceLocation.tryBuild("asyncparticles", "animate_tick");
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int i, int j, int k, Operation<Void> original) {
-		if (!AsyncTicker.shouldTickParticles) {
+		if (!AsyncTicker.shouldTickParticles &&
+			SimplePropertiesConfig.isTickAsync()) {
 			// don't tick animate if the game is lagging
 			return;
 		}

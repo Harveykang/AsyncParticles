@@ -14,8 +14,8 @@ public class AsyncParticlesModMenu implements ModMenuApi {
 			return parent -> AsyncParticlesConfig.screenBuilder(parent).build();
 		} else {
 			return parent -> new DisconnectedScreen(parent,
-				Component.translatable("config.asyncparticles.error.menu_unavailable"),
-				Component.translatable("config.asyncparticles.error.cloth_config_required"),
+				Component.translatable("config.asyncparticles.error.menu-unavailable"),
+				Component.translatable("config.asyncparticles.error.cloth-config-required"),
 				Component.translatable("gui.back"));
 		}
 	}
