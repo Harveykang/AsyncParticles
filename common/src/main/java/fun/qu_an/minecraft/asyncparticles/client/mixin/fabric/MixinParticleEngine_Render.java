@@ -4,11 +4,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.blaze3d.vertex.Tesselator;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
-import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -28,18 +28,13 @@ import java.util.*;
 @Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class MixinParticleEngine_Render {
 	@Shadow
-	@Final
 	public Map<ParticleRenderType, Queue<Particle>> particles;
-
 	@Shadow
 	protected ClientLevel level;
-
 	@Shadow
 	@Final
 	public TextureManager textureManager;
 	@Shadow
-	@Mutable
-	@Final
 	public static List<ParticleRenderType> RENDER_ORDER;
 
 	/**
@@ -49,12 +44,20 @@ public abstract class MixinParticleEngine_Render {
 	@Overwrite
 	public void render(LightTexture lightTexture, Camera camera, float f) {
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
+		boolean renderAsync = AsyncRenderer.isRenderAsync();
+		if (renderAsync) {
+			profiler.push("wait_for_async_tasks");
+			AsyncRenderer.tryWaitForAsyncTasks();
+			profiler.pop();
+		}
+
 		profiler.push("prepare");
-		Frustum frustum = AsyncRenderer.frustum;
 		lightTexture.turnOnLightLayer();
-//		RenderSystem.enableDepthTest();
 		profiler.pop();
 
+		Frustum frustum = AsyncRenderer.frustum;
+		boolean cullParticles = ConfigHelper.isCullParticles();
+		boolean mixedParticleRendering = AsyncRenderer.isMixedParticleRendering();
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			// FABRIC skips NO_RENDER
 //				if (particleRenderType == ParticleRenderType.NO_RENDER) {
@@ -65,19 +68,31 @@ public abstract class MixinParticleEngine_Render {
 				continue;
 			}
 			BindingTesselator tesselator = AsyncRenderer.getBTesselator(particleRenderType, textureManager);
-			// set shader before begin
-			RenderSystem.setShader(GameRenderer::getParticleShader);
+			profiler.push("render_sync");
+			Collection<? extends Particle> syncParticles;
+			boolean enableCull;
+			Tesselator toBegin;
+			if (!renderAsync || tesselator.shouldSync) {
+				enableCull = cullParticles;
+				syncParticles = queue;
+				toBegin = Tesselator.getInstance();
+			} else {
+				enableCull = false;
+				syncParticles = AsyncRenderer.getSync(particleRenderType);
+				toBegin = tesselator;
+			}
 			// why ParticleRenderType#end() removed?...
 			RenderSystem.enableCull();
 			RenderSystem.enableDepthTest();
+			// set shader before begin
+			RenderSystem.setShader(GameRenderer::getParticleShader);
 			// begin before sync particles to be compatible with some mod
-			particleRenderType.begin(FakeTesselator.getFakeInstance(), this.textureManager);
-			profiler.push("render_sync");
-			boolean shouldSync = tesselator.shouldSync;
-			Collection<? extends Particle> syncParticles = shouldSync
-				? queue
-				: AsyncRenderer.getSync(particleRenderType);
-			BufferBuilder bufferBuilder = tesselator.begin();
+			// We must ensure only call begin once in this method,
+			// otherwise it will mess up some mod's mixins.
+			BufferBuilder bufferBuilder = particleRenderType.begin(toBegin, this.textureManager);
+			if (bufferBuilder == null) {
+				continue;
+			}
 			if (!syncParticles.isEmpty()) {
 				float f2 = f + 1f;
 				for (Particle particle : syncParticles) {
@@ -85,8 +100,7 @@ public abstract class MixinParticleEngine_Render {
 						continue;
 					}
 					float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
-					if (shouldSync && SimplePropertiesConfig.isCullParticles() &&
-						!frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(f3))) {
+					if (enableCull && !frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(f3))) {
 						continue;
 					}
 					try {

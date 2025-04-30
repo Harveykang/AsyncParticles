@@ -81,6 +81,12 @@ dependencies {
     modCompileOnly "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
     modCompileOnly "curse.maven:flerovium-1142875:6359527" // 1.0.4
 
+    // Iris
+//    modLocalRuntime "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
+//    // decompressed jarjars
+//    localRuntime fileTree(dir: '../libs', include: 'jcpp-1.4.14.jar')
+//    localRuntime fileTree(dir: '../libs', include: 'glsl-transformer-2.0.1.jar')
+    // Sodium
     modLocalRuntime('maven.modrinth:sodium:mc1.21.1-0.6.13-neoforge')
     // decompressed jarjars
     modLocalRuntime fileTree(dir: '../libs', include: 'fabric-api-base-0.4.42+d1308ded19.jar')

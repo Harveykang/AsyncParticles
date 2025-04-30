@@ -34,23 +34,23 @@ public class ExceptionTracker<T> {
 
 	public String toString() {
 		return "ExceptionTracker{" +
-			"exceptions=" + exceptions +
-			", duration=" + duration.getAsInt() +
-			", failurePerSecThreshold=" + failurePerSecThreshold.getAsInt() +
-			'}';
+			   "exceptions=" + exceptions +
+			   ", duration=" + duration.getAsInt() +
+			   ", failurePerSecThreshold=" + failurePerSecThreshold.getAsInt() +
+			   '}';
 	}
 
 	private class ExceptionQueue {
 		private final LongPriorityQueue queue = new LongArrayFIFOQueue();
 
-		public boolean push() {
+		public synchronized boolean push() {
 			long time = System.currentTimeMillis();
 			LongPriorityQueue queue = this.queue;
-			queue.enqueue(time);
 			int size = queue.size();
-			while (--size >= 0 && time - queue.firstLong() > duration.getAsInt()) {
+			while (size-- > 0 && time - queue.firstLong() > duration.getAsInt()) {
 				queue.dequeueLong();
 			}
+			queue.enqueue(time);
 			return queue.size() / (duration.getAsInt() * 0.001) >= failurePerSecThreshold.getAsInt();
 		}
 

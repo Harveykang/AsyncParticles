@@ -74,6 +74,20 @@ public class ModListHelper {
 	public static final boolean FABRIC_VULKAN_MOD_LOADED = isFabricModLoaded("vulkanmod");
 	/* Lodestone */
 	public static final boolean LODESTONE_LOADED = isModLoaded("lodestone");
+	/* Cloth Config */
+	public static final boolean CLOTH_CONFIG_LOADED = isModLoaded("cloth_config") || isModLoaded("cloth-config");
+	/* Photon Editor */
+	public static final boolean PHOTON_EDITOR_LOADED = isModLoaded("photon");
+	/* Fluffy Fur */
+	public static final boolean FLUFFY_FUR_LOADED = isModLoaded("fluffy_fur");
+	public static final boolean FORGE_FLUFFY_FUR_LOADED = isForgeModLoaded("fluffy_fur");
+	/* Wizards Reborn */
+	public static final boolean FORGE_WIZARDS_REBORN_LOADED = isForgeModLoaded("wizards_reborn");
+	/* Porting Lib Base */
+	public static final boolean FABRIC_PORTING_LIB_BASE_LOADED = isFabricModLoaded("porting_lib_base");
+	/* Loot Beams Up */
+	public static final boolean FABRIC_LOOT_BEAMS_UP_LOADED = isFabricModLoaded("lootbeams");
+	public static final boolean SHIMMER_LOADED = isModLoaded("shimmer");
 
 	@ExpectPlatform
 	private static boolean isForge() {

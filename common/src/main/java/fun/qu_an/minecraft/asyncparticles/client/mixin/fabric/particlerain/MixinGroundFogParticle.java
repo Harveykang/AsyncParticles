@@ -27,7 +27,7 @@ public abstract class MixinGroundFogParticle extends MixinWeatherParticle implem
 	}
 
 	@Override
-	public AABB getRenderBoundingBox(float partialTicks) {
+	public AABB getRenderBoundingBox(float partialTick) {
 		return this.getBoundingBox().inflate(4.0);
 	}
 }

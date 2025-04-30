@@ -3,7 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -13,8 +13,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
-import static fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon.compress;
-import static fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon.decompress;
+import static fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon.*;
 
 @Mixin(Particle.class)
 public abstract class MixinParticle_LightCache implements LightCachedParticleAddon {
@@ -31,7 +30,7 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 
 	@WrapMethod(method = "getLightColor")
 	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {
-		return SimplePropertiesConfig.particleLightCache()
+		return ConfigHelper.particleLightCache()
 			? decompress(asyncparticles$getCompressedLight())
 			: original.call(partialTick);
 	}
@@ -41,6 +40,10 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 		// for some particles, light is hard coded, so this is not necessary for all particles
 		// see override method in MixinParticle_LightCacheNoRefresh
 		// TODO: do we need a better design?
+		ClientLevel level = this.level;
+		if (level == null) {
+			return;
+		}
 		BlockPos blockPos = BlockPos.containing(x, y, z);
 		int light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
 		asyncparticles$setLight(light);

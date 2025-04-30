@@ -5,16 +5,12 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
-import net.minecraft.world.phys.AABB;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -25,9 +21,6 @@ public abstract class MixinParticle implements ParticleAddon {
 	public abstract void remove();
 
 	@Shadow
-	public abstract boolean isAlive();
-
-	@Shadow
 	public double x;
 	@Shadow
 	public double y;
@@ -36,11 +29,6 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Shadow
 	@Final
 	public ClientLevel level;
-
-	@Shadow
-	public abstract AABB getBoundingBox();
-
-	// TODO: 换 byte?
 	@Unique
 	private boolean asyncparticles$ticked = true;
 	@Unique
@@ -48,12 +36,13 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Unique
 	private boolean asyncparticles$tickSync;
 
-	@Inject(method = "<init>*", at = @At("RETURN"))
-	private void onInit(CallbackInfo ci) {
-		if (AsyncRenderer.shouldSync(((Particle) (Object) this).getClass())) {
+	@Inject(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V", at = @At("RETURN"))
+	protected void onInit(CallbackInfo ci) {
+		Class<?> aClass = this.getClass();
+		if (AsyncRenderer.shouldSync(aClass)) {
 			asyncparticles$setRenderSync();
 		}
-		if (AsyncTicker.shouldSync(((Particle) (Object) this).getClass())) {
+		if (AsyncTicker.shouldSync(aClass)) {
 			asyncparticles$setTickSync();
 		}
 	}
@@ -61,20 +50,17 @@ public abstract class MixinParticle implements ParticleAddon {
 	@WrapOperation(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V",
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;create()Lnet/minecraft/util/RandomSource;"))
 	private RandomSource onInit(Operation<RandomSource> original) {
-		return new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong());
-	}
-
-	@Override
-	public boolean asyncparticles$shouldRemove() {
-		if (!isAlive()) return true;
-		if (asyncparticles$ticked) return asyncparticles$ticked = false;
-		remove();
-		return true;
+		return new SingleThreadedRandomSource(RandomSupport.generateUniqueSeed());
 	}
 
 	@Override
 	public void asyncparticles$setTicked() {
 		this.asyncparticles$ticked = true;
+	}
+
+	@Override
+	public void asyncparticles$resetTicked() {
+		this.asyncparticles$ticked = false;
 	}
 
 	@Override

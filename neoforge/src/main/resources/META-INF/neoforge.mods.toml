@@ -46,3 +46,6 @@ config = "asyncparticles-neoforge.mixins.json"
 
 [[mixins]]
 config = "asyncparticles-common.mixins.json"
+
+[[mixins]]
+config = "asyncparticles.target-modifier.mixins.json"

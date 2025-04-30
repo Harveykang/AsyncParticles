@@ -17,17 +17,21 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "fun.qu_an.minecraft.asyncparticles.client.fabric.AsyncparticlesClientFabric"
+      "fun.qu_an.minecraft.asyncparticles.client.fabric.AsyncParticlesClientFabric"
+    ],
+    "modmenu": [
+      "fun.qu_an.minecraft.asyncparticles.client.config.fabric.AsyncParticlesModMenu"
     ]
   },
   "mixins": [
-    "asyncparticles-common.mixins.json"
+    "asyncparticles-common.mixins.json",
+    "asyncparticles.target-modifier.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.0",
     "minecraft": ">=1.21",
     "mixinextras": ">=0.4.1",
-    "mixinsquared": ">0.1.999"
+    "mixinsquared": "*"
   },
   "suggests": {
     "fabric-api": "*"

@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class IterationSafeEvictingQueue<E> implements Queue<E> {
+	public static final int MAX_CAPACITY = Integer.MIN_VALUE >>> 1;
 	protected Object[] queue;
 	protected final int maxCapacity;
 	protected final int maxCapacityPowerOfTwo;
@@ -15,21 +16,41 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 	protected int head;
 	protected int size;
 
+	/**
+	 * @apiNote This queue does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
 	public IterationSafeEvictingQueue(int initialCapacity, int maxCapacity) {
 		this(initialCapacity, maxCapacity, e -> {
 		});
 	}
 
+	/**
+	 * @apiNote This queue does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
 	public IterationSafeEvictingQueue(int initialCapacity, int maxCapacity, Consumer<E> onEvict) {
-		if (initialCapacity <= 0 || maxCapacity <= 0 || initialCapacity > maxCapacity) {
-			throw new IllegalArgumentException("Invalid capacities");
+		if (initialCapacity < 0 || maxCapacity <= 0 || initialCapacity > maxCapacity) {
+			throw new IllegalArgumentException("Invalid capacities, initialCapacity: " + initialCapacity + ", maxCapacity: " + maxCapacity);
 		}
-		this.queue = new Object[roundUpToPowerOfTwo(initialCapacity)];
+		this.queue = new Object[roundUpToPowerOfTwo(Math.max(8, initialCapacity))];
 		this.maxCapacity = maxCapacity;
 		this.maxCapacityPowerOfTwo = roundUpToPowerOfTwo(maxCapacity);
 		this.onEvict = onEvict;
 		this.head = 0;
 		this.size = 0;
+	}
+
+	/**
+	 * @apiNote This queue does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
+	public static <E> IterationSafeEvictingQueue<E> newInstance(int initialCapacity, int maxCapacity) {
+		return new IterationSafeEvictingQueue<>(Math.min(initialCapacity, maxCapacity), maxCapacity);
+	}
+
+	/**
+	 * @apiNote This queue does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
+	public static <E> IterationSafeEvictingQueue<E> newInstance(int initialCapacity, int maxCapacity, Consumer<E> onEvict) {
+		return new IterationSafeEvictingQueue<>(Math.min(initialCapacity, maxCapacity), maxCapacity, onEvict);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -49,7 +70,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			if (evicted != null) {
 				onEvict.accept(evicted);
 			}
-//			q[head] = item; // head is now tail
+			//			q[head] = item; // head is now tail
 			q[head] = null;
 			q[head + size & (capacity - 1)] = item;
 		} else {
@@ -103,15 +124,15 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		return size == 0;
 	}
 
-//	@Override
-//	public @NotNull Spliterator<E> spliterator() {
-//		// FIXME: implement a Spliterator
-//		throw new UnsupportedOperationException();
-//	}
+	//	@Override
+	//	public @NotNull Spliterator<E> spliterator() {
+	//		// FIXME: implement a Spliterator
+	//		throw new UnsupportedOperationException();
+	//	}
 
 	private Object[] resize(int newCapacity) {
 		if (newCapacity > this.maxCapacityPowerOfTwo) {
-			throw new IllegalStateException("Cannot increase capacity beyond max capacity");
+			throw new IllegalStateException("Cannot increase capacity beyond max capacity " + maxCapacityPowerOfTwo + " : " + newCapacity);
 		}
 		Object[] q = this.queue;
 		int head = this.head;
@@ -290,7 +311,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			if (tail <= q.length) {
 				System.arraycopy(q, toRemove + 1, q, toRemove, l - 1);
 			} else if (toRemove <= mask) {
-				if (toRemove < mask){
+				if (toRemove < mask) {
 					System.arraycopy(q, toRemove + 1, q, toRemove, q.length - toRemove - 1);
 				}
 				q[mask] = q[0];
@@ -384,7 +405,10 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 
 	private static int roundUpToPowerOfTwo(int n) {
 		if (n <= 0) {
-			throw new IllegalArgumentException("n must be positive");
+			throw new IllegalArgumentException("n must be positive: " + n);
+		}
+		if (n > MAX_CAPACITY) {
+			throw new IllegalArgumentException("n cannot larger than " + MAX_CAPACITY + " : " + n);
 		}
 		n--;
 		n |= n >> 1;

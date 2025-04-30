@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Set;
 
+// FIXME: Can I remove this?
 @Mixin(ModelDataManager.class)
 public abstract class MixinModelDataManager {
 	@Mutable

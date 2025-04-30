@@ -13,23 +13,28 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(value = WeatherParticleSpawner.class, remap = false)
+@Mixin(value = WeatherParticleSpawner.class)
 public class MixinWeatherParticleSpawner {
-	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", remap = false, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;particleCount:I"))
+	@ModifyExpressionValue(method = "spawnParticle", remap = false, at = @At(value = "FIELD", remap = false, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;particleCount:I"))
 	private static int modifyParticleCount(int original) {
 		return ParticleRainCompat.asyncparticles$particleCount.get();
 	}
 
-	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", remap = false, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;fogCount:I"))
+	@ModifyExpressionValue(method = "spawnParticle", remap = false, at = @At(value = "FIELD", remap = false, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;fogCount:I"))
 	private static int modifyFogCount(int original) {
 		return ParticleRainCompat.asyncparticles$fogCount.get();
 	}
 
 	@Unique
 	private static final ResourceLocation asyncparticles$PARTICLE_RAIN$UPDATE =
-		ResourceLocation.tryBuild("particlerain", "update");
-	@WrapMethod(method = "update")
+		ResourceLocation.fromNamespaceAndPath("particlerain", "update");
+	@WrapMethod(method = "update", remap = false)
 	private static void onUpdate(ClientLevel level, Entity entity, float f, Operation<Void> original) {
 		AsyncTicker.addEndTickTask(asyncparticles$PARTICLE_RAIN$UPDATE, () -> original.call(level, entity, f));
+	}
+
+	@ModifyExpressionValue(method = "update", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/core/BlockPos$MutableBlockPos;getY()I"))
+	private static int redirectGetY(int original) {
+		return original - 2;
 	}
 }

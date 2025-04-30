@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.core.particles.ParticleGroup;
 
 public class TrackedParticleCountsMap extends Object2IntOpenHashMap<ParticleGroup> {
-	private final SpinLock spinLock = new SpinLock();
+	private final SingleSpinLock spinLock = new SingleSpinLock();
 	@Override
 	public int addTo(ParticleGroup key, int value) {
 		spinLock.lock();

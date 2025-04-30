@@ -25,14 +25,6 @@ public class ExceptionUtil {
 		}
 	}
 
-	public static ReportedException getReportedException(Throwable t) {
-		if (t instanceof ReportedException re) {
-			return re;
-		}
-		Throwable cause = t.getCause();
-		return cause == null ? null : getReportedException(cause);
-	}
-
 	public static void throwAssertionError() {
 		throw new AssertionError();
 	}

@@ -93,10 +93,10 @@ public class CreateUtilImpl {
 						return false;
 					}
 					if (next != null && next.isAliveOrStale()) {
-						break;
+						return true;
 					}
 				}
-				return next != null;
+				return false;
 			}
 
 			@Override
@@ -118,6 +118,7 @@ public class CreateUtilImpl {
 			public void forEachRemaining(Consumer<? super AbstractContraptionEntity> action) {
 				while (hasNext()) {
 					action.accept(next);
+					next = null;
 				}
 			}
 		};

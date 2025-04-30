@@ -4,18 +4,28 @@ import it.unimi.dsi.fastutil.objects.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
+	/**
+	 * @apiNote This list does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
 	public IterationSafeArrayList() {
 	}
 
+	/**
+	 * @apiNote This list does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
 	public IterationSafeArrayList(Collection<E> c) {
 		super(c);
+	}
+
+	/**
+	 * @apiNote This list does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
+	public IterationSafeArrayList(int i) {
+		super(i);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -35,7 +45,7 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void addElements(final int index, final E a[], final int offset, final int length) {
+	public void addElements(final int index, final E[] a, final int offset, final int length) {
 		ensureIndex(index);
 		ObjectArrays.ensureOffsetLength(a, offset, length);
 		final E[] b;
@@ -152,6 +162,30 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 		return new ListItr(a, s, i);
 	}
 
+	@Override
+	public Object @NotNull [] toArray() {
+		E[] es = this.a;
+		int size = Math.min(es.length, size());
+		return Arrays.copyOf(es, size, Object[].class);
+	}
+
+	@SuppressWarnings({"unchecked", "SuspiciousSystemArraycopy"})
+	@Override
+	public <K> K @NotNull [] toArray(K[] a) {
+		E[] es = this.a;
+		int size = Math.min(es.length, size());
+		if (a == null) {
+			a = (K[]) new Object[size];
+		} else if (a.length < size) {
+			a = (K[]) Array.newInstance(a.getClass().getComponentType(), size);
+		}
+		System.arraycopy(es, 0, a, 0, size);
+		if (a.length > size) {
+			a[size] = null;
+		}
+		return a;
+	}
+
 	private class ListItr implements ObjectListIterator<E> {
 		private final E[] a;
 		private int size;
@@ -187,8 +221,7 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 			}
 			final E e = curr;
 			while (cursor > 0) {
-				prev = a[--cursor];
-				if (prev != null && prev != e) {
+				if ((prev = a[--cursor]) != null && prev != e) {
 					return true;
 				}
 			}
@@ -213,8 +246,7 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 			}
 			final E e = curr;
 			while (cursor < size) {
-				next = a[cursor++];
-				if (next != null && next != e) {
+				if ((next = a[cursor++]) != null && next != e) {
 					return true;
 				}
 			}
@@ -254,51 +286,5 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 			--size;
 			curr = null;
 		}
-	}
-
-	public static void main(String[] args) throws InterruptedException {
-		IterationSafeArrayList<Integer> list = new IterationSafeArrayList<>();
-		for (int i = 0; i < 100000; i++) {
-			list.add(i);
-		}
-		Thread thread0 = new Thread(() -> {
-			list.removeIf(next -> next % 2 == 0);
-		});
-		thread0.setDaemon(true);
-		thread0.start();
-//		thread0.join();
-		// 多线程同时遍历测试
-		Thread[] threads = new Thread[10];
-		for (int i = 0; i < threads.length; i++) {
-			threads[i] = new Thread(() -> {
-				int j = 0;
-				int prev = -1;
-				for (Integer integer : list) {
-					if (integer - prev != 1) {
-						if (prev == integer) {
-							throw new RuntimeException("Duplicated element: " + integer);
-						} else {
-//							throw new RuntimeException("Element: " + integer + "and element: " + prev + "not consecutive");
-						}
-					}
-					prev = integer;
-					if (j++ % 77 == 76) {
-						System.out.println(integer);
-					}
-				}
-			});
-		}
-		for (Thread thread : threads) {
-			thread.setDaemon(true);
-			thread.start();
-		}
-		for (Thread thread : threads) {
-			try {
-				thread.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		System.out.println("ok");
 	}
 }

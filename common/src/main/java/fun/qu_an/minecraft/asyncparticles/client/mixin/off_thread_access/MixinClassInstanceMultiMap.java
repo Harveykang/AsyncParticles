@@ -1,16 +1,17 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 
+import com.bawnorton.mixinsquared.TargetHandler;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeArrayList;
 import net.minecraft.util.ClassInstanceMultiMap;
 import org.spongepowered.asm.mixin.*;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 // some mod get entities when ticking particles, may cause a CME
 @Mixin(value = ClassInstanceMultiMap.class, priority = 1100) // higher priority to run after VMP's mixin
@@ -39,10 +40,31 @@ public class MixinClassInstanceMultiMap {
 		return null;
 	}
 
-	// FIXME: 这行吗？
+	// FIXME: can't remap lambda method_15217 properly, use * instead
 	@Dynamic
-	@Redirect(method = "*", require = 0, at = @At(value = "NEW", remap = false, target = "Lit/unimi/dsi/fastutil/objects/ObjectArrayList;<init>()V"))
-	private <T> List<T> newArrayList() {
+	@Group(name = "redirect_collector", min = 1)
+	@Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;toMutableList()Ljava/util/stream/Collector;"))
+	private <T> Collector<T, ?, List<T>> collect1() {
+		return Collectors.toCollection(IterationSafeArrayList::new);
+	}
+
+	// FIXME: can't remap lambda method_15217 properly, use * instead
+	@Dynamic
+	@Group(name = "redirect_collector", min = 1)
+	@Redirect(method = "*", at = @At(value = "INVOKE", remap = false,
+		target = "Ljava/util/stream/Collectors;toList()Ljava/util/stream/Collector;"))
+	private <T> Collector<T, ?, List<T>> collect2() {
+		return Collectors.toCollection(IterationSafeArrayList::new);
+	}
+
+	@Dynamic
+	@TargetHandler(
+		mixin = "net.caffeinemc.mods.lithium.mixin.collections.entity_filtering.TypeFilterableListMixin",
+		name = "createAllOfType"
+	)
+	@ModifyVariable(method = "@MixinSquared:Handler", name = "list", require = 0,
+		at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"))
+	private <T> List<T> modifyCreateAllOfType(List<T> value) {
 		return new IterationSafeArrayList<>();
 	}
 }

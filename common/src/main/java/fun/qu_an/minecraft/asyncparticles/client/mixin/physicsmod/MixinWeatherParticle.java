@@ -29,7 +29,7 @@ public abstract class MixinWeatherParticle implements ParticleAddon {
 	}
 
 	@Override
-	public @NotNull AABB getRenderBoundingBox(float partialTicks) {
+	public @NotNull AABB getRenderBoundingBox(float partialTick) {
 		Vector3d min = aabb.getMin();
 		Vector3d max = aabb.getMax();
 		return new AABB(min.x, min.y, min.z, max.x, max.y, max.z);

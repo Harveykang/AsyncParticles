@@ -27,9 +27,14 @@ public class MixinWeatherParticleSpawner {
 
 	@Unique
 	private static final ResourceLocation asyncparticles$PARTICLE_RAIN$UPDATE =
-		ResourceLocation.tryBuild("particlerain", "update");
+		ResourceLocation.fromNamespaceAndPath("particlerain", "update");
 	@WrapMethod(method = "update")
 	private static void wrapUpdate(ClientLevel level, Entity entity, float f, Operation<Void> original) {
 		AsyncTicker.addEndTickTask(asyncparticles$PARTICLE_RAIN$UPDATE, () -> original.call(level, entity, f));
+	}
+
+	@ModifyExpressionValue(method = "update", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/core/BlockPos$MutableBlockPos;getY()I"))
+	private static int redirectGetY(int original) {
+		return original - 2;
 	}
 }

@@ -13,7 +13,7 @@ public abstract class MixinParticle implements ParticleAddon {
 	// NeoForge has implemented this method.
 	// So we need only to implement for fabric.
 	@Override
-	public AABB getRenderBoundingBox(float partialTicks) {
+	public AABB getRenderBoundingBox(float partialTick) {
 		return this.getBoundingBox().inflate(1.0);
 	}
 }

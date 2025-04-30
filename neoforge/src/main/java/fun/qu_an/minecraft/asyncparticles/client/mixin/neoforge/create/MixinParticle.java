@@ -29,8 +29,6 @@ public abstract class MixinParticle {
 
 	@Shadow public double z;
 
-	@Shadow public abstract AABB getBoundingBox();
-
 	/**
 	 * See {@link fun.qu_an.minecraft.asyncparticles.client.mixin.vs2.MixinParticle#collideBoundingBox}
 	 */

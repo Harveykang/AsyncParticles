@@ -1,11 +1,10 @@
 package fun.qu_an.minecraft.asyncparticles.client.addon;
 
-
 import net.minecraft.world.phys.AABB;
 
 public interface ParticleAddon {
-	boolean asyncparticles$shouldRemove();
 	void asyncparticles$setTicked();
+	void asyncparticles$resetTicked();
 	boolean asyncparticles$isTicked();
 	void asyncparticles$setRenderSync();
 	boolean asyncparticles$isRenderSync();
@@ -15,5 +14,5 @@ public interface ParticleAddon {
 	/**
 	 * NeoForge getRenderBoundingBox()
 	 */
-	AABB getRenderBoundingBox(float partialTicks);
+	AABB getRenderBoundingBox(float partialTick);
 }

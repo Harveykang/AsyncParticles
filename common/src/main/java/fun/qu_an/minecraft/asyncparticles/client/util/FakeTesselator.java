@@ -7,11 +7,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import org.jetbrains.annotations.NotNull;
 
 public class FakeTesselator extends Tesselator {
-	private static final FakeTesselator INSTANCE = new FakeTesselator();
-
-	public static FakeTesselator getFakeInstance() {
-		return INSTANCE;
-	}
+	public static final FakeTesselator INSTANCE = new FakeTesselator();
 
 	protected FakeTesselator() {
 		super(0);
