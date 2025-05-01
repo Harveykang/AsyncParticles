@@ -44,7 +44,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 		if (CANCELLERS.isEmpty()) {
 			return;
 		}
-		Optional<TargetClassContextExtension> optional = TargetClassContextExtension.tryAs(context);
+		Optional<TargetClassContextExtension> optional = MixinUtil.tryAs(context);
 		TargetClassContextExtension contextExtension = optional.orElseThrow();
 		SortedSet<IMixinInfo> mixins = contextExtension.getMixins();
 		for (IMixinInfo mixin : mixins) {

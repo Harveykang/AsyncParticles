@@ -520,7 +520,7 @@ public class AsyncTicker {
 			particleEngine.trackingEmitters = newEmitters;
 			particleEngine.particles.entrySet().forEach(entry -> {
 				Queue<Particle> queue = entry.getValue();
-				Queue<Particle> newQueue = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+				Queue<Particle> newQueue = new IterationSafeEvictingQueue<>(16, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 				newQueue.addAll(queue);
 				entry.setValue(newQueue);
 			});
