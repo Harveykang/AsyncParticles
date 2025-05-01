@@ -9,9 +9,6 @@ import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.phys.Vec3;
-import org.valkyrienskies.core.impl.shadow.E;
-
-import java.io.IOException;
 
 @Environment(EnvType.CLIENT)
 public class AsyncParticlesClient {

@@ -33,6 +33,7 @@
     "mixinsquared": "*"
   },
   "suggests": {
-    "fabric": "*"
+    "fabric": "*",
+    "cloth-config": "*"
   }
 }

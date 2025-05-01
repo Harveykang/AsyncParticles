@@ -40,7 +40,10 @@ dependencies {
     modCompileOnly 'maven.modrinth:modmenu:7.2.2'
     modLocalRuntime 'maven.modrinth:modmenu:7.2.2'
     modLocalRuntime 'maven.modrinth:architectury-api:9.2.14+fabric'
-    modApi("me.shedaniel.cloth:cloth-config-fabric:11.1.136") {
+    modLocalRuntime("me.shedaniel.cloth:cloth-config-fabric:11.1.136") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+    modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:11.1.136") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
@@ -56,7 +59,7 @@ dependencies {
     }
 
     /* APIs */
-    modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
+//    modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
 
     /* Performance */
     modLocalRuntime "maven.modrinth:spark:1.10.53-fabric"
@@ -96,7 +99,7 @@ dependencies {
     }
 
     /* Particle Rain/Pretty Rain */
-    modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
+//    modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
     modCompileOnly "maven.modrinth:particle-rain:3.0.6-1.20"
 
     /* Mmmmmmmmmmmm */
@@ -104,7 +107,7 @@ dependencies {
     modLocalRuntime "maven.modrinth:moonlight:fabric_1.20-2.13.62"
 
     /* Effectual */
-    modLocalRuntime 'maven.modrinth:effectual:0.6.0-1.20.1'
+//    modLocalRuntime 'maven.modrinth:effectual:0.6.0-1.20.1'
     modCompileOnly 'maven.modrinth:effectual:0.6.0-1.20.1'
 
     /* Effective */
@@ -116,7 +119,7 @@ dependencies {
     modCompileOnly "at.petra-k.hexcasting:hexcasting-fabric-1.20.1:0.11.2-pre-715"
 
     /* Particular */
-    modLocalRuntime "maven.modrinth:particular:1.1.1"
+//    modLocalRuntime "maven.modrinth:particular:1.1.1"
     modLocalRuntime "maven.modrinth:sushi-bar:0.2.2+1.20"
 
     modCompileOnly "maven.modrinth:particular:1.1.1"

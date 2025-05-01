@@ -9,10 +9,12 @@ import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
 public class FallbackScreen extends Screen {
+	@Nullable
 	public final Screen parent;
 	public Component reason;
 	private final Component buttonTextLeft;
@@ -20,8 +22,9 @@ public class FallbackScreen extends Screen {
 	private final Component buttonTextRight;
 	private final Consumer<FallbackScreen> buttonRightCallback;
 	private final GridLayout layout = new GridLayout();
+	private MultiLineTextWidget reasonWidget;
 
-	public FallbackScreen(Screen parent,
+	public FallbackScreen(@Nullable Screen parent,
 						  Component title,
 						  Component reason,
 						  Component buttonL,
@@ -29,15 +32,10 @@ public class FallbackScreen extends Screen {
 						  Component buttonR,
 						  Consumer<FallbackScreen> buttonRightCallback) {
 		super(title);
-//
 		this.parent = parent;
 		this.reason = reason;
-//	;
-//		this.buttonTextLeft = ;
-//		this.buttonTextRight = ;
 		this.buttonTextLeft = buttonL;
 		this.buttonLeftCallback = buttonLeftCallback;
-
 		this.buttonTextRight = buttonR;
 		this.buttonRightCallback = buttonRightCallback;
 	}
@@ -45,9 +43,10 @@ public class FallbackScreen extends Screen {
 	@Override
 	protected void init() {
 		this.layout.defaultCellSetting().alignHorizontallyCenter().padding(10);
-		GridLayout.RowHelper rowHelper = this.layout.createRowHelper(1);
-		rowHelper.addChild(new StringWidget(this.title, this.font));
-		rowHelper.addChild(new MultiLineTextWidget(this.reason, this.font).setMaxWidth(this.width - 50).setCentered(true));
+		GridLayout.RowHelper rowHelper = this.layout.createRowHelper(2);
+		rowHelper.addChild(new StringWidget(this.title, this.font), 2);
+		reasonWidget = new MultiLineTextWidget(this.reason, this.font).setMaxWidth(this.width - 50).setCentered(true);
+		rowHelper.addChild(reasonWidget, 2);
 
 		Button buttonL = Button.builder(this.buttonTextLeft, button1 -> buttonLeftCallback.accept(this))
 			.bounds(this.width / 2 - 155, this.height / 6 + 96, 150, 20)
@@ -76,6 +75,15 @@ public class FallbackScreen extends Screen {
 	@Override
 	public boolean shouldCloseOnEsc() {
 		return false;
+	}
+
+	@Override
+	public void tick() {
+		if (reasonWidget.getMessage() != reason) {
+			// FIXME: centered broken
+			reasonWidget.setMessage(reason);
+		}
+		super.tick();
 	}
 
 	@Override
