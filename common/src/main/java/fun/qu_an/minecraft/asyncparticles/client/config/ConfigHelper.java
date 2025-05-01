@@ -2,11 +2,9 @@ package fun.qu_an.minecraft.asyncparticles.client.config;
 
 import net.minecraft.resources.ResourceLocation;
 
-import java.io.IOException;
 import java.util.Set;
 
-@Deprecated(forRemoval = true)
-public class SimplePropertiesConfig {
+public class ConfigHelper {
 	public static void load() throws Exception {
 		AsyncParticlesConfig.reload();
 	}

@@ -9,7 +9,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -120,7 +120,7 @@ public class AsyncRenderer {
 	private static int asyncTasksSize;
 	private static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
-		() -> SimplePropertiesConfig.getRenderFailurePerSecondThreshold()
+		() -> ConfigHelper.getRenderFailurePerSecondThreshold()
 	);
 
 	/* Renderer */
@@ -128,7 +128,7 @@ public class AsyncRenderer {
 	public static void start(float f, Camera camera) {
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
-		if (!SimplePropertiesConfig.isRenderAsync()) {
+		if (!ConfigHelper.isRenderAsync()) {
 			captureParticleRenderingSetting();
 			tryDebug();
 			return;

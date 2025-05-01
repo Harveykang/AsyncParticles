@@ -9,7 +9,7 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.forge.Menus;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -133,7 +133,7 @@ public final class AsyncParticlesClientForge {
 				.executes(context -> {
 					CommandSourceStack source = context.getSource();
 					try {
-						SimplePropertiesConfig.load();
+						ConfigHelper.load();
 					} catch (Exception e) {
 						source.sendSystemMessage(Component.literal("Failed to reload config")
 							.append(e.getMessage()));

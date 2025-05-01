@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
 import net.minecraft.client.Camera;
@@ -25,7 +25,7 @@ public abstract class MixinLevelRenderer {
 
 	@WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V"))
 	private void redirectRenderParticles(ParticleEngine instance, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f, Operation<Void> original) {
-		if (SimplePropertiesConfig.isRenderAsync()) {
+		if (ConfigHelper.isRenderAsync()) {
 			AsyncRenderer.irisTranslucent(poseStack, f, camera, lightTexture);
 		} else {
 			if (AsyncRenderer.isMixedParticleRenderingSetting()){
@@ -47,7 +47,7 @@ public abstract class MixinLevelRenderer {
 									  LightTexture lightTexture,
 									  Matrix4f projectionMatrix,
 									  CallbackInfo ci) {
-		if (SimplePropertiesConfig.isRenderAsync()) {
+		if (ConfigHelper.isRenderAsync()) {
 			AsyncRenderer.irisSync(poseStack, partialTick, camera, lightTexture);
 		} else if (AsyncRenderer.isMixedParticleRenderingSetting()) {
 			ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;

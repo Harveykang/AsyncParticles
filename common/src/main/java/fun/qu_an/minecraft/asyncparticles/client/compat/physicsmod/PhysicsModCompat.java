@@ -3,7 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.compat.physicsmod;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
-import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.diebuddies.physics.snow.math.AABB3D;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -45,7 +45,7 @@ public class PhysicsModCompat {
 			return;
 		}
 		Vec3 shipMotion = hit.shipMotion;
-		if (!SimplePropertiesConfig.doVsShipRainEffectsIfMoving() && abs(shipMotion.lengthSqr()) > 0.01) {
+		if (!ConfigHelper.doVsShipRainEffectsIfMoving() && abs(shipMotion.lengthSqr()) > 0.01) {
 			return;
 		}
 		Vec3 spawnPos = hit.getLocation().add(shipMotion);

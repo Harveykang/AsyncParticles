@@ -3,7 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.render;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -52,7 +52,7 @@ public abstract class MixinLevelRenderer {
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;particlesTarget:Lcom/mojang/blaze3d/pipeline/RenderTarget;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;clear(Z)V"))
 	private void redirectClearRenderTarget(RenderTarget instance, boolean bl) {
-		if (!SimplePropertiesConfig.isRenderAsync()) {
+		if (!ConfigHelper.isRenderAsync()) {
 			instance.clear(bl);
 		}
 	}
@@ -61,7 +61,7 @@ public abstract class MixinLevelRenderer {
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;particlesTarget:Lcom/mojang/blaze3d/pipeline/RenderTarget;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;copyDepthFrom(Lcom/mojang/blaze3d/pipeline/RenderTarget;)V"))
 	private void redirectCopyDepthFrom(RenderTarget instance, RenderTarget target) {
-		if (!SimplePropertiesConfig.isRenderAsync()) {
+		if (!ConfigHelper.isRenderAsync()) {
 			instance.copyDepthFrom(target);
 		}
 	}
@@ -70,7 +70,7 @@ public abstract class MixinLevelRenderer {
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderStateShard;PARTICLES_TARGET:Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;setupRenderState()V"))
 	private void redirectSetupRenderState(RenderStateShard.OutputStateShard instance) {
-		if (!SimplePropertiesConfig.isRenderAsync()) {
+		if (!ConfigHelper.isRenderAsync()) {
 			instance.setupRenderState();
 		}
 	}
@@ -79,7 +79,7 @@ public abstract class MixinLevelRenderer {
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderStateShard;PARTICLES_TARGET:Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;clearRenderState()V"))
 	private void redirectClearRenderState(RenderStateShard.OutputStateShard instance) {
-		if (!SimplePropertiesConfig.isRenderAsync()) {
+		if (!ConfigHelper.isRenderAsync()) {
 			instance.clearRenderState();
 		}
 	}

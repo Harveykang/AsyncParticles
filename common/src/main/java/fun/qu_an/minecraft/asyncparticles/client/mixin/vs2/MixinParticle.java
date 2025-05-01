@@ -7,7 +7,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -79,7 +79,7 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 	public void asyncparticles$refresh() {
 		BlockPos blockPos = BlockPos.containing(x, y, z);
 		int light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
-		if (asyncparticles$vsShip == null || !SimplePropertiesConfig.fixParticleLightOnVsShips()) {
+		if (asyncparticles$vsShip == null || !ConfigHelper.fixParticleLightOnVsShips()) {
 			asyncparticles$setLight(light);
 		} else {
 			Vector3d transformed = asyncparticles$vsShip.getWorldToShip().transformPosition(x, y, z, new Vector3d());

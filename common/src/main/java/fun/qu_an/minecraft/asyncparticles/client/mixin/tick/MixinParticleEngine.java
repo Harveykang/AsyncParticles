@@ -7,7 +7,7 @@ import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -53,7 +53,7 @@ public abstract class MixinParticleEngine {
 
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
 	public void onTickParticle(Particle particle, CallbackInfo ci, @Local Throwable t) {
-		if (SimplePropertiesConfig.isTickAsync()) {
+		if (ConfigHelper.isTickAsync()) {
 			throw ExceptionUtil.toThrowDirectly(t);
 		}
 	}
@@ -78,7 +78,7 @@ public abstract class MixinParticleEngine {
 		// we'll add particles later
 		AsyncTicker.PARTICLE_OPERATIONS.add(this::asyncparticles$tickEmitters);
 
-		boolean tickAsync = SimplePropertiesConfig.isTickAsync();
+		boolean tickAsync = ConfigHelper.isTickAsync();
 		if (tickAsync) {
 			AsyncTicker.waitForCleanUp();
 		} else {
@@ -109,7 +109,7 @@ public abstract class MixinParticleEngine {
 					k -> {
 						Queue<Particle> queue1 = IterationSafeEvictingQueue.newInstance(
 							16,
-							SimplePropertiesConfig.getLimit(),
+							ConfigHelper.getLimit(),
 							AsyncTicker::onEvicted);
 						// fix the first added particle not ticked.
 						if (tickAsync) {
@@ -134,7 +134,7 @@ public abstract class MixinParticleEngine {
 	@Unique
 	private void asyncparticles$tickEmitters() {
 		for (TrackingEmitter emitter : this.trackingEmitters) {
-			if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneParticleTick()) {
+			if (AsyncTicker.isCancelled() && !ConfigHelper.forceDoneParticleTick()) {
 				return;
 			}
 			if (!emitter.isAlive()) {
@@ -187,7 +187,7 @@ public abstract class MixinParticleEngine {
 			return;
 		}
 		for (Particle particle : collection) {
-			if (AsyncTicker.isCancelled() && !SimplePropertiesConfig.forceDoneParticleTick()) {
+			if (AsyncTicker.isCancelled() && !ConfigHelper.forceDoneParticleTick()) {
 				return;
 			}
 			if (!particle.isAlive()) {
@@ -200,7 +200,7 @@ public abstract class MixinParticleEngine {
 				if (((ParticleAddon) particle).asyncparticles$isTicked()) {
 					// Skip the first tick that the particle is added to the queue.
 					if (particle instanceof LightCachedParticleAddon lightCachedParticle
-						&& SimplePropertiesConfig.particleLightCache()) {
+						&& ConfigHelper.particleLightCache()) {
 						lightCachedParticle.asyncparticles$refresh();
 					}
 					continue;
@@ -213,7 +213,7 @@ public abstract class MixinParticleEngine {
 			try {
 				tickParticle(particle);
 				if (particle instanceof LightCachedParticleAddon lightCachedParticle
-					&& SimplePropertiesConfig.particleLightCache()) {
+					&& ConfigHelper.particleLightCache()) {
 					lightCachedParticle.asyncparticles$refresh();
 				}
 				((ParticleAddon) particle).asyncparticles$setTicked();
@@ -225,12 +225,12 @@ public abstract class MixinParticleEngine {
 
 	@Inject(method = "add", at = @At(value = "HEAD"))
 	public void add(Particle particle, CallbackInfo ci) {
-		if (!AsyncTicker.shouldTickParticles && SimplePropertiesConfig.isTickAsync()) {
+		if (!AsyncTicker.shouldTickParticles && ConfigHelper.isTickAsync()) {
 			particle.remove(); // to compatible with some mods...
 			// don't cancel it,
 			// otherwise it may cause memory leak with some mods
 		} else if (particle instanceof LightCachedParticleAddon lightCachedParticle
-				   && SimplePropertiesConfig.particleLightCache()) {
+				   && ConfigHelper.particleLightCache()) {
 			lightCachedParticle.asyncparticles$refresh();
 		}
 	}
@@ -238,9 +238,9 @@ public abstract class MixinParticleEngine {
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void redirectClearParticles(CallbackInfo ci) {
 		particlesToAdd.forEach(AsyncTicker::onEvicted);
-		particlesToAdd = BusyWaitEvictingQueue.newInstance(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+		particlesToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getLimit(), AsyncTicker::onEvicted);
 		trackingEmitters.forEach(AsyncTicker::onEvicted);
-		trackingEmitters = BusyWaitEvictingQueue.newInstance(256, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+		trackingEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getLimit(), AsyncTicker::onEvicted);
 		particles.values().forEach(queue -> queue.forEach(AsyncTicker::onEvicted));
 		AsyncTicker.onParticleEngineClear();
 	}

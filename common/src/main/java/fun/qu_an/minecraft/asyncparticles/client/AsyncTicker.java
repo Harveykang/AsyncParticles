@@ -6,7 +6,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
-import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.api.EnvType;
@@ -61,7 +61,7 @@ public class AsyncTicker {
 	public static final String THREAD_PREFIX = "AsyncParticleTicker";
 	private static final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
-		() -> SimplePropertiesConfig.getTickFailurePerSecondThreshold()
+		() -> ConfigHelper.getTickFailurePerSecondThreshold()
 	);
 	private static final LongRef timeUsageNano = new LongRef(0L);
 
@@ -109,7 +109,7 @@ public class AsyncTicker {
 	 * @param to Count of ticks to run
 	 */
 	public static void onTickBefore(int i, int to) {
-		if (!SimplePropertiesConfig.isTickAsync()) {
+		if (!ConfigHelper.isTickAsync()) {
 			return;
 		}
 		// assert i < to;
@@ -177,7 +177,7 @@ public class AsyncTicker {
 	public static void onTickAfter(int i, int to) {
 		Minecraft mc = Minecraft.getInstance();
 		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
-		if (!SimplePropertiesConfig.isTickAsync()) {
+		if (!ConfigHelper.isTickAsync()) {
 			tryReload();
 			tryDebug();
 			END_TICK_OPERATIONS.forEach(p -> p.second().run());
@@ -260,7 +260,7 @@ public class AsyncTicker {
 				.map(runnable -> CompletableFuture
 					.runAsync(runnable, EXECUTOR)
 					.exceptionally(e -> {
-						if (!SimplePropertiesConfig.markSyncIfTickFailed()
+						if (!ConfigHelper.markSyncIfTickFailed()
 							&& isTolerable(e)) {
 							LOGGER.warn("Exception while executing particle operation, you can ignore it if it doesn't happen frequently.", e);
 							return null;
@@ -298,7 +298,7 @@ public class AsyncTicker {
 			   || rootCause instanceof NullPointerException
 			   || rootCause instanceof IndexOutOfBoundsException
 			   || rootCause instanceof ArrayIndexOutOfBoundsException
-			   || (rootCause instanceof ConcurrentModificationException && SimplePropertiesConfig.suppressCME());
+			   || (rootCause instanceof ConcurrentModificationException && ConfigHelper.suppressCME());
 	}
 
 	public static void onTickingParticleException(Particle particle, Throwable t) {
@@ -309,7 +309,7 @@ public class AsyncTicker {
 		if (tolerable && !EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
 			return;
 		}
-		if (SimplePropertiesConfig.markSyncIfTickFailed()) {
+		if (ConfigHelper.markSyncIfTickFailed()) {
 			((ParticleAddon) particle).asyncparticles$setTickSync();
 			if (!shouldSync(particle.getClass())) {
 				if (!tolerable) {
@@ -378,7 +378,7 @@ public class AsyncTicker {
 	/* Sync Ticking */
 
 	public static void tickSyncParticles() {
-		if ((!shouldTickParticles && SimplePropertiesConfig.isTickAsync()) || SYNC_PARTICLES.isEmpty()) {
+		if ((!shouldTickParticles && ConfigHelper.isTickAsync()) || SYNC_PARTICLES.isEmpty()) {
 			return;
 		}
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
@@ -388,7 +388,7 @@ public class AsyncTicker {
 				particleEngine.tickParticle(particle);
 				if (!(particle instanceof TrackingEmitter)) {
 					if (particle instanceof LightCachedParticleAddon lightCachedParticle
-						&& SimplePropertiesConfig.particleLightCache()) {
+						&& ConfigHelper.particleLightCache()) {
 						lightCachedParticle.asyncparticles$refresh();
 					}
 					((ParticleAddon) particle).asyncparticles$setTicked();
@@ -445,12 +445,12 @@ public class AsyncTicker {
 			particles to add size: %d
 			sync particle count: %d,
 			sync particle types: %s,"""
-			.formatted(SimplePropertiesConfig.isTickAsync() ? timeUsageNano.get() / 1000000d : Double.NaN,
+			.formatted(ConfigHelper.isTickAsync() ? timeUsageNano.get() / 1000000d : Double.NaN,
 				debug_cancelled,
 				PARTICLE_OPERATIONS.size(),
 				END_TICK_EVENTS.size(),
 				END_TICK_OPERATIONS.size(),
-				SimplePropertiesConfig.getLimit(),
+				ConfigHelper.getLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
 					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
 						Queue<Particle> queue = e.getValue();
@@ -488,15 +488,15 @@ public class AsyncTicker {
 			reset();
 			particleEngine.clearParticles();
 		} else {
-			Queue<Particle> newToAdd = BusyWaitEvictingQueue.newInstance(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+			Queue<Particle> newToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getLimit(), AsyncTicker::onEvicted);
 			newToAdd.addAll(particleEngine.particlesToAdd);
 			particleEngine.particlesToAdd = newToAdd;
-			Queue<TrackingEmitter> newEmitters = BusyWaitEvictingQueue.newInstance(256, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+			Queue<TrackingEmitter> newEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getLimit(), AsyncTicker::onEvicted);
 			newEmitters.addAll(particleEngine.trackingEmitters);
 			particleEngine.trackingEmitters = newEmitters;
 			particleEngine.particles.entrySet().forEach(entry -> {
 				Queue<Particle> queue = entry.getValue();
-				Queue<Particle> newQueue = IterationSafeEvictingQueue.newInstance(queue.size(), SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+				Queue<Particle> newQueue = IterationSafeEvictingQueue.newInstance(queue.size(), ConfigHelper.getLimit(), AsyncTicker::onEvicted);
 				newQueue.addAll(queue);
 				entry.setValue(newQueue);
 			});
@@ -539,7 +539,7 @@ public class AsyncTicker {
 	}
 
 	public static void addEndTickTask(ResourceLocation resourceLocation, Runnable operation) {
-		if (shouldTickParticles || !SimplePropertiesConfig.isTickAsync()) {
+		if (shouldTickParticles || !ConfigHelper.isTickAsync()) {
 			AsyncTicker.END_TICK_OPERATIONS.add(Pair.of(resourceLocation, operation));
 		}
 	}

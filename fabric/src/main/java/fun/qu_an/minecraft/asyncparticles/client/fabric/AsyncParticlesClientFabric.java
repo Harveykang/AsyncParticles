@@ -8,7 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -19,7 +19,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
@@ -116,7 +115,7 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 						.executes(context -> {
 							FabricClientCommandSource source = context.getSource();
 							try {
-								SimplePropertiesConfig.load();
+								ConfigHelper.load();
 							} catch (Exception e) {
 								source.sendFeedback(Component.literal("Failed to reload config")
 									.append(e.getMessage()));
