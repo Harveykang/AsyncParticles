@@ -39,5 +39,8 @@
   "config.asyncparticles.enum.RainEffect.ALWAYS": "始终生成",
   "config.asyncparticles.enum.AsyncTickBehavior.INTERRUPTIBLE": "可中断",
   "config.asyncparticles.enum.AsyncTickBehavior.FORCE_COMPLETE": "强制完成",
-  "config.asyncparticles.enum.AsyncTickBehavior.DISABLED": "同步执行"
+  "config.asyncparticles.enum.AsyncTickBehavior.DISABLED": "同步执行",
+  "config.asyncparticles.error": "出错啦！",
+  "config.asyncparticles.error.save-failed": "保存失败：%s",
+  "config.asyncparticles.error.reload-failed": "重载失败：%s"
 }

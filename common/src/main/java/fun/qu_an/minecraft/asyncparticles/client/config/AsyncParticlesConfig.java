@@ -8,6 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.TranslatableEnum;
 import me.shedaniel.clothconfig2.api.*;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -206,9 +207,47 @@ public class AsyncParticlesConfig {
 				save();
 			} catch (Exception e) {
 				LOGGER.error("Failed to save config", e);
+				Minecraft mc = Minecraft.getInstance();
+				Screen prevScreen = mc.screen;
+				mc.setScreen(new FallbackScreen(
+					prevScreen,
+					Component.translatable("config.asyncparticles.error"),
+					Component.translatable("config.asyncparticles.error.save-failed", e.getMessage()),
+					Component.translatable("gui.back"),
+					current -> Minecraft.getInstance().setScreen(current.parent),
+					Component.translatable("gui.continue"),
+					current -> Minecraft.getInstance().setScreen(current.parent)));
 			}
 		});
 		return builder;
+	}
+
+	public static Screen fallBackScreen(Screen parent) {
+		return new FallbackScreen(
+			parent,
+			Component.translatable("config.asyncparticles.error.menu-unavailable"),
+			Component.translatable("config.asyncparticles.error.cloth-config-required"),
+			Component.translatable("gui.cancel"),
+			current -> {
+				try {
+					AsyncParticlesConfig.save();
+				} catch (Exception e) {
+					current.reason = Component.translatable("config.asyncparticles.error.save-failed", e.getMessage());
+					return;
+				}
+				Minecraft.getInstance().setScreen(current.parent);
+			},
+			Component.translatable("gui.done"),
+			current -> {
+				try {
+					AsyncParticlesConfig.reload();
+				} catch (Exception e) {
+					current.reason = Component.translatable("config.asyncparticles.error.reload-failed", e.getMessage());
+					return;
+				}
+				AsyncTicker.reloadLater();
+				Minecraft.getInstance().setScreen(current.parent);
+			});
 	}
 
 	public static void reload() throws IOException, JsonParseException {
@@ -248,13 +287,6 @@ public class AsyncParticlesConfig {
 		try (BufferedWriter writer = Files.newBufferedWriter(CONFIG_FILE)) {
 			GSON.toJson(configObj, writer);
 		}
-	}
-
-	public static Screen fallBackScreen(Screen parent) {
-		return new DisconnectedScreen(parent,
-			Component.translatable("config.asyncparticles.error.menu-unavailable"),
-			Component.translatable("config.asyncparticles.error.cloth-config-required"),
-			Component.translatable("gui.back"));
 	}
 
 	private static class ConfigObj {

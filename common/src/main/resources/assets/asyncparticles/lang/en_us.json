@@ -39,5 +39,8 @@
   "config.asyncparticles.enum.RainEffect.ALWAYS": "Always",
   "config.asyncparticles.enum.AsyncTickBehavior.INTERRUPTIBLE": "Interruptible",
   "config.asyncparticles.enum.AsyncTickBehavior.FORCE_COMPLETE": "Force Complete",
-  "config.asyncparticles.enum.AsyncTickBehavior.DISABLED": "Disabled"
+  "config.asyncparticles.enum.AsyncTickBehavior.DISABLED": "Disabled",
+  "config.asyncparticles.error": "Error!",
+  "config.asyncparticles.error.save-failed": "Fail to save: %s",
+  "config.asyncparticles.error.reload-failed": "Fail to reload: %s"
 }
