@@ -2,14 +2,31 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.lodestone;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import fun.qu_an.minecraft.asyncparticles.client.util.ReentrantSpinLock;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import team.lodestar.lodestone.handlers.RenderHandler;
+
+import java.util.HashMap;
 
 @Mixin(RenderHandler.class)
 public class MixinRenderHandler {
+	@Unique
+	private static final ReentrantSpinLock asyncparticles$lock = new ReentrantSpinLock();
+
 	@WrapMethod(method = "addRenderType", remap = false)
-	private static synchronized void addRenderType(RenderType renderType, Operation<Void> original) {
-		original.call(renderType);
+	private static void addRenderType(RenderType renderType, Operation<Void> original) {
+		asyncparticles$lock.wrap(() -> original.call(renderType));
+	}
+
+	@WrapMethod(method = "renderBufferedBatches(Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Ljava/util/HashMap;Z)V", remap = false)
+	private static void renderBufferedBatches(MultiBufferSource.BufferSource bufferSource,
+											  HashMap<RenderType, BufferBuilder> buffer,
+											  boolean transparentOnly,
+											  Operation<Void> original) {
+		asyncparticles$lock.wrap(() -> original.call(bufferSource, buffer, transparentOnly));
 	}
 }
