@@ -1,10 +1,13 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension;
 
+import com.bawnorton.mixinsquared.reflection.TargetClassContextExtension;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.spongepowered.asm.mixin.transformer.ext.ITargetClassContext;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
+import java.util.Optional;
 
 public class MixinUtils {
 	private static final VarHandle MIXININFO$STATE;
@@ -25,5 +28,12 @@ public class MixinUtils {
 
 	public static ClassNode getDirectClassNode(IMixinInfo mixinInfo) {
 		return (ClassNode) MIXININFO$STATE_CLASSNODE.get(MIXININFO$STATE.get(mixinInfo));
+	}
+
+	public static Optional<TargetClassContextExtension> tryAs(ITargetClassContext reference) {
+		if (reference.getClass().getName().equals("org.spongepowered.asm.mixin.transformer.TargetClassContext")) {
+			return Optional.of(new TargetClassContextExtension(reference));
+		}
+		return Optional.empty();
 	}
 }
