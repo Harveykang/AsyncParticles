@@ -80,8 +80,15 @@ public class FallbackScreen extends Screen {
 	@Override
 	public void tick() {
 		if (reasonWidget.getMessage() != reason) {
-			// FIXME: centered broken
-			reasonWidget.setMessage(reason);
+			minecraft.setScreen(new FallbackScreen(
+				parent,
+				title,
+				reason,
+				buttonTextLeft,
+				buttonLeftCallback,
+				buttonTextRight,
+				buttonRightCallback
+			));
 		}
 		super.tick();
 	}
