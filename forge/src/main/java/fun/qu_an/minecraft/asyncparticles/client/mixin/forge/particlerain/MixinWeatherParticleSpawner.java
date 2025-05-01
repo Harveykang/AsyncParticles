@@ -7,23 +7,20 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(value = WeatherParticleSpawner.class, remap = false)
+@Mixin(value = WeatherParticleSpawner.class)
 public class MixinWeatherParticleSpawner {
-	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", remap = false, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;particleCount:I"))
+	@ModifyExpressionValue(method = "spawnParticle", remap = false, at = @At(value = "FIELD", remap = false, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;particleCount:I"))
 	private static int modifyParticleCount(int original) {
 		return ParticleRainCompat.asyncparticles$particleCount.get();
 	}
 
-	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", remap = false, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;fogCount:I"))
+	@ModifyExpressionValue(method = "spawnParticle", remap = false, at = @At(value = "FIELD", remap = false, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;fogCount:I"))
 	private static int modifyFogCount(int original) {
 		return ParticleRainCompat.asyncparticles$fogCount.get();
 	}
@@ -31,7 +28,7 @@ public class MixinWeatherParticleSpawner {
 	@Unique
 	private static final ResourceLocation asyncparticles$PARTICLE_RAIN$UPDATE =
 		ResourceLocation.tryBuild("particlerain", "update");
-	@WrapMethod(method = "update")
+	@WrapMethod(method = "update", remap = false)
 	private static void onUpdate(ClientLevel level, Entity entity, float f, Operation<Void> original) {
 		AsyncTicker.addEndTickTask(asyncparticles$PARTICLE_RAIN$UPDATE, () -> original.call(level, entity, f));
 	}

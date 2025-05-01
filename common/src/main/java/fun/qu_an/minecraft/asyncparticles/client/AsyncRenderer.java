@@ -385,7 +385,7 @@ public class AsyncRenderer {
 
 	private static void captureParticleRenderingSetting() {
 		if (ModListHelper.IRIS_LIKE_LOADED) {
-			mixedParticleRenderingSetting = Iris.isPackInUseQuick() &&
+			mixedParticleRenderingSetting = IrisApi.getInstance().isShaderPackInUse() &&
 											getParticleRenderingSettings0() == ParticleRenderingSettings.MIXED;
 		}
 	}
