@@ -42,10 +42,15 @@
   "config.asyncparticles.enum.AsyncTickBehavior.DISABLED": "Disabled",
   "gui.asyncparticles": "Async Particles",
   "gui.asyncparticles.error": "Error!",
+  "gui.asyncparticles.menu-unavailable": "Config Menu Unavailable",
+  "gui.asyncparticles.menu-unavailable.message": "Please install Cloth Config API to access the config menu.\nYou can also make changes manually and click 'Reload Config'.\nPress SHIFT to show the reset button.",
   "gui.asyncparticles.failed-to-save": "Failed to save: %s",
+  "gui.asyncparticles.reload": "Reload Config",
   "gui.asyncparticles.failed-to-reload": "Failed to reload: %s",
   "gui.asyncparticles.reload-successfully": "Reload successfully!",
-  "gui.asyncparticles.menu-unavailable": "Config Menu Unavailable",
-  "gui.asyncparticles.cloth-config-required": "Please install Cloth Config API to access the config menu.\nYou can also make changes manually and click 'Reload Config'.",
-  "gui.asyncparticles.reload": "Reload Config"
+  "gui.asyncparticles.reload-confirmation": "Do you want to reload the configuration?",
+  "gui.asyncparticles.reset": "Reset Config",
+  "gui.asyncparticles.failed-to-reset": "Failed to reset: %s",
+  "gui.asyncparticles.reset-successfully": "Reset successfully!",
+  "gui.asyncparticles.reset-confirmation": "Do you want to reset all configurations?"
 }

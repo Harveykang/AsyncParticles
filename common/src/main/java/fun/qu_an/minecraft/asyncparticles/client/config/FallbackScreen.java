@@ -11,29 +11,34 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class FallbackScreen extends Screen {
 	@Nullable
 	public final Screen parent;
-	public Component reason;
-	private final Component buttonTextLeft;
-	private final Consumer<FallbackScreen> buttonLeftCallback;
-	private final Component buttonTextRight;
-	private final Consumer<FallbackScreen> buttonRightCallback;
+	public Component message;
+	public final Component buttonTextLeft;
+	public Consumer<FallbackScreen> buttonLeftCallback;
+	public final Component buttonTextRight;
+	public Consumer<FallbackScreen> buttonRightCallback;
 	private final GridLayout layout = new GridLayout();
 	private MultiLineTextWidget reasonWidget;
+	public Button buttonLeft;
+	public Button buttonRight;
+	public BiConsumer<FallbackScreen, Button> buttonLeftTick;
+	public BiConsumer<FallbackScreen, Button> buttonRightTick;
 
 	public FallbackScreen(@Nullable Screen parent,
 						  Component title,
-						  Component reason,
+						  Component message,
 						  Component buttonL,
 						  Consumer<FallbackScreen> buttonLeftCallback,
 						  Component buttonR,
 						  Consumer<FallbackScreen> buttonRightCallback) {
 		super(title);
 		this.parent = parent;
-		this.reason = reason;
+		this.message = message;
 		this.buttonTextLeft = buttonL;
 		this.buttonLeftCallback = buttonLeftCallback;
 		this.buttonTextRight = buttonR;
@@ -42,20 +47,21 @@ public class FallbackScreen extends Screen {
 
 	@Override
 	protected void init() {
+		super.init();
 		this.layout.defaultCellSetting().alignHorizontallyCenter().padding(10);
 		GridLayout.RowHelper rowHelper = this.layout.createRowHelper(2);
 		rowHelper.addChild(new StringWidget(this.title, this.font), 2);
-		reasonWidget = new MultiLineTextWidget(this.reason, this.font).setMaxWidth(this.width - 50).setCentered(true);
+		reasonWidget = new MultiLineTextWidget(this.message, this.font).setMaxWidth(this.width - 50).setCentered(true);
 		rowHelper.addChild(reasonWidget, 2);
 
-		Button buttonL = Button.builder(this.buttonTextLeft, button1 -> buttonLeftCallback.accept(this))
+		buttonLeft = Button.builder(this.buttonTextLeft, button1 -> buttonLeftCallback.accept(this))
 			.bounds(this.width / 2 - 155, this.height / 6 + 96, 150, 20)
 			.build();
-		Button buttonR = Button.builder(this.buttonTextRight, button1 -> buttonRightCallback.accept(this))
+		buttonRight = Button.builder(this.buttonTextRight, button1 -> buttonRightCallback.accept(this))
 			.bounds(this.width / 2 - 155 + 160, this.height / 6 + 96, 150, 20)
 			.build();
-		rowHelper.addChild(buttonL);
-		rowHelper.addChild(buttonR);
+		rowHelper.addChild(buttonLeft);
+		rowHelper.addChild(buttonRight);
 
 		this.layout.arrangeElements();
 		this.layout.visitWidgets(this::addRenderableWidget);
@@ -69,7 +75,7 @@ public class FallbackScreen extends Screen {
 
 	@Override
 	public Component getNarrationMessage() {
-		return CommonComponents.joinForNarration(this.title, this.reason);
+		return CommonComponents.joinForNarration(this.title, this.message);
 	}
 
 	@Override
@@ -79,16 +85,27 @@ public class FallbackScreen extends Screen {
 
 	@Override
 	public void tick() {
-		if (reasonWidget.getMessage() != reason) {
-			minecraft.setScreen(new FallbackScreen(
+		if (buttonLeftTick != null) {
+			buttonLeftTick.accept(this, buttonLeft);
+		}
+		if (buttonRightTick != null) {
+			buttonRightTick.accept(this, buttonRight);
+		}
+		if (reasonWidget.getMessage() != message) {
+			FallbackScreen guiScreen = new FallbackScreen(
 				parent,
 				title,
-				reason,
+				message,
 				buttonTextLeft,
 				buttonLeftCallback,
 				buttonTextRight,
 				buttonRightCallback
-			));
+			);
+			guiScreen.buttonLeft = buttonLeft;
+			guiScreen.buttonLeftTick = buttonLeftTick;
+			guiScreen.buttonRight = buttonRight;
+			guiScreen.buttonRightTick = buttonRightTick;
+			minecraft.setScreen(guiScreen);
 		}
 		super.tick();
 	}

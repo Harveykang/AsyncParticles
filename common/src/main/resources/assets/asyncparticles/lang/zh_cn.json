@@ -42,10 +42,15 @@
   "config.asyncparticles.enum.AsyncTickBehavior.DISABLED": "同步执行",
   "gui.asyncparticles": "异步粒子",
   "gui.asyncparticles.error": "出错啦！",
+  "gui.asyncparticles.menu-unavailable": "配置菜单不可用",
+  "gui.asyncparticles.menu-unavailable.message": "请安装 Cloth Config API 以访问配置菜单。\n您也可以手动修改然后点击“重载配置文件”。\n按下 SHIFT 显示重置按钮。",
   "gui.asyncparticles.failed-to-save": "保存失败：%s",
+  "gui.asyncparticles.reload": "重载配置文件",
   "gui.asyncparticles.failed-to-reload": "重载失败：%s",
   "gui.asyncparticles.reload-successfully": "重载成功！",
-  "gui.asyncparticles.menu-unavailable": "配置菜单不可用",
-  "gui.asyncparticles.cloth-config-required": "请安装 Cloth Config API 以访问配置菜单。\n您也可以手动修改然后点击“重载配置文件”",
-  "gui.asyncparticles.reload": "重载配置文件"
+  "gui.asyncparticles.reload-confirmation": "确认要重载配置文件？",
+  "gui.asyncparticles.reset": "重置配置文件",
+  "gui.asyncparticles.failed-to-reset": "重置失败：%s",
+  "gui.asyncparticles.reset-successfully": "重置成功！",
+  "gui.asyncparticles.reset-confirmation": "确认要重置配置文件？"
 }

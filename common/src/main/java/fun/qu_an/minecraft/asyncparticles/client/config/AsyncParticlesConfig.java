@@ -11,9 +11,13 @@ import fun.qu_an.minecraft.asyncparticles.client.util.TranslatableEnum;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import org.slf4j.Logger;
@@ -24,9 +28,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNullElse;
-import static java.util.Objects.requireNonNullElseGet;
 
 public class AsyncParticlesConfig {
 	public static final Path CONFIG_FILE = Path.of("config", "asyncparticles.json");
@@ -55,23 +60,87 @@ public class AsyncParticlesConfig {
 	}
 
 	public static Screen fallBackScreen(Screen parent) {
-		return new FallbackScreen(
+		FallbackScreen fallbackScreen = new FallbackScreen(
 			parent,
 			Component.translatable("gui.asyncparticles.menu-unavailable"),
-			Component.translatable("gui.asyncparticles.cloth-config-required"),
+			Component.translatable("gui.asyncparticles.menu-unavailable.message"),
 			Component.translatable("gui.back"),
 			current -> Minecraft.getInstance().setScreen(current.parent),
 			Component.translatable("gui.asyncparticles.reload"),
-			current -> {
-				try {
-					AsyncParticlesConfig.reload();
-				} catch (Exception e) {
-					current.reason = Component.translatable("gui.asyncparticles.failed-to-reload", e.toString());
-					return;
-				}
-				AsyncTicker.reloadLater();
-				current.reason = Component.translatable("gui.asyncparticles.reload-successfully");
-			});
+			current -> Minecraft.getInstance().setScreen(
+				new ConfirmScreen(b -> {
+					MutableComponent msg = Component.translatable("gui.asyncparticles.menu-unavailable.message");
+					if (!b) {
+						current.message = msg;
+						Minecraft.getInstance().setScreen(current);
+						return;
+					}
+					try {
+						AsyncParticlesConfig.reload();
+					} catch (Exception e) {
+						current.message = msg.append("\n").append(
+							Component.translatable("gui.asyncparticles.failed-to-reload", e.toString())
+								.withStyle(ChatFormatting.DARK_RED));
+						Minecraft.getInstance().setScreen(current);
+						return;
+					} finally {
+						AsyncTicker.reloadLater();
+					}
+					current.message = msg.append("\n").append(
+						Component.translatable("gui.asyncparticles.reload-successfully")
+							.withStyle(ChatFormatting.DARK_GREEN));
+					Minecraft.getInstance().setScreen(current);
+				},
+					Component.translatable("gui.asyncparticles.menu-unavailable"),
+					Component.translatable("gui.asyncparticles.reload-confirmation"))));
+		@SuppressWarnings("unchecked")
+		BiConsumer<FallbackScreen, Button>[] tickCallbacks = new BiConsumer[2];
+		Consumer<FallbackScreen> reloadCallback = fallbackScreen.buttonRightCallback;
+		tickCallbacks[0] = (fs, br) -> {
+			if (!Screen.hasShiftDown()) {
+				return;
+			}
+			br.setMessage(Component.translatable("gui.asyncparticles.reset")
+				.withStyle(ChatFormatting.RED));
+			fs.buttonRightTick = tickCallbacks[1];
+			fs.buttonRightCallback = current -> Minecraft.getInstance().setScreen(
+				new ConfirmScreen(b -> {
+					MutableComponent msg = Component.translatable("gui.asyncparticles.menu-unavailable.message");
+					if (!b) {
+						current.message = msg;
+						Minecraft.getInstance().setScreen(current);
+						return;
+					}
+					try {
+						AsyncParticlesConfig.reset();
+					} catch (Exception e) {
+						current.message = msg.append("\n").append(
+							Component.translatable("gui.asyncparticles.failed-to-reset", e.toString())
+								.withStyle(ChatFormatting.DARK_RED));
+						Minecraft.getInstance().setScreen(current);
+						return;
+					} finally {
+						AsyncTicker.reloadLater();
+					}
+					current.message = msg.append("\n").append(
+						Component.translatable("gui.asyncparticles.reset-successfully")
+							.withStyle(ChatFormatting.DARK_GREEN));
+					Minecraft.getInstance().setScreen(current);
+				},
+					Component.translatable("gui.asyncparticles.menu-unavailable"),
+					Component.translatable("gui.asyncparticles.reset-confirmation")
+						.withStyle(ChatFormatting.RED)));
+		};
+		tickCallbacks[1] = (fs, br) -> {
+			if (Screen.hasShiftDown()) {
+				return;
+			}
+			br.setMessage(Component.translatable("gui.asyncparticles.reload"));
+			fs.buttonRightTick = tickCallbacks[0];
+			fs.buttonRightCallback = reloadCallback;
+		};
+		fallbackScreen.buttonRightTick = tickCallbacks[0];
+		return fallbackScreen;
 	}
 
 	public static void reload() throws IOException, JsonParseException {
@@ -277,7 +346,7 @@ public class AsyncParticlesConfig {
 					.setDefaultValue(defaultConfig.tick.failBehavior)
 					.setTooltip(Component.empty()
 						.append(Component.translatable("config.asyncparticles.tick.failBehavior.tooltip")
-							.setStyle(Style.EMPTY.withStrikethrough(true)))
+							.withStyle(ChatFormatting.STRIKETHROUGH))
 						.append("\n")
 						.append(Component.translatable("config.asyncparticles.not-implemented")))
 					.setSaveConsumer(newValue -> tick$failBehavior = newValue)
@@ -359,7 +428,7 @@ public class AsyncParticlesConfig {
 							.setDefaultValue(defaultConfig.create.rainEffect)
 							.setTooltip(Component.empty()
 								.append(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect.tooltip")
-									.setStyle(Style.EMPTY.withStrikethrough(true)))
+									.withStyle(ChatFormatting.STRIKETHROUGH))
 								.append("\n")
 								.append(Component.translatable("config.asyncparticles.not-implemented")))
 							.setSaveConsumer(newValue -> create$rainEffect = newValue)
