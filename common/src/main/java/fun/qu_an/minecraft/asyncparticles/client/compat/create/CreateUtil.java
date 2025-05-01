@@ -30,7 +30,7 @@ public class CreateUtil {
 	}
 
 	public static boolean isUnderContraption(ClientLevel level, Vec3 pos, double size) {
-		AABB bounds = new AABB(pos.x - size, pos.y - size, pos.z - size, pos.x + size, pos.y - size, pos.z + size);
+		AABB bounds = new AABB(pos.x - size, pos.y - size, pos.z - size, pos.x + size, pos.y + size, pos.z + size);
 		return isCollideWithContraption(level, new Vec3(0, Math.max(16, level.getMaxBuildHeight() - pos.y), 0), bounds);
 	}
 
