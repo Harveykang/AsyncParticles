@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member
 import com.bawnorton.mixinsquared.adjuster.tools.AdjustableAnnotationNode;
 import com.bawnorton.mixinsquared.reflection.FieldReference;
 import com.bawnorton.mixinsquared.reflection.TargetClassContextExtension;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.MixinUtils;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
@@ -47,7 +48,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
         if (CANCELLERS.isEmpty()) {
             return;
         }
-        Optional<TargetClassContextExtension> optional = TargetClassContextExtension.tryAs(context);
+        Optional<TargetClassContextExtension> optional = MixinUtils.tryAs(context);
         if (!optional.isPresent()) {
             return;
         }

@@ -47,7 +47,7 @@ public final class ExtensionCancelMixinMethod implements IExtension {
 		if (CANCELLERS.isEmpty()) {
 			return;
 		}
-		TargetClassContextExtension.tryAs(context).ifPresent(contextExtension -> {
+		MixinUtils.tryAs(context).ifPresent(contextExtension -> {
 			SortedSet<IMixinInfo> mixins = contextExtension.getMixins();
 			mixins.forEach(mixin -> {
 				String mixinClassName = mixin.getClassName();
