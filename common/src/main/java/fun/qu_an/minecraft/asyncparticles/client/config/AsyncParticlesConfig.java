@@ -162,7 +162,7 @@ public class AsyncParticlesConfig {
 		modCompatCategory
 			.addEntry(entryBuilder
 //				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
-				.startSubCategory(Component.translatable("itemGroup.valkyrienSkies"),
+				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
 					List.of(entryBuilder
 						// .startEnumSelector(Component.translatable("config.asyncparticles.valkyrienskies.rainEffect"),
 						// 	RainEffect.class, valkyrienSkies$rainEffect)
@@ -185,7 +185,7 @@ public class AsyncParticlesConfig {
 				.build())
 			.addEntry(entryBuilder
 //				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
-				.startSubCategory(Component.translatable("itemGroup.create.base"),
+				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
 					List.of(entryBuilder
 						.startEnumSelector(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect"),
 							RainEffect.class, create$rainEffect)
