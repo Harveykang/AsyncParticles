@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -20,8 +21,9 @@ public class MixinModClientForgeEvents {
 		return ParticleRainCompat.asyncparticles$fogCount.get();
 	}
 
-	@Inject(method = {"onPlayerJoin", "onPlayerClone"}, at = @At("HEAD"))
-	private static void onClearCounters2(CallbackInfo ci) {
+	@Group(name = "asyncparticles$particlerain$ClientStuff$onClearCounters", min = 2, max = 2)
+	@Inject(method = {"onPlayerJoin", "onPlayerClone", "onPlayerChangeDimension"}, at = @At("HEAD"))
+	private static void onClearCounters1(CallbackInfo ci) {
 		ParticleRainCompat.clearCounters();
 	}
 }

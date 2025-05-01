@@ -263,27 +263,27 @@ public class VSClientUtils {
 		return closestHit;
 	}
 
-	public static boolean isUnderHeightMapIncludeShips(ClientLevel level, double x, double y, double z) {
+	public static boolean isUnderHeightMapIncludeShips(ClientLevel level, double x, double y, double z, int size) {
 		if (level.getHeight(Heightmap.Types.MOTION_BLOCKING, floor(x), floor(z)) >= y) {
 			return true;
 		}
-		return isUnderShipHeightMap(level, x, y, z);
+		return isUnderShipHeightMap(level, x, y, z, size);
 	}
 
-	public static boolean isUnderShipHeightMap(ClientLevel level, double x, double y, double z) {
+	public static boolean isUnderShipHeightMap(ClientLevel level, double x, double y, double z, double size) {
 		var shipObjectWorld = VSGameUtilsKt.getShipObjectWorld(level);
 		for (var nearbyShip : shipObjectWorld.getLoadedShips().getIntersecting(
 			new AABBd(x - 1, y - 1, z - 1, x + 1, Math.max(y + 16, level.getMaxBuildHeight()), z + 1))) {
 			var posInShip = nearbyShip.getWorldToShip().transformPosition(new Vector3d(x, y, z));
-			if (level.getHeight(Heightmap.Types.MOTION_BLOCKING, floor(posInShip.x), floor(posInShip.z)) + 1 >= posInShip.y) {
+			if (level.getHeight(Heightmap.Types.MOTION_BLOCKING, floor(posInShip.x), floor(posInShip.z)) >= posInShip.y - size) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public static boolean isUnderShipHeightMap(ClientLevel level, Vec3 pos) {
-		return isUnderShipHeightMap(level, pos.x, pos.y, pos.z);
+	public static boolean isUnderShipHeightMap(ClientLevel level, Vec3 pos, int size) {
+		return isUnderShipHeightMap(level, pos.x, pos.y, pos.z, size);
 	}
 
 	public static boolean isUnderShipHeightMap(ClientLevel level, Vec3 pos, Matrix4dc worldToShip) {

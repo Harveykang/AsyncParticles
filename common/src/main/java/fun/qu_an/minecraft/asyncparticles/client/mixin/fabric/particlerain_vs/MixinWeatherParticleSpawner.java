@@ -19,6 +19,6 @@ public class MixinWeatherParticleSpawner {
 										   double xSpeed,
 										   double ySpeed,
 										   double zSpeed) {
-		return VSCompat.canCreateWeatherParticle(instance, x, y, z);
+		return VSCompat.canCreateWeatherParticle(instance, x, y, z, 2.0);
 	}
 }
