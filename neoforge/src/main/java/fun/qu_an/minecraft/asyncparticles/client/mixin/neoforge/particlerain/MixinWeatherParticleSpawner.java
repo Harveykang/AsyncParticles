@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(value = WeatherParticleSpawner.class, remap = false)
+@Mixin(value = WeatherParticleSpawner.class)
 public class MixinWeatherParticleSpawner {
 	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", remap = false, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;particleCount:I"))
 	private static int modifyParticleCount(int original) {

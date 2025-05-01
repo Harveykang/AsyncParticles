@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin_extension;
 
 import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
-import com.bawnorton.mixinsquared.reflection.TargetClassContextExtension;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.asm.logging.ILogger;
