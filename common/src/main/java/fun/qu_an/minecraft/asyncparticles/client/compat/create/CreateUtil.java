@@ -24,13 +24,13 @@ public class CreateUtil {
 		return false;
 	}
 
-	public static boolean isUnderContraption(ClientLevel level, double x, double y, double z) {
-		AABB bounds = new AABB(x - 0.5, y - 2, z - 0.5, x + 0.5, y - 1, z + 0.5);
+	public static boolean isUnderContraption(ClientLevel level, double x, double y, double z, double size) {
+		AABB bounds = new AABB(x - size, y - size, z - size, x + size, y + size, z + size);
 		return isCollideWithContraption(level, new Vec3(0, Math.max(16, level.getMaxBuildHeight() - y), 0), bounds);
 	}
 
-	public static boolean isUnderContraption(ClientLevel level, Vec3 pos) {
-		AABB bounds = new AABB(pos.x - 0.5, pos.y - 2, pos.z - 0.5, pos.x + 0.5, pos.y - 1, pos.z + 0.5);
+	public static boolean isUnderContraption(ClientLevel level, Vec3 pos, double size) {
+		AABB bounds = new AABB(pos.x - size, pos.y - size, pos.z - size, pos.x + size, pos.y - size, pos.z + size);
 		return isCollideWithContraption(level, new Vec3(0, Math.max(16, level.getMaxBuildHeight() - pos.y), 0), bounds);
 	}
 
