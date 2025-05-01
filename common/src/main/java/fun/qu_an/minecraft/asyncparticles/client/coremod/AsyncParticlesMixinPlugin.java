@@ -43,8 +43,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					case "einstein.subtle_effects.mixin.client.particle.FabricParticleEngineMixin",
 						 "einstein.subtle_effects.mixin.client.particle.ForgeParticleEngineMixin" ->
 						"shouldRenderParticle".equals(mixinMethodName);
-					case "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin" ->
-						"tick".equals(mixinMethodName);
+					case "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin" -> "tick".equals(mixinMethodName);
 					case "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin" ->
 						"flerovium$getLightColorCached".equals(mixinMethodName);
 					default -> false;
@@ -110,11 +109,16 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		return switch (split[0]) {
 			case "fabric" -> {
 				if (split.length == 2) {
-					yield !ModListHelper.IS_FORGE;
+					if (ModListHelper.IS_FORGE) {
+						yield false;
+					}
+					yield switch (split[1]) {
+						case "MixinLevelRenderer" -> !ModListHelper.FABRIC_IRIS_LOADED;
+						default -> true;
+					};
 				}
 				yield switch (split[1]) {
-					case "particlerain_vs" ->
-						ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.VS_LOADED;
+					case "particlerain_vs" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.VS_LOADED;
 					case "particlerain_create" ->
 						ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.CREATE_LOADED;
 					case "particlerain" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED;
@@ -125,6 +129,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					case "effectual" -> ModListHelper.FABRIC_EFFECTUAL_LOADED;
 					case "particular" -> ModListHelper.FABRIC_PARTICULAR_LOADED;
 					case "vulkanmod" -> ModListHelper.FABRIC_VULKAN_MOD_LOADED;
+					case "iris" -> ModListHelper.FABRIC_IRIS_LOADED;
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}

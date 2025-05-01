@@ -23,7 +23,7 @@ public class MixinParticleEngine {
 										 VertexConsumer vertexConsumer,
 										 Camera camera,
 										 float v,
-										 @Local(ordinal = 0) boolean shouldSync) {
+										 @Local(name = "shouldSync") boolean shouldSync) {
 		return !shouldSync || SubtleEffectsCompat.shouldRenderParticle(instance, camera, level);
 	}
 }

@@ -4,11 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.TranslatableEnum;
 import me.shedaniel.clothconfig2.api.*;
-import me.shedaniel.clothconfig2.gui.entries.SubCategoryListEntry;
-import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -21,11 +20,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import static java.util.Objects.requireNonNullElseGet;
+
 public class AsyncParticlesConfig {
 	public static final Path CONFIG_FILE = Path.of("config", "asyncparticles.json");
 	static final Gson GSON = new GsonBuilder()
 		.setVersion(1.0)
-		.setLenient()
 		.setPrettyPrinting()
 		.disableHtmlEscaping()
 		.create();
@@ -51,15 +51,20 @@ public class AsyncParticlesConfig {
 		ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
 		// Tick Category
-		ConfigCategory tickCategory = builder
-			.getOrCreateCategory(Component.translatable("config.asyncparticles.category.tick"));
-		tickCategory
+		ConfigCategory particleCategory = builder
+			.getOrCreateCategory(Component.translatable("config.asyncparticles.category.particle"));
+		particleCategory
 			.addEntry(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.tick.particleLimit"),
 					tick$particleLimit)
 				.setDefaultValue(defaultConfig.tick.particleLimit)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.particleLimit.tooltip"))
-				.setSaveConsumer(newValue -> tick$particleLimit = newValue)
+				.setSaveConsumer(newValue -> {
+					tick$particleLimit = newValue;
+					AsyncTicker.reloadLater();
+				})
+				.setMin(1024)
+				.setMax(262144)
 				.build())
 			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.particleLightCache"),
@@ -67,7 +72,11 @@ public class AsyncParticlesConfig {
 				.setDefaultValue(defaultConfig.tick.particleLightCache)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.particleLightCache.tooltip"))
 				.setSaveConsumer(newValue -> tick$particleLightCache = newValue)
-				.build())
+				.build());
+
+		ConfigCategory tickCategory = builder
+			.getOrCreateCategory(Component.translatable("config.asyncparticles.category.tick"));
+		tickCategory
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.tick.asyncAnimationTickBehavior"),
 					AsyncTickBehavior.class, tick$asyncAnimationTickBehavior)
@@ -90,6 +99,8 @@ public class AsyncParticlesConfig {
 				.setDefaultValue(defaultConfig.tick.failPerSecLimit)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.failPerSecLimit.tooltip"))
 				.setSaveConsumer(newValue -> tick$failPerSecLimit = newValue)
+				.setMin(0)
+				.setMax(256)
 				.build())
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.tick.failBehavior"),
@@ -128,21 +139,28 @@ public class AsyncParticlesConfig {
 				.setDefaultValue(defaultConfig.rendering.failPerSecLimit)
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.failPerSecLimit.tooltip"))
 				.setSaveConsumer(newValue -> rendering$failPerSecLimit = newValue)
+				.setMin(0)
+				.setMax(256)
 				.build())
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.failBehavior"),
 					FailBehavior.class, rendering$failBehavior)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
 				.setDefaultValue(defaultConfig.rendering.failBehavior)
-				.setTooltip(Component.translatable("config.asyncparticles.rendering.failBehavior.tooltip"))
+				.setTooltip(Component.empty()
+					.append(Component.translatable("config.asyncparticles.rendering.failBehavior.tooltip"))
+					.append("\n")
+					.append(Component.translatable("config.asyncparticles.not-implemented")))
 				.setSaveConsumer(newValue -> rendering$failBehavior = newValue)
+				.setRequirement(() -> false)
 				.build());
 
 		// Mod Compat Category
 		ConfigCategory modCompatCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mod-compat"));
 		modCompatCategory
 			.addEntry(entryBuilder
-				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
+//				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
+				.startSubCategory(Component.translatable("itemGroup.valkyrienSkies"),
 					List.of(entryBuilder
 						// .startEnumSelector(Component.translatable("config.asyncparticles.valkyrienskies.rainEffect"),
 						// 	RainEffect.class, valkyrienSkies$rainEffect)
@@ -164,7 +182,8 @@ public class AsyncParticlesConfig {
 					))
 				.build())
 			.addEntry(entryBuilder
-				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
+//				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
+				.startSubCategory(Component.translatable("itemGroup.create.base"),
 					List.of(entryBuilder
 						.startEnumSelector(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect"),
 							RainEffect.class, create$rainEffect)
@@ -253,8 +272,8 @@ public class AsyncParticlesConfig {
 		private static class Tick {
 			int particleLimit = 32768;
 			boolean particleLightCache = true;
-			AsyncTickBehavior asyncAnimationTickBehavior = AsyncTickBehavior.CANCELLABLE;
-			AsyncTickBehavior asyncParticleTickBehavior = AsyncTickBehavior.CANCELLABLE;
+			AsyncTickBehavior asyncAnimationTickBehavior = AsyncTickBehavior.INTERRUPTIBLE;
+			AsyncTickBehavior asyncParticleTickBehavior = AsyncTickBehavior.INTERRUPTIBLE;
 			int failPerSecLimit = 5;
 			FailBehavior failBehavior = FailBehavior.RAISE_EXCEPTION;
 			boolean suppressCME = false;
@@ -262,10 +281,10 @@ public class AsyncParticlesConfig {
 			private void flat() {
 				tick$particleLimit = particleLimit;
 				tick$particleLightCache = particleLightCache;
-				tick$asyncAnimationTickBehavior = asyncAnimationTickBehavior;
-				tick$asyncParticleTickBehavior = asyncParticleTickBehavior;
+				tick$asyncAnimationTickBehavior = requireNonNullElseGet(asyncAnimationTickBehavior, () -> new Tick().asyncAnimationTickBehavior);
+				tick$asyncParticleTickBehavior = requireNonNullElseGet(asyncParticleTickBehavior, () -> new Tick().asyncParticleTickBehavior);
 				tick$failPerSecLimit = failPerSecLimit;
-				tick$failBehavior = failBehavior;
+				tick$failBehavior = requireNonNullElseGet(failBehavior, () -> new Tick().failBehavior);
 				tick$suppressCME = suppressCME;
 			}
 
@@ -288,7 +307,7 @@ public class AsyncParticlesConfig {
 			private void flat() {
 				rendering$asyncParticleRendering = asyncParticleRendering;
 				rendering$failPerSecLimit = failPerSecLimit;
-				rendering$failBehavior = failBehavior;
+				rendering$failBehavior = requireNonNullElseGet(failBehavior, () -> new Rendering().failBehavior);
 			}
 
 			private void fold() {
@@ -303,7 +322,7 @@ public class AsyncParticlesConfig {
 			boolean fixParticleLights = true;
 
 			private void flat() {
-				valkyrienSkies$rainEffect = rainEffect;
+				valkyrienSkies$rainEffect = requireNonNullElseGet(rainEffect, () -> new ValkyrienSkies().rainEffect);
 				valkyrienSkies$fixParticleLights = fixParticleLights;
 			}
 
@@ -317,7 +336,7 @@ public class AsyncParticlesConfig {
 			RainEffect rainEffect = RainEffect.ALWAYS;
 
 			private void flat() {
-				create$rainEffect = rainEffect;
+				create$rainEffect = requireNonNullElseGet(rainEffect, () -> new Create().rainEffect);
 			}
 
 			private void fold() {

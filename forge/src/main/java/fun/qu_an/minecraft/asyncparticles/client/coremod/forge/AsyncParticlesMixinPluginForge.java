@@ -31,7 +31,10 @@ public class AsyncParticlesMixinPluginForge implements IMixinConfigPlugin {
 		String mixinPackageName = mixinClassName.substring(PACKAGE_LENGTH);
 		String[] split = mixinPackageName.split("\\.");
 		if (split.length == 1) {
-			return true;
+			return switch (split[0]){
+				case "MixinLevelRenderer" -> !ModListHelper.FORGE_IRIS_LIKE_LOADED;
+				default -> true;
+			};
 		}
 		return switch (split[0]) {
 			case "particlerain_vs" -> ModListHelper.FORGE_PARTICLERAIN_LOADED && ModListHelper.VS_LOADED;
@@ -63,6 +66,7 @@ public class AsyncParticlesMixinPluginForge implements IMixinConfigPlugin {
 			case "weather2_vs" -> ModListHelper.FORGE_WEATHER2_LOADED && ModListHelper.VS_LOADED;
 			case "weather2_create" -> ModListHelper.FORGE_WEATHER2_LOADED && ModListHelper.CREATE_LOADED;
 			case "particular" -> ModListHelper.FORGE_PARTICULAR_LOADED;
+			case "iris_like" -> ModListHelper.FORGE_IRIS_LIKE_LOADED;
 			default -> throw new IllegalArgumentException("Unknown forge mixin: " + mixinClassName);
 		};
 	}

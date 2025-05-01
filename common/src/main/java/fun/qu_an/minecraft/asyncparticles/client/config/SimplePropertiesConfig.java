@@ -81,4 +81,9 @@ public class SimplePropertiesConfig {
 	public static int getTickFailurePerSecondThreshold() {
 		return AsyncParticlesConfig.tick$failPerSecLimit;
 	}
+
+	@Deprecated(forRemoval = true)
+	public static boolean isRenderAsync() {
+		return AsyncParticlesConfig.rendering$asyncParticleRendering;
+	}
 }

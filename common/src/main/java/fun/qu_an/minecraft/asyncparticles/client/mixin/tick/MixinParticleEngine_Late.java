@@ -40,8 +40,8 @@ public abstract class MixinParticleEngine_Late {
 	@Inject(method = "<init>", at = @At(value = "RETURN"))
 	public void initTail(CallbackInfo ci) {
 		trackedParticleCounts = new TrackedParticleCountsMap();
-		particlesToAdd = new BusyWaitEvictingQueue<>(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
-		trackingEmitters = new BusyWaitEvictingQueue<>(256, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+		particlesToAdd = BusyWaitEvictingQueue.newInstance(1024, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
+		trackingEmitters = BusyWaitEvictingQueue.newInstance(256, SimplePropertiesConfig.getLimit(), AsyncTicker::onEvicted);
 		random = new SingleThreadedRandomSource(ThreadLocalRandom.current().nextInt());
 	}
 }

@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.CustomTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
@@ -59,6 +60,7 @@ public abstract class MixinParticleEngine_Render {
 		profiler.pop();
 
 		// We don't use entrySet() to be compatible with iris.
+		boolean renderAsync = SimplePropertiesConfig.isRenderAsync();
 		for (ParticleRenderType particleRenderType : particles.keySet()) {
 			// FORGE doesn't skip NO_RENDER
 			if (particleRenderType == ParticleRenderType.NO_RENDER) {
@@ -70,16 +72,29 @@ public abstract class MixinParticleEngine_Render {
 			}
 			BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
 			profiler.push("render_sync");
+			RenderSystem.setShader(GameRenderer::getParticleShader);
 			Collection<? extends Particle> syncParticles;
 			Tesselator tesselator;
-			boolean shouldSync = bufferBuilder == FakeBufferBuilder.INSTANCE;
-			if (shouldSync) {
-				syncParticles = AsyncRenderer.isMixedParticleRenderingSetting() ? Collections.emptyList() : queue;
+			// must set shader before begin
+			boolean shouldSync;
+			if (!renderAsync) {
+				shouldSync = true;
+				syncParticles = queue;
 				tesselator = Tesselator.getInstance();
 				bufferBuilder = tesselator.getBuilder();
+				particleRenderType.begin(bufferBuilder, textureManager);
+			} else if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
+				shouldSync = true;
+				syncParticles = AsyncRenderer.isMixedParticleRenderingSetting()
+					? Collections.emptyList() : queue;
+				tesselator = Tesselator.getInstance();
+				bufferBuilder = tesselator.getBuilder();
+				particleRenderType.begin(FakeBufferBuilder.INSTANCE, this.textureManager);
 			} else {
+				shouldSync = false;
 				syncParticles = AsyncRenderer.getSync(particleRenderType);
 				tesselator = null;
+				particleRenderType.begin(FakeBufferBuilder.INSTANCE, this.textureManager);
 			}
 			// must set shader before begin
 			RenderSystem.setShader(GameRenderer::getParticleShader);

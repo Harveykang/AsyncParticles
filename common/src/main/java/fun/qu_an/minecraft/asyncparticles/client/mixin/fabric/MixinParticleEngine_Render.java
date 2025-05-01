@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.util.CustomTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
@@ -28,7 +29,6 @@ import java.util.*;
 @Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class MixinParticleEngine_Render {
 	@Shadow
-	@Final
 	public Map<ParticleRenderType, Queue<Particle>> particles;
 
 	@Shadow
@@ -56,6 +56,7 @@ public abstract class MixinParticleEngine_Render {
 		RenderSystem.applyModelViewMatrix();
 		profiler.pop();
 
+		boolean renderAsync = SimplePropertiesConfig.isRenderAsync();
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			// FABRIC skips NO_RENDER
 //				if (particleRenderType == ParticleRenderType.NO_RENDER) {
@@ -67,20 +68,31 @@ public abstract class MixinParticleEngine_Render {
 			}
 			BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
 			profiler.push("render_sync");
+			RenderSystem.setShader(GameRenderer::getParticleShader);
 			Collection<? extends Particle> syncParticles;
 			Tesselator tesselator;
-			boolean shouldSync = bufferBuilder == FakeBufferBuilder.INSTANCE;
-			if (shouldSync) {
-				syncParticles = AsyncRenderer.isMixedParticleRenderingSetting() ? Collections.emptyList() : queue;
+			// must set shader before begin
+			boolean shouldSync;
+			if (!renderAsync) {
+				shouldSync = true;
+				syncParticles = queue;
 				tesselator = Tesselator.getInstance();
 				bufferBuilder = tesselator.getBuilder();
+				particleRenderType.begin(bufferBuilder, textureManager);
 			} else {
-				syncParticles = AsyncRenderer.getSync(particleRenderType);
-				tesselator = null;
+				if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
+					shouldSync = true;
+					syncParticles = AsyncRenderer.isMixedParticleRenderingSetting()
+						? Collections.emptyList() : queue;
+					tesselator = Tesselator.getInstance();
+					bufferBuilder = tesselator.getBuilder();
+				} else {
+					shouldSync = false;
+					syncParticles = AsyncRenderer.getSync(particleRenderType);
+					tesselator = null;
+				}
+				particleRenderType.begin(FakeBufferBuilder.INSTANCE, this.textureManager);
 			}
-			// must set shader before begin
-			RenderSystem.setShader(GameRenderer::getParticleShader);
-			particleRenderType.begin(FakeBufferBuilder.INSTANCE, this.textureManager);
 			if (!syncParticles.isEmpty()) {
 				float f2 = f + 1f;
 				for (Particle particle : syncParticles) {

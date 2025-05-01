@@ -22,7 +22,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 
 	public IterationSafeEvictingQueue(int initialCapacity, int maxCapacity, Consumer<E> onEvict) {
 		if (initialCapacity <= 0 || maxCapacity <= 0 || initialCapacity > maxCapacity) {
-			throw new IllegalArgumentException("Invalid capacities");
+			throw new IllegalArgumentException("Invalid capacities, initialCapacity: " + initialCapacity + ", maxCapacity: " + maxCapacity);
 		}
 		this.queue = new Object[roundUpToPowerOfTwo(initialCapacity)];
 		this.maxCapacity = maxCapacity;
@@ -30,6 +30,14 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		this.onEvict = onEvict;
 		this.head = 0;
 		this.size = 0;
+	}
+
+	public static <E> IterationSafeEvictingQueue<E> newInstance(int initialCapacity, int maxCapacity) {
+		return new IterationSafeEvictingQueue<>(Math.min(initialCapacity, maxCapacity), maxCapacity);
+	}
+
+	public static <E> IterationSafeEvictingQueue<E> newInstance(int initialCapacity, int maxCapacity, Consumer<E> onEvict) {
+		return new IterationSafeEvictingQueue<>(Math.min(initialCapacity, maxCapacity), maxCapacity, onEvict);
 	}
 
 	@SuppressWarnings("unchecked")

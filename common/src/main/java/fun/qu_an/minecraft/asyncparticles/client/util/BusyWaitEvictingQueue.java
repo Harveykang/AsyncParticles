@@ -9,8 +9,20 @@ import java.util.function.Predicate;
 public class BusyWaitEvictingQueue<E> extends IterationSafeEvictingQueue<E> {
 	private final ReentrantSpinLock lock = new ReentrantSpinLock();
 
+	public BusyWaitEvictingQueue(int initialCapacity, int maxCapacity) {
+		super(initialCapacity, maxCapacity);
+	}
+
 	public BusyWaitEvictingQueue(int initialCapacity, int maxCapacity, Consumer<E> onEvict) {
 		super(initialCapacity, maxCapacity, onEvict);
+	}
+
+	public static <E> BusyWaitEvictingQueue<E> newInstance(int initialCapacity, int maxCapacity) {
+		return new BusyWaitEvictingQueue<>(Math.min(initialCapacity, maxCapacity), maxCapacity);
+	}
+
+	public static <E> BusyWaitEvictingQueue<E> newInstance(int initialCapacity, int maxCapacity, Consumer<E> onEvict) {
+		return new BusyWaitEvictingQueue<>(Math.min(initialCapacity, maxCapacity), maxCapacity, onEvict);
 	}
 
 	@Override

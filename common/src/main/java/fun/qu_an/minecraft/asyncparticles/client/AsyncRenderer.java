@@ -128,6 +128,11 @@ public class AsyncRenderer {
 	public static void start(float f, Camera camera) {
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
+		if (!SimplePropertiesConfig.isRenderAsync()) {
+			captureParticleRenderingSetting();
+			tryDebug();
+			return;
+		}
 		profiler.popPush("async_particles");
 		tryDebug();
 		clearSync();
@@ -211,6 +216,9 @@ public class AsyncRenderer {
 	}
 
 	public static void join(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
+//		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
+//			return;
+//		}
 		if (isMixedParticleRenderingSetting()) {
 			return;
 		}
@@ -241,6 +249,9 @@ public class AsyncRenderer {
 	}
 
 	public static void irisOpaque(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
+//		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
+//			return;
+//		}
 		if (!isMixedParticleRenderingSetting()) {
 			return;
 		}
@@ -260,6 +271,9 @@ public class AsyncRenderer {
 	}
 
 	public static void irisTranslucent(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
+//		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
+//			return;
+//		}
 		if (!isMixedParticleRenderingSetting()) {
 			return;
 		}

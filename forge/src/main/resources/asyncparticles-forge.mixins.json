@@ -18,6 +18,7 @@
     "flerovium.MixinMixinParticleEngine",
     "flerovium.MixinSingleQuadParticleMixin",
     "gateways.MixinGatewayParticle",
+    "iris_like.MixinLevelRenderer",
     "particlerain.MixinGroundFogParticle",
     "particlerain.MixinRainParticle",
     "particlerain.MixinRippleParticle",
