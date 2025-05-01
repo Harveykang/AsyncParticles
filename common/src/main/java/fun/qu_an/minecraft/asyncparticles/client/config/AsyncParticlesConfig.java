@@ -8,6 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.TranslatableEnum;
 import me.shedaniel.clothconfig2.api.*;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -55,10 +56,10 @@ public class AsyncParticlesConfig {
 			.getOrCreateCategory(Component.translatable("config.asyncparticles.category.particle"));
 		particleCategory
 			.addEntry(entryBuilder
-				.startIntField(Component.translatable("config.asyncparticles.tick.particleLimit"),
+				.startIntField(Component.translatable("config.asyncparticles.particle.particleLimit"),
 					tick$particleLimit)
 				.setDefaultValue(defaultConfig.tick.particleLimit)
-				.setTooltip(Component.translatable("config.asyncparticles.tick.particleLimit.tooltip"))
+				.setTooltip(Component.translatable("config.asyncparticles.particle.particleLimit.tooltip"))
 				.setSaveConsumer(newValue -> {
 					tick$particleLimit = newValue;
 					AsyncTicker.reloadLater();
@@ -67,10 +68,10 @@ public class AsyncParticlesConfig {
 				.setMax(262144)
 				.build())
 			.addEntry(entryBuilder
-				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.particleLightCache"),
+				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.particleLightCache"),
 					tick$particleLightCache)
 				.setDefaultValue(defaultConfig.tick.particleLightCache)
-				.setTooltip(Component.translatable("config.asyncparticles.tick.particleLightCache.tooltip"))
+				.setTooltip(Component.translatable("config.asyncparticles.particle.particleLightCache.tooltip"))
 				.setSaveConsumer(newValue -> tick$particleLightCache = newValue)
 				.build());
 
@@ -249,6 +250,13 @@ public class AsyncParticlesConfig {
 		}
 	}
 
+	public static Screen fallBackScreen(Screen parent) {
+		return new DisconnectedScreen(parent,
+			Component.translatable("config.asyncparticles.error.menu-unavailable"),
+			Component.translatable("config.asyncparticles.error.cloth-config-required"),
+			Component.translatable("gui.back"));
+	}
+
 	private static class ConfigObj {
 		Tick tick = new Tick();
 		Rendering rendering = new Rendering();
@@ -275,7 +283,7 @@ public class AsyncParticlesConfig {
 			AsyncTickBehavior asyncAnimationTickBehavior = AsyncTickBehavior.INTERRUPTIBLE;
 			AsyncTickBehavior asyncParticleTickBehavior = AsyncTickBehavior.INTERRUPTIBLE;
 			int failPerSecLimit = 5;
-			FailBehavior failBehavior = FailBehavior.RAISE_EXCEPTION;
+			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
 			boolean suppressCME = false;
 
 			private void flat() {
@@ -302,7 +310,7 @@ public class AsyncParticlesConfig {
 		private static class Rendering {
 			boolean asyncParticleRendering = true;
 			int failPerSecLimit = 20;
-			FailBehavior failBehavior = FailBehavior.RAISE_EXCEPTION;
+			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
 
 			private void flat() {
 				rendering$asyncParticleRendering = asyncParticleRendering;

@@ -23,7 +23,8 @@ public class SimplePropertiesConfig {
 
 	@Deprecated(forRemoval = true)
 	public static boolean markSyncIfTickFailed() {
-		return AsyncParticlesConfig.tick$failBehavior == FailBehavior.MARK_AS_SYNC;
+//		TODO: return AsyncParticlesConfig.tick$failBehavior == FailBehavior.MARK_AS_SYNC;
+		return false;
 	}
 
 	@Deprecated(forRemoval = true)

@@ -4,7 +4,7 @@ import fun.qu_an.minecraft.asyncparticles.client.util.TranslatableEnum;
 import net.minecraft.network.chat.Component;
 
 public enum FailBehavior implements TranslatableEnum {
-	RAISE_EXCEPTION(Component.translatable("config.asyncparticles.enum.FailBehavior.RAISE_EXCEPTION")),
+	RAISE_CRASH(Component.translatable("config.asyncparticles.enum.FailBehavior.RAISE_CRASH")),
 	MARK_AS_SYNC(Component.translatable("config.asyncparticles.enum.FailBehavior.MARK_AS_SYNC"));
 	private final Component translatable;
 

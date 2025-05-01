@@ -21,10 +21,10 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 	}
 
 	public IterationSafeEvictingQueue(int initialCapacity, int maxCapacity, Consumer<E> onEvict) {
-		if (initialCapacity <= 0 || maxCapacity <= 0 || initialCapacity > maxCapacity) {
+		if (initialCapacity < 0 || maxCapacity <= 0 || initialCapacity > maxCapacity) {
 			throw new IllegalArgumentException("Invalid capacities, initialCapacity: " + initialCapacity + ", maxCapacity: " + maxCapacity);
 		}
-		this.queue = new Object[roundUpToPowerOfTwo(initialCapacity)];
+		this.queue = new Object[roundUpToPowerOfTwo(Math.max(8, initialCapacity))];
 		this.maxCapacity = maxCapacity;
 		this.maxCapacityPowerOfTwo = roundUpToPowerOfTwo(maxCapacity);
 		this.onEvict = onEvict;

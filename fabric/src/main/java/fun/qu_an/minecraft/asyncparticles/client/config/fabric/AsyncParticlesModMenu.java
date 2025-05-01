@@ -6,6 +6,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.network.chat.Component;
+import org.valkyrienskies.core.impl.shadow.B;
 
 public class AsyncParticlesModMenu implements ModMenuApi {
 	@Override
@@ -13,10 +14,7 @@ public class AsyncParticlesModMenu implements ModMenuApi {
 		if (ModListHelper.CLOTH_CONFIG_LOADED){
 			return parent -> AsyncParticlesConfig.screenBuilder(parent).build();
 		} else {
-			return parent -> new DisconnectedScreen(parent,
-				Component.translatable("config.asyncparticles.error.menu-unavailable"),
-				Component.translatable("config.asyncparticles.error.cloth-config-required"),
-				Component.translatable("gui.back"));
+			return AsyncParticlesConfig::fallBackScreen;
 		}
 	}
 }

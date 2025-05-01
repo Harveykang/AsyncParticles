@@ -11,6 +11,7 @@ import org.joml.Vector3d;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(value = {AirFlowParticle.class, AirParticle.class, SteamJetParticle.class}, priority = 1500)
+// Later than mixin.create.MixinParticle_LightCache
 public abstract class MixinParticle_LightCache extends MixinParticle {
 	@Override
 	public void asyncparticles$refresh() {

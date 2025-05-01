@@ -11,6 +11,7 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.SimplePropertiesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.config.forge.Menus;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -46,17 +47,8 @@ public final class AsyncParticlesClientForge {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener((FMLClientSetupEvent event) -> {
 			ModLoadingContext.get().registerExtensionPoint(
 				ConfigScreenHandler.ConfigScreenFactory.class,
-				() -> new ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> {
-					if (ModListHelper.CLOTH_CONFIG_LOADED) {
-						return AsyncParticlesConfig.screenBuilder(parent).build();
-					} else {
-						return new DisconnectedScreen(parent,
-							Component.translatable("config.asyncparticles.error.menu-unavailable"),
-							Component.translatable("config.asyncparticles.error.cloth-config-required"),
-							Component.translatable("gui.back"));
-					}
-				})
-			);
+				() -> new ConfigScreenHandler.ConfigScreenFactory(
+					(mc, parent) -> Menus.newConfigScreen(parent)));
 		});
 	}
 
