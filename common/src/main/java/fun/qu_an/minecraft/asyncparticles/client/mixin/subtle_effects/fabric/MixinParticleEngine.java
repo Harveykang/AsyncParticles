@@ -24,7 +24,7 @@ public class MixinParticleEngine {
 										 Camera camera,
 										 float v,
 										 @SuppressWarnings("UnresolvedLocalCapture")
-										 @Local(name = "shouldSync") boolean shouldSync) {
-		return !shouldSync || SubtleEffectsCompat.shouldRenderParticle(instance, camera, level);
+										 @Local(name = "enableCull") boolean enableCull) {
+		return !enableCull || SubtleEffectsCompat.shouldRenderParticle(instance, camera, level);
 	}
 }

@@ -35,6 +35,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+import team.lodestar.lodestone.events.Stage;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -86,6 +87,7 @@ public class AsyncRenderer {
 	//	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = new ConcurrentHashMap<>();
 	// some mod use zero content record class as particle render type, so we need to use IdentityHashMap to get rid of duplicated hashcode...
 	private static final Map<ParticleRenderType, Set<Particle>> SYNC_PARTICLES = Collections.synchronizedMap(new IdentityHashMap<>());
+//	private static Stage stage = Stage.PREPARING;
 	public static final ForkJoinPool EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
 
@@ -120,7 +122,7 @@ public class AsyncRenderer {
 	private static int asyncTasksSize;
 	private static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
-		() -> ConfigHelper.getRenderFailurePerSecondThreshold()
+		ConfigHelper::getRenderFailurePerSecondThreshold
 	);
 
 	/* Renderer */
@@ -133,6 +135,7 @@ public class AsyncRenderer {
 			tryDebug();
 			return;
 		}
+//		setStage(Stage.PREPARING);
 		profiler.popPush("async_particles");
 		tryDebug();
 		clearSync();
@@ -162,18 +165,24 @@ public class AsyncRenderer {
 		profiler.pop();
 	}
 
+//	public static void setStage(Stage stage) {
+//		AsyncRenderer.stage = stage;
+//	}
+
 	private static void renderParticles(float f,
 										Camera camera,
 										Queue<Particle> particles,
 										ParticleRenderType particleRenderType,
 										BufferBuilder bufferBuilder) {
 		Frustum frustum = AsyncRenderer.frustum;
+		boolean enableCull = ConfigHelper.isCullParticles();
 		float f2 = f + 1f;
 		for (Particle particle : particles) {
 			if (!particle.isAlive()) {
 				continue;
 			}
-			if (((ParticleAddon) particle).shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
+			if (enableCull && ((ParticleAddon) particle).shouldCull() &&
+				!frustum.isVisible(particle.getBoundingBox())) {
 				continue;
 			}
 			if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
@@ -232,9 +241,6 @@ public class AsyncRenderer {
 			particlesTarget.copyDepthFrom(mc.getMainRenderTarget());
 			RenderStateShard.PARTICLES_TARGET.setupRenderState();
 		}
-		profiler.push("wait_for_async_tasks");
-		waitForAsyncTasks();
-		profiler.pop();
 
 		MultiBufferSource.BufferSource bufferSource = mc.levelRenderer.renderBuffers.bufferSource();
 		ParticleEngine particleEngine = mc.particleEngine;
@@ -259,9 +265,6 @@ public class AsyncRenderer {
 		ProfilerFiller profiler = mc.getProfiler();
 		profiler.popPush("async_particles");
 
-		profiler.push("wait_for_async_tasks");
-		waitForAsyncTasks();
-		profiler.pop();
 		LevelRenderer levelRenderer = mc.levelRenderer;
 		MultiBufferSource.BufferSource bufferSource = levelRenderer.renderBuffers.bufferSource();
 
@@ -305,6 +308,9 @@ public class AsyncRenderer {
 		PoseStack poseStack2 = null;
 		Minecraft mc = Minecraft.getInstance();
 		ParticleEngine particleEngine = mc.particleEngine;
+		Frustum frustum = AsyncRenderer.frustum;
+		boolean enableCull = ConfigHelper.isCullParticles();
+		float f2 = f + 1f;
 		for (Map.Entry<ParticleRenderType, Queue<Particle>> entry : particleEngine.particles.entrySet()) {
 			ParticleRenderType particleRenderType = entry.getKey();
 			if (particleRenderType == ParticleRenderType.NO_RENDER) {
@@ -337,16 +343,17 @@ public class AsyncRenderer {
 				if (!particle.isAlive()) {
 					continue;
 				}
-				if (((ParticleAddon) particle).shouldCull() && !frustum.isVisible(particle.getBoundingBox())) {
+				if (enableCull && ((ParticleAddon) particle).shouldCull() &&
+					!frustum.isVisible(particle.getBoundingBox())) {
 					continue;
 				}
 				if (!began) {
 					particleRenderType.begin(bufferBuilder, particleEngine.textureManager);
 					began = true;
 				}
-				float g = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f + 1f;
+				float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
 				try {
-					particle.render(bufferBuilder, camera, g);
+					particle.render(bufferBuilder, camera, f3);
 				} catch (Throwable t) {
 					throw constructCrashReport(particle, particleRenderType, t);
 				}
@@ -369,6 +376,13 @@ public class AsyncRenderer {
 			asyncTask.join();
 			asyncTask = null;
 		}
+	}
+
+	public static void tryWaitForAsyncTasks() {
+//		if (ConfigHelper.isRenderAsync() && stage != Stage.RENDERABLE) {
+//			throw new IllegalStateException("Can only wait for async tasks around translucent");
+//		}
+		waitForAsyncTasks();
 	}
 
 	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable t) {
@@ -529,4 +543,9 @@ public class AsyncRenderer {
 		FORMATS.clear();
 		clearSync();
 	}
+
+//	public enum Stage {
+//		PREPARING,
+//		RENDERABLE
+//	}
 }

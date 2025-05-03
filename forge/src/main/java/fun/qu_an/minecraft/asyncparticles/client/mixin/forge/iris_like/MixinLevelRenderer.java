@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = LevelRenderer.class, priority = 499)
+@Mixin(value = LevelRenderer.class, priority = 599) // After mixin.render.MixinLevelRenderer
 public abstract class MixinLevelRenderer {
 	@Shadow @Final public RenderBuffers renderBuffers;
 

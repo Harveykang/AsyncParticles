@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 /**
  * @implNote Suppressed if Iris mod loaded.
  */
-@Mixin(value = LevelRenderer.class, priority = 499)
+@Mixin(value = LevelRenderer.class, priority = 599) // After mixin.render.MixinLevelRenderer
 public abstract class MixinLevelRenderer {
 	@WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V"))
 	private void redirectRenderParticles(ParticleEngine instance, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f, Operation<Void> original) {

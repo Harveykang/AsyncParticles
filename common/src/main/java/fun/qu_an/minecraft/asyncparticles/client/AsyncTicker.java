@@ -61,7 +61,7 @@ public class AsyncTicker {
 	public static final String THREAD_PREFIX = "AsyncParticleTicker";
 	private static final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
-		() -> ConfigHelper.getTickFailurePerSecondThreshold()
+		ConfigHelper::getTickFailurePerSecondThreshold
 	);
 	private static final LongRef timeUsageNano = new LongRef(0L);
 

@@ -47,6 +47,10 @@ public abstract class MixinParticleEngine_Render {
 	@Overwrite(remap = false) // Forge override
 	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f, Frustum ignored) {
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
+		profiler.push("wait_for_async_tasks");
+		AsyncRenderer.tryWaitForAsyncTasks();
+		profiler.pop();
+
 		profiler.push("prepare");
 		Frustum frustum = AsyncRenderer.frustum;
 		lightTexture.turnOnLightLayer();
@@ -61,6 +65,7 @@ public abstract class MixinParticleEngine_Render {
 
 		// We don't use entrySet() to be compatible with iris.
 		boolean renderAsync = ConfigHelper.isRenderAsync();
+		boolean cullParticles = ConfigHelper.isCullParticles();
 		for (ParticleRenderType particleRenderType : particles.keySet()) {
 			// FORGE doesn't skip NO_RENDER
 			if (particleRenderType == ParticleRenderType.NO_RENDER) {
@@ -75,37 +80,35 @@ public abstract class MixinParticleEngine_Render {
 			RenderSystem.setShader(GameRenderer::getParticleShader);
 			Collection<? extends Particle> syncParticles;
 			Tesselator tesselator;
-			// must set shader before begin
-			boolean shouldSync;
+			boolean enableCull;
+			BufferBuilder toBegin;
 			if (!renderAsync) {
-				shouldSync = true;
+				enableCull = cullParticles;
 				syncParticles = queue;
 				tesselator = Tesselator.getInstance();
-				bufferBuilder = tesselator.getBuilder();
-				particleRenderType.begin(bufferBuilder, textureManager);
+				toBegin = bufferBuilder = tesselator.getBuilder();
 			} else if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
-				shouldSync = true;
+				enableCull = cullParticles;
 				syncParticles = AsyncRenderer.isMixedParticleRenderingSetting()
 					? Collections.emptyList() : queue;
 				tesselator = Tesselator.getInstance();
-				bufferBuilder = tesselator.getBuilder();
-				particleRenderType.begin(FakeBufferBuilder.INSTANCE, this.textureManager);
+				toBegin = bufferBuilder = tesselator.getBuilder();
 			} else {
-				shouldSync = false;
+				enableCull = false;
 				syncParticles = AsyncRenderer.getSync(particleRenderType);
 				tesselator = null;
-				particleRenderType.begin(FakeBufferBuilder.INSTANCE, this.textureManager);
+				toBegin = FakeBufferBuilder.INSTANCE;
 			}
 			// must set shader before begin
 			RenderSystem.setShader(GameRenderer::getParticleShader);
-			particleRenderType.begin(FakeBufferBuilder.INSTANCE, this.textureManager);
+			particleRenderType.begin(toBegin, textureManager);
 			if (!syncParticles.isEmpty()) {
 				float f2 = f + 1f;
 				for (Particle particle : syncParticles) {
 					if (!particle.isAlive()) {
 						continue;
 					}
-					if (shouldSync && particle.shouldCull() &&
+					if (enableCull && particle.shouldCull() &&
 						// Flerovium will Redirect isVisible invocation.
 						!frustum.isVisible(particle.getBoundingBox())) {
 						continue;
@@ -118,13 +121,7 @@ public abstract class MixinParticleEngine_Render {
 					}
 				}
 			}
-			profiler.pop();
-			if (!bufferBuilder.building()) {
-				particleRenderType.end(FakeTesselator.INSTANCE);
-				// call end to be compatible with some mod
-				continue;
-			}
-			profiler.push("upload_particles");
+			profiler.popPush("upload_particles");
 			// use fake, mod compatibility
 			particleRenderType.end(tesselator != null
 				? tesselator : CustomTesselator.of(bufferBuilder, b -> BufferUploader.drawWithShader(b.end())));

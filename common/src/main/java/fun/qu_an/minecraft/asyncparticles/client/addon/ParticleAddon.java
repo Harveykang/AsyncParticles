@@ -12,7 +12,5 @@ public interface ParticleAddon {
 	/**
 	 * Forge shouldCull()
 	 */
-	default boolean shouldCull() {
-		return true;
-	}
+	boolean shouldCull();
 }

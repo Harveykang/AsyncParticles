@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.Pseudo;
 }, targets = {
 	"dev.shadowsoffire.gateways.client.GatewayParticle",
 	"com.chailotl.particular.particles.FireflyParticle",
+	"com.lowdragmc.photon.client.gameobject.FXObject" // Photon mod
 })
 public abstract class MixinParticle_LightCacheNoRefresh implements LightCachedParticleAddon {
 	@Override

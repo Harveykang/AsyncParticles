@@ -6,7 +6,7 @@ import java.util.Set;
 
 public class ConfigHelper {
 	public static void load() throws Exception {
-		AsyncParticlesConfig.reload();
+		AsyncParticlesConfig.load();
 	}
 
 	public static boolean asyncBlockEntityAnimate() {
@@ -23,7 +23,7 @@ public class ConfigHelper {
 	}
 
 	public static boolean particleLightCache() {
-		return AsyncParticlesConfig.tick$particleLightCache;
+		return AsyncParticlesConfig.particle$particleLightCache;
 	}
 
 	public static boolean suppressCME() {
@@ -42,13 +42,8 @@ public class ConfigHelper {
 		return AsyncParticlesConfig.valkyrienSkies$fixParticleLights;
 	}
 
-	// TODO: implement weather particle config, which will not be spawn into physics structures
-	public static Set<ResourceLocation> getWeatherParticles() {
-		return Set.of();
-	}
-
 	public static int getLimit() {
-		return AsyncParticlesConfig.tick$particleLimit;
+		return AsyncParticlesConfig.particle$particleLimit;
 	}
 
 	public static boolean doVsShipRainEffectsIfMoving() {
@@ -69,5 +64,14 @@ public class ConfigHelper {
 
 	public static boolean isRenderAsync() {
 		return AsyncParticlesConfig.rendering$asyncParticleRendering;
+	}
+
+	public static boolean isCullParticles() {
+		return AsyncParticlesConfig.rendering$cullParticles;
+	}
+
+	// TODO: implement weather particle config, which will not be spawn into physics structures
+	public static Set<ResourceLocation> getWeatherParticles() {
+		return Set.of();
 	}
 }
