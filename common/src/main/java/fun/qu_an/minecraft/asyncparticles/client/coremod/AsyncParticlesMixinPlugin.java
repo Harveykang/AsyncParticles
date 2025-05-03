@@ -40,7 +40,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		MixinTargetsModifierRegistrar.register(new MixinTargetModifier() {
 			@Override
 			public String getMixinClassName() {
-				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "neoforge." : "fabric.") +
+				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge." : "fabric.") +
 					   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_ShouldCull";
 			}
 
@@ -52,7 +52,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		MixinTargetsModifierRegistrar.register(new MixinTargetModifier() {
 			@Override
 			public String getMixinClassName() {
-				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "neoforge." : "fabric.") +
+				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge." : "fabric.") +
 					   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_LightCacheNoRefresh";
 			}
 
@@ -66,7 +66,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		MixinTargetsModifierRegistrar.register(new MixinTargetModifier() {
 			@Override
 			public String getMixinClassName() {
-				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "neoforge." : "fabric.") +
+				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge." : "fabric.") +
 					"fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_ConcurrentUnsafe";
 			}
 
