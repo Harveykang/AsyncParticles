@@ -86,6 +86,8 @@ public class ModListHelper {
 	public static final boolean LODESTONE_LOADED = isModLoaded("lodestone");
 	/* Cloth Config */
 	public static final boolean CLOTH_CONFIG_LOADED = isModLoaded("cloth_config") || isModLoaded("cloth-config");
+	/* Photon Editor */
+	public static final boolean PHOTON_EDITOR_LOADED = isModLoaded("photon");
 
 	@ExpectPlatform
 	private static boolean isForge() {

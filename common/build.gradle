@@ -84,4 +84,6 @@ dependencies {
 
     /* Essential */
     modCompileOnly fileTree(dir: '../libs', include: 'essential-2ad45c42c435a189db2ca6041033cb8f.jar')
+
+    modCompileOnly "maven.modrinth:photon-editor:mc1.20.1-1.1.7-fabric"
 }

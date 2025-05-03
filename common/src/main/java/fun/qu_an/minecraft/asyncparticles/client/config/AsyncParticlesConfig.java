@@ -18,7 +18,6 @@ import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import org.slf4j.Logger;
 
@@ -28,26 +27,28 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNullElse;
 
 public class AsyncParticlesConfig {
-	public static final Path CONFIG_FILE = Path.of("config", "asyncparticles.json");
+	public static final Path CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles.json");
 	static final Gson GSON = new GsonBuilder()
 		.setVersion(1.0)
 		.setPrettyPrinting()
 		.disableHtmlEscaping()
 		.create();
 	static final Logger LOGGER = LogUtils.getLogger();
-	public static int tick$particleLimit;
-	public static boolean tick$particleLightCache;
+	public static int particle$particleLimit;
+	public static boolean particle$particleLightCache;
 	public static AsyncTickBehavior tick$asyncAnimationTickBehavior;
 	public static AsyncTickBehavior tick$asyncParticleTickBehavior;
 	public static int tick$failPerSecLimit;
 	public static FailBehavior tick$failBehavior;
 	public static boolean tick$suppressCME;
+	public static boolean rendering$cullParticles;
 	public static boolean rendering$asyncParticleRendering;
 	public static int rendering$failPerSecLimit;
 	public static FailBehavior rendering$failBehavior;
@@ -55,11 +56,15 @@ public class AsyncParticlesConfig {
 	public static boolean valkyrienSkies$fixParticleLights;
 	public static RainEffect create$rainEffect;
 
-	public static ConfigBuilder screenBuilder(Screen screen) {
-		return ClothConfigMenus.screenBuilder(screen);
+	public static Screen newConfigScreen(Screen parent) {
+		if (ModListHelper.CLOTH_CONFIG_LOADED) {
+			return ClothConfigMenus.screenBuilder(parent).build();
+		} else {
+			return fallBackScreen(parent);
+		}
 	}
 
-	public static Screen fallBackScreen(Screen parent) {
+	private static Screen fallBackScreen(Screen parent) {
 		FallbackScreen fallbackScreen = new FallbackScreen(
 			parent,
 			Component.translatable("gui.asyncparticles.menu-unavailable"),
@@ -76,7 +81,7 @@ public class AsyncParticlesConfig {
 						return;
 					}
 					try {
-						AsyncParticlesConfig.reload();
+						AsyncParticlesConfig.load();
 					} catch (Exception e) {
 						current.message = msg.append("\n").append(
 							Component.translatable("gui.asyncparticles.failed-to-reload", e.toString())
@@ -143,11 +148,15 @@ public class AsyncParticlesConfig {
 		return fallbackScreen;
 	}
 
-	public static void reload() throws IOException, JsonParseException {
+	public static void load() throws IOException, JsonParseException {
 		if (!Files.exists(CONFIG_FILE)) {
 			Files.createDirectories(CONFIG_FILE.getParent());
 			Files.createFile(CONFIG_FILE);
-			reset();
+			if (LegacyConfigTransitions.migrate()) {
+				save();
+			} else {
+				reset();
+			}
 			return;
 		}
 
@@ -170,7 +179,7 @@ public class AsyncParticlesConfig {
 		save(configObj);
 	}
 
-	private static void reset() throws IOException {
+	public static void reset() throws IOException {
 		ConfigObj configObj = new ConfigObj();
 		configObj.flat();
 		save(configObj);
@@ -182,13 +191,15 @@ public class AsyncParticlesConfig {
 		}
 	}
 
-	private static class ConfigObj {
+	static class ConfigObj {
+		Particle particle = new Particle();
 		Tick tick = new Tick();
 		Rendering rendering = new Rendering();
 		ValkyrienSkies valkyrienSkies = new ValkyrienSkies();
 		Create create = new Create();
 
 		private void flat() {
+			particle.flat();
 			tick.flat();
 			rendering.flat();
 			valkyrienSkies.flat();
@@ -196,15 +207,29 @@ public class AsyncParticlesConfig {
 		}
 
 		private void fold() {
+			particle.fold();
 			tick.fold();
 			rendering.fold();
 			valkyrienSkies.fold();
 			create.fold();
 		}
 
-		private static class Tick {
-			int particleLimit = 32768;
+		static class Particle {
+			int particleLimit = 16384;
 			boolean particleLightCache = true;
+
+			private void flat() {
+				particle$particleLimit = Mth.clamp(particleLimit, 1024, 262144);
+				particle$particleLightCache = particleLightCache;
+			}
+
+			private void fold() {
+				particleLimit = particle$particleLimit;
+				particleLightCache = particle$particleLightCache;
+			}
+		}
+
+		static class Tick {
 			AsyncTickBehavior asyncAnimationTickBehavior = AsyncTickBehavior.INTERRUPTIBLE;
 			AsyncTickBehavior asyncParticleTickBehavior = AsyncTickBehavior.INTERRUPTIBLE;
 			int failPerSecLimit = 5;
@@ -212,8 +237,6 @@ public class AsyncParticlesConfig {
 			boolean suppressCME = false;
 
 			private void flat() {
-				tick$particleLimit = Mth.clamp(particleLimit, 1024, 262144);
-				tick$particleLightCache = particleLightCache;
 				tick$asyncAnimationTickBehavior = requireNonNullElse(asyncAnimationTickBehavior, AsyncTickBehavior.INTERRUPTIBLE);
 				tick$asyncParticleTickBehavior = requireNonNullElse(asyncParticleTickBehavior, AsyncTickBehavior.INTERRUPTIBLE);
 				tick$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
@@ -222,8 +245,6 @@ public class AsyncParticlesConfig {
 			}
 
 			private void fold() {
-				particleLimit = tick$particleLimit;
-				particleLightCache = tick$particleLightCache;
 				asyncAnimationTickBehavior = tick$asyncAnimationTickBehavior;
 				asyncParticleTickBehavior = tick$asyncParticleTickBehavior;
 				failPerSecLimit = tick$failPerSecLimit;
@@ -232,25 +253,28 @@ public class AsyncParticlesConfig {
 			}
 		}
 
-		private static class Rendering {
+		static class Rendering {
+			boolean cullParticles = true;
 			boolean asyncParticleRendering = true;
 			int failPerSecLimit = 20;
 			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
 
 			private void flat() {
-				rendering$asyncParticleRendering = asyncParticleRendering;
+				rendering$cullParticles = cullParticles;
+				rendering$asyncParticleRendering = !ModListHelper.PHOTON_EDITOR_LOADED && asyncParticleRendering;
 				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
 			}
 
 			private void fold() {
+				cullParticles = rendering$cullParticles;
 				asyncParticleRendering = rendering$asyncParticleRendering;
 				failPerSecLimit = rendering$failPerSecLimit;
 				failBehavior = rendering$failBehavior;
 			}
 		}
 
-		private static class ValkyrienSkies {
+		static class ValkyrienSkies {
 			RainEffect rainEffect = RainEffect.STATIONARY;
 			boolean fixParticleLights = true;
 
@@ -265,7 +289,7 @@ public class AsyncParticlesConfig {
 			}
 		}
 
-		private static class Create {
+		static class Create {
 			RainEffect rainEffect = RainEffect.ALWAYS;
 
 			private void flat() {
@@ -293,11 +317,11 @@ public class AsyncParticlesConfig {
 			particleCategory
 				.addEntry(entryBuilder
 					.startIntField(Component.translatable("config.asyncparticles.particle.particleLimit"),
-						tick$particleLimit)
-					.setDefaultValue(defaultConfig.tick.particleLimit)
+						particle$particleLimit)
+					.setDefaultValue(defaultConfig.particle.particleLimit)
 					.setTooltip(Component.translatable("config.asyncparticles.particle.particleLimit.tooltip"))
 					.setSaveConsumer(newValue -> {
-						tick$particleLimit = newValue;
+						particle$particleLimit = newValue;
 						AsyncTicker.reloadLater();
 					})
 					.setMin(1024)
@@ -305,10 +329,10 @@ public class AsyncParticlesConfig {
 					.build())
 				.addEntry(entryBuilder
 					.startBooleanToggle(Component.translatable("config.asyncparticles.particle.particleLightCache"),
-						tick$particleLightCache)
-					.setDefaultValue(defaultConfig.tick.particleLightCache)
+						particle$particleLightCache)
+					.setDefaultValue(defaultConfig.particle.particleLightCache)
 					.setTooltip(Component.translatable("config.asyncparticles.particle.particleLightCache.tooltip"))
-					.setSaveConsumer(newValue -> tick$particleLightCache = newValue)
+					.setSaveConsumer(newValue -> particle$particleLightCache = newValue)
 					.build());
 
 			ConfigCategory tickCategory = builder
@@ -348,7 +372,8 @@ public class AsyncParticlesConfig {
 						.append(Component.translatable("config.asyncparticles.tick.failBehavior.tooltip")
 							.withStyle(ChatFormatting.STRIKETHROUGH))
 						.append("\n")
-						.append(Component.translatable("config.asyncparticles.not-implemented")))
+						.append(Component.translatable("config.asyncparticles.not-implemented")
+							.withStyle(ChatFormatting.DARK_RED)))
 					.setSaveConsumer(newValue -> tick$failBehavior = newValue)
 					.setRequirement(() -> false)
 					.build())
@@ -364,11 +389,32 @@ public class AsyncParticlesConfig {
 			ConfigCategory renderingCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.rendering"));
 			renderingCategory
 				.addEntry(entryBuilder
+					.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.cullParticles"),
+						rendering$cullParticles)
+					.setDefaultValue(defaultConfig.rendering.cullParticles)
+					.setTooltip(Component.translatable("config.asyncparticles.rendering.cullParticles.tooltip"))
+					.setSaveConsumer(newValue -> rendering$cullParticles = newValue)
+					.build())
+				.addEntry(entryBuilder
 					.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.asyncParticleRendering"),
 						rendering$asyncParticleRendering)
 					.setDefaultValue(defaultConfig.rendering.asyncParticleRendering)
-					.setTooltip(Component.translatable("config.asyncparticles.rendering.asyncParticleRendering.tooltip"))
+					.setTooltipSupplier(() -> {
+						Component[] components;
+						if (!ModListHelper.PHOTON_EDITOR_LOADED) {
+							components = new Component[]{
+								Component.translatable("config.asyncparticles.rendering.asyncParticleRendering.tooltip")};
+						} else {
+							components = new Component[]{
+								Component.translatable("config.asyncparticles.rendering.asyncParticleRendering.tooltip")
+									.withStyle(ChatFormatting.STRIKETHROUGH),
+								Component.translatable("config.asyncparticles.incompatibility", "Photon Editor")
+									.withStyle(ChatFormatting.DARK_RED)};
+						}
+						return Optional.of(components);
+					})
 					.setSaveConsumer(newValue -> rendering$asyncParticleRendering = newValue)
+					.setRequirement(() -> !ModListHelper.PHOTON_EDITOR_LOADED)
 					.build())
 				.addEntry(entryBuilder
 					.startIntField(Component.translatable("config.asyncparticles.rendering.failPerSecLimit"),
@@ -387,7 +433,8 @@ public class AsyncParticlesConfig {
 					.setTooltip(Component.empty()
 						.append(Component.translatable("config.asyncparticles.rendering.failBehavior.tooltip"))
 						.append("\n")
-						.append(Component.translatable("config.asyncparticles.not-implemented")))
+						.append(Component.translatable("config.asyncparticles.not-implemented")
+							.withStyle(ChatFormatting.DARK_RED)))
 					.setSaveConsumer(newValue -> rendering$failBehavior = newValue)
 					.setRequirement(() -> false)
 					.build());
@@ -396,7 +443,7 @@ public class AsyncParticlesConfig {
 			ConfigCategory modCompatCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mod-compat"));
 			modCompatCategory
 				.addEntry(entryBuilder
-					//				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
+					// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
 					.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
 						List.of(entryBuilder
 							// .startEnumSelector(Component.translatable("config.asyncparticles.valkyrienskies.rainEffect"),
@@ -419,7 +466,7 @@ public class AsyncParticlesConfig {
 						))
 					.build())
 				.addEntry(entryBuilder
-					//				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
+					// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
 					.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
 						List.of(entryBuilder
 							.startEnumSelector(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect"),
@@ -430,7 +477,8 @@ public class AsyncParticlesConfig {
 								.append(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect.tooltip")
 									.withStyle(ChatFormatting.STRIKETHROUGH))
 								.append("\n")
-								.append(Component.translatable("config.asyncparticles.not-implemented")))
+								.append(Component.translatable("config.asyncparticles.not-implemented")
+									.withStyle(ChatFormatting.DARK_RED)))
 							.setSaveConsumer(newValue -> create$rainEffect = newValue)
 							// .setRequirement(() -> ModListHelper.CREATE_LOADED)
 							.setRequirement(() -> false)

@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FakeBufferBuilder extends BufferBuilder {
-
 	public static final FakeBufferBuilder INSTANCE = new FakeBufferBuilder();
 
 	protected FakeBufferBuilder() {
@@ -69,7 +68,7 @@ public class FakeBufferBuilder extends BufferBuilder {
 	}
 
 	public SortState getSortState() {
-		throw new UnsupportedOperationException("Cannot get sort state of a fake buffer builder");
+		throw new UnsupportedOperationException("Cannot get sort state of a " + this.getClass().getSimpleName());
 	}
 
 	public boolean isCurrentBatchEmpty() {
@@ -78,21 +77,21 @@ public class FakeBufferBuilder extends BufferBuilder {
 
 	@Nullable
 	public BufferBuilder.RenderedBuffer endOrDiscardIfEmpty() {
-		throw new UnsupportedOperationException("Cannot end or discard a fake buffer builder");
+		throw new UnsupportedOperationException("Cannot end or discard a " + this.getClass().getSimpleName());
 	}
 
 	public RenderedBuffer end() {
-		throw new UnsupportedOperationException("Cannot end a fake buffer builder");
+		throw new UnsupportedOperationException("Cannot end a " + this.getClass().getSimpleName());
 	}
 
 	@Override
 	public VertexConsumer color(int red, int green, int blue, int alpha) {
-		throw new UnsupportedOperationException("Cannot set color in a fake buffer builder");
+		throw new UnsupportedOperationException("Cannot set color in a " + this.getClass().getSimpleName());
 	}
 
 	@Override
 	public VertexFormatElement currentElement() {
-		throw new UnsupportedOperationException("Cannot get the current element in a fake buffer builder");
+		throw new UnsupportedOperationException("Cannot get the current element in a " + this.getClass().getSimpleName());
 	}
 
 	public boolean building() {
