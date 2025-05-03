@@ -54,10 +54,10 @@ public class FallbackScreen extends Screen {
 		reasonWidget = new MultiLineTextWidget(this.message, this.font).setMaxWidth(this.width - 50).setCentered(true);
 		rowHelper.addChild(reasonWidget, 2);
 
-		buttonLeft = Button.builder(this.buttonTextLeft, button1 -> buttonLeftCallback.accept(this))
+		buttonLeft = Button.builder(this.buttonTextLeft, button1 -> getButtonLeftCallback().accept(this))
 			.bounds(this.width / 2 - 155, this.height / 6 + 96, 150, 20)
 			.build();
-		buttonRight = Button.builder(this.buttonTextRight, button1 -> buttonRightCallback.accept(this))
+		buttonRight = Button.builder(this.buttonTextRight, button1 -> getButtonRightCallback().accept(this))
 			.bounds(this.width / 2 - 155 + 160, this.height / 6 + 96, 150, 20)
 			.build();
 		rowHelper.addChild(buttonLeft);
@@ -66,6 +66,14 @@ public class FallbackScreen extends Screen {
 		this.layout.arrangeElements();
 		this.layout.visitWidgets(this::addRenderableWidget);
 		this.repositionElements();
+	}
+
+	private Consumer<FallbackScreen> getButtonLeftCallback() {
+		return buttonLeftCallback;
+	}
+
+	private Consumer<FallbackScreen> getButtonRightCallback() {
+		return buttonRightCallback;
 	}
 
 	@Override
