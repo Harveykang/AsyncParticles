@@ -1,9 +1,10 @@
-package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension;
+package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller;
 
 import com.bawnorton.mixinsquared.adjuster.tools.AdjustableAnnotationNode;
 import com.bawnorton.mixinsquared.reflection.FieldReference;
 import com.bawnorton.mixinsquared.reflection.TargetClassContextExtension;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinUtil;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
 import org.objectweb.asm.tree.*;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.MixinEnvironment;
@@ -16,6 +17,7 @@ import org.spongepowered.asm.util.Annotations;
 
 import java.util.*;
 
+@PreLaunch
 public final class ExtensionMemberCancelApplication implements IExtension {
 	static final ILogger LOGGER = MixinService.getService().getLogger("mixinsquared-member-canceller");
 	static final List<MixinMemberCanceller> CANCELLERS = new ArrayList<>();

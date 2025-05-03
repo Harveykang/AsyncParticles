@@ -34,6 +34,12 @@
   "config.asyncparticles.category.mod-compat.create": "Create",
   "config.asyncparticles.mod-compat.create.rainEffect": "Rain Effect",
   "config.asyncparticles.mod-compat.create.rainEffect.tooltip": "Control when rain effects spawn\non Create contraptions.",
+  "gui.asyncparticles.reset-confirmation": "Do you want to reset all configurations?",
+  "config.asyncparticles.category.mixin": "Mixin",
+  "config.asyncparticles.mixin.particle.noCulling": "Particle Culling Blacklist",
+  "config.asyncparticles.mixin.particle.noLightCache": "Particles Light Cache Blacklist",
+  "config.asyncparticles.mixin.particle.spinLockRequired": "Particles Concurrent Unsafe",
+  "config.asyncparticles.mixin.particle.invalid-class": "Class not found or not a subclass of 'net.minecraft.client.particle.Particle'!",
   "config.asyncparticles.enum.FailBehavior.RAISE_CRASH": "Raise Crash",
   "config.asyncparticles.enum.FailBehavior.MARK_AS_SYNC": "Mark as Sync",
   "config.asyncparticles.enum.RainEffect.NONE": "None",
@@ -54,6 +60,5 @@
   "gui.asyncparticles.reload-confirmation": "Do you want to reload the configuration?",
   "gui.asyncparticles.reset": "Reset Config",
   "gui.asyncparticles.failed-to-reset": "Failed to reset: %s",
-  "gui.asyncparticles.reset-successfully": "Reset successfully!",
-  "gui.asyncparticles.reset-confirmation": "Do you want to reset all configurations?"
+  "gui.asyncparticles.reset-successfully": "Reset successfully!"
 }

@@ -17,12 +17,8 @@ import org.spongepowered.asm.mixin.Pseudo;
 	VibrationSignalParticle.class,
 	WeatherParticle.class,
 	// Add more particle classes here if needed
-}, targets = {
-	"dev.shadowsoffire.gateways.client.GatewayParticle",
-	"com.chailotl.particular.particles.FireflyParticle",
-	"com.lowdragmc.photon.client.gameobject.FXObject" // Photon mod
 })
-public abstract class MixinParticle_LightCacheNoRefresh implements LightCachedParticleAddon {
+public abstract class MixinParticles_LightCacheNoRefresh implements LightCachedParticleAddon {
 	@Override
 	public void asyncparticles$refresh() {
 	}

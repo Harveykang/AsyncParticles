@@ -24,7 +24,8 @@
     ]
   },
   "mixins": [
-    "asyncparticles-common.mixins.json"
+    "asyncparticles-common.mixins.json",
+    "asyncparticles.target-modifier.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.0",

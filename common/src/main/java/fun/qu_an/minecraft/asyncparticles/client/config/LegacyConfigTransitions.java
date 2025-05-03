@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,6 +17,15 @@ public class LegacyConfigTransitions {
 		}
 
 		Properties properties = new Properties();
+		try (InputStream is = Files.newInputStream(legacyConfigFile)) {
+			properties.load(is);
+		} catch (IOException e) {
+			try {
+				Files.deleteIfExists(legacyConfigFile);
+			} catch (IOException ignored) {
+			}
+			return false;
+		}
 		AsyncParticlesConfig.ConfigObj defaultConfig = new AsyncParticlesConfig.ConfigObj();
 
 		particle$particleLimit = getInt(properties, "limit", defaultConfig.particle.particleLimit);
@@ -45,6 +56,10 @@ public class LegacyConfigTransitions {
 			defaultConfig.valkyrienSkies.rainEffect == RainEffect.ALWAYS)
 			? RainEffect.ALWAYS : RainEffect.STATIONARY;
 
+		try {
+			Files.deleteIfExists(legacyConfigFile);
+		} catch (IOException ignored) {
+		}
 		return true;
 	}
 

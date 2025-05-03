@@ -8,6 +8,7 @@ loom {
     forge {
         mixinConfig "asyncparticles-common.mixins.json"
         mixinConfig "asyncparticles-forge.mixins.json"
+        mixinConfig "asyncparticles.target-modifier.mixins.json"
         convertAccessWideners.set(true)
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
     }

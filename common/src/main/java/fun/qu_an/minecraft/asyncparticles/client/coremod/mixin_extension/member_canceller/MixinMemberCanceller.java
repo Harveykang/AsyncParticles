@@ -1,7 +1,10 @@
-package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension;
+package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller;
+
+import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
 
 import java.util.List;
 
+@PreLaunch
 public interface MixinMemberCanceller {
     /**
      * Pre-test method to check if the canceller should be applied to the given mixin class.
