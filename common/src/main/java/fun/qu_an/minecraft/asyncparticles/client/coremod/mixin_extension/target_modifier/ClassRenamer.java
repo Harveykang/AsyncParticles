@@ -37,6 +37,12 @@ public class ClassRenamer {
                     tin.desc = tin.desc.replace(oldInternalName, newInternalName);
                 }
             }
+
+            if (method.localVariables!= null) {
+                for (LocalVariableNode localVariableNode : method.localVariables) {
+                    localVariableNode.desc = localVariableNode.desc.replace(oldInternalName, newInternalName);
+                }
+            }
         }
     }
 }

@@ -46,7 +46,13 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 
 			@Override
 			public List<String> getTargets(List<String> originalTargets) {
-				return List.copyOf(config.noCulling);
+				return List.copyOf(config.getNoCulling());
+			}
+
+			@Override
+			public String getRefMapperConfig() {
+				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge-" : "fabric-") +
+					   "asyncparticles-common-refmap.json";
 			}
 		});
 		MixinTargetsModifierRegistrar.register(new MixinTargetModifier() {
@@ -59,8 +65,14 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			@Override
 			public List<String> getTargets(List<String> originalTargets) {
 				ArrayList<String> list = new ArrayList<>(originalTargets);
-				list.addAll(config.noLightCache);
+				list.addAll(config.getNoLightCache());
 				return list;
+			}
+
+			@Override
+			public String getRefMapperConfig() {
+				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge-" : "fabric-") +
+					   "asyncparticles-common-refmap.json";
 			}
 		});
 		MixinTargetsModifierRegistrar.register(new MixinTargetModifier() {
@@ -72,7 +84,13 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 
 			@Override
 			public List<String> getTargets(List<String> originalTargets) {
-				return List.copyOf(config.spinLockRequired);
+				return List.copyOf(config.getSpinLockRequired());
+			}
+
+			@Override
+			public String getRefMapperConfig() {
+				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge-" : "fabric-") +
+					   "asyncparticles-common-refmap.json";
 			}
 		});
 		ExtensionRegistrar.register(new ExtensionMemberCancelApplication());

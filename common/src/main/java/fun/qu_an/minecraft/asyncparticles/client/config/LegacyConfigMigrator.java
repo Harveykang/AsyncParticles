@@ -10,7 +10,7 @@ import java.util.Properties;
 
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
 
-public class LegacyConfigTransitions {
+public class LegacyConfigMigrator {
 	public static boolean migrate() {
 		Path legacyConfigFile = Paths.get("config", "asyncparticles.properties");
 		if (!Files.exists(legacyConfigFile)) {
@@ -28,7 +28,10 @@ public class LegacyConfigTransitions {
 		}
 		AsyncParticlesConfig.ConfigObj defaultConfig = new AsyncParticlesConfig.ConfigObj();
 
-		particle$particleLimit = getInt(properties, "limit", defaultConfig.particle.particleLimit);
+		particle$particleLimit = getInt(properties, "limit", 32768);
+		if (particle$particleLimit == 32768) {
+			particle$particleLimit = defaultConfig.particle.particleLimit;
+		}
 		particle$particleLightCache = getBoolean(properties, "particleLightCache", defaultConfig.particle.particleLightCache);
 
 		tick$failPerSecLimit = getInt(properties, "tickFailurePerSecondThreshold", defaultConfig.tick.failPerSecLimit);

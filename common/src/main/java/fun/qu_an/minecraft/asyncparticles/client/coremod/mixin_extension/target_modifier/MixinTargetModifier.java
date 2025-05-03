@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier;
 
 import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 
 import java.util.List;
@@ -19,6 +20,8 @@ public interface MixinTargetModifier {
      * @apiNote Will not be obfuscated, runtime names will be used
      */
     List<String> getTargets(List<String> originalTargets);
+
+	@Nullable String getRefMapperConfig();
 
 	/**
 	 * Once a mixin class has been modified by a target modifier,

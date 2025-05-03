@@ -200,12 +200,12 @@ class ClothConfigMenus {
 				.build());
 
 		ConfigCategory mixinCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mixin"));
-		ClothConfigMixinMenus.buildCategory(mixinCategory, entryBuilder);
+		Object newConfig = ClothConfigMixinMenus.buildCategory(mixinCategory, entryBuilder);
 
 		builder.setSavingRunnable(() -> {
 			try {
 				AsyncParticlesConfig.save();
-				ClothConfigMixinMenus.onSave();
+				ClothConfigMixinMenus.onSave(newConfig);
 			} catch (Exception e) {
 				AsyncParticlesConfig.LOGGER.error("Failed to save config", e);
 				Minecraft mc = Minecraft.getInstance();

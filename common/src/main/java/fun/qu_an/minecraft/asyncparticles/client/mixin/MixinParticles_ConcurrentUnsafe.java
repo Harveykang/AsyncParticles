@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.simibubi.create.content.fluids.particle.BasinFluidParticle;
 import fun.qu_an.minecraft.asyncparticles.client.util.SpinLock;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.Particle;
@@ -11,9 +12,7 @@ import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Unique;
 
 @Pseudo
-@Mixin({
-	Particle.class
-})
+@Mixin({Particle.class, BasinFluidParticle.class})
 public class MixinParticles_ConcurrentUnsafe {
 	@Unique
 	protected final SpinLock asyncparticles$lock = new SpinLock();

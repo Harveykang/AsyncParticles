@@ -61,7 +61,7 @@ public class AsyncParticlesMixinConfig {
 
 	static class Mixin$Particle {
 		@Unmodifiable
-		Set<String> noCulling;
+		private Set<String> noCulling;
 
 		{
 			Set<String> noCulling = new LinkedHashSet<>();
@@ -70,7 +70,7 @@ public class AsyncParticlesMixinConfig {
 		}
 
 		@Unmodifiable
-		Set<String> noLightCache;
+		private Set<String> noLightCache;
 
 		{
 			Set<String> noLightCache = new LinkedHashSet<>();
@@ -81,38 +81,34 @@ public class AsyncParticlesMixinConfig {
 		}
 
 		@Unmodifiable
-		Set<String> spinLockRequired;
+		private Set<String> spinLockRequired;
 
 		{
 			Set<String> spinLockRequired = new LinkedHashSet<>();
 			spinLockRequired.add("yesman.epicfight.client.particle.TrailParticle");
-			spinLockRequired.add("comcom.dfdyz.epicacg.client.particle.BloomTrailParticle");
+			spinLockRequired.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
 			spinLockRequired.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
 			spinLockRequired.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
 			this.spinLockRequired = Collections.unmodifiableSet(spinLockRequired);
 		}
 
-		private void flat() {
-			config = this;
-		}
-
 		private void fold() {
-			if (this == config) {
-				throw new IllegalStateException("Cannot modify global config object");
-			}
+			assertNotGlobal();
 			noCulling = config.noCulling;
 			noLightCache = config.noLightCache;
 			spinLockRequired = config.spinLockRequired;
 		}
 
 		private void read(Properties properties) {
-			if (this == config) {
-				throw new IllegalStateException("Cannot modify global config object");
-			}
+			assertNotGlobal();
 			Mixin$Particle defaultConfig = new Mixin$Particle();
 			noCulling = read(properties, "particle$noCulling", defaultConfig.noCulling);
 			noLightCache = read(properties, "particle$noLightCache",defaultConfig.noLightCache);
 			spinLockRequired = read(properties, "particle$spinLockRequired", defaultConfig.spinLockRequired);
+		}
+
+		private void flat() {
+			config = this;
 		}
 
 		private void write(Properties properties) {
@@ -139,6 +135,39 @@ public class AsyncParticlesMixinConfig {
 				set.add(s);
 			}
 			return Collections.unmodifiableSet(set);
+		}
+
+		Set<String> getNoCulling() {
+			return noCulling;
+		}
+
+		void setNoCulling(Set<String> noCulling) {
+			assertNotGlobal();
+			this.noCulling = noCulling;
+		}
+
+		Set<String> getNoLightCache() {
+			return noLightCache;
+		}
+
+		void setNoLightCache(Set<String> noLightCache) {
+			assertNotGlobal();
+			this.noLightCache = noLightCache;
+		}
+
+		Set<String> getSpinLockRequired() {
+			return spinLockRequired;
+		}
+
+		void setSpinLockRequired(Set<String> spinLockRequired) {
+			assertNotGlobal();
+			this.spinLockRequired = spinLockRequired;
+		}
+
+		private void assertNotGlobal() {
+			if (this == config) {
+				throw new IllegalStateException("Cannot modify global config object");
+			}
 		}
 	}
 }

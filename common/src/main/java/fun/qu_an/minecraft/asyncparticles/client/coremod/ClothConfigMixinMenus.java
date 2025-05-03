@@ -6,38 +6,44 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.network.chat.Component;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.*;
 
 // No more NoClassDefFoundError
 public class ClothConfigMixinMenus {
-	public static void buildCategory(ConfigCategory mixinCategory, ConfigEntryBuilder entryBuilder) {
+	public static Object buildCategory(ConfigCategory mixinCategory, ConfigEntryBuilder entryBuilder) {
 		Mixin$Particle defaultConfig = new Mixin$Particle();
+		Mixin$Particle newConfig = new Mixin$Particle();
 		mixinCategory
 			.addEntry(entryBuilder
 				.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noCulling"),
-					List.copyOf(config.noCulling))
-				.setDefaultValue(List.copyOf(defaultConfig.noCulling))
-				.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.noCulling.contains(s)))
+					List.copyOf(config.getNoCulling()))
+				.setDefaultValue(List.copyOf(defaultConfig.getNoCulling()))
+				.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoCulling().contains(s)))
+				.setSaveConsumer(l -> newConfig.setNoCulling(Collections.unmodifiableSet(new LinkedHashSet<>(l))))
 				.requireRestart()
 				.build())
 			.addEntry(entryBuilder
 				.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noLightCache"),
-					List.copyOf(config.noLightCache))
-				.setDefaultValue(List.copyOf(defaultConfig.noLightCache))
-				.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.noLightCache.contains(s)))
+					List.copyOf(config.getNoLightCache()))
+				.setDefaultValue(List.copyOf(defaultConfig.getNoLightCache()))
+				.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoLightCache().contains(s)))
+				.setSaveConsumer(l -> newConfig.setNoLightCache(Collections.unmodifiableSet(new LinkedHashSet<>(l))))
 				.requireRestart()
 				.build())
 			.addEntry(entryBuilder
 				.startStrList(Component.translatable("config.asyncparticles.mixin.particle.spinLockRequired"),
-					List.copyOf(config.spinLockRequired))
-				.setDefaultValue(List.copyOf(defaultConfig.spinLockRequired))
-				.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.spinLockRequired.contains(s)))
+					List.copyOf(config.getSpinLockRequired()))
+				.setDefaultValue(List.copyOf(defaultConfig.getSpinLockRequired()))
+				.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getSpinLockRequired().contains(s)))
+				.setSaveConsumer(l -> newConfig.setSpinLockRequired(Collections.unmodifiableSet(new LinkedHashSet<>(l))))
 				.requireRestart()
 				.build());
+		return newConfig;
 	}
 
 	private static Optional<Component> testParticleClass(String s, boolean b) {
@@ -56,7 +62,8 @@ public class ClothConfigMixinMenus {
 		return Optional.empty();
 	}
 
-	public static void onSave() throws IOException {
+	public static void onSave(Object newConfig) throws IOException {
+		AsyncParticlesMixinConfig.config = (Mixin$Particle) newConfig;
 		AsyncParticlesMixinConfig.save();
 	}
 }

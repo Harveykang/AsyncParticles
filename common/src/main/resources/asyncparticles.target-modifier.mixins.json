@@ -1,6 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_17",
   "package": "fun.qu_an.minecraft.asyncparticles.client.mixin",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.TargetModifierMixinPlugin",
   "priority": 0

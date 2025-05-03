@@ -128,7 +128,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 					mNode.desc);
 				if (b) {
 					iterator.remove();
-					LOGGER.warn("Cancelled mixin method {}#{}{} by {}", mixinClassName, mNode.name, mNode.desc, canceller.getClass().getName());
+					LOGGER.warn("Cancelled mixin method {}#{};{} by {}", mixinClassName, mNode.name, mNode.desc, canceller.getClass().getName());
 					break;
 				}
 			}
@@ -159,7 +159,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 						removed = new HashSet<>();
 					}
 					removed.add(field.name);
-					LOGGER.warn("Cancelled mixin field {}#{}{} by {}", mixinClassName, field.name, field.desc, canceller.getClass().getName());
+					LOGGER.warn("Cancelled mixin field {}#{};{} by {}", mixinClassName, field.name, field.desc, canceller.getClass().getName());
 					break;
 				}
 			}
@@ -189,7 +189,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 					// remove code between line numbers
 					// find previous line number
 					while (iterator1.hasPrevious() &&
-						   !(iterator1.previous() instanceof LineNumberNode)){
+						   !(iterator1.previous() instanceof LineNumberNode)) {
 						iterator1.remove();
 					}
 					iterator1.next();
