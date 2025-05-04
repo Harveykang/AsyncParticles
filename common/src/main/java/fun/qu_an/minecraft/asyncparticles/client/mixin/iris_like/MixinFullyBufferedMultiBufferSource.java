@@ -19,10 +19,15 @@ public class MixinFullyBufferedMultiBufferSource {
 
 	@Inject(method = {
 		"endBatch()V",
-		"endBatch(Lnet/minecraft/client/renderer/RenderType;)V",
-		"endBatchWithType"},
-		remap = false, at = @At("HEAD"))
+		"endBatch(Lnet/minecraft/client/renderer/RenderType;)V"},
+		at = @At("HEAD"))
 		private void endBatches(CallbackInfo ci) {
+		ThreadUtil.assertNotParticleRendererThread();
+	}
+
+	@Inject(method = "endBatchWithType",
+		remap = false, at = @At("HEAD"))
+		private void endBatches2(CallbackInfo ci) {
 		ThreadUtil.assertNotParticleRendererThread();
 	}
 }
