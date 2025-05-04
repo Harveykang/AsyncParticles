@@ -10,22 +10,19 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = MultiBufferSource.BufferSource.class, priority = 900)
-public abstract class MixinMultiBufferSource$BufferSource
-//	implements RenderCall
-{
+@Mixin(MultiBufferSource.BufferSource.class)
+public abstract class MixinMultiBufferSource$BufferSource {
 	@Inject(method = "getBuffer", at = @At("HEAD"))
 	private void getBuffer(RenderType renderType, CallbackInfoReturnable<VertexConsumer> cir) {
 		ThreadUtil.assertNotParticleRendererThread();
 	}
 
-	@Inject(method = "endBatch()V", at = @At("HEAD"))
-	private void endBatch(CallbackInfo ci) {
-		ThreadUtil.assertNotParticleRendererThread();
-	}
-
-	@Inject(method = "endLastBatch", at = @At("HEAD"))
-	private void endLastBatch(CallbackInfo ci) {
+	@Inject(method = {
+		"endBatch(Lnet/minecraft/client/renderer/RenderType;)V",
+		"endBatch()V",
+		"endLastBatch"},
+		at = @At("HEAD"))
+	private void endBatches(CallbackInfo ci) {
 		ThreadUtil.assertNotParticleRendererThread();
 	}
 }

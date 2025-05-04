@@ -20,9 +20,10 @@ import java.util.Optional;
 class ClothConfigMenus {
 	static ConfigBuilder screenBuilder(Screen screen) {
 		AsyncParticlesConfig.ConfigObj defaultConfig = new AsyncParticlesConfig.ConfigObj();
-		ConfigBuilder builder = ConfigBuilder.create();
-		builder.setParentScreen(screen);
-		builder.setTitle(Component.translatable("gui.asyncparticles"));
+		ConfigBuilder builder = ConfigBuilder.create()
+			.setParentScreen(screen)
+			.setTitle(Component.translatable("gui.asyncparticles"))
+			.setTransparentBackground(true);
 		ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
 		// Tick Category

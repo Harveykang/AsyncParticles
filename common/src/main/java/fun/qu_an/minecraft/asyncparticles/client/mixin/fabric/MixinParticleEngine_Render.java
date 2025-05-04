@@ -54,6 +54,8 @@ public abstract class MixinParticleEngine_Render {
 		Frustum frustum = AsyncRenderer.frustum;
 		lightTexture.turnOnLightLayer();
 		RenderSystem.enableDepthTest();
+		RenderSystem.activeTexture(33986);
+		RenderSystem.activeTexture(33984);
 		PoseStack poseStack2 = RenderSystem.getModelViewStack();
 		poseStack2.pushPose();
 		poseStack2.mulPoseMatrix(poseStack.last().pose());
@@ -71,7 +73,7 @@ public abstract class MixinParticleEngine_Render {
 			if (queue == null || queue.isEmpty()) {
 				continue;
 			}
-			BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
+			BufferBuilder bufferBuilder;
 			profiler.push("render_sync");
 			Collection<? extends Particle> syncParticles;
 			Tesselator tesselator;
@@ -82,7 +84,8 @@ public abstract class MixinParticleEngine_Render {
 				syncParticles = queue;
 				tesselator = Tesselator.getInstance();
 				toBegin = bufferBuilder = tesselator.getBuilder();
-			} else if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
+			} else if ((bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager)) ==
+					   FakeBufferBuilder.INSTANCE) {
 				enableCull = cullParticles;
 				syncParticles = AsyncRenderer.isMixedParticleRenderingSetting()
 					? Collections.emptyList() : queue;

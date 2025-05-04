@@ -18,40 +18,41 @@ public class ClothConfigMixinMenus {
     public static Object buildCategory(ConfigCategory mixinCategory, ConfigEntryBuilder entryBuilder) {
         Mixin$Particle defaultConfig = new Mixin$Particle();
         Mixin$Particle newConfig = new Mixin$Particle();
-        mixinCategory
-            .addEntry(entryBuilder
-                .startStrList(Component.translatable("config.asyncparticles.mixin.particle.noCulling"),
-                    List.copyOf(config.getNoCulling()))
-                .setDefaultValue(List.copyOf(defaultConfig.getNoCulling()))
-                .setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoCulling().contains(s)))
-                .setSaveConsumer(l -> newConfig.setNoCulling(l.isEmpty()
-                    ? defaultConfig.getNoCulling()
-                    : Collections.unmodifiableSet(new LinkedHashSet<>(l))))
-                .setTooltip(Component.translatable("config.asyncparticles.mixin.delete-all-to-reset"))
-                .requireRestart()
-                .build())
-            .addEntry(entryBuilder
-                .startStrList(Component.translatable("config.asyncparticles.mixin.particle.noLightCache"),
-                    List.copyOf(config.getNoLightCache()))
-                .setDefaultValue(List.copyOf(defaultConfig.getNoLightCache()))
-                .setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoLightCache().contains(s)))
-                .setSaveConsumer(l -> newConfig.setNoLightCache(l.isEmpty()
-                    ? defaultConfig.getNoLightCache()
-                    : Collections.unmodifiableSet(new LinkedHashSet<>(l))))
-                .setTooltip(Component.translatable("config.asyncparticles.mixin.delete-all-to-reset"))
-                .requireRestart()
-                .build())
-            .addEntry(entryBuilder
-                .startStrList(Component.translatable("config.asyncparticles.mixin.particle.spinLockRequired"),
-                    List.copyOf(config.getSpinLockRequired()))
-                .setDefaultValue(List.copyOf(defaultConfig.getSpinLockRequired()))
-                .setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getSpinLockRequired().contains(s)))
-                .setSaveConsumer(l -> newConfig.setSpinLockRequired(l.isEmpty()
-                    ? defaultConfig.getSpinLockRequired()
-                    : Collections.unmodifiableSet(new LinkedHashSet<>(l))))
-                .setTooltip(Component.translatable("config.asyncparticles.mixin.delete-all-to-reset"))
-                .requireRestart()
-                .build());
+        List<String> defaultNoCulling = List.copyOf(config.getNoCulling());
+        mixinCategory.addEntry(entryBuilder
+            .startStrList(Component.translatable("config.asyncparticles.mixin.particle.noCulling"),
+                defaultNoCulling)
+            .setDefaultValue(defaultNoCulling)
+            .setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoCulling().contains(s)))
+            .setSaveConsumer(l -> newConfig.setNoCulling(l.isEmpty()
+                ? defaultConfig.getNoCulling()
+                : Collections.unmodifiableSet(new LinkedHashSet<>(l))))
+            .setTooltip(Component.translatable("config.asyncparticles.mixin.delete-all-to-reset"))
+            .requireRestart()
+            .build());
+        List<String> defaultNoLightCache = List.copyOf(config.getNoLightCache());
+        mixinCategory.addEntry(entryBuilder
+            .startStrList(Component.translatable("config.asyncparticles.mixin.particle.noLightCache"),
+                defaultNoLightCache)
+            .setDefaultValue(defaultNoLightCache)
+            .setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoLightCache().contains(s)))
+            .setSaveConsumer(l -> newConfig.setNoLightCache(l.isEmpty()
+                ? defaultConfig.getNoLightCache()
+                : Collections.unmodifiableSet(new LinkedHashSet<>(l))))
+            .setTooltip(Component.translatable("config.asyncparticles.mixin.delete-all-to-reset"))
+            .requireRestart()
+            .build());
+        List<String> defaultSpinLockRequired = List.copyOf(config.getSpinLockRequired());
+        mixinCategory.addEntry(entryBuilder
+            .startStrList(Component.translatable("config.asyncparticles.mixin.particle.spinLockRequired"), defaultSpinLockRequired)
+            .setDefaultValue(defaultSpinLockRequired)
+            .setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getSpinLockRequired().contains(s)))
+            .setSaveConsumer(l -> newConfig.setSpinLockRequired(l.isEmpty()
+                ? defaultConfig.getSpinLockRequired()
+                : Collections.unmodifiableSet(new LinkedHashSet<>(l))))
+            .setTooltip(Component.translatable("config.asyncparticles.mixin.delete-all-to-reset"))
+            .requireRestart()
+            .build());
         return newConfig;
     }
 
