@@ -3,6 +3,8 @@ package fun.qu_an.minecraft.asyncparticles.client.config;
 import net.minecraft.resources.ResourceLocation;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,7 +27,7 @@ public class SimplePropertiesConfig {
 	private static boolean suppressCME = false;
 	private static boolean fixParticleLightOnVsShips = true;
 	private static boolean doVsShipRainEffectsIfMoving = false;
-//	private static boolean doCreateRainEffectsIfMoving = true;
+	//	private static boolean doCreateRainEffectsIfMoving = true;
 	private static boolean shouldSave;
 
 	public static void load() throws IOException {
@@ -34,7 +36,9 @@ public class SimplePropertiesConfig {
 			Files.createDirectories(CONFIG_FILE.getParent());
 			Files.createFile(CONFIG_FILE);
 		} else {
-			properties.load(Files.newInputStream(CONFIG_FILE));
+			try (InputStream in = Files.newInputStream(CONFIG_FILE)) {
+				properties.load(in);
+			}
 			String verStr = properties.getProperty("version_doNotModify");
 			int ver = -1;
 			try {
@@ -67,7 +71,9 @@ public class SimplePropertiesConfig {
 //		doCreateRainEffectsIfMoving = getBoolean(properties, "doCreateRainEffectsIfMoving", true);
 
 		if (shouldSave) {
-			properties.store(Files.newOutputStream(CONFIG_FILE), null);
+			try (OutputStream out = Files.newOutputStream(CONFIG_FILE)) {
+				properties.store(out, null);
+			}
 			shouldSave = false;
 		}
 	}
