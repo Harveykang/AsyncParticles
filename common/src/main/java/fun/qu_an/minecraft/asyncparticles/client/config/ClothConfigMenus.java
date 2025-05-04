@@ -200,7 +200,9 @@ class ClothConfigMenus {
 				.build());
 
 		ConfigCategory mixinCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mixin"));
-		Object newConfig = ClothConfigMixinMenus.buildCategory(mixinCategory, entryBuilder);
+		ConfigEntryBuilder mixinEntryBuilder = builder.entryBuilder();
+		mixinEntryBuilder.setResetButtonKey(Component.translatable("gui.asyncparticles.revert"));
+		Object newConfig = ClothConfigMixinMenus.buildCategory(mixinCategory, mixinEntryBuilder);
 
 		builder.setSavingRunnable(() -> {
 			try {

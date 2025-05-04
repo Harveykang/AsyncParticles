@@ -109,7 +109,7 @@ public abstract class MixinParticleEngine {
 					k -> {
 						Queue<Particle> queue1 = IterationSafeEvictingQueue.newInstance(
 							16,
-							ConfigHelper.getLimit(),
+							ConfigHelper.getParticleLimit(),
 							AsyncTicker::onEvicted);
 						// fix the first added particle not ticked.
 						if (tickAsync) {
@@ -238,9 +238,9 @@ public abstract class MixinParticleEngine {
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void redirectClearParticles(CallbackInfo ci) {
 		particlesToAdd.forEach(AsyncTicker::onEvicted);
-		particlesToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getLimit(), AsyncTicker::onEvicted);
+		particlesToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 		trackingEmitters.forEach(AsyncTicker::onEvicted);
-		trackingEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getLimit(), AsyncTicker::onEvicted);
+		trackingEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 		particles.values().forEach(queue -> queue.forEach(AsyncTicker::onEvicted));
 		AsyncTicker.onParticleEngineClear();
 	}

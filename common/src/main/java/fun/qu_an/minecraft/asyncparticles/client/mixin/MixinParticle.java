@@ -65,15 +65,6 @@ public abstract class MixinParticle implements ParticleAddon {
 		return true;
 	}
 
-	/**
-	 * @author
-	 * @reason Impl this method for target modifier
-	 */
-	@Overwrite
-	@SuppressWarnings("OverwriteModifiers")
-	public void render(VertexConsumer buffer, Camera renderInfo, float partialTicks) {
-	}
-
 	@Override
 	public void asyncparticles$setTicked() {
 		this.asyncparticles$ticked = true;

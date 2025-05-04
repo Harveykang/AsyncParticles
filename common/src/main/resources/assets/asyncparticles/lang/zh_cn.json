@@ -34,7 +34,9 @@
   "config.asyncparticles.category.mod-compat.create": "机械动力",
   "config.asyncparticles.mod-compat.create.rainEffect": "雨水效果",
   "config.asyncparticles.mod-compat.create.rainEffect.tooltip": "设置机械动力结构上雨水效果的生成条件。",
+  "gui.asyncparticles.reset-confirmation": "确认要重置配置文件？",
   "config.asyncparticles.category.mixin": "Mixin",
+  "config.asyncparticles.mixin.delete-all-to-reset": "删除所有条目可重置为默认值。",
   "config.asyncparticles.mixin.particle.noCulling": "粒子剔除黑名单",
   "config.asyncparticles.mixin.particle.noLightCache": "粒子光照缓存黑名单",
   "config.asyncparticles.mixin.particle.spinLockRequired": "并发不安全的粒子",
@@ -60,5 +62,5 @@
   "gui.asyncparticles.reset": "重置配置文件",
   "gui.asyncparticles.failed-to-reset": "重置失败：%s",
   "gui.asyncparticles.reset-successfully": "重置成功！",
-  "gui.asyncparticles.reset-confirmation": "确认要重置配置文件？"
+  "gui.asyncparticles.revert": "还原"
 }

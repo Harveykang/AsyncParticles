@@ -36,6 +36,7 @@
   "config.asyncparticles.mod-compat.create.rainEffect.tooltip": "Control when rain effects spawn\non Create contraptions.",
   "gui.asyncparticles.reset-confirmation": "Do you want to reset all configurations?",
   "config.asyncparticles.category.mixin": "Mixin",
+  "config.asyncparticles.mixin.delete-all-to-reset": "Delete all entries to reset to default values.",
   "config.asyncparticles.mixin.particle.noCulling": "Particle Culling Blacklist",
   "config.asyncparticles.mixin.particle.noLightCache": "Particles Light Cache Blacklist",
   "config.asyncparticles.mixin.particle.spinLockRequired": "Particles Concurrent Unsafe",
@@ -60,5 +61,6 @@
   "gui.asyncparticles.reload-confirmation": "Do you want to reload the configuration?",
   "gui.asyncparticles.reset": "Reset Config",
   "gui.asyncparticles.failed-to-reset": "Failed to reset: %s",
-  "gui.asyncparticles.reset-successfully": "Reset successfully!"
+  "gui.asyncparticles.reset-successfully": "Reset successfully!",
+  "gui.asyncparticles.revert": "Revert"
 }

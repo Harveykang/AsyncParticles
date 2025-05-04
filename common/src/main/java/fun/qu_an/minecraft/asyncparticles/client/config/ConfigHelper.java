@@ -42,12 +42,12 @@ public class ConfigHelper {
 		return AsyncParticlesConfig.valkyrienSkies$fixParticleLights;
 	}
 
-	public static int getLimit() {
+	public static int getParticleLimit() {
 		return AsyncParticlesConfig.particle$particleLimit;
 	}
 
-	public static boolean doVsShipRainEffectsIfMoving() {
-		return AsyncParticlesConfig.valkyrienSkies$rainEffect == RainEffect.STATIONARY;
+	public static boolean alwaysSpawnRainParticlesOnVsShips() {
+		return AsyncParticlesConfig.valkyrienSkies$rainEffect == RainEffect.ALWAYS;
 	}
 
 	public static boolean doCreateRainEffectsIfMoving() {
