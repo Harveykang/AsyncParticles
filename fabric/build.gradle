@@ -144,10 +144,6 @@ dependencies {
     modCompileOnly "maven.modrinth:what-are-they-up-to:1.20.1-1.2.3"
     modLocalRuntime "maven.modrinth:what-are-they-up-to:1.20.1-1.2.3"
 
-    /* ===Fabric Connector===*/
-
-    // FIXME: to compile properly, we can add FABRIC dependencies to the FORGE modCompileOnly configuration
-    // ... so far we didn't do that, until we have to
 }
 
 processResources {
