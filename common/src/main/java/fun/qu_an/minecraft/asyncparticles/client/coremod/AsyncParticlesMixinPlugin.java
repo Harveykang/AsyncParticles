@@ -4,26 +4,95 @@ import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.ExtensionMemberCancelApplication;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.MixinMemberCanceller;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.MixinMemberCancellerRegistrar;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.ExtensionMemberCancelApplication;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.MixinMemberCanceller;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.MixinMemberCancellerRegistrar;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.MixinTargetModifier;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.MixinTargetsModifierRegistrar;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
+
+@PreLaunch
 public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 	static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles:plugin");
 
 	@Override
 	public void onLoad(String mixinPackage) {
-		if (!ModListHelper.IS_CLIENT) {
+		if (!IS_CLIENT) {
 			return;
 		}
+		try {
+			AsyncParticlesMixinConfig.load();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		AsyncParticlesMixinConfig.Mixin$Particle config = AsyncParticlesMixinConfig.config;
+		MixinTargetsModifierRegistrar.register(new MixinTargetModifier() {
+			@Override
+			public String getMixinClassName() {
+				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge." : "fabric.") +
+					   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_ShouldCull";
+			}
+
+			@Override
+			public List<String> getTargets(List<String> originalTargets) {
+				return List.copyOf(config.getNoCulling());
+			}
+
+			@Override
+			public String getRefMapperConfig() {
+				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge-" : "fabric-") +
+					   "asyncparticles-common-refmap.json";
+			}
+		});
+		MixinTargetsModifierRegistrar.register(new MixinTargetModifier() {
+			@Override
+			public String getMixinClassName() {
+				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge." : "fabric.") +
+					   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_LightCacheNoRefresh";
+			}
+
+			@Override
+			public List<String> getTargets(List<String> originalTargets) {
+				ArrayList<String> list = new ArrayList<>(originalTargets);
+				list.addAll(config.getNoLightCache());
+				return list;
+			}
+
+			@Override
+			public String getRefMapperConfig() {
+				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge-" : "fabric-") +
+					   "asyncparticles-common-refmap.json";
+			}
+		});
+		MixinTargetsModifierRegistrar.register(new MixinTargetModifier() {
+			@Override
+			public String getMixinClassName() {
+				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge." : "fabric.") +
+					"fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_ConcurrentUnsafe";
+			}
+
+			@Override
+			public List<String> getTargets(List<String> originalTargets) {
+				return List.copyOf(config.getSpinLockRequired());
+			}
+
+			@Override
+			public String getRefMapperConfig() {
+				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge-" : "fabric-") +
+					   "asyncparticles-common-refmap.json";
+			}
+		});
 		ExtensionRegistrar.register(new ExtensionMemberCancelApplication());
 		MixinMemberCancellerRegistrar.register(new MixinMemberCanceller() {
 			@Override
@@ -98,7 +167,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 	/// - mixin/<mod_id>/fabric 包下的mixin只在fabric环境下生效，其他mixin在任何环境下生效
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-		if (!ModListHelper.IS_CLIENT) {
+		if (!IS_CLIENT) {
 			return false;
 		}
 		String mixinPackageName = mixinClassName.substring(PACKAGE_LENGTH);
@@ -109,27 +178,26 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		return switch (split[0]) {
 			case "fabric" -> {
 				if (split.length == 2) {
-					if (ModListHelper.IS_FORGE) {
+					if (IS_FORGE) {
 						yield false;
 					}
 					yield switch (split[1]) {
-						case "MixinLevelRenderer" -> !ModListHelper.FABRIC_IRIS_LOADED;
+						case "MixinLevelRenderer" -> !FABRIC_IRIS_LOADED;
 						default -> true;
 					};
 				}
 				yield switch (split[1]) {
-					case "particlerain_vs" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.VS_LOADED;
-					case "particlerain_create" ->
-						ModListHelper.FABRIC_PARTICLERAIN_LOADED && ModListHelper.CREATE_LOADED;
-					case "particlerain" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED;
-					case "create_5" -> ModListHelper.FABRIC_CREATE_LOADED && ModListHelper.IS_LEGACY_CREATE;
-					case "create_6" -> ModListHelper.FABRIC_CREATE_LOADED && !ModListHelper.IS_LEGACY_CREATE;
-					case "sodium" -> ModListHelper.FABRIC_SODIUM_LOADED;
-					case "effective" -> ModListHelper.FABRIC_EFFECTIVE_LOADED;
-					case "effectual" -> ModListHelper.FABRIC_EFFECTUAL_LOADED;
-					case "particular" -> ModListHelper.FABRIC_PARTICULAR_LOADED;
-					case "vulkanmod" -> ModListHelper.FABRIC_VULKAN_MOD_LOADED;
-					case "iris" -> ModListHelper.FABRIC_IRIS_LOADED;
+					case "particlerain_vs" -> FABRIC_PARTICLERAIN_LOADED && VS_LOADED;
+					case "particlerain_create" -> FABRIC_PARTICLERAIN_LOADED && CREATE_LOADED;
+					case "particlerain" -> FABRIC_PARTICLERAIN_LOADED;
+					case "create_5" -> FABRIC_CREATE_LOADED && IS_LEGACY_CREATE;
+					case "create_6" -> FABRIC_CREATE_LOADED && !IS_LEGACY_CREATE;
+					case "sodium" -> FABRIC_SODIUM_LOADED;
+					case "effective" -> FABRIC_EFFECTIVE_LOADED;
+					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
+					case "particular" -> FABRIC_PARTICULAR_LOADED;
+					case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
+					case "iris" -> FABRIC_IRIS_LOADED;
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
@@ -138,8 +206,8 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					throw new IllegalArgumentException("Unknown legacy mixin: " + mixinClassName);
 				}
 				yield switch (split[1]) {
-					case "flywheel" -> ModListHelper.FLYWHEEL_LOADED &&
-									   ModListHelper.versionCheck("flywheel", "0.6", "1.0");
+					case "flywheel" -> FLYWHEEL_LOADED &&
+									   versionCheck("flywheel", "0.6", "1.0");
 					default -> throw new IllegalArgumentException("Unknown legacy mod mixin: " + mixinClassName);
 				};
 			}
@@ -147,29 +215,29 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				 "off_thread_access",
 				 "tick",
 				 "render" -> true;
-			case "modernui" -> ModListHelper.MODERN_UI_LOADED;
-			case "vs2" -> ModListHelper.VS_LOADED;
-			case "vs2_create" -> ModListHelper.VS_LOADED && ModListHelper.CREATE_LOADED;
-			case "create" -> ModListHelper.CREATE_LOADED;
-			case "iris_like" -> ModListHelper.IRIS_LIKE_LOADED;
-			case "flywheel" -> ModListHelper.FLYWHEEL_LOADED &&
-							   ModListHelper.versionCheck("flywheel", "1.0", "2.0");
-			case "particle_core" -> ModListHelper.PARTICLE_CORE_LOADED;
-			case "physicsmod" -> ModListHelper.PHYSICSMOD_LOADED;
-			case "physicsmod_create" -> ModListHelper.PHYSICSMOD_LOADED && ModListHelper.CREATE_LOADED;
-			case "physicsmod_vs" -> ModListHelper.PHYSICSMOD_LOADED && ModListHelper.VS_LOADED;
-			case "a_good_place" -> ModListHelper.A_GOOD_PLACE_LOADED;
+			case "modernui" -> MODERN_UI_LOADED;
+			case "vs2" -> VS_LOADED;
+			case "vs2_create" -> VS_LOADED && CREATE_LOADED;
+			case "create" -> CREATE_LOADED;
+			case "iris_like" -> IRIS_LIKE_LOADED;
+			case "flywheel" -> FLYWHEEL_LOADED &&
+							   versionCheck("flywheel", "1.0", "2.0");
+			case "particle_core" -> PARTICLE_CORE_LOADED;
+			case "physicsmod" -> PHYSICSMOD_LOADED;
+			case "physicsmod_create" -> PHYSICSMOD_LOADED && CREATE_LOADED;
+			case "physicsmod_vs" -> PHYSICSMOD_LOADED && VS_LOADED;
+			case "a_good_place" -> A_GOOD_PLACE_LOADED;
 			case "subtle_effects" -> {
 				if (split.length == 2) {
-					yield ModListHelper.SUBTLE_EFFECTS_LOADED;
+					yield SUBTLE_EFFECTS_LOADED;
 				}
 				yield switch (split[1]) {
-					case "fabric" -> !ModListHelper.IS_FORGE && ModListHelper.FABRIC_SUBTLE_EFFECTS_LOADED;
-					default -> ModListHelper.SUBTLE_EFFECTS_LOADED;
+					case "fabric" -> !IS_FORGE && FABRIC_SUBTLE_EFFECTS_LOADED;
+					default -> SUBTLE_EFFECTS_LOADED;
 				};
 			}
-			case "watut" -> ModListHelper.WATUT_LOADED;
-			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
+			case "watut" -> WATUT_LOADED;
+			case "lodestone" -> LODESTONE_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

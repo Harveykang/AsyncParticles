@@ -19,9 +19,4 @@ public abstract class MixinGroundFogParticle implements ParticleAddon {
 	private void onRemove(CallbackInfo ci) {
 		ParticleRainCompat.asyncparticles$fogCount.getAndDecrement();
 	}
-
-	@Override
-	public boolean shouldCull() {
-		return false;
-	}
 }

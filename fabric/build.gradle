@@ -29,7 +29,7 @@ configurations {
 }
 
 dependencies {
-    include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.2.0")))
+    include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.3.2-beta.4")))
 
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
@@ -59,7 +59,7 @@ dependencies {
     }
 
     /* APIs */
-//    modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
+    modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
 
     /* Performance */
     modLocalRuntime "maven.modrinth:spark:1.10.53-fabric"
@@ -99,7 +99,7 @@ dependencies {
     }
 
     /* Particle Rain/Pretty Rain */
-//    modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
+    modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
     modCompileOnly "maven.modrinth:particle-rain:3.0.6-1.20"
 
     /* Mmmmmmmmmmmm */

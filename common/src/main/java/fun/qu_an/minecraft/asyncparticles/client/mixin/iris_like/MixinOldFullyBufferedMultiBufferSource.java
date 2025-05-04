@@ -17,13 +17,11 @@ public class MixinOldFullyBufferedMultiBufferSource {
 		ThreadUtil.assertNotParticleRendererThread();
 	}
 
-	@Inject(method = "endBatch()V", at = @At("HEAD"))
-	private void endBatch(CallbackInfo ci) {
-		ThreadUtil.assertNotParticleRendererThread();
-	}
-
-	@Inject(method = "endBatch(Lnet/minecraft/client/renderer/RenderType;)V", at = @At("HEAD"))
-	private void endBatch1(CallbackInfo ci) {
+	@Inject(method = {
+		"endBatch()V",
+		"endBatch(Lnet/minecraft/client/renderer/RenderType;)V",},
+		at = @At("HEAD"))
+	private void endBatches(CallbackInfo ci) {
 		ThreadUtil.assertNotParticleRendererThread();
 	}
 }

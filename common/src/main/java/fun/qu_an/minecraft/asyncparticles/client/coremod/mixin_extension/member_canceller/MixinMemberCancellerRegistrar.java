@@ -1,6 +1,9 @@
-package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension;
+package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller;
+
+import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
 
 @SuppressWarnings("unused")
+@PreLaunch
 public class MixinMemberCancellerRegistrar {
     /**
      * Registers a MixinMemberCanceller to be used by the ExtensionCancelMixinMember.

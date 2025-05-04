@@ -45,7 +45,7 @@ public class PhysicsModCompat {
 			return;
 		}
 		Vec3 shipMotion = hit.shipMotion;
-		if (!ConfigHelper.doVsShipRainEffectsIfMoving() && abs(shipMotion.lengthSqr()) > 0.01) {
+		if (!ConfigHelper.alwaysSpawnRainParticlesOnVsShips() && abs(shipMotion.lengthSqr()) > 0.01) {
 			return;
 		}
 		Vec3 spawnPos = hit.getLocation().add(shipMotion);

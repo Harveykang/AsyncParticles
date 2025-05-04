@@ -114,6 +114,7 @@ public class FallbackScreen extends Screen {
 			guiScreen.buttonRight = buttonRight;
 			guiScreen.buttonRightTick = buttonRightTick;
 			minecraft.setScreen(guiScreen);
+			return;
 		}
 		super.tick();
 	}

@@ -1,9 +1,10 @@
-package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension;
+package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller;
 
 import com.bawnorton.mixinsquared.adjuster.tools.AdjustableAnnotationNode;
 import com.bawnorton.mixinsquared.reflection.FieldReference;
 import com.bawnorton.mixinsquared.reflection.TargetClassContextExtension;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinUtil;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
 import org.objectweb.asm.tree.*;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.MixinEnvironment;
@@ -16,6 +17,7 @@ import org.spongepowered.asm.util.Annotations;
 
 import java.util.*;
 
+@PreLaunch
 public final class ExtensionMemberCancelApplication implements IExtension {
 	static final ILogger LOGGER = MixinService.getService().getLogger("mixinsquared-member-canceller");
 	static final List<MixinMemberCanceller> CANCELLERS = new ArrayList<>();
@@ -126,7 +128,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 					mNode.desc);
 				if (b) {
 					iterator.remove();
-					LOGGER.warn("Cancelled mixin method {}#{}{} by {}", mixinClassName, mNode.name, mNode.desc, canceller.getClass().getName());
+					LOGGER.warn("Cancelled mixin method {}#{};{} by {}", mixinClassName, mNode.name, mNode.desc, canceller.getClass().getName());
 					break;
 				}
 			}
@@ -157,7 +159,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 						removed = new HashSet<>();
 					}
 					removed.add(field.name);
-					LOGGER.warn("Cancelled mixin field {}#{}{} by {}", mixinClassName, field.name, field.desc, canceller.getClass().getName());
+					LOGGER.warn("Cancelled mixin field {}#{};{} by {}", mixinClassName, field.name, field.desc, canceller.getClass().getName());
 					break;
 				}
 			}
@@ -187,7 +189,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 					// remove code between line numbers
 					// find previous line number
 					while (iterator1.hasPrevious() &&
-						   !(iterator1.previous() instanceof LineNumberNode)){
+						   !(iterator1.previous() instanceof LineNumberNode)) {
 						iterator1.remove();
 					}
 					iterator1.next();

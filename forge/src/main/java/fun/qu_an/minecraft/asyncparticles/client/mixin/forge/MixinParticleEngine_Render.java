@@ -75,7 +75,7 @@ public abstract class MixinParticleEngine_Render {
 			if (queue == null || queue.isEmpty()) {
 				continue;
 			}
-			BufferBuilder bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager);
+			BufferBuilder bufferBuilder;
 			profiler.push("render_sync");
 			RenderSystem.setShader(GameRenderer::getParticleShader);
 			Collection<? extends Particle> syncParticles;
@@ -87,7 +87,8 @@ public abstract class MixinParticleEngine_Render {
 				syncParticles = queue;
 				tesselator = Tesselator.getInstance();
 				toBegin = bufferBuilder = tesselator.getBuilder();
-			} else if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
+			} else if ((bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager)) ==
+					   FakeBufferBuilder.INSTANCE) {
 				enableCull = cullParticles;
 				syncParticles = AsyncRenderer.isMixedParticleRenderingSetting()
 					? Collections.emptyList() : queue;

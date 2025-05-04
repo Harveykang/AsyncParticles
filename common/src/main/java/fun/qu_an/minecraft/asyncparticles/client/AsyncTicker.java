@@ -450,7 +450,7 @@ public class AsyncTicker {
 				PARTICLE_OPERATIONS.size(),
 				END_TICK_EVENTS.size(),
 				END_TICK_OPERATIONS.size(),
-				ConfigHelper.getLimit(),
+				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
 					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
 						Queue<Particle> queue = e.getValue();
@@ -488,15 +488,15 @@ public class AsyncTicker {
 			reset();
 			particleEngine.clearParticles();
 		} else {
-			Queue<Particle> newToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getLimit(), AsyncTicker::onEvicted);
+			Queue<Particle> newToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 			newToAdd.addAll(particleEngine.particlesToAdd);
 			particleEngine.particlesToAdd = newToAdd;
-			Queue<TrackingEmitter> newEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getLimit(), AsyncTicker::onEvicted);
+			Queue<TrackingEmitter> newEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 			newEmitters.addAll(particleEngine.trackingEmitters);
 			particleEngine.trackingEmitters = newEmitters;
 			particleEngine.particles.entrySet().forEach(entry -> {
 				Queue<Particle> queue = entry.getValue();
-				Queue<Particle> newQueue = IterationSafeEvictingQueue.newInstance(queue.size(), ConfigHelper.getLimit(), AsyncTicker::onEvicted);
+				Queue<Particle> newQueue = IterationSafeEvictingQueue.newInstance(queue.size(), ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 				newQueue.addAll(queue);
 				entry.setValue(newQueue);
 			});
