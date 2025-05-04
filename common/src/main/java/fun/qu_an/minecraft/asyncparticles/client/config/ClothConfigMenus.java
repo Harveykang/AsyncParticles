@@ -16,10 +16,12 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 import java.util.Optional;
 
+import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
+
 // No more NoClassDefFoundError
 class ClothConfigMenus {
 	static ConfigBuilder screenBuilder(Screen screen) {
-		AsyncParticlesConfig.ConfigObj defaultConfig = new AsyncParticlesConfig.ConfigObj();
+		ConfigObj defaultConfig = new ConfigObj();
 		ConfigBuilder builder = ConfigBuilder.create()
 			.setParentScreen(screen)
 			.setTitle(Component.translatable("gui.asyncparticles"))
@@ -32,11 +34,11 @@ class ClothConfigMenus {
 		particleCategory
 			.addEntry(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.particle.particleLimit"),
-					AsyncParticlesConfig.particle$particleLimit)
+					particle$particleLimit)
 				.setDefaultValue(defaultConfig.particle.particleLimit)
 				.setTooltip(Component.translatable("config.asyncparticles.particle.particleLimit.tooltip"))
 				.setSaveConsumer(newValue -> {
-					AsyncParticlesConfig.particle$particleLimit = newValue;
+					particle$particleLimit = newValue;
 					AsyncTicker.reloadLater();
 				})
 				.setMin(1024)
@@ -44,10 +46,10 @@ class ClothConfigMenus {
 				.build())
 			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.particleLightCache"),
-					AsyncParticlesConfig.particle$particleLightCache)
+					particle$particleLightCache)
 				.setDefaultValue(defaultConfig.particle.particleLightCache)
 				.setTooltip(Component.translatable("config.asyncparticles.particle.particleLightCache.tooltip"))
-				.setSaveConsumer(newValue -> AsyncParticlesConfig.particle$particleLightCache = newValue)
+				.setSaveConsumer(newValue -> particle$particleLightCache = newValue)
 				.build());
 
 		ConfigCategory tickCategory = builder
@@ -55,32 +57,32 @@ class ClothConfigMenus {
 		tickCategory
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.tick.asyncAnimationTickBehavior"),
-					AsyncTickBehavior.class, AsyncParticlesConfig.tick$asyncAnimationTickBehavior)
+					AsyncTickBehavior.class, tick$asyncAnimationTickBehavior)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
 				.setDefaultValue(defaultConfig.tick.asyncAnimationTickBehavior)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.asyncAnimationTickBehavior.tooltip"))
-				.setSaveConsumer(newValue -> AsyncParticlesConfig.tick$asyncAnimationTickBehavior = newValue)
+				.setSaveConsumer(newValue -> tick$asyncAnimationTickBehavior = newValue)
 				.build())
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.tick.asyncParticleTickBehavior"),
-					AsyncTickBehavior.class, AsyncParticlesConfig.tick$asyncParticleTickBehavior)
+					AsyncTickBehavior.class, tick$asyncParticleTickBehavior)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
 				.setDefaultValue(defaultConfig.tick.asyncParticleTickBehavior)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.asyncParticleTickBehavior.tooltip"))
-				.setSaveConsumer(newValue -> AsyncParticlesConfig.tick$asyncParticleTickBehavior = newValue)
+				.setSaveConsumer(newValue -> tick$asyncParticleTickBehavior = newValue)
 				.build())
 			.addEntry(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.tick.failPerSecLimit"),
-					AsyncParticlesConfig.tick$failPerSecLimit)
+					tick$failPerSecLimit)
 				.setDefaultValue(defaultConfig.tick.failPerSecLimit)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.failPerSecLimit.tooltip"))
-				.setSaveConsumer(newValue -> AsyncParticlesConfig.tick$failPerSecLimit = newValue)
+				.setSaveConsumer(newValue -> tick$failPerSecLimit = newValue)
 				.setMin(0)
 				.setMax(256)
 				.build())
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.tick.failBehavior"),
-					FailBehavior.class, AsyncParticlesConfig.tick$failBehavior)
+					FailBehavior.class, tick$failBehavior)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
 				.setDefaultValue(defaultConfig.tick.failBehavior)
 				.setTooltip(Component.empty()
@@ -89,15 +91,15 @@ class ClothConfigMenus {
 					.append("\n")
 					.append(Component.translatable("config.asyncparticles.not-implemented")
 						.withStyle(ChatFormatting.DARK_RED)))
-				.setSaveConsumer(newValue -> AsyncParticlesConfig.tick$failBehavior = newValue)
+				.setSaveConsumer(newValue -> tick$failBehavior = newValue)
 				.setRequirement(() -> false)
 				.build())
 			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.suppressCME"),
-					AsyncParticlesConfig.tick$suppressCME)
+					tick$suppressCME)
 				.setDefaultValue(defaultConfig.tick.suppressCME)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.suppressCME.tooltip"))
-				.setSaveConsumer(newValue -> AsyncParticlesConfig.tick$suppressCME = newValue)
+				.setSaveConsumer(newValue -> tick$suppressCME = newValue)
 				.build());
 
 		// Rendering Category
@@ -105,14 +107,14 @@ class ClothConfigMenus {
 		renderingCategory
 			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.cullParticles"),
-					AsyncParticlesConfig.rendering$cullParticles)
+					rendering$cullParticles)
 				.setDefaultValue(defaultConfig.rendering.cullParticles)
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.cullParticles.tooltip"))
-				.setSaveConsumer(newValue -> AsyncParticlesConfig.rendering$cullParticles = newValue)
+				.setSaveConsumer(newValue -> rendering$cullParticles = newValue)
 				.build())
 			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.asyncParticleRendering"),
-					AsyncParticlesConfig.rendering$asyncParticleRendering)
+					rendering$asyncParticleRendering)
 				.setDefaultValue(defaultConfig.rendering.asyncParticleRendering)
 				.setTooltipSupplier(() -> {
 					Component[] components;
@@ -128,21 +130,21 @@ class ClothConfigMenus {
 					}
 					return Optional.of(components);
 				})
-				.setSaveConsumer(newValue -> AsyncParticlesConfig.rendering$asyncParticleRendering = newValue)
+				.setSaveConsumer(newValue -> rendering$asyncParticleRendering = newValue)
 				.setRequirement(() -> !ModListHelper.PHOTON_EDITOR_LOADED)
 				.build())
 			.addEntry(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.rendering.failPerSecLimit"),
-					AsyncParticlesConfig.rendering$failPerSecLimit)
+					rendering$failPerSecLimit)
 				.setDefaultValue(defaultConfig.rendering.failPerSecLimit)
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.failPerSecLimit.tooltip"))
-				.setSaveConsumer(newValue -> AsyncParticlesConfig.rendering$failPerSecLimit = newValue)
+				.setSaveConsumer(newValue -> rendering$failPerSecLimit = newValue)
 				.setMin(0)
 				.setMax(256)
 				.build())
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.failBehavior"),
-					FailBehavior.class, AsyncParticlesConfig.rendering$failBehavior)
+					FailBehavior.class, rendering$failBehavior)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
 				.setDefaultValue(defaultConfig.rendering.failBehavior)
 				.setTooltip(Component.empty()
@@ -150,7 +152,7 @@ class ClothConfigMenus {
 					.append("\n")
 					.append(Component.translatable("config.asyncparticles.not-implemented")
 						.withStyle(ChatFormatting.DARK_RED)))
-				.setSaveConsumer(newValue -> AsyncParticlesConfig.rendering$failBehavior = newValue)
+				.setSaveConsumer(newValue -> rendering$failBehavior = newValue)
 				.setRequirement(() -> false)
 				.build());
 
@@ -164,18 +166,18 @@ class ClothConfigMenus {
 						// .startEnumSelector(Component.translatable("config.asyncparticles.valkyrienskies.rainEffect"),
 						// 	RainEffect.class, valkyrienSkies$rainEffect)
 						.startSelector(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect"),
-							new RainEffect[]{RainEffect.ALWAYS, RainEffect.STATIONARY}, AsyncParticlesConfig.valkyrienSkies$rainEffect)
+							new RainEffect[]{RainEffect.ALWAYS, RainEffect.STATIONARY}, valkyrienSkies$rainEffect)
 						.setNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
 						.setDefaultValue(defaultConfig.valkyrienSkies.rainEffect)
 						.setTooltip(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect.tooltip"))
-						.setSaveConsumer(newValue -> AsyncParticlesConfig.valkyrienSkies$rainEffect = newValue)
+						.setSaveConsumer(newValue -> valkyrienSkies$rainEffect = newValue)
 						.setRequirement(() -> ModListHelper.VS_LOADED)
 						.build(), entryBuilder
 						.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.fixParticleLights"),
-							AsyncParticlesConfig.valkyrienSkies$fixParticleLights)
+							valkyrienSkies$fixParticleLights)
 						.setDefaultValue(defaultConfig.valkyrienSkies.fixParticleLights)
 						.setTooltip(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.fixParticleLights.tooltip"))
-						.setSaveConsumer(newValue -> AsyncParticlesConfig.valkyrienSkies$fixParticleLights = newValue)
+						.setSaveConsumer(newValue -> valkyrienSkies$fixParticleLights = newValue)
 						.setRequirement(() -> ModListHelper.VS_LOADED)
 						.build()
 					))
@@ -185,7 +187,7 @@ class ClothConfigMenus {
 				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
 					List.of(entryBuilder
 						.startEnumSelector(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect"),
-							RainEffect.class, AsyncParticlesConfig.create$rainEffect)
+							RainEffect.class, create$rainEffect)
 						.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
 						.setDefaultValue(defaultConfig.create.rainEffect)
 						.setTooltip(Component.empty()
@@ -194,7 +196,7 @@ class ClothConfigMenus {
 							.append("\n")
 							.append(Component.translatable("config.asyncparticles.not-implemented")
 								.withStyle(ChatFormatting.DARK_RED)))
-						.setSaveConsumer(newValue -> AsyncParticlesConfig.create$rainEffect = newValue)
+						.setSaveConsumer(newValue -> create$rainEffect = newValue)
 						// .setRequirement(() -> ModListHelper.CREATE_LOADED)
 						.setRequirement(() -> false)
 						.build()))
@@ -207,10 +209,10 @@ class ClothConfigMenus {
 
 		builder.setSavingRunnable(() -> {
 			try {
-				AsyncParticlesConfig.save();
+				save();
 				ClothConfigMixinMenus.onSave(newConfig);
 			} catch (Exception e) {
-				AsyncParticlesConfig.LOGGER.error("Failed to save config", e);
+				LOGGER.error("Failed to save config", e);
 				Minecraft mc = Minecraft.getInstance();
 				Screen configScreen = mc.screen;
 				ThreadUtil.enqueueClientTask(() -> {
