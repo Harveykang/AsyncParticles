@@ -5,13 +5,13 @@ import net.minecraft.network.chat.Component;
 
 import java.util.function.Supplier;
 
-public enum RainEffect implements TranslatableEnum {
-	NONE(() -> Component.translatable("config.asyncparticles.enum.RainEffect.NONE")),
-	STATIONARY(() -> Component.translatable("config.asyncparticles.enum.RainEffect.STATIONARY")),
-	ALWAYS(() -> Component.translatable("config.asyncparticles.enum.RainEffect.ALWAYS"));
+public enum TickMode implements TranslatableEnum {
+	INTERRUPTIBLE(() -> Component.translatable("config.asyncparticles.enum.TickMode.INTERRUPTIBLE")),
+	FORCE_COMPLETE(() -> Component.translatable("config.asyncparticles.enum.TickMode.FORCE_COMPLETE")),
+	SYNCHRONOUSLY(() -> Component.translatable("config.asyncparticles.enum.TickMode.SYNCHRONOUSLY"));
 	private final Supplier<Component> componentSupplier;
 
-	RainEffect(Supplier<Component> componentSupplier) {
+	TickMode(Supplier<Component> componentSupplier) {
 		this.componentSupplier = componentSupplier;
 	}
 

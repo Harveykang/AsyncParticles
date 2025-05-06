@@ -10,7 +10,6 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.CustomTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
-import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -66,6 +65,7 @@ public abstract class MixinParticleEngine_Render {
 		// We don't use entrySet() to be compatible with iris.
 		boolean renderAsync = ConfigHelper.isRenderAsync();
 		boolean cullParticles = ConfigHelper.isCullParticles();
+		boolean mixedParticleRendering = AsyncRenderer.isMixedParticleRendering();
 		for (ParticleRenderType particleRenderType : particles.keySet()) {
 			// FORGE doesn't skip NO_RENDER
 			if (particleRenderType == ParticleRenderType.NO_RENDER) {
@@ -90,8 +90,7 @@ public abstract class MixinParticleEngine_Render {
 			} else if ((bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager)) ==
 					   FakeBufferBuilder.INSTANCE) {
 				enableCull = cullParticles;
-				syncParticles = AsyncRenderer.isMixedParticleRenderingSetting()
-					? Collections.emptyList() : queue;
+				syncParticles = mixedParticleRendering ? Collections.emptyList() : queue;
 				tesselator = Tesselator.getInstance();
 				toBegin = bufferBuilder = tesselator.getBuilder();
 			} else {

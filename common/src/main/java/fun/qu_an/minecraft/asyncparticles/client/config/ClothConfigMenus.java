@@ -28,7 +28,7 @@ class ClothConfigMenus {
 			.setTransparentBackground(true);
 		ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
-		// Tick Category
+		// region Particle Category
 		ConfigCategory particleCategory = builder
 			.getOrCreateCategory(Component.translatable("config.asyncparticles.category.particle"));
 		particleCategory
@@ -51,25 +51,26 @@ class ClothConfigMenus {
 				.setTooltip(Component.translatable("config.asyncparticles.particle.particleLightCache.tooltip"))
 				.setSaveConsumer(newValue -> particle$particleLightCache = newValue)
 				.build());
-
+		// endregion
+		// region Tick Category
 		ConfigCategory tickCategory = builder
 			.getOrCreateCategory(Component.translatable("config.asyncparticles.category.tick"));
 		tickCategory
 			.addEntry(entryBuilder
-				.startEnumSelector(Component.translatable("config.asyncparticles.tick.asyncAnimationTickBehavior"),
-					AsyncTickBehavior.class, tick$asyncAnimationTickBehavior)
-				.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
-				.setDefaultValue(defaultConfig.tick.asyncAnimationTickBehavior)
-				.setTooltip(Component.translatable("config.asyncparticles.tick.asyncAnimationTickBehavior.tooltip"))
-				.setSaveConsumer(newValue -> tick$asyncAnimationTickBehavior = newValue)
+				.startEnumSelector(Component.translatable("config.asyncparticles.tick.animationTickMode"),
+					TickMode.class, tick$animationTickMode)
+				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
+				.setDefaultValue(defaultConfig.tick.animationTickMode)
+				.setTooltip(Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip"))
+				.setSaveConsumer(newValue -> tick$animationTickMode = newValue)
 				.build())
 			.addEntry(entryBuilder
-				.startEnumSelector(Component.translatable("config.asyncparticles.tick.asyncParticleTickBehavior"),
-					AsyncTickBehavior.class, tick$asyncParticleTickBehavior)
-				.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
-				.setDefaultValue(defaultConfig.tick.asyncParticleTickBehavior)
-				.setTooltip(Component.translatable("config.asyncparticles.tick.asyncParticleTickBehavior.tooltip"))
-				.setSaveConsumer(newValue -> tick$asyncParticleTickBehavior = newValue)
+				.startEnumSelector(Component.translatable("config.asyncparticles.tick.particleTickMode"),
+					TickMode.class, tick$particleTickMode)
+				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
+				.setDefaultValue(defaultConfig.tick.particleTickMode)
+				.setTooltip(Component.translatable("config.asyncparticles.tick.particleTickMode.tooltip"))
+				.setSaveConsumer(newValue -> tick$particleTickMode = newValue)
 				.build())
 			.addEntry(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.tick.failPerSecLimit"),
@@ -83,14 +84,13 @@ class ClothConfigMenus {
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.tick.failBehavior"),
 					FailBehavior.class, tick$failBehavior)
-				.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
+				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
 				.setDefaultValue(defaultConfig.tick.failBehavior)
-				.setTooltip(Component.empty()
-					.append(Component.translatable("config.asyncparticles.tick.failBehavior.tooltip")
-						.withStyle(ChatFormatting.STRIKETHROUGH))
-					.append("\n")
-					.append(Component.translatable("config.asyncparticles.not-implemented")
-						.withStyle(ChatFormatting.DARK_RED)))
+				.setTooltip(
+					Component.translatable("config.asyncparticles.tick.failBehavior.tooltip")
+						.withStyle(ChatFormatting.STRIKETHROUGH),
+					Component.translatable("config.asyncparticles.not-implemented")
+						.withStyle(ChatFormatting.DARK_RED))
 				.setSaveConsumer(newValue -> tick$failBehavior = newValue)
 				.setRequirement(() -> false)
 				.build())
@@ -101,8 +101,8 @@ class ClothConfigMenus {
 				.setTooltip(Component.translatable("config.asyncparticles.tick.suppressCME.tooltip"))
 				.setSaveConsumer(newValue -> tick$suppressCME = newValue)
 				.build());
-
-		// Rendering Category
+		// endregion
+		// region Rendering Category
 		ConfigCategory renderingCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.rendering"));
 		renderingCategory
 			.addEntry(entryBuilder
@@ -113,24 +113,25 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> rendering$cullParticles = newValue)
 				.build())
 			.addEntry(entryBuilder
-				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.asyncParticleRendering"),
-					rendering$asyncParticleRendering)
-				.setDefaultValue(defaultConfig.rendering.asyncParticleRendering)
+				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.particleRenderingMode"),
+					RenderingMode.class, rendering$particleRenderingMode)
+				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
+				.setDefaultValue(defaultConfig.rendering.particleRenderingMode)
 				.setTooltipSupplier(() -> {
 					Component[] components;
 					if (!ModListHelper.PHOTON_EDITOR_LOADED) {
 						components = new Component[]{
-							Component.translatable("config.asyncparticles.rendering.asyncParticleRendering.tooltip")};
+							Component.translatable("config.asyncparticles.rendering.particleRenderingMode.tooltip")};
 					} else {
 						components = new Component[]{
-							Component.translatable("config.asyncparticles.rendering.asyncParticleRendering.tooltip")
+							Component.translatable("config.asyncparticles.rendering.particleRenderingMode.tooltip")
 								.withStyle(ChatFormatting.STRIKETHROUGH),
 							Component.translatable("config.asyncparticles.incompatibility", "Photon Editor")
 								.withStyle(ChatFormatting.DARK_RED)};
 					}
 					return Optional.of(components);
 				})
-				.setSaveConsumer(newValue -> rendering$asyncParticleRendering = newValue)
+				.setSaveConsumer(newValue -> rendering$particleRenderingMode = newValue)
 				.setRequirement(() -> !ModListHelper.PHOTON_EDITOR_LOADED)
 				.build())
 			.addEntry(entryBuilder
@@ -145,18 +146,17 @@ class ClothConfigMenus {
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.failBehavior"),
 					FailBehavior.class, rendering$failBehavior)
-				.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
+				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
 				.setDefaultValue(defaultConfig.rendering.failBehavior)
-				.setTooltip(Component.empty()
-					.append(Component.translatable("config.asyncparticles.rendering.failBehavior.tooltip"))
-					.append("\n")
-					.append(Component.translatable("config.asyncparticles.not-implemented")
-						.withStyle(ChatFormatting.DARK_RED)))
+				.setTooltip(
+					Component.translatable("config.asyncparticles.rendering.failBehavior.tooltip"),
+					Component.translatable("config.asyncparticles.not-implemented")
+						.withStyle(ChatFormatting.DARK_RED))
 				.setSaveConsumer(newValue -> rendering$failBehavior = newValue)
 				.setRequirement(() -> false)
 				.build());
-
-		// Mod Compat Category
+		// endregion
+		// region Mod Compat Category
 		ConfigCategory modCompatCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mod-compat"));
 		modCompatCategory
 			.addEntry(entryBuilder
@@ -167,7 +167,7 @@ class ClothConfigMenus {
 						// 	RainEffect.class, valkyrienSkies$rainEffect)
 						.startSelector(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect"),
 							new RainEffect[]{RainEffect.ALWAYS, RainEffect.STATIONARY}, valkyrienSkies$rainEffect)
-						.setNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
+						.setNameProvider(value -> ((TranslatableEnum) value).getComponent())
 						.setDefaultValue(defaultConfig.valkyrienSkies.rainEffect)
 						.setTooltip(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect.tooltip"))
 						.setSaveConsumer(newValue -> valkyrienSkies$rainEffect = newValue)
@@ -188,24 +188,25 @@ class ClothConfigMenus {
 					List.of(entryBuilder
 						.startEnumSelector(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect"),
 							RainEffect.class, create$rainEffect)
-						.setEnumNameProvider(value -> ((TranslatableEnum) value).getTranslatable())
+						.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
 						.setDefaultValue(defaultConfig.create.rainEffect)
-						.setTooltip(Component.empty()
-							.append(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect.tooltip")
-								.withStyle(ChatFormatting.STRIKETHROUGH))
-							.append("\n")
-							.append(Component.translatable("config.asyncparticles.not-implemented")
-								.withStyle(ChatFormatting.DARK_RED)))
+						.setTooltip(
+							Component.translatable("config.asyncparticles.mod-compat.create.rainEffect.tooltip")
+								.withStyle(ChatFormatting.STRIKETHROUGH),
+							Component.translatable("config.asyncparticles.not-implemented")
+								.withStyle(ChatFormatting.DARK_RED))
 						.setSaveConsumer(newValue -> create$rainEffect = newValue)
 						// .setRequirement(() -> ModListHelper.CREATE_LOADED)
 						.setRequirement(() -> false)
 						.build()))
 				.build());
-
+		// endregion
+		// region Mixin Category
 		ConfigCategory mixinCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mixin"));
 		ConfigEntryBuilder mixinEntryBuilder = builder.entryBuilder();
 		mixinEntryBuilder.setResetButtonKey(Component.translatable("gui.asyncparticles.revert"));
 		Object newConfig = ClothConfigMixinMenus.buildCategory(mixinCategory, mixinEntryBuilder);
+		// endregion
 
 		builder.setSavingRunnable(() -> {
 			try {

@@ -157,6 +157,12 @@ dependencies {
 
     /* Particular Reforged */
     modCompileOnly "maven.modrinth:particular-reforged:ZP94L2Nm" // 1.2.0
+
+    /* Fluffy Fur */
+    modCompileOnly "maven.modrinth:fluffy-fur:1.20.1-0.1.9"
+
+    /* Wizards Reborn */
+//    modCompileOnly "maven.modrinth:wizards-reborn:1.20.1-0.2.9"
 }
 
 processResources {

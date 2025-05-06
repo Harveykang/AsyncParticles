@@ -291,15 +291,11 @@ public class VSClientUtils {
 		return level.getHeight(Heightmap.Types.MOTION_BLOCKING, floor(posInShip.x), floor(posInShip.z)) >= posInShip.y;
 	}
 
-	public static boolean isOutOfSight(Particle particle) {
-		double x1 = particle.x;
-		double y1 = particle.y;
-		double z1 = particle.z;
-
+	public static boolean isOutOfSight(ClientLevel level, double x1, double y1, double z1) {
 		double inWorldX1 = x1;
 		double inWorldZ1 = z1;
 
-		var ship1 = VSGameUtilsKt.getShipManagingPos(particle.level, x1, y1, z1);
+		var ship1 = VSGameUtilsKt.getShipManagingPos(level, x1, y1, z1);
 		if (ship1 != null) {
 			Matrix4dc m = ship1.getShipToWorld();
 			inWorldX1 = m.m00() * x1 + m.m10() * y1 + m.m20() * z1 + m.m30();
@@ -307,7 +303,7 @@ public class VSClientUtils {
 		}
 
 		Minecraft mc = Minecraft.getInstance();
-		int renderDistance = mc.levelRenderer.lastViewDistance << 4;
+		int renderDistance = mc.options.getEffectiveRenderDistance() << 4;
 		Camera camera = mc.gameRenderer.getMainCamera();
 
 		Vec3 pos = camera.getPosition();

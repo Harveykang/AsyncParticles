@@ -37,19 +37,19 @@ public class LegacyConfigMigrator {
 		tick$failPerSecLimit = getInt(properties, "tickFailurePerSecondThreshold", defaultConfig.tick.failPerSecLimit);
 		tick$suppressCME = getBoolean(properties, "suppressCME", defaultConfig.tick.suppressCME);
 		if (!getBoolean(properties, "asyncClientBlockEntityAnimate",
-			defaultConfig.tick.asyncAnimationTickBehavior != AsyncTickBehavior.DISABLED)) {
-			tick$asyncAnimationTickBehavior = AsyncTickBehavior.DISABLED;
+			defaultConfig.tick.animationTickMode != TickMode.SYNCHRONOUSLY)) {
+			tick$animationTickMode = TickMode.SYNCHRONOUSLY;
 		} else if (getBoolean(properties, "forceDoneBlockAnimateTick",
-			defaultConfig.tick.asyncAnimationTickBehavior == AsyncTickBehavior.FORCE_COMPLETE)) {
-			tick$asyncAnimationTickBehavior = AsyncTickBehavior.FORCE_COMPLETE;
+			defaultConfig.tick.animationTickMode == TickMode.FORCE_COMPLETE)) {
+			tick$animationTickMode = TickMode.FORCE_COMPLETE;
 		} else {
-			tick$asyncAnimationTickBehavior = AsyncTickBehavior.INTERRUPTIBLE;
+			tick$animationTickMode = TickMode.INTERRUPTIBLE;
 		}
 		if (getBoolean(properties, "forceDoneParticleTick",
-			defaultConfig.tick.asyncParticleTickBehavior == AsyncTickBehavior.FORCE_COMPLETE)) {
-			tick$asyncParticleTickBehavior = AsyncTickBehavior.FORCE_COMPLETE;
+			defaultConfig.tick.particleTickMode == TickMode.FORCE_COMPLETE)) {
+			tick$particleTickMode = TickMode.FORCE_COMPLETE;
 		} else {
-			tick$asyncParticleTickBehavior = defaultConfig.tick.asyncParticleTickBehavior;
+			tick$particleTickMode = defaultConfig.tick.particleTickMode;
 		}
 
 		rendering$failPerSecLimit = getInt(properties, "renderFailurePerSecondThreshold", defaultConfig.rendering.failPerSecLimit);

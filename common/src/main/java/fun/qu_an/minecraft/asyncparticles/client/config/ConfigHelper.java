@@ -10,11 +10,11 @@ public class ConfigHelper {
 	}
 
 	public static boolean asyncBlockEntityAnimate() {
-		return AsyncParticlesConfig.tick$asyncAnimationTickBehavior != AsyncTickBehavior.DISABLED;
+		return AsyncParticlesConfig.tick$animationTickMode != TickMode.SYNCHRONOUSLY;
 	}
 
 	public static boolean forceDoneBlockAnimateTick() {
-		return AsyncParticlesConfig.tick$asyncAnimationTickBehavior == AsyncTickBehavior.FORCE_COMPLETE;
+		return AsyncParticlesConfig.tick$animationTickMode == TickMode.FORCE_COMPLETE;
 	}
 
 	public static boolean markSyncIfTickFailed() {
@@ -31,11 +31,11 @@ public class ConfigHelper {
 	}
 
 	public static boolean isTickAsync() {
-		return AsyncParticlesConfig.tick$asyncParticleTickBehavior != AsyncTickBehavior.DISABLED;
+		return AsyncParticlesConfig.tick$particleTickMode != TickMode.SYNCHRONOUSLY;
 	}
 
 	public static boolean forceDoneParticleTick() {
-		return AsyncParticlesConfig.tick$asyncParticleTickBehavior == AsyncTickBehavior.FORCE_COMPLETE;
+		return AsyncParticlesConfig.tick$particleTickMode == TickMode.FORCE_COMPLETE;
 	}
 
 	public static boolean fixParticleLightOnVsShips() {
@@ -63,7 +63,15 @@ public class ConfigHelper {
 	}
 
 	public static boolean isRenderAsync() {
-		return AsyncParticlesConfig.rendering$asyncParticleRendering;
+		return AsyncParticlesConfig.rendering$particleRenderingMode != RenderingMode.SYNCHRONOUSLY;
+	}
+
+	public static boolean isCompatibilityRendering() {
+		return AsyncParticlesConfig.rendering$particleRenderingMode == RenderingMode.COMPATIBILITY;
+	}
+
+	public static boolean isDelayedRendering() {
+		return AsyncParticlesConfig.rendering$particleRenderingMode == RenderingMode.DELAYED;
 	}
 
 	public static boolean isCullParticles() {

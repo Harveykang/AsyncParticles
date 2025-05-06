@@ -36,7 +36,7 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 			return;
 		}
 		AsyncParticlesClient.init();
-		if (ModListHelper.FABRIC_API_LOADED) {
+		if (ModListHelper.FABRIC_API_LOADED) { // assert !IS_FORGE
 			ClientCommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
 				dispatcher.register(literal(AsyncParticlesClient.MOD_ID)
 					.then(literal("isfabricmod")

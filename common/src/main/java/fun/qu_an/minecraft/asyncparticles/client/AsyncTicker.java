@@ -382,13 +382,14 @@ public class AsyncTicker {
 			return;
 		}
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
+		boolean enableLightCache = ConfigHelper.particleLightCache();
 		for (Iterator<Particle> iterator = SYNC_PARTICLES.iterator(); iterator.hasNext(); ) {
 			Particle particle = iterator.next();
 			try {
 				particleEngine.tickParticle(particle);
 				if (!(particle instanceof TrackingEmitter)) {
 					if (particle instanceof LightCachedParticleAddon lightCachedParticle
-						&& ConfigHelper.particleLightCache()) {
+						&& enableLightCache) {
 						lightCachedParticle.asyncparticles$refresh();
 					}
 					((ParticleAddon) particle).asyncparticles$setTicked();
@@ -398,7 +399,7 @@ public class AsyncTicker {
 			}
 			if (!particle.isAlive()) {
 				// we manage the count in cleanup task
-//				particle.getParticleGroup().ifPresent((particleGroup) -> particleEngine.updateCount(particleGroup, -1));
+				//				particle.getParticleGroup().ifPresent((particleGroup) -> particleEngine.updateCount(particleGroup, -1));
 				iterator.remove();
 			}
 		}

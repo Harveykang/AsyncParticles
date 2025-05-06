@@ -4,12 +4,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 
 public class VSCompat {
-	public static void removeIfOutOfSight(Particle particle) {
-		if (VSClientUtils.isOutOfSight(particle)) {
-			particle.remove();
-		}
-	}
-
 	public static boolean canCreateWeatherParticle(ClientLevel level, double x, double y, double z) {
 		return !VSClientUtils.isUnderShipHeightMap(level, x, y, z, 0.5);
 	}

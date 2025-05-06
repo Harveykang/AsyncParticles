@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.compat;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
+import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
 import org.sinytra.connector.loader.ConnectorEarlyLoader;
 
 @PreLaunch
@@ -90,6 +91,11 @@ public class ModListHelper {
 	public static final boolean CLOTH_CONFIG_LOADED = isModLoaded("cloth_config") || isModLoaded("cloth-config");
 	/* Photon Editor */
 	public static final boolean PHOTON_EDITOR_LOADED = isModLoaded("photon");
+	/* Fluffy Fur */
+	public static final boolean FLUFFY_FUR_LOADED = isModLoaded("fluffy_fur");
+	public static final boolean FORGE_FLUFFY_FUR_LOADED = isForgeModLoaded("fluffy_fur");
+	/* Wizards Reborn */
+	public static final boolean FORGE_WIZARDS_REBORN_LOADED = isForgeModLoaded("wizards_reborn");
 
 	@ExpectPlatform
 	private static boolean isForge() {
@@ -129,7 +135,8 @@ public class ModListHelper {
 
 	@ExpectPlatform
 	public static boolean isDevelopmentEnvironment() {
-		throw new AssertionError();
+		ExceptionUtil.throwAssertionError();
+		return false;
 	}
 
 	public static boolean classExists(String className) {

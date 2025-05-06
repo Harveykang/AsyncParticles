@@ -38,7 +38,7 @@ public abstract class MixinClientLevel extends Level {
 
 	@Unique
 	private static final ResourceLocation asyncparticles$ANIMATE_TICK =
-		ResourceLocation.tryBuild("asyncparticles", "animate_tick");
+		new ResourceLocation("asyncparticles", "animate_tick");
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int i, int j, int k, Operation<Void> original) {
 		if (!AsyncTicker.shouldTickParticles &&

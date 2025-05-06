@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.render;
 
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
@@ -32,7 +34,21 @@ public abstract class MixinLevelRenderer {
 	private Frustum cullingFrustum;
 
 	@Inject(method = "renderLevel", at = @At(value = "HEAD"))
-	private void onRenderLevelHead(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+	private void onRenderLevelHead(PoseStack poseStack,
+								   float f,
+								   long l,
+								   boolean bl,
+								   Camera camera,
+								   GameRenderer gameRenderer,
+								   LightTexture lightTexture,
+								   Matrix4f matrix4f,
+								   CallbackInfo ci,
+								   @Share(namespace = "asyncparticles", value = "isRenderAsync")
+								   LocalBooleanRef isRenderAsync,
+								   @Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
+								   LocalBooleanRef isMixedParticleRendering) {
+		boolean b = ConfigHelper.isRenderAsync();
+		isRenderAsync.set(b);
 		if (this.capturedFrustum != null) {
 			Frustum frustum = this.capturedFrustum;
 			frustum.prepare(this.frustumPos.x, this.frustumPos.y, this.frustumPos.z);
@@ -40,7 +56,8 @@ public abstract class MixinLevelRenderer {
 		} else {
 			AsyncRenderer.frustum = this.cullingFrustum;
 		}
-		AsyncRenderer.start(f, camera);
+		AsyncRenderer.start(f, camera, b);
+		isMixedParticleRendering.set(AsyncRenderer.isMixedParticleRendering());
 	}
 
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;prepare(DDD)V"))
@@ -48,19 +65,21 @@ public abstract class MixinLevelRenderer {
 		// do nothing
 	}
 
-//	@Inject(method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V",
-//		at = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;"))
-//	private void onRenderLevelTransparencyChain(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
-//		if (ConfigHelper.isRenderAsync()) {
-//			AsyncRenderer.setStage(AsyncRenderer.Stage.RENDERABLE);
-//		}
-//	}
+	//	@Inject(method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V",
+	//		at = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;"))
+	//	private void onRenderLevelTransparencyChain(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
+	//		if (ConfigHelper.isRenderAsync()) {
+	//			AsyncRenderer.setStage(AsyncRenderer.Stage.RENDERABLE);
+	//		}
+	//	}
 
 	@Redirect(method = "renderLevel",
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;particlesTarget:Lcom/mojang/blaze3d/pipeline/RenderTarget;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;clear(Z)V"))
-	private void redirectClearRenderTarget(RenderTarget instance, boolean bl) {
-		if (!ConfigHelper.isRenderAsync()) {
+	private void redirectClearRenderTarget(RenderTarget instance, boolean bl,
+										   @Share(namespace = "asyncparticles", value = "isRenderAsync")
+										   LocalBooleanRef isRenderAsync) {
+		if (!isRenderAsync.get()) {
 			instance.clear(bl);
 		}
 	}
@@ -68,8 +87,10 @@ public abstract class MixinLevelRenderer {
 	@Redirect(method = "renderLevel",
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;particlesTarget:Lcom/mojang/blaze3d/pipeline/RenderTarget;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;copyDepthFrom(Lcom/mojang/blaze3d/pipeline/RenderTarget;)V"))
-	private void redirectCopyDepthFrom(RenderTarget instance, RenderTarget target) {
-		if (!ConfigHelper.isRenderAsync()) {
+	private void redirectCopyDepthFrom(RenderTarget instance, RenderTarget target,
+									   @Share(namespace = "asyncparticles", value = "isRenderAsync")
+									   LocalBooleanRef isRenderAsync) {
+		if (!isRenderAsync.get()) {
 			instance.copyDepthFrom(target);
 		}
 	}
@@ -77,8 +98,10 @@ public abstract class MixinLevelRenderer {
 	@Redirect(method = "renderLevel",
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderStateShard;PARTICLES_TARGET:Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;setupRenderState()V"))
-	private void redirectSetupRenderState(RenderStateShard.OutputStateShard instance) {
-		if (!ConfigHelper.isRenderAsync()) {
+	private void redirectSetupRenderState(RenderStateShard.OutputStateShard instance,
+										  @Share(namespace = "asyncparticles", value = "isRenderAsync")
+										  LocalBooleanRef isRenderAsync) {
+		if (!isRenderAsync.get()) {
 			instance.setupRenderState();
 		}
 	}
@@ -86,8 +109,10 @@ public abstract class MixinLevelRenderer {
 	@Redirect(method = "renderLevel",
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderStateShard;PARTICLES_TARGET:Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;clearRenderState()V"))
-	private void redirectClearRenderState(RenderStateShard.OutputStateShard instance) {
-		if (!ConfigHelper.isRenderAsync()) {
+	private void redirectClearRenderState(RenderStateShard.OutputStateShard instance,
+										  @Share(namespace = "asyncparticles", value = "isRenderAsync")
+										  LocalBooleanRef isRenderAsync) {
+		if (!isRenderAsync.get()) {
 			instance.clearRenderState();
 		}
 	}

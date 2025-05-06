@@ -46,11 +46,11 @@ public class ExceptionTracker<T> {
 		public boolean push() {
 			long time = System.currentTimeMillis();
 			LongPriorityQueue queue = this.queue;
-			queue.enqueue(time);
 			int size = queue.size();
-			while (--size >= 0 && time - queue.firstLong() > duration.getAsInt()) {
+			while (size-- >= 0 && time - queue.firstLong() > duration.getAsInt()) {
 				queue.dequeueLong();
 			}
+			queue.enqueue(time);
 			return queue.size() / (duration.getAsInt() * 0.001) >= failurePerSecThreshold.getAsInt();
 		}
 

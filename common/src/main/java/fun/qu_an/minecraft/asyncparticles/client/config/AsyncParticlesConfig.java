@@ -36,13 +36,13 @@ public class AsyncParticlesConfig {
 	static final Logger LOGGER = LogUtils.getLogger();
 	public static int particle$particleLimit;
 	public static boolean particle$particleLightCache;
-	public static AsyncTickBehavior tick$asyncAnimationTickBehavior;
-	public static AsyncTickBehavior tick$asyncParticleTickBehavior;
+	public static TickMode tick$animationTickMode;
+	public static TickMode tick$particleTickMode;
 	public static int tick$failPerSecLimit;
 	public static FailBehavior tick$failBehavior;
 	public static boolean tick$suppressCME;
 	public static boolean rendering$cullParticles;
-	public static boolean rendering$asyncParticleRendering;
+	public static RenderingMode rendering$particleRenderingMode;
 	public static int rendering$failPerSecLimit;
 	public static FailBehavior rendering$failBehavior;
 	public static RainEffect valkyrienSkies$rainEffect;
@@ -224,23 +224,23 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Tick {
-			AsyncTickBehavior asyncAnimationTickBehavior = AsyncTickBehavior.INTERRUPTIBLE;
-			AsyncTickBehavior asyncParticleTickBehavior = AsyncTickBehavior.INTERRUPTIBLE;
+			TickMode animationTickMode = TickMode.INTERRUPTIBLE;
+			TickMode particleTickMode = TickMode.INTERRUPTIBLE;
 			int failPerSecLimit = 5;
 			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
 			boolean suppressCME = false;
 
 			private void flat() {
-				tick$asyncAnimationTickBehavior = requireNonNullElse(asyncAnimationTickBehavior, AsyncTickBehavior.INTERRUPTIBLE);
-				tick$asyncParticleTickBehavior = requireNonNullElse(asyncParticleTickBehavior, AsyncTickBehavior.INTERRUPTIBLE);
+				tick$animationTickMode = requireNonNullElse(animationTickMode, TickMode.INTERRUPTIBLE);
+				tick$particleTickMode = requireNonNullElse(particleTickMode, TickMode.INTERRUPTIBLE);
 				tick$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				tick$failBehavior = requireNonNullElse(failBehavior, FailBehavior.RAISE_CRASH);
 				tick$suppressCME = suppressCME;
 			}
 
 			private void fold() {
-				asyncAnimationTickBehavior = tick$asyncAnimationTickBehavior;
-				asyncParticleTickBehavior = tick$asyncParticleTickBehavior;
+				animationTickMode = tick$animationTickMode;
+				particleTickMode = tick$particleTickMode;
 				failPerSecLimit = tick$failPerSecLimit;
 				failBehavior = tick$failBehavior;
 				suppressCME = tick$suppressCME;
@@ -249,20 +249,25 @@ public class AsyncParticlesConfig {
 
 		static class Rendering {
 			boolean cullParticles = true;
-			boolean asyncParticleRendering = true;
+			RenderingMode particleRenderingMode = ModListHelper.PHOTON_EDITOR_LOADED
+				? RenderingMode.SYNCHRONOUSLY
+				: RenderingMode.DELAYED;
 			int failPerSecLimit = 20;
 			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
 
 			private void flat() {
 				rendering$cullParticles = cullParticles;
-				rendering$asyncParticleRendering = !ModListHelper.PHOTON_EDITOR_LOADED && asyncParticleRendering;
+				rendering$particleRenderingMode = ModListHelper.PHOTON_EDITOR_LOADED
+					// Force sync if Photon is loaded.
+					? RenderingMode.SYNCHRONOUSLY
+					: requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
 				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
 			}
 
 			private void fold() {
 				cullParticles = rendering$cullParticles;
-				asyncParticleRendering = rendering$asyncParticleRendering;
+				particleRenderingMode = rendering$particleRenderingMode;
 				failPerSecLimit = rendering$failPerSecLimit;
 				failBehavior = rendering$failBehavior;
 			}

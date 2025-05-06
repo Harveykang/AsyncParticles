@@ -35,7 +35,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
-import team.lodestar.lodestone.events.Stage;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -127,10 +126,10 @@ public class AsyncRenderer {
 
 	/* Renderer */
 
-	public static void start(float f, Camera camera) {
+	public static void start(float f, Camera camera, boolean isRenderAsync) {
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
-		if (!ConfigHelper.isRenderAsync()) {
+		if (!isRenderAsync) {
 			captureParticleRenderingSetting();
 			tryDebug();
 			return;
@@ -228,9 +227,9 @@ public class AsyncRenderer {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
-		if (isMixedParticleRenderingSetting()) {
-			return;
-		}
+//		if (isMixedParticleRendering()) { // Tested outside.
+//			return;
+//		}
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
 		profiler.popPush("async_particles");
@@ -258,9 +257,9 @@ public class AsyncRenderer {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
-		if (!isMixedParticleRenderingSetting()) {
-			return;
-		}
+//		if (!isMixedParticleRendering()) { // Tested outside.
+//			return;
+//		}
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
 		profiler.popPush("async_particles");
@@ -277,9 +276,9 @@ public class AsyncRenderer {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
-		if (!isMixedParticleRenderingSetting()) {
-			return;
-		}
+//		if (!isMixedParticleRendering()) { // Tested outside.
+//			return;
+//		}
 		Minecraft mc = Minecraft.getInstance();
 		mc.getProfiler().popPush("async_particles");
 		LevelRenderer levelRenderer = mc.levelRenderer;
@@ -302,9 +301,9 @@ public class AsyncRenderer {
 	}
 
 	public static void irisSync(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
-		if (!isMixedParticleRenderingSetting()) {
-			return;
-		}
+//		if (!isMixedParticleRendering()) { // Tested outside.
+//			return;
+//		}
 		PoseStack poseStack2 = null;
 		Minecraft mc = Minecraft.getInstance();
 		ParticleEngine particleEngine = mc.particleEngine;
@@ -404,7 +403,7 @@ public class AsyncRenderer {
 		}
 	}
 
-	public static boolean isMixedParticleRenderingSetting() {
+	public static boolean isMixedParticleRendering() {
 		return mixedParticleRenderingSetting;
 	}
 

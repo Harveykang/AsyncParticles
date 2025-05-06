@@ -178,13 +178,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		return switch (split[0]) {
 			case "fabric" -> {
 				if (split.length == 2) {
-					if (IS_FORGE) {
-						yield false;
-					}
-					yield switch (split[1]) {
-						case "MixinLevelRenderer" -> !FABRIC_IRIS_LOADED;
-						default -> true;
-					};
+					yield !IS_FORGE;
 				}
 				yield switch (split[1]) {
 					case "particlerain_vs" -> FABRIC_PARTICLERAIN_LOADED && VS_LOADED;
@@ -198,6 +192,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					case "particular" -> FABRIC_PARTICULAR_LOADED;
 					case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
 					case "iris" -> FABRIC_IRIS_LOADED;
+					case "iris_else" -> !IS_FORGE && !FABRIC_IRIS_LOADED;
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
@@ -238,6 +233,8 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			}
 			case "watut" -> WATUT_LOADED;
 			case "lodestone" -> LODESTONE_LOADED;
+			case "fabric_api" -> FABRIC_API_LOADED; // Includes Connector
+			case "cloth_config" -> CLOTH_CONFIG_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}
