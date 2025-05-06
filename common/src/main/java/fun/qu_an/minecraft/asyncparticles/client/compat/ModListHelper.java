@@ -96,6 +96,8 @@ public class ModListHelper {
 	public static final boolean FORGE_FLUFFY_FUR_LOADED = isForgeModLoaded("fluffy_fur");
 	/* Wizards Reborn */
 	public static final boolean FORGE_WIZARDS_REBORN_LOADED = isForgeModLoaded("wizards_reborn");
+	/* Porting Lib Base */
+	public static final boolean FABRIC_PORTING_LIB_BASE_LOADED = isFabricModLoaded("porting_lib_base");
 
 	@ExpectPlatform
 	private static boolean isForge() {

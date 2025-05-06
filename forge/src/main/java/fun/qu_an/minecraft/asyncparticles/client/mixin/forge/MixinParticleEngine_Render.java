@@ -32,7 +32,6 @@ import java.util.*;
 @Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class MixinParticleEngine_Render {
 	@Shadow
-	@Final
 	public Map<ParticleRenderType, Queue<Particle>> particles;
 
 	@Shadow

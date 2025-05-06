@@ -1,5 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
+import com.bawnorton.mixinsquared.adjuster.MixinAnnotationAdjusterRegistrar;
+import com.bawnorton.mixinsquared.adjuster.tools.AdjustableAnnotationNode;
+import com.bawnorton.mixinsquared.adjuster.tools.AdjustableInjectorNode;
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
@@ -10,9 +13,11 @@ import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.MixinTargetModifier;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.MixinTargetsModifierRegistrar;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.service.MixinService;
 
 import java.io.IOException;
@@ -36,6 +41,8 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+		ExtensionRegistrar.register(new ExtensionMemberCancelApplication());
+
 		AsyncParticlesMixinConfig.Mixin$Particle config = AsyncParticlesMixinConfig.config;
 		MixinTargetsModifierRegistrar.register(new MixinTargetModifier() {
 			@Override
@@ -79,7 +86,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			@Override
 			public String getMixinClassName() {
 				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge." : "fabric.") +
-					"fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_ConcurrentUnsafe";
+					   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_ConcurrentUnsafe";
 			}
 
 			@Override
@@ -93,7 +100,6 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					   "asyncparticles-common-refmap.json";
 			}
 		});
-		ExtensionRegistrar.register(new ExtensionMemberCancelApplication());
 		MixinMemberCancellerRegistrar.register(new MixinMemberCanceller() {
 			@Override
 			public boolean preCancel(List<String> targetClassNames, String mixinClassName) {
@@ -101,7 +107,8 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					case "einstein.subtle_effects.mixin.client.particle.FabricParticleEngineMixin",
 						 "einstein.subtle_effects.mixin.client.particle.ForgeParticleEngineMixin",
 						 "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin",
-						 "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin" -> true;
+						 "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin",
+						 "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin" -> true;
 					default -> false;
 				};
 			}
@@ -115,6 +122,8 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					case "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin" -> "tick".equals(mixinMethodName);
 					case "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin" ->
 						"flerovium$getLightColorCached".equals(mixinMethodName);
+					case "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin" ->
+						"port_lib$addCustomRenderTypes".equals(mixinMethodName);
 					default -> false;
 				};
 			}
@@ -141,17 +150,11 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				 "me.fzzyhmstrs.particle_core.mixins.ParticleMixin",
 				 "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
 				 "com.moepus.flerovium.mixins.Particle.ParticleMixin"
-//			, TODO: 这里处理一下
-//				 "net.diebuddies.mixins.ocean.MixinParticleEngine"
+				//			, TODO: 这里处理一下
+				//				 "net.diebuddies.mixins.ocean.MixinParticleEngine"
 				-> true;
 			default -> false;
 		});
-//		MixinAnnotationAdjusterRegistrar.register((List<String> targetClassNames,
-//												   String mixinClassName,
-//												   MethodNode handlerNode,
-//												   AdjustableAnnotationNode annotationNode) -> {
-//			return annotationNode;
-//		});
 	}
 
 	@Override
@@ -193,6 +196,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
 					case "iris" -> FABRIC_IRIS_LOADED;
 					case "iris_else" -> !IS_FORGE && !FABRIC_IRIS_LOADED;
+					case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
@@ -235,6 +239,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "lodestone" -> LODESTONE_LOADED;
 			case "fabric_api" -> FABRIC_API_LOADED; // Includes Connector
 			case "cloth_config" -> CLOTH_CONFIG_LOADED;
+			case "photon_editor" -> PHOTON_EDITOR_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

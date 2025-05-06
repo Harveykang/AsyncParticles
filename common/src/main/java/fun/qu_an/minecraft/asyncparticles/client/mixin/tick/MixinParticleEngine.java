@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.tick;
 
+import com.bawnorton.mixinsquared.TargetHandler;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -64,7 +65,7 @@ public abstract class MixinParticleEngine {
 	 */
 	@Overwrite
 	public void tick() {
-//		assert AsyncTicker.shouldTickParticles;
+		//		assert AsyncTicker.shouldTickParticles;
 		particles.forEach((particleRenderType, queue) -> {
 			// submit this task even though the queue is empty
 			// we'll add particles later
@@ -117,12 +118,16 @@ public abstract class MixinParticleEngine {
 						}
 						// fix not added to RENDER_ORDER
 						// e.g. LodestoneParticleRenderType#*#withDepthFade()
-						if (!ModListHelper.IS_FORGE &&
-							k != ParticleRenderType.NO_RENDER &&
-							!RENDER_ORDER.contains(k)) {
-							// holy shit, this is definitely a giant of shit
-							asyncparticles_Neo$addToOrderList(k);
-						}
+						// Since 2.0:
+						// We don't do it ourselves, since it may cause some particles render twice
+						// Porting Lib will do this so we just do compat to them
+						// though theirs still may cause the same issue :(
+						//						if (!ModListHelper.IS_FORGE &&
+						//							k != ParticleRenderType.NO_RENDER &&
+						//							!RENDER_ORDER.contains(k)) {
+						//							// holy shit, this is definitely a giant of shit
+						//							asyncparticles_Neo$addToOrderList(k);
+						//						}
 						return queue1;
 					});
 				queue.add(particle);
@@ -245,20 +250,20 @@ public abstract class MixinParticleEngine {
 		AsyncTicker.onParticleEngineClear();
 	}
 
-//	@Inject(method = "createParticle", at = @At("HEAD"), cancellable = true)
-//	public void onCreateParticle(ParticleOptions particleType, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, CallbackInfoReturnable<Particle> cir) {
-//		if (!ModListHelper.CREATE_LOADED && !ModListHelper.VS_LOADED) {
-//			return;
-//		}
-//		ResourceLocation key = BuiltInRegistries.PARTICLE_TYPE.getKey(particleType.getType());
-//		if (!SimplePropertiesConfig.getWeatherParticles().contains(key)) {
-//			return;
-//		}
-//		if (ModListHelper.CREATE_LOADED && !CreateCompat.canSpawnWeatherParticle(level, x, y, z)) {
-//			cir.setReturnValue(null);
-//		}
-//		if (ModListHelper.VS_LOADED && !VSCompat.canCreateWeatherParticle(level, x, y, z)) {
-//			cir.setReturnValue(null);
-//		}
-//	}
+	//	@Inject(method = "createParticle", at = @At("HEAD"), cancellable = true)
+	//	public void onCreateParticle(ParticleOptions particleType, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, CallbackInfoReturnable<Particle> cir) {
+	//		if (!ModListHelper.CREATE_LOADED && !ModListHelper.VS_LOADED) {
+	//			return;
+	//		}
+	//		ResourceLocation key = BuiltInRegistries.PARTICLE_TYPE.getKey(particleType.getType());
+	//		if (!SimplePropertiesConfig.getWeatherParticles().contains(key)) {
+	//			return;
+	//		}
+	//		if (ModListHelper.CREATE_LOADED && !CreateCompat.canSpawnWeatherParticle(level, x, y, z)) {
+	//			cir.setReturnValue(null);
+	//		}
+	//		if (ModListHelper.VS_LOADED && !VSCompat.canCreateWeatherParticle(level, x, y, z)) {
+	//			cir.setReturnValue(null);
+	//		}
+	//	}
 }
