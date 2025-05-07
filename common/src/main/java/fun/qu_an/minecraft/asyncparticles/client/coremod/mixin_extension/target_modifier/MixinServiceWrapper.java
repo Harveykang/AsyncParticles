@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier;
 
-import com.llamalad7.mixinextras.utils.ClassGenUtils;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
@@ -29,11 +28,11 @@ public class MixinServiceWrapper implements IMixinService, IClassBytecodeProvide
 
     @Override
     public ClassNode getClassNode(String name) throws ClassNotFoundException, IOException {
-        byte[] bytes = ClassGenUtils.getDefinitions().get(name.replace('/', '.'));
+        byte[] bytes = MixinClassAdjusterApplication.getInstance().getByteCode(name);
         if (bytes == null) {
             return delegate.getBytecodeProvider().getClassNode(name);
         }
-        MixinTargetsModifierApplication.LOGGER.info("Redirecting IClassBytecodeProvider#getClassNode for {}", name);
+        MixinClassAdjusterApplication.LOGGER.info("Redirecting IClassBytecodeProvider#getClassNode for {}", name);
         ClassNode node = new ClassNode();
         new ClassReader(bytes).accept(node, 0);
         return node;
@@ -41,11 +40,11 @@ public class MixinServiceWrapper implements IMixinService, IClassBytecodeProvide
 
     @Override
     public ClassNode getClassNode(String name, boolean runTransformers) throws ClassNotFoundException, IOException {
-        byte[] bytes = ClassGenUtils.getDefinitions().get(name.replace('/', '.'));
+        byte[] bytes = MixinClassAdjusterApplication.getInstance().getByteCode(name);
         if (bytes == null) {
             return delegate.getBytecodeProvider().getClassNode(name, runTransformers);
         }
-        MixinTargetsModifierApplication.LOGGER.info("Redirecting IClassBytecodeProvider#getClassNode for {}", name);
+        MixinClassAdjusterApplication.LOGGER.info("Redirecting IClassBytecodeProvider#getClassNode for {}", name);
         ClassNode node = new ClassNode();
         new ClassReader(bytes).accept(node, 0);
         return node;
@@ -53,11 +52,11 @@ public class MixinServiceWrapper implements IMixinService, IClassBytecodeProvide
 
     @Override
     public ClassNode getClassNode(String name, boolean runTransformers, int readerFlags) throws ClassNotFoundException, IOException {
-        byte[] bytes = ClassGenUtils.getDefinitions().get(name.replace('/', '.'));
+        byte[] bytes = MixinClassAdjusterApplication.getInstance().getByteCode(name);
         if (bytes == null) {
             return delegate.getBytecodeProvider().getClassNode(name, runTransformers, readerFlags);
         }
-        MixinTargetsModifierApplication.LOGGER.info("Redirecting IClassBytecodeProvider#getClassNode for {}", name);
+        MixinClassAdjusterApplication.LOGGER.info("Redirecting IClassBytecodeProvider#getClassNode for {}", name);
         ClassNode node = new ClassNode();
         new ClassReader(bytes).accept(node, readerFlags);
         return node;

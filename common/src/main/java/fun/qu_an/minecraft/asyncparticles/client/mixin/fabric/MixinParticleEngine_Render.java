@@ -45,9 +45,12 @@ public abstract class MixinParticleEngine_Render {
 	@Overwrite
 	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f) {
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-		profiler.push("wait_for_async_tasks");
-		AsyncRenderer.tryWaitForAsyncTasks();
-		profiler.pop();
+		boolean renderAsync = AsyncRenderer.isRenderAsync();
+		if (renderAsync) {
+			profiler.push("wait_for_async_tasks");
+			AsyncRenderer.tryWaitForAsyncTasks();
+			profiler.pop();
+		}
 
 		profiler.push("prepare");
 		Frustum frustum = AsyncRenderer.frustum;
@@ -61,14 +64,13 @@ public abstract class MixinParticleEngine_Render {
 		RenderSystem.applyModelViewMatrix();
 		profiler.pop();
 
-		boolean renderAsync = ConfigHelper.isRenderAsync();
 		boolean cullParticles = ConfigHelper.isCullParticles();
 		boolean mixedParticleRendering = AsyncRenderer.isMixedParticleRendering();
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			// FABRIC skips NO_RENDER
-//				if (particleRenderType == ParticleRenderType.NO_RENDER) {
-//					continue;
-//				}
+			//				if (particleRenderType == ParticleRenderType.NO_RENDER) {
+			//					continue;
+			//				}
 			Queue<Particle> queue = this.particles.get(particleRenderType);
 			if (queue == null || queue.isEmpty()) {
 				continue;

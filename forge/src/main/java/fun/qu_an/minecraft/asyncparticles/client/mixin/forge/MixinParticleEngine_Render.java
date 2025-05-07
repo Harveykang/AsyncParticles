@@ -45,9 +45,12 @@ public abstract class MixinParticleEngine_Render {
 	@Overwrite(remap = false) // Forge override
 	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f, Frustum ignored) {
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-		profiler.push("wait_for_async_tasks");
-		AsyncRenderer.tryWaitForAsyncTasks();
-		profiler.pop();
+		boolean renderAsync = AsyncRenderer.isRenderAsync();
+		if (renderAsync) {
+			profiler.push("wait_for_async_tasks");
+			AsyncRenderer.tryWaitForAsyncTasks();
+			profiler.pop();
+		}
 
 		profiler.push("prepare");
 		Frustum frustum = AsyncRenderer.frustum;
@@ -62,7 +65,6 @@ public abstract class MixinParticleEngine_Render {
 		profiler.pop();
 
 		// We don't use entrySet() to be compatible with iris.
-		boolean renderAsync = ConfigHelper.isRenderAsync();
 		boolean cullParticles = ConfigHelper.isCullParticles();
 		boolean mixedParticleRendering = AsyncRenderer.isMixedParticleRendering();
 		for (ParticleRenderType particleRenderType : particles.keySet()) {

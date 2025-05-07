@@ -8,9 +8,10 @@
   "client": [
     "MixinParticle",
     "MixinParticle_LightCache",
-    "MixinParticles_ConcurrentUnsafe",
+    "MixinParticles_LockRequired",
     "MixinParticles_LightCacheNoRefresh",
-    "MixinParticles_ShouldCull",
+    "MixinParticles_NoCulling",
+    "MixinParticles_LockProvider",
     "a_good_place.InvokerBlocksParticlesManager",
     "a_good_place.MixinBlocksParticlesManager",
     "a_good_place.MixinPlacingBlockParticle",

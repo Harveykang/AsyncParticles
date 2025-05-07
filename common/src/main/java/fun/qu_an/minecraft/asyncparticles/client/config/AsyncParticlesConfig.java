@@ -249,18 +249,13 @@ public class AsyncParticlesConfig {
 
 		static class Rendering {
 			boolean cullParticles = true;
-			RenderingMode particleRenderingMode = ModListHelper.PHOTON_EDITOR_LOADED
-				? RenderingMode.SYNCHRONOUSLY
-				: RenderingMode.DELAYED;
+			RenderingMode particleRenderingMode = RenderingMode.DELAYED;
 			int failPerSecLimit = 20;
 			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
 
 			private void flat() {
 				rendering$cullParticles = cullParticles;
-				rendering$particleRenderingMode = ModListHelper.PHOTON_EDITOR_LOADED
-					// Force sync if Photon is loaded.
-					? RenderingMode.SYNCHRONOUSLY
-					: requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
+				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
 				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
 			}

@@ -117,22 +117,8 @@ class ClothConfigMenus {
 					RenderingMode.class, rendering$particleRenderingMode)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
 				.setDefaultValue(defaultConfig.rendering.particleRenderingMode)
-				.setTooltipSupplier(() -> {
-					Component[] components;
-					if (!ModListHelper.PHOTON_EDITOR_LOADED) {
-						components = new Component[]{
-							Component.translatable("config.asyncparticles.rendering.particleRenderingMode.tooltip")};
-					} else {
-						components = new Component[]{
-							Component.translatable("config.asyncparticles.rendering.particleRenderingMode.tooltip")
-								.withStyle(ChatFormatting.STRIKETHROUGH),
-							Component.translatable("config.asyncparticles.incompatibility", "Photon Editor")
-								.withStyle(ChatFormatting.DARK_RED)};
-					}
-					return Optional.of(components);
-				})
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.particleRenderingMode.tooltip"))
 				.setSaveConsumer(newValue -> rendering$particleRenderingMode = newValue)
-				.setRequirement(() -> !ModListHelper.PHOTON_EDITOR_LOADED)
 				.build())
 			.addEntry(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.rendering.failPerSecLimit"),

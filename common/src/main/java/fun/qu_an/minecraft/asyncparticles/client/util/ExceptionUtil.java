@@ -1,8 +1,10 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
+import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
 import net.minecraft.ReportedException;
 import org.jetbrains.annotations.NotNull;
 
+@PreLaunch
 public class ExceptionUtil {
 	public static RuntimeException toThrowDirectly(@NotNull Throwable t) {
 		return toThrowDirectly0(t);
@@ -25,15 +27,21 @@ public class ExceptionUtil {
 		}
 	}
 
-	public static ReportedException getReportedException(Throwable t) {
-		if (t instanceof ReportedException re) {
-			return re;
-		}
-		Throwable cause = t.getCause();
-		return cause == null ? null : getReportedException(cause);
+	public static RuntimeException getReportedException(Throwable t) {
+		return PostLaunch.getReportedException(t);
 	}
 
 	public static void throwAssertionError() {
 		throw new AssertionError();
+	}
+
+	private static class PostLaunch {
+		public static ReportedException getReportedException(Throwable t) {
+			if (t instanceof ReportedException re) {
+				return re;
+			}
+			Throwable cause = t.getCause();
+			return cause == null ? null : getReportedException(cause);
+		}
 	}
 }

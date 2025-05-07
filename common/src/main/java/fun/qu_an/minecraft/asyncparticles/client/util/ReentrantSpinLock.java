@@ -4,7 +4,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.function.Supplier;
 
-public class ReentrantSpinLock implements AutoCloseable {
+public class ReentrantSpinLock implements SpinLock {
 	private static final VarHandle OWNER;
 
 	static {
@@ -19,6 +19,7 @@ public class ReentrantSpinLock implements AutoCloseable {
 	private volatile Thread owner;
 	private int holdCount;
 
+	@Override
 	public void lock() {
 		Thread currentThread = Thread.currentThread();
 		if (!OWNER.compareAndSet(this, null, currentThread)) {
@@ -33,6 +34,7 @@ public class ReentrantSpinLock implements AutoCloseable {
 		holdCount = 1;
 	}
 
+	@Override
 	public void unlock() {
 		Thread currentThread = Thread.currentThread();
 		if (currentThread != owner) {
@@ -40,34 +42,6 @@ public class ReentrantSpinLock implements AutoCloseable {
 		}
 		if (--holdCount == 0) {
 			owner = null;
-		}
-	}
-
-	@Override
-	public void close() {
-		unlock();
-	}
-
-	public ReentrantSpinLock sugar() {
-		lock();
-		return this;
-	}
-
-	public void wrap(Runnable runnable) {
-		lock();
-		try {
-			runnable.run();
-		} finally {
-			unlock();
-		}
-	}
-
-	public <T> T wrap(Supplier<T> supplier) {
-		lock();
-		try {
-			return supplier.get();
-		} finally {
-			unlock();
 		}
 	}
 }

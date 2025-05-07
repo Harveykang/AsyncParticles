@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
-import net.diebuddies.minecraft.weather.WeatherParticle;
 import net.minecraft.client.particle.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -15,9 +14,7 @@ import org.spongepowered.asm.mixin.Pseudo;
 	SimpleAnimatedParticle.class,
 	ShriekParticle.class,
 	VibrationSignalParticle.class,
-	WeatherParticle.class,
-	// Add more particle classes here if needed
-})
+}) // Will be replaced by the actual targets
 public abstract class MixinParticles_LightCacheNoRefresh implements LightCachedParticleAddon {
 	@Override
 	public void asyncparticles$refresh() {

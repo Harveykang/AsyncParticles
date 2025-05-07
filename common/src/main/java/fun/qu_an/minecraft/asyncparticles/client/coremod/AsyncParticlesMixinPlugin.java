@@ -1,29 +1,27 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
-import com.bawnorton.mixinsquared.adjuster.MixinAnnotationAdjusterRegistrar;
-import com.bawnorton.mixinsquared.adjuster.tools.AdjustableAnnotationNode;
-import com.bawnorton.mixinsquared.adjuster.tools.AdjustableInjectorNode;
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.ExtensionMemberCancelApplication;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.MixinMemberCanceller;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.MixinMemberCancellerRegistrar;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.MixinTargetModifier;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.MixinClassAdjuster;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.MixinTargetsModifierRegistrar;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.throwables.MixinError;
 import org.spongepowered.asm.service.MixinService;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 
@@ -39,16 +37,16 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		try {
 			AsyncParticlesMixinConfig.load();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new MixinError(e);
 		}
 		ExtensionRegistrar.register(new ExtensionMemberCancelApplication());
 
 		AsyncParticlesMixinConfig.Mixin$Particle config = AsyncParticlesMixinConfig.config;
-		MixinTargetsModifierRegistrar.register(new MixinTargetModifier() {
+		MixinTargetsModifierRegistrar.register(new MixinClassAdjuster() {
 			@Override
 			public String getMixinClassName() {
-				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge." : "fabric.") +
-					   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_ShouldCull";
+				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
+					   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_NoCulling";
 			}
 
 			@Override
@@ -58,14 +56,14 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 
 			@Override
 			public String getRefMapperConfig() {
-				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge-" : "fabric-") +
+				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge-" : "fabric-") +
 					   "asyncparticles-common-refmap.json";
 			}
 		});
-		MixinTargetsModifierRegistrar.register(new MixinTargetModifier() {
+		MixinTargetsModifierRegistrar.register(new MixinClassAdjuster() {
 			@Override
 			public String getMixinClassName() {
-				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge." : "fabric.") +
+				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
 					   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_LightCacheNoRefresh";
 			}
 
@@ -78,25 +76,43 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 
 			@Override
 			public String getRefMapperConfig() {
-				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge-" : "fabric-") +
+				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge-" : "fabric-") +
 					   "asyncparticles-common-refmap.json";
 			}
 		});
-		MixinTargetsModifierRegistrar.register(new MixinTargetModifier() {
+		MixinTargetsModifierRegistrar.register(new MixinClassAdjuster() {
 			@Override
 			public String getMixinClassName() {
-				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge." : "fabric.") +
-					   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_ConcurrentUnsafe";
+				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
+					   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_LockProvider";
 			}
 
 			@Override
 			public List<String> getTargets(List<String> originalTargets) {
-				return List.copyOf(config.getSpinLockRequired());
+				return List.copyOf(config.getLockProvider());
 			}
 
 			@Override
 			public String getRefMapperConfig() {
-				return (ModListHelper.isDevelopmentEnvironment() ? "" : ModListHelper.IS_FORGE ? "forge-" : "fabric-") +
+				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge-" : "fabric-") +
+					   "asyncparticles-common-refmap.json";
+			}
+		});
+		MixinTargetsModifierRegistrar.register(new MixinClassAdjuster() {
+			@Override
+			public String getMixinClassName() {
+				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
+					   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_LockRequired";
+			}
+
+			@Override
+			public List<String> getTargets(List<String> originalTargets) {
+				return List.copyOf(config.getLockRequired());
+			}
+
+			@Override
+			public String getRefMapperConfig() {
+				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge-" : "fabric-") +
 					   "asyncparticles-common-refmap.json";
 			}
 		});
@@ -237,7 +253,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			}
 			case "watut" -> WATUT_LOADED;
 			case "lodestone" -> LODESTONE_LOADED;
-			case "fabric_api" -> FABRIC_API_LOADED; // Includes Connector
+			case "fabric_api" -> FABRIC_API_LOADED; // Includes Forge version
 			case "cloth_config" -> CLOTH_CONFIG_LOADED;
 			case "photon_editor" -> PHOTON_EDITOR_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);

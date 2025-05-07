@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class IterationSafeEvictingQueue<E> implements Queue<E> {
+	public static final int MAX_CAPACITY = Integer.MIN_VALUE >>> 1;
 	protected Object[] queue;
 	protected final int maxCapacity;
 	protected final int maxCapacityPowerOfTwo;
@@ -57,7 +58,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			if (evicted != null) {
 				onEvict.accept(evicted);
 			}
-//			q[head] = item; // head is now tail
+			//			q[head] = item; // head is now tail
 			q[head] = null;
 			q[head + size & (capacity - 1)] = item;
 		} else {
@@ -111,15 +112,15 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		return size == 0;
 	}
 
-//	@Override
-//	public @NotNull Spliterator<E> spliterator() {
-//		// FIXME: implement a Spliterator
-//		throw new UnsupportedOperationException();
-//	}
+	//	@Override
+	//	public @NotNull Spliterator<E> spliterator() {
+	//		// FIXME: implement a Spliterator
+	//		throw new UnsupportedOperationException();
+	//	}
 
 	private Object[] resize(int newCapacity) {
 		if (newCapacity > this.maxCapacityPowerOfTwo) {
-			throw new IllegalStateException("Cannot increase capacity beyond max capacity");
+			throw new IllegalStateException("Cannot increase capacity beyond max capacity " + maxCapacityPowerOfTwo + " : " + newCapacity);
 		}
 		Object[] q = this.queue;
 		int head = this.head;
@@ -298,7 +299,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			if (tail <= q.length) {
 				System.arraycopy(q, toRemove + 1, q, toRemove, l - 1);
 			} else if (toRemove <= mask) {
-				if (toRemove < mask){
+				if (toRemove < mask) {
 					System.arraycopy(q, toRemove + 1, q, toRemove, q.length - toRemove - 1);
 				}
 				q[mask] = q[0];
@@ -392,7 +393,10 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 
 	private static int roundUpToPowerOfTwo(int n) {
 		if (n <= 0) {
-			throw new IllegalArgumentException("n must be positive");
+			throw new IllegalArgumentException("n must be positive: " + n);
+		}
+		if (n > MAX_CAPACITY) {
+			throw new IllegalArgumentException("n cannot larger than " + MAX_CAPACITY + " : " + n);
 		}
 		n--;
 		n |= n >> 1;

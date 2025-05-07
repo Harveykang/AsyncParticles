@@ -50,13 +50,27 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
 			.build()));
-		List<String> defaultSpinLockRequired = List.copyOf(config.getSpinLockRequired());
+		List<String> defaultLockProvider = List.copyOf(config.getLockProvider());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(entryBuilder
-			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.spinLockRequired"), defaultSpinLockRequired)
-			.setDefaultValue(defaultSpinLockRequired)
-			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getSpinLockRequired().contains(s)))
-			.setSaveConsumer(l -> newConfig.setSpinLockRequired(l.isEmpty()
-				? defaultConfig.getSpinLockRequired()
+			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockProvider"), defaultLockProvider)
+			.setDefaultValue(defaultLockProvider)
+			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getLockProvider().contains(s)))
+			.setSaveConsumer(l -> newConfig.setLockProvider(l.isEmpty()
+				? defaultConfig.getLockProvider()
+				: Collections.unmodifiableSet(new LinkedHashSet<>(l))))
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.tooltip"))
+			.requireRestart()
+			.build()));
+		List<String> defaultLockRequired = List.copyOf(config.getLockRequired());
+		mixinCategory.addEntry(new StringListListEntryFixRestart(entryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockRequired"), defaultLockRequired)
+			.setDefaultValue(defaultLockRequired)
+			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getLockRequired().contains(s)))
+			.setSaveConsumer(l -> newConfig.setLockRequired(l.isEmpty()
+				? defaultConfig.getLockRequired()
 				: Collections.unmodifiableSet(new LinkedHashSet<>(l))))
 			.setTooltip(
 				Component.translatable("text.cloth-config.restart_required")

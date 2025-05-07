@@ -18,7 +18,7 @@ public class AsyncParticlesMixinConfig {
 	static String COMMENTS = """
 		particle$noCulling: comma-separated list of particle classes that should not be culled.
 		particle$noLightCache: comma-separated list of particle classes that should not use the light cache.
-		particle$spinLockRequired: comma-separated list of particle classes that require a spin lock.""";
+		particle$lockRequired: comma-separated list of particle classes that require a spin lock.""";
 	static Mixin$Particle config = new Mixin$Particle();
 
 	static void load() throws IOException {
@@ -77,26 +77,45 @@ public class AsyncParticlesMixinConfig {
 			noLightCache.add("dev.shadowsoffire.gateways.client.GatewayParticle");
 			noLightCache.add("com.chailotl.particular.particles.FireflyParticle");
 			noLightCache.add("com.lowdragmc.photon.client.gameobject.FXObject");
+			noLightCache.add("net.diebuddies.minecraft.weather.WeatherParticle");
 			this.noLightCache = Collections.unmodifiableSet(noLightCache);
 		}
 
 		@Unmodifiable
-		private Set<String> spinLockRequired;
+		private Set<String> lockProvider;
 
 		{
-			Set<String> spinLockRequired = new LinkedHashSet<>();
-			spinLockRequired.add("yesman.epicfight.client.particle.TrailParticle");
-			spinLockRequired.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
-			spinLockRequired.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
-			spinLockRequired.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
-			this.spinLockRequired = Collections.unmodifiableSet(spinLockRequired);
+			Set<String> lockProvider = new LinkedHashSet<>();
+			lockProvider.add("yesman.epicfight.client.particle.TrailParticle");
+			lockProvider.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
+			lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
+			lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
+			lockProvider.add("com.lowdragmc.photon.client.gameobject.emitter.Emitter");
+			this.lockProvider = Collections.unmodifiableSet(lockProvider);
+		}
+
+		@Unmodifiable
+		private Set<String> lockRequired;
+
+		{
+			Set<String> lockRequired = new LinkedHashSet<>();
+			lockRequired.add("yesman.epicfight.client.particle.TrailParticle");
+			lockRequired.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
+			lockRequired.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
+			lockRequired.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
+			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.Emitter");
+			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.particle.ParticleEmitter");
+			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.beam.BeamEmitter");
+			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.trail.TrailEmitter");
+			this.lockRequired = Collections.unmodifiableSet(lockRequired);
 		}
 
 		private void fold() {
 			assertNotGlobal();
 			noCulling = config.noCulling;
 			noLightCache = config.noLightCache;
-			spinLockRequired = config.spinLockRequired;
+			lockProvider = config.lockProvider;
+			lockRequired = config.lockRequired;
 		}
 
 		private void read(Properties properties) {
@@ -104,7 +123,8 @@ public class AsyncParticlesMixinConfig {
 			Mixin$Particle defaultConfig = new Mixin$Particle();
 			noCulling = read(properties, "particle$noCulling", defaultConfig.noCulling);
 			noLightCache = read(properties, "particle$noLightCache",defaultConfig.noLightCache);
-			spinLockRequired = read(properties, "particle$spinLockRequired", defaultConfig.spinLockRequired);
+			lockProvider = read(properties, "particle$lockRequired", defaultConfig.lockProvider);
+			lockRequired = read(properties, "particle$lockProvider", defaultConfig.lockRequired);
 		}
 
 		private void flat() {
@@ -114,7 +134,8 @@ public class AsyncParticlesMixinConfig {
 		private void write(Properties properties) {
 			properties.setProperty("particle$noCulling", String.join(",", noCulling));
 			properties.setProperty("particle$noLightCache", String.join(",", noLightCache));
-			properties.setProperty("particle$spinLockRequired", String.join(",", spinLockRequired));
+			properties.setProperty("particle$lockProvider", String.join(",", lockProvider));
+			properties.setProperty("particle$lockRequired", String.join(",", lockRequired));
 		}
 
 		private static Set<String> read(Properties properties, String key, Set<String> defaultValue) {
@@ -155,13 +176,22 @@ public class AsyncParticlesMixinConfig {
 			this.noLightCache = noLightCache;
 		}
 
-		Set<String> getSpinLockRequired() {
-			return spinLockRequired;
+		Set<String> getLockProvider() {
+			return lockProvider;
 		}
 
-		void setSpinLockRequired(Set<String> spinLockRequired) {
+		void setLockProvider(Set<String> lockProvider) {
 			assertNotGlobal();
-			this.spinLockRequired = spinLockRequired;
+			this.lockProvider = lockProvider;
+		}
+
+		Set<String> getLockRequired() {
+			return lockRequired;
+		}
+
+		void setLockRequired(Set<String> lockRequired) {
+			assertNotGlobal();
+			this.lockRequired = lockRequired;
 		}
 
 		private void assertNotGlobal() {

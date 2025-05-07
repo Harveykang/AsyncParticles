@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
 public class AsyncRenderer {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
+	private static boolean renderAsync = false;
 
 	static {
 		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
@@ -246,7 +247,9 @@ public class AsyncRenderer {
 		if (ModListHelper.IRIS_LIKE_LOADED) {
 			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
+		renderAsync = ConfigHelper.isRenderAsync();
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
+		renderAsync = false;
 
 		if (levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();
@@ -269,7 +272,9 @@ public class AsyncRenderer {
 
 		ParticleEngine particleEngine = mc.particleEngine;
 		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
+		renderAsync = ConfigHelper.isRenderAsync();
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
+		renderAsync = false;
 	}
 
 	public static void irisTranslucent(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
@@ -293,7 +298,9 @@ public class AsyncRenderer {
 
 		ParticleEngine particleEngine = mc.particleEngine;
 		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
+		renderAsync = ConfigHelper.isRenderAsync();
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
+		renderAsync = false;
 
 		if (levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();
@@ -368,6 +375,10 @@ public class AsyncRenderer {
 			RenderSystem.disableBlend();
 			lightTexture.turnOffLightLayer();
 		}
+	}
+
+	public static boolean isRenderAsync() {
+		return renderAsync;
 	}
 
 	private static void waitForAsyncTasks() {
@@ -542,9 +553,4 @@ public class AsyncRenderer {
 		FORMATS.clear();
 		clearSync();
 	}
-
-//	public enum Stage {
-//		PREPARING,
-//		RENDERABLE
-//	}
 }

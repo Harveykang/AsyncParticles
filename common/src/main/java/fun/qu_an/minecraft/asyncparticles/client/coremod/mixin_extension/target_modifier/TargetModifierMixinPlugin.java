@@ -11,7 +11,7 @@ import java.util.Set;
 public class TargetModifierMixinPlugin implements IMixinConfigPlugin {
 	@Override
 	public void onLoad(String mixinPackage) {
-		MixinTargetsModifierApplication.init(GeneratedImplDummy.LOOKUP, this);
+		MixinClassAdjusterApplication.init(GeneratedImplDummy.LOOKUP, this);
 	}
 
 	@Override
@@ -21,7 +21,7 @@ public class TargetModifierMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-		return MixinTargetsModifierApplication.getInstance().shouldApplyMixin(targetClassName, mixinClassName);
+		return MixinClassAdjusterApplication.getInstance().shouldApplyMixin(targetClassName, mixinClassName);
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class TargetModifierMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public List<String> getMixins() {
-		return MixinTargetsModifierApplication.getInstance().applyModifiers();
+		return MixinClassAdjusterApplication.getInstance().applyAdjusters();
 	}
 
 	@Override
