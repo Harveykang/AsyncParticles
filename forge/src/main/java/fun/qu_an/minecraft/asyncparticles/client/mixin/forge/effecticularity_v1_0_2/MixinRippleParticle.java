@@ -4,6 +4,7 @@ import concerrox.effective.particle.RippleParticle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -14,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(RippleParticle.class)
 public abstract class MixinRippleParticle extends TextureSheetParticle {
+	@Dynamic
 	@Shadow(remap = false)
 	@Final
 	private SpriteSet spriteProvider;
@@ -32,7 +34,8 @@ public abstract class MixinRippleParticle extends TextureSheetParticle {
 		setSpriteFromAge(this.spriteProvider);
 	}
 
-	@Redirect(method = "render", require = 0, at = @At(value = "INVOKE",
+	@Dynamic
+	@Redirect(method = "render", at = @At(value = "INVOKE",
 		target = "Lconcerrox/effective/particle/RippleParticle;setSpriteFromAge(Lnet/minecraft/client/particle/SpriteSet;)V"))
 	private void onRender(RippleParticle particle, SpriteSet spriteProvider) {
 		// do nothing

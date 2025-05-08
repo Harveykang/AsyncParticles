@@ -1,8 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.physicsmod;
 
 import com.bawnorton.mixinsquared.TargetHandler;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.diebuddies.minecraft.ParticleSpawner;

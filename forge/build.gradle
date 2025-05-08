@@ -76,8 +76,8 @@ dependencies {
 
     /* Valkyrien Skies */
     modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'
-    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.5"
-    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.5"
+    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.6"
+    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.6"
     modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.5.1-beta.3'
 
     /* Particle Rain/Pretty Rain */
@@ -112,8 +112,8 @@ dependencies {
     modLocalRuntime("com.tterrag.registrate:Registrate:${registrate_version}")
 
     /* Effective */
-//    modLocalRuntime fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
-    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
+//    modLocalRuntime fileTree(dir: '../libs', include: 'effective-1.0.6-1.20.1-forge.jar')
+    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.6-1.20.1-forge.jar')
 //    modCompileOnly "com.github.ConcerroX:Effecticularity:31265b5750" // no they didn't publish 1.0.2 :(
 
     /* Particle Core */
@@ -152,8 +152,8 @@ dependencies {
     modCompileOnly "maven.modrinth:subtle-effects:lCMnqufi"
 
     /* Physics Mod */
-//    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v171d-forge-1.20.1.jar')
-    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171d-forge-1.20.1.jar')
+//    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v171e-forge-1.20.1.jar')
+    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171e-forge-1.20.1.jar')
 
     /* Particular Reforged */
     modCompileOnly "maven.modrinth:particular-reforged:ZP94L2Nm" // 1.2.0

@@ -1,7 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.physicsmod;
 
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.compat.physicsmod.PhysicsModParticleRenderType;
 import net.diebuddies.minecraft.weather.RainParticle;
 import net.minecraft.client.particle.ParticleRenderType;

@@ -29,7 +29,7 @@ dependencies {
 
     /* Valkyrien Skies */
     modCompileOnly "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
-    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.5"
+    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.6"
     modCompileOnly 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
 
     /* Particle Rain/Pretty Rain */
@@ -56,10 +56,7 @@ dependencies {
 
     /* Effective */
     modCompileOnly "maven.modrinth:effective:2.3.2-1.20.1"
-//    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
-
-    /* Hex Casting */
-    modCompileOnly "at.petra-k.hexcasting:hexcasting-fabric-1.20.1:0.11.2-pre-715"
+//    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.6-1.20.1-forge.jar')
 
     /* Tombstone */
 //    modCompileOnly fileTree(dir: '../libs', include: 'tombstone-1.20.1-8.9.0.jar')
@@ -71,20 +68,17 @@ dependencies {
 //    modCompileOnly "maven.modrinth:particle-core:0.2.5+1.20.1"
 
     /* A Good Place */
-    modCompileOnly "curse.maven:a-good-place-1020455:6277409" // 1.2.6
+    modCompileOnly "maven.modrinth:a-good-place:1.20-1.2.7"
 
     /* Physics Mod */
-    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171c-fabric-1.20.1.jar')
+    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171e-fabric-1.20.1.jar')
 
     /* Subtle Effects */
-    modCompileOnly "maven.modrinth:subtle-effects:y7DGrtIb" // fabric 1.9.3
+    modCompileOnly "maven.modrinth:subtle-effects:NA1rBYFJ" // fabric 1.9.4-hf
 
     /* What Are They Up To */
     modCompileOnly "maven.modrinth:what-are-they-up-to:1.20.1-1.2.3"
 
-    /* Essential */
-    modCompileOnly fileTree(dir: '../libs', include: 'essential-2ad45c42c435a189db2ca6041033cb8f.jar')
-
     /* Photon Editor */
-    modCompileOnly "maven.modrinth:photon-editor:mc1.20.1-1.1.7-fabric"
+    modCompileOnly "maven.modrinth:photon-editor:mc1.20.1-1.1.8-fabric"
 }
