@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target
 import com.bawnorton.mixinsquared.reflection.FieldReference;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfig;
+import org.spongepowered.asm.mixin.throwables.MixinError;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
 
 import java.lang.reflect.Field;
@@ -27,7 +28,7 @@ public class MixinTransformerExtension {
             try {
                 mixinTransformerClass = Class.forName("org.spongepowered.asm.mixin.transformer.MixinTransformer");
             } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
+                throw new MixinError(e);
             }
             mixinProcessor = new FieldReference<>(mixinTransformerClass, "processor");
         }
@@ -36,7 +37,7 @@ public class MixinTransformerExtension {
             try {
                 mixinProcessorClass = Class.forName("org.spongepowered.asm.mixin.transformer.MixinProcessor");
             } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
+                throw new MixinError(e);
             }
             pendingConfigs = new FieldReference<>(mixinProcessorClass, "pendingConfigs");
         }

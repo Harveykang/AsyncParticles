@@ -10,6 +10,7 @@ import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.spongepowered.asm.mixin.throwables.MixinError;
 import org.spongepowered.asm.mixin.transformer.ext.IExtension;
 import org.spongepowered.asm.mixin.transformer.ext.ITargetClassContext;
 import org.spongepowered.asm.service.MixinService;
@@ -33,7 +34,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 			Class<?> stateClass = Class.forName("org.spongepowered.asm.mixin.transformer.MixinInfo$State");
 			field_MixinInfo$State$classNode = new FieldReference<>(stateClass, "classNode");
 		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
+			throw new MixinError(e);
 		}
 	}
 

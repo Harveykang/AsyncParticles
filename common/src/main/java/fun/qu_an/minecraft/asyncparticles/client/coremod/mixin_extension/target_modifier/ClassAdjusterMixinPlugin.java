@@ -8,10 +8,10 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import java.util.List;
 import java.util.Set;
 
-public class TargetModifierMixinPlugin implements IMixinConfigPlugin {
+public class ClassAdjusterMixinPlugin implements IMixinConfigPlugin {
 	@Override
 	public void onLoad(String mixinPackage) {
-		MixinClassAdjusterApplication.init(GeneratedImplDummy.LOOKUP, this);
+		MixinClassAdjusterApplication.init(GeneratedImplDummy.class.getPackageName(), this);
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class TargetModifierMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public List<String> getMixins() {
-		return MixinClassAdjusterApplication.getInstance().applyAdjusters();
+		return MixinClassAdjusterApplication.getInstance().apply();
 	}
 
 	@Override

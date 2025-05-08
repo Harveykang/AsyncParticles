@@ -7,9 +7,8 @@ import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.MixinMemberCanceller;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.MixinMemberCancellerRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.MixinClassAdjuster;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.MixinTargetsModifierRegistrar;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.MixinClassAdjusterRegistrar;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -19,9 +18,7 @@ import org.spongepowered.asm.service.MixinService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 
@@ -42,7 +39,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		ExtensionRegistrar.register(new ExtensionMemberCancelApplication());
 
 		AsyncParticlesMixinConfig.Mixin$Particle config = AsyncParticlesMixinConfig.config;
-		MixinTargetsModifierRegistrar.register(new MixinClassAdjuster() {
+		MixinClassAdjusterRegistrar.register(new MixinClassAdjuster() {
 			@Override
 			public String getMixinClassName() {
 				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
@@ -60,7 +57,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					   "asyncparticles-common-refmap.json";
 			}
 		});
-		MixinTargetsModifierRegistrar.register(new MixinClassAdjuster() {
+		MixinClassAdjusterRegistrar.register(new MixinClassAdjuster() {
 			@Override
 			public String getMixinClassName() {
 				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
@@ -80,7 +77,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					   "asyncparticles-common-refmap.json";
 			}
 		});
-		MixinTargetsModifierRegistrar.register(new MixinClassAdjuster() {
+		MixinClassAdjusterRegistrar.register(new MixinClassAdjuster() {
 			@Override
 			public String getMixinClassName() {
 				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
@@ -98,7 +95,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					   "asyncparticles-common-refmap.json";
 			}
 		});
-		MixinTargetsModifierRegistrar.register(new MixinClassAdjuster() {
+		MixinClassAdjusterRegistrar.register(new MixinClassAdjuster() {
 			@Override
 			public String getMixinClassName() {
 				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +

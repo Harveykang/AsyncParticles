@@ -57,7 +57,7 @@
   "gui.asyncparticles": "Async Particles",
   "gui.asyncparticles.error": "Error!",
   "gui.asyncparticles.menu-unavailable": "Config Menu Unavailable",
-  "gui.asyncparticles.menu-unavailable.message": "Please install Cloth Config API to access the config menu.\nYou can also make changes manually and click 'Reload Config'.\nPress SHIFT to show the reset button.",
+  "gui.asyncparticles.menu-unavailable.message": "Please install Cloth Config API to access the config menu.\nYou can also make changes manually and click 'Reload Config'.\nHold SHIFT to show the reset button.",
   "gui.asyncparticles.failed-to-save": "Failed to save: %s",
   "gui.asyncparticles.reload": "Reload Config",
   "gui.asyncparticles.failed-to-reload": "Failed to reload: %s",

@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.refmap.IReferenceMapper;
 import org.spongepowered.asm.mixin.refmap.ReferenceMapper;
 import org.spongepowered.asm.mixin.refmap.RemappingReferenceMapper;
+import org.spongepowered.asm.mixin.throwables.MixinError;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
 import org.spongepowered.asm.mixin.transformer.ext.Extensions;
 import org.spongepowered.asm.service.IClassBytecodeProvider;
@@ -23,14 +24,18 @@ import org.spongepowered.asm.service.MixinService;
 import org.spongepowered.asm.util.Annotations;
 
 import java.io.IOException;
-import java.lang.invoke.MethodHandles;
 import java.util.*;
 
 public class MixinClassAdjusterApplication {
 	static final ILogger LOGGER = MixinService.getService().getLogger("mixinsquared-class-adjuster");
-	static MixinClassAdjusterApplication INSTANCE;
+	private static MixinClassAdjusterApplication INSTANCE;
 	private static final FieldReference<String> pluginClassName;
 	private static final FieldReference<IMixinService> mixinService;
+	/**
+	 * key: original mixin class name, value: class adjuster
+	 */
+	private static Map<String, MixinClassAdjuster> ADJUSTERS;
+	private static final Map<String, byte[]> RUNTIME_MIXINS = new HashMap<>();
 
 	static {
 		try {
@@ -38,47 +43,45 @@ public class MixinClassAdjusterApplication {
 			pluginClassName = new FieldReference<>(mixinConfigClass, "pluginClassName");
 			mixinService = new FieldReference<>(mixinConfigClass, "service");
 		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
+			throw new MixinError(e);
 		}
 	}
 
-	/**
-	 * key: original mixin class name, value: class adjuster
-	 */
-	static final Map<String, MixinClassAdjuster> ADJUSTERS = new HashMap<>();
 	final Map<String, String> generatedToOriginalMixins = new HashMap<>();
 	final Set<String> originalMixins = new HashSet<>();
 	final IMixinConfigPlugin mixinSquaredPlugin;
 	private final String generatedMixinPrefix;
 
-	public static void init(MethodHandles.Lookup lookup, IMixinConfigPlugin mixinSquaredPlugin) {
+	public static void init(String packageName, IMixinConfigPlugin mixinSquaredPlugin) {
 		if (INSTANCE != null) {
 			throw new IllegalStateException("MixinClassAdjusterApplication is already initialized");
 		}
-		INSTANCE = new MixinClassAdjusterApplication(lookup, mixinSquaredPlugin);
+		INSTANCE = new MixinClassAdjusterApplication(packageName, mixinSquaredPlugin);
 	}
 
 	public static MixinClassAdjusterApplication getInstance() {
 		return INSTANCE;
 	}
 
-	private MixinClassAdjusterApplication(MethodHandles.Lookup lookup, IMixinConfigPlugin mixinSquaredPlugin) {
+	private MixinClassAdjusterApplication(String packagename, IMixinConfigPlugin mixinSquaredPlugin) {
 		MixinCancellerRegistrar.register((targetClassName, mixinClassName) -> originalMixins.contains(mixinClassName));
 		this.mixinSquaredPlugin = mixinSquaredPlugin;
-		this.generatedMixinPrefix = lookup.lookupClass().getPackage().getName() +
-									".MixinSquaredGenerated$";
+		this.generatedMixinPrefix = packagename + ".MixinSquaredGenerated$";
 	}
 
 	public String getGeneratedMixinPrefix(String mixinClassName) {
-		return generatedMixinPrefix + mixinClassName.replace(".", "$_");
+		return generatedMixinPrefix + mixinClassName.replace("/", "$_").replace(".", "$_");
 	}
 
 	public boolean shouldApplyMixin(String targetClassName, String generatedMixinClassName) {
 		String mixinClassName = generatedToOriginalMixins.get(generatedMixinClassName);
+		if (mixinClassName == null) {
+			return true;
+		}
 		return ADJUSTERS.get(mixinClassName).shouldApplyMixin(targetClassName);
 	}
 
-	public List<String> applyAdjusters() {
+	public List<String> apply() {
 		IMixinTransformer activeTransformer =
 			(IMixinTransformer) MixinEnvironment.getDefaultEnvironment().getActiveTransformer();
 		// FIXME: this is unsafe
@@ -106,18 +109,30 @@ public class MixinClassAdjusterApplication {
 		} else {
 			mixinServiceWrapper = (MixinServiceWrapper) service;
 		}
+
 		// Apply adjusters!
 		Map<String, IReferenceMapper> mappersCache = new HashMap<>();
+		ADJUSTERS = MixinClassAdjusterRegistrar.endAdjusters();
 		for (MixinClassAdjuster adjuster : ADJUSTERS.values()) {
 			applyAdjuster(mixinServiceWrapper, adjuster, mappersCache);
 		}
+		List<MixinClassProvider> providers = MixinClassAdjusterRegistrar.endProviders();
 		// Collect generated mixin class's simple names
-		List<String> list = new ArrayList<>(generatedToOriginalMixins.size());
+		ArrayList<String> mixins = new ArrayList<>(generatedToOriginalMixins.size() + providers.size());
 		for (String s : generatedToOriginalMixins.keySet()) {
 			String substring = s.substring(s.lastIndexOf('.') + 1);
-			list.add(substring);
+			mixins.add(substring);
 		}
-		return list;
+
+		// Apply providers!
+		for (MixinClassProvider provider : providers) {
+			ClassNode mixinClass = provider.getMixinClass();
+			ClassRenamer.renameClass(mixinClass, getGeneratedMixinPrefix(mixinClass.name));
+			genClass(mixinClass);
+			mixins.add(mixinClass.name.substring(mixinClass.name.lastIndexOf('/') + 1));
+		}
+
+		return mixins;
 	}
 
 	private void applyAdjuster(IClassBytecodeProvider bytecodeProvider,
@@ -129,7 +144,7 @@ public class MixinClassAdjusterApplication {
 		try {
 			cNode = bytecodeProvider.getClassNode(mixinClassName);
 		} catch (ClassNotFoundException | IOException e) {
-			throw new RuntimeException(e);
+			throw new MixinError(e);
 		}
 		// A list of original targets
 		List<String> targets = new ArrayList<>();
@@ -285,19 +300,17 @@ public class MixinClassAdjusterApplication {
 		}
 	}
 
-	private final Map<String, byte[]> byteCodes = new HashMap<>();
-
 	private void genClass(ClassNode node) {
 		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
 		node.accept(writer);
 		byte[] bytes = writer.toByteArray();
-		byteCodes.put(node.name, bytes);
+		RUNTIME_MIXINS.put(node.name, bytes);
 		IMixinTransformer transformer = (IMixinTransformer) MixinEnvironment.getDefaultEnvironment().getActiveTransformer();
 		((Extensions) transformer.getExtensions())
 			.export(MixinEnvironment.getCurrentEnvironment(), node.name, false, node);
 	}
 
 	byte[] getByteCode(String name) {
-		return byteCodes.get(name.replace('.', '/'));
+		return RUNTIME_MIXINS.get(name.replace('.', '/'));
 	}
 }
