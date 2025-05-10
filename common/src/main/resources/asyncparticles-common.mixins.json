@@ -29,6 +29,7 @@
     "fabric.effectual.MixinWaterDripEffect",
     "fabric.iris.MixinLevelRenderer_Late",
     "fabric.iris_else.MixinLevelRenderer_Late",
+    "fabric.loot_beams_up.MixinParticleRenderType",
     "fabric.particlerain.MixinGroundFogParticle",
     "fabric.particlerain.MixinParticleRainClient",
     "fabric.particlerain.MixinRainParticle",

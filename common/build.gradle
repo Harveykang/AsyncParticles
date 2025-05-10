@@ -81,4 +81,7 @@ dependencies {
 
     /* Photon Editor */
     modCompileOnly "maven.modrinth:photon-editor:mc1.20.1-1.1.8-fabric"
+
+    /* Loot Beams */
+//    modCompileOnly fileTree(dir: '../libs', include: 'lootbeams-3.6.1-mc1.20-.4-de.jar')
 }

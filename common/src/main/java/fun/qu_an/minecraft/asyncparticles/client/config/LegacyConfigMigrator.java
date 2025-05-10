@@ -10,8 +10,8 @@ import java.util.Properties;
 
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
 
-public class LegacyConfigMigrator {
-	public static boolean migrate() {
+class LegacyConfigMigrator {
+	static boolean migrate() {
 		Path legacyConfigFile = Paths.get("config", "asyncparticles.properties");
 		if (!Files.exists(legacyConfigFile)) {
 			return false;

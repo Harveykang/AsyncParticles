@@ -20,7 +20,8 @@ public class AsyncParticlesMixinConfig {
 	static String COMMENTS = """
 		particle$noCulling: comma-separated list of particle classes that should not be culled.
 		particle$noLightCache: comma-separated list of particle classes that should not use the light cache.
-		particle$lockRequired: comma-separated list of particle classes that require a spin lock.""";
+		particle$lockRequired: comma-separated list of particle classes that require a spin lock.
+		particle$lockProvider: comma-separated list of particle classes that provide a spin lock.""";
 	static Mixin$Particle config = new Mixin$Particle();
 
 	static void load() throws IOException {
