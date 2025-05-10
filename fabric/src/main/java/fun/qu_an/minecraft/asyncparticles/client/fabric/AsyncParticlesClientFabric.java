@@ -8,11 +8,14 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -111,6 +114,12 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 										}
 										return 1;
 									})))))
+					.then(literal("config")
+						.executes(context -> {
+							Minecraft mc = Minecraft.getInstance();
+							ThreadUtil.enqueueClientTask(() -> mc.setScreen(AsyncParticlesConfig.newConfigScreen(null)));
+							return 1;
+						}))
 					.then(literal("reload")
 						.executes(context -> {
 							FabricClientCommandSource source = context.getSource();

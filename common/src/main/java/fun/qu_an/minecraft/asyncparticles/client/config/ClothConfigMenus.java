@@ -153,7 +153,7 @@ class ClothConfigMenus {
 						// 	RainEffect.class, valkyrienSkies$rainEffect)
 						.startSelector(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect"),
 							new RainEffect[]{RainEffect.ALWAYS, RainEffect.STATIONARY}, valkyrienSkies$rainEffect)
-						.setNameProvider(value -> ((TranslatableEnum) value).getComponent())
+						.setNameProvider(value -> value.getComponent())
 						.setDefaultValue(defaultConfig.valkyrienSkies.rainEffect)
 						.setTooltip(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect.tooltip"))
 						.setSaveConsumer(newValue -> valkyrienSkies$rainEffect = newValue)

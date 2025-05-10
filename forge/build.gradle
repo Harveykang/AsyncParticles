@@ -76,8 +76,8 @@ dependencies {
 
     /* Valkyrien Skies */
     modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'
-    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.6"
-    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.6"
+    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.7"
+    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.7"
     modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.5.1-beta.3'
 
     /* Particle Rain/Pretty Rain */
@@ -156,7 +156,7 @@ dependencies {
     modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171e-forge-1.20.1.jar')
 
     /* Particular Reforged */
-    modCompileOnly "maven.modrinth:particular-reforged:ZP94L2Nm" // 1.2.0
+    modCompileOnly "maven.modrinth:particular-reforged:1.2.1"
 
     /* Fluffy Fur */
     modCompileOnly "maven.modrinth:fluffy-fur:1.20.1-0.1.9"

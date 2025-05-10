@@ -21,11 +21,12 @@ import java.util.*;
 @PreLaunch
 public final class ExtensionMemberCancelApplication implements IExtension {
 	static final ILogger LOGGER = MixinService.getService().getLogger("mixinsquared-member-canceller");
-	static final List<MixinMemberCanceller> CANCELLERS = new ArrayList<>();
+	static final Set<MixinMemberCanceller> CANCELLERS = new HashSet<>();
 	// from MixinExtras com.llamalad7.mixinextras.transformer.MixinTransformerExtension
 	private final Set<ClassNode> preparedMixins = Collections.newSetFromMap(new WeakHashMap<>());
 	private final FieldReference<Object> field_MixinInfo$state;
 	private final FieldReference<ClassNode> field_MixinInfo$State$classNode;
+	private final FieldReference<SortedSet<IMixinInfo>> field_TargetClassContext$mixins;
 
 	public ExtensionMemberCancelApplication() {
 		try {
@@ -33,6 +34,8 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 			field_MixinInfo$state = new FieldReference<>(infoClass, "state");
 			Class<?> stateClass = Class.forName("org.spongepowered.asm.mixin.transformer.MixinInfo$State");
 			field_MixinInfo$State$classNode = new FieldReference<>(stateClass, "classNode");
+			Class<?> contextClass = Class.forName("org.spongepowered.asm.mixin.transformer.TargetClassContext");
+			field_TargetClassContext$mixins = new FieldReference<>(contextClass, "mixins");
 		} catch (ClassNotFoundException e) {
 			throw new MixinError(e);
 		}
@@ -48,9 +51,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 		if (CANCELLERS.isEmpty()) {
 			return;
 		}
-		Optional<TargetClassContextExtension> optional = MixinUtil.tryAs(context);
-		TargetClassContextExtension contextExtension = optional.orElseThrow();
-		SortedSet<IMixinInfo> mixins = contextExtension.getMixins();
+		SortedSet<IMixinInfo> mixins = field_TargetClassContext$mixins.get(context);
 		for (IMixinInfo mixin : mixins) {
 			// Get the internal class node of the mixinInfo.
 			ClassNode cNode = field_MixinInfo$State$classNode.get(field_MixinInfo$state.get(mixin));
@@ -129,7 +130,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 					mNode.desc);
 				if (b) {
 					iterator.remove();
-					LOGGER.warn("Cancelled mixin method {}{};{} by {}", mixinClassName, mNode.name, mNode.desc, canceller.getClass().getName());
+					LOGGER.warn("Cancelled mixin method {};{};{} by {}", mixinClassName, mNode.name, mNode.desc, canceller.getClass().getName());
 					break;
 				}
 			}
@@ -160,7 +161,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 						removed = new HashSet<>();
 					}
 					removed.add(field.name);
-					LOGGER.warn("Cancelled mixin field {}{};{} by {}", mixinClassName, field.name, field.desc, canceller.getClass().getName());
+					LOGGER.warn("Cancelled mixin field {};{};{} by {}", mixinClassName, field.name, field.desc, canceller.getClass().getName());
 					break;
 				}
 			}

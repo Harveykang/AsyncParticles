@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfig;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
+import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.mixin.refmap.IReferenceMapper;
 import org.spongepowered.asm.mixin.refmap.ReferenceMapper;
 import org.spongepowered.asm.mixin.refmap.RemappingReferenceMapper;
@@ -31,11 +32,6 @@ public class MixinClassAdjusterApplication {
 	private static MixinClassAdjusterApplication INSTANCE;
 	private static final FieldReference<String> pluginClassName;
 	private static final FieldReference<IMixinService> mixinService;
-	/**
-	 * key: original mixin class name, value: class adjuster
-	 */
-	private static Map<String, MixinClassAdjuster> ADJUSTERS;
-	private static final Map<String, byte[]> RUNTIME_MIXINS = new HashMap<>();
 
 	static {
 		try {
@@ -47,9 +43,14 @@ public class MixinClassAdjusterApplication {
 		}
 	}
 
-	final Map<String, String> generatedToOriginalMixins = new HashMap<>();
-	final Set<String> originalMixins = new HashSet<>();
-	final IMixinConfigPlugin mixinSquaredPlugin;
+	/**
+	 * key: original mixin class name, value: class adjuster
+	 */
+	private Map<String, MixinClassAdjuster> adjusters;
+	private final Map<String, byte[]> runtimeMixins = new HashMap<>();
+	private final Map<String, String> generatedToOriginalMixins = new HashMap<>();
+	private final Set<String> originalMixins = new HashSet<>();
+	private final IMixinConfigPlugin mixinSquaredPlugin;
 	private final String generatedMixinPrefix;
 
 	public static void init(String packageName, IMixinConfigPlugin mixinSquaredPlugin) {
@@ -78,7 +79,7 @@ public class MixinClassAdjusterApplication {
 		if (mixinClassName == null) {
 			return true;
 		}
-		return ADJUSTERS.get(mixinClassName).shouldApplyMixin(targetClassName);
+		return adjusters.get(mixinClassName).shouldApplyMixin(targetClassName);
 	}
 
 	public List<String> apply() {
@@ -112,11 +113,11 @@ public class MixinClassAdjusterApplication {
 
 		// Apply adjusters!
 		Map<String, IReferenceMapper> mappersCache = new HashMap<>();
-		ADJUSTERS = MixinClassAdjusterRegistrar.endAdjusters();
-		for (MixinClassAdjuster adjuster : ADJUSTERS.values()) {
+		adjusters = MixinClassAdjusterRegistrar.endAdjusters();
+		for (MixinClassAdjuster adjuster : adjusters.values()) {
 			applyAdjuster(mixinServiceWrapper, adjuster, mappersCache);
 		}
-		List<MixinClassProvider> providers = MixinClassAdjusterRegistrar.endProviders();
+		Set<MixinClassProvider> providers = MixinClassAdjusterRegistrar.endProviders();
 		// Collect generated mixin class's simple names
 		ArrayList<String> mixins = new ArrayList<>(generatedToOriginalMixins.size() + providers.size());
 		for (String s : generatedToOriginalMixins.keySet()) {
@@ -249,7 +250,7 @@ public class MixinClassAdjusterApplication {
 			// Adjust specials
 			List<String> toRemove = null;
 			for (String modifiedTarget : finalTargets) {
-				ClassNode modifiedMixin = adjuster.adjustSpecial(modifiedTarget, () -> {
+				ClassNode modifiedMixin = adjuster.adjustMixin(modifiedTarget, () -> {
 					// Lazy, faster
 					ClassNode modifiedClassNode = new ClassNode();
 					// cNode now has modified targets
@@ -304,13 +305,37 @@ public class MixinClassAdjusterApplication {
 		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
 		node.accept(writer);
 		byte[] bytes = writer.toByteArray();
-		RUNTIME_MIXINS.put(node.name, bytes);
+		runtimeMixins.put(node.name, bytes);
 		IMixinTransformer transformer = (IMixinTransformer) MixinEnvironment.getDefaultEnvironment().getActiveTransformer();
 		((Extensions) transformer.getExtensions())
 			.export(MixinEnvironment.getCurrentEnvironment(), node.name, false, node);
 	}
 
 	byte[] getByteCode(String name) {
-		return RUNTIME_MIXINS.get(name.replace('.', '/'));
+		return runtimeMixins.get(name.replace('.', '/'));
+	}
+
+	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+		String originalMixinClassMame = generatedToOriginalMixins.get(mixinClassName);
+		if (originalMixinClassMame == null) {
+			return;
+		}
+		MixinClassAdjuster adjuster = adjusters.get(originalMixinClassMame);
+		if (adjuster == null) {
+			return;
+		}
+		adjuster.preApply(targetClassName, targetClass, originalMixinClassMame, mixinInfo);
+	}
+
+	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+		String originalMixinClassMame = generatedToOriginalMixins.get(mixinClassName);
+		if (originalMixinClassMame == null) {
+			return;
+		}
+		MixinClassAdjuster adjuster = adjusters.get(originalMixinClassMame);
+		if (adjuster == null) {
+			return;
+		}
+		adjuster.postApply(targetClassName, targetClass, originalMixinClassMame, mixinInfo);
 	}
 }

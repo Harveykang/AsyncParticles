@@ -7,6 +7,7 @@ transitive-mutable field net/minecraft/client/particle/ParticleEngine particles 
 accessible field net/minecraft/client/particle/Particle x D
 accessible field net/minecraft/client/particle/Particle y D
 accessible field net/minecraft/client/particle/Particle z D
+accessible field net/minecraft/client/particle/Particle alpha F
 accessible field net/minecraft/client/particle/Particle level Lnet/minecraft/client/multiplayer/ClientLevel;
 accessible field net/minecraft/world/phys/HitResult location Lnet/minecraft/world/phys/Vec3;
 transitive-mutable field net/minecraft/world/phys/HitResult location Lnet/minecraft/world/phys/Vec3;
@@ -55,6 +56,3 @@ accessible method com/mojang/blaze3d/vertex/PoseStack$Pose <init> (Lorg/joml/Mat
 accessible field net/minecraft/client/particle/ParticleEngine textureManager Lnet/minecraft/client/renderer/texture/TextureManager;
 accessible field net/minecraft/client/particle/ParticleEngine RENDER_ORDER Ljava/util/List;
 accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;
-accessible field net/minecraft/client/particle/Particle xd D
-accessible field net/minecraft/client/particle/Particle yd D
-accessible field net/minecraft/client/particle/Particle zd D

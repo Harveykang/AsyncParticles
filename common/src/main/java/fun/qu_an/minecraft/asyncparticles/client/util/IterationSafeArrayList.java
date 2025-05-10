@@ -39,7 +39,7 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void addElements(final int index, final E a[], final int offset, final int length) {
+	public void addElements(final int index, final E[] a, final int offset, final int length) {
 		ensureIndex(index);
 		ObjectArrays.ensureOffsetLength(a, offset, length);
 		final E[] b;

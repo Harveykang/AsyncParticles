@@ -16,10 +16,10 @@ allprojects {
     forgix {
         group = rootProject.group
         mergedJarName = rootProject.archives_name + '-' + rootProject.mod_version +
-                (rootProject.snapshot ?
-                        "-SNAPSHOT." + Integer.toHexString(UUID.randomUUID().hashCode()) :
+                (rootProject.snapshot == 'true' ?
+                        '-SNAPSHOT.' + Long.toHexString(new Random().nextLong(0x1000000L, 0xFFFFFFFFL)) :
                         '') +
-                '.jar'
+                '+' + rootProject.minecraft_version + '.jar'
     }
 }
 

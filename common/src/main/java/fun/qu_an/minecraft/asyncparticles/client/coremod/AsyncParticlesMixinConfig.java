@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.util.Set;
 @PreLaunch
 public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
+	public static final int VERSION = 1;
 	static String COMMENTS = """
 		particle$noCulling: comma-separated list of particle classes that should not be culled.
 		particle$noLightCache: comma-separated list of particle classes that should not use the light cache.
@@ -33,10 +35,21 @@ public class AsyncParticlesMixinConfig {
 		try (InputStream is = Files.newInputStream(MIXIN_CONFIG_FILE)) {
 			properties.load(is);
 		}
+
 		Mixin$Particle configObj = new Mixin$Particle();
 		configObj.read(properties);
-		save(configObj);
+		configObj = upgrade(configObj.version, configObj);
+
 		AsyncParticlesMixinConfig.config = configObj;
+		save(configObj);
+	}
+
+	@Contract
+	private static Mixin$Particle upgrade(int ver, Mixin$Particle configObj) {
+		return switch (ver) {
+			case VERSION -> configObj;
+			default -> new Mixin$Particle();
+		};
 	}
 
 	static void save() throws IOException {
@@ -53,6 +66,7 @@ public class AsyncParticlesMixinConfig {
 
 	private static void save(Mixin$Particle configObj) throws IOException {
 		Properties properties = new Properties();
+		configObj.version = VERSION;
 		configObj.write(properties);
 		try (OutputStream os = Files.newOutputStream(MIXIN_CONFIG_FILE)) {
 			properties.store(os, COMMENTS);
@@ -60,6 +74,7 @@ public class AsyncParticlesMixinConfig {
 	}
 
 	static class Mixin$Particle {
+		private int version = 0;
 		@Unmodifiable
 		private Set<String> noCulling;
 
@@ -119,12 +134,16 @@ public class AsyncParticlesMixinConfig {
 		}
 
 		private void read(Properties properties) {
+			try{
+				version = Integer.parseInt(properties.getProperty("version"));
+			} catch (NumberFormatException ignored) {
+			}
 			assertNotGlobal();
 			Mixin$Particle defaultConfig = new Mixin$Particle();
 			noCulling = read(properties, "particle$noCulling", defaultConfig.noCulling);
-			noLightCache = read(properties, "particle$noLightCache",defaultConfig.noLightCache);
-			lockProvider = read(properties, "particle$lockRequired", defaultConfig.lockProvider);
-			lockRequired = read(properties, "particle$lockProvider", defaultConfig.lockRequired);
+			noLightCache = read(properties, "particle$noLightCache", defaultConfig.noLightCache);
+			lockProvider = read(properties, "particle$lockProvider", defaultConfig.lockProvider);
+			lockRequired = read(properties, "particle$lockRequired", defaultConfig.lockRequired);
 		}
 
 		private void flat() {
@@ -132,6 +151,7 @@ public class AsyncParticlesMixinConfig {
 		}
 
 		private void write(Properties properties) {
+			properties.setProperty("version", Integer.toString(version));
 			properties.setProperty("particle$noCulling", String.join(",", noCulling));
 			properties.setProperty("particle$noLightCache", String.join(",", noLightCache));
 			properties.setProperty("particle$lockProvider", String.join(",", lockProvider));

@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier;
 
-import fun.qu_an.minecraft.asyncparticles.client.mixin.GeneratedImplDummy;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -11,7 +10,7 @@ import java.util.Set;
 public class ClassAdjusterMixinPlugin implements IMixinConfigPlugin {
 	@Override
 	public void onLoad(String mixinPackage) {
-		MixinClassAdjusterApplication.init(GeneratedImplDummy.class.getPackageName(), this);
+		MixinClassAdjusterApplication.init(mixinPackage, this);
 	}
 
 	@Override
@@ -36,9 +35,11 @@ public class ClassAdjusterMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+		MixinClassAdjusterApplication.getInstance().preApply(targetClassName, targetClass, mixinClassName, mixinInfo);
 	}
 
 	@Override
 	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+		MixinClassAdjusterApplication.getInstance().postApply(targetClassName, targetClass, mixinClassName, mixinInfo);
 	}
 }

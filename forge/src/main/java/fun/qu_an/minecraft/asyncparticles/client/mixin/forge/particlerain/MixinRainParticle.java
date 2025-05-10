@@ -76,11 +76,7 @@ public abstract class MixinRainParticle extends MixinWeatherParticle {
 			this.stoppedByCollision = true;
 		}
 
-		if (h != e && h < (double) 0.0F) {
-			this.onGround = true;
-		} else {
-			this.onGround = false;
-		}
+		this.onGround = h != e && h < (double) 0.0F;
 
 		if (g != d) {
 			this.xd = 0.0;

@@ -61,7 +61,7 @@ public class LegacyConfigMigrator {
 
 		properties.setProperty("migrated" , "");
 		try (OutputStream os = Files.newOutputStream(legacyConfigFile)) {
-			properties.store(os, "");
+			properties.store(os, null);
 		} catch (IOException e) {
 			return true;
 		}

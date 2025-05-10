@@ -14,6 +14,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Contract;
 import org.slf4j.Logger;
 
 import java.io.BufferedReader;
@@ -27,9 +28,10 @@ import java.util.function.Consumer;
 import static java.util.Objects.requireNonNullElse;
 
 public class AsyncParticlesConfig {
+	public static final int VERSION = 1;
 	public static final Path CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles.json");
 	static final Gson GSON = new GsonBuilder()
-		.setVersion(1.0)
+		.setLenient()
 		.setPrettyPrinting()
 		.disableHtmlEscaping()
 		.create();
@@ -162,9 +164,18 @@ public class AsyncParticlesConfig {
 			reset();
 			return;
 		}
+		configObj = upgrade(configObj.version, configObj);
 
 		configObj.flat();
 		save(configObj);
+	}
+
+	@Contract
+	private static ConfigObj upgrade(int ver, ConfigObj configObj) {
+		return switch (ver) {
+			case VERSION -> configObj;
+			default -> new ConfigObj();
+		};
 	}
 
 	public static void save() throws IOException, JsonParseException {
@@ -180,12 +191,14 @@ public class AsyncParticlesConfig {
 	}
 
 	private static void save(ConfigObj configObj) throws IOException {
+		configObj.version = VERSION;
 		try (BufferedWriter writer = Files.newBufferedWriter(CONFIG_FILE)) {
 			GSON.toJson(configObj, writer);
 		}
 	}
 
 	static class ConfigObj {
+		int version = 0; // 0 means no version, will reset to default values.
 		Particle particle = new Particle();
 		Tick tick = new Tick();
 		Rendering rendering = new Rendering();

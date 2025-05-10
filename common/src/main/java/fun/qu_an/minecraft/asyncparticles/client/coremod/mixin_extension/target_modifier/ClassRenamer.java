@@ -22,19 +22,16 @@ public class ClassRenamer {
             Iterator<AbstractInsnNode> iterator = method.instructions.iterator();
             while (iterator.hasNext()) {
                 AbstractInsnNode insn = iterator.next();
-                if (insn instanceof FieldInsnNode) {
-                    FieldInsnNode fin = (FieldInsnNode) insn;
-                    if (fin.owner.equals(oldInternalName)) {
+                if (insn instanceof FieldInsnNode fin) {
+					if (fin.owner.equals(oldInternalName)) {
                         fin.owner = newInternalName;
                     }
-                } else if (insn instanceof MethodInsnNode) {
-                    MethodInsnNode min = (MethodInsnNode) insn;
-                    if (min.owner.equals(oldInternalName)) {
+                } else if (insn instanceof MethodInsnNode min) {
+					if (min.owner.equals(oldInternalName)) {
                         min.owner = newInternalName;
                     }
-                } else if (insn instanceof TypeInsnNode) {
-                    TypeInsnNode tin = (TypeInsnNode) insn;
-                    tin.desc = tin.desc.replace(oldInternalName, newInternalName);
+                } else if (insn instanceof TypeInsnNode tin) {
+					tin.desc = tin.desc.replace(oldInternalName, newInternalName);
                 }
             }
 

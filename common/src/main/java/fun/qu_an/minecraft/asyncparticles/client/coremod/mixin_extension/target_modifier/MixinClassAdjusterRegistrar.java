@@ -4,16 +4,13 @@ import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.service.MixinService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @PreLaunch
 public class MixinClassAdjusterRegistrar {
 	private static final ILogger LOGGER = MixinService.getService().getLogger("mixinsquared");
-	static Map<String, MixinClassAdjuster> pendingAdjusters = new HashMap<>();
-	static List<MixinClassProvider> pendingProviders = new ArrayList<>();
+	private static Map<String, MixinClassAdjuster> pendingAdjusters = new HashMap<>();
+	private static Set<MixinClassProvider> pendingProviders = new HashSet<>();
 
 	public static void register(MixinClassAdjuster mixinClassAdjuster) {
 		if (pendingAdjusters == null) {
@@ -37,8 +34,8 @@ public class MixinClassAdjusterRegistrar {
 		return m;
 	}
 
-	static List<MixinClassProvider> endProviders() {
-		List<MixinClassProvider> l = pendingProviders;
+	static Set<MixinClassProvider> endProviders() {
+		Set<MixinClassProvider> l = pendingProviders;
 		pendingProviders = null;
 		return l;
 	}

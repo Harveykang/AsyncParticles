@@ -5,9 +5,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
 import org.spongepowered.asm.mixin.Dynamic;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -15,21 +13,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(RippleParticle.class)
 public abstract class MixinRippleParticle extends TextureSheetParticle {
-	@Dynamic
-	@Shadow(remap = false)
-	@Final
+	@SuppressWarnings({"AddedMixinMembersNamePattern", "MissingUnique", "unused"})
 	private SpriteSet spriteProvider;
 
 	protected MixinRippleParticle(ClientLevel level, double x, double y, double z) {
 		super(level, x, y, z);
 	}
 
-	@Inject(method = "<init>", require = 0, at = @At("RETURN"))
+	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
 		setSpriteFromAge(this.spriteProvider);
 	}
 
-	@Inject(method = "tick", require = 0, at = @At("HEAD"))
+	@Inject(method = "tick", at = @At("HEAD"))
 	private void onTick(CallbackInfo ci) {
 		setSpriteFromAge(this.spriteProvider);
 	}
