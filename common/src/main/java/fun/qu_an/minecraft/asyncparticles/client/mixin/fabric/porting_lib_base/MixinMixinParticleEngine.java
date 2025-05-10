@@ -29,6 +29,7 @@ public class MixinMixinParticleEngine {
 	}
 
 	// priority = 550 so this will not override PortingLib's implementation
+	@SuppressWarnings("MissingUnique")
 	private static void port_lib$addRenderType(ParticleRenderType particleRenderType) {
 	}
 }

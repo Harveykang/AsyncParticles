@@ -50,6 +50,13 @@ class ClothConfigMenus {
 				.setDefaultValue(defaultConfig.particle.particleLightCache)
 				.setTooltip(Component.translatable("config.asyncparticles.particle.particleLightCache.tooltip"))
 				.setSaveConsumer(newValue -> particle$particleLightCache = newValue)
+				.build())
+			.addEntry(entryBuilder
+				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.cullUnderwaterParticleType"),
+					particle$cullUnderwaterParticleType)
+				.setDefaultValue(defaultConfig.particle.cullUnderwaterParticleType)
+				.setTooltip(Component.translatable("config.asyncparticles.particle.cullUnderwaterParticleType.tooltip"))
+				.setSaveConsumer(newValue -> particle$cullUnderwaterParticleType = newValue)
 				.build());
 		// endregion
 		// region Tick Category

@@ -21,6 +21,8 @@
   "config.asyncparticles.rendering.cullParticles.tooltip": "Cull particles outside the camera view.",
   "config.asyncparticles.rendering.particleRenderingMode": "Particle Rendering Mode",
   "config.asyncparticles.rendering.particleRenderingMode.tooltip": "Choose how particles are rendered.\n'Compatibility' improves mod compatibility\nbut affects optimization. Automatically enabled\nwith shader packs.\n'Synchronously' disables all optimization.",
+  "config.asyncparticles.particle.cullUnderwaterParticleType": "Cull 'UNDERWATER' Particle Type",
+  "config.asyncparticles.particle.cullUnderwaterParticleType.tooltip": "On non-Fabulous graphics, enabling this\nmakes 'UNDERWATER' particles appear only\nwhen you're actually underwater.",
   "config.asyncparticles.rendering.failPerSecLimit": "Fail Per Second Limit",
   "config.asyncparticles.rendering.failPerSecLimit.tooltip": "Maximum rendering failures per second allowed\nper particle class. Exceeding this will follow\nthe 'Fail Behavior' setting.",
   "config.asyncparticles.rendering.failBehavior": "Fail Behavior",

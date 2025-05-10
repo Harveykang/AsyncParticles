@@ -82,4 +82,8 @@ public class ConfigHelper {
 	public static Set<ResourceLocation> getWeatherParticles() {
 		return Set.of();
 	}
+
+	public static boolean cullUnderwaterParticleType() {
+		return AsyncParticlesConfig.particle$cullUnderwaterParticleType;
+	}
 }
