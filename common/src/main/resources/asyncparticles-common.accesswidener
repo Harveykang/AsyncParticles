@@ -5,6 +5,7 @@ accessible field net/minecraft/client/particle/ParticleEngine particles Ljava/ut
 accessible field net/minecraft/client/particle/Particle x D
 accessible field net/minecraft/client/particle/Particle y D
 accessible field net/minecraft/client/particle/Particle z D
+accessible field net/minecraft/client/particle/Particle alpha F
 accessible field net/minecraft/client/particle/Particle level Lnet/minecraft/client/multiplayer/ClientLevel;
 accessible field net/minecraft/world/phys/HitResult location Lnet/minecraft/world/phys/Vec3;
 transitive-mutable field net/minecraft/world/phys/HitResult location Lnet/minecraft/world/phys/Vec3;
