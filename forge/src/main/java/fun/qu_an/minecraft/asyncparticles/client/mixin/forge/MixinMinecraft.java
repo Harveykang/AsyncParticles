@@ -25,7 +25,7 @@ public class MixinMinecraft {
 	@Shadow @Final public ParticleEngine particleEngine;
 
 	@Inject(method = "run", at = @At("HEAD"))
-	private void onRun(CallbackInfo ci) { // Later than mixin.MixinMinecraft
+	private void onRun(CallbackInfo ci) { // Later than mixin.tick.MixinMinecraft
 		ThreadUtil.enqueueClientTask(() -> { // Do it later.
 			List<ParticleRenderType> renderOrder = ParticleEngine.RENDER_ORDER;
 			AtomicInteger orderGenerator = new AtomicInteger();

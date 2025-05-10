@@ -81,6 +81,7 @@ public class AsyncParticlesMixinConfig {
 		{
 			Set<String> noCulling = new LinkedHashSet<>();
 			noCulling.add("pigcart.particlerain.particle.GroundFogParticle");
+			noCulling.add("com.lowdragmc.photon.client.gameobject.FXObject");
 			this.noCulling = Collections.unmodifiableSet(noCulling);
 		}
 
