@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class MixinClientStuff {
 	@Unique
 	private static final ResourceLocation asyncparticles$PARTICULAR$ON_CLIENT_TICK =
-		ResourceLocation.tryBuild("particular", "on_client_tick");
+		ResourceLocation.fromNamespaceAndPath("particular", "on_client_tick");
 	@WrapMethod(method = "onClientTick", remap = false)
 	private static void onClientTick(ClientTickEvent.Pre event, Operation<Void> original) {
 		AsyncTicker.addEndTickTask(asyncparticles$PARTICULAR$ON_CLIENT_TICK, () -> original.call((Object) null));
@@ -27,7 +27,7 @@ public class MixinClientStuff {
 
 	@Unique
 	private static final ResourceLocation asyncparticles$PARTICULAR$ON_CHUNK_LOAD =
-		ResourceLocation.tryBuild("particular", "on_chunk_load");
+		ResourceLocation.fromNamespaceAndPath("particular", "on_chunk_load");
 	@Redirect(method = "lambda$onChunkLoad$3", remap = false,
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;execute(Ljava/lang/Runnable;)V"))
 	private static void onChunkLoad(Minecraft mc, Runnable runnable) {

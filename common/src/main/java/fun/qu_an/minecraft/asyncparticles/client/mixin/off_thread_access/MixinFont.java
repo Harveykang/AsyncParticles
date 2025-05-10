@@ -2,9 +2,9 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.gui.Font;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,6 +14,6 @@ public class MixinFont {
 	@WrapOperation(method = "<init>",
 		at = @At(value = "INVOKE", target ="Lnet/minecraft/util/RandomSource;create()Lnet/minecraft/util/RandomSource;"))
 	private RandomSource onInit(Operation<RandomSource> original) {
-		return new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong());
+		return new SingleThreadedRandomSource(RandomSupport.generateUniqueSeed());
 	}
 }

@@ -54,8 +54,8 @@ public abstract class MixinLevelRenderer {
 										  Matrix4f modelViewMatrix,
 										  Matrix4f projectionMatrix,
 										  Operation<Void> original,
-										  @Share("asyncparticles$addParticlesPassOperation") LocalRef<Operation<Void>> originalRef) {
-//		this.asyncparticles$addParticlesPassOperation = original;
+										  @Share("addParticlesPassOperation") LocalRef<Operation<Void>> originalRef) {
+//		this.addParticlesPassOperation = original;
 		// do nothing, we'll call the original method later
 		if (SimplePropertiesConfig.isRenderAsync()) {
 			originalRef.set(original);
@@ -79,7 +79,7 @@ public abstract class MixinLevelRenderer {
 									@Local(ordinal = 0) float f,
 									@Local(ordinal = 0) FogParameters fogParameters,
 									@Local(ordinal = 0) Frustum frustum,
-									@Share("asyncparticles$addParticlesPassOperation") LocalRef<Operation<Void>> originalRef) {
+									@Share("addParticlesPassOperation") LocalRef<Operation<Void>> originalRef) {
 		// Fabulous graphics
 		if (SimplePropertiesConfig.isRenderAsync()) {
 			originalRef.get().call(this, frameGraphBuilder, camera, f, fogParameters, frustum, frustumMatrix, projectionMatrix);
@@ -101,7 +101,7 @@ public abstract class MixinLevelRenderer {
 									@Local(ordinal = 0) FogParameters fogParameters,
 									@Local(ordinal = 0) Frustum frustum,
 									@Local(ordinal = 0) PostChain postChain, // first one
-									@Share("asyncparticles$addParticlesPassOperation") LocalRef<Operation<Void>> originalRef) {
+									@Share("addParticlesPassOperation") LocalRef<Operation<Void>> originalRef) {
 		// non-Fabulous graphics
 		if (postChain == null && SimplePropertiesConfig.isRenderAsync()) {
 			originalRef.get().call(this, frameGraphBuilder, camera, f, fogParameters, frustum, frustumMatrix, projectionMatrix);

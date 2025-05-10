@@ -30,9 +30,9 @@ public abstract class MixinLevelRenderer {
 										  float partialTick,
 										  FogParameters fog,
 										  Operation<Void> original,
-										  @Share("asyncparticles$addParticlesPassOperation")
+										  @Share("addParticlesPassOperation")
 										  LocalRef<Operation<Void>> originalRef) {
-//		this.asyncparticles$addParticlesPassOperation = original;
+//		this.addParticlesPassOperation = original;
 		// we'll call the original method later
 		if (SimplePropertiesConfig.isRenderAsync()) {
 			originalRef.set(original);
@@ -55,7 +55,7 @@ public abstract class MixinLevelRenderer {
 									@Local(ordinal = 0) FrameGraphBuilder frameGraphBuilder,
 									@Local(ordinal = 0) float f,
 									@Local(ordinal = 0) FogParameters fogParameters,
-									@Share("asyncparticles$addParticlesPassOperation")
+									@Share("addParticlesPassOperation")
 									LocalRef<Operation<Void>> originalRef) {
 		// Fabulous graphics
 		if (SimplePropertiesConfig.isRenderAsync()) {
@@ -76,7 +76,7 @@ public abstract class MixinLevelRenderer {
 									@Local(ordinal = 0) FrameGraphBuilder frameGraphBuilder,
 									@Local(ordinal = 0) float f,
 									@Local(ordinal = 0) FogParameters fogParameters,
-									@Share("asyncparticles$addParticlesPassOperation")
+									@Share("addParticlesPassOperation")
 									LocalRef<Operation<Void>> originalRef) {
 		// non-Fabulous graphics
 		if (!Minecraft.useShaderTransparency() // assert @Local.postChain == null
