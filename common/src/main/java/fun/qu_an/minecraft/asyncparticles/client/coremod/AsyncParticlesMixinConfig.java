@@ -106,7 +106,7 @@ public class AsyncParticlesMixinConfig {
 			lockProvider.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
 			lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
 			lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
-			lockProvider.add("com.lowdragmc.photon.client.gameobject.emitter.Emitter");
+			lockProvider.add("com.lowdragmc.photon.client.gameobject.FXObject");
 			this.lockProvider = Collections.unmodifiableSet(lockProvider);
 		}
 
