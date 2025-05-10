@@ -1,6 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,7 +31,9 @@ public class SimplePropertiesConfig {
 			Files.createDirectories(CONFIG_FILE.getParent());
 			Files.createFile(CONFIG_FILE);
 		} else {
-			properties.load(Files.newInputStream(CONFIG_FILE));
+			try (InputStream is = Files.newInputStream(CONFIG_FILE)) {
+				properties.load(is);
+			}
 			String verStr = properties.getProperty("version_doNotModify");
 			int ver = -1;
 			try {
@@ -60,7 +64,9 @@ public class SimplePropertiesConfig {
 		cullParticles = getBoolean(properties, "cullParticles", true);
 
 		if (shouldSave) {
-			properties.store(Files.newOutputStream(CONFIG_FILE), null);
+			try (OutputStream os = Files.newOutputStream(CONFIG_FILE)) {
+				properties.store(os, null);
+			}
 			shouldSave = false;
 		}
 	}

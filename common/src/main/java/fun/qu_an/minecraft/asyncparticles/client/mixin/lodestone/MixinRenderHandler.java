@@ -17,12 +17,12 @@ public class MixinRenderHandler {
 	@Unique
 	private static final ReentrantSpinLock asyncparticles$lock = new ReentrantSpinLock();
 
-	@WrapMethod(method = "addRenderType", remap = false)
+	@WrapMethod(method = "addRenderType")
 	private static void addRenderType(RenderType renderType, Operation<Void> original) {
 		asyncparticles$lock.wrap(() -> original.call(renderType));
 	}
 
-	@WrapMethod(method = "renderBufferedBatches(Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Ljava/util/SequencedMap;Z)V", remap = false)
+	@WrapMethod(method = "renderBufferedBatches(Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Ljava/util/SequencedMap;Z)V")
 	private static void renderBufferedBatches(MultiBufferSource.BufferSource bufferSource,
 											  SequencedMap<RenderType, ByteBufferBuilder> buffer,
 											  boolean transparentOnly,
