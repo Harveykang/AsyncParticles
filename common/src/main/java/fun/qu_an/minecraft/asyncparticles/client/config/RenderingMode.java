@@ -6,9 +6,9 @@ import net.minecraft.network.chat.Component;
 import java.util.function.Supplier;
 
 public enum RenderingMode implements TranslatableEnum {
+	SYNCHRONOUSLY(() -> Component.translatable("config.asyncparticles.enum.RenderingMode.SYNCHRONOUSLY")),
 	DELAYED(() -> Component.translatable("config.asyncparticles.enum.RenderingMode.DELAYED")),
-	COMPATIBILITY(() -> Component.translatable("config.asyncparticles.enum.RenderingMode.COMPATIBILITY")),
-	SYNCHRONOUSLY(() -> Component.translatable("config.asyncparticles.enum.RenderingMode.SYNCHRONOUSLY"));
+	COMPATIBILITY(() -> Component.translatable("config.asyncparticles.enum.RenderingMode.COMPATIBILITY"));
 	private final Supplier<Component> componentSupplier;
 
 	RenderingMode(Supplier<Component> componentSupplier) {

@@ -5,6 +5,7 @@ import com.simibubi.create.content.kinetics.steamEngine.SteamJetParticle;
 import com.simibubi.create.foundation.particle.AirParticle;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.vs2.MixinParticle;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import org.joml.Vector3d;
@@ -15,6 +16,10 @@ import org.spongepowered.asm.mixin.Mixin;
 public abstract class MixinParticle_LightCache extends MixinParticle {
 	@Override
 	public void asyncparticles$refresh() {
+		ClientLevel level = this.level;
+		if (level == null) {
+			return;
+		}
 		BlockPos blockPos = BlockPos.containing(x, y, z);
 		int light = level.isLoaded(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
 		if (asyncparticles$vsShip == null || !ConfigHelper.fixParticleLightOnVsShips()) {

@@ -77,6 +77,10 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 
 	@Override // inject after MixinParticle_LightCache to override
 	public void asyncparticles$refresh() {
+		ClientLevel level = this.level;
+		if (level == null) {
+			return;
+		}
 		BlockPos blockPos = BlockPos.containing(x, y, z);
 		int light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
 		if (asyncparticles$vsShip == null || !ConfigHelper.fixParticleLightOnVsShips()) {
