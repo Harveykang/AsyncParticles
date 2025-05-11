@@ -184,8 +184,9 @@ public class MixinClassAdjusterApplication {
 		boolean modified = false;
 
 		// Modify the priority
-		Integer priority = adjuster.getPriority();
-		if (priority != null) {
+		int originalPriority = priorityIndex > -1 ? (int) values.get(priorityIndex) : 1000;
+		int priority = adjuster.getPriority(originalPriority);
+		if (priority != originalPriority) {
 			if (priorityIndex > -1) {
 				values.set(priorityIndex, priority);
 			} else {
@@ -198,9 +199,26 @@ public class MixinClassAdjusterApplication {
 		// Modify the target classes
 		List<String> unmodifiableTargets = Collections.unmodifiableList(targets);
 		List<String> modifiedTargets = adjuster.getTargets(unmodifiableTargets);
-		Map<String, ClassNode> specialTargets = null;
-		if (modifiedTargets != null && modifiedTargets != unmodifiableTargets) {// Remove the original targets
-			// and write the modified to the annotation
+		boolean isModifiedTargets = modifiedTargets != null && modifiedTargets != unmodifiableTargets;
+		final List<String> finalTargets;
+		if (isModifiedTargets) {
+			finalTargets = new ArrayList<>(modifiedTargets);
+			modified = true;
+		} else {
+			finalTargets = targets;
+		}
+
+		if (modified) {
+			// Set targets
+			if (targetIndex > -1) {
+				values.set(targetIndex, finalTargets);
+			} else {
+				values.add("targets");
+				targetIndex = values.size();
+				values.add(finalTargets);
+			}
+
+			// Remap methods
 			String internalClassName = cNode.name;
 			String refMapperConfig = adjuster.getRefMapperConfig();
 			if (refMapperConfig == null) {
@@ -237,21 +255,14 @@ public class MixinClassAdjusterApplication {
 					}
 				}
 			}
+		}
 
-			// Set targets
-			List<String> finalTargets = new ArrayList<>(modifiedTargets);
-			if (targetIndex > -1) {
-				values.set(targetIndex, finalTargets);
-			} else {
-				values.add("targets");
-				targetIndex = values.size();
-				values.add(finalTargets);
-			}
+		Map<String, ClassNode> specialTargets = null;
+		if (isModifiedTargets) {
 			// Adjust specials
-			List<String> toRemove = null;
 			for (String modifiedTarget : finalTargets) {
 				ClassNode modifiedMixin = adjuster.adjustMixin(modifiedTarget, () -> {
-					// Lazy, faster
+					// Lazy
 					ClassNode modifiedClassNode = new ClassNode();
 					// cNode now has modified targets
 					cNode.accept(modifiedClassNode);
@@ -260,17 +271,13 @@ public class MixinClassAdjusterApplication {
 				if (modifiedMixin != null) {
 					if (specialTargets == null) {
 						specialTargets = new HashMap<>();
-						toRemove = new ArrayList<>();
 					}
-					toRemove.add(modifiedTarget);
 					specialTargets.put(modifiedTarget, modifiedMixin);
 				}
 			}
-			if (toRemove != null) {
-				finalTargets.removeAll(toRemove);
+			if (specialTargets != null) {
+				finalTargets.removeAll(specialTargets.keySet());
 			}
-
-			modified = true;
 		}
 
 		if (modified) {
@@ -278,7 +285,6 @@ public class MixinClassAdjusterApplication {
 			String generatedMixin = getGeneratedMixinPrefix(mixinClassName);
 			ClassRenamer.renameClass(cNode, generatedMixin);
 			// Define the modified mixin class
-			// TODO: Change the usage of ClassGenUtils to our implementation.
 			genClass(cNode);
 			// Done!
 			generatedToOriginalMixins.put(generatedMixin, mixinClassName);
@@ -288,11 +294,11 @@ public class MixinClassAdjusterApplication {
 				for (Map.Entry<String, ClassNode> entry : specialTargets.entrySet()) {
 					String target = entry.getKey();
 					ClassNode modifiedMixin = entry.getValue();
-					List<Object> values1 = Annotations.getInvisible(modifiedMixin, Mixin.class).values;
-					ArrayList<String> targets1 = new ArrayList<>();
+					ArrayList<String> targets1 = new ArrayList<>(1);
 					targets1.add(target);
+					List<Object> values1 = Annotations.getInvisible(modifiedMixin, Mixin.class).values;
 					values1.set(targetIndex, targets1);
-					String generatedTarget = getGeneratedMixinPrefix(mixinClassName + "$TARGET_" + target.replace(".", "$_"));
+					String generatedTarget = generatedMixin + "$TARGET_" + target.replace(".", "$_");
 					ClassRenamer.renameClass(modifiedMixin, generatedTarget);
 					genClass(modifiedMixin);
 					generatedToOriginalMixins.put(generatedTarget, mixinClassName);

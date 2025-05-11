@@ -33,6 +33,8 @@ public abstract class MixinLevelRenderer {
 	@Shadow
 	private Frustum cullingFrustum;
 
+	@Shadow @Nullable public PostChain transparencyChain;
+
 	@Inject(method = "renderLevel", at = @At(value = "HEAD"))
 	private void onRenderLevelHead(PoseStack poseStack,
 								   float f,
@@ -114,6 +116,29 @@ public abstract class MixinLevelRenderer {
 										  LocalBooleanRef isRenderAsync) {
 		if (!isRenderAsync.get()) {
 			instance.clearRenderState();
+		}
+	}
+
+	@Inject(method = "renderLevel", // priority = 499, inject earlier
+		at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/renderer/LevelRenderer;renderDebug(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/Camera;)V"))
+	private void onRenderLevelTail(PoseStack poseStack,
+								   float f,
+								   long l,
+								   boolean bl,
+								   Camera camera,
+								   GameRenderer gameRenderer,
+								   LightTexture lightTexture,
+								   Matrix4f matrix4f,
+								   CallbackInfo ci,
+								   @Share(namespace = "asyncparticles", value = "isRenderAsync")
+								   LocalBooleanRef isRenderAsync,
+								   @Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
+								   LocalBooleanRef isMixedParticleRendering) {
+		if (isRenderAsync.get() &&
+			!isMixedParticleRendering.get() &&
+			!ConfigHelper.isCompatibilityRendering() &&
+			transparencyChain == null) {
+			AsyncRenderer.join(poseStack, f, camera, lightTexture);
 		}
 	}
 }

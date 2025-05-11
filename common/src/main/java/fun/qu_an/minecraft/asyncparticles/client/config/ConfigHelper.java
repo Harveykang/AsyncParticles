@@ -87,7 +87,7 @@ public class ConfigHelper {
 		return Set.of();
 	}
 
-	public static boolean cullUnderwaterParticleType() {
+	public static boolean isCullUnderwaterParticleType() {
 		return AsyncParticlesConfig.particle$cullUnderwaterParticleType;
 	}
 }

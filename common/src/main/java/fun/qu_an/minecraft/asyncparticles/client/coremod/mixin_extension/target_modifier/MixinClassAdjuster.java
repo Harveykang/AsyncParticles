@@ -30,8 +30,8 @@ public interface MixinClassAdjuster {
 	 * null to keep the original priority
 	 * @see Mixin#priority()
 	 */
-	default Integer getPriority() {
-		return null;
+	default int getPriority(int original) {
+		return original;
 	}
 
 	/**
@@ -55,6 +55,7 @@ public interface MixinClassAdjuster {
 	/**
 	 * Adjust anything special, e.g. {@link Opcodes#INVOKESPECIAL}
 	 *
+	 * @param targetClassName one of the target class names provided by getTargets()
 	 * @param mixinClassNode provide a remapped class node
 	 * @return a new ClassNode or the modified toModifyClassNode
 	 * @apiNote DO NOT modify targets here

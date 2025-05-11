@@ -12,9 +12,9 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(WaterFluid.class)
 public class MixinWaterFluid {
 	@WrapWithCondition(method = "animateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"))
-	public boolean addParticle(Level instance, ParticleOptions particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+	public boolean cullUnderWaterParticleType(Level instance, ParticleOptions particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
 		// assert level instanceof ClientLevel;
-		return !ConfigHelper.cullUnderwaterParticleType() ||
+		return !ConfigHelper.isCullUnderwaterParticleType() ||
 			   Minecraft.useShaderTransparency() ||
 			   Minecraft.getInstance().player.isUnderWater();
 	}
