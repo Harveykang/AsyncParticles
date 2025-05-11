@@ -1,9 +1,11 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller;
 
-import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
-
+/**
+ * These codes are from my fork of MixinSquared.<p>
+ * <a href="https://github.com/Harveykang/MixinSquared">https://github.com/Harveykang/MixinSquared</a><p>
+ * APIs may be removed or change frequently before pull request.
+ */
 @SuppressWarnings("unused")
-@PreLaunch
 public class MixinMemberCancellerRegistrar {
     /**
      * Registers a MixinMemberCanceller to be used by the ExtensionCancelMixinMember.

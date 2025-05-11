@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier;
 
-import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.launch.platform.container.IContainerHandle;
@@ -13,7 +12,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 
-@PreLaunch
+/**
+ * These codes are from my fork of MixinSquared.<p>
+ * <a href="https://github.com/Harveykang/MixinSquared">https://github.com/Harveykang/MixinSquared</a><p>
+ * APIs may be removed or change frequently before pull request.
+ */
 public class MixinServiceWrapper implements IMixinService, IClassBytecodeProvider {
     private final IMixinService delegate;
 

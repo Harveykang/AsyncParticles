@@ -1,12 +1,15 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier;
 
-import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.service.MixinService;
 
 import java.util.*;
 
-@PreLaunch
+/**
+ * These codes are from my fork of MixinSquared.<p>
+ * <a href="https://github.com/Harveykang/MixinSquared">https://github.com/Harveykang/MixinSquared</a><p>
+ * APIs may be removed or change frequently before pull request.
+ */
 public class MixinClassAdjusterRegistrar {
 	private static final ILogger LOGGER = MixinService.getService().getLogger("mixinsquared");
 	private static Map<String, MixinClassAdjuster> pendingAdjusters = new HashMap<>();

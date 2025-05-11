@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier;
 
 import com.bawnorton.mixinsquared.reflection.FieldReference;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfig;
 import org.spongepowered.asm.mixin.throwables.MixinError;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
@@ -11,7 +10,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-@PreLaunch
+/**
+ * These codes are from my fork of MixinSquared.<p>
+ * <a href="https://github.com/Harveykang/MixinSquared">https://github.com/Harveykang/MixinSquared</a><p>
+ * APIs may be removed or change frequently before pull request.
+ */
 public class MixinTransformerExtension {
     private final IMixinTransformer reference;
     private static FieldReference<List<IMixinConfig>> pendingConfigs;

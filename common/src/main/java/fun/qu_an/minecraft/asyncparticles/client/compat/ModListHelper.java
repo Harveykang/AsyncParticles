@@ -1,12 +1,9 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
-import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
 import org.sinytra.connector.loader.ConnectorEarlyLoader;
 
-@PreLaunch
 public class ModListHelper {
 	public static final boolean IS_FORGE = isForge();
 	public static final boolean IS_CLIENT = isClient();

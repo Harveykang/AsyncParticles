@@ -1,11 +1,14 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier;
 
-import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
 import org.objectweb.asm.tree.*;
 
 import java.util.Iterator;
 
-@PreLaunch
+/**
+ * These codes are from my fork of MixinSquared.<p>
+ * <a href="https://github.com/Harveykang/MixinSquared">https://github.com/Harveykang/MixinSquared</a><p>
+ * APIs may be removed or change frequently before pull request.
+ */
 public class ClassRenamer {
     public static void renameClass(ClassNode classNode, String newClassName) {
         String oldInternalName = classNode.name;

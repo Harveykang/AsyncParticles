@@ -1,10 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
-import fun.qu_an.minecraft.asyncparticles.client.coremod.PreLaunch;
 import net.minecraft.ReportedException;
 import org.jetbrains.annotations.NotNull;
 
-@PreLaunch
 public class ExceptionUtil {
 	public static RuntimeException toThrowDirectly(@NotNull Throwable t) {
 		return toThrowDirectly0(t);
