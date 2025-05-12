@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.StringListListEntryFixRestart;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
@@ -17,14 +18,39 @@ import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMi
 
 // No more NoClassDefFoundError
 public class ClothConfigMixinMenus {
-	public static Object buildCategory(ConfigCategory mixinCategory, ConfigEntryBuilder entryBuilder) {
+	public static Object buildCategory(ConfigCategory mixinCategory,
+									   ConfigEntryBuilder entryBuilder,
+									   ConfigEntryBuilder revertEntryBuilder) {
 		Mixin$Particle defaultConfig = new Mixin$Particle();
 		Mixin$Particle newConfig = new Mixin$Particle();
-		List<String> defaultNoCulling = List.copyOf(config.getNoCulling());
-		mixinCategory.addEntry(new StringListListEntryFixRestart(entryBuilder
+		Mixin$Particle lastConfig = getToSaveConfig();
+		mixinCategory.addEntry(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.particle.redirectFleroviumCulling"),
+				lastConfig.isRedirectFleroviumCulling())
+			.setDefaultValue(defaultConfig.isRedirectFleroviumCulling())
+			.setSaveConsumer(newConfig::setRedirectFleroviumCulling)
+			.setTooltipSupplier(() -> {
+				if (!ModListHelper.FORGE_FLEROVIUM_LOADED || !ModListHelper.SHIMMER_LOADED) {
+					return Optional.of(new Component[]{
+						Component.translatable("config.asyncparticles.mixin.particle.redirectFleroviumCulling.tooltip")
+					});
+				} else {
+					return Optional.of(new Component[]{
+						Component.translatable("config.asyncparticles.mixin.particle.redirectFleroviumCulling.tooltip")
+							.withStyle(ChatFormatting.STRIKETHROUGH),
+						Component.translatable("config.asyncparticles.incompatibility", "Shimmer")
+							.withStyle(ChatFormatting.DARK_RED)
+					});
+				}
+			})
+			.requireRestart()
+			.setRequirement(() -> ModListHelper.FORGE_FLEROVIUM_LOADED && !ModListHelper.SHIMMER_LOADED)
+			.build());
+		List<String> lastNoCulling = List.copyOf(lastConfig.getNoCulling());
+		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noCulling"),
-				defaultNoCulling)
-			.setDefaultValue(defaultNoCulling)
+				lastNoCulling)
+			.setDefaultValue(lastNoCulling)
 			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoCulling().contains(s)))
 			.setSaveConsumer(l -> newConfig.setNoCulling(l.isEmpty()
 				? defaultConfig.getNoCulling()
@@ -35,11 +61,11 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
 			.build()));
-		List<String> defaultNoLightCache = List.copyOf(config.getNoLightCache());
-		mixinCategory.addEntry(new StringListListEntryFixRestart(entryBuilder
+		List<String> lastNoLightCache = List.copyOf(lastConfig.getNoLightCache());
+		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noLightCache"),
-				defaultNoLightCache)
-			.setDefaultValue(defaultNoLightCache)
+				lastNoLightCache)
+			.setDefaultValue(lastNoLightCache)
 			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoLightCache().contains(s)))
 			.setSaveConsumer(l -> newConfig.setNoLightCache(l.isEmpty()
 				? defaultConfig.getNoLightCache()
@@ -50,10 +76,10 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
 			.build()));
-		List<String> defaultLockProvider = List.copyOf(config.getLockProvider());
-		mixinCategory.addEntry(new StringListListEntryFixRestart(entryBuilder
-			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockProvider"), defaultLockProvider)
-			.setDefaultValue(defaultLockProvider)
+		List<String> lastLockProvider = List.copyOf(lastConfig.getLockProvider());
+		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockProvider"), lastLockProvider)
+			.setDefaultValue(lastLockProvider)
 			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getLockProvider().contains(s)))
 			.setSaveConsumer(l -> newConfig.setLockProvider(l.isEmpty()
 				? defaultConfig.getLockProvider()
@@ -64,10 +90,10 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
 			.build()));
-		List<String> defaultLockRequired = List.copyOf(config.getLockRequired());
-		mixinCategory.addEntry(new StringListListEntryFixRestart(entryBuilder
-			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockRequired"), defaultLockRequired)
-			.setDefaultValue(defaultLockRequired)
+		List<String> lastLockRequired = List.copyOf(lastConfig.getLockRequired());
+		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockRequired"), lastLockRequired)
+			.setDefaultValue(lastLockRequired)
 			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getLockRequired().contains(s)))
 			.setSaveConsumer(l -> newConfig.setLockRequired(l.isEmpty()
 				? defaultConfig.getLockRequired()
@@ -98,7 +124,6 @@ public class ClothConfigMixinMenus {
 	}
 
 	public static void onSave(Object newConfig) throws IOException {
-		AsyncParticlesMixinConfig.config = (Mixin$Particle) newConfig;
-		AsyncParticlesMixinConfig.save();
+		AsyncParticlesMixinConfig.setAndSave((Mixin$Particle) newConfig);
 	}
 }

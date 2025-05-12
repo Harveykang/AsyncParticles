@@ -1,23 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.forge;
 
-import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import com.llamalad7.mixinextras.sugar.Share;
-import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
-import com.mojang.blaze3d.vertex.PoseStack;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import net.minecraft.client.Camera;
-import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.culling.Frustum;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
 
-/**
- * @implNote Suppressed if Iris mod loaded.
- */
 @Mixin(value = LevelRenderer.class, priority = 1600) // After mixin.render.MixinLevelRenderer_Late
 public abstract class MixinLevelRenderer_Late {
 	//	@WrapWithCondition(method = "renderLevel",

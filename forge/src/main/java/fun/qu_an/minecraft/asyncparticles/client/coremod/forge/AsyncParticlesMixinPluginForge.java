@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.forge;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
+import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.CONFIG;
 
 public class AsyncParticlesMixinPluginForge implements IMixinConfigPlugin {
 	@Override
@@ -55,7 +56,16 @@ public class AsyncParticlesMixinPluginForge implements IMixinConfigPlugin {
 			// TODO: 下面这个 mod 没有正式发布，且不确定是否是唯一的 forge 移植版
 			case "effecticularity_v1_0_2" -> FORGE_EFFECTICULARITY_LOADED &&
 											 versionCheck("effective", "1.0.0", "1.0.3");
-			case "flerovium" -> FORGE_FLEROVIUM_LOADED;
+			case "flerovium" -> {
+				if (!FORGE_FLEROVIUM_LOADED) {
+					yield false;
+				}
+				yield switch (split[1]) {
+					case "MixinAsyncRenderer",
+						 "MixinMixinParticleEngine" -> CONFIG.isRedirectFleroviumCulling();
+					default -> true;
+				};
+			}
 			case "embeddium" -> FORGE_EMBEDDIUM_LOADED;
 			case "epicfight" -> FORGE_EPICFIGHT_LOADED;
 			case "epicacg" -> FORGE_EPICACG_LOADED;

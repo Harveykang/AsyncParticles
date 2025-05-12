@@ -173,8 +173,11 @@ public class AsyncParticlesConfig {
 
 	@Contract
 	private static ConfigObj upgrade(int ver, ConfigObj configObj) {
+		if (VERSION != 1) {
+			throw new RuntimeException("I forgot to update the upgrade method.");
+		}
 		return switch (ver) {
-			case VERSION -> configObj;
+			case 1 -> configObj;
 			default -> new ConfigObj();
 		};
 	}

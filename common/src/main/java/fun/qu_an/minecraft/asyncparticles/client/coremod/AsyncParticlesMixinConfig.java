@@ -1,7 +1,9 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
+import org.spongepowered.asm.mixin.throwables.MixinError;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +23,17 @@ public class AsyncParticlesMixinConfig {
 		particle$noLightCache: comma-separated list of particle classes that should not use the light cache.
 		particle$lockRequired: comma-separated list of particle classes that require a spin lock.
 		particle$lockProvider: comma-separated list of particle classes that provide a spin lock.""";
-	static Mixin$Particle config = new Mixin$Particle();
+	public static final Mixin$Particle CONFIG;
+	private static Mixin$Particle toSaveConfig;
+
+	static {
+		try {
+			load();
+		} catch (IOException e) {
+			throw new MixinError(e);
+		}
+		CONFIG = toSaveConfig;
+	}
 
 	static void load() throws IOException {
 		if (!Files.exists(MIXIN_CONFIG_FILE)) {
@@ -40,14 +52,17 @@ public class AsyncParticlesMixinConfig {
 		configObj.read(properties);
 		configObj = upgrade(configObj.version, configObj);
 
-		AsyncParticlesMixinConfig.config = configObj;
+		toSaveConfig = configObj;
 		save(configObj);
 	}
 
 	@Contract
 	private static Mixin$Particle upgrade(int ver, Mixin$Particle configObj) {
+		if (VERSION != 1) {
+			throw new RuntimeException("I forgot to update the upgrade method.");
+		}
 		return switch (ver) {
-			case VERSION -> configObj;
+			case 1 -> configObj;
 			default -> new Mixin$Particle();
 		};
 	}
@@ -65,56 +80,55 @@ public class AsyncParticlesMixinConfig {
 	}
 
 	private static void save(Mixin$Particle configObj) throws IOException {
-		Properties properties = new Properties();
 		configObj.version = VERSION;
+		Properties properties = new Properties();
 		configObj.write(properties);
 		try (OutputStream os = Files.newOutputStream(MIXIN_CONFIG_FILE)) {
 			properties.store(os, COMMENTS);
 		}
 	}
 
-	static class Mixin$Particle {
+	static void setAndSave(Mixin$Particle newConfig) throws IOException {
+		toSaveConfig = newConfig;
+		save(newConfig);
+	}
+
+	static Mixin$Particle getToSaveConfig() {
+		return toSaveConfig;
+	}
+
+	public static class Mixin$Particle {
 		private int version = 0;
-		@Unmodifiable
-		private Set<String> noCulling;
+		private boolean redirectFleroviumCulling = !ModListHelper.SHIMMER_LOADED || !ModListHelper.FORGE_FLEROVIUM_LOADED;
+		private Set<String> noCulling = new LinkedHashSet<>();
 
 		{
-			Set<String> noCulling = new LinkedHashSet<>();
 			noCulling.add("pigcart.particlerain.particle.GroundFogParticle");
 			noCulling.add("com.lowdragmc.photon.client.gameobject.FXObject");
-			this.noCulling = Collections.unmodifiableSet(noCulling);
 		}
 
-		@Unmodifiable
-		private Set<String> noLightCache;
+		private Set<String> noLightCache = new LinkedHashSet<>();
 
 		{
-			Set<String> noLightCache = new LinkedHashSet<>();
 			noLightCache.add("dev.shadowsoffire.gateways.client.GatewayParticle");
 			noLightCache.add("com.chailotl.particular.particles.FireflyParticle");
 			noLightCache.add("com.lowdragmc.photon.client.gameobject.FXObject");
 			noLightCache.add("net.diebuddies.minecraft.weather.WeatherParticle");
-			this.noLightCache = Collections.unmodifiableSet(noLightCache);
 		}
 
-		@Unmodifiable
-		private Set<String> lockProvider;
+		private Set<String> lockProvider = new LinkedHashSet<>();
 
 		{
-			Set<String> lockProvider = new LinkedHashSet<>();
 			lockProvider.add("yesman.epicfight.client.particle.TrailParticle");
 			lockProvider.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
 			lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
 			lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
 			lockProvider.add("com.lowdragmc.photon.client.gameobject.FXObject");
-			this.lockProvider = Collections.unmodifiableSet(lockProvider);
 		}
 
-		@Unmodifiable
-		private Set<String> lockRequired;
+		private Set<String> lockRequired = new LinkedHashSet<>();
 
 		{
-			Set<String> lockRequired = new LinkedHashSet<>();
 			lockRequired.add("yesman.epicfight.client.particle.TrailParticle");
 			lockRequired.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
 			lockRequired.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
@@ -123,32 +137,35 @@ public class AsyncParticlesMixinConfig {
 			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.particle.ParticleEmitter");
 			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.beam.BeamEmitter");
 			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.trail.TrailEmitter");
-			this.lockRequired = Collections.unmodifiableSet(lockRequired);
 		}
 
 		private void fold() {
 			assertNotGlobal();
-			noCulling = config.noCulling;
-			noLightCache = config.noLightCache;
-			lockProvider = config.lockProvider;
-			lockRequired = config.lockRequired;
+			noCulling = toSaveConfig.noCulling;
+			noLightCache = toSaveConfig.noLightCache;
+			lockProvider = toSaveConfig.lockProvider;
+			lockRequired = toSaveConfig.lockRequired;
+			redirectFleroviumCulling = toSaveConfig.redirectFleroviumCulling;
 		}
 
 		private void read(Properties properties) {
-			try{
+			assertNotGlobal();
+			try {
 				version = Integer.parseInt(properties.getProperty("version"));
 			} catch (NumberFormatException ignored) {
 			}
-			assertNotGlobal();
 			Mixin$Particle defaultConfig = new Mixin$Particle();
-			noCulling = read(properties, "particle$noCulling", defaultConfig.noCulling);
-			noLightCache = read(properties, "particle$noLightCache", defaultConfig.noLightCache);
-			lockProvider = read(properties, "particle$lockProvider", defaultConfig.lockProvider);
-			lockRequired = read(properties, "particle$lockRequired", defaultConfig.lockRequired);
+			noCulling = getSet(properties, "particle$noCulling", defaultConfig.noCulling);
+			noLightCache = getSet(properties, "particle$noLightCache", defaultConfig.noLightCache);
+			lockProvider = getSet(properties, "particle$lockProvider", defaultConfig.lockProvider);
+			lockRequired = getSet(properties, "particle$lockRequired", defaultConfig.lockRequired);
+			redirectFleroviumCulling =
+				(!ModListHelper.SHIMMER_LOADED || !ModListHelper.FORGE_FLEROVIUM_LOADED) &&
+				getBoolean(properties, "particle$redirectFleroviumCulling", defaultConfig.redirectFleroviumCulling);
 		}
 
 		private void flat() {
-			config = this;
+			toSaveConfig = this;
 		}
 
 		private void write(Properties properties) {
@@ -157,9 +174,10 @@ public class AsyncParticlesMixinConfig {
 			properties.setProperty("particle$noLightCache", String.join(",", noLightCache));
 			properties.setProperty("particle$lockProvider", String.join(",", lockProvider));
 			properties.setProperty("particle$lockRequired", String.join(",", lockRequired));
+			properties.setProperty("particle$redirectFleroviumCulling", Boolean.toString(redirectFleroviumCulling));
 		}
 
-		private static Set<String> read(Properties properties, String key, Set<String> defaultValue) {
+		private static Set<String> getSet(Properties properties, String key, Set<String> defaultValue) {
 			String value = properties.getProperty(key);
 			if (value == null) {
 				return defaultValue;
@@ -179,8 +197,17 @@ public class AsyncParticlesMixinConfig {
 			return Collections.unmodifiableSet(set);
 		}
 
-		Set<String> getNoCulling() {
-			return noCulling;
+		private static boolean getBoolean(Properties properties, String key, boolean defaultValue) {
+			String bool = properties.getProperty(key);
+			if (bool == null) {
+				return defaultValue;
+			}
+			return Boolean.parseBoolean(bool);
+		}
+
+		@Unmodifiable
+		public Set<String> getNoCulling() {
+			return Collections.unmodifiableSet(noCulling);
 		}
 
 		void setNoCulling(Set<String> noCulling) {
@@ -188,8 +215,9 @@ public class AsyncParticlesMixinConfig {
 			this.noCulling = noCulling;
 		}
 
-		Set<String> getNoLightCache() {
-			return noLightCache;
+		@Unmodifiable
+		public Set<String> getNoLightCache() {
+			return Collections.unmodifiableSet(noLightCache);
 		}
 
 		void setNoLightCache(Set<String> noLightCache) {
@@ -197,8 +225,9 @@ public class AsyncParticlesMixinConfig {
 			this.noLightCache = noLightCache;
 		}
 
-		Set<String> getLockProvider() {
-			return lockProvider;
+		@Unmodifiable
+		public Set<String> getLockProvider() {
+			return Collections.unmodifiableSet(lockProvider);
 		}
 
 		void setLockProvider(Set<String> lockProvider) {
@@ -206,8 +235,9 @@ public class AsyncParticlesMixinConfig {
 			this.lockProvider = lockProvider;
 		}
 
-		Set<String> getLockRequired() {
-			return lockRequired;
+		@Unmodifiable
+		public Set<String> getLockRequired() {
+			return Collections.unmodifiableSet(lockRequired);
 		}
 
 		void setLockRequired(Set<String> lockRequired) {
@@ -215,8 +245,17 @@ public class AsyncParticlesMixinConfig {
 			this.lockRequired = lockRequired;
 		}
 
+		public boolean isRedirectFleroviumCulling() {
+			return redirectFleroviumCulling;
+		}
+
+		void setRedirectFleroviumCulling(boolean redirectFleroviumCulling) {
+			assertNotGlobal();
+			this.redirectFleroviumCulling = redirectFleroviumCulling;
+		}
+
 		private void assertNotGlobal() {
-			if (this == config) {
+			if (this == toSaveConfig || this == CONFIG) {
 				throw new IllegalStateException("Cannot modify global config object");
 			}
 		}

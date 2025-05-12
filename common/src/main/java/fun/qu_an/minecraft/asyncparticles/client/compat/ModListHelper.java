@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.compat;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
+import org.jetbrains.annotations.Nullable;
 import org.sinytra.connector.loader.ConnectorEarlyLoader;
 
 public class ModListHelper {
@@ -97,6 +98,7 @@ public class ModListHelper {
 	public static final boolean FABRIC_PORTING_LIB_BASE_LOADED = isFabricModLoaded("porting_lib_base");
 	/* Loot Beams Up */
 	public static final boolean FABRIC_LOOT_BEAMS_UP_LOADED = isFabricModLoaded("lootbeams");
+	public static final boolean SHIMMER_LOADED = isModLoaded("shimmer");
 
 	@ExpectPlatform
 	private static boolean isForge() {
@@ -114,7 +116,7 @@ public class ModListHelper {
 	}
 
 	@ExpectPlatform
-	public static boolean versionCheck(String modId, String minInclusive, String maxExclusive) {
+	public static boolean versionCheck(String modId, @Nullable String minInclusive, @Nullable String maxExclusive) {
 		// Suppressing the ConstantValue check because this is a generated method.
 		ExceptionUtil.throwAssertionError();
 		return true;

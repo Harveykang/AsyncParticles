@@ -12,15 +12,14 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.asm.mixin.throwables.MixinError;
 import org.spongepowered.asm.service.MixinService;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
+import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.CONFIG;
 
 public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 	static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles:plugin");
@@ -30,14 +29,8 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		if (!IS_CLIENT) {
 			return;
 		}
-		try {
-			AsyncParticlesMixinConfig.load();
-		} catch (IOException e) {
-			throw new MixinError(e);
-		}
 		ExtensionRegistrar.register(new ExtensionMemberCancelApplication());
 
-		AsyncParticlesMixinConfig.Mixin$Particle config = AsyncParticlesMixinConfig.config;
 		MixinClassAdjusterRegistrar.register(new MixinClassAdjuster() {
 			@Override
 			public String getMixinClassName() {
@@ -47,7 +40,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 
 			@Override
 			public List<String> getTargets(List<String> originalTargets) {
-				return List.copyOf(config.getNoCulling());
+				return List.copyOf(CONFIG.getNoCulling());
 			}
 
 			@Override
@@ -66,7 +59,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			@Override
 			public List<String> getTargets(List<String> originalTargets) {
 				ArrayList<String> list = new ArrayList<>(originalTargets);
-				list.addAll(config.getNoLightCache());
+				list.addAll(CONFIG.getNoLightCache());
 				return list;
 			}
 
@@ -85,7 +78,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 
 			@Override
 			public List<String> getTargets(List<String> originalTargets) {
-				return List.copyOf(config.getLockProvider());
+				return List.copyOf(CONFIG.getLockProvider());
 			}
 
 			@Override
@@ -103,7 +96,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 
 			@Override
 			public List<String> getTargets(List<String> originalTargets) {
-				return List.copyOf(config.getLockRequired());
+				return List.copyOf(CONFIG.getLockRequired());
 			}
 
 			@Override

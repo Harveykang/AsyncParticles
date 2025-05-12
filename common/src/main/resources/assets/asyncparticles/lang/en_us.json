@@ -38,6 +38,8 @@
   "config.asyncparticles.mod-compat.create.rainEffect.tooltip": "Control when rain effects spawn\non Create contraptions.",
   "gui.asyncparticles.reset-confirmation": "Do you want to reset all configurations?",
   "config.asyncparticles.category.mixin": "Mixin",
+  "config.asyncparticles.mixin.particle.redirectFleroviumCulling": "Redirect Flerovium's Particle Culling",
+  "config.asyncparticles.mixin.particle.redirectFleroviumCulling.tooltip": "Replace our particle culling with Flerovium's.\n(Only available when Flerovium is installed.)",
   "config.asyncparticles.mixin.tooltip": "Default entries can't be deleted.\n(Reset to default by removing all entries.)",
   "config.asyncparticles.mixin.particle.noCulling": "Particle Culling Blacklist",
   "config.asyncparticles.mixin.particle.noLightCache": "Particles Light Cache Blacklist",
