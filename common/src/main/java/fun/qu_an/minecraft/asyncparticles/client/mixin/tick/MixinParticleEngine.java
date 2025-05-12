@@ -191,6 +191,7 @@ public abstract class MixinParticleEngine {
 		if (collection.isEmpty()) {
 			return;
 		}
+		boolean enableLightCache = ConfigHelper.particleLightCache();
 		for (Particle particle : collection) {
 			if (AsyncTicker.isCancelled() && !ConfigHelper.forceDoneParticleTick()) {
 				return;
@@ -204,9 +205,8 @@ public abstract class MixinParticleEngine {
 			if (!RenderSystem.isOnRenderThread()) {
 				if (((ParticleAddon) particle).asyncparticles$isTicked()) {
 					// Skip the first tick that the particle is added to the queue.
-					if (particle instanceof LightCachedParticleAddon lightCachedParticle
-						&& ConfigHelper.particleLightCache()) {
-						lightCachedParticle.asyncparticles$refresh();
+					if (enableLightCache) {
+						((LightCachedParticleAddon) particle).asyncparticles$refresh();
 					}
 					continue;
 				}
@@ -217,9 +217,8 @@ public abstract class MixinParticleEngine {
 			}
 			try {
 				tickParticle(particle);
-				if (particle instanceof LightCachedParticleAddon lightCachedParticle
-					&& ConfigHelper.particleLightCache()) {
-					lightCachedParticle.asyncparticles$refresh();
+				if (enableLightCache) {
+					((LightCachedParticleAddon) particle).asyncparticles$refresh();
 				}
 				((ParticleAddon) particle).asyncparticles$setTicked();
 			} catch (Throwable t) {
@@ -234,9 +233,8 @@ public abstract class MixinParticleEngine {
 			particle.remove(); // to compatible with some mods...
 			// don't cancel it,
 			// otherwise it may cause memory leak with some mods
-		} else if (particle instanceof LightCachedParticleAddon lightCachedParticle
-				   && ConfigHelper.particleLightCache()) {
-			lightCachedParticle.asyncparticles$refresh();
+		} else if (ConfigHelper.particleLightCache()) {
+			((LightCachedParticleAddon) particle).asyncparticles$refresh();
 		}
 	}
 

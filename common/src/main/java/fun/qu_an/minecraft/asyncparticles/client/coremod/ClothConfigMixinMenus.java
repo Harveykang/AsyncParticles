@@ -26,9 +26,13 @@ public class ClothConfigMixinMenus {
 		Mixin$Particle lastConfig = getToSaveConfig();
 		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.particle.redirectFleroviumCulling"),
-				lastConfig.isRedirectFleroviumCulling())
-			.setDefaultValue(defaultConfig.isRedirectFleroviumCulling())
-			.setSaveConsumer(newConfig::setRedirectFleroviumCulling)
+				!ModListHelper.SHIMMER_LOADED && lastConfig.isRedirectFleroviumCulling())
+			.setDefaultValue(!ModListHelper.SHIMMER_LOADED && defaultConfig.isRedirectFleroviumCulling())
+			.setSaveConsumer(redirectFleroviumCulling -> {
+				if (!ModListHelper.SHIMMER_LOADED) {
+					newConfig.setRedirectFleroviumCulling(redirectFleroviumCulling);
+				}
+			})
 			.setTooltipSupplier(() -> {
 				if (!ModListHelper.FORGE_FLEROVIUM_LOADED || !ModListHelper.SHIMMER_LOADED) {
 					return Optional.of(new Component[]{

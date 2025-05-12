@@ -388,9 +388,8 @@ public class AsyncTicker {
 			try {
 				particleEngine.tickParticle(particle);
 				if (!(particle instanceof TrackingEmitter)) {
-					if (particle instanceof LightCachedParticleAddon lightCachedParticle
-						&& enableLightCache) {
-						lightCachedParticle.asyncparticles$refresh();
+					if (enableLightCache) {
+						((LightCachedParticleAddon) particle).asyncparticles$refresh();
 					}
 					((ParticleAddon) particle).asyncparticles$setTicked();
 				}

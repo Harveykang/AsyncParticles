@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import org.spongepowered.asm.mixin.throwables.MixinError;
@@ -23,7 +22,7 @@ public class AsyncParticlesMixinConfig {
 		particle$noLightCache: comma-separated list of particle classes that should not use the light cache.
 		particle$lockRequired: comma-separated list of particle classes that require a spin lock.
 		particle$lockProvider: comma-separated list of particle classes that provide a spin lock.""";
-	public static final Mixin$Particle CONFIG;
+	static final Mixin$Particle CONFIG;
 	private static Mixin$Particle toSaveConfig;
 
 	static {
@@ -99,7 +98,7 @@ public class AsyncParticlesMixinConfig {
 
 	public static class Mixin$Particle {
 		private int version = 0;
-		private boolean redirectFleroviumCulling = !ModListHelper.SHIMMER_LOADED || !ModListHelper.FORGE_FLEROVIUM_LOADED;
+		private boolean redirectFleroviumCulling = true;
 		private Set<String> noCulling = new LinkedHashSet<>();
 
 		{
@@ -160,7 +159,6 @@ public class AsyncParticlesMixinConfig {
 			lockProvider = getSet(properties, "particle$lockProvider", defaultConfig.lockProvider);
 			lockRequired = getSet(properties, "particle$lockRequired", defaultConfig.lockRequired);
 			redirectFleroviumCulling =
-				(!ModListHelper.SHIMMER_LOADED || !ModListHelper.FORGE_FLEROVIUM_LOADED) &&
 				getBoolean(properties, "particle$redirectFleroviumCulling", defaultConfig.redirectFleroviumCulling);
 		}
 

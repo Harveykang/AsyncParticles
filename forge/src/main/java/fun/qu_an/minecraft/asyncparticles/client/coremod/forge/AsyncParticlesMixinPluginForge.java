@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.forge;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinConfigHelper;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Set;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
-import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.CONFIG;
 
 public class AsyncParticlesMixinPluginForge implements IMixinConfigPlugin {
 	@Override
@@ -62,7 +61,7 @@ public class AsyncParticlesMixinPluginForge implements IMixinConfigPlugin {
 				}
 				yield switch (split[1]) {
 					case "MixinAsyncRenderer",
-						 "MixinMixinParticleEngine" -> CONFIG.isRedirectFleroviumCulling();
+						 "MixinMixinParticleEngine" -> MixinConfigHelper.isRedirectFleroviumCulling();
 					default -> true;
 				};
 			}
