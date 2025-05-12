@@ -3,6 +3,8 @@
   "config.asyncparticles.category.particle": "Particle",
   "config.asyncparticles.particle.particleLimit": "Particle Limit",
   "config.asyncparticles.particle.particleLimit.tooltip": "Set the maximum number of particles per\n'ParticleRenderType'.",
+  "config.asyncparticles.particle.removeIfMissedTick": "Remove If Missed Tick",
+  "config.asyncparticles.particle.removeIfMissedTick.tooltip": "Remove the particle if the async task is interrupted before it is ticked.",
   "config.asyncparticles.particle.particleLightCache": "Particle Light Cache",
   "config.asyncparticles.particle.particleLightCache.tooltip": "Enable caching of particle lighting\nfor performance.",
   "config.asyncparticles.category.tick": "Tick",

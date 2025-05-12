@@ -56,16 +56,13 @@ public abstract class MixinParticle implements ParticleAddon {
 	}
 
 	@Override
-	public boolean asyncparticles$shouldRemove() {
-		if (!isAlive()) return true;
-		if (asyncparticles$ticked) return asyncparticles$ticked = false;
-		remove();
-		return true;
+	public void asyncparticles$setTicked() {
+		this.asyncparticles$ticked = true;
 	}
 
 	@Override
-	public void asyncparticles$setTicked() {
-		this.asyncparticles$ticked = true;
+	public void asyncparticles$resetTicked() {
+		this.asyncparticles$ticked = false;
 	}
 
 	@Override

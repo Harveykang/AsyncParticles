@@ -37,6 +37,7 @@ public class AsyncParticlesConfig {
 		.create();
 	static final Logger LOGGER = LogUtils.getLogger();
 	public static int particle$particleLimit;
+	public static boolean particle$removeIfMissedTick;
 	public static boolean particle$particleLightCache;
 	public static boolean particle$cullUnderwaterParticleType;
 	public static TickMode tick$animationTickMode;
@@ -227,17 +228,20 @@ public class AsyncParticlesConfig {
 
 		static class Particle {
 			int particleLimit = 16384;
+			boolean removeIfMissedTick = false;
 			boolean particleLightCache = true;
 			boolean cullUnderwaterParticleType = true;
 
 			private void flat() {
 				particle$particleLimit = Mth.clamp(particleLimit, 1024, 262144);
+				particle$removeIfMissedTick = removeIfMissedTick;
 				particle$particleLightCache = particleLightCache;
 				particle$cullUnderwaterParticleType = cullUnderwaterParticleType;
 			}
 
 			private void fold() {
 				particleLimit = particle$particleLimit;
+				removeIfMissedTick = particle$removeIfMissedTick;
 				particleLightCache = particle$particleLightCache;
 				cullUnderwaterParticleType = particle$cullUnderwaterParticleType;
 			}

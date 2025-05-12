@@ -3,6 +3,8 @@
   "config.asyncparticles.category.particle": "粒子效果",
   "config.asyncparticles.particle.particleLimit": "粒子上限",
   "config.asyncparticles.particle.particleLimit.tooltip": "为每个粒子渲染类型设置最大粒子数量。",
+  "config.asyncparticles.particle.removeIfMissedTick": "错过 Tick 时移除",
+  "config.asyncparticles.particle.removeIfMissedTick.tooltip": "如果异步任务中断时粒子未 tick 则移除。",
   "config.asyncparticles.particle.particleLightCache": "粒子光照缓存",
   "config.asyncparticles.particle.particleLightCache.tooltip": "启用粒子光照缓存以提升性能。",
   "config.asyncparticles.category.tick": "游戏刻",

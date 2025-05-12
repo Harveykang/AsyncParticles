@@ -3,10 +3,14 @@ package fun.qu_an.minecraft.asyncparticles.client.coremod;
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.AdjusterParticlesLockProvider;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.AdjusterParticlesLockRequired;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.AdjusterParticlesNoCulling;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.AdjusterParticlesNoLightCache;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticlesMixinCanceller;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticlesMixinMemberCanceller;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.ExtensionMemberCancelApplication;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.MixinMemberCanceller;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.MixinMemberCancellerRegistrar;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.MixinClassAdjuster;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.MixinClassAdjusterRegistrar;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.logging.ILogger;
@@ -14,12 +18,10 @@ import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
-import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.CONFIG;
 
 public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 	static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles:plugin");
@@ -31,135 +33,12 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		}
 		ExtensionRegistrar.register(new ExtensionMemberCancelApplication());
 
-		MixinClassAdjusterRegistrar.register(new MixinClassAdjuster() {
-			@Override
-			public String getMixinClassName() {
-				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
-					   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_NoCulling";
-			}
-
-			@Override
-			public List<String> getTargets(List<String> originalTargets) {
-				return List.copyOf(CONFIG.getNoCulling());
-			}
-
-			@Override
-			public String getRefMapperConfig() {
-				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge-" : "fabric-") +
-					   "asyncparticles-common-refmap.json";
-			}
-		});
-		MixinClassAdjusterRegistrar.register(new MixinClassAdjuster() {
-			@Override
-			public String getMixinClassName() {
-				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
-					   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_LightCacheNoRefresh";
-			}
-
-			@Override
-			public List<String> getTargets(List<String> originalTargets) {
-				ArrayList<String> list = new ArrayList<>(originalTargets);
-				list.addAll(CONFIG.getNoLightCache());
-				return list;
-			}
-
-			@Override
-			public String getRefMapperConfig() {
-				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge-" : "fabric-") +
-					   "asyncparticles-common-refmap.json";
-			}
-		});
-		MixinClassAdjusterRegistrar.register(new MixinClassAdjuster() {
-			@Override
-			public String getMixinClassName() {
-				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
-					   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_LockProvider";
-			}
-
-			@Override
-			public List<String> getTargets(List<String> originalTargets) {
-				return List.copyOf(CONFIG.getLockProvider());
-			}
-
-			@Override
-			public String getRefMapperConfig() {
-				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge-" : "fabric-") +
-					   "asyncparticles-common-refmap.json";
-			}
-		});
-		MixinClassAdjusterRegistrar.register(new MixinClassAdjuster() {
-			@Override
-			public String getMixinClassName() {
-				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
-					   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_LockRequired";
-			}
-
-			@Override
-			public List<String> getTargets(List<String> originalTargets) {
-				return List.copyOf(CONFIG.getLockRequired());
-			}
-
-			@Override
-			public String getRefMapperConfig() {
-				return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge-" : "fabric-") +
-					   "asyncparticles-common-refmap.json";
-			}
-		});
-		MixinMemberCancellerRegistrar.register(new MixinMemberCanceller() {
-			@Override
-			public boolean preCancel(List<String> targetClassNames, String mixinClassName) {
-				return switch (mixinClassName) {
-					case "einstein.subtle_effects.mixin.client.particle.FabricParticleEngineMixin",
-						 "einstein.subtle_effects.mixin.client.particle.ForgeParticleEngineMixin",
-						 "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin",
-						 "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin",
-						 "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin" -> true;
-					default -> false;
-				};
-			}
-
-			@Override
-			public boolean shouldCancelMethod(List<String> targetClassNames, String mixinClassName, List<String> targetMethodDescs, String mixinMethodName, String mixinMethodDesc) {
-				return switch (mixinClassName) {
-					case "einstein.subtle_effects.mixin.client.particle.FabricParticleEngineMixin",
-						 "einstein.subtle_effects.mixin.client.particle.ForgeParticleEngineMixin" ->
-						"shouldRenderParticle".equals(mixinMethodName);
-					case "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin" -> "tick".equals(mixinMethodName);
-					case "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin" ->
-						"flerovium$getLightColorCached".equals(mixinMethodName);
-					case "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin" ->
-						"port_lib$addCustomRenderTypes".equals(mixinMethodName);
-					default -> false;
-				};
-			}
-
-			@Override
-			public boolean shouldCancelField(List<String> targetClassNames, String mixinClassName, String mixinFieldName, String mixinFieldDesc) {
-				return switch (mixinClassName) {
-					case "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin" ->
-						"flerovium$lastTick".equals(mixinFieldName) ||
-						"flerovium$cachedLight".equals(mixinFieldName);
-					default -> false;
-				};
-			}
-		});
-		MixinCancellerRegistrar.register((targetClassNames, mixinClassName)
-			-> switch (mixinClassName) {
-			case "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer",
-				 // o(≧口≦)o particle_core: These mixins not support async rendering
-				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerFrustumMixin",
-				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerRotationMixin",
-				 "me.fzzyhmstrs.particle_core.mixins.WorldRendererFrustumMixin",
-				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerCachedLightMixin",
-				 "me.fzzyhmstrs.particle_core.mixins.BillboardParticleMixin",
-				 "me.fzzyhmstrs.particle_core.mixins.ParticleMixin",
-				 "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
-				 "com.moepus.flerovium.mixins.Particle.ParticleMixin"
-				//			, TODO: 这里处理一下
-				//				 "net.diebuddies.mixins.ocean.MixinParticleEngine"
-				-> true;
-			default -> false;
-		});
+		MixinClassAdjusterRegistrar.register(new AdjusterParticlesNoCulling());
+		MixinClassAdjusterRegistrar.register(new AdjusterParticlesNoLightCache());
+		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockProvider());
+		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired());
+		MixinMemberCancellerRegistrar.register(new AsyncParticlesMixinMemberCanceller());
+		MixinCancellerRegistrar.register(new AsyncParticlesMixinCanceller());
 	}
 
 	@Override

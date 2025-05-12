@@ -44,6 +44,13 @@ class ClothConfigMenus {
 				.setMax(262144)
 				.build())
 			.addEntry(entryBuilder
+				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.removeIfMissedTick"),
+					particle$removeIfMissedTick)
+				.setDefaultValue(defaultConfig.particle.removeIfMissedTick)
+				.setTooltip(Component.translatable("config.asyncparticles.particle.removeIfMissedTick.tooltip"))
+				.setSaveConsumer(newValue -> particle$removeIfMissedTick = newValue)
+				.build())
+			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.particleLightCache"),
 					particle$particleLightCache)
 				.setDefaultValue(defaultConfig.particle.particleLightCache)
@@ -141,7 +148,8 @@ class ClothConfigMenus {
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
 				.setDefaultValue(defaultConfig.rendering.failBehavior)
 				.setTooltip(
-					Component.translatable("config.asyncparticles.rendering.failBehavior.tooltip"),
+					Component.translatable("config.asyncparticles.rendering.failBehavior.tooltip")
+						.withStyle(ChatFormatting.STRIKETHROUGH),
 					Component.translatable("config.asyncparticles.not-implemented")
 						.withStyle(ChatFormatting.DARK_RED))
 				.setSaveConsumer(newValue -> rendering$failBehavior = newValue)

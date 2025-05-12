@@ -43,11 +43,11 @@ public class ExceptionTracker<T> {
 	private class ExceptionQueue {
 		private final LongPriorityQueue queue = new LongArrayFIFOQueue();
 
-		public boolean push() {
+		public synchronized boolean push() {
 			long time = System.currentTimeMillis();
 			LongPriorityQueue queue = this.queue;
 			int size = queue.size();
-			while (size-- >= 0 && time - queue.firstLong() > duration.getAsInt()) {
+			while (size-- > 0 && time - queue.firstLong() > duration.getAsInt()) {
 				queue.dequeueLong();
 			}
 			queue.enqueue(time);

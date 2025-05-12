@@ -90,4 +90,8 @@ public class ConfigHelper {
 	public static boolean isCullUnderwaterParticleType() {
 		return AsyncParticlesConfig.particle$cullUnderwaterParticleType;
 	}
+
+	public static boolean isRemoveIfMissedTick() {
+		return AsyncParticlesConfig.particle$removeIfMissedTick;
+	}
 }

@@ -96,7 +96,7 @@ public class AsyncParticlesMixinConfig {
 		return toSaveConfig;
 	}
 
-	public static class Mixin$Particle {
+	static class Mixin$Particle {
 		private int version = 0;
 		private boolean redirectFleroviumCulling = true;
 		private Set<String> noCulling = new LinkedHashSet<>();
@@ -204,7 +204,7 @@ public class AsyncParticlesMixinConfig {
 		}
 
 		@Unmodifiable
-		public Set<String> getNoCulling() {
+		Set<String> getNoCulling() {
 			return Collections.unmodifiableSet(noCulling);
 		}
 
@@ -214,7 +214,7 @@ public class AsyncParticlesMixinConfig {
 		}
 
 		@Unmodifiable
-		public Set<String> getNoLightCache() {
+		Set<String> getNoLightCache() {
 			return Collections.unmodifiableSet(noLightCache);
 		}
 
@@ -224,7 +224,7 @@ public class AsyncParticlesMixinConfig {
 		}
 
 		@Unmodifiable
-		public Set<String> getLockProvider() {
+		Set<String> getLockProvider() {
 			return Collections.unmodifiableSet(lockProvider);
 		}
 
@@ -234,7 +234,7 @@ public class AsyncParticlesMixinConfig {
 		}
 
 		@Unmodifiable
-		public Set<String> getLockRequired() {
+		Set<String> getLockRequired() {
 			return Collections.unmodifiableSet(lockRequired);
 		}
 
@@ -243,7 +243,7 @@ public class AsyncParticlesMixinConfig {
 			this.lockRequired = lockRequired;
 		}
 
-		public boolean isRedirectFleroviumCulling() {
+		boolean isRedirectFleroviumCulling() {
 			return redirectFleroviumCulling;
 		}
 

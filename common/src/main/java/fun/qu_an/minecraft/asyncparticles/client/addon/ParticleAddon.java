@@ -1,8 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.addon;
 
 public interface ParticleAddon {
-	boolean asyncparticles$shouldRemove();
 	void asyncparticles$setTicked();
+	void asyncparticles$resetTicked();
 	boolean asyncparticles$isTicked();
 	void asyncparticles$setRenderSync();
 	boolean asyncparticles$isRenderSync();

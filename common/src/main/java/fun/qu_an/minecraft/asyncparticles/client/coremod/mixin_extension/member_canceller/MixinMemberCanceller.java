@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import java.util.List;
 
 /**
@@ -32,6 +34,7 @@ public interface MixinMemberCanceller {
      * Note: Currently, we can only cancel fields that are not be accessed by Opcodes.GETFIELD or Opcodes.GETSTATIC.
      * @return true if the given field should be cancelled, false otherwise
      */
+    @ApiStatus.Experimental
     default boolean shouldCancelField(List<String> targetClassNames,
                                       String mixinClassName,
                                       String mixinFieldName,

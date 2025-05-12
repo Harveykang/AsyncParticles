@@ -134,35 +134,44 @@ public class AsyncTicker {
 				ParticleEngine particleEngine = mc.particleEngine;
 				Collection<Queue<Particle>> values = particleEngine.particles.values();
 				CompletableFuture<?>[] futures = new CompletableFuture[values.size() + 1];
-				int k = 0;
 				Queue<TrackingEmitter> trackingEmitters = particleEngine.trackingEmitters;
 				if (trackingEmitters.isEmpty()) {
-					futures[k++] = CompletableFuture.completedFuture(null);
+					futures[0] = Utils.NULL_FUTURE;
 				} else {
-					futures[k++] = CompletableFuture.runAsync(() ->
+					futures[0] = CompletableFuture.runAsync(() ->
 						trackingEmitters.removeIf(trackingEmitter -> !trackingEmitter.isAlive()), EXECUTOR);
 				}
+				int k = 1;
+				boolean removeIfMissedTick = ConfigHelper.isRemoveIfMissedTick();
 				for (Queue<Particle> particles : values) {
 					if (particles.isEmpty()) {
-						futures[k++] = CompletableFuture.completedFuture(null);
+						futures[k++] = Utils.NULL_FUTURE;
 						continue;
 					}
-					futures[k++] = CompletableFuture.runAsync(() -> {
-						particles.removeIf(particle1 -> {
-							// JDK 并没有定义这个判断会对每个对象执行多少次，但目前没遇到例外情况
-							// use ArrayDeque's removeIf to improve performance
-							boolean b = ((ParticleAddon) particle1).asyncparticles$isTickSync()
-								? !particle1.isAlive()
-								: ((ParticleAddon) particle1).asyncparticles$shouldRemove();
-							if (b) {
-								// make sure the tracked count is correct
-								particle1.getParticleGroup().ifPresent(
-									group -> particleEngine.updateCount(group, -1));
-								return true;
-							}
+					futures[k++] = CompletableFuture.runAsync(() -> particles.removeIf(particle1 -> {
+						if (!particle1.isAlive()) {
+							// make sure the tracked count is correct
+							particle1.getParticleGroup().ifPresent(
+								group -> particleEngine.updateCount(group, -1));
+							return true;
+						}
+						ParticleAddon particleAddon = (ParticleAddon) particle1;
+						if (particleAddon.asyncparticles$isTickSync()) {
 							return false;
-						});
-					}, EXECUTOR);
+						}
+						if (particleAddon.asyncparticles$isTicked()) {
+							particleAddon.asyncparticles$resetTicked();
+							return false;
+						}
+						if (removeIfMissedTick) {
+							particle1.remove();
+							// make sure the tracked count is correct
+							particle1.getParticleGroup().ifPresent(
+								group -> particleEngine.updateCount(group, -1));
+							return true;
+						}
+						return false;
+					}), EXECUTOR);
 				}
 				particleCleanup = CompletableFuture.allOf(futures);
 			}
