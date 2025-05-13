@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
@@ -7,7 +8,9 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import pigcart.particlerain.ParticleRainClient;
 import pigcart.particlerain.particle.RainParticle;
 
 import java.util.Collections;
@@ -28,6 +31,24 @@ public abstract class MixinRainParticle extends MixinWeatherParticle {
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
 		setSize(3.8F, 3.8F);
+	}
+
+	@ModifyExpressionValue(method = "tick", at = @At(value = "FIELD", remap = false,
+		target = "Lpigcart/particlerain/ModConfig$RainOptions;windStrength:F"))
+	private float modifyWindStrength(float original) {
+		return original > 0 ? original + 1.89f : original - 1.89f;
+	}
+
+	@ModifyExpressionValue(method = "tick",
+		slice = @Slice(from = @At(value = "FIELD", target = "Lpigcart/particlerain/ParticleRainClient;STREAK:Lnet/minecraft/core/particles/SimpleParticleType;")),
+		at = {
+			@At(value = "FIELD", remap = false, ordinal = 0, target = "Lpigcart/particlerain/particle/RainParticle;x:D"),
+			@At(value = "FIELD", remap = false, ordinal = 0, target = "Lpigcart/particlerain/particle/RainParticle;z:D"),
+			@At(value = "FIELD", remap = false, ordinal = 1, target = "Lpigcart/particlerain/particle/RainParticle;x:D"),
+			@At(value = "FIELD", remap = false, ordinal = 1, target = "Lpigcart/particlerain/particle/RainParticle;z:D"),
+		})
+	private double modifyPos(double original) {
+		return ParticleRainClient.config.rain.windStrength > 0 ? original + 1.89d : original - 1.89d;
 	}
 
 	@Override

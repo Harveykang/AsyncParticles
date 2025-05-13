@@ -5,6 +5,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRai
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -18,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import pigcart.particlerain.particle.WeatherParticle;
+import pigcart.particlerain.particle.*;
 
 import java.util.Collections;
 
@@ -54,10 +55,16 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 		asyncparticles$invisible = visible;
 	}
 
+	@SuppressWarnings("ConstantValue")
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
 		ParticleRainCompat.asyncparticles$particleCount.getAndIncrement();
-		asyncparticles$setWeatherAABB(AABB.ofSize(new Vec3(x, y, z), 3.8, 3.8, 3.8));
+		if (StreakParticle.class.isInstance(this) ||
+			RippleParticle.class.isInstance(this)) {
+			asyncparticles$setWeatherAABB(AABB.ofSize(new Vec3(x, y, z), 0.01, 0.01, 0.01));
+		} else {
+			asyncparticles$setWeatherAABB(AABB.ofSize(new Vec3(x, y, z), 3.8, 3.8, 3.8));
+		}
 	}
 
 	@Inject(method = "remove", at = @At(value = "FIELD", remap = false, ordinal = 0, target = "Lpigcart/particlerain/ParticleRainClient;particleCount:I"))
@@ -69,9 +76,12 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 		super(clientLevel, d, e, f);
 	}
 
+	@SuppressWarnings("ConstantValue")
 	@ModifyConstant(method = "tick", constant = @Constant(doubleValue = 0.2))
 	private double onTick(double original) {
-		return 2.1;
+		return (SnowParticle.class.isInstance(this) ||
+			   RainParticle.class.isInstance(this))
+			? 2.1 : 0.2;
 	}
 
 	/**

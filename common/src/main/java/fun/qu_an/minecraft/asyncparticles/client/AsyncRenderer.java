@@ -84,9 +84,6 @@ public class AsyncRenderer {
 		}
 	}
 
-	//	private static final Map<ParticleRenderType, List<Particle>> SYNC_PARTICLES = new ConcurrentHashMap<>();
-	// some mod use zero content record class as particle render type, so we need to use IdentityHashMap to get rid of duplicated hashcode...
-	private static final Map<ParticleRenderType, Set<Particle>> SYNC_PARTICLES = Collections.synchronizedMap(new IdentityHashMap<>());
 //	private static Stage stage = Stage.PREPARING;
 	public static final ForkJoinPool EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
@@ -112,9 +109,6 @@ public class AsyncRenderer {
 		}, Util::onThreadException, true);
 	}
 
-	//	private static final Map<ParticleRenderType, BufferBuilder> BUFFER_BUILDERS = new ConcurrentHashMap<>();
-// some mod use zero content record class as particle render type, so we need to use IdentityHashMap to get rid of duplicated hashcode...
-	private static final Map<ParticleRenderType, BufferBuilder> BUFFER_BUILDERS = new IdentityHashMap<>();
 	public static Frustum frustum;
 	private static Consumer<String> debugConsumer;
 	private static CompletableFuture<Void> asyncTask;
@@ -428,6 +422,7 @@ public class AsyncRenderer {
 
 	private static final Map<ParticleRenderType, Pair<VertexFormat.Mode, VertexFormat>> FORMATS = new ConcurrentHashMap<>();
 	public static final Pair<VertexFormat.Mode, VertexFormat> EMPTY_FORMAT = Pair.of(null, null);
+	private static final Map<ParticleRenderType, BufferBuilder> BUFFER_BUILDERS = new IdentityHashMap<>();
 
 	public static BufferBuilder beginBufferBuilder(ParticleRenderType particleRenderType, TextureManager textureManager) {
 		Pair<VertexFormat.Mode, VertexFormat> pair = getVertexFormatPair(particleRenderType, textureManager);
@@ -481,6 +476,8 @@ public class AsyncRenderer {
 	}
 
 	/* Sync Rendering */
+
+	private static final Map<ParticleRenderType, Set<Particle>> SYNC_PARTICLES = Collections.synchronizedMap(new IdentityHashMap<>());
 
 	public static void markAsSync(Class<? extends Particle> aClass) {
 		synchronized (SYNC_PARTICLE_TYPES) {
