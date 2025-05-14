@@ -24,11 +24,11 @@ public abstract class MixinParticles_LockRequired implements SpinLockProvider {
 	}
 
 	@WrapMethod(method = "render")
-	public void wrapRender(VertexConsumer buffer, Camera renderInfo, float partialTicks, Operation<Void> original) {
+	public void wrapRender(VertexConsumer buffer, Camera renderInfo, float partialTick, Operation<Void> original) {
 		SpinLock lock = asyncparticles$getSpinLock();
 		lock.lock();
 		try {
-			original.call(buffer, renderInfo, partialTicks);
+			original.call(buffer, renderInfo, partialTick);
 		} finally {
 			lock.unlock();
 		}

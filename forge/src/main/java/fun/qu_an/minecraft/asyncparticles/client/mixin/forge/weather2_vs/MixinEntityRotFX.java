@@ -26,8 +26,6 @@ public abstract class MixinEntityRotFX extends TextureSheetParticle {
 	@Shadow
 	public abstract void remove();
 
-	@Shadow(remap = false) public abstract AABB getBoundingBoxForRender(float partialTicks);
-
 	protected MixinEntityRotFX(ClientLevel level, double x, double y, double z) {
 		super(level, x, y, z);
 	}

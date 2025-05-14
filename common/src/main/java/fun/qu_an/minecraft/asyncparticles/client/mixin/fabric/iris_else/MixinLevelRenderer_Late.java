@@ -25,7 +25,7 @@ public abstract class MixinLevelRenderer_Late {
 											MultiBufferSource.BufferSource buffer,
 											LightTexture lightTexture,
 											Camera camera,
-											float partialTicks,
+											float partialTick,
 											@Share(namespace = "asyncparticles", value = "isRenderAsync")
 											LocalBooleanRef isRenderAsync) {
 		if (!isRenderAsync.get()) {
@@ -33,10 +33,8 @@ public abstract class MixinLevelRenderer_Late {
 		}
 		// assert !isMixedParticleRendering.get();
 		if (ConfigHelper.isCompatibilityRendering()) {
-			AsyncRenderer.join(poseStack, partialTicks, camera, lightTexture);
+			AsyncRenderer.join(poseStack, partialTick, camera, lightTexture);
 		}
 		return false;
 	}
-
-	// TODO delayed world render events
 }

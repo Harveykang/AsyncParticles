@@ -21,9 +21,6 @@ public abstract class MixinParticle implements ParticleAddon {
 	public abstract void remove();
 
 	@Shadow
-	public abstract boolean isAlive();
-
-	@Shadow
 	public double x;
 	@Shadow
 	public double y;

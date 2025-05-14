@@ -84,7 +84,6 @@ public class AsyncRenderer {
 		}
 	}
 
-//	private static Stage stage = Stage.PREPARING;
 	public static final ForkJoinPool EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
 
@@ -129,13 +128,12 @@ public class AsyncRenderer {
 			tryDebug();
 			return;
 		}
-//		setStage(Stage.PREPARING);
 		profiler.popPush("async_particles");
 		tryDebug();
 		clearSync();
 		captureParticleRenderingSetting();
-		ParticleEngine particleEngine = mc.particleEngine;
 		profiler.push("render_async");
+		ParticleEngine particleEngine = mc.particleEngine;
 		TextureManager textureManager = particleEngine.textureManager;
 		ObjectArrayList<CompletableFuture<Void>> asyncTasks = new ObjectArrayList<>(asyncTasksSize);
 		for (ParticleRenderType particleRenderType
@@ -158,10 +156,6 @@ public class AsyncRenderer {
 		asyncTask = CompletableFuture.allOf(asyncTasks.toArray(new CompletableFuture[size]));
 		profiler.pop();
 	}
-
-//	public static void setStage(Stage stage) {
-//		AsyncRenderer.stage = stage;
-//	}
 
 	private static void renderParticles(float f,
 										Camera camera,
@@ -413,6 +407,9 @@ public class AsyncRenderer {
 	}
 
 	private static ParticleRenderingSettings getParticleRenderingSettings0() {
+		if (!IrisApi.getInstance().isShaderPackInUse()) {
+			return null;
+		}
 		return Iris.getPipelineManager().getPipeline()
 			.map(WorldRenderingPipeline::getParticleRenderingSettings)
 			.orElse(ParticleRenderingSettings.MIXED);
@@ -462,7 +459,7 @@ public class AsyncRenderer {
 			RenderSystem.enableCull();
 			RenderSystem.defaultBlendFunc();
 		}
-		VertexFormat.Mode mode = fakeBufferBuilder.getVertexFormatMode();
+		VertexFormat.Mode mode = fakeBufferBuilder.getMode();
 		VertexFormat format = fakeBufferBuilder.getFormat();
 		if (mode != null && format != null) {
 			return Pair.of(mode, format);

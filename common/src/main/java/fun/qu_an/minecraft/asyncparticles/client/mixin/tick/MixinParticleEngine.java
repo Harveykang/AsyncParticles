@@ -158,30 +158,6 @@ public abstract class MixinParticleEngine {
 		}
 	}
 
-	@Unique
-	private void asyncparticles_Neo$addToOrderList(ParticleRenderType k) {
-		// must treat as ImmutableList. forge will use this to order treemap
-		List<ParticleRenderType> list = new ArrayList<>(RENDER_ORDER.size() + 1);
-		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderer.getVertexFormatPair(type, textureManager) != AsyncRenderer.EMPTY_FORMAT) {
-				list.add(type);
-			}
-		}
-		Pair<VertexFormat.Mode, VertexFormat> pair = AsyncRenderer.getVertexFormatPair(k, textureManager);
-		if (pair != AsyncRenderer.EMPTY_FORMAT) {
-			list.add(k);
-		}
-		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderer.getVertexFormatPair(type, textureManager) == AsyncRenderer.EMPTY_FORMAT) {
-				list.add(type);
-			}
-		}
-		if (pair == AsyncRenderer.EMPTY_FORMAT) {
-			list.add(k);
-		}
-		RENDER_ORDER = list;
-	}
-
 	/**
 	 * @author
 	 * @reason

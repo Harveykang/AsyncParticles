@@ -9,7 +9,7 @@ public class AsyncParticlesMixinCanceller implements MixinCanceller {
 	public boolean shouldCancel(List<String> targetClassNames, String mixinClassName) {
 		return switch (mixinClassName) {
 			case "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer",
-				 // o(≧口≦)o particle_core: These mixins not support async rendering
+				 // These mixins do not support async rendering
 				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerFrustumMixin",
 				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerRotationMixin",
 				 "me.fzzyhmstrs.particle_core.mixins.WorldRendererFrustumMixin",

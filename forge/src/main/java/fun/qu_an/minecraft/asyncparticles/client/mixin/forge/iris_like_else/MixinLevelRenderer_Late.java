@@ -21,7 +21,7 @@ public abstract class MixinLevelRenderer_Late {
 											MultiBufferSource.BufferSource bufferSource,
 											LightTexture lightTexture,
 											Camera camera,
-											float partialTicks,
+											float partialTick,
 											Frustum frustum,
 											@Share(namespace = "asyncparticles", value = "isRenderAsync")
 											LocalBooleanRef isRenderAsync) {
@@ -30,7 +30,7 @@ public abstract class MixinLevelRenderer_Late {
 		}
 //		assert !isMixedParticleRendering.get();
 		if (ConfigHelper.isCompatibilityRendering()) {
-			AsyncRenderer.join(poseStack, partialTicks, camera, lightTexture);
+			AsyncRenderer.join(poseStack, partialTick, camera, lightTexture);
 		}
 		return false;
 	}

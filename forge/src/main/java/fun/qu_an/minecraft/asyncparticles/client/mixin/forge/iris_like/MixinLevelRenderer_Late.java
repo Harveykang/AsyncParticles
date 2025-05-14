@@ -54,6 +54,26 @@ public abstract class MixinLevelRenderer_Late {
 		}
 	}
 
+	@Inject(method = "renderLevel",
+		at = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;"))
+	private void onRenderLevelTransparencyChain(PoseStack poseStack,
+												float f,
+												long l,
+												boolean bl,
+												Camera camera,
+												GameRenderer gameRenderer,
+												LightTexture lightTexture,
+												Matrix4f projectionMatrix,
+												CallbackInfo ci,
+												@Share(namespace = "asyncparticles", value = "isRenderAsync")
+												LocalBooleanRef isRenderAsync,
+												@Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
+												LocalBooleanRef isMixedParticleRendering) {
+		if (isRenderAsync.get() && isMixedParticleRendering.get()) {
+			AsyncRenderer.irisOpaque(poseStack, f, camera, lightTexture);
+		}
+	}
+
 	@WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", remap = false,
 		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;)V"))
 	private void redirectRenderParticles(ParticleEngine instance,
@@ -61,7 +81,7 @@ public abstract class MixinLevelRenderer_Late {
 										 MultiBufferSource.BufferSource bufferSource,
 										 LightTexture lightTexture,
 										 Camera camera,
-										 float partialTicks,
+										 float partialTick,
 										 Frustum frustum,
 										 Operation<Void> original,
 										 @Share(namespace = "asyncparticles", value = "isRenderAsync")
@@ -70,9 +90,9 @@ public abstract class MixinLevelRenderer_Late {
 										 LocalBooleanRef isMixedParticleRendering) {
 		if (isRenderAsync.get()) {
 			if (isMixedParticleRendering.get()) {
-				AsyncRenderer.irisTranslucent(poseStack, partialTicks, camera, lightTexture);
+				AsyncRenderer.irisTranslucent(poseStack, partialTick, camera, lightTexture);
 			} else if (ConfigHelper.isCompatibilityRendering()) {
-				AsyncRenderer.join(poseStack, partialTicks, camera, lightTexture);
+				AsyncRenderer.join(poseStack, partialTick, camera, lightTexture);
 			}
 		} else {
 			if (isMixedParticleRendering.get()) {
@@ -80,7 +100,7 @@ public abstract class MixinLevelRenderer_Late {
 			} else {
 				((PhasedParticleEngine) Minecraft.getInstance().particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 			}
-			original.call(instance, poseStack, bufferSource, lightTexture, camera, partialTicks, frustum);
+			original.call(instance, poseStack, bufferSource, lightTexture, camera, partialTick, frustum);
 		}
 	}
 }

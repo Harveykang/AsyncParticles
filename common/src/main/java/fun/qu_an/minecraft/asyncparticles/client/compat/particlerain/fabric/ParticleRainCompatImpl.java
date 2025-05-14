@@ -71,18 +71,7 @@ public class ParticleRainCompatImpl {
 		}
 	}
 
-	public static void onCreateCollision(@NotNull ClientLevel level, Vec3 originalMotion, @NotNull Vec3 clipMotion, @NotNull AABB aabb) {
-		if (!config.doSplashParticles) {
-			return;
-		}
-		Vec3 center = aabb.getCenter();
-		AABB aabb1 = new AABB(center.x, aabb.minY - 1, center.z, center.x, aabb.minY, center.z);
-		Vec3 motion1 = originalMotion.scale(2);
-		if (CreateUtil.isCollideWithContraption(level, motion1, aabb1, false)) {
-			Vec3 startPos = new Vec3(center.x, aabb.minY, center.z);
-			Vec3 spawnPos = startPos.add(clipMotion);
-			Minecraft.getInstance().particleEngine
-				.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);
-		}
+	public static boolean onCreateCollision0() {
+		return config.doSplashParticles;
 	}
 }

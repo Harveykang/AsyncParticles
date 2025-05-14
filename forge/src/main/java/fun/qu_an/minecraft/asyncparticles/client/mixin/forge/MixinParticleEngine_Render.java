@@ -141,6 +141,7 @@ public abstract class MixinParticleEngine_Render {
 		// other mods may change them...
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.enableCull();
+		RenderSystem.enableDepthTest();
 		lightTexture.turnOffLightLayer();
 		profiler.pop();
 	}

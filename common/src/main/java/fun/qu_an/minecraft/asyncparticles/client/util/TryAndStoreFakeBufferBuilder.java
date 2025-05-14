@@ -13,11 +13,11 @@ public class TryAndStoreFakeBufferBuilder extends FakeBufferBuilder {
 		this.format = format;
 	}
 
-	public VertexFormat	getFormat() {
-		return format;
+	public VertexFormat.Mode getMode() {
+		return mode;
 	}
 
-	public VertexFormat.Mode getVertexFormatMode() {
-		return mode;
+	public VertexFormat getFormat() {
+		return format;
 	}
 }

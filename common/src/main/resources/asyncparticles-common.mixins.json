@@ -50,7 +50,6 @@
     "fake_renders.MixinTesselator",
     "iris_like.MixinFullyBufferedMultiBufferSource",
     "iris_like.MixinIris",
-    "iris_like.MixinLevelRenderer",
     "iris_like.MixinOldFullyBufferedMultiBufferSource",
     "legacy.flywheel.MixinClientLevelMixin",
     "legacy.flywheel.MixinLightUpdater",

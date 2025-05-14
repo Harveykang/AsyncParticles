@@ -41,8 +41,10 @@ public class MixinClassInstanceMultiMap {
 		return null;
 	}
 
-	@Redirect(method = "method_15217", at = @At(value = "INVOKE", target = "Ljava/util/stream/Collectors;toList()Ljava/util/stream/Collector;"))
-	private <T> Collector<T, ?, List<T>> collect() {
+	@Dynamic
+	@Redirect(method = "*", at = @At(value = "INVOKE", remap = false,
+		target = "Ljava/util/stream/Collectors;toList()Ljava/util/stream/Collector;"))
+	private <T> Collector<T, ?, List<T>> collect2() {
 		return Collectors.toCollection(IterationSafeArrayList::new);
 	}
 

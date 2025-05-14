@@ -56,8 +56,6 @@ public abstract class MixinParticleEngine_Render {
 		Frustum frustum = AsyncRenderer.frustum;
 		lightTexture.turnOnLightLayer();
 		RenderSystem.enableDepthTest();
-		RenderSystem.activeTexture(33986);
-		RenderSystem.activeTexture(33984);
 		PoseStack poseStack2 = RenderSystem.getModelViewStack();
 		poseStack2.pushPose();
 		poseStack2.mulPoseMatrix(poseStack.last().pose());
@@ -75,10 +73,10 @@ public abstract class MixinParticleEngine_Render {
 			if (queue == null || queue.isEmpty()) {
 				continue;
 			}
-			BufferBuilder bufferBuilder;
 			profiler.push("render_sync");
 			Collection<? extends Particle> syncParticles;
 			Tesselator tesselator;
+			BufferBuilder bufferBuilder;
 			boolean enableCull;
 			BufferBuilder toBegin;
 			if (!renderAsync) {
@@ -138,6 +136,7 @@ public abstract class MixinParticleEngine_Render {
 		// other mods may change them...
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.enableCull();
+		RenderSystem.enableDepthTest();
 		lightTexture.turnOffLightLayer();
 		profiler.pop();
 	}

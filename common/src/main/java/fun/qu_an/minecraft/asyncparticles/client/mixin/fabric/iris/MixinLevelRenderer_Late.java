@@ -53,6 +53,26 @@ public abstract class MixinLevelRenderer_Late {
 		}
 	}
 
+	@Inject(method = "renderLevel",
+		at = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;"))
+	private void onRenderLevelTransparencyChain(PoseStack poseStack,
+												float f,
+												long l,
+												boolean bl,
+												Camera camera,
+												GameRenderer gameRenderer,
+												LightTexture lightTexture,
+												Matrix4f projectionMatrix,
+												CallbackInfo ci,
+												@Share(namespace = "asyncparticles", value = "isRenderAsync")
+												LocalBooleanRef isRenderAsync,
+												@Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
+												LocalBooleanRef isMixedParticleRendering) {
+		if (isRenderAsync.get() && isMixedParticleRendering.get()) {
+			AsyncRenderer.irisOpaque(poseStack, f, camera, lightTexture);
+		}
+	}
+
 	@WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V"))
 	private void redirectRenderParticles(ParticleEngine instance,
 										 PoseStack poseStack,

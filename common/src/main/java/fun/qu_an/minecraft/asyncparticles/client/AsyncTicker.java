@@ -214,7 +214,7 @@ public class AsyncTicker {
 		// tick last, schedule async tasks
 		tryReload();
 		tryDebug();
-		CompletableFuture<Void> particleFuture = null;
+		CompletableFuture<Void> particleFuture;
 		// end tick events
 		if (!levelRunning) {
 			particleFuture = CompletableFuture.runAsync(() -> timeUsageNano.set(System.nanoTime()), EXECUTOR);

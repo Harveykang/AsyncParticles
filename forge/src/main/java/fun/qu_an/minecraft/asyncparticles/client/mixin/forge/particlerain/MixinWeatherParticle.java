@@ -28,6 +28,10 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 	@Unique
 	private AABB asyncparticles$weathersAABB = INITIAL_AABB;
 
+	protected MixinWeatherParticle(ClientLevel clientLevel, double d, double e, double f) {
+		super(clientLevel, d, e, f);
+	}
+
 	@Shadow
 	public abstract void remove();
 
@@ -66,10 +70,6 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 	@Inject(method = "remove", at = @At(value = "FIELD", remap = false, ordinal = 0, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;particleCount:I"))
 	private void onRemove(CallbackInfo ci) {
 		ParticleRainCompat.asyncparticles$particleCount.getAndDecrement();
-	}
-
-	protected MixinWeatherParticle(ClientLevel clientLevel, double d, double e, double f) {
-		super(clientLevel, d, e, f);
 	}
 
 	@SuppressWarnings("ConstantValue")
