@@ -78,7 +78,6 @@ public abstract class MixinParticleEngine_Render {
 			}
 			BufferBuilder bufferBuilder;
 			profiler.push("render_sync");
-			RenderSystem.setShader(GameRenderer::getParticleShader);
 			Collection<? extends Particle> syncParticles;
 			Tesselator tesselator;
 			boolean enableCull;
