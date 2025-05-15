@@ -77,6 +77,7 @@
     "render.MixinMultiBufferSource$BufferSource",
     "render.MixinTesselator",
     "render.MixinVertexConsumer",
+    "shimmer.MixinPostParticle",
     "subtle_effects.MixinAsyncRenderer",
     "subtle_effects.fabric.MixinParticleEngine",
     "tick.MixinClientLevel",

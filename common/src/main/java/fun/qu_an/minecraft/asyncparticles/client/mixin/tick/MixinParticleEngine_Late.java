@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.tick;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.BusyWaitEvictingQueue;
@@ -10,6 +12,7 @@ import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.TrackingEmitter;
 import net.minecraft.core.particles.ParticleGroup;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -43,5 +46,11 @@ public abstract class MixinParticleEngine_Late {
 		particlesToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 		trackingEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 		random = new SingleThreadedRandomSource(ThreadLocalRandom.current().nextInt());
+	}
+
+	@WrapOperation(method = "<init>",
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;create()Lnet/minecraft/util/RandomSource;"))
+	private RandomSource onInit(Operation<RandomSource> original) {
+		return new SingleThreadedRandomSource(RandomSupport.generateUniqueSeed());
 	}
 }

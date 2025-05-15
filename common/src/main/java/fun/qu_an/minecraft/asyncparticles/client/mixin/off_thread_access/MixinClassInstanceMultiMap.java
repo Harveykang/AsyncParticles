@@ -1,10 +1,12 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 
+import com.bawnorton.mixinsquared.TargetHandler;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeArrayList;
 import net.minecraft.util.ClassInstanceMultiMap;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -15,7 +17,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 // some mod get entities when ticking particles, may cause a CME
-@Mixin(value = ClassInstanceMultiMap.class, priority = 1100) // higher priority to run after VMP's mixin
+@Mixin(value = ClassInstanceMultiMap.class, priority = 1500) // higher priority to run after VMP's mixin
 public class MixinClassInstanceMultiMap {
 	@Final
 	@Mutable
@@ -48,10 +50,14 @@ public class MixinClassInstanceMultiMap {
 		return Collectors.toCollection(IterationSafeArrayList::new);
 	}
 
-	// FIXME: 这行吗？
 	@Dynamic
-	@Redirect(method = "*", require = 0, at = @At(value = "NEW", remap = false, target = "Lit/unimi/dsi/fastutil/objects/ObjectArrayList;<init>()V"))
-	private <T> List<T> newArrayList() {
+	@TargetHandler(
+		mixin = "me.jellysquid.mods.lithium.mixin.collections.entity_filtering.TypeFilterableListMixin",
+		name = "createAllOfType"
+	)
+	@ModifyVariable(method = "@MixinSquared:Handler", name = "list", require = 0,
+		at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"))
+	private <T> List<T> createAllOfType(List<T> value) {
 		return new IterationSafeArrayList<>();
 	}
 }

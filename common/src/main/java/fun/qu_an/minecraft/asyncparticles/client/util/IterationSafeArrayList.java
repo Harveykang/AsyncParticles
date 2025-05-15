@@ -4,20 +4,26 @@ import it.unimi.dsi.fastutil.objects.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
+	/**
+	 * @apiNote This list does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
 	public IterationSafeArrayList() {
 	}
 
+	/**
+	 * @apiNote This list does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
 	public IterationSafeArrayList(Collection<E> c) {
 		super(c);
 	}
 
+	/**
+	 * @apiNote This list does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
 	public IterationSafeArrayList(int i) {
 		super(i);
 	}
@@ -156,6 +162,30 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 		return new ListItr(a, s, i);
 	}
 
+	@Override
+	public Object @NotNull [] toArray() {
+		E[] es = this.a;
+		int size = Math.min(es.length, size());
+		return Arrays.copyOf(es, size, Object[].class);
+	}
+
+	@SuppressWarnings({"unchecked", "SuspiciousSystemArraycopy"})
+	@Override
+	public <K> K @NotNull [] toArray(K[] a) {
+		E[] es = this.a;
+		int size = Math.min(es.length, size());
+		if (a == null) {
+			a = (K[]) new Object[size];
+		} else if (a.length < size) {
+			a = (K[]) Array.newInstance(a.getClass().getComponentType(), size);
+		}
+		System.arraycopy(es, 0, a, 0, size);
+		if (a.length > size) {
+			a[size] = null;
+		}
+		return a;
+	}
+
 	private class ListItr implements ObjectListIterator<E> {
 		private final E[] a;
 		private int size;
@@ -191,8 +221,7 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 			}
 			final E e = curr;
 			while (cursor > 0) {
-				prev = a[--cursor];
-				if (prev != null && prev != e) {
+				if ((prev = a[--cursor]) != null && prev != e) {
 					return true;
 				}
 			}
@@ -217,8 +246,7 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 			}
 			final E e = curr;
 			while (cursor < size) {
-				next = a[cursor++];
-				if (next != null && next != e) {
+				if ((next = a[cursor++]) != null && next != e) {
 					return true;
 				}
 			}

@@ -16,11 +16,17 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 	protected int head;
 	protected int size;
 
+	/**
+	 * @apiNote This queue does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
 	public IterationSafeEvictingQueue(int initialCapacity, int maxCapacity) {
 		this(initialCapacity, maxCapacity, e -> {
 		});
 	}
 
+	/**
+	 * @apiNote This queue does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
 	public IterationSafeEvictingQueue(int initialCapacity, int maxCapacity, Consumer<E> onEvict) {
 		if (initialCapacity < 0 || maxCapacity <= 0 || initialCapacity > maxCapacity) {
 			throw new IllegalArgumentException("Invalid capacities, initialCapacity: " + initialCapacity + ", maxCapacity: " + maxCapacity);
@@ -33,10 +39,16 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		this.size = 0;
 	}
 
+	/**
+	 * @apiNote This queue does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
 	public static <E> IterationSafeEvictingQueue<E> newInstance(int initialCapacity, int maxCapacity) {
 		return new IterationSafeEvictingQueue<>(Math.min(initialCapacity, maxCapacity), maxCapacity);
 	}
 
+	/**
+	 * @apiNote This queue does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
 	public static <E> IterationSafeEvictingQueue<E> newInstance(int initialCapacity, int maxCapacity, Consumer<E> onEvict) {
 		return new IterationSafeEvictingQueue<>(Math.min(initialCapacity, maxCapacity), maxCapacity, onEvict);
 	}

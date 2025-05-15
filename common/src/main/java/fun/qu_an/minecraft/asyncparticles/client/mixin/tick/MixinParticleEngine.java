@@ -1,19 +1,14 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.tick;
 
-import com.bawnorton.mixinsquared.TargetHandler;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
-import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.particles.ParticleGroup;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.spongepowered.asm.mixin.*;
@@ -40,14 +35,6 @@ public abstract class MixinParticleEngine {
 
 	@Shadow
 	public abstract void tickParticle(Particle particle);
-
-	@Shadow
-	@Mutable
-	public static List<ParticleRenderType> RENDER_ORDER;
-
-	@Shadow
-	@Final
-	public TextureManager textureManager;
 
 	@Shadow
 	public abstract void updateCount(ParticleGroup group, int count);
@@ -79,6 +66,9 @@ public abstract class MixinParticleEngine {
 		// we'll add particles later
 		AsyncTicker.PARTICLE_OPERATIONS.add(this::asyncparticles$tickEmitters);
 
+		// Keep local variable tables as they were
+		Particle particle;
+
 		boolean tickAsync = ConfigHelper.isTickAsync();
 		if (tickAsync) {
 			AsyncTicker.waitForCleanUp();
@@ -98,7 +88,6 @@ public abstract class MixinParticleEngine {
 
 		if (!this.particlesToAdd.isEmpty()) {
 			// Write like this to be compatible with e.g. Spectrum mod
-			Particle particle;
 			//noinspection ForLoopReplaceableByForEach
 			for (Iterator<Particle> iterator = particlesToAdd.iterator(); iterator.hasNext(); ) {
 				particle = iterator.next();

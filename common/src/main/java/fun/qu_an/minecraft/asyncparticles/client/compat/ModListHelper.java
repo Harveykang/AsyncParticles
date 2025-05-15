@@ -98,6 +98,7 @@ public class ModListHelper {
 	public static final boolean FABRIC_PORTING_LIB_BASE_LOADED = isFabricModLoaded("porting_lib_base");
 	/* Loot Beams Up */
 	public static final boolean FABRIC_LOOT_BEAMS_UP_LOADED = isFabricModLoaded("lootbeams");
+	/* Shimmer */
 	public static final boolean SHIMMER_LOADED = isModLoaded("shimmer");
 
 	@ExpectPlatform

@@ -125,6 +125,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "fabric_api" -> FABRIC_API_LOADED; // Includes Forge version
 			case "cloth_config" -> CLOTH_CONFIG_LOADED;
 			case "photon_editor" -> PHOTON_EDITOR_LOADED;
+			case "shimmer" -> SHIMMER_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

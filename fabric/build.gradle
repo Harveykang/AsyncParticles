@@ -72,6 +72,8 @@ dependencies {
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
     localRuntime "org.anarres:jcpp:1.4.14"
     modLocalRuntime "maven.modrinth:indium:1.0.36+mc1.20.1"
+    modCompileOnly 'maven.modrinth:lithium:mc1.20.1-0.11.3-fabric'
+    modLocalRuntime 'maven.modrinth:lithium:mc1.20.1-0.11.3-fabric'
 
     modCompileOnly "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
     modCompileOnly 'maven.modrinth:iris:1.7.6+1.20.1'

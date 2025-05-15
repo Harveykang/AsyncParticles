@@ -15,7 +15,7 @@ dependencies {
     // which get remapped to the correct annotations on each platform.
     // Do NOT use other classes from Fabric Loader.
 
-    implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.3.2-beta.4"))
+    implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:0.3.2-beta.4"))
 
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
 //    modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
@@ -26,6 +26,7 @@ dependencies {
     modCompileOnly 'maven.modrinth:vulkanmod:0.5.2'
     modCompileOnly "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
     modCompileOnly 'maven.modrinth:iris:1.7.6+1.20.1'
+    modCompileOnly 'maven.modrinth:lithium:mc1.20.1-0.11.3-fabric'
 
     /* Valkyrien Skies */
     modCompileOnly "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
@@ -45,7 +46,7 @@ dependencies {
     /* Create */
     // 6.0.0
 //    modCompileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}") { transitive = false }
-    modCompileOnly("net.createmod.ponder:Ponder-Fabric-${minecraft_version}:${ponder_version}")
+//    modCompileOnly("net.createmod.ponder:Ponder-Fabric-${minecraft_version}:${ponder_version}")
 //    modCompileOnly("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}")
 //    modCompileOnly("com.tterrag.registrate:Registrate:${registrate_version}")
     // 0.5.0
@@ -81,6 +82,9 @@ dependencies {
 
     /* Photon Editor */
     modCompileOnly "maven.modrinth:photon-editor:mc1.20.1-1.1.8-fabric"
+
+    /* Shimmer */
+    modCompileOnly "curse.maven:shimmer-627824:5685942" // 0.2.4
 
     /* Loot Beams */
 //    modCompileOnly fileTree(dir: '../libs', include: 'lootbeams-3.6.1-mc1.20-.4-de.jar')

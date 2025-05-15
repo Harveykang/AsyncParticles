@@ -47,7 +47,7 @@ public abstract class MixinParticle implements ParticleAddon {
 	}
 
 	@WrapOperation(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V",
-		at = @At(value = "INVOKE", target ="Lnet/minecraft/util/RandomSource;create()Lnet/minecraft/util/RandomSource;"))
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;create()Lnet/minecraft/util/RandomSource;"))
 	private RandomSource onInit(Operation<RandomSource> original) {
 		return new SingleThreadedRandomSource(RandomSupport.generateUniqueSeed());
 	}
