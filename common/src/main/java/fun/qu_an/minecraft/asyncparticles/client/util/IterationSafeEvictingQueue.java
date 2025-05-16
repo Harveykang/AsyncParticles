@@ -99,7 +99,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "ConstantValue"})
 	public E peek() {
 		if (size == 0) {
 			return null;

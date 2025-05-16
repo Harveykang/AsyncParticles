@@ -315,12 +315,13 @@ public class AsyncTicker {
 			throw constructCrashReport(particle, t);
 		}
 		boolean tolerable = isTolerable(t);
-		if (tolerable && !EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
+		Class<? extends Particle> particleClass = ((ParticleAddon) particle).asyncparticles$getRealClass();
+		if (tolerable && !EXCEPTION_TRACKER.addException(particleClass, t)) {
 			return;
 		}
 		if (ConfigHelper.markSyncIfTickFailed()) {
 			((ParticleAddon) particle).asyncparticles$setTickSync();
-			if (!shouldSync(particle.getClass())) {
+			if (!shouldSync(particleClass)) {
 				if (!tolerable) {
 					LOGGER.warn("Exception while ticking particle {}, marking as sync", particle, t);
 				} else {
@@ -330,7 +331,7 @@ public class AsyncTicker {
 						AsyncParticlesClient.ISSUE_URL,
 						t);
 				}
-				markAsSync(particle.getClass());
+				markAsSync(particleClass);
 			}
 			recordSync(particle);
 		} else if (tolerable) {
@@ -338,7 +339,7 @@ public class AsyncTicker {
 			if (player != null) {
 				player.sendSystemMessage(Component.literal(
 						"Exception %s thrown while ticking particle %s exceeds the threshold, please contact the author: "
-							.formatted(t.getClass().getSimpleName(), particle.getClass()))
+							.formatted(t.getClass().getSimpleName(), particleClass))
 					.append(Component.literal(AsyncParticlesClient.ISSUE_URL)
 						.setStyle(Style.EMPTY
 							.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncParticlesClient.ISSUE_URL))
@@ -419,7 +420,7 @@ public class AsyncTicker {
 		}
 	}
 
-	public static boolean shouldSync(Class<? extends Particle> aClass) {
+	public static boolean shouldSync(Class<?> aClass) {
 		return SYNC_PARTICLE_TYPES.contains(aClass);
 	}
 

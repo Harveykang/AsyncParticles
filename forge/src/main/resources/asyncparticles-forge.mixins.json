@@ -21,6 +21,7 @@
     "iris_like.MixinLevelRenderer_Late",
     "iris_like_else.MixinLevelRenderer_Late",
     "particlerain.MixinGroundFogParticle",
+    "particlerain.MixinGroundFogRenderType",
     "particlerain.MixinRainParticle",
     "particlerain.MixinRippleParticle",
     "particlerain.MixinSnowParticle",

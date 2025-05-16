@@ -53,7 +53,7 @@ public abstract class MixinRainParticle extends MixinWeatherParticle {
 			@At(value = "FIELD", ordinal = 1,
 				target = "Lpigcart/particlerain/particle/RainParticle;y:D")
 		})
-	private double modifyWindStrength(double original) {
+	private double modifyY(double original) {
 		return original - 1.9d;
 	}
 

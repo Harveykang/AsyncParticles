@@ -57,7 +57,7 @@ public class MixinClassInstanceMultiMap {
 	)
 	@ModifyVariable(method = "@MixinSquared:Handler", name = "list", require = 0,
 		at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"))
-	private <T> List<T> createAllOfType(List<T> value) {
+	private <T> List<T> modifyCreateAllOfType(List<T> value) {
 		return new IterationSafeArrayList<>();
 	}
 }
