@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 	static String COMMENTS = """
 		particle$noCulling: comma-separated list of particle classes that should not be culled.
 		particle$noLightCache: comma-separated list of particle classes that should not use the light cache.
@@ -57,11 +57,11 @@ public class AsyncParticlesMixinConfig {
 
 	@Contract
 	private static Mixin$Particle upgrade(int ver, Mixin$Particle configObj) {
-		if (VERSION != 1) {
+		if (VERSION != 2) {
 			throw new RuntimeException("I forgot to update the upgrade method.");
 		}
 		return switch (ver) {
-			case 1 -> configObj;
+			case 2 -> configObj;
 			default -> new Mixin$Particle();
 		};
 	}
@@ -101,8 +101,7 @@ public class AsyncParticlesMixinConfig {
 		private Set<String> noCulling = new LinkedHashSet<>();
 
 		{
-			noCulling.add("pigcart.particlerain.particle.GroundFogParticle");
-			noCulling.add("com.lowdragmc.photon.client.gameobject.FXObject");
+//			noCulling.add("com.lowdragmc.photon.client.gameobject.FXObject");
 		}
 
 		private Set<String> noLightCache = new LinkedHashSet<>();
@@ -110,18 +109,18 @@ public class AsyncParticlesMixinConfig {
 		{
 			noLightCache.add("dev.shadowsoffire.gateways.client.GatewayParticle");
 			noLightCache.add("com.chailotl.particular.particles.FireflyParticle");
-			noLightCache.add("com.lowdragmc.photon.client.gameobject.FXObject");
+//			noLightCache.add("com.lowdragmc.photon.client.gameobject.FXObject");
 			noLightCache.add("net.diebuddies.minecraft.weather.WeatherParticle");
 		}
 
 		private Set<String> lockProvider = new LinkedHashSet<>();
 
 		{
-			lockProvider.add("yesman.epicfight.client.particle.TrailParticle");
-			lockProvider.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
-			lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
-			lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
-			lockProvider.add("com.lowdragmc.photon.client.gameobject.FXObject");
+//			lockProvider.add("yesman.epicfight.client.particle.TrailParticle");
+//			lockProvider.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
+//			lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
+//			lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
+//			lockProvider.add("com.lowdragmc.photon.client.gameobject.FXObject");
 		}
 
 		private Set<String> lockRequired = new LinkedHashSet<>();

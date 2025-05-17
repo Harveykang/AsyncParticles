@@ -28,7 +28,7 @@ import java.util.function.Predicate;
 public abstract class MixinLevelRenderer_Late {
 	@WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", ordinal = 0, remap = false,
 		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
-	private boolean redirectRenderParticles(ParticleEngine instance,
+	private boolean redirectRenderParticles0(ParticleEngine instance,
 											LightTexture lightTexture,
 											Camera camera,
 											float v,
@@ -49,7 +49,7 @@ public abstract class MixinLevelRenderer_Late {
 
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE", ordinal = 1, remap = false,
 		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
-	private void beforeRenderEntities(DeltaTracker deltaTracker,
+	private void beforeRenderParticles1(DeltaTracker deltaTracker,
 									  boolean renderBlockOutline,
 									  Camera camera,
 									  GameRenderer gameRenderer,
@@ -68,37 +68,43 @@ public abstract class MixinLevelRenderer_Late {
 		}
 	}
 
-	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", ordinal = 1, remap = false,
+	@WrapWithCondition(method = "renderLevel", at = @At(value = "INVOKE", ordinal = 1, remap = false,
 		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
-	private void onRenderLevelTransparencyChain(ParticleEngine instance,
-												LightTexture lightTexture,
-												Camera camera,
-												float v,
-												Frustum frustum,
-												Predicate<ParticleRenderType> predicate,
-												@Local(ordinal = 0) float partialTick,
-												@Share(namespace = "asyncparticles", value = "isRenderAsync")
-													LocalBooleanRef isRenderAsync,
-												@Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
-													LocalBooleanRef isMixedParticleRendering) {
+	private boolean redirectRenderParticles1(ParticleEngine instance,
+											 LightTexture lightTexture,
+											 Camera camera,
+											 float v,
+											 Frustum frustum,
+											 Predicate<ParticleRenderType> predicate,
+											 @Local(ordinal = 0) float partialTick,
+											 @Share(namespace = "asyncparticles", value = "isRenderAsync")
+											 LocalBooleanRef isRenderAsync,
+											 @Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
+											 LocalBooleanRef isMixedParticleRendering) {
+		if (!isRenderAsync.get()) {
+			return true;
+		}
 		if (isMixedParticleRendering.get()) {
 			AsyncRenderer.irisOpaque(partialTick, camera, lightTexture, t -> !t.isTranslucent());
+		} else if (ConfigHelper.isCompatibilityRendering()) {
+			AsyncRenderer.join(partialTick, camera, lightTexture);
 		}
+		return false;
 	}
 
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", remap = false, ordinal = 2,
 		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
-	private void redirectRenderParticles(ParticleEngine instance,
-										 LightTexture lightTexture,
-										 Camera camera,
-										 float v,
-										 Frustum frustum,
-										 Predicate<ParticleRenderType> predicate,
-										 @Local(ordinal = 0) float partialTick,
-										 @Share(namespace = "asyncparticles", value = "isRenderAsync")
-										 LocalBooleanRef isRenderAsync,
-										 @Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
-										 LocalBooleanRef isMixedParticleRendering) {
+	private void redirectRenderParticles2(ParticleEngine instance,
+										  LightTexture lightTexture,
+										  Camera camera,
+										  float v,
+										  Frustum frustum,
+										  Predicate<ParticleRenderType> predicate,
+										  @Local(ordinal = 0) float partialTick,
+										  @Share(namespace = "asyncparticles", value = "isRenderAsync")
+										  LocalBooleanRef isRenderAsync,
+										  @Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
+										  LocalBooleanRef isMixedParticleRendering) {
 		if (isRenderAsync.get()) {
 			if (isMixedParticleRendering.get()) {
 				AsyncRenderer.irisTranslucent(partialTick, camera, lightTexture, ParticleRenderType::isTranslucent);
@@ -107,7 +113,7 @@ public abstract class MixinLevelRenderer_Late {
 			}
 		} else {
 			if (isMixedParticleRendering.get()) {
-				instance.render(lightTexture, camera, v, frustum, predicate);
+				instance.render(lightTexture, camera, v, frustum, ParticleRenderType::isTranslucent);
 			}
 		}
 	}

@@ -122,17 +122,14 @@ public class AsyncRenderer {
 	/* Renderer */
 
 	public static void start(float f, Camera camera, boolean isRenderAsync) {
-		Minecraft mc = Minecraft.getInstance();
-		ProfilerFiller profiler = mc.getProfiler();
+		tryDebug();
 		if (!isRenderAsync) {
-			captureParticleRenderingSetting();
-			tryDebug();
 			return;
 		}
+		Minecraft mc = Minecraft.getInstance();
+		ProfilerFiller profiler = mc.getProfiler();
 		profiler.popPush("async_particles");
-		tryDebug();
 		clearSync();
-		captureParticleRenderingSetting();
 		profiler.push("render_async");
 		ParticleEngine particleEngine = mc.particleEngine;
 		TextureManager textureManager = particleEngine.textureManager;
@@ -285,7 +282,7 @@ public class AsyncRenderer {
 		return new ReportedException(crashReport);
 	}
 
-	private static void captureParticleRenderingSetting() {
+	public static void captureParticleRenderingSetting() {
 		if (ModListHelper.IRIS_LIKE_LOADED) {
 			mixedParticleRenderingSetting = Iris.isPackInUseQuick() &&
 											getParticleRenderingSettings0() == ParticleRenderingSettings.MIXED;

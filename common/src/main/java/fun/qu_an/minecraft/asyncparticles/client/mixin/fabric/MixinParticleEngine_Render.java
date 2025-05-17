@@ -57,7 +57,6 @@ public abstract class MixinParticleEngine_Render {
 
 		Frustum frustum = AsyncRenderer.frustum;
 		boolean cullParticles = ConfigHelper.isCullParticles();
-		boolean mixedParticleRendering = AsyncRenderer.isMixedParticleRendering();
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			// FABRIC skips NO_RENDER
 //				if (particleRenderType == ParticleRenderType.NO_RENDER) {
