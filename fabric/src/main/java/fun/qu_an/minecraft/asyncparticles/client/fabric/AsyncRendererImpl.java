@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.fabric;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
@@ -19,7 +20,7 @@ import java.util.function.Predicate;
 
 @SuppressWarnings("unused")
 public class AsyncRendererImpl {
-	public static void irisOpaque(float f, Camera camera, LightTexture lightTexture, Predicate<ParticleRenderType> predicate) {
+	public static void endOpaque(float f, Camera camera, LightTexture lightTexture) {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
@@ -27,19 +28,20 @@ public class AsyncRendererImpl {
 //			return;
 //		}
 		Minecraft mc = Minecraft.getInstance();
-		ProfilerFiller profiler = mc.getProfiler();
-		profiler.popPush("async_particles");
-
-		LevelRenderer levelRenderer = mc.levelRenderer;
+		mc.getProfiler().popPush("particles");
 
 		ParticleEngine particleEngine = mc.particleEngine;
-		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
+		if (ModListHelper.FABRIC_IRIS_LOADED) {
+			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
+		} else {
+			throw new UnsupportedOperationException("endOpaque");
+		}
 		AsyncRenderer.renderAsync = ConfigHelper.isRenderAsync();
 		particleEngine.render(lightTexture, camera, f);
 		AsyncRenderer.renderAsync = false;
 	}
 
-	public static void irisTranslucent(float f, Camera camera, LightTexture lightTexture, Predicate<ParticleRenderType> predicate) {
+	public static void endTranslucent(float f, Camera camera, LightTexture lightTexture) {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
@@ -47,7 +49,7 @@ public class AsyncRendererImpl {
 //			return;
 //		}
 		Minecraft mc = Minecraft.getInstance();
-		mc.getProfiler().popPush("async_particles");
+		mc.getProfiler().popPush("particles");
 		LevelRenderer levelRenderer = mc.levelRenderer;
 
 		if (levelRenderer.transparencyChain != null) {
@@ -58,7 +60,11 @@ public class AsyncRendererImpl {
 		}
 
 		ParticleEngine particleEngine = mc.particleEngine;
-		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
+		if (ModListHelper.FABRIC_IRIS_LOADED) {
+			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
+		} else {
+			throw new UnsupportedOperationException("endOpaque");
+		}
 		AsyncRenderer.renderAsync = ConfigHelper.isRenderAsync();
 		particleEngine.render(lightTexture, camera, f);
 		AsyncRenderer.renderAsync = false;

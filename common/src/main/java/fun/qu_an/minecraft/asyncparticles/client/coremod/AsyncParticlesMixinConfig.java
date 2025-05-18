@@ -126,14 +126,14 @@ public class AsyncParticlesMixinConfig {
 		private Set<String> lockRequired = new LinkedHashSet<>();
 
 		{
-			lockRequired.add("yesman.epicfight.client.particle.TrailParticle");
-			lockRequired.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
-			lockRequired.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
-			lockRequired.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
-			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.Emitter");
-			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.particle.ParticleEmitter");
-			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.beam.BeamEmitter");
-			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.trail.TrailEmitter");
+//			lockRequired.add("yesman.epicfight.client.particle.TrailParticle");
+//			lockRequired.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
+//			lockRequired.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
+//			lockRequired.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
+//			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.Emitter");
+//			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.particle.ParticleEmitter");
+//			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.beam.BeamEmitter");
+//			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.trail.TrailEmitter");
 		}
 
 		private void fold() {

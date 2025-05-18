@@ -15,7 +15,6 @@ accessible field net/minecraft/world/phys/HitResult location Lnet/minecraft/worl
 transitive-mutable field net/minecraft/world/phys/HitResult location Lnet/minecraft/world/phys/Vec3;
 accessible field net/minecraft/client/particle/Particle stoppedByCollision Z
 accessible field net/minecraft/client/particle/Particle MAXIMUM_COLLISION_VELOCITY_SQUARED D
-accessible field com/mojang/blaze3d/vertex/PoseStack poseStack Ljava/util/Deque;
 accessible method net/minecraft/client/renderer/RenderStateShard setupRenderState ()V
 accessible method net/minecraft/client/renderer/RenderStateShard clearRenderState ()V
 accessible class net/minecraft/client/renderer/RenderStateShard$OutputStateShard

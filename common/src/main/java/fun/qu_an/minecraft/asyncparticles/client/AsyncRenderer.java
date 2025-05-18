@@ -27,7 +27,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -43,7 +42,6 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 // TODO: 整理这一坨
@@ -128,7 +126,7 @@ public class AsyncRenderer {
 		}
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
-		profiler.popPush("async_particles");
+		profiler.popPush("particles");
 		clearSync();
 		profiler.push("render_async");
 		ParticleEngine particleEngine = mc.particleEngine;
@@ -210,8 +208,7 @@ public class AsyncRenderer {
 		return null;
 	}
 
-	// TODO: 是否需要在transparencyChain.process(partialTick)前调用？
-	public static void join(float f, Camera camera, LightTexture lightTexture) {
+	public static void endAll(float f, Camera camera, LightTexture lightTexture) {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
@@ -219,8 +216,8 @@ public class AsyncRenderer {
 //			return;
 //		}
 		Minecraft mc = Minecraft.getInstance();
-		ProfilerFiller profiler = mc.getProfiler();
-		profiler.popPush("async_particles");
+		mc.getProfiler().popPush("particles");
+
 		LevelRenderer levelRenderer = mc.levelRenderer;
 		if (levelRenderer.transparencyChain != null) {
 			RenderTarget particlesTarget = levelRenderer.getParticlesTarget();
@@ -230,12 +227,13 @@ public class AsyncRenderer {
 		}
 
 		ParticleEngine particleEngine = mc.particleEngine;
+
+		AsyncRenderer.renderAsync = ConfigHelper.isRenderAsync();
 		if (ModListHelper.FABRIC_IRIS_LOADED) {
 			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
-		renderAsync = ConfigHelper.isRenderAsync();
 		particleEngine.render(lightTexture, camera, f);
-		renderAsync = false;
+		AsyncRenderer.renderAsync = false;
 
 		if (levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();
@@ -243,12 +241,12 @@ public class AsyncRenderer {
 	}
 
 	@ExpectPlatform
-	public static void irisOpaque(float f, Camera camera, LightTexture lightTexture, Predicate<ParticleRenderType> predicate) {
+	public static void endOpaque(float f, Camera camera, LightTexture lightTexture) {
 		throw new AssertionError();
 	}
 
 	@ExpectPlatform
-	public static void irisTranslucent(float f, Camera camera, LightTexture lightTexture, Predicate<ParticleRenderType> predicate) {
+	public static void endTranslucent(float f, Camera camera, LightTexture lightTexture) {
 		throw new AssertionError();
 	}
 

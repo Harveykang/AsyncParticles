@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = LevelRenderer.class, priority = 499)
+@Mixin(value = LevelRenderer.class, priority = 500)
 public abstract class MixinLevelRenderer {
 	@Shadow
 	@Nullable
@@ -117,7 +117,7 @@ public abstract class MixinLevelRenderer {
 		}
 	}
 
-	@Inject(method = "renderLevel", // priority = 499, inject earlier
+	@Inject(method = "renderLevel", // priority = 500, inject earlier
 		at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/renderer/LevelRenderer;renderDebug(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/Camera;)V"))
 	private void onRenderLevelTail(DeltaTracker deltaTracker,
 								   boolean renderBlockOutline,
@@ -136,7 +136,30 @@ public abstract class MixinLevelRenderer {
 			!isMixedParticleRendering.get() &&
 			!ConfigHelper.isCompatibilityRendering() &&
 			transparencyChain == null) {
-			AsyncRenderer.join(partialTick, camera, lightTexture);
+			AsyncRenderer.endAll(partialTick, camera, lightTexture);
+		}
+	}
+
+	@Inject(method = "renderLevel", order = 1500, // inject later
+		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderStateShard;WEATHER_TARGET:Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;")),
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;process(F)V"))
+	private void onRenderLevelTail2(DeltaTracker deltaTracker,
+									boolean renderBlockOutline,
+									Camera camera,
+									GameRenderer gameRenderer,
+									LightTexture lightTexture,
+									Matrix4f frustumMatrix,
+									Matrix4f projectionMatrix,
+									CallbackInfo ci,
+									@Local(ordinal = 0) float partialTick,
+									@Share(namespace = "asyncparticles", value = "isRenderAsync")
+										LocalBooleanRef isRenderAsync,
+									@Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
+										LocalBooleanRef isMixedParticleRendering) {
+		if (isRenderAsync.get() &&
+			!isMixedParticleRendering.get() &&
+			!ConfigHelper.isCompatibilityRendering()) {
+			AsyncRenderer.endAll(partialTick, camera, lightTexture);
 		}
 	}
 }

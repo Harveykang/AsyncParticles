@@ -37,14 +37,12 @@ public abstract class MixinLevelRenderer_Late {
 									  @Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
 									  LocalBooleanRef isMixedParticleRendering) {
 		if (!isRenderAsync.get() && isMixedParticleRendering.get()) {
-			ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
-			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
-			particleEngine.render(lightTexture, camera, partialTick);
+			AsyncRenderer.endOpaque(partialTick, camera, lightTexture);
 		}
 	}
 
 	@Inject(method = "renderLevel", at = @At(value = "FIELD", ordinal = 0,
-			target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;"))
+		target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;"))
 	private void onRenderLevelTransparencyChain(DeltaTracker deltaTracker,
 												boolean renderBlockOutline,
 												Camera camera,
@@ -59,7 +57,7 @@ public abstract class MixinLevelRenderer_Late {
 												@Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
 												LocalBooleanRef isMixedParticleRendering) {
 		if (isRenderAsync.get() && isMixedParticleRendering.get()) {
-			AsyncRenderer.irisOpaque(partialTick, camera, lightTexture, null);
+			AsyncRenderer.endOpaque(partialTick, camera, lightTexture);
 		}
 	}
 
@@ -70,14 +68,14 @@ public abstract class MixinLevelRenderer_Late {
 										 Camera camera,
 										 float partialTick,
 										 @Share(namespace = "asyncparticles", value = "isRenderAsync")
-											 LocalBooleanRef isRenderAsync,
+										 LocalBooleanRef isRenderAsync,
 										 @Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
-											 LocalBooleanRef isMixedParticleRendering) {
+										 LocalBooleanRef isMixedParticleRendering) {
 		if (isRenderAsync.get()) {
 			if (isMixedParticleRendering.get()) {
-				AsyncRenderer.irisTranslucent(partialTick, camera, lightTexture, null);
+				AsyncRenderer.endTranslucent(partialTick, camera, lightTexture);
 			} else if (ConfigHelper.isCompatibilityRendering()) {
-				AsyncRenderer.join(partialTick, camera, lightTexture);
+				AsyncRenderer.endAll(partialTick, camera, lightTexture);
 			}
 		} else {
 			if (isMixedParticleRendering.get()) {
