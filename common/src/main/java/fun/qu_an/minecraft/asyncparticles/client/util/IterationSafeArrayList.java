@@ -12,6 +12,7 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 	 * @apiNote This list does not allow the same object to be adjacent elements, which can cause issues with iteration.
 	 */
 	public IterationSafeArrayList() {
+		super();
 	}
 
 	/**

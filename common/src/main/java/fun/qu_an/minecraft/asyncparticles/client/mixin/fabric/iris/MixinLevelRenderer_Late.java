@@ -52,7 +52,8 @@ public abstract class MixinLevelRenderer_Late {
 		}
 	}
 
-	@Inject(method = "renderLevel", at = @At(value = "CONSTANT", ordinal = 1, args = "stringValue=translucent"))
+	@Inject(method = "renderLevel",
+		at = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;"))
 	private void onRenderLevelTranslucent(PoseStack poseStack,
 												float partialTick,
 												long l,

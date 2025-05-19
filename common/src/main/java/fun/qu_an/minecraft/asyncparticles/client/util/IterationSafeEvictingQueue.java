@@ -99,19 +99,27 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 	}
 
 	@Override
-	@SuppressWarnings({"unchecked", "ConstantValue"})
+	@SuppressWarnings({"unchecked"})
 	public E peek() {
 		if (size == 0) {
 			return null;
 		}
 		Object o;
 		// thread safety
-		while ((o = queue[head]) == null) {
+		while (true) {
+			Object[] queue = this.queue;
+			int head = this.head;
+			if (head >= queue.length) {
+				Thread.yield();
+				continue;
+			}
+			if ((o = queue[head]) != null) {
+				return (E) o;
+			}
 			if (size == 0) {
 				return null;
 			}
 		}
-		return (E) o;
 	}
 
 	@Override
