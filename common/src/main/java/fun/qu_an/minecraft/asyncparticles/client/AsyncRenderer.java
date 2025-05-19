@@ -121,17 +121,14 @@ public class AsyncRenderer {
 	/* Renderer */
 
 	public static void start(float f, Camera camera, boolean isRenderAsync) {
-		Minecraft mc = Minecraft.getInstance();
-		ProfilerFiller profiler = mc.getProfiler();
+		tryDebug();
 		if (!isRenderAsync) {
-			captureParticleRenderingSetting();
-			tryDebug();
 			return;
 		}
+		Minecraft mc = Minecraft.getInstance();
+		ProfilerFiller profiler = mc.getProfiler();
 		profiler.popPush("async_particles");
-		tryDebug();
 		clearSync();
-		captureParticleRenderingSetting();
 		profiler.push("render_async");
 		ParticleEngine particleEngine = mc.particleEngine;
 		TextureManager textureManager = particleEngine.textureManager;
@@ -217,7 +214,7 @@ public class AsyncRenderer {
 		return null;
 	}
 
-	public static void join(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
+	public static void endAll(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
@@ -225,8 +222,8 @@ public class AsyncRenderer {
 //			return;
 //		}
 		Minecraft mc = Minecraft.getInstance();
-		ProfilerFiller profiler = mc.getProfiler();
-		profiler.popPush("async_particles");
+		mc.getProfiler().popPush("async_particles");
+
 		LevelRenderer levelRenderer = mc.levelRenderer;
 		if (levelRenderer.transparencyChain != null) {
 			RenderTarget particlesTarget = levelRenderer.getParticlesTarget();
@@ -257,8 +254,7 @@ public class AsyncRenderer {
 //			return;
 //		}
 		Minecraft mc = Minecraft.getInstance();
-		ProfilerFiller profiler = mc.getProfiler();
-		profiler.popPush("async_particles");
+		mc.getProfiler().popPush("async_particles");
 
 		LevelRenderer levelRenderer = mc.levelRenderer;
 		MultiBufferSource.BufferSource bufferSource = levelRenderer.renderBuffers.bufferSource();
@@ -400,7 +396,7 @@ public class AsyncRenderer {
 		return new ReportedException(crashReport);
 	}
 
-	private static void captureParticleRenderingSetting() {
+	public static void captureParticleRenderingSetting() {
 		if (ModListHelper.IRIS_LIKE_LOADED) {
 			mixedParticleRenderingSetting = IrisApi.getInstance().isShaderPackInUse() &&
 											getParticleRenderingSettings0() == ParticleRenderingSettings.MIXED;
@@ -505,7 +501,9 @@ public class AsyncRenderer {
 	}
 
 	private static void clearSync() {
-		SYNC_PARTICLES.clear();
+		if (!SYNC_PARTICLES.isEmpty()) {
+			SYNC_PARTICLES.clear();
+		}
 	}
 
 	/* Debug */

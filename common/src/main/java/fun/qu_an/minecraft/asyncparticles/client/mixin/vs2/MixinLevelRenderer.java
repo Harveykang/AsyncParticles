@@ -32,6 +32,9 @@ public class MixinLevelRenderer {
 										 double zSpeed,
 										 Operation<Particle> original) {
 		Particle particle = original.call(options, force, decreased, x, y, z, xSpeed, ySpeed, zSpeed);
+		if (particle == null) {
+			return null;
+		}
 		final ClientShip ship = VSGameUtilsKt.getShipObjectManagingPos(level, (int) x >> 4, (int) z >> 4);
 		if (ship != null) {
 			((VSParticleAddon) particle).asyncparticles$setShip(ship);

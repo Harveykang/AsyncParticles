@@ -30,7 +30,7 @@ public abstract class MixinLevelRenderer_Late {
 		}
 //		assert !isMixedParticleRendering.get();
 		if (ConfigHelper.isCompatibilityRendering()) {
-			AsyncRenderer.join(poseStack, partialTick, camera, lightTexture);
+			AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture);
 		}
 		return false;
 	}

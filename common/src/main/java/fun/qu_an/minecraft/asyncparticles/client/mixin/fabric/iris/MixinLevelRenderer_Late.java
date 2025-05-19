@@ -1,7 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.iris;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -19,6 +17,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = LevelRenderer.class, priority = 1500) // After mixin.render.MixinLevelRenderer
@@ -53,10 +52,9 @@ public abstract class MixinLevelRenderer_Late {
 		}
 	}
 
-	@Inject(method = "renderLevel",
-		at = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;"))
-	private void onRenderLevelTransparencyChain(PoseStack poseStack,
-												float f,
+	@Inject(method = "renderLevel", at = @At(value = "CONSTANT", ordinal = 1, args = "stringValue=translucent"))
+	private void onRenderLevelTranslucent(PoseStack poseStack,
+												float partialTick,
 												long l,
 												boolean bl,
 												Camera camera,
@@ -69,27 +67,27 @@ public abstract class MixinLevelRenderer_Late {
 												@Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
 												LocalBooleanRef isMixedParticleRendering) {
 		if (isRenderAsync.get() && isMixedParticleRendering.get()) {
-			AsyncRenderer.irisOpaque(poseStack, f, camera, lightTexture);
+			AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture);
 		}
 	}
 
-	@WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V"))
+	@Redirect(method = "renderLevel", at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V"))
 	private void redirectRenderParticles(ParticleEngine instance,
 										 PoseStack poseStack,
 										 MultiBufferSource.BufferSource bufferSource,
 										 LightTexture lightTexture,
 										 Camera camera,
-										 float f,
-										 Operation<Void> original,
+										 float partialTick,
 										 @Share(namespace = "asyncparticles", value = "isRenderAsync")
 										 LocalBooleanRef isRenderAsync,
 										 @Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
 										 LocalBooleanRef isMixedParticleRendering) {
 		if (isRenderAsync.get()) {
 			if (isMixedParticleRendering.get()) {
-				AsyncRenderer.irisTranslucent(poseStack, f, camera, lightTexture);
+				AsyncRenderer.irisTranslucent(poseStack, partialTick, camera, lightTexture);
 			} else if (ConfigHelper.isCompatibilityRendering()) {
-				AsyncRenderer.join(poseStack, f, camera, lightTexture);
+				AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture);
 			}
 		} else {
 			if (isMixedParticleRendering.get()) {
@@ -97,7 +95,7 @@ public abstract class MixinLevelRenderer_Late {
 			} else {
 				((PhasedParticleEngine) Minecraft.getInstance().particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 			}
-			original.call(instance, poseStack, bufferSource, lightTexture, camera, f);
+			instance.render(poseStack, bufferSource, lightTexture, camera, partialTick);
 		}
 	}
 }

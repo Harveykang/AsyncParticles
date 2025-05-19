@@ -8,10 +8,8 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.*;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Slice;
@@ -41,7 +39,7 @@ public abstract class MixinLevelRenderer_Late {
 			PoseStack stack = RenderSystem.getModelViewStack();
 			// so that we don't need to change the behavior of ParticleEngine.render()
 			PoseStack.Pose pose = stack.poseStack.removeLast();
-			AsyncRenderer.join(poseStack, f, camera, lightTexture);
+			AsyncRenderer.endAll(poseStack, f, camera, lightTexture);
 			stack.poseStack.addLast(pose);
 		}
 	}

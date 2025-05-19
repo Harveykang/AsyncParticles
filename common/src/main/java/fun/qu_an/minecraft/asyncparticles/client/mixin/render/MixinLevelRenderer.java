@@ -58,8 +58,10 @@ public abstract class MixinLevelRenderer {
 		} else {
 			AsyncRenderer.frustum = this.cullingFrustum;
 		}
-		AsyncRenderer.start(f, camera, b);
+		// TODO move to iris compat
+		AsyncRenderer.captureParticleRenderingSetting();
 		isMixedParticleRendering.set(AsyncRenderer.isMixedParticleRendering());
+		AsyncRenderer.start(f, camera, b);
 	}
 
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;prepare(DDD)V"))
@@ -130,7 +132,7 @@ public abstract class MixinLevelRenderer {
 			!isMixedParticleRendering.get() &&
 			!ConfigHelper.isCompatibilityRendering() &&
 			transparencyChain == null) {
-			AsyncRenderer.join(poseStack, f, camera, lightTexture);
+			AsyncRenderer.endAll(poseStack, f, camera, lightTexture);
 		}
 	}
 }

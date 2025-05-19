@@ -87,13 +87,14 @@ public class CreateUtil {
 						next = iterator.next().get();
 					} catch (ConcurrentModificationException ignored) {
 						// Ignore as they are not critical
+						next = null;
 						return false;
 					}
 					if (next != null && next.isAliveOrStale()) {
-						break;
+						return true;
 					}
 				}
-				return next != null;
+				return false;
 			}
 
 			@Override
@@ -115,6 +116,7 @@ public class CreateUtil {
 			public void forEachRemaining(Consumer<? super AbstractContraptionEntity> action) {
 				while (hasNext()) {
 					action.accept(next);
+					next = null;
 				}
 			}
 		};

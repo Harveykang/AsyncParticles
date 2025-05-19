@@ -50,8 +50,9 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 	private static final int PACKAGE_LENGTH = AsyncParticlesClient.class.getPackage().getName().length() +
 											  ".mixin.".length();
 
-	/// - mixin/fabric 包下位于根目录的mixin只在fabric环境下生效。除非另有说明，位于其他子目录的mixin在fabric或信雅互联环境下均生效
-	/// - mixin/<mod_id>/fabric 包下的mixin只在fabric环境下生效，其他mixin在任何环境下生效
+	/// - mixins located in `mixin/fabric` or `mixin/<mod_id>/fabric` package only take effect in fabric.
+	/// - mixins located in `mixin/fabric/<mod_id>` take effect in fabric or Sinytra Connector.
+	/// - others take effect in any environment.
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		if (!IS_CLIENT) {
