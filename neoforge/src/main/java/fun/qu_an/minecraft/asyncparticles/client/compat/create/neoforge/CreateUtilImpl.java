@@ -87,15 +87,19 @@ public class CreateUtilImpl {
 				}
 				while (iterator.hasNext()) {
 					try {
-						next = iterator.next().get();
+						if ((next = iterator.next().get()) == null) {
+							continue;
+						}
 					} catch (ConcurrentModificationException ignored) {
 						// Ignore as they are not critical
+						next = null;
 						return false;
 					}
-					if (next != null && next.isAliveOrStale()) {
+					if (next.isAliveOrStale()) {
 						return true;
 					}
 				}
+				next = null;
 				return false;
 			}
 

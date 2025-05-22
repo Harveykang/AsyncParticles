@@ -2,9 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.simple_weather;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import fun.qu_an.minecraft.asyncparticles.client.compat.simpleweather.neoforge.SimpleWeatherCompat;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
@@ -19,7 +17,7 @@ public interface MixinSimpleWeather$NeoBus {
 	@WrapMethod(method = "renderWeather", remap = false)
 	private static void renderWeather(ClientTickEvent.Pre event, Operation<Void> original) {
 		if (SimpleWeather.ClientConfig.OverrideWeather.get()) {
-			AsyncTicker.addEndTickTask(SimpleWeatherCompat.SIMPLE_WEATHER$RENDER_WEATHER, () -> original.call((Object) null));
+			AsyncTicker.addEndTickOperation(SimpleWeatherCompat.SIMPLE_WEATHER$RENDER_WEATHER, () -> original.call((Object) null), true);
 		}
 	}
 

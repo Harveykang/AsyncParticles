@@ -10,6 +10,7 @@ public class AsyncParticlesMixinCanceller implements MixinCanceller {
 		return switch (mixinClassName) {
 			case "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer",
 				 "net.irisshaders.iris.mixin.fabric.MixinLevelRenderer",
+				 "cn.coostack.cooparticlesapi.mixin.ParticleManagerMixin",
 				 // disable this because our implementation is better
 				 "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin",
 				 // These mixins do not support async rendering

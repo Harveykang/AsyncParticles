@@ -49,7 +49,7 @@ public abstract class MixinClientLevel extends Level {
 		if (!ConfigHelper.asyncBlockEntityAnimate()) {
 			original.call(i, j, k);
 		} else {
-			AsyncTicker.addEndTickTask(asyncparticles$ANIMATE_TICK, () -> original.call(i, j, k));
+			AsyncTicker.addEndTickOperation(asyncparticles$ANIMATE_TICK, () -> original.call(i, j, k), true);
 		}
 	}
 

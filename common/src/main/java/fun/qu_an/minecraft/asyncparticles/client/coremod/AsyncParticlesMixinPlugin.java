@@ -23,14 +23,13 @@ import java.util.List;
 import java.util.Set;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.FABRIC_LOOT_BEAMS_UP_LOADED;
 
 public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 	static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles:plugin");
 
 	@Override
 	public void onLoad(String mixinPackage) {
-		if (!ModListHelper.IS_CLIENT) {
+		if (!IS_CLIENT) {
 			return;
 		}
 		ExtensionRegistrar.register(new ExtensionMemberCancelApplication());
@@ -46,19 +45,19 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 	@Override
 	public String getRefMapperConfig() {
 		// this fixes the useless refmap (crash) on neoforge
-		return ModListHelper.IS_FORGE ? null : "fabric-asyncparticles-common-refmap.json";
+		return IS_FORGE ? null : "fabric-asyncparticles-common-refmap.json";
 	}
 
 	//	private static final int L = "fun.qu_an.minecraft.asyncparticles.client.mixin.".length();
 	private static final int PACKAGE_LENGTH = AsyncParticlesClient.class.getPackage().getName().length() +
 											  ".mixin.".length();
 
-	/// - mixins located in `mixin/fabric` or `mixin/<mod_id>/fabric` package only take effect in fabric.
-	/// - mixins located in `mixin/fabric/<mod_id>` take effect in fabric or Sinytra Connector.
-	/// - others take effect in any environment.
+	/// - mixins located in `mixin/fabric` or `mixin/<mod_id>/fabric` package only take effect on fabric.
+	/// - mixins located in `mixin/fabric/<mod_id>` take effect on fabric or Sinytra Connector.
+	/// - others take effect on any platform.
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-		if (!ModListHelper.IS_CLIENT) {
+		if (!IS_CLIENT) {
 			return false;
 		}
 		String mixinPackageName = mixinClassName.substring(PACKAGE_LENGTH);
@@ -69,22 +68,22 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		return switch (split[0]) {
 			case "fabric" -> {
 				if (split.length == 2) {
-					yield !ModListHelper.IS_FORGE;
+					yield !IS_FORGE;
 				}
 				yield switch (split[1]) {
-					case "off_thread_access" -> !ModListHelper.IS_FORGE;
-					case "particlerain_create" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED &&
-												  ModListHelper.CREATE_LOADED;
-					case "particlerain" -> ModListHelper.FABRIC_PARTICLERAIN_LOADED;
-					case "create" -> ModListHelper.FABRIC_CREATE_LOADED;
-					case "effective" -> ModListHelper.FABRIC_EFFECTIVE_LOADED;
-					case "effectual" -> ModListHelper.FABRIC_EFFECTUAL_LOADED;
-					case "particular" -> ModListHelper.FABRIC_PARTICULAR_LOADED;
-					case "vulkanmod" -> ModListHelper.FABRIC_VULKAN_MOD_LOADED;
+					case "off_thread_access" -> !IS_FORGE;
+					case "particlerain_create" -> FABRIC_PARTICLERAIN_LOADED && CREATE_LOADED;
+					case "particlerain" -> FABRIC_PARTICLERAIN_LOADED;
+					case "create" -> FABRIC_CREATE_LOADED;
+					case "effective" -> FABRIC_EFFECTIVE_LOADED;
+					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
+					case "particular" -> FABRIC_PARTICULAR_LOADED;
+					case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
 					case "iris" -> FABRIC_IRIS_LOADED;
 					case "iris_else" -> !IS_FORGE && !FABRIC_IRIS_LOADED;
 					case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;
 					case "loot_beams_up" -> FABRIC_LOOT_BEAMS_UP_LOADED;
+					case "cooparticlesapi" -> FABRIC_COO_PARTICLES_API_LOADED;
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
@@ -92,28 +91,27 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				 "off_thread_access",
 				 "tick",
 				 "render" -> true;
-			case "modernui" -> ModListHelper.MODERN_UI_LOADED;
-			case "create" -> ModListHelper.CREATE_LOADED;
+			case "modernui" -> MODERN_UI_LOADED;
+			case "create" -> CREATE_LOADED;
 //			case "sodium_0_6" -> ModListHelper.SODIUM_LOADED
 //								 && ModListHelper.versionCheck("sodium", "0.6", "0.7");
-			case "sodium_0_7" -> ModListHelper.SODIUM_LOADED
-								 && ModListHelper.versionCheck("sodium", "0.7", "0.8");
-			case "iris_like" -> ModListHelper.IRIS_LIKE_LOADED;
-			case "a_good_place" -> ModListHelper.A_GOOD_PLACE_LOADED;
+			case "sodium_0_7" -> SODIUM_LOADED && versionCheck("sodium", "0.7", "0.8");
+			case "iris_like" -> IRIS_LIKE_LOADED;
+			case "a_good_place" -> A_GOOD_PLACE_LOADED;
 			case "subtle_effects" -> {
 				if (split.length == 2) {
-					yield ModListHelper.SUBTLE_EFFECTS_LOADED;
+					yield SUBTLE_EFFECTS_LOADED;
 				}
 				yield switch (split[1]) {
-					case "fabric" -> !ModListHelper.IS_FORGE && ModListHelper.FABRIC_SUBTLE_EFFECTS_LOADED;
-					default -> ModListHelper.SUBTLE_EFFECTS_LOADED;
+					case "fabric" -> !IS_FORGE && FABRIC_SUBTLE_EFFECTS_LOADED;
+					default -> SUBTLE_EFFECTS_LOADED;
 				};
 			}
-			case "watut" -> ModListHelper.WATUT_LOADED;
-			case "physicsmod" -> ModListHelper.PHYSICSMOD_LOADED;
-			case "physicsmod_create" -> ModListHelper.PHYSICSMOD_LOADED && ModListHelper.CREATE_LOADED;
-			case "lodestone" -> ModListHelper.LODESTONE_LOADED;
-			case "cloth_config" -> ModListHelper.CLOTH_CONFIG_LOADED;
+			case "watut" -> WATUT_LOADED;
+			case "physicsmod" -> PHYSICSMOD_LOADED;
+			case "physicsmod_create" -> PHYSICSMOD_LOADED && CREATE_LOADED;
+			case "lodestone" -> LODESTONE_LOADED;
+			case "cloth_config" -> CLOTH_CONFIG_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

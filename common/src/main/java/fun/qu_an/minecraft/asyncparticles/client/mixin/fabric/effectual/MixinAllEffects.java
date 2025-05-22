@@ -1,53 +1,54 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.effectual;
 
-import com.imeetake.effects.Bubbles.BubbleBreathEffect;
-import com.imeetake.effects.Bubbles.BubbleChestEffect;
-import com.imeetake.effects.Bubbles.BubblePotsEffect;
-import com.imeetake.effects.CaveDust.CaveDustEffect;
-import com.imeetake.effects.Firefly.FireflyEffect;
-import com.imeetake.effects.GoldGlow.LanternGlowEffect;
-import com.imeetake.effects.MouthSteam.MouthSteamEffect;
-import com.imeetake.effects.PlayerRunEffect.PlayerRunEffect;
-import com.imeetake.effects.SoulGlow.SoulLanternGlowEffect;
-import com.imeetake.effects.Sparks.CampfireImprovements;
-import com.imeetake.effects.Sparks.FireEntitySparks;
-import com.imeetake.effects.Sparks.FireImprovements;
-import com.imeetake.effects.SparksCart.SparksCartEffect;
-import com.imeetake.effects.SparksSoul.SoulCampfireImprovements;
-import com.imeetake.effects.SparksSoul.SoulFireImprovements;
-import com.imeetake.effects.SteamEffect.SteamEffect;
-import com.imeetake.effects.WaterDrip.WaterDripEffect;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.Event;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Pseudo
-@Mixin(value = {
-	SteamEffect.class,
-	WaterDripEffect.class,
-	SoulCampfireImprovements.class,
-	SoulFireImprovements.class,
-	SparksCartEffect.class,
-	FireImprovements.class,
-	FireEntitySparks.class,
-	CampfireImprovements.class,
-	SoulLanternGlowEffect.class,
-	PlayerRunEffect.class,
-	MouthSteamEffect.class,
-	LanternGlowEffect.class,
-	FireflyEffect.class,
-	CaveDustEffect.class,
-	BubbleBreathEffect.class,
-	BubbleChestEffect.class,
-	BubblePotsEffect.class,
+@Mixin(targets = {
+	"com.imeetake.effects.SteamEffect.SteamEffect",
+	"com.imeetake.effects.WaterDrip.WaterDripEffect",
+	"com.imeetake.effects.SparksSoul.SoulCampfireImprovements",
+	"com.imeetake.effects.SparksSoul.SoulFireImprovements",
+	"com.imeetake.effects.SparksCart.SparksCartEffect",
+	"com.imeetake.effects.Sparks.FireImprovements",
+	"com.imeetake.effects.Sparks.FireEntitySparks",
+	"com.imeetake.effects.Sparks.CampfireImprovements",
+	"com.imeetake.effects.SoulGlow.SoulLanternGlowEffect",
+	"com.imeetake.effects.PlayerRunEffect.PlayerRunEffect",
+	"com.imeetake.effects.MouthSteam.MouthSteamEffect",
+	"com.imeetake.effects.GoldGlow.LanternGlowEffect",
+	"com.imeetake.effects.Firefly.FireflyEffect",
+	"com.imeetake.effects.CaveDust.CaveDustEffect",
+	"com.imeetake.effects.Bubbles.BubbleBreathEffect",
+	"com.imeetake.effects.Bubbles.BubbleChestEffect",
+	"com.imeetake.effects.Bubbles.BubblePotsEffect",
+	"com.imeetake.effectual.effects.Bubbles.BubbleBreathEffect",
+	"com.imeetake.effectual.effects.Bubbles.BubbleChestEffect",
+	"com.imeetake.effectual.effects.Bubbles.BubblePotsEffect",
+	"com.imeetake.effectual.effects.CaveDust.CaveDustEffect",
+	"com.imeetake.effectual.effects.Firefly.FireflyEffect",
+	"com.imeetake.effectual.effects.GoldGlow.LanternGlowEffect",
+	"com.imeetake.effectual.effects.MouthSteam.MouthSteamEffect",
+	"com.imeetake.effectual.effects.PlayerRunEffect.PlayerRunEffect",
+	"com.imeetake.effectual.effects.SoulGlow.SoulLanternGlowEffect",
+	"com.imeetake.effectual.effects.Sparks.CampfireImprovements",
+	"com.imeetake.effectual.effects.Sparks.FireEntitySparks",
+	"com.imeetake.effectual.effects.Sparks.FireImprovements",
+	"com.imeetake.effectual.effects.SparksCart.SparksCartEffect",
+	"com.imeetake.effectual.effects.SparksSoul.SoulCampfireImprovements",
+	"com.imeetake.effectual.effects.SparksSoul.SoulFireImprovements",
+	"com.imeetake.effectual.effects.SteamEffect.SteamEffect",
+	"com.imeetake.effectual.effects.WaterDrip.WaterDripEffect",
 })
 public abstract class MixinAllEffects {
 	@Redirect(method = "register", remap = false, at = @At(value = "INVOKE", remap = false, target = "Lnet/fabricmc/fabric/api/event/Event;register(Ljava/lang/Object;)V"))
 	private static void register(Event<?> instance, Object t) {
-		AsyncTicker.registerEndTickEvent(((ClientTickEvents.EndTick) t)::onEndTick);
+		AsyncTicker.registerEndTickEvent(((ClientTickEvents.EndTick) t)::onEndTick, true);
 	}
 }

@@ -33,7 +33,7 @@ configurations {
 }
 
 dependencies {
-    include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.2.0")))
+    include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.3.2-beta.4")))
 
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
@@ -69,7 +69,8 @@ dependencies {
 //    modLocalRuntime "maven.modrinth:pretty-rain:TGjK6ChS"
 
     /* Effectual */
-    modLocalRuntime 'maven.modrinth:effectual:0.7.0-1.21.1'
+    modLocalRuntime 'maven.modrinth:tlib:1.2.0-1.21.1'
+    modLocalRuntime 'maven.modrinth:effectual:1.0.0-1.21.1'
 
     /* Mmmmmmmmmmmm */
 //    modLocalRuntime 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
