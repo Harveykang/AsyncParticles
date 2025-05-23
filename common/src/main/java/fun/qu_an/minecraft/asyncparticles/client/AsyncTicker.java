@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.api.EndTickEvent;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
@@ -28,6 +29,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -48,7 +50,7 @@ public class AsyncTicker {
 	private static boolean cancelled = false;
 	public static boolean shouldTickParticles = false;
 	public static CompletableFuture<Void> particleCleanup;
-	private final static List<Runnable> ORDERED_END_TICK_EVENTS = new ArrayList<>();
+	private final static List<EndTickEvent> ORDERED_END_TICK_EVENTS = new ArrayList<>();
 	private static final List<Runnable> UNORDERED_END_TICK_EVENTS = new ArrayList<>();
 	private final static List<Pair<ResourceLocation, Runnable>> ORDERED_END_TICK_OPERATIONS = new ArrayList<>();
 	private static final List<Pair<ResourceLocation, Runnable>> UNORDERED_END_TICK_OPERATIONS = new ArrayList<>();
@@ -58,7 +60,7 @@ public class AsyncTicker {
 	private static boolean shouldReload;
 	public static final ExecutorService EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleTicker";
-	private static final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
+	public static final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
 		ConfigHelper::getTickFailurePerSecondThreshold
 	);
@@ -218,9 +220,9 @@ public class AsyncTicker {
 		tryDebug();
 		CompletableFuture<Void> particleFuture = CompletableFuture.runAsync(() -> timeUsageNano.set(System.nanoTime()), EXECUTOR);
 		CompletableFuture<Void> orderedTaskFuture = particleFuture;
-		CompletableFuture<Void> freeTaskFuture = null;
+		CompletableFuture<Void> unorderedTaskFuture = null;
 		// end tick events
-		if (levelRunning) {
+		if (levelRunning && i == to - 1) {
 			orderedTaskFuture = orderedTaskFuture.thenRun(() -> {
 				// 每 tick 结束时都要执行的固定事件
 				for (Runnable endTickEvent : ORDERED_END_TICK_EVENTS) {
@@ -233,13 +235,19 @@ public class AsyncTicker {
 					}
 				}
 			}).exceptionally(AsyncTicker::tickExceptionally);
-			freeTaskFuture = particleFuture.thenCompose(v -> {
+			unorderedTaskFuture = particleFuture.thenCompose(v -> {
 				// 每 tick 结束时都要执行的固定事件，可在 tick 间的任意时刻执行
 				@SuppressWarnings("rawtypes")
 				CompletableFuture[] completableFutures = new CompletableFuture[UNORDERED_END_TICK_EVENTS.size()];
 				int j = 0;
 				for (Runnable endTickEvent : UNORDERED_END_TICK_EVENTS) {
-					completableFutures[j++] = CompletableFuture.runAsync(endTickEvent, EXECUTOR);
+					completableFutures[j++] = CompletableFuture.runAsync(endTickEvent, EXECUTOR)
+						.exceptionally(e -> {
+							if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickEvent, e)) {
+								throw toThrowDirectly(e);
+							}
+							return null;
+						});
 				}
 				return CompletableFuture.allOf(completableFutures);
 			}).exceptionally(AsyncTicker::tickExceptionally);
@@ -262,6 +270,29 @@ public class AsyncTicker {
 						}
 					}
 				}
+			}).exceptionally(AsyncTicker::tickExceptionally);
+		}
+		List<Pair<ResourceLocation, Runnable>> endTickOperations2 = UNORDERED_END_TICK_OPERATIONS;
+		if (!endTickOperations2.isEmpty()) {
+			@SuppressWarnings("unchecked")
+			Pair<ResourceLocation, Runnable>[] endTickTasks2 = endTickOperations2.toArray(new Pair[0]);
+			endTickOperations2.clear();
+			orderedTaskFuture = orderedTaskFuture.thenCompose(v -> {
+				// 每 tick 结束时都要执行的固定事件，可在 tick 间的任意时刻执行
+				@SuppressWarnings("rawtypes")
+				CompletableFuture[] completableFutures2 = new CompletableFuture[endTickTasks2.length];
+				int j = 0;
+				for (Pair<ResourceLocation, Runnable> endTickEvent2 : endTickTasks2) {
+					ResourceLocation left = endTickEvent2.left();
+					completableFutures2[j++] = CompletableFuture.runAsync(endTickEvent2.right(), EXECUTOR)
+						.exceptionally(e -> {
+							if (!isTolerable(e) || EXCEPTION_TRACKER.addException(left, e)) {
+								throw toThrowDirectly(e);
+							}
+							return null;
+						});
+				}
+				return CompletableFuture.allOf(completableFutures2);
 			}).exceptionally(AsyncTicker::tickExceptionally);
 		}
 
@@ -289,11 +320,11 @@ public class AsyncTicker {
 			}
 		}
 
-		if (freeTaskFuture == null || orderedTaskFuture == freeTaskFuture) {
+		if (unorderedTaskFuture == null || orderedTaskFuture == unorderedTaskFuture) {
 			AsyncTicker.particleFuture = orderedTaskFuture
 				.thenRunAsync(() -> timeUsageNano.set(System.nanoTime() - timeUsageNano.get()), EXECUTOR);
 		} else {
-			AsyncTicker.particleFuture = CompletableFuture.allOf(orderedTaskFuture, freeTaskFuture)
+			AsyncTicker.particleFuture = CompletableFuture.allOf(orderedTaskFuture, unorderedTaskFuture)
 				.thenRunAsync(() -> timeUsageNano.set(System.nanoTime() - timeUsageNano.get()), EXECUTOR);
 		}
 		profiler.pop();
@@ -541,15 +572,15 @@ public class AsyncTicker {
 
 	/* Events */
 
-	public static void registerEndTickEvent(MinecraftConsumer consumer, boolean isOrdered) {
-		registerEndTickEvent(() -> consumer.accept(Minecraft.getInstance()), isOrdered);
+	public static void registerEvent(MinecraftConsumer consumer, boolean isOrdered) {
+		registerEvent(() -> consumer.accept(Minecraft.getInstance()), isOrdered);
 	}
 
-	public static void registerEndTickEvent(ClientLevelConsumer consumer, boolean isOrdered) {
-		registerEndTickEvent(() -> consumer.accept(Minecraft.getInstance().level), isOrdered);
+	public static void registerEvent(ClientLevelConsumer consumer, boolean isOrdered) {
+		registerEvent(() -> consumer.accept(Minecraft.getInstance().level), isOrdered);
 	}
 
-	public static void registerEndTickEvent(Runnable operation, boolean isOrdered) {
+	public static void registerEvent(Runnable operation, boolean isOrdered) {
 		if (isOrdered) {
 			ORDERED_END_TICK_EVENTS.add(operation);
 		} else {
@@ -574,6 +605,12 @@ public class AsyncTicker {
 		} else {
 			UNORDERED_END_TICK_OPERATIONS.add(Pair.of(resourceLocation, operation));
 		}
+	}
+
+	@ApiStatus.Internal
+	public static void registerEvent(EndTickEvent task) {
+		ORDERED_END_TICK_EVENTS.add(task);
+		ORDERED_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
 	}
 
 	@FunctionalInterface

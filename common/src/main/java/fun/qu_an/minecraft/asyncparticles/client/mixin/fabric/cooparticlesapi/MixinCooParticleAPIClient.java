@@ -14,7 +14,7 @@ public class MixinCooParticleAPIClient {
 		at = @At(value = "INVOKE", remap = false, target = "Lnet/fabricmc/fabric/api/event/Event;register(Ljava/lang/Object;)V"))
 	private void onRegisterEvent(Event<?> instance, Object t) {
 		if (t instanceof ClientTickEvents.StartWorldTick event) {
-			AsyncTicker.registerEndTickEvent(event::onStartTick, false);
+			AsyncTicker.registerEvent(event::onStartTick, false);
 		}
 	}
 }
