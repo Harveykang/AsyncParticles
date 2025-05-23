@@ -94,4 +94,8 @@ public class ConfigHelper {
 	public static boolean isRemoveIfMissedTick() {
 		return AsyncParticlesConfig.particle$removeIfMissedTick;
 	}
+
+	public static RenderingMode getParticleRenderingMode() {
+		return AsyncParticlesConfig.rendering$particleRenderingMode;
+	}
 }

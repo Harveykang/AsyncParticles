@@ -31,9 +31,11 @@ public class ClothConfigMixinMenus {
 				lastNoCulling)
 			.setDefaultValue(lastNoCulling)
 			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoCulling().contains(s)))
-			.setSaveConsumer(l -> newConfig.setNoCulling(l.isEmpty()
-				? defaultConfig.getNoCulling()
-				: Collections.unmodifiableSet(new LinkedHashSet<>(l))))
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultConfig.getNoCulling());
+				newConfig.setNoCulling(Collections.unmodifiableSet(s));
+			})
 			.setTooltip(
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
@@ -46,9 +48,11 @@ public class ClothConfigMixinMenus {
 				lastNoLightCache)
 			.setDefaultValue(lastNoLightCache)
 			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoLightCache().contains(s)))
-			.setSaveConsumer(l -> newConfig.setNoLightCache(l.isEmpty()
-				? defaultConfig.getNoLightCache()
-				: Collections.unmodifiableSet(new LinkedHashSet<>(l))))
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultConfig.getNoLightCache());
+				newConfig.setNoLightCache(Collections.unmodifiableSet(s));
+			})
 			.setTooltip(
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
@@ -60,9 +64,11 @@ public class ClothConfigMixinMenus {
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockProvider"), lastLockProvider)
 			.setDefaultValue(lastLockProvider)
 			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getLockProvider().contains(s)))
-			.setSaveConsumer(l -> newConfig.setLockProvider(l.isEmpty()
-				? defaultConfig.getLockProvider()
-				: Collections.unmodifiableSet(new LinkedHashSet<>(l))))
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultConfig.getLockProvider());
+				newConfig.setLockProvider(Collections.unmodifiableSet(s));
+			})
 			.setTooltip(
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
@@ -74,9 +80,11 @@ public class ClothConfigMixinMenus {
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockRequired"), lastLockRequired)
 			.setDefaultValue(lastLockRequired)
 			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getLockRequired().contains(s)))
-			.setSaveConsumer(l -> newConfig.setLockRequired(l.isEmpty()
-				? defaultConfig.getLockRequired()
-				: Collections.unmodifiableSet(new LinkedHashSet<>(l))))
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultConfig.getLockRequired());
+				newConfig.setLockRequired(Collections.unmodifiableSet(s));
+			})
 			.setTooltip(
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
