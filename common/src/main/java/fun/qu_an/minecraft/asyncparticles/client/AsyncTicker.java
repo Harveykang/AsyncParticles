@@ -53,7 +53,7 @@ public class AsyncTicker {
 	private final static List<EndTickEvent> ORDERED_END_TICK_EVENTS = new ArrayList<>();
 	private static final List<Runnable> UNORDERED_END_TICK_EVENTS = new ArrayList<>();
 	private final static List<Pair<ResourceLocation, Runnable>> ORDERED_END_TICK_OPERATIONS = new ArrayList<>();
-	private static final List<Pair<ResourceLocation, Runnable>> UNORDERED_END_TICK_OPERATIONS = new ArrayList<>();
+//	private static final List<Pair<ResourceLocation, Runnable>> UNORDERED_END_TICK_OPERATIONS = new ArrayList<>();
 	private static CompletableFuture<Void> particleFuture;
 	private static boolean debug_cancelled = false;
 	private static Consumer<String> debugConsumer;
@@ -192,8 +192,8 @@ public class AsyncTicker {
 			tryDebug();
 			ORDERED_END_TICK_OPERATIONS.forEach(p -> p.second().run());
 			ORDERED_END_TICK_OPERATIONS.clear();
-			UNORDERED_END_TICK_OPERATIONS.forEach(p -> p.second().run());
-			UNORDERED_END_TICK_OPERATIONS.clear();
+//			UNORDERED_END_TICK_OPERATIONS.forEach(p -> p.second().run());
+//			UNORDERED_END_TICK_OPERATIONS.clear();
 			if (levelRunning) {
 				ORDERED_END_TICK_EVENTS.forEach(Runnable::run);
 				UNORDERED_END_TICK_EVENTS.forEach(Runnable::run);
@@ -503,7 +503,9 @@ public class AsyncTicker {
 				debug_cancelled,
 				PARTICLE_OPERATIONS.size(),
 				ORDERED_END_TICK_EVENTS.size() + UNORDERED_END_TICK_EVENTS.size(),
-				ORDERED_END_TICK_OPERATIONS.size() + UNORDERED_END_TICK_OPERATIONS.size(),
+				ORDERED_END_TICK_OPERATIONS.size()
+//				+ UNORDERED_END_TICK_OPERATIONS.size()
+				,
 				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
 					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
@@ -603,7 +605,8 @@ public class AsyncTicker {
 		if (ordered) {
 			ORDERED_END_TICK_OPERATIONS.add(Pair.of(resourceLocation, operation));
 		} else {
-			UNORDERED_END_TICK_OPERATIONS.add(Pair.of(resourceLocation, operation));
+//			UNORDERED_END_TICK_OPERATIONS.add(Pair.of(resourceLocation, operation));
+			ORDERED_END_TICK_OPERATIONS.add(Pair.of(resourceLocation, operation));
 		}
 	}
 

@@ -227,7 +227,7 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Particle {
-			int particleLimit = 16384;
+			int particleLimit = ModListHelper.FABRIC_COO_PARTICLES_API_LOADED ? 65536 : 16384;
 			boolean removeIfMissedTick = false;
 			boolean particleLightCache = true;
 			boolean cullUnderwaterParticleType = true;
