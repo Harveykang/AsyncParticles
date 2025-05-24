@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.cooparticlesapi.CooTickMode;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Set;
@@ -97,5 +98,9 @@ public class ConfigHelper {
 
 	public static RenderingMode getParticleRenderingMode() {
 		return AsyncParticlesConfig.rendering$particleRenderingMode;
+	}
+
+	public static CooTickMode cooparticlesapi$getTickMode() {
+		return AsyncParticlesConfig.cooparticlesapi$tickMode;
 	}
 }

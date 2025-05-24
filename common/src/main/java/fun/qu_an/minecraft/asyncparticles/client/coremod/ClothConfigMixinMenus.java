@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.StringListListEntryFixRestart;
+import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.ChatFormatting;
@@ -19,9 +19,9 @@ import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMi
 
 // No more NoClassDefFoundError
 public class ClothConfigMixinMenus {
-	public static Object buildCategory(ConfigCategory mixinCategory,
-									   ConfigEntryBuilder entryBuilder,
-									   ConfigEntryBuilder revertEntryBuilder) {
+	public static Runnable buildCategory(ConfigCategory mixinCategory,
+										 ConfigEntryBuilder entryBuilder,
+										 ConfigEntryBuilder revertEntryBuilder) {
 		Mixin$Particle defaultConfig = new Mixin$Particle();
 		Mixin$Particle newConfig = new Mixin$Particle();
 		Mixin$Particle lastConfig = getToSaveConfig();
@@ -91,7 +91,14 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
 			.build()));
-		return newConfig;
+		return () -> {
+			try {
+				newConfig.flat();
+				AsyncParticlesMixinConfig.save(newConfig);
+			} catch (IOException e) {
+				throw ExceptionUtil.toThrowDirectly(e);
+			}
+		};
 	}
 
 	private static Optional<Component> testParticleClass(String s, boolean b) {
@@ -108,9 +115,5 @@ public class ClothConfigMixinMenus {
 			return Optional.of(Component.translatable("config.asyncparticles.mixin.particle.invalid-class"));
 		}
 		return Optional.empty();
-	}
-
-	public static void onSave(Object newConfig) throws IOException {
-		AsyncParticlesMixinConfig.setAndSave((Mixin$Particle) newConfig);
 	}
 }

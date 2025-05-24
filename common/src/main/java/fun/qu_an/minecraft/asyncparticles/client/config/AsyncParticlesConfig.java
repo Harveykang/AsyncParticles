@@ -6,6 +6,7 @@ import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.cooparticlesapi.CooTickMode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -52,6 +53,7 @@ public class AsyncParticlesConfig {
 	public static RainEffect valkyrienSkies$rainEffect;
 	public static boolean valkyrienSkies$fixParticleLights;
 	public static RainEffect create$rainEffect;
+	public static CooTickMode cooparticlesapi$tickMode;
 
 	public static Screen newConfigScreen(Screen parent) {
 		if (ModListHelper.CLOTH_CONFIG_LOADED) {
@@ -209,6 +211,7 @@ public class AsyncParticlesConfig {
 		Rendering rendering = new Rendering();
 		ValkyrienSkies valkyrienSkies = new ValkyrienSkies();
 		Create create = new Create();
+		CooParticlesAPI cooParticlesAPI = new CooParticlesAPI();
 
 		private void flat() {
 			particle.flat();
@@ -216,6 +219,7 @@ public class AsyncParticlesConfig {
 			rendering.flat();
 			valkyrienSkies.flat();
 			create.flat();
+			cooParticlesAPI.flat();
 		}
 
 		private void fold() {
@@ -224,6 +228,7 @@ public class AsyncParticlesConfig {
 			rendering.fold();
 			valkyrienSkies.fold();
 			create.fold();
+			cooParticlesAPI.fold();
 		}
 
 		static class Particle {
@@ -316,6 +321,18 @@ public class AsyncParticlesConfig {
 
 			private void fold() {
 				rainEffect = create$rainEffect;
+			}
+		}
+
+		static class CooParticlesAPI {
+			CooTickMode tickMode = CooTickMode.ASYNC_IN_PARALLEL;
+
+			private void flat() {
+				cooparticlesapi$tickMode = requireNonNullElse(tickMode, CooTickMode.ASYNC_IN_PARALLEL);
+			}
+
+			private void fold() {
+				tickMode = cooparticlesapi$tickMode;
 			}
 		}
 	}

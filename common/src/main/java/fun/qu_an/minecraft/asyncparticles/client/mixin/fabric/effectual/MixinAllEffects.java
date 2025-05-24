@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.effectual;
 
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.api.EndTickEvent;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.Event;
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,6 +48,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public abstract class MixinAllEffects {
 	@Redirect(method = "register", remap = false, at = @At(value = "INVOKE", remap = false, target = "Lnet/fabricmc/fabric/api/event/Event;register(Ljava/lang/Object;)V"))
 	private static void register(Event<?> instance, Object t) {
-		AsyncTicker.registerEvent(((ClientTickEvents.EndTick) t)::onEndTick, true);
+		EndTickEvent.register(((ClientTickEvents.EndTick) t)::onEndTick, true);
 	}
 }

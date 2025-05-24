@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particular;
 
 import com.chailotl.particular.Main;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.api.EndTickEvent;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.Event;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,6 +15,6 @@ public class MixinMain {
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/fabricmc/fabric/api/client/event/lifecycle/v1/ClientTickEvents;START_WORLD_TICK:Lnet/fabricmc/fabric/api/event/Event;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/fabricmc/fabric/api/event/Event;register(Ljava/lang/Object;)V"))
 	private void onRegister(Event<ClientTickEvents.StartWorldTick> instance, Object t) {
-		AsyncTicker.registerEvent(((ClientTickEvents.StartWorldTick) t)::onStartTick, true);
+		EndTickEvent.register(((ClientTickEvents.StartWorldTick) t)::onStartTick, true);
 	}
 }

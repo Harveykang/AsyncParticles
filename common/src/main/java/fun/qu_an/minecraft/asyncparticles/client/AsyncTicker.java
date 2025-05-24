@@ -4,18 +4,17 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.api.EndTickEvent;
+import fun.qu_an.minecraft.asyncparticles.client.api.EndTickOperation;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
-import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.TrackingEmitter;
@@ -23,7 +22,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
@@ -51,9 +49,8 @@ public class AsyncTicker {
 	public static boolean shouldTickParticles = false;
 	public static CompletableFuture<Void> particleCleanup;
 	private final static List<EndTickEvent> ORDERED_END_TICK_EVENTS = new ArrayList<>();
-	private static final List<Runnable> UNORDERED_END_TICK_EVENTS = new ArrayList<>();
-	private final static List<Pair<ResourceLocation, Runnable>> ORDERED_END_TICK_OPERATIONS = new ArrayList<>();
-//	private static final List<Pair<ResourceLocation, Runnable>> UNORDERED_END_TICK_OPERATIONS = new ArrayList<>();
+	private static final List<EndTickEvent> UNORDERED_END_TICK_EVENTS = new ArrayList<>();
+	private static final List<EndTickOperation> END_TICK_OPERATIONS = new ArrayList<>();
 	private static CompletableFuture<Void> particleFuture;
 	private static boolean debug_cancelled = false;
 	private static Consumer<String> debugConsumer;
@@ -190,13 +187,10 @@ public class AsyncTicker {
 		if (!ConfigHelper.isTickAsync()) {
 			tryReload();
 			tryDebug();
-			ORDERED_END_TICK_OPERATIONS.forEach(p -> p.second().run());
-			ORDERED_END_TICK_OPERATIONS.clear();
-//			UNORDERED_END_TICK_OPERATIONS.forEach(p -> p.second().run());
-//			UNORDERED_END_TICK_OPERATIONS.clear();
+			END_TICK_OPERATIONS.forEach(Runnable::run);
+			END_TICK_OPERATIONS.clear();
 			if (levelRunning) {
 				ORDERED_END_TICK_EVENTS.forEach(Runnable::run);
-				UNORDERED_END_TICK_EVENTS.forEach(Runnable::run);
 			}
 			return;
 		}
@@ -220,7 +214,8 @@ public class AsyncTicker {
 		tryDebug();
 		CompletableFuture<Void> particleFuture = CompletableFuture.runAsync(() -> timeUsageNano.set(System.nanoTime()), EXECUTOR);
 		CompletableFuture<Void> orderedTaskFuture = particleFuture;
-		CompletableFuture<Void> unorderedTaskFuture = null;
+		CompletableFuture<?> unorderedEventsFuture = Utils.NULL_FUTURE;
+		CompletableFuture<?> unorderedOperationsFuture = Utils.NULL_FUTURE;
 		// end tick events
 		if (levelRunning && i == to - 1) {
 			orderedTaskFuture = orderedTaskFuture.thenRun(() -> {
@@ -235,7 +230,7 @@ public class AsyncTicker {
 					}
 				}
 			}).exceptionally(AsyncTicker::tickExceptionally);
-			unorderedTaskFuture = particleFuture.thenCompose(v -> {
+			unorderedEventsFuture = particleFuture.thenCompose(v -> {
 				// 每 tick 结束时都要执行的固定事件，可在 tick 间的任意时刻执行
 				@SuppressWarnings("rawtypes")
 				CompletableFuture[] completableFutures = new CompletableFuture[UNORDERED_END_TICK_EVENTS.size()];
@@ -254,47 +249,46 @@ public class AsyncTicker {
 		}
 
 		// end tick operations
-		List<Pair<ResourceLocation, Runnable>> endTickOperations = ORDERED_END_TICK_OPERATIONS;
+		List<EndTickOperation> endTickOperations = END_TICK_OPERATIONS;
 		if (!endTickOperations.isEmpty()) {
-			@SuppressWarnings("unchecked")
-			Pair<ResourceLocation, Runnable>[] endTickTasks = endTickOperations.toArray(new Pair[0]);
+			EndTickOperation[] endTickTasks = endTickOperations.toArray(new EndTickOperation[0]);
 			endTickOperations.clear();
 			orderedTaskFuture = orderedTaskFuture.thenRun(() -> {
 				// 每 tick 添加的不固定操作
-				for (Pair<ResourceLocation, Runnable> endTickTask : endTickTasks) {
+				for (EndTickOperation endTickTask : endTickTasks) {
+					if (!endTickTask.isOrdered()) {
+						continue;
+					}
 					try {
-						endTickTask.second().run();
+						endTickTask.run();
 					} catch (Exception e) {
-						if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickTask.first(), e)) {
+						if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickTask.getId(), e)) {
 							throw e;
 						}
 					}
 				}
 			}).exceptionally(AsyncTicker::tickExceptionally);
-		}
-		List<Pair<ResourceLocation, Runnable>> endTickOperations2 = UNORDERED_END_TICK_OPERATIONS;
-		if (!endTickOperations2.isEmpty()) {
-			@SuppressWarnings("unchecked")
-			Pair<ResourceLocation, Runnable>[] endTickTasks2 = endTickOperations2.toArray(new Pair[0]);
-			endTickOperations2.clear();
-			orderedTaskFuture = orderedTaskFuture.thenCompose(v -> {
+			unorderedOperationsFuture = particleFuture.thenCompose(v -> {
 				// 每 tick 结束时都要执行的固定事件，可在 tick 间的任意时刻执行
 				@SuppressWarnings("rawtypes")
-				CompletableFuture[] completableFutures2 = new CompletableFuture[endTickTasks2.length];
+				CompletableFuture[] futures = new CompletableFuture[endTickTasks.length];
 				int j = 0;
-				for (Pair<ResourceLocation, Runnable> endTickEvent2 : endTickTasks2) {
-					ResourceLocation left = endTickEvent2.left();
-					completableFutures2[j++] = CompletableFuture.runAsync(endTickEvent2.right(), EXECUTOR)
+				for (EndTickOperation endTickTask : endTickTasks) {
+					if (endTickTask.isOrdered()) {
+						continue;
+					}
+					futures[j++] = CompletableFuture.runAsync(endTickTask, EXECUTOR)
 						.exceptionally(e -> {
-							if (!isTolerable(e) || EXCEPTION_TRACKER.addException(left, e)) {
+							if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickTask.getId(), e)) {
 								throw toThrowDirectly(e);
 							}
 							return null;
 						});
 				}
-				return CompletableFuture.allOf(completableFutures2);
+				return CompletableFuture.allOf(futures);
 			}).exceptionally(AsyncTicker::tickExceptionally);
 		}
+		orderedTaskFuture = CompletableFuture.allOf(orderedTaskFuture, unorderedEventsFuture, unorderedOperationsFuture);
 
 		// tick particles
 		List<Runnable> particleOperations = PARTICLE_OPERATIONS;
@@ -320,13 +314,9 @@ public class AsyncTicker {
 			}
 		}
 
-		if (unorderedTaskFuture == null || orderedTaskFuture == unorderedTaskFuture) {
-			AsyncTicker.particleFuture = orderedTaskFuture
-				.thenRunAsync(() -> timeUsageNano.set(System.nanoTime() - timeUsageNano.get()), EXECUTOR);
-		} else {
-			AsyncTicker.particleFuture = CompletableFuture.allOf(orderedTaskFuture, unorderedTaskFuture)
-				.thenRunAsync(() -> timeUsageNano.set(System.nanoTime() - timeUsageNano.get()), EXECUTOR);
-		}
+		AsyncTicker.particleFuture = orderedTaskFuture
+			.thenRunAsync(() -> timeUsageNano.set(System.nanoTime() - timeUsageNano.get()), EXECUTOR);
+
 		profiler.pop();
 	}
 
@@ -503,7 +493,7 @@ public class AsyncTicker {
 				debug_cancelled,
 				PARTICLE_OPERATIONS.size(),
 				ORDERED_END_TICK_EVENTS.size() + UNORDERED_END_TICK_EVENTS.size(),
-				ORDERED_END_TICK_OPERATIONS.size()
+				END_TICK_OPERATIONS.size()
 //				+ UNORDERED_END_TICK_OPERATIONS.size()
 				,
 				ConfigHelper.getParticleLimit(),
@@ -567,62 +557,27 @@ public class AsyncTicker {
 			particleFuture = null;
 		}
 		PARTICLE_OPERATIONS.clear();
-		ORDERED_END_TICK_OPERATIONS.clear();
+		END_TICK_OPERATIONS.clear();
 		SYNC_PARTICLES.clear();
 		cancelled = false;
 	}
 
 	/* Events */
 
-	public static void registerEvent(MinecraftConsumer consumer, boolean isOrdered) {
-		registerEvent(() -> consumer.accept(Minecraft.getInstance()), isOrdered);
-	}
-
-	public static void registerEvent(ClientLevelConsumer consumer, boolean isOrdered) {
-		registerEvent(() -> consumer.accept(Minecraft.getInstance().level), isOrdered);
-	}
-
-	public static void registerEvent(Runnable operation, boolean isOrdered) {
-		if (isOrdered) {
-			ORDERED_END_TICK_EVENTS.add(operation);
+	@ApiStatus.Internal
+	public static void registerEvent(EndTickEvent task) {
+		if (task.isOrdered()) {
+			ORDERED_END_TICK_EVENTS.add(task);
+			ORDERED_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
 		} else {
-			UNORDERED_END_TICK_EVENTS.add(operation);
-		}
-	}
-
-	public static void addEndTickOperation(ResourceLocation resourceLocation, MinecraftConsumer consumer, boolean ordered) {
-		addEndTickOperation(resourceLocation, () -> consumer.accept(Minecraft.getInstance()), ordered);
-	}
-
-	public static void addEndTickOperation(ResourceLocation resourceLocation, ClientLevelConsumer consumer, boolean ordered) {
-		addEndTickOperation(resourceLocation, () -> consumer.accept(Minecraft.getInstance().level), ordered);
-	}
-
-	public static void addEndTickOperation(ResourceLocation resourceLocation, Runnable operation, boolean ordered) {
-		if (!shouldTickParticles && ConfigHelper.isTickAsync()) {
-			return;
-		}
-		if (ordered) {
-			ORDERED_END_TICK_OPERATIONS.add(Pair.of(resourceLocation, operation));
-		} else {
-//			UNORDERED_END_TICK_OPERATIONS.add(Pair.of(resourceLocation, operation));
-			ORDERED_END_TICK_OPERATIONS.add(Pair.of(resourceLocation, operation));
+			UNORDERED_END_TICK_EVENTS.add(task);
+			// also sort the unordered events. To determine the order of submission of asynchronous tasks
+			UNORDERED_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
 		}
 	}
 
 	@ApiStatus.Internal
-	public static void registerEvent(EndTickEvent task) {
-		ORDERED_END_TICK_EVENTS.add(task);
-		ORDERED_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
-	}
-
-	@FunctionalInterface
-	public interface MinecraftConsumer {
-		void accept(Minecraft mc);
-	}
-
-	@FunctionalInterface
-	public interface ClientLevelConsumer {
-		void accept(ClientLevel level);
+	public static void scheduleOperation(EndTickOperation task) {
+		END_TICK_OPERATIONS.add(task);
 	}
 }

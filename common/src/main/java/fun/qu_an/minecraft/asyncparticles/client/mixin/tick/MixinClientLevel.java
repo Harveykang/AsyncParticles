@@ -3,7 +3,9 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.tick;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.api.EndTickOperation;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -37,8 +39,7 @@ public abstract class MixinClientLevel extends Level {
 	}
 
 	@Unique
-	private static final ResourceLocation asyncparticles$ANIMATE_TICK =
-		ResourceLocation.tryBuild("asyncparticles", "animate_tick");
+	private static final ResourceLocation ANIMATE_TICK = GameUtil.id("animate_tick");
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int i, int j, int k, Operation<Void> original) {
 		if (!AsyncTicker.shouldTickParticles &&
@@ -49,7 +50,7 @@ public abstract class MixinClientLevel extends Level {
 		if (!ConfigHelper.asyncBlockEntityAnimate()) {
 			original.call(i, j, k);
 		} else {
-			AsyncTicker.addEndTickOperation(asyncparticles$ANIMATE_TICK, () -> original.call(i, j, k), true);
+			EndTickOperation.schedule(ANIMATE_TICK, () -> original.call(i, j, k), true);
 		}
 	}
 
