@@ -2,11 +2,13 @@ package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.StringListListEntryFixRestart;
+import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -18,9 +20,9 @@ import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMi
 
 // No more NoClassDefFoundError
 public class ClothConfigMixinMenus {
-	public static Object buildCategory(ConfigCategory mixinCategory,
-									   ConfigEntryBuilder entryBuilder,
-									   ConfigEntryBuilder revertEntryBuilder) {
+	public static Runnable buildCategory(ConfigCategory mixinCategory,
+										 ConfigEntryBuilder entryBuilder,
+										 ConfigEntryBuilder revertEntryBuilder) {
 		Mixin$Particle defaultConfig = new Mixin$Particle();
 		Mixin$Particle newConfig = new Mixin$Particle();
 		Mixin$Particle lastConfig = getToSaveConfig();
@@ -56,9 +58,11 @@ public class ClothConfigMixinMenus {
 				lastNoCulling)
 			.setDefaultValue(lastNoCulling)
 			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoCulling().contains(s)))
-			.setSaveConsumer(l -> newConfig.setNoCulling(l.isEmpty()
-				? defaultConfig.getNoCulling()
-				: Collections.unmodifiableSet(new LinkedHashSet<>(l))))
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultConfig.getNoCulling());
+				newConfig.setNoCulling(Collections.unmodifiableSet(s));
+			})
 			.setTooltip(
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
@@ -71,9 +75,11 @@ public class ClothConfigMixinMenus {
 				lastNoLightCache)
 			.setDefaultValue(lastNoLightCache)
 			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoLightCache().contains(s)))
-			.setSaveConsumer(l -> newConfig.setNoLightCache(l.isEmpty()
-				? defaultConfig.getNoLightCache()
-				: Collections.unmodifiableSet(new LinkedHashSet<>(l))))
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultConfig.getNoLightCache());
+				newConfig.setNoLightCache(Collections.unmodifiableSet(s));
+			})
 			.setTooltip(
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
@@ -85,9 +91,11 @@ public class ClothConfigMixinMenus {
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockProvider"), lastLockProvider)
 			.setDefaultValue(lastLockProvider)
 			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getLockProvider().contains(s)))
-			.setSaveConsumer(l -> newConfig.setLockProvider(l.isEmpty()
-				? defaultConfig.getLockProvider()
-				: Collections.unmodifiableSet(new LinkedHashSet<>(l))))
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultConfig.getLockProvider());
+				newConfig.setLockProvider(Collections.unmodifiableSet(s));
+			})
 			.setTooltip(
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
@@ -99,16 +107,25 @@ public class ClothConfigMixinMenus {
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockRequired"), lastLockRequired)
 			.setDefaultValue(lastLockRequired)
 			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getLockRequired().contains(s)))
-			.setSaveConsumer(l -> newConfig.setLockRequired(l.isEmpty()
-				? defaultConfig.getLockRequired()
-				: Collections.unmodifiableSet(new LinkedHashSet<>(l))))
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultConfig.getLockRequired());
+				newConfig.setLockRequired(Collections.unmodifiableSet(s));
+			})
 			.setTooltip(
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
 			.build()));
-		return newConfig;
+		return () -> {
+			try {
+				newConfig.flat();
+				AsyncParticlesMixinConfig.save(newConfig);
+			} catch (IOException e) {
+				throw ExceptionUtil.toThrowDirectly(e);
+			}
+		};
 	}
 
 	private static Optional<Component> testParticleClass(String s, boolean b) {
@@ -125,9 +142,5 @@ public class ClothConfigMixinMenus {
 			return java.util.Optional.of(Component.translatable("config.asyncparticles.mixin.particle.invalid-class"));
 		}
 		return Optional.empty();
-	}
-
-	public static void onSave(Object newConfig) throws IOException {
-		AsyncParticlesMixinConfig.setAndSave((Mixin$Particle) newConfig);
 	}
 }

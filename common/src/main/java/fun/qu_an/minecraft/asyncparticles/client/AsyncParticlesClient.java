@@ -3,7 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.fabricmc.api.EnvType;
@@ -26,7 +26,7 @@ public class AsyncParticlesClient {
 		}
 		if (ModListHelper.PARTICLERAIN_LOADED) {
 			if (ModListHelper.VS_LOADED) {
-				WeatherParticleAddon.Type.RAIN.register((level, location, originalMovement, aabb) -> {
+				ParticleRainAddon.Type.RAIN.register((level, location, originalMovement, aabb) -> {
 					Vec3 shipMovement = VSClientUtils.entityMovColShipOnly(null, originalMovement, aabb, level);
 					if (shipMovement == null) {
 						return originalMovement;
@@ -40,17 +40,17 @@ public class AsyncParticlesClient {
 //					ParticleRainCompat.onShipCollision(level, location, originalMovement, aabb);
 //					return null;
 				});
-				WeatherParticleAddon.CollisionFunction function = (level, location, v, aabb) -> {
+				ParticleRainAddon.CollisionFunction function = (level, location, v, aabb) -> {
 					Vec3 shipMovement = VSClientUtils.entityMovColShipOnly(null, v, aabb, level);
 					return shipMovement == null ? v : shipMovement;
 //					boolean b = VSClientUtils.isEntityMovColShipOnly(null, v, aabb, level);
 //					return b ? null : v;
 				};
-				WeatherParticleAddon.Type.SNOW.register(function);
-				WeatherParticleAddon.Type.OTHER.register(function);
+				ParticleRainAddon.Type.SNOW.register(function);
+				ParticleRainAddon.Type.OTHER.register(function);
 			}
 			if (ModListHelper.CREATE_LOADED) {
-				WeatherParticleAddon.Type.RAIN.register((level, position, motion, aabb) -> {
+				ParticleRainAddon.Type.RAIN.register((level, position, motion, aabb) -> {
 					Vec3 collide = CreateUtil.collideMotionWithContraptions(level, motion, aabb);
 					if (collide == null) {
 						return motion;
@@ -58,12 +58,12 @@ public class AsyncParticlesClient {
 					ParticleRainCompat.onCreateCollision(level, motion, collide, aabb);
 					return collide;
 				});
-				WeatherParticleAddon.CollisionFunction function = (level, position, motion, aabb) -> {
+				ParticleRainAddon.CollisionFunction function = (level, position, motion, aabb) -> {
 					Vec3 collide = CreateUtil.collideMotionWithContraptions(level, motion, aabb);
 					return collide == null ? motion : collide;
 				};
-				WeatherParticleAddon.Type.SNOW.register(function);
-				WeatherParticleAddon.Type.OTHER.register(function);
+				ParticleRainAddon.Type.SNOW.register(function);
+				ParticleRainAddon.Type.OTHER.register(function);
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier;
+package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster;
 
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.service.MixinService;

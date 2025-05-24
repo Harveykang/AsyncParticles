@@ -3,7 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.particlerain;
 import com.leclowndu93150.particlerain.particle.*;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainAddon;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TextureSheetParticle;
@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Collections;
 
 @Mixin(value = WeatherParticle.class)
-public abstract class MixinWeatherParticle extends TextureSheetParticle implements WeatherParticleAddon {
+public abstract class MixinWeatherParticle extends TextureSheetParticle implements ParticleRainAddon {
 	@Unique
 	private boolean asyncparticles$invisible;
 	@Unique

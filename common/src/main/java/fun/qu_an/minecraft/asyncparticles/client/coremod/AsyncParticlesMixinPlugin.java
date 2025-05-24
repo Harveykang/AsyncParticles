@@ -11,7 +11,7 @@ import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticl
 import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticlesMixinMemberCanceller;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.ExtensionMemberCancelApplication;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.MixinMemberCancellerRegistrar;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.MixinClassAdjusterRegistrar;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.MixinClassAdjusterRegistrar;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -50,9 +50,9 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 	private static final int PACKAGE_LENGTH = AsyncParticlesClient.class.getPackage().getName().length() +
 											  ".mixin.".length();
 
-	/// - mixins located in `mixin/fabric` or `mixin/<mod_id>/fabric` package only take effect in fabric.
-	/// - mixins located in `mixin/fabric/<mod_id>` take effect in fabric or Sinytra Connector.
-	/// - others take effect in any environment.
+	/// - mixins located in `mixin/fabric` or `mixin/<mod_id>/fabric` package only take effect on fabric.
+	/// - mixins located in `mixin/fabric/<mod_id>` take effect on fabric or Sinytra Connector.
+	/// - others take effect on any platform.
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		if (!IS_CLIENT) {

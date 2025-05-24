@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainAddon;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TextureSheetParticle;
@@ -19,7 +19,7 @@ import pigcart.particlerain.particle.*;
 	StreakParticle.class,
 	ShrubParticle.class,
 	RippleParticle.class})
-public abstract class MixinWeatherParticles extends TextureSheetParticle implements WeatherParticleAddon {
+public abstract class MixinWeatherParticles extends TextureSheetParticle implements ParticleRainAddon {
 	protected MixinWeatherParticles(ClientLevel clientLevel, double d, double e, double f) {
 		super(clientLevel, d, e, f);
 	}

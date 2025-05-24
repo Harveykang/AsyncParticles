@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.api.EndTickOperation;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
@@ -30,7 +31,7 @@ public class MixinWeatherParticleSpawner {
 		new ResourceLocation("particlerain", "update");
 	@WrapMethod(method = "update", remap = false)
 	private static void onUpdate(ClientLevel level, Entity entity, float f, Operation<Void> original) {
-		AsyncTicker.addEndTickTask(asyncparticles$PARTICLE_RAIN$UPDATE, () -> original.call(level, entity, f));
+		EndTickOperation.schedule(asyncparticles$PARTICLE_RAIN$UPDATE, false, () -> original.call(level, entity, f));
 	}
 
 	@ModifyExpressionValue(method = "update", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/core/BlockPos$MutableBlockPos;getY()I"))

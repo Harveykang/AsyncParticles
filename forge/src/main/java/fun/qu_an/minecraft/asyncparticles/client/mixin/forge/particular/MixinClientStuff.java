@@ -4,6 +4,7 @@ import com.leclowndu93150.particular.ClientStuff;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.api.EndTickOperation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.event.TickEvent;
@@ -20,7 +21,7 @@ public class MixinClientStuff {
 	@WrapMethod(method = "onClientTick", remap = false)
 	private static void onClientTick(TickEvent.ClientTickEvent event, Operation<Void> original) {
 		if (event.phase == TickEvent.Phase.START) {
-			AsyncTicker.addEndTickTask(asyncparticles$PARTICULAR$ON_CLIENT_TICK, () -> original.call(new TickEvent.ClientTickEvent(TickEvent.Phase.START)));
+			EndTickOperation.schedule(asyncparticles$PARTICULAR$ON_CLIENT_TICK, false, () -> original.call(new TickEvent.ClientTickEvent(TickEvent.Phase.START)));
 		}
 	}
 
@@ -30,6 +31,6 @@ public class MixinClientStuff {
 	@Redirect(method = "lambda$onChunkLoad$4", remap = false,
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;execute(Ljava/lang/Runnable;)V"))
 	private static void onChunkLoad(Minecraft mc, Runnable runnable) {
-		AsyncTicker.addEndTickTask(asyncparticles$PARTICULAR$ON_CHUNK_LOAD, runnable);
+		EndTickOperation.schedule(asyncparticles$PARTICULAR$ON_CHUNK_LOAD, false, runnable);
 	}
 }

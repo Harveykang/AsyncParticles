@@ -9,17 +9,16 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.iris.IrisCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
-import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
 import net.irisshaders.iris.shaderpack.properties.ParticleRenderingSettings;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -44,6 +43,8 @@ import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
 
 // TODO: 整理这一坨
 @Environment(EnvType.CLIENT)
@@ -120,14 +121,23 @@ public class AsyncRenderer {
 
 	/* Renderer */
 
-	public static void start(float f, Camera camera, boolean isRenderAsync) {
+	public static void start(float f, Camera camera, int irm) {
 		tryDebug();
-		if (!isRenderAsync) {
-			return;
+		switch (irm) {
+			case IRIS_MIXED_SYNC -> {
+				mixedParticleRenderingSetting = true;
+				return;
+			}
+			case SYNC, IRIS_BEFORE_SYNC, IRIS_AFTER_SYNC -> {
+				mixedParticleRenderingSetting = false;
+				return;
+			}
+			case IRIS_MIXED_ASYNC -> mixedParticleRenderingSetting = true;
+			default -> mixedParticleRenderingSetting = false;
 		}
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
-		profiler.popPush("async_particles");
+		profiler.popPush("particles");
 		clearSync();
 		profiler.push("render_async");
 		ParticleEngine particleEngine = mc.particleEngine;
@@ -214,7 +224,7 @@ public class AsyncRenderer {
 		return null;
 	}
 
-	public static void endAll(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
+	public static void endAll(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
@@ -222,7 +232,7 @@ public class AsyncRenderer {
 //			return;
 //		}
 		Minecraft mc = Minecraft.getInstance();
-		mc.getProfiler().popPush("async_particles");
+		mc.getProfiler().popPush("particles");
 
 		LevelRenderer levelRenderer = mc.levelRenderer;
 		if (levelRenderer.transparencyChain != null) {
@@ -237,7 +247,7 @@ public class AsyncRenderer {
 		if (ModListHelper.IRIS_LIKE_LOADED) {
 			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
-		renderAsync = ConfigHelper.isRenderAsync();
+		renderAsync = isAsync;
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
 		renderAsync = false;
 
@@ -246,7 +256,11 @@ public class AsyncRenderer {
 		}
 	}
 
-	public static void irisOpaque(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
+	public static boolean isMixedParticleRendering() {
+		return mixedParticleRenderingSetting;
+	}
+
+	public static void irisOpaque(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
@@ -254,19 +268,19 @@ public class AsyncRenderer {
 //			return;
 //		}
 		Minecraft mc = Minecraft.getInstance();
-		mc.getProfiler().popPush("async_particles");
+		mc.getProfiler().popPush("particles");
 
 		LevelRenderer levelRenderer = mc.levelRenderer;
 		MultiBufferSource.BufferSource bufferSource = levelRenderer.renderBuffers.bufferSource();
 
 		ParticleEngine particleEngine = mc.particleEngine;
 		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
-		renderAsync = ConfigHelper.isRenderAsync();
+		renderAsync = isAsync;
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
 		renderAsync = false;
 	}
 
-	public static void irisTranslucent(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
+	public static void irisTranslucent(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
@@ -274,7 +288,7 @@ public class AsyncRenderer {
 //			return;
 //		}
 		Minecraft mc = Minecraft.getInstance();
-		mc.getProfiler().popPush("async_particles");
+		mc.getProfiler().popPush("particles");
 		LevelRenderer levelRenderer = mc.levelRenderer;
 		MultiBufferSource.BufferSource bufferSource = levelRenderer.renderBuffers.bufferSource();
 
@@ -287,7 +301,7 @@ public class AsyncRenderer {
 
 		ParticleEngine particleEngine = mc.particleEngine;
 		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
-		renderAsync = ConfigHelper.isRenderAsync();
+		renderAsync = isAsync;
 		particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
 		renderAsync = false;
 
@@ -296,7 +310,7 @@ public class AsyncRenderer {
 		}
 	}
 
-	public static void irisSync(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
+	public static void irisCustom(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
 //		if (!isMixedParticleRendering()) { // Tested outside.
 //			return;
 //		}
@@ -394,26 +408,6 @@ public class AsyncRenderer {
 		crashReportCategory.setDetail("Particle", particle::toString);
 		crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
 		return new ReportedException(crashReport);
-	}
-
-	public static void captureParticleRenderingSetting() {
-		if (ModListHelper.IRIS_LIKE_LOADED) {
-			mixedParticleRenderingSetting = IrisApi.getInstance().isShaderPackInUse() &&
-											getParticleRenderingSettings0() == ParticleRenderingSettings.MIXED;
-		}
-	}
-
-	public static boolean isMixedParticleRendering() {
-		return mixedParticleRenderingSetting;
-	}
-
-	private static ParticleRenderingSettings getParticleRenderingSettings0() {
-		if (!IrisApi.getInstance().isShaderPackInUse()) {
-			return null;
-		}
-		return Iris.getPipelineManager().getPipeline()
-			.map(WorldRenderingPipeline::getParticleRenderingSettings)
-			.orElse(ParticleRenderingSettings.MIXED);
 	}
 
 	/* BufferBuilder */
@@ -538,7 +532,9 @@ public class AsyncRenderer {
 						.filter(e -> e.getValue() == EMPTY_FORMAT)
 						.map(Map.Entry::getKey).toList(),
 					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse()
-						? getParticleRenderingSettings0().name() : "disabled"));
+						? Optional.ofNullable(IrisCompat.getParticleRenderingSettings())
+						.map(ParticleRenderingSettings::name)
+						.orElse("disabled"): "disabled"));
 			debugConsumer = null;
 		}
 	}

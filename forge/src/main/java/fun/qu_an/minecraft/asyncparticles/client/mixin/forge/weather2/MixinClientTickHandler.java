@@ -1,8 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.weather2;
 
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.api.EndTickEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -14,7 +13,7 @@ public class MixinClientTickHandler {
 	@Shadow @Final public static ClientTickHandler INSTANCE;
 
 	static {
-		AsyncTicker.registerEndTickEvent(() -> INSTANCE.onTickInGame());
+		EndTickEvent.register(false, () -> INSTANCE.onTickInGame());
 	}
 
 	/**

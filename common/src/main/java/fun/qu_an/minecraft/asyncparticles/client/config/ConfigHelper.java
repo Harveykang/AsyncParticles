@@ -70,14 +70,6 @@ public class ConfigHelper {
 		return AsyncParticlesConfig.rendering$particleRenderingMode != RenderingMode.SYNCHRONOUSLY;
 	}
 
-	public static boolean isCompatibilityRendering() {
-		return AsyncParticlesConfig.rendering$particleRenderingMode == RenderingMode.COMPATIBILITY;
-	}
-
-	public static boolean isDelayedRendering() {
-		return AsyncParticlesConfig.rendering$particleRenderingMode == RenderingMode.DELAYED;
-	}
-
 	public static boolean isCullParticles() {
 		return AsyncParticlesConfig.rendering$cullParticles;
 	}
@@ -93,5 +85,9 @@ public class ConfigHelper {
 
 	public static boolean isRemoveIfMissedTick() {
 		return AsyncParticlesConfig.particle$removeIfMissedTick;
+	}
+
+	public static RenderingMode getParticleRenderingMode() {
+		return AsyncParticlesConfig.rendering$particleRenderingMode;
 	}
 }

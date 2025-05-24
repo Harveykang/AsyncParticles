@@ -1,11 +1,11 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.render;
 
 import com.llamalad7.mixinextras.sugar.Share;
-import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.*;
 import org.joml.Matrix4f;
@@ -29,17 +29,13 @@ public abstract class MixinLevelRenderer_Late {
 									LightTexture lightTexture,
 									Matrix4f matrix4f,
 									CallbackInfo ci,
-									@Share(namespace = "asyncparticles", value = "isRenderAsync")
-									LocalBooleanRef isRenderAsync,
-									@Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
-									LocalBooleanRef isMixedParticleRendering) {
-		if (isRenderAsync.get() &&
-			!isMixedParticleRendering.get() &&
-			!ConfigHelper.isCompatibilityRendering()) {
+									@Share(namespace = "asyncparticles", value = "internalRenderingMode")
+									LocalIntRef irm) {
+		if (irm.get() == InternalRenderingMode.DELAYED_ASYNC) {
 			PoseStack stack = RenderSystem.getModelViewStack();
 			// so that we don't need to change the behavior of ParticleEngine.render()
 			PoseStack.Pose pose = stack.poseStack.removeLast();
-			AsyncRenderer.endAll(poseStack, f, camera, lightTexture);
+			AsyncRenderer.endAll(poseStack, f, camera, lightTexture, true);
 			stack.poseStack.addLast(pose);
 		}
 	}

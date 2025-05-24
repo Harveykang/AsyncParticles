@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.CustomTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
@@ -26,7 +27,7 @@ import org.spongepowered.asm.mixin.*;
 import java.util.*;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
-public abstract class MixinParticleEngine_Render {
+public abstract class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Shadow
 	public Map<ParticleRenderType, Queue<Particle>> particles;
 
@@ -37,6 +38,16 @@ public abstract class MixinParticleEngine_Render {
 	@Shadow
 	@Mutable
 	public static List<ParticleRenderType> RENDER_ORDER;
+
+	@Override
+	public void asyncparticle$addRenderType(ParticleRenderType particleRenderType) {
+		if (!RENDER_ORDER.contains(particleRenderType)) {
+			if (!(RENDER_ORDER instanceof ArrayList<ParticleRenderType>)) {
+				RENDER_ORDER = new ArrayList<>(RENDER_ORDER);
+			}
+			RENDER_ORDER.add(particleRenderType);
+		}
+	}
 
 	/**
 	 * @author

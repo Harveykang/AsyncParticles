@@ -25,8 +25,51 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 	/**
 	 * @apiNote This list does not allow the same object to be adjacent elements, which can cause issues with iteration.
 	 */
+	public IterationSafeArrayList(ObjectCollection<E> c) {
+		super(c);
+	}
+
+	/**
+	 * @apiNote This list does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
 	public IterationSafeArrayList(int i) {
 		super(i);
+	}
+
+	protected IterationSafeArrayList(E[] a, @SuppressWarnings("unused") boolean wrapped) {
+		super(a, wrapped);
+	}
+
+	/**
+	 * @apiNote This list does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
+	public static <K> IterationSafeArrayList<K> wrap(final K[] a, final int length) {
+		if (length > a.length) throw new IllegalArgumentException("The specified length (" + length + ") is greater than the array size (" + a.length + ")");
+		final IterationSafeArrayList<K> l = new IterationSafeArrayList<>(a, true);
+		l.size = length;
+		return l;
+	}
+
+	/**
+	 * @apiNote This list does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
+	public static <K> IterationSafeArrayList<K> wrap(final K[] a) {
+		return wrap(a, a.length);
+	}
+
+	/**
+	 * @apiNote This list does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
+	public static <K> IterationSafeArrayList<K> of() {
+		return new IterationSafeArrayList<>();
+	}
+
+	/**
+	 * @apiNote This list does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
+	@SafeVarargs
+	public static <K> IterationSafeArrayList<K> of(final K... init) {
+		return wrap(init);
 	}
 
 	@SuppressWarnings("unchecked")

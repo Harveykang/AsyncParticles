@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.particlerain;
 
 import com.leclowndu93150.particlerain.particle.SnowParticle;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainAddon;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -40,7 +40,7 @@ public abstract class MixinSnowParticle extends MixinWeatherParticle {
 		double i = f;
 		if (this.hasPhysics && (d != (double) 0.0F || e != (double) 0.0F || f != (double) 0.0F) && d * d + e * e + f * f < MAXIMUM_COLLISION_VELOCITY_SQUARED) {
 			Vec3 originalMotion = new Vec3(d, e, f);
-			Vec3 apply = WeatherParticleAddon.Type.SNOW.collide(level, new Vec3(x, y, z), originalMotion, asyncparticles$getWeatherAABB());
+			Vec3 apply = ParticleRainAddon.Type.SNOW.collide(level, new Vec3(x, y, z), originalMotion, asyncparticles$getWeatherAABB());
 			if (apply == null) {
 				asyncparticles$setInvisible(true);
 				remove();

@@ -204,7 +204,7 @@ public abstract class MixinParticleEngine {
 	}
 
 	@Inject(method = "clearParticles", at = @At("HEAD"))
-	public void redirectClearParticles(CallbackInfo ci) {
+	public void onClearParticles(CallbackInfo ci) {
 		particlesToAdd.forEach(AsyncTicker::onEvicted);
 		particlesToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 		trackingEmitters.forEach(AsyncTicker::onEvicted);

@@ -78,7 +78,7 @@ public class AsyncParticlesConfig {
 						return;
 					}
 					try {
-						AsyncParticlesConfig.load();
+						load();
 					} catch (Exception e) {
 						current.message = msg.append("\n").append(
 							Component.translatable("gui.asyncparticles.failed-to-reload", e.toString())

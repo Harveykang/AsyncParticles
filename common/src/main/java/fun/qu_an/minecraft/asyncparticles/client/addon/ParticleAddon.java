@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.addon;
 
 import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleRenderType;
 
 public interface ParticleAddon {
 	void asyncparticles$setTicked();

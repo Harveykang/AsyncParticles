@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainAddon;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
@@ -139,7 +139,7 @@ public abstract class MixinRainParticle extends MixinWeatherParticle {
 		double i = f;
 		if (this.hasPhysics && (d != (double) 0.0F || e != (double) 0.0F || f != (double) 0.0F) && d * d + e * e + f * f < MAXIMUM_COLLISION_VELOCITY_SQUARED) {
 			Vec3 originalMotion = new Vec3(d, e, f);
-			Vec3 apply = WeatherParticleAddon.Type.RAIN.collide(level, new Vec3(x, y, z), originalMotion, asyncparticles$getWeatherAABB());
+			Vec3 apply = ParticleRainAddon.Type.RAIN.collide(level, new Vec3(x, y, z), originalMotion, asyncparticles$getWeatherAABB());
 			if (apply == null) {
 				asyncparticles$setInvisible(true);
 				remove();

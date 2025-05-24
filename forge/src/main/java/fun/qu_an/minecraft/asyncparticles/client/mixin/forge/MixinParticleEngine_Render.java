@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.CustomTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
@@ -30,13 +31,18 @@ import java.util.*;
 
 // TODO: 分为两个 Mixin
 @Mixin(value = ParticleEngine.class, priority = 500)
-public abstract class MixinParticleEngine_Render {
+public class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Shadow
 	public Map<ParticleRenderType, Queue<Particle>> particles;
 
 	@Shadow
 	@Final
 	public TextureManager textureManager;
+
+	@Override
+	public void asyncparticle$addRenderType(ParticleRenderType particleRenderType) {
+		throw new UnsupportedOperationException("Forge doesn't supports asyncparticle$addRenderType.");
+	}
 
 	/**
 	 * @author

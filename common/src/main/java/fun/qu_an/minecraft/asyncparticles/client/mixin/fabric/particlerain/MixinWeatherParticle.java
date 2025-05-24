@@ -2,10 +2,9 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainAddon;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -24,7 +23,7 @@ import pigcart.particlerain.particle.*;
 import java.util.Collections;
 
 @Mixin(value = WeatherParticle.class)
-public abstract class MixinWeatherParticle extends TextureSheetParticle implements WeatherParticleAddon {
+public abstract class MixinWeatherParticle extends TextureSheetParticle implements ParticleRainAddon {
 	@Shadow
 	protected BlockPos.MutableBlockPos pos;
 	@Unique

@@ -51,7 +51,7 @@ public class AsyncParticlesMixinConfig {
 		configObj.read(properties);
 		configObj = upgrade(configObj.version, configObj);
 
-		toSaveConfig = configObj;
+		configObj.flat();
 		save(configObj);
 	}
 
@@ -78,18 +78,13 @@ public class AsyncParticlesMixinConfig {
 		save(configObj);
 	}
 
-	private static void save(Mixin$Particle configObj) throws IOException {
+	static void save(Mixin$Particle configObj) throws IOException {
 		configObj.version = VERSION;
 		Properties properties = new Properties();
 		configObj.write(properties);
 		try (OutputStream os = Files.newOutputStream(MIXIN_CONFIG_FILE)) {
 			properties.store(os, COMMENTS);
 		}
-	}
-
-	static void setAndSave(Mixin$Particle newConfig) throws IOException {
-		toSaveConfig = newConfig;
-		save(newConfig);
 	}
 
 	static Mixin$Particle getToSaveConfig() {
@@ -162,7 +157,7 @@ public class AsyncParticlesMixinConfig {
 				getBoolean(properties, "particle$redirectFleroviumCulling", defaultConfig.redirectFleroviumCulling);
 		}
 
-		private void flat() {
+		void flat() {
 			toSaveConfig = this;
 		}
 

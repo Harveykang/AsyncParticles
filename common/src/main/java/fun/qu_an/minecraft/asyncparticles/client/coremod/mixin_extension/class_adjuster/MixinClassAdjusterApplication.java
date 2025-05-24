@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier;
+package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster;
 
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.reflection.FieldReference;
@@ -6,10 +6,12 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfig;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -120,7 +122,11 @@ public class MixinClassAdjusterApplication {
 		Map<String, IReferenceMapper> mappersCache = new HashMap<>();
 		adjusters = MixinClassAdjusterRegistrar.endAdjusters();
 		for (MixinClassAdjuster adjuster : adjusters.values()) {
-			applyAdjuster(mixinServiceWrapper, adjuster, mappersCache);
+			try {
+				applyAdjuster(mixinServiceWrapper, adjuster, mappersCache);
+			} catch (Exception e) {
+				throw new MixinError("Failed to apply adjuster " + adjuster, e);
+			}
 		}
 		Set<MixinClassProvider> providers = MixinClassAdjusterRegistrar.endProviders();
 		// Collect generated mixin class's simple names
@@ -229,11 +235,50 @@ public class MixinClassAdjusterApplication {
 			if (refMapperConfig == null) {
 				refMapperConfig = ReferenceMapper.DEFAULT_RESOURCE;
 			}
+			if (finalTargets.size() > 1) {
+				for (FieldNode fNode : cNode.fields) {
+					AnnotationNode shadow = Annotations.getVisible(fNode, Shadow.class);
+					if (shadow != null) {
+						List<Object> shadowValues = shadow.values;
+						int i;
+						if (shadowValues == null) {
+							shadowValues = shadow.values = new ArrayList<>();
+							shadowValues.add("remap");
+							shadowValues.add(false);
+						} else if ((i = shadowValues.indexOf("remap")) == -1) {
+							shadowValues.add("remap");
+							shadowValues.add(false);
+						} else {
+							shadowValues.set(i + 1, false);
+						}
+					}
+				}
+			}
 			for (MethodNode mNode : cNode.methods) {
 				if (mNode.visibleAnnotations == null) {
 					continue;
 				}
+				AnnotationNode shadow;
+				if (finalTargets.size() > 1 &&
+					(shadow = Annotations.getVisible(mNode, Shadow.class)) != null) {
+					List<Object> shadowValues = shadow.values;
+					int i;
+					if (shadowValues == null) {
+						shadowValues = shadow.values = new ArrayList<>();
+						shadowValues.add("remap");
+						shadowValues.add(false);
+					} else if ((i = shadowValues.indexOf("remap")) == -1) {
+						shadowValues.add("remap");
+						shadowValues.add(false);
+					} else {
+						shadowValues.set(i + 1, false);
+					}
+					continue;
+				}
 				for (AnnotationNode aNode1 : mNode.visibleAnnotations) {
+					if (aNode1.values == null) {
+						continue;
+					}
 					int i = aNode1.values.indexOf("method");
 					if (i == -1) {
 						continue;

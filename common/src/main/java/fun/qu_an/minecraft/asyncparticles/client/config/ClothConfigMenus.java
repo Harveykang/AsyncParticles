@@ -36,10 +36,7 @@ class ClothConfigMenus {
 					particle$particleLimit)
 				.setDefaultValue(defaultConfig.particle.particleLimit)
 				.setTooltip(Component.translatable("config.asyncparticles.particle.particleLimit.tooltip"))
-				.setSaveConsumer(newValue -> {
-					particle$particleLimit = newValue;
-					AsyncTicker.reloadLater();
-				})
+				.setSaveConsumer(newValue -> particle$particleLimit = newValue)
 				.setMin(1024)
 				.setMax(262144)
 				.build())
@@ -167,7 +164,7 @@ class ClothConfigMenus {
 						// 	RainEffect.class, valkyrienSkies$rainEffect)
 						.startSelector(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect"),
 							new RainEffect[]{RainEffect.ALWAYS, RainEffect.STATIONARY}, valkyrienSkies$rainEffect)
-						.setNameProvider(value -> value.getComponent())
+						.setNameProvider(RainEffect::getComponent)
 						.setDefaultValue(defaultConfig.valkyrienSkies.rainEffect)
 						.setTooltip(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect.tooltip"))
 						.setSaveConsumer(newValue -> valkyrienSkies$rainEffect = newValue)
@@ -205,13 +202,13 @@ class ClothConfigMenus {
 		ConfigCategory mixinCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mixin"));
 		ConfigEntryBuilder mixinEntryBuilder = builder.entryBuilder();
 		mixinEntryBuilder.setResetButtonKey(Component.translatable("gui.asyncparticles.revert"));
-		Object newConfig = ClothConfigMixinMenus.buildCategory(mixinCategory, entryBuilder, mixinEntryBuilder);
+		Runnable mixinSaveRunnable = ClothConfigMixinMenus.buildCategory(mixinCategory, entryBuilder, mixinEntryBuilder);
 		// endregion
 
 		builder.setSavingRunnable(() -> {
 			try {
 				save();
-				ClothConfigMixinMenus.onSave(newConfig);
+				mixinSaveRunnable.run();
 			} catch (Exception e) {
 				LOGGER.error("Failed to save config", e);
 				Minecraft mc = Minecraft.getInstance();
@@ -228,6 +225,7 @@ class ClothConfigMenus {
 						current -> Minecraft.getInstance().setScreen(prevScreen)));
 				});
 			}
+			AsyncTicker.reloadLater();
 		});
 
 		return builder;

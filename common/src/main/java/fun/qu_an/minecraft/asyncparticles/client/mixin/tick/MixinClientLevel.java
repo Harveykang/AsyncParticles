@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.tick;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.api.EndTickOperation;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Holder;
@@ -49,7 +50,7 @@ public abstract class MixinClientLevel extends Level {
 		if (!ConfigHelper.asyncBlockEntityAnimate()) {
 			original.call(i, j, k);
 		} else {
-			AsyncTicker.addEndTickTask(asyncparticles$ANIMATE_TICK, () -> original.call(i, j, k));
+			EndTickOperation.schedule(asyncparticles$ANIMATE_TICK, false, () -> original.call(i, j, k));
 		}
 	}
 
