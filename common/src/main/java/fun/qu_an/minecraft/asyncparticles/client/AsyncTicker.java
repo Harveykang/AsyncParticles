@@ -191,6 +191,7 @@ public class AsyncTicker {
 			END_TICK_OPERATIONS.clear();
 			if (levelRunning) {
 				ORDERED_END_TICK_EVENTS.forEach(Runnable::run);
+				UNORDERED_END_TICK_EVENTS.forEach(Runnable::run);
 			}
 			return;
 		}
@@ -213,12 +214,12 @@ public class AsyncTicker {
 		tryReload();
 		tryDebug();
 		CompletableFuture<Void> particleFuture = CompletableFuture.runAsync(() -> timeUsageNano.set(System.nanoTime()), EXECUTOR);
-		CompletableFuture<Void> orderedTaskFuture = particleFuture;
-		CompletableFuture<?> unorderedEventsFuture = Utils.NULL_FUTURE;
-		CompletableFuture<?> unorderedOperationsFuture = Utils.NULL_FUTURE;
+		CompletableFuture<Void> sequencedTaskFuture = particleFuture;
+		CompletableFuture<?> parallelEventsFuture = Utils.NULL_FUTURE;
+		CompletableFuture<?> parallelOperationsFuture = Utils.NULL_FUTURE;
 		// end tick events
-		if (levelRunning && i == to - 1) {
-			orderedTaskFuture = orderedTaskFuture.thenRun(() -> {
+		if (levelRunning) {
+			sequencedTaskFuture = sequencedTaskFuture.thenRun(() -> {
 				// 每 tick 结束时都要执行的固定事件
 				for (Runnable endTickEvent : ORDERED_END_TICK_EVENTS) {
 					try {
@@ -230,7 +231,7 @@ public class AsyncTicker {
 					}
 				}
 			}).exceptionally(AsyncTicker::tickExceptionally);
-			unorderedEventsFuture = particleFuture.thenCompose(v -> {
+			parallelEventsFuture = particleFuture.thenCompose(v -> {
 				// 每 tick 结束时都要执行的固定事件，可在 tick 间的任意时刻执行
 				@SuppressWarnings("rawtypes")
 				CompletableFuture[] completableFutures = new CompletableFuture[UNORDERED_END_TICK_EVENTS.size()];
@@ -253,7 +254,7 @@ public class AsyncTicker {
 		if (!endTickOperations.isEmpty()) {
 			EndTickOperation[] endTickTasks = endTickOperations.toArray(new EndTickOperation[0]);
 			endTickOperations.clear();
-			orderedTaskFuture = orderedTaskFuture.thenRun(() -> {
+			sequencedTaskFuture = sequencedTaskFuture.thenRun(() -> {
 				// 每 tick 添加的不固定操作
 				for (EndTickOperation endTickTask : endTickTasks) {
 					if (!endTickTask.isOrdered()) {
@@ -268,7 +269,7 @@ public class AsyncTicker {
 					}
 				}
 			}).exceptionally(AsyncTicker::tickExceptionally);
-			unorderedOperationsFuture = particleFuture.thenCompose(v -> {
+			parallelOperationsFuture = particleFuture.thenCompose(v -> {
 				// 每 tick 结束时都要执行的固定事件，可在 tick 间的任意时刻执行
 				@SuppressWarnings("rawtypes")
 				CompletableFuture[] futures = new CompletableFuture[endTickTasks.length];
@@ -288,7 +289,7 @@ public class AsyncTicker {
 				return CompletableFuture.allOf(futures);
 			}).exceptionally(AsyncTicker::tickExceptionally);
 		}
-		orderedTaskFuture = CompletableFuture.allOf(orderedTaskFuture, unorderedEventsFuture, unorderedOperationsFuture);
+		sequencedTaskFuture = CompletableFuture.allOf(sequencedTaskFuture, parallelEventsFuture, parallelOperationsFuture);
 
 		// tick particles
 		List<Runnable> particleOperations = PARTICLE_OPERATIONS;
@@ -310,11 +311,11 @@ public class AsyncTicker {
 							throw toThrowDirectly(e);
 						}))
 					.toArray(CompletableFuture[]::new));
-				orderedTaskFuture = orderedTaskFuture.thenCompose(function).exceptionally(AsyncTicker::tickExceptionally);
+				sequencedTaskFuture = sequencedTaskFuture.thenCompose(function).exceptionally(AsyncTicker::tickExceptionally);
 			}
 		}
 
-		AsyncTicker.particleFuture = orderedTaskFuture
+		AsyncTicker.particleFuture = sequencedTaskFuture
 			.thenRunAsync(() -> timeUsageNano.set(System.nanoTime() - timeUsageNano.get()), EXECUTOR);
 
 		profiler.pop();

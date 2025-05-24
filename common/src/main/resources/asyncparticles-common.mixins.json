@@ -19,6 +19,9 @@
     "cloth_config.BaseListEntryAccessor",
     "fabric.MixinParticle",
     "fabric.MixinParticleEngine_Render",
+    "fabric.cooparticlesapi.MixinClientParticleGroupManager",
+    "fabric.cooparticlesapi.MixinParticleEmittersManager",
+    "fabric.cooparticlesapi.MixinParticleStyleManager",
     "fabric.cooparticlesapi.MixinCooParticleAPIClient",
     "fabric.effective.MixinEffective",
     "fabric.effectual.MixinAllEffects",
@@ -76,8 +79,5 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "fabric.cooparticlesapi.MixinClientParticleGroupManager",
-    "fabric.cooparticlesapi.MixinParticleEmittersManager",
-    "fabric.cooparticlesapi.MixinParticleStyleManager"
   ]
 }

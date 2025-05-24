@@ -38,9 +38,7 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 			case "off_thread_access" -> true;
 			case "particlerain_create" -> FORGE_PARTICLERAIN_LOADED && CREATE_LOADED;
 			case "particlerain" -> FORGE_PARTICLERAIN_LOADED;
-			case "create" -> // vulkan mod has no forge version
-				// but to avoid I forgot to cancel this mixin when they support forge
-				FORGE_CREATE_LOADED;
+			case "create" -> FORGE_CREATE_LOADED;
 			// TODO: 下面这个 mod 没有正式发布，且不确定是否是唯一的 forge 移植版
 			case "effecticularity" -> FORGE_EFFECTIVE_LOADED;
 			case "subtle_effects" -> FORGE_SUBTLE_EFFECTS_LOADED;
