@@ -50,7 +50,7 @@ public abstract class MixinClientLevel extends Level {
 		if (!ConfigHelper.asyncBlockEntityAnimate()) {
 			original.call(i, j, k);
 		} else {
-			EndTickOperation.schedule(ANIMATE_TICK, () -> original.call(i, j, k), true);
+			EndTickOperation.schedule(ANIMATE_TICK, () -> original.call(i, j, k), false);
 		}
 	}
 

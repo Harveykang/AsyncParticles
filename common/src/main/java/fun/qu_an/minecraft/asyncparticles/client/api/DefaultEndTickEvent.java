@@ -3,12 +3,12 @@ package fun.qu_an.minecraft.asyncparticles.client.api;
 public final class DefaultEndTickEvent implements EndTickEvent {
 	private final Runnable task;
 	private final int priority;
-	private final boolean ordered;
+	private final boolean parallel;
 
-	public DefaultEndTickEvent(Runnable task, int priority, boolean ordered) {
+	public DefaultEndTickEvent(Runnable task, int priority, boolean parallel) {
 		this.task = task;
 		this.priority = priority;
-		this.ordered = ordered;
+		this.parallel = parallel;
 	}
 
 	@Override
@@ -20,7 +20,7 @@ public final class DefaultEndTickEvent implements EndTickEvent {
 		return priority;
 	}
 
-	public boolean isOrdered() {
-		return ordered;
+	public boolean isParallel() {
+		return parallel;
 	}
 }

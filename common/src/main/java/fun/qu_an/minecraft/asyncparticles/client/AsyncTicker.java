@@ -48,8 +48,8 @@ public class AsyncTicker {
 	private static boolean cancelled = false;
 	public static boolean shouldTickParticles = false;
 	public static CompletableFuture<Void> particleCleanup;
-	private final static List<EndTickEvent> ORDERED_END_TICK_EVENTS = new ArrayList<>();
-	private static final List<EndTickEvent> UNORDERED_END_TICK_EVENTS = new ArrayList<>();
+	private final static List<EndTickEvent> SEQUENCED_END_TICK_EVENTS = new ArrayList<>();
+	private static final List<EndTickEvent> PARALLEL_END_TICK_EVENTS = new ArrayList<>();
 	private static final List<EndTickOperation> END_TICK_OPERATIONS = new ArrayList<>();
 	private static CompletableFuture<Void> particleFuture;
 	private static boolean debug_cancelled = false;
@@ -190,8 +190,8 @@ public class AsyncTicker {
 			END_TICK_OPERATIONS.forEach(Runnable::run);
 			END_TICK_OPERATIONS.clear();
 			if (levelRunning) {
-				ORDERED_END_TICK_EVENTS.forEach(Runnable::run);
-				UNORDERED_END_TICK_EVENTS.forEach(Runnable::run);
+				SEQUENCED_END_TICK_EVENTS.forEach(Runnable::run);
+				PARALLEL_END_TICK_EVENTS.forEach(Runnable::run);
 			}
 			return;
 		}
@@ -221,7 +221,7 @@ public class AsyncTicker {
 		if (levelRunning) {
 			sequencedTaskFuture = sequencedTaskFuture.thenRun(() -> {
 				// 每 tick 结束时都要执行的固定事件
-				for (Runnable endTickEvent : ORDERED_END_TICK_EVENTS) {
+				for (Runnable endTickEvent : SEQUENCED_END_TICK_EVENTS) {
 					try {
 						endTickEvent.run();
 					} catch (Exception e) {
@@ -234,9 +234,9 @@ public class AsyncTicker {
 			parallelEventsFuture = particleFuture.thenCompose(v -> {
 				// 每 tick 结束时都要执行的固定事件，可在 tick 间的任意时刻执行
 				@SuppressWarnings("rawtypes")
-				CompletableFuture[] completableFutures = new CompletableFuture[UNORDERED_END_TICK_EVENTS.size()];
+				CompletableFuture[] completableFutures = new CompletableFuture[PARALLEL_END_TICK_EVENTS.size()];
 				int j = 0;
-				for (Runnable endTickEvent : UNORDERED_END_TICK_EVENTS) {
+				for (Runnable endTickEvent : PARALLEL_END_TICK_EVENTS) {
 					completableFutures[j++] = CompletableFuture.runAsync(endTickEvent, EXECUTOR)
 						.exceptionally(e -> {
 							if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickEvent, e)) {
@@ -257,7 +257,7 @@ public class AsyncTicker {
 			sequencedTaskFuture = sequencedTaskFuture.thenRun(() -> {
 				// 每 tick 添加的不固定操作
 				for (EndTickOperation endTickTask : endTickTasks) {
-					if (!endTickTask.isOrdered()) {
+					if (endTickTask.isParallel()) {
 						continue;
 					}
 					try {
@@ -275,7 +275,7 @@ public class AsyncTicker {
 				CompletableFuture[] futures = new CompletableFuture[endTickTasks.length];
 				int j = 0;
 				for (EndTickOperation endTickTask : endTickTasks) {
-					if (endTickTask.isOrdered()) {
+					if (!endTickTask.isParallel()) {
 						continue;
 					}
 					futures[j++] = CompletableFuture.runAsync(endTickTask, EXECUTOR)
@@ -493,7 +493,7 @@ public class AsyncTicker {
 			.formatted(ConfigHelper.isTickAsync() ? timeUsageNano.get() / 1000000d : Double.NaN,
 				debug_cancelled,
 				PARTICLE_OPERATIONS.size(),
-				ORDERED_END_TICK_EVENTS.size() + UNORDERED_END_TICK_EVENTS.size(),
+				SEQUENCED_END_TICK_EVENTS.size() + PARALLEL_END_TICK_EVENTS.size(),
 				END_TICK_OPERATIONS.size()
 //				+ UNORDERED_END_TICK_OPERATIONS.size()
 				,
@@ -567,13 +567,13 @@ public class AsyncTicker {
 
 	@ApiStatus.Internal
 	public static void registerEvent(EndTickEvent task) {
-		if (task.isOrdered()) {
-			ORDERED_END_TICK_EVENTS.add(task);
-			ORDERED_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
-		} else {
-			UNORDERED_END_TICK_EVENTS.add(task);
+		if (task.isParallel()) {
+			PARALLEL_END_TICK_EVENTS.add(task);
 			// also sort the unordered events. To determine the order of submission of asynchronous tasks
-			UNORDERED_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
+			PARALLEL_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
+		} else {
+			SEQUENCED_END_TICK_EVENTS.add(task);
+			SEQUENCED_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
 		}
 	}
 

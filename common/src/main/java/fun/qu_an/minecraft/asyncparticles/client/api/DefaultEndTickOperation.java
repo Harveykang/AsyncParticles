@@ -7,17 +7,17 @@ import java.util.UUID;
 public final class DefaultEndTickOperation implements EndTickOperation {
 	private final Runnable task;
 	private final ResourceLocation id;
-	private final boolean ordered;
+	private final boolean parallel;
 
-	public DefaultEndTickOperation(ResourceLocation id, Runnable task, boolean ordered) {
+	public DefaultEndTickOperation(ResourceLocation id, Runnable task, boolean parallel) {
 		this.task = task;
 		this.id = id;
-		this.ordered = ordered;
+		this.parallel = parallel;
 	}
 
 	@Override
-	public boolean isOrdered() {
-		return ordered;
+	public boolean isParallel() {
+		return parallel;
 	}
 
 	@Override

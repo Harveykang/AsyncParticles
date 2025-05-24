@@ -9,27 +9,27 @@ public interface EndTickOperation extends Runnable {
 		AsyncTicker.scheduleOperation(task);
 	}
 
-	static void schedule(ResourceLocation id, Runnable task, boolean ordered) {
-		schedule(new DefaultEndTickOperation(id, task, ordered));
+	static void schedule(ResourceLocation id, Runnable task, boolean parallel) {
+		schedule(new DefaultEndTickOperation(id, task, parallel));
 	}
 
 	static void schedule(ResourceLocation id, Runnable task) {
-		schedule(id, task, false);
+		schedule(id, task, true);
 	}
 
-	static void schedule(ResourceLocation id, MinecraftConsumer task, boolean ordered) {
-		schedule(new DefaultEndTickOperation(id, () -> task.accept(Minecraft.getInstance()), ordered));
+	static void schedule(ResourceLocation id, MinecraftConsumer task, boolean parallel) {
+		schedule(new DefaultEndTickOperation(id, () -> task.accept(Minecraft.getInstance()), parallel));
 	}
 
-	static void schedule(ResourceLocation id, ClientLevelConsumer task, boolean ordered) {
-		schedule(new DefaultEndTickOperation(id, () -> task.accept(Minecraft.getInstance().level), ordered));
+	static void schedule(ResourceLocation id, ClientLevelConsumer task, boolean parallel) {
+		schedule(new DefaultEndTickOperation(id, () -> task.accept(Minecraft.getInstance().level), parallel));
 	}
 
 	/**
 	 * @implSpec Must be thread-safe.
 	 */
-	default boolean isOrdered() {
-		return false;
+	default boolean isParallel() {
+		return true;
 	}
 
 	/**
