@@ -22,7 +22,10 @@ public class MixinClientParticleGroupManager {
 
 	@WrapMethod(method = "doClientTick")
 	public void doClientTick(Operation<Void> original) {
-		if (ConfigHelper.cooparticlesapi$getTickMode() == CooTickMode.ASYNC_IN_PARALLEL) {
+		if (ConfigHelper.cooparticlesapi$getTickMode() != CooTickMode.ASYNC_IN_PARALLEL ||
+			!ConfigHelper.isTickAsync()) {
+			original.call();
+		} else {
 			if (visibleControls.isEmpty()) {
 				return;
 			}
@@ -32,8 +35,6 @@ public class MixinClientParticleGroupManager {
 				}
 				controlableParticleGroup.tick$coo_particles_api();
 			});
-		} else {
-			original.call();
 		}
 	}
 }

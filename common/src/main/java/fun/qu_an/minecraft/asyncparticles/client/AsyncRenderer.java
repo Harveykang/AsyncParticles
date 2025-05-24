@@ -177,26 +177,31 @@ public class AsyncRenderer {
 			try {
 				particle.render(bufferBuilder, camera, f3);
 			} catch (Throwable t) {
-				boolean tolerable = AsyncTicker.isTolerable(t);
-				if (tolerable && !EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
-					continue;
-				}
-				((ParticleAddon) particle).asyncparticles$setRenderSync();
-				if (!shouldSync(particle.getClass())) {
-					if (!tolerable) {
-						LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, t);
-					} else {
-						LOGGER.warn("Exception {} thrown while rendering particle {} exceeds the threshold, please contact the author: {}",
-							t.getClass().getSimpleName(),
-							particle,
-							AsyncParticlesClient.ISSUE_URL,
-							t);
-					}
-					markAsSync(particle.getClass());
-				}
-				recordSync(particleRenderType, particle);
+				onRenderingParticleException(particleRenderType, particle, t);
 			}
 		}
+	}
+
+	private static void onRenderingParticleException(ParticleRenderType particleRenderType, Particle particle, Throwable t) {
+		boolean tolerable = AsyncTicker.isTolerable(t);
+		Class<? extends Particle> particleClass = ((ParticleAddon) particle).asyncparticles$getRealClass();
+		if (tolerable && !EXCEPTION_TRACKER.addException(particleClass, t)) {
+			return;
+		}
+		((ParticleAddon) particle).asyncparticles$setRenderSync();
+		if (!shouldSync(particleClass)) {
+			if (!tolerable) {
+				LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, t);
+			} else {
+				LOGGER.warn("Exception {} thrown while rendering particle {} exceeds the threshold, please contact the author: {}",
+					t.getClass().getSimpleName(),
+					particle,
+					AsyncParticlesClient.ISSUE_URL,
+					t);
+			}
+			markAsSync(particleClass);
+		}
+		recordSync(particleRenderType, particle);
 	}
 
 	private static Void renderAsyncExceptionally(Throwable e) {

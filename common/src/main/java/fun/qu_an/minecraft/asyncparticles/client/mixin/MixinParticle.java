@@ -38,12 +38,12 @@ public abstract class MixinParticle implements ParticleAddon {
 
 	@Inject(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V", at = @At("RETURN"))
 	protected void onInit(CallbackInfo ci) {
-		Class<?> aClass = this.getClass();
-		if (AsyncRenderer.shouldSync(aClass)) {
-			asyncparticles$setRenderSync();
-		}
+		Class<?> aClass = asyncparticles$getRealClass();
 		if (AsyncTicker.shouldSync(aClass)) {
 			asyncparticles$setTickSync();
+		}
+		if (AsyncRenderer.shouldSync(aClass)) {
+			asyncparticles$setRenderSync();
 		}
 	}
 
@@ -86,5 +86,11 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Override
 	public boolean asyncparticles$isTickSync() {
 		return asyncparticles$tickSync;
+	}
+
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	@Override
+	public Class<? extends Particle> asyncparticles$getRealClass() {
+		return (Class) this.getClass();
 	}
 }

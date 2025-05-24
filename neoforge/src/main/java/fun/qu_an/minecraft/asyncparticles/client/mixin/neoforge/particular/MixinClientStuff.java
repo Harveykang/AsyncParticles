@@ -15,19 +15,19 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(Main.ClientEvents.class)
 public class MixinClientStuff {
 	@Unique
-	private static final ResourceLocation asyncparticles$PARTICULAR$ON_CLIENT_TICK =
+	private static final ResourceLocation PARTICULAR$ON_CLIENT_TICK =
 		ResourceLocation.fromNamespaceAndPath("particular", "on_client_tick");
 	@WrapMethod(method = "onClientTick", remap = false)
 	private static void onClientTick(ClientTickEvent.Pre event, Operation<Void> original) {
-		EndTickOperation.schedule(asyncparticles$PARTICULAR$ON_CLIENT_TICK, () -> original.call((Object) null), false);
+		EndTickOperation.schedule(PARTICULAR$ON_CLIENT_TICK, false, () -> original.call((Object) null));
 	}
 
 	@Unique
-	private static final ResourceLocation asyncparticles$PARTICULAR$ON_CHUNK_LOAD =
+	private static final ResourceLocation PARTICULAR$ON_CHUNK_LOAD =
 		ResourceLocation.fromNamespaceAndPath("particular", "on_chunk_load");
 	@Redirect(method = "lambda$onChunkLoad$3", remap = false,
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;execute(Ljava/lang/Runnable;)V"))
 	private static void onChunkLoad(Minecraft mc, Runnable runnable) {
-		EndTickOperation.schedule(asyncparticles$PARTICULAR$ON_CHUNK_LOAD, runnable, false);
+		EndTickOperation.schedule(PARTICULAR$ON_CHUNK_LOAD, false, runnable);
 	}
 }

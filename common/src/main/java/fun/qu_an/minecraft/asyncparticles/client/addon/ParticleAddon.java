@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.addon;
 
+import net.minecraft.client.particle.Particle;
 import net.minecraft.world.phys.AABB;
 
 public interface ParticleAddon {
@@ -15,4 +16,6 @@ public interface ParticleAddon {
 	 * NeoForge getRenderBoundingBox()
 	 */
 	AABB getRenderBoundingBox(float partialTick);
+
+	Class<? extends Particle> asyncparticles$getRealClass();
 }

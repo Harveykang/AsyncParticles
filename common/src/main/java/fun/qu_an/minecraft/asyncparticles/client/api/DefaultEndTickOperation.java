@@ -9,10 +9,10 @@ public final class DefaultEndTickOperation implements EndTickOperation {
 	private final ResourceLocation id;
 	private final boolean parallel;
 
-	public DefaultEndTickOperation(ResourceLocation id, Runnable task, boolean parallel) {
-		this.task = task;
+	public DefaultEndTickOperation(ResourceLocation id, boolean parallel, Runnable task) {
 		this.id = id;
 		this.parallel = parallel;
+		this.task = task;
 	}
 
 	@Override

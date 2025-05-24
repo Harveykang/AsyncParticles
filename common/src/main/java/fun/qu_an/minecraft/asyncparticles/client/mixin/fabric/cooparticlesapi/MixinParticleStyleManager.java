@@ -22,7 +22,10 @@ public class MixinParticleStyleManager {
 
 	@WrapMethod(method = "doTickClient")
 	public void doClientTick(Operation<Void> original) {
-		if (ConfigHelper.cooparticlesapi$getTickMode() == CooTickMode.ASYNC_IN_PARALLEL) {
+		if (ConfigHelper.cooparticlesapi$getTickMode() != CooTickMode.ASYNC_IN_PARALLEL ||
+			!ConfigHelper.isTickAsync()) {
+			original.call();
+		} else {
 			if (clientViewStyles.isEmpty()) {
 				return;
 			}
@@ -35,8 +38,6 @@ public class MixinParticleStyleManager {
 					clientViewStyles.remove(particleGroupStyle.getUuid());
 				}
 			});
-		} else {
-			original.call();
 		}
 	}
 }

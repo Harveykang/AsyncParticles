@@ -10,6 +10,8 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceC
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -40,6 +42,7 @@ import java.util.stream.Collectors;
 import static fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil.toThrowDirectly;
 
 // TODO: 整理这一坨
+@Environment(EnvType.CLIENT)
 public class AsyncTicker {
 	public static final Logger LOGGER = LogManager.getLogger();
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -57,7 +60,7 @@ public class AsyncTicker {
 	private static boolean shouldReload;
 	public static final ExecutorService EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleTicker";
-	public static final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
+	private static final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
 		ConfigHelper::getTickFailurePerSecondThreshold
 	);
@@ -257,7 +260,7 @@ public class AsyncTicker {
 			sequencedTaskFuture = sequencedTaskFuture.thenRun(() -> {
 				// 每 tick 添加的不固定操作
 				for (EndTickOperation endTickTask : endTickTasks) {
-					if (endTickTask.isParallel()) {
+					if (!endTickTask.isParallel()) {
 						continue;
 					}
 					try {
@@ -275,7 +278,7 @@ public class AsyncTicker {
 				CompletableFuture[] futures = new CompletableFuture[endTickTasks.length];
 				int j = 0;
 				for (EndTickOperation endTickTask : endTickTasks) {
-					if (!endTickTask.isParallel()) {
+					if (endTickTask.isParallel()) {
 						continue;
 					}
 					futures[j++] = CompletableFuture.runAsync(endTickTask, EXECUTOR)
@@ -286,7 +289,7 @@ public class AsyncTicker {
 							return null;
 						});
 				}
-				return CompletableFuture.allOf(futures);
+				return j == 0 ? Utils.nullFuture() : CompletableFuture.allOf(Arrays.copyOf(futures, j));
 			}).exceptionally(AsyncTicker::tickExceptionally);
 		}
 		sequencedTaskFuture = CompletableFuture.allOf(sequencedTaskFuture, parallelEventsFuture, parallelOperationsFuture);
@@ -351,12 +354,13 @@ public class AsyncTicker {
 			throw constructCrashReport(particle, t);
 		}
 		boolean tolerable = isTolerable(t);
-		if (tolerable && !EXCEPTION_TRACKER.addException(particle.getClass(), t)) {
+		Class<? extends Particle> particleClass = ((ParticleAddon) particle).asyncparticles$getRealClass();
+		if (tolerable && !EXCEPTION_TRACKER.addException(particleClass, t)) {
 			return;
 		}
 		if (ConfigHelper.markSyncIfTickFailed()) {
 			((ParticleAddon) particle).asyncparticles$setTickSync();
-			if (!shouldSync(particle.getClass())) {
+			if (!shouldSync(particleClass)) {
 				if (!tolerable) {
 					LOGGER.warn("Exception while ticking particle {}, marking as sync", particle, t);
 				} else {
@@ -366,7 +370,7 @@ public class AsyncTicker {
 						AsyncParticlesClient.ISSUE_URL,
 						t);
 				}
-				markAsSync(particle.getClass());
+				markAsSync(particleClass);
 			}
 			recordSync(particle);
 		} else if (tolerable) {
@@ -374,7 +378,7 @@ public class AsyncTicker {
 			if (player != null) {
 				player.sendSystemMessage(Component.literal(
 						"Exception %s thrown while ticking particle %s exceeds the threshold, please contact the author: "
-							.formatted(t.getClass().getSimpleName(), particle.getClass()))
+							.formatted(t.getClass().getSimpleName(), particleClass))
 					.append(Component.literal(AsyncParticlesClient.ISSUE_URL)
 						.setStyle(Style.EMPTY
 							.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncParticlesClient.ISSUE_URL))
@@ -494,9 +498,7 @@ public class AsyncTicker {
 				debug_cancelled,
 				PARTICLE_OPERATIONS.size(),
 				SEQUENCED_END_TICK_EVENTS.size() + PARALLEL_END_TICK_EVENTS.size(),
-				END_TICK_OPERATIONS.size()
-//				+ UNORDERED_END_TICK_OPERATIONS.size()
-				,
+				END_TICK_OPERATIONS.size(),
 				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
 					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {

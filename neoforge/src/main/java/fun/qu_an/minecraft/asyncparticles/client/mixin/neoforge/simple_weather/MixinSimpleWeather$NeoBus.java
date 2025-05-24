@@ -17,7 +17,7 @@ public interface MixinSimpleWeather$NeoBus {
 	@WrapMethod(method = "renderWeather", remap = false)
 	private static void renderWeather(ClientTickEvent.Pre event, Operation<Void> original) {
 		if (SimpleWeather.ClientConfig.OverrideWeather.get()) {
-			EndTickOperation.schedule(SimpleWeatherCompat.SIMPLE_WEATHER$RENDER_WEATHER, () -> original.call((Object) null), false);
+			EndTickOperation.schedule(SimpleWeatherCompat.SIMPLE_WEATHER$RENDER_WEATHER, false, () -> original.call((Object) null));
 		}
 	}
 

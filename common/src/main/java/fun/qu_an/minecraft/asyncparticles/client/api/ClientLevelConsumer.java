@@ -6,5 +6,6 @@ import java.util.function.Consumer;
 
 @FunctionalInterface
 public interface ClientLevelConsumer extends Consumer<ClientLevel> {
+	@Override
 	void accept(ClientLevel level);
 }

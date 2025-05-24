@@ -22,7 +22,10 @@ public class MixinParticleEmittersManager {
 
 	@WrapMethod(method = "doTickClient")
 	public void doClientTick(Operation<Void> original) {
-		if (ConfigHelper.cooparticlesapi$getTickMode() == CooTickMode.ASYNC_IN_PARALLEL) {
+		if (ConfigHelper.cooparticlesapi$getTickMode() != CooTickMode.ASYNC_IN_PARALLEL ||
+			!ConfigHelper.isTickAsync()) {
+			original.call();
+		} else {
 			if (clientEmitters.isEmpty()) {
 				return;
 			}
@@ -35,8 +38,6 @@ public class MixinParticleEmittersManager {
 					clientEmitters.remove(particleEmitters.getUuid());
 				}
 			});
-		} else {
-			original.call();
 		}
 	}
 }

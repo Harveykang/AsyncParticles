@@ -5,10 +5,10 @@ public final class DefaultEndTickEvent implements EndTickEvent {
 	private final int priority;
 	private final boolean parallel;
 
-	public DefaultEndTickEvent(Runnable task, int priority, boolean parallel) {
-		this.task = task;
+	public DefaultEndTickEvent(int priority, boolean parallel, Runnable task) {
 		this.priority = priority;
 		this.parallel = parallel;
+		this.task = task;
 	}
 
 	@Override
