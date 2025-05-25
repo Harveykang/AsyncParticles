@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.api.EndTickEvent;
@@ -58,7 +57,7 @@ public class AsyncTicker {
 	private static boolean debug_cancelled = false;
 	private static Consumer<String> debugConsumer;
 	private static boolean shouldReload;
-	public static final ExecutorService EXECUTOR;
+	public static final ForkJoinPool EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleTicker";
 	private static final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
@@ -350,7 +349,7 @@ public class AsyncTicker {
 	}
 
 	public static void onTickingParticleException(Particle particle, Throwable t) {
-		if (RenderSystem.isOnRenderThread()) {
+		if (ThreadUtil.isOnMainThread()) {
 			throw constructCrashReport(particle, t);
 		}
 		boolean tolerable = isTolerable(t);
@@ -570,17 +569,28 @@ public class AsyncTicker {
 	@ApiStatus.Internal
 	public static void registerEvent(EndTickEvent task) {
 		if (task.isParallel()) {
-			PARALLEL_END_TICK_EVENTS.add(task);
-			// also sort the unordered events. To determine the order of submission of asynchronous tasks
-			PARALLEL_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
+			synchronized (PARALLEL_END_TICK_EVENTS) {
+				PARALLEL_END_TICK_EVENTS.add(task);
+				// also sort the unordered events. To determine the order of submission of asynchronous tasks
+				PARALLEL_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
+			}
 		} else {
-			SEQUENCED_END_TICK_EVENTS.add(task);
-			SEQUENCED_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
+			synchronized (SEQUENCED_END_TICK_EVENTS) {
+				SEQUENCED_END_TICK_EVENTS.add(task);
+				SEQUENCED_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
+			}
 		}
 	}
 
 	@ApiStatus.Internal
 	public static void scheduleOperation(EndTickOperation task) {
-		END_TICK_OPERATIONS.add(task);
+		if (!shouldTickParticles && ConfigHelper.isTickAsync()) {
+			return;
+		}
+		if (ThreadUtil.isOnMainThread()) {
+			END_TICK_OPERATIONS.add(task);
+		} else {
+			ThreadUtil.enqueueClientTask(() -> END_TICK_OPERATIONS.add(task));
+		}
 	}
 }
