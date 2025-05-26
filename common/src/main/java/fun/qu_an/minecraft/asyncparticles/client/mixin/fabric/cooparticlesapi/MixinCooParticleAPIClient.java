@@ -10,12 +10,14 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.cooparticlesapi.CooTickM
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.Event;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(CooParticleAPIClient.class)
 public class MixinCooParticleAPIClient {
-	@WrapWithCondition(method = "onInitializeClient", remap = false,
+	@Dynamic
+	@WrapWithCondition(method = {"onInitializeClient", "registerClientEvents"}, remap = false,
 		at = @At(value = "INVOKE", remap = false, target = "Lnet/fabricmc/fabric/api/event/Event;register(Ljava/lang/Object;)V"))
 	private boolean onRegisterEvent(Event<ClientTickEvents.StartWorldTick> instance, Object t) {
 		if (!(t instanceof ClientTickEvents.StartWorldTick event)) {
