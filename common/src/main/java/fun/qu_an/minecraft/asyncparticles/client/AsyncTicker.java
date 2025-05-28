@@ -350,7 +350,7 @@ public class AsyncTicker {
 	}
 
 	public static void onTickingParticleException(Particle particle, Throwable t) {
-		if (RenderSystem.isOnRenderThread()) {
+		if (ThreadUtil.isOnMainThread()) {
 			throw constructCrashReport(particle, t);
 		}
 		boolean tolerable = isTolerable(t);
@@ -581,6 +581,13 @@ public class AsyncTicker {
 
 	@ApiStatus.Internal
 	public static void scheduleOperation(EndTickOperation task) {
-		END_TICK_OPERATIONS.add(task);
+		if (!shouldTickParticles && ConfigHelper.isTickAsync()) {
+			return;
+		}
+		if (ThreadUtil.isOnMainThread()) {
+			END_TICK_OPERATIONS.add(task);
+		} else {
+			ThreadUtil.enqueueClientTask(() -> END_TICK_OPERATIONS.add(task));
+		}
 	}
 }

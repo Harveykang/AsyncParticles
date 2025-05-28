@@ -49,15 +49,10 @@ public abstract class MixinEntityRotFX extends TextureSheetParticle {
 		}
 		// we do it in the other thread, so we don't need to worry about costly collision checks
 		AABB boundingBox = getBoundingBox();
-		double xsize = boundingBox.getXsize();
-		double ysize = boundingBox.getYsize();
-		double zsize = boundingBox.getZsize();
-		boundingBox = boundingBox.inflate(xsize >= 0.1 ? 0.0 : 0.1 - xsize, ysize >= 0.1 ? 0.0 : 0.1 - ysize, zsize >= 0.1 ? 0.0 : 0.1 - zsize);
-		Vec3 mov = VSClientUtils.entityMovColShipOnly(vec3,
+		Vec3 mov = VSClientUtils.entityMovColShipOnly(null,
+			vec3,
 			boundingBox,
-			(ClientLevel) level,
-			0.1,
-			ysize / 8.0);
+			(ClientLevel) level);
 		return original.call(entity,
 			mov == null ? vec3 : mov,
 			aABB, level, list);

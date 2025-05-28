@@ -17,9 +17,10 @@ public class AsyncParticlesMixinCanceller implements MixinCanceller {
 				 "me.fzzyhmstrs.particle_core.mixins.BillboardParticleMixin",
 				 "me.fzzyhmstrs.particle_core.mixins.ParticleMixin",
 				 "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
-				 "com.moepus.flerovium.mixins.Particle.ParticleMixin"
-				//			, TODO: 这里处理一下
+				 "com.moepus.flerovium.mixins.Particle.ParticleMixin",
+				// TODO: 这里处理一下
 				//				 "net.diebuddies.mixins.ocean.MixinParticleEngine"
+				 "indi.yunherry.weather.mixin.MixinParticle"
 				-> true;
 			default -> false;
 		};

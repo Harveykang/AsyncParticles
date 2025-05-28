@@ -59,7 +59,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 		boolean renderAsync = AsyncRenderer.isRenderAsync();
 		if (renderAsync) {
 			profiler.push("wait_for_async_tasks");
-			AsyncRenderer.tryWaitForAsyncTasks();
+			AsyncRenderer.tryWaitingForAsyncTasks();
 			profiler.pop();
 		}
 

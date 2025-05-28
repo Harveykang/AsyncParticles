@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.legacy.flywheel;
 
 import com.bawnorton.mixinsquared.TargetHandler;
-import com.mojang.blaze3d.systems.RenderSystem;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Dynamic;
@@ -20,7 +20,7 @@ public class MixinClientLevelMixin {
 	)
 	@Inject(method = "@MixinSquared:Handler", at = @At("HEAD"), cancellable = true)
 	private void filterEntities(CallbackInfoReturnable<Iterable<Entity>> ignored, CallbackInfo ci) {
-		if (!RenderSystem.isOnRenderThread()) {
+		if (!ThreadUtil.isOnMainThread()) {
 			ci.cancel();
 		}
 	}

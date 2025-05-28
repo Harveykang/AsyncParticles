@@ -54,7 +54,7 @@ public class ThreadUtil {
 	}
 
 	public static boolean isOnClientTickThread() {
-		return RenderSystem.isOnRenderThread() || isOnParticleTickerThread();
+		return isOnMainThread() || isOnParticleTickerThread();
 	}
 
 	public static void runOnClient(Runnable runnable) {
@@ -63,5 +63,13 @@ public class ThreadUtil {
 
 	public static void enqueueClientTask(Runnable runnable) {
 		Minecraft.getInstance().pendingRunnables.add(runnable);
+	}
+
+	public static boolean isOnMainThread() {
+		return RenderSystem.isOnRenderThread();
+	}
+
+	public static void assertOnMainThread() {
+		RenderSystem.assertOnRenderThread();
 	}
 }

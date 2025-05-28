@@ -41,7 +41,6 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 
 	@Override
 	public void asyncparticle$addRenderType(ParticleRenderType particleRenderType) {
-		throw new UnsupportedOperationException("Forge doesn't supports asyncparticle$addRenderType.");
 	}
 
 	/**
@@ -54,7 +53,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 		boolean renderAsync = AsyncRenderer.isRenderAsync();
 		if (renderAsync) {
 			profiler.push("wait_for_async_tasks");
-			AsyncRenderer.tryWaitForAsyncTasks();
+			AsyncRenderer.tryWaitingForAsyncTasks();
 			profiler.pop();
 		}
 

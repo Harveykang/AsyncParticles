@@ -26,7 +26,7 @@ public abstract class MixinWeatherParticle extends FastTextureSheetParticle {
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", remap = false, target = "Lnet/diebuddies/physics/ocean/OceanWorld;spawnRainRipple(IFDDD)V"))
 	private void onSpawnRainRipple(OceanWorld instance, int lifetime, float scale, double x, double y, double z) {
-		if (RenderSystem.isOnRenderThread()){
+		if (ThreadUtil.isOnMainThread()){
 			instance.spawnRainRipple(lifetime, scale, x, y, z);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> instance.spawnRainRipple(lifetime, scale, x, y, z));

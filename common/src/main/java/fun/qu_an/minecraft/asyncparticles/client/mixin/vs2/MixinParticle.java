@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.valkyrienskies.core.api.ships.ClientShip;
+import org.valkyrienskies.core.impl.shadow.A;
 
 import java.util.List;
 
@@ -50,9 +51,12 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 		double xsize = aABB.getXsize();
 		double ysize = aABB.getYsize();
 		double zsize = aABB.getZsize();
+		if (xsize < 0.1 || ysize < 0.1 || zsize < 0.1) {
+			aABB = aABB.inflate(xsize < 0.1 ? 0.1 - xsize : 0.0, ysize < 0.1 ? 0.1 - ysize : 0.0, zsize < 0.1 ? 0.1 - zsize : 0.0);
+		}
 		Vec3 mov = VSClientUtils.entityMovColShipOnly(null,
 			vec3,
-			aABB.inflate(xsize >= 0.1 ? 0.0 : 0.1 - xsize, ysize >= 0.1 ? 0.0 : 0.1 - ysize, zsize >= 0.1 ? 0.0 : 0.1 - zsize),
+			aABB,
 			(ClientLevel) level);
 		return original.call(entity,
 			mov == null ? vec3 : mov,

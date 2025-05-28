@@ -4,7 +4,6 @@ import com.lowdragmc.photon.client.gameobject.emitter.ParticleQueueRenderType;
 import com.lowdragmc.photon.client.gameobject.emitter.PhotonParticleRenderType;
 import com.lowdragmc.photon.client.gameobject.particle.IParticle;
 import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
-import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;

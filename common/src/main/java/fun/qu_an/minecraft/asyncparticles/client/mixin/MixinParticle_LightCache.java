@@ -31,7 +31,7 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 	@WrapMethod(method = "getLightColor")
 	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {
 		return ConfigHelper.particleLightCache()
-			? decompress(asyncparticles$getCompressedLight())
+			? asyncparticles$getCachedLight()
 			: original.call(partialTick);
 	}
 

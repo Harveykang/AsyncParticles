@@ -134,7 +134,7 @@ public abstract class MixinParticleEngine {
 			if (!emitter.isAlive()) {
 				continue;
 			}
-			if (!RenderSystem.isOnRenderThread() &&
+			if (!ThreadUtil.isOnMainThread() &&
 				((ParticleAddon) emitter).asyncparticles$isTickSync()) {
 				AsyncTicker.recordSync(emitter);
 				continue;
@@ -167,7 +167,7 @@ public abstract class MixinParticleEngine {
 				Utils.DUMMY_ITERATOR.remove();
 				continue;
 			}
-			if (!RenderSystem.isOnRenderThread()) {
+			if (!ThreadUtil.isOnMainThread()) {
 				if (((ParticleAddon) particle).asyncparticles$isTicked()) {
 					// Skip the first tick that the particle is added to the queue.
 					if (enableLightCache) {
