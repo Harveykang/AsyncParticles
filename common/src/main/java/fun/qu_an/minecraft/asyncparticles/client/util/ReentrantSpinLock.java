@@ -2,7 +2,6 @@ package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
-import java.util.function.Supplier;
 
 public class ReentrantSpinLock implements SpinLock {
 	private static final VarHandle OWNER;

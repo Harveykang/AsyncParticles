@@ -3,7 +3,6 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.particular;
 import com.leclowndu93150.particular.ClientStuff;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.api.EndTickOperation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;

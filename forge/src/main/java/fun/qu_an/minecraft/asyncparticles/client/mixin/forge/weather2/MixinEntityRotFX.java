@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.weather2;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import extendedrenderer.ParticleManagerExtended;
 import extendedrenderer.particle.entity.EntityRotFX;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;

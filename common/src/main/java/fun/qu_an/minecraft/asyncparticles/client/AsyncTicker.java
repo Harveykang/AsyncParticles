@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.api.EndTickEvent;

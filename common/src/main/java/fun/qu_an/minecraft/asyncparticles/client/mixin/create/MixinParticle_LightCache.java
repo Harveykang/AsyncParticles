@@ -11,8 +11,6 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 
-import static fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon.decompress;
-
 @Mixin({AirFlowParticle.class, AirParticle.class, SteamJetParticle.class})
 public abstract class MixinParticle_LightCache
 	extends fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticle_LightCache {

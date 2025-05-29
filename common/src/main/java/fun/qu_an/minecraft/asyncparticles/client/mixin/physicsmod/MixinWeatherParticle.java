@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.physicsmod;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.diebuddies.minecraft.weather.FastTextureSheetParticle;
 import net.diebuddies.minecraft.weather.WeatherParticle;
