@@ -570,12 +570,16 @@ public class AsyncTicker {
 	@ApiStatus.Internal
 	public static void registerEvent(EndTickEvent task) {
 		if (task.isParallel()) {
-			PARALLEL_END_TICK_EVENTS.add(task);
-			// also sort the unordered events. To determine the order of submission of asynchronous tasks
-			PARALLEL_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
+			synchronized (PARALLEL_END_TICK_EVENTS) {
+				PARALLEL_END_TICK_EVENTS.add(task);
+				// also sort the unordered events. To determine the order of submission of asynchronous tasks
+				PARALLEL_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
+			}
 		} else {
-			SEQUENCED_END_TICK_EVENTS.add(task);
-			SEQUENCED_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
+			synchronized (SEQUENCED_END_TICK_EVENTS) {
+				SEQUENCED_END_TICK_EVENTS.add(task);
+				SEQUENCED_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
+			}
 		}
 	}
 
