@@ -537,7 +537,9 @@ public class AsyncTicker {
 	}
 
 	public static void registerEndTickEvent(Runnable operation) {
-		AsyncTicker.END_TICK_EVENTS.add(operation);
+		synchronized (END_TICK_EVENTS) {
+			END_TICK_EVENTS.add(operation);
+		}
 	}
 
 	public static void addEndTickTask(ResourceLocation resourceLocation, MinecraftConsumer consumer) {
@@ -550,7 +552,11 @@ public class AsyncTicker {
 
 	public static void addEndTickTask(ResourceLocation resourceLocation, Runnable operation) {
 		if (shouldTickParticles || !ConfigHelper.isTickAsync()) {
-			AsyncTicker.END_TICK_OPERATIONS.add(Pair.of(resourceLocation, operation));
+			if (RenderSystem.isOnRenderThread()) {
+				AsyncTicker.END_TICK_OPERATIONS.add(Pair.of(resourceLocation, operation));
+			} else {
+				ThreadUtil.enqueueClientTask(() -> AsyncTicker.END_TICK_OPERATIONS.add(Pair.of(resourceLocation, operation)));
+			}
 		}
 	}
 
