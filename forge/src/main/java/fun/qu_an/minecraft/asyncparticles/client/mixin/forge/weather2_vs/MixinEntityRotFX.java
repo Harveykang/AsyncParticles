@@ -43,22 +43,27 @@ public abstract class MixinEntityRotFX extends TextureSheetParticle {
 	 * See {@link fun.qu_an.minecraft.asyncparticles.client.mixin.vs2.MixinParticle#collideBoundingBox}
 	 */
 	@WrapOperation(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;collideBoundingBox(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Lnet/minecraft/world/level/Level;Ljava/util/List;)Lnet/minecraft/world/phys/Vec3;"))
-	private Vec3 collideBoundingBox(Entity entity, Vec3 vec3, AABB aABB, Level level, List<VoxelShape> list, Operation<Vec3> original) {
+	private Vec3 collideBoundingBox(Entity entity, Vec3 vec3, AABB aabb, Level level, List<VoxelShape> list, Operation<Vec3> original) {
 		if ((Object) this instanceof ParticleTexExtraRender) {
-			return original.call(entity, vec3, aABB, level, list);
+			return original.call(entity, vec3, aabb, level, list);
 		}
 		// we do it in the other thread, so we don't need to worry about costly collision checks
-		AABB boundingBox = getBoundingBox();
-		double xsize = boundingBox.getXsize();
-		double ysize = boundingBox.getYsize();
-		double zsize = boundingBox.getZsize();
-		boundingBox = boundingBox.inflate(xsize >= 0.1 ? 0.0 : 0.1 - xsize, ysize >= 0.1 ? 0.0 : 0.1 - ysize, zsize >= 0.1 ? 0.0 : 0.1 - zsize);
+		double xsize = aabb.getXsize();
+		double ysize = aabb.getYsize();
+		double zsize = aabb.getZsize();
+
+		AABB aabb1;
+		if (xsize < 0.1 || ysize < 0.1 || zsize < 0.1){
+			aabb1 = aabb.inflate(xsize >= 0.1 ? 0.0 : 0.1 - xsize, ysize >= 0.1 ? 0.0 : 0.1 - ysize, zsize >= 0.1 ? 0.0 : 0.1 - zsize);
+		} else {
+			aabb1 = aabb;
+		}
 		Vec3 mov = VSClientUtils.entityMovColShipOnly(null,
 			vec3,
-			boundingBox,
+			aabb1,
 			(ClientLevel) level);
 		return original.call(entity,
 			mov == null ? vec3 : mov,
-			aABB, level, list);
+			aabb, level, list);
 	}
 }

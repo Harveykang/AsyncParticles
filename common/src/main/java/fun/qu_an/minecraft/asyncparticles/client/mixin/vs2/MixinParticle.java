@@ -45,21 +45,24 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 	 * See {@link fun.qu_an.minecraft.asyncparticles.client.mixin.forge.weather2_vs.MixinEntityRotFX#collideBoundingBox}
 	 */
 	@WrapOperation(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;collideBoundingBox(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Lnet/minecraft/world/level/Level;Ljava/util/List;)Lnet/minecraft/world/phys/Vec3;"))
-	private Vec3 collideBoundingBox(Entity entity, Vec3 vec3, AABB aABB, Level level, List<VoxelShape> list, Operation<Vec3> original) {
+	private Vec3 collideBoundingBox(Entity entity, Vec3 vec3, AABB aabb, Level level, List<VoxelShape> list, Operation<Vec3> original) {
 		// we do it in another thread, so we don't need to worry about costly collision checks
-		double xsize = aABB.getXsize();
-		double ysize = aABB.getYsize();
-		double zsize = aABB.getZsize();
+		double xsize = aabb.getXsize();
+		double ysize = aabb.getYsize();
+		double zsize = aabb.getZsize();
+		AABB aabb1;
 		if (xsize < 0.1 || ysize < 0.1 || zsize < 0.1) {
-			aABB = aABB.inflate(xsize < 0.1 ? 0.1 - xsize : 0.0, ysize < 0.1 ? 0.1 - ysize : 0.0, zsize < 0.1 ? 0.1 - zsize : 0.0);
+			aabb1 = aabb.inflate(xsize < 0.1 ? 0.1 - xsize : 0.0, ysize < 0.1 ? 0.1 - ysize : 0.0, zsize < 0.1 ? 0.1 - zsize : 0.0);
+		} else {
+			aabb1 = aabb;
 		}
 		Vec3 mov = VSClientUtils.entityMovColShipOnly(null,
 			vec3,
-			aABB,
+			aabb1,
 			(ClientLevel) level);
 		return original.call(entity,
 			mov == null ? vec3 : mov,
-			aABB, level, list);
+			aabb, level, list);
 	}
 
 	@TargetHandler(
