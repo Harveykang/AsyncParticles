@@ -10,8 +10,8 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
 
 public class SubtleEffectsCompat {
-	public static boolean shouldRenderParticle(Particle particle, Camera camera, ClientLevel level) {
-		if (particle.getRenderType() == ParticleRenderType.CUSTOM) {
+	public static boolean shouldRenderParticle(ParticleRenderType renderType, Particle particle, Camera camera, ClientLevel level) {
+		if (renderType == ParticleRenderType.CUSTOM) {
 			return true;
 		}
 
@@ -19,10 +19,6 @@ public class SubtleEffectsCompat {
 		if (!ModListHelper.VS_LOADED &&
 			ModConfigs.GENERAL.cullParticlesInUnloadedChunks &&
 			!Util.isChunkLoaded(level, particle.x, particle.z)) {
-			return false;
-		}
-
-		if (ModConfigs.GENERAL.cullParticlesWithNoAlpha && accessor.getAlpha() <= 0.0F) {
 			return false;
 		}
 
