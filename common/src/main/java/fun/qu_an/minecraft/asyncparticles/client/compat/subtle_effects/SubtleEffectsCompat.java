@@ -11,6 +11,10 @@ import net.minecraft.client.particle.ParticleRenderType;
 
 public class SubtleEffectsCompat {
 	public static boolean shouldRenderParticle(ParticleRenderType renderType, Particle particle, Camera camera, ClientLevel level) {
+		if (!ModConfigs.GENERAL.enableParticleCulling) {
+			return true;
+		}
+
 		if (renderType == ParticleRenderType.CUSTOM) {
 			return true;
 		}
