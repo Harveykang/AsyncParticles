@@ -22,10 +22,6 @@ public class SubtleEffectsCompat {
 			return false;
 		}
 
-		if (ModConfigs.GENERAL.cullParticlesWithNoAlpha && accessor.getAlpha() <= 0.0F) {
-			return false;
-		}
-
 		int distance = ModConfigs.GENERAL.particleRenderDistance << 4;
 		return accessor.subtleEffects$wasForced() ||
 			   camera.getPosition().distanceToSqr(accessor.getX(), accessor.getY(), accessor.getZ()) <
