@@ -130,7 +130,7 @@ dependencies {
 
     /* Subtle Effects */
     localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"
-    modLocalRuntime "maven.modrinth:subtle-effects:TdzGdTcL" // fabric 1.9.4-hf
+    modLocalRuntime "maven.modrinth:subtle-effects:Mgx7dpV7" // fabric 1.10.0
 
     /* A Good Place */
     modLocalRuntime "maven.modrinth:a-good-place:1.20-1.2.7"

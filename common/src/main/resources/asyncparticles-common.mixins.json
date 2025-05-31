@@ -53,6 +53,7 @@
     "iris_like.MixinOldFullyBufferedMultiBufferSource",
     "legacy.flywheel.MixinClientLevelMixin",
     "legacy.flywheel.MixinLightUpdater",
+    "lodestone.MixinLodestoneWorldParticle",
     "lodestone.MixinRenderHandler",
     "modernui.MixinRenderSystem",
     "off_thread_access.MixinActiveProfiler",

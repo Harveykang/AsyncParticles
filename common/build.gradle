@@ -75,7 +75,7 @@ dependencies {
     modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171e-fabric-1.20.1.jar')
 
     /* Subtle Effects */
-    modCompileOnly "maven.modrinth:subtle-effects:TdzGdTcL" // fabric 1.9.4-hf
+    modCompileOnly "maven.modrinth:subtle-effects:Mgx7dpV7" // fabric 1.10.0
 
     /* What Are They Up To */
     modCompileOnly "maven.modrinth:what-are-they-up-to:1.20.1-1.2.3"
