@@ -10,8 +10,8 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
 
 public class SubtleEffectsCompat {
-	public static boolean shouldRenderParticle(Particle particle, Camera camera, ClientLevel level) {
-		if (particle.getRenderType() == ParticleRenderType.CUSTOM) {
+	public static boolean shouldRenderParticle(ParticleRenderType renderType, Particle particle, Camera camera, ClientLevel level) {
+		if (renderType == ParticleRenderType.CUSTOM) {
 			return true;
 		}
 
