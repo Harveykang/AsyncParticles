@@ -20,22 +20,28 @@ public class SingleSpinLock implements SpinLock {
 
 	@Override
 	public void lock() {
-		Thread thread = Thread.currentThread();
-		if (OWNER.compareAndSet(this, null, thread)) {
+		Thread currentThread = Thread.currentThread();
+		if (OWNER.compareAndSet(this, null, currentThread)) {
 			return;
 		}
-		if (thread == this.owner) {
+		if (currentThread == this.owner) {
 			throw new IllegalMonitorStateException("Attempt to lock an already locked lock!");
 		}
-		while (!OWNER.compareAndSet(this, null, thread)) {
-			Thread.onSpinWait();
+		int i = 0;
+		while (!OWNER.compareAndSet(this, null, currentThread)) {
+			if (i < 50){
+				Thread.onSpinWait();
+				++i;
+			} else {
+				Thread.yield();
+			}
 		}
 	}
 
 	@Override
 	public void unlock() {
-		Thread thread = Thread.currentThread();
-		if (!OWNER.compareAndSet(this, thread, null)) {
+		Thread currentThread = Thread.currentThread();
+		if (!OWNER.compareAndSet(this, currentThread, null)) {
 			throw new IllegalMonitorStateException("Attempt to unlock an non-locked lock!");
 		}
 	}

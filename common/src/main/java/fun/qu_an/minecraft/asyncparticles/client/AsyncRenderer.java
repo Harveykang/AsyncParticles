@@ -266,7 +266,7 @@ public class AsyncRenderer {
 		}
 	}
 
-	public static void tryWaitForAsyncTasks() {
+	public static void tryWaitingForAsyncTasks() {
 //		if (ConfigHelper.isRenderAsync() && stage != Stage.RENDERABLE) {
 //			throw new IllegalStateException("Can only wait for async tasks around translucent");
 //		}

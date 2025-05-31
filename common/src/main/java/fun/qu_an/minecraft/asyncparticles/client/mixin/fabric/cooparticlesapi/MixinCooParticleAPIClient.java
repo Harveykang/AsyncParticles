@@ -24,9 +24,9 @@ public class MixinCooParticleAPIClient {
 			return true;
 		}
 
-		instance.register(mc -> {
+		instance.register(level -> {
 			if (ConfigHelper.cooparticlesapi$getTickMode() == CooTickMode.SYNCHRONOUSLY) {
-				event.onStartTick(mc);
+				event.onStartTick(level);
 			}
 		});
 		EndTickEvent.register(() -> {

@@ -6,6 +6,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.subtle_effects.SubtleEff
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleRenderType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -14,8 +15,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class MixinAsyncRenderer {
 	@Redirect(method = "renderParticles",
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/Particle;isAlive()Z"))
-	private static boolean shouldRenderParticle(Particle instance, @Local(argsOnly = true) Camera camera) {
+	private static boolean shouldRenderParticle(Particle instance,
+												@Local(argsOnly = true) Camera camera,
+												@Local(argsOnly = true) ParticleRenderType renderType) {
 		// To make sure if shouldSync is false, the particles are all culled.
-		return instance.isAlive() && SubtleEffectsCompat.shouldRenderParticle(instance, camera, Minecraft.getInstance().level);
+		return instance.isAlive() && SubtleEffectsCompat.shouldRenderParticle(renderType, instance, camera, Minecraft.getInstance().level);
 	}
 }

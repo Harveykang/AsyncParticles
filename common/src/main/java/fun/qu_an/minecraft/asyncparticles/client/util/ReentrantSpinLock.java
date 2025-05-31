@@ -26,8 +26,14 @@ public class ReentrantSpinLock implements SpinLock {
 				holdCount++;
 				return;
 			}
+			int i = 0;
 			while (!OWNER.compareAndSet(this, null, currentThread)) {
-				Thread.onSpinWait();
+				if (i < 50){
+					Thread.onSpinWait();
+					++i;
+				} else {
+					Thread.yield();
+				}
 			}
 		}
 		holdCount = 1;

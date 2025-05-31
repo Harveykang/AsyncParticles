@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.Tesselator;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
 import net.minecraft.client.Camera;
@@ -26,7 +27,7 @@ import java.util.*;
 
 // TODO: 分为两个 Mixin
 @Mixin(value = ParticleEngine.class, priority = 500)
-public abstract class MixinParticleEngine_Render {
+public abstract class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Shadow
 	public Map<ParticleRenderType, Queue<Particle>> particles;
 	@Shadow
@@ -36,6 +37,16 @@ public abstract class MixinParticleEngine_Render {
 	public TextureManager textureManager;
 	@Shadow
 	public static List<ParticleRenderType> RENDER_ORDER;
+
+	@Override
+	public void asyncparticle$addRenderType(ParticleRenderType particleRenderType) {
+		if (!RENDER_ORDER.contains(particleRenderType)) {
+			if (!(RENDER_ORDER instanceof ArrayList<ParticleRenderType>)) {
+				RENDER_ORDER = new ArrayList<>(RENDER_ORDER);
+			}
+			RENDER_ORDER.add(particleRenderType);
+		}
+	}
 
 	/**
 	 * @author
@@ -47,7 +58,7 @@ public abstract class MixinParticleEngine_Render {
 		boolean renderAsync = AsyncRenderer.isRenderAsync();
 		if (renderAsync) {
 			profiler.push("wait_for_async_tasks");
-			AsyncRenderer.tryWaitForAsyncTasks();
+			AsyncRenderer.tryWaitingForAsyncTasks();
 			profiler.pop();
 		}
 
