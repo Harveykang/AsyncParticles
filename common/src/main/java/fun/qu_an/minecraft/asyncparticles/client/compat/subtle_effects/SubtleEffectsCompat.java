@@ -4,7 +4,7 @@ import einstein.subtle_effects.init.ModConfigs;
 import einstein.subtle_effects.util.ParticleAccessor;
 import einstein.subtle_effects.util.Util;
 import net.minecraft.client.Camera;
-import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 
 public class SubtleEffectsCompat {
@@ -15,7 +15,7 @@ public class SubtleEffectsCompat {
 
 		ParticleAccessor accessor = (ParticleAccessor)particle;
 		if (ModConfigs.GENERAL.cullParticlesInUnloadedChunks &&
-			!Util.isChunkLoaded(particle.level, accessor.getX(), accessor.getZ())) {
+			!Util.isChunkLoaded(Minecraft.getInstance().level, accessor.getX(), accessor.getZ())) {
 			return false;
 		}
 
