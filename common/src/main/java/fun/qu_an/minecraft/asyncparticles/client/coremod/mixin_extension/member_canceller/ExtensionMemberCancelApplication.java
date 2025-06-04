@@ -21,7 +21,7 @@ import java.util.*;
  * APIs may be removed or change frequently before pull requests are merged.
  */
 public final class ExtensionMemberCancelApplication implements IExtension {
-	static final ILogger LOGGER = MixinService.getService().getLogger("mixinsquared-member-canceller");
+	static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles-member-canceller");
 	static final Set<MixinMemberCanceller> CANCELLERS = new HashSet<>();
 	// from MixinExtras com.llamalad7.mixinextras.transformer.MixinTransformerExtension
 	private final Set<ClassNode> preparedMixins = Collections.newSetFromMap(new WeakHashMap<>());

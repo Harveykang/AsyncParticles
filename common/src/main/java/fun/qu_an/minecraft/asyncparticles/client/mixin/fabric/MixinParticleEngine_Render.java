@@ -25,7 +25,6 @@ import org.spongepowered.asm.mixin.*;
 
 import java.util.*;
 
-// TODO: 分为两个 Mixin
 @Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Shadow
