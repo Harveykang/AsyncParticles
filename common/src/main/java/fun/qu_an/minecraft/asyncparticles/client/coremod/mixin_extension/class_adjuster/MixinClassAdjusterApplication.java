@@ -35,7 +35,7 @@ import java.util.*;
  * APIs may be removed or change frequently before pull requests are merged.
  */
 public class MixinClassAdjusterApplication {
-	static final ILogger LOGGER = MixinService.getService().getLogger("mixinsquared-class-adjuster");
+	static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles-class-adjuster");
 	private static MixinClassAdjusterApplication INSTANCE;
 	private static final FieldReference<String> pluginClassName;
 	private static final FieldReference<IMixinService> mixinService;
