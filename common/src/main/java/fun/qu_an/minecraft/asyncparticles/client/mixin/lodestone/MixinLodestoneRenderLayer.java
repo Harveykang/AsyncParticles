@@ -9,7 +9,9 @@ import team.lodestar.lodestone.handlers.RenderHandler;
 
 @Mixin(RenderHandler.LodestoneRenderLayer.class)
 public class MixinLodestoneRenderLayer {
-	@Inject(method = {"getBuffers", "getParticleBuffers", "getTarget", "getParticleTarget"}, at = @At("HEAD"))
+	@Inject(method = {"getBuffers", "getParticleBuffers", "getTarget", "getParticleTarget"},
+		remap = false,
+		at = @At("HEAD"))
 	private void onGetBuffers(CallbackInfoReturnable<Boolean> cir) {
 		ThreadUtil.assertNotParticleRendererThread();
 	}
