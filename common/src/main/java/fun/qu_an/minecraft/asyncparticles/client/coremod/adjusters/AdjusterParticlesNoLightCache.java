@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters;
 
 import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.MixinClassAdjuster;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.MixinClassAdjuster;
 
 import java.util.ArrayList;
 import java.util.List;
