@@ -72,9 +72,6 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					case "particlerain_vs" -> FABRIC_PARTICLERAIN_LOADED && VS_LOADED;
 					case "particlerain_create" -> FABRIC_PARTICLERAIN_LOADED && CREATE_LOADED;
 					case "particlerain" -> FABRIC_PARTICLERAIN_LOADED;
-					case "create_5" -> FABRIC_CREATE_LOADED && IS_LEGACY_CREATE;
-					case "create_6" -> FABRIC_CREATE_LOADED && !IS_LEGACY_CREATE;
-					case "sodium" -> FABRIC_SODIUM_LOADED;
 					case "effective" -> FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
 					case "particular" -> FABRIC_PARTICULAR_LOADED;

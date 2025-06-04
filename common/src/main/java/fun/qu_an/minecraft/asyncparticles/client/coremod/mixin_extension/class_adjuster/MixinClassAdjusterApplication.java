@@ -72,7 +72,7 @@ public class MixinClassAdjusterApplication {
 	private MixinClassAdjusterApplication(String packagename, IMixinConfigPlugin mixinSquaredPlugin) {
 		MixinCancellerRegistrar.register((targetClassName, mixinClassName) -> originalMixins.contains(mixinClassName));
 		this.mixinSquaredPlugin = mixinSquaredPlugin;
-		this.generatedMixinPrefix = packagename + ".MixinSquaredGenerated$";
+		this.generatedMixinPrefix = packagename + ".AsyncParticlesGenerated$";
 	}
 
 	public String getGeneratedMixinPrefix(String mixinClassName) {
