@@ -7,7 +7,7 @@ license = "MIT"
 modId = "asyncparticles"
 version = "${version}"
 displayName = "AsyncParticles"
-authors = ""
+authors = "Harvey_Husky"
 description = '''
 
 '''
