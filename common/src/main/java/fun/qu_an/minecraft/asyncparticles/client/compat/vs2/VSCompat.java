@@ -1,9 +1,13 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.vs2;
 
-import net.minecraft.client.particle.Particle;
+import net.minecraft.client.multiplayer.ClientLevel;
 
 public class VSCompat {
-	public static void removeIfOutSight(Particle particle) {
-		throw new UnsupportedOperationException();
+	public static boolean canCreateWeatherParticle(ClientLevel level, double x, double y, double z) {
+		return !VSClientUtils.isUnderShipHeightMap(level, x, y, z, 0.5);
+	}
+
+	public static boolean canCreateWeatherParticle(ClientLevel level, double x, double y, double z, double size) {
+		return !VSClientUtils.isUnderShipHeightMap(level, x, y, z, size);
 	}
 }

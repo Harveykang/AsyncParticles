@@ -84,6 +84,10 @@ dependencies {
     // 0.5.0
 //    modLocalRuntime("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
 
+    /* Valkyrien Skies */
+//    modLocalRuntime "com.github.ValkyrienSkies:Valkyrien-Skies-2:91fd4a9c8a"
+//    modLocalRuntime "com.github.ValkyrienSkies:Eureka:bff0192e8a"
+
     /* Lodestone */
 //    modLocalRuntime "maven.modrinth:lodestonelib:1.21.1-1.7.0.5-fabric"
 

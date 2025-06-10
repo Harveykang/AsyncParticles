@@ -143,6 +143,12 @@ dependencies {
     modCompileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}")
     modCompileOnly("com.tterrag.registrate:Registrate:${registrate_version}")
 
+    /* Valkyrien Skies */
+    modCompileOnly("com.github.ValkyrienSkies:Valkyrien-Skies-2:91fd4a9c8a")
+//            { transitive = false }
+//    modLocalRuntime "com.github.ValkyrienSkies:Valkyrien-Skies-2:91fd4a9c8a"
+//    modLocalRuntime "com.github.ValkyrienSkies:Eureka:bff0192e8a"
+
     /* Effective */
 //    modLocalRuntime fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
 //    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')

@@ -64,6 +64,14 @@ subprojects {
             url = "https://jitpack.io/"
             content { includeGroupAndSubgroups("com.github") }
         }
+        maven {
+            name = "Valkyrien Skies Internal"
+            url = 'https://maven.valkyrienskies.org'
+            allowInsecureProtocol = true
+            content {
+                includeGroup "org.valkyrienskies.core"
+            }
+        }
         maven { url "https://maven.shedaniel.me/" }
         maven { url = "https://mvn.devos.one/releases" } // Porting Lib releases
         maven { url = "https://mvn.devos.one/snapshots" } // Create and several dependencies, Registrate

@@ -26,7 +26,8 @@
     "simple_weather.MixinRainParticle",
     "simple_weather.MixinSimpleWeather$NeoBus",
     "simple_weather_create.MixinSimpleWeather$NeoBus",
-    "subtle_effects.MixinParticleEngine"
+    "subtle_effects.MixinParticleEngine",
+    "vs2_create.MixinParticle_LightCache"
   ],
   "injectors": {
     "defaultRequire": 1

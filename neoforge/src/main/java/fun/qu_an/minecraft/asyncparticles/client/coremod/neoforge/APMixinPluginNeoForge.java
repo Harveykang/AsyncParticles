@@ -47,6 +47,7 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 			case "particular" -> FORGE_PARTICULAR_LOADED;
 			case "iris_like" -> FORGE_IRIS_LIKE_LOADED;
 			case "iris_like_else" -> !FORGE_IRIS_LIKE_LOADED;
+			case "vs2_create" -> FORGE_VS_LOADED && CREATE_LOADED;
 			default -> throw new IllegalArgumentException("Unknown forge mixin: " + mixinClassName);
 		};
 	}

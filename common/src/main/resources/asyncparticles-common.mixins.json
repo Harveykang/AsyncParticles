@@ -44,8 +44,8 @@
     "iris_like.MixinFullyBufferedMultiBufferSource",
     "iris_like.MixinIris",
     "iris_like.MixinOldFullyBufferedMultiBufferSource",
-    "lodestone.MixinRenderHandler",
     "lodestone.MixinLodestoneRenderLayer",
+    "lodestone.MixinRenderHandler",
     "modernui.MixinRenderSystem",
     "off_thread_access.MixinActiveProfiler",
     "off_thread_access.MixinClassInstanceMultiMap",
@@ -74,6 +74,12 @@
     "tick.MixinParticleEngine_Late",
     "tick.MixinTextureManager",
     "tick.MixinWaterFluid",
+    "vs2.MixinLevelRenderer",
+    "vs2.MixinParticle",
+    "vs2.MixinVSAnimation",
+    "vs2.MixinVSSoundEngine",
+    "vs2.InvokerEntityShipCollisionUtils",
+    "vs2.InvokerRaycastUtils",
     "watut.MixinCustomParticleEngine"
   ],
   "injectors": {
