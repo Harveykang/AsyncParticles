@@ -54,6 +54,14 @@ subprojects {
             url = "https://jitpack.io/"
             content { includeGroupAndSubgroups("com.github") }
         }
+        maven {
+            name = "Valkyrien Skies Internal"
+            url = 'https://maven.valkyrienskies.org'
+            allowInsecureProtocol = true
+            content {
+                includeGroup "org.valkyrienskies.core"
+            }
+        }
         maven { url = "https://maven.bawnorton.com/releases" } // Mixin Squared
         maven { url "https://maven.shedaniel.me/" } // Cloth Config API
         maven { url "https://maven.terraformersmc.com/releases/" } // Cloth Config API

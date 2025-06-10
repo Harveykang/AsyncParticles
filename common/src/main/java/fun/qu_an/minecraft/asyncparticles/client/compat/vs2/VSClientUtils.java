@@ -130,7 +130,7 @@ public class VSClientUtils {
 				null
 			);
 			AABBdc entityBoundingBoxInShipCoordinates = entityPolyInShipCoordinates.getEnclosingAABB(new AABBd());
-			if (BugFixUtil.INSTANCE.isCollisionBoxToBig(toMinecraft(entityBoundingBoxInShipCoordinates))) {
+			if (VSCompat.isCollisionBoxTooBig(toMinecraft(entityBoundingBoxInShipCoordinates))) {
 				// Box too large, skip it
 				continue;
 			}
