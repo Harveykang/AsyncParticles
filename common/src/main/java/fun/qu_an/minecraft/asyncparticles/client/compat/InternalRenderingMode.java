@@ -18,7 +18,11 @@ public class InternalRenderingMode {
 
 	public static int asInternalMode(RenderingMode renderingMode) {
 		if (!ModListHelper.IRIS_LIKE_LOADED) {
-			return mode = renderingMode.ordinal();
+			return mode = switch (renderingMode) {
+				case SYNCHRONOUSLY -> SYNC;
+				case DELAYED -> DELAYED_ASYNC;
+				case COMPATIBILITY -> COMPATIBILITY_ASYNC;
+			};
 		}
 		int i = renderingMode.ordinal();
 		ParticleRenderingSettings settings = IrisCompat.getParticleRenderingSettings();
