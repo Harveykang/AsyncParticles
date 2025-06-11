@@ -74,6 +74,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					case "off_thread_access" -> !IS_FORGE;
 					case "particlerain_create" -> FABRIC_PARTICLERAIN_LOADED && CREATE_LOADED;
 					case "particlerain" -> FABRIC_PARTICLERAIN_LOADED;
+					case "particlerain_vs" -> FABRIC_PARTICLERAIN_LOADED && VS_LOADED;
 					case "create" -> FABRIC_CREATE_LOADED;
 					case "effective" -> FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
@@ -110,6 +111,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "watut" -> WATUT_LOADED;
 			case "physicsmod" -> PHYSICSMOD_LOADED;
 			case "physicsmod_create" -> PHYSICSMOD_LOADED && CREATE_LOADED;
+			case "physicsmod_vs" -> PHYSICSMOD_LOADED && VS_LOADED;
 			case "lodestone" -> LODESTONE_LOADED;
 			case "cloth_config" -> CLOTH_CONFIG_LOADED;
 			case "vs2" -> VS_LOADED;
