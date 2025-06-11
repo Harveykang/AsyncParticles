@@ -3,7 +3,6 @@ package fun.qu_an.minecraft.asyncparticles.client.coremod;
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.AdjusterParticlesLockProvider;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.AdjusterParticlesLockRequired;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.AdjusterParticlesNoCulling;
@@ -12,7 +11,7 @@ import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticl
 import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticlesMixinCanceller;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.ExtensionMemberCancelApplication;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.MixinMemberCancellerRegistrar;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier.MixinClassAdjusterRegistrar;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.MixinClassAdjusterRegistrar;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;

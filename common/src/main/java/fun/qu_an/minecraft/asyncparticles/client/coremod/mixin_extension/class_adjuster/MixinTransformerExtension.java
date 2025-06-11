@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.target_modifier;
+package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster;
 
 import com.bawnorton.mixinsquared.reflection.FieldReference;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfig;
