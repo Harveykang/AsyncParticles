@@ -26,7 +26,6 @@ import static pigcart.particlerain.ParticleRainClient.config;
 
 @SuppressWarnings("unused")
 public class ParticleRainCompatImpl {
-	@Unique
 	public static void onShipCollision(ClientLevel level, Vec3 location, Vec3 movement, AABB aabb) {
 		if (!config.doRippleParticles && !config.doSplashParticles) {
 			return;

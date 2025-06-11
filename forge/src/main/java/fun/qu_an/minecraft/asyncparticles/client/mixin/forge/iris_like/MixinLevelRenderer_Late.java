@@ -21,10 +21,6 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRendering
 
 @Mixin(value = LevelRenderer.class, priority = 1500) // After mixin.render.MixinLevelRenderer
 public abstract class MixinLevelRenderer_Late {
-	@Shadow
-	@Final
-	public RenderBuffers renderBuffers;
-
 	@Inject(method = "renderLevel", at = @At(value = "CONSTANT", args = "stringValue=entities"))
 	private void beforeRenderEntities(PoseStack poseStack,
 									  float partialTick,

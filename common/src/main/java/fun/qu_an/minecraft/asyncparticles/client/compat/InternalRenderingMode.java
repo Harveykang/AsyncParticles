@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.compat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.iris.IrisCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.RenderingMode;
 import net.irisshaders.iris.shaderpack.properties.ParticleRenderingSettings;
+import org.jetbrains.annotations.ApiStatus;
 
 public class InternalRenderingMode {
 	public static final int
@@ -16,7 +17,8 @@ public class InternalRenderingMode {
 		IRIS_AFTER_SYNC = 6;
 	private static int mode = 0;
 
-	public static int asInternalMode(RenderingMode renderingMode) {
+	@ApiStatus.Internal
+	public static int updateInternalMode(RenderingMode renderingMode) {
 		if (!ModListHelper.IRIS_LIKE_LOADED) {
 			return mode = switch (renderingMode) {
 				case SYNCHRONOUSLY -> SYNC;

@@ -21,7 +21,7 @@ public abstract class MixinLevelRenderer_Late {
 		slice = @Slice(from = @At(value = "FIELD", ordinal = 1, target = "Lnet/minecraft/client/renderer/RenderStateShard;WEATHER_TARGET:Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;")),
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;process(F)V"))
 	private void onRenderLevelTail2(PoseStack poseStack,
-									float f,
+									float partialTick,
 									long l,
 									boolean bl,
 									Camera camera,
@@ -35,7 +35,7 @@ public abstract class MixinLevelRenderer_Late {
 			PoseStack stack = RenderSystem.getModelViewStack();
 			// so that we don't need to change the behavior of ParticleEngine.render()
 			PoseStack.Pose pose = stack.poseStack.removeLast();
-			AsyncRenderer.endAll(poseStack, f, camera, lightTexture, true);
+			AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, true);
 			stack.poseStack.addLast(pose);
 		}
 	}

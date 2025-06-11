@@ -40,7 +40,7 @@ public abstract class MixinLevelRenderer {
 
 	@Inject(method = "renderLevel", at = @At(value = "HEAD"))
 	private void onRenderLevelHead(PoseStack poseStack,
-								   float f,
+								   float partialTick,
 								   long l,
 								   boolean bl,
 								   Camera camera,
@@ -57,10 +57,9 @@ public abstract class MixinLevelRenderer {
 		} else {
 			AsyncRenderer.frustum = this.cullingFrustum;
 		}
-		// TODO move to iris compat
-		int irmValue = InternalRenderingMode.asInternalMode(ConfigHelper.getParticleRenderingMode());
+		int irmValue = InternalRenderingMode.updateInternalMode(ConfigHelper.getParticleRenderingMode());
 		irm.set(irmValue);
-		AsyncRenderer.start(f, camera, irmValue);
+		AsyncRenderer.start(partialTick, camera, irmValue);
 	}
 
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;prepare(DDD)V"))
@@ -99,7 +98,7 @@ public abstract class MixinLevelRenderer {
 	@Inject(method = "renderLevel", // priority = 499, inject earlier
 		at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/renderer/LevelRenderer;renderDebug(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/Camera;)V"))
 	private void onRenderLevelTail(PoseStack poseStack,
-								   float f,
+								   float partialTick,
 								   long l,
 								   boolean bl,
 								   Camera camera,
@@ -111,7 +110,7 @@ public abstract class MixinLevelRenderer {
 								   LocalIntRef irm) {
 		if (irm.get() == InternalRenderingMode.DELAYED_ASYNC &&
 			transparencyChain == null) {
-			AsyncRenderer.endAll(poseStack, f, camera, lightTexture, true);
+			AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, true);
 		}
 	}
 }
