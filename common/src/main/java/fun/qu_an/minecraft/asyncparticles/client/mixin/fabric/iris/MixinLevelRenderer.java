@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
 
 @Mixin(value = LevelRenderer.class, priority = 1500) // After mixin.render.MixinLevelRenderer
-public abstract class MixinLevelRenderer_Late {
+public abstract class MixinLevelRenderer {
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/client/multiplayer/ClientLevel;entitiesForRendering()Ljava/lang/Iterable;"))
 	private void beforeRenderEntities(DeltaTracker deltaTracker,
@@ -66,10 +66,10 @@ public abstract class MixinLevelRenderer_Late {
 										 @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 										 LocalIntRef irm) {
 		switch (irm.get()) {
-			case IRIS_MIXED_ASYNC -> AsyncRenderer.endTranslucent(partialTick, camera, lightTexture, true);
+			case SYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, false);
 			case COMPATIBILITY_ASYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
 			case IRIS_MIXED_SYNC -> AsyncRenderer.endTranslucent(partialTick, camera, lightTexture, false);
-			case SYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, false);
+			case IRIS_MIXED_ASYNC -> AsyncRenderer.endTranslucent(partialTick, camera, lightTexture, true);
 		}
 	}
 }

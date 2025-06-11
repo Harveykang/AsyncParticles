@@ -16,8 +16,8 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRendering
 /**
  * @implNote Suppressed if Iris mod loaded.
  */
-@Mixin(value = LevelRenderer.class, priority = 1500) // After mixin.render.MixinLevelRenderer
-public abstract class MixinLevelRenderer_Late {
+@Mixin(LevelRenderer.class) // After mixin.render.MixinLevelRenderer
+public abstract class MixinLevelRenderer {
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V"))
 	private void redirectRenderParticles(ParticleEngine instance,
