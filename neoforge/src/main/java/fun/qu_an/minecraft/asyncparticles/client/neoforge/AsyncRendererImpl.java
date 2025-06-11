@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.RenderStateShard;
 
 @SuppressWarnings("unused")
 public class AsyncRendererImpl {
-	public static void endOpaque(float f, Camera camera, LightTexture lightTexture) {
+	public static void endOpaque(float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
@@ -23,13 +23,12 @@ public class AsyncRendererImpl {
 		Minecraft mc = Minecraft.getInstance();
 		mc.getProfiler().popPush("particles");
 
-		ParticleEngine particleEngine = mc.particleEngine;
-		AsyncRenderer.renderAsync = ConfigHelper.isRenderAsync();
-		particleEngine.render(lightTexture, camera, f, null, t -> !t.isTranslucent());
+		AsyncRenderer.renderAsync = isAsync;
+		mc.particleEngine.render(lightTexture, camera, f, null, t -> !t.isTranslucent());
 		AsyncRenderer.renderAsync = false;
 	}
 
-	public static void endTranslucent(float f, Camera camera, LightTexture lightTexture) {
+	public static void endTranslucent(float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
@@ -47,9 +46,8 @@ public class AsyncRendererImpl {
 			RenderStateShard.PARTICLES_TARGET.setupRenderState();
 		}
 
-		ParticleEngine particleEngine = mc.particleEngine;
-		AsyncRenderer.renderAsync = ConfigHelper.isRenderAsync();
-		particleEngine.render(lightTexture, camera, f, null, ParticleRenderType::isTranslucent);
+		AsyncRenderer.renderAsync = isAsync;
+		mc.particleEngine.render(lightTexture, camera, f, null, ParticleRenderType::isTranslucent);
 		AsyncRenderer.renderAsync = false;
 
 		if (levelRenderer.transparencyChain != null) {

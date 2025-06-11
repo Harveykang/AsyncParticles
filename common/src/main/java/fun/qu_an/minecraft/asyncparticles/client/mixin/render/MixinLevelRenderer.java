@@ -2,9 +2,10 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.render;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
-import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -48,13 +49,9 @@ public abstract class MixinLevelRenderer {
 								   Matrix4f frustumMatrix,
 								   Matrix4f projectionMatrix,
 								   CallbackInfo ci,
-								   @Share(namespace = "asyncparticles", value = "isRenderAsync")
-								   LocalBooleanRef isRenderAsync,
-								   @Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
-								   LocalBooleanRef isMixedParticleRendering) {
-		float f = deltaTracker.getGameTimeDeltaPartialTick(false);
-		boolean b = ConfigHelper.isRenderAsync();
-		isRenderAsync.set(b);
+								   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+								   LocalIntRef irm) {
+		float partialTick = deltaTracker.getGameTimeDeltaPartialTick(false);
 		if (this.capturedFrustum != null) {
 			Frustum frustum = this.capturedFrustum;
 			frustum.prepare(this.frustumPos.x, this.frustumPos.y, this.frustumPos.z);
@@ -62,59 +59,42 @@ public abstract class MixinLevelRenderer {
 		} else {
 			AsyncRenderer.frustum = this.cullingFrustum;
 		}
-		// TODO move to iris
-		AsyncRenderer.captureParticleRenderingSetting();
-		isMixedParticleRendering.set(AsyncRenderer.isMixedParticleRendering());
-		AsyncRenderer.start(f, camera, b);
+		int irmValue = InternalRenderingMode.updateInternalMode(ConfigHelper.getParticleRenderingMode());
+		irm.set(irmValue);
+		AsyncRenderer.start(partialTick, camera, irmValue);
 	}
 
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;prepare(DDD)V"))
 	private void redirectPrepare(Frustum frustum, double x, double y, double z) {
-		// do nothing
+		// no-op
 	}
 
 	@Redirect(method = "renderLevel",
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;particlesTarget:Lcom/mojang/blaze3d/pipeline/RenderTarget;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;clear(Z)V"))
-	private void redirectClearRenderTarget(RenderTarget instance, boolean bl,
-										   @Share(namespace = "asyncparticles", value = "isRenderAsync")
-										   LocalBooleanRef isRenderAsync) {
-		if (!isRenderAsync.get()) {
-			instance.clear(bl);
-		}
+	private void redirectClearRenderTarget(RenderTarget instance, boolean bl) {
+		// no-op
 	}
 
 	@Redirect(method = "renderLevel",
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;particlesTarget:Lcom/mojang/blaze3d/pipeline/RenderTarget;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;copyDepthFrom(Lcom/mojang/blaze3d/pipeline/RenderTarget;)V"))
-	private void redirectCopyDepthFrom(RenderTarget instance, RenderTarget target,
-									   @Share(namespace = "asyncparticles", value = "isRenderAsync")
-									   LocalBooleanRef isRenderAsync) {
-		if (!isRenderAsync.get()) {
-			instance.copyDepthFrom(target);
-		}
+	private void redirectCopyDepthFrom(RenderTarget instance, RenderTarget target) {
+		// no-op
 	}
 
 	@Redirect(method = "renderLevel",
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderStateShard;PARTICLES_TARGET:Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;setupRenderState()V"))
-	private void redirectSetupRenderState(RenderStateShard.OutputStateShard instance,
-										  @Share(namespace = "asyncparticles", value = "isRenderAsync")
-										  LocalBooleanRef isRenderAsync) {
-		if (!isRenderAsync.get()) {
-			instance.setupRenderState();
-		}
+	private void redirectSetupRenderState(RenderStateShard.OutputStateShard instance) {
+		// no-op
 	}
 
 	@Redirect(method = "renderLevel",
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderStateShard;PARTICLES_TARGET:Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;clearRenderState()V"))
-	private void redirectClearRenderState(RenderStateShard.OutputStateShard instance,
-										  @Share(namespace = "asyncparticles", value = "isRenderAsync")
-										  LocalBooleanRef isRenderAsync) {
-		if (!isRenderAsync.get()) {
-			instance.clearRenderState();
-		}
+	private void redirectClearRenderState(RenderStateShard.OutputStateShard instance) {
+		// no-op
 	}
 
 	@Inject(method = "renderLevel", // priority = 500, inject earlier
@@ -128,15 +108,11 @@ public abstract class MixinLevelRenderer {
 								   Matrix4f projectionMatrix,
 								   CallbackInfo ci,
 								   @Local(ordinal = 0) float partialTick,
-								   @Share(namespace = "asyncparticles", value = "isRenderAsync")
-								   LocalBooleanRef isRenderAsync,
-								   @Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
-								   LocalBooleanRef isMixedParticleRendering) {
-		if (isRenderAsync.get() &&
-			!isMixedParticleRendering.get() &&
-			!ConfigHelper.isCompatibilityRendering() &&
+								   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+								   LocalIntRef irm) {
+		if (irm.get() == InternalRenderingMode.DELAYED_ASYNC &&
 			transparencyChain == null) {
-			AsyncRenderer.endAll(partialTick, camera, lightTexture);
+			AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
 		}
 	}
 
@@ -152,14 +128,10 @@ public abstract class MixinLevelRenderer {
 									Matrix4f projectionMatrix,
 									CallbackInfo ci,
 									@Local(ordinal = 0) float partialTick,
-									@Share(namespace = "asyncparticles", value = "isRenderAsync")
-										LocalBooleanRef isRenderAsync,
-									@Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
-										LocalBooleanRef isMixedParticleRendering) {
-		if (isRenderAsync.get() &&
-			!isMixedParticleRendering.get() &&
-			!ConfigHelper.isCompatibilityRendering()) {
-			AsyncRenderer.endAll(partialTick, camera, lightTexture);
+									@Share(namespace = "asyncparticles", value = "internalRenderingMode")
+									LocalIntRef irm) {
+		if (irm.get() == InternalRenderingMode.DELAYED_ASYNC) {
+			AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
 		}
 	}
 }

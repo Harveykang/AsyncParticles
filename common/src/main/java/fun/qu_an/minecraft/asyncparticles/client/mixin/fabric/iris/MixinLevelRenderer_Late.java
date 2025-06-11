@@ -2,14 +2,10 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.iris;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
-import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
-import net.irisshaders.iris.fantastic.PhasedParticleEngine;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.*;
 import org.joml.Matrix4f;
@@ -18,6 +14,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
 
 @Mixin(value = LevelRenderer.class, priority = 1500) // After mixin.render.MixinLevelRenderer
 public abstract class MixinLevelRenderer_Late {
@@ -32,12 +30,11 @@ public abstract class MixinLevelRenderer_Late {
 									  Matrix4f projectionMatrix,
 									  CallbackInfo ci,
 									  @Local(ordinal = 0) float partialTick,
-									  @Share(namespace = "asyncparticles", value = "isRenderAsync")
-									  LocalBooleanRef isRenderAsync,
-									  @Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
-									  LocalBooleanRef isMixedParticleRendering) {
-		if (!isRenderAsync.get() && isMixedParticleRendering.get()) {
-			AsyncRenderer.endOpaque(partialTick, camera, lightTexture);
+									  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+									  LocalIntRef irm) {
+		switch (irm.get()) {
+			case IRIS_MIXED_SYNC -> AsyncRenderer.endOpaque(partialTick, camera, lightTexture, false);
+			case IRIS_BEFORE_SYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, false);
 		}
 	}
 
@@ -52,12 +49,11 @@ public abstract class MixinLevelRenderer_Late {
 												Matrix4f projectionMatrix,
 												CallbackInfo ci,
 												@Local(ordinal = 0) float partialTick,
-												@Share(namespace = "asyncparticles", value = "isRenderAsync")
-												LocalBooleanRef isRenderAsync,
-												@Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
-												LocalBooleanRef isMixedParticleRendering) {
-		if (isRenderAsync.get() && isMixedParticleRendering.get()) {
-			AsyncRenderer.endOpaque(partialTick, camera, lightTexture);
+												@Share(namespace = "asyncparticles", value = "internalRenderingMode")
+												LocalIntRef irm) {
+		switch (irm.get()) {
+			case IRIS_MIXED_ASYNC -> AsyncRenderer.endOpaque(partialTick, camera, lightTexture, true);
+			case IRIS_BEFORE_ASYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
 		}
 	}
 
@@ -67,23 +63,13 @@ public abstract class MixinLevelRenderer_Late {
 										 LightTexture lightTexture,
 										 Camera camera,
 										 float partialTick,
-										 @Share(namespace = "asyncparticles", value = "isRenderAsync")
-										 LocalBooleanRef isRenderAsync,
-										 @Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
-										 LocalBooleanRef isMixedParticleRendering) {
-		if (isRenderAsync.get()) {
-			if (isMixedParticleRendering.get()) {
-				AsyncRenderer.endTranslucent(partialTick, camera, lightTexture);
-			} else if (ConfigHelper.isCompatibilityRendering()) {
-				AsyncRenderer.endAll(partialTick, camera, lightTexture);
-			}
-		} else {
-			if (isMixedParticleRendering.get()) {
-				((PhasedParticleEngine) Minecraft.getInstance().particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
-			} else {
-				((PhasedParticleEngine) Minecraft.getInstance().particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
-			}
-			instance.render(lightTexture, camera, partialTick);
+										 @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+										 LocalIntRef irm) {
+		switch (irm.get()) {
+			case IRIS_MIXED_ASYNC -> AsyncRenderer.endTranslucent(partialTick, camera, lightTexture, true);
+			case COMPATIBILITY_ASYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
+			case IRIS_MIXED_SYNC -> AsyncRenderer.endTranslucent(partialTick, camera, lightTexture, false);
+			case SYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, false);
 		}
 	}
 }

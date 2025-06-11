@@ -44,6 +44,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.IRIS_AFTER_SYNC;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.IRIS_MIXED_ASYNC;
+
 // TODO: 整理这一坨
 @Environment(EnvType.CLIENT)
 public class AsyncRenderer {
@@ -119,10 +123,19 @@ public class AsyncRenderer {
 
 	/* Renderer */
 
-	public static void start(float f, Camera camera, boolean isRenderAsync) {
+	public static void start(float f, Camera camera, int irm) {
 		tryDebug();
-		if (!isRenderAsync) {
-			return;
+		switch (irm) {
+			case IRIS_MIXED_SYNC -> {
+				mixedParticleRenderingSetting = true;
+				return;
+			}
+			case SYNC, IRIS_BEFORE_SYNC, IRIS_AFTER_SYNC -> {
+				mixedParticleRenderingSetting = false;
+				return;
+			}
+			case IRIS_MIXED_ASYNC -> mixedParticleRenderingSetting = true;
+			default -> mixedParticleRenderingSetting = false;
 		}
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
@@ -213,7 +226,7 @@ public class AsyncRenderer {
 		return null;
 	}
 
-	public static void endAll(float f, Camera camera, LightTexture lightTexture) {
+	public static void endAll(float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
@@ -233,7 +246,7 @@ public class AsyncRenderer {
 
 		ParticleEngine particleEngine = mc.particleEngine;
 
-		AsyncRenderer.renderAsync = ConfigHelper.isRenderAsync();
+		AsyncRenderer.renderAsync = isAsync;
 		if (ModListHelper.FABRIC_IRIS_LOADED) {
 			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
@@ -246,12 +259,12 @@ public class AsyncRenderer {
 	}
 
 	@ExpectPlatform
-	public static void endOpaque(float f, Camera camera, LightTexture lightTexture) {
+	public static void endOpaque(float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
 		throw new AssertionError();
 	}
 
 	@ExpectPlatform
-	public static void endTranslucent(float f, Camera camera, LightTexture lightTexture) {
+	public static void endTranslucent(float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
 		throw new AssertionError();
 	}
 

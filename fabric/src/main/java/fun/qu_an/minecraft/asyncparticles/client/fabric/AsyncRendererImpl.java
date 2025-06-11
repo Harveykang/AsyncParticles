@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 
 @SuppressWarnings("unused")
 public class AsyncRendererImpl {
-	public static void endOpaque(float f, Camera camera, LightTexture lightTexture) {
+	public static void endOpaque(float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
@@ -36,12 +36,12 @@ public class AsyncRendererImpl {
 		} else {
 			throw new UnsupportedOperationException("endOpaque");
 		}
-		AsyncRenderer.renderAsync = ConfigHelper.isRenderAsync();
+		AsyncRenderer.renderAsync = isAsync;
 		particleEngine.render(lightTexture, camera, f);
 		AsyncRenderer.renderAsync = false;
 	}
 
-	public static void endTranslucent(float f, Camera camera, LightTexture lightTexture) {
+	public static void endTranslucent(float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
@@ -65,7 +65,7 @@ public class AsyncRendererImpl {
 		} else {
 			throw new UnsupportedOperationException("endOpaque");
 		}
-		AsyncRenderer.renderAsync = ConfigHelper.isRenderAsync();
+		AsyncRenderer.renderAsync = isAsync;
 		particleEngine.render(lightTexture, camera, f);
 		AsyncRenderer.renderAsync = false;
 

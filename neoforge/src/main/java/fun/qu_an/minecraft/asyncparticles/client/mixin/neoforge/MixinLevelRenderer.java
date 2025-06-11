@@ -1,9 +1,8 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.iris_like;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge;
 
 import com.llamalad7.mixinextras.sugar.Share;
-import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -15,8 +14,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.function.Predicate;
 
-@Mixin(value = LevelRenderer.class, priority = 1500) // After mixin.render.MixinLevelRenderer
-public abstract class MixinLevelRenderer_Late {
+import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
+
+@Mixin(value = LevelRenderer.class) // After mixin.render.MixinLevelRenderer
+public abstract class MixinLevelRenderer {
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", ordinal = 0, remap = false,
 		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
 	private void redirectRenderParticles0(ParticleEngine instance,
@@ -25,13 +26,11 @@ public abstract class MixinLevelRenderer_Late {
 										  float partialTick,
 										  Frustum frustum,
 										  Predicate<ParticleRenderType> predicate,
-										  @Share(namespace = "asyncparticles", value = "isRenderAsync")
-										  LocalBooleanRef isRenderAsync) {
-		if (!isRenderAsync.get()) {
-			instance.render(lightTexture, camera, partialTick, frustum, predicate);
-		} else if (ConfigHelper.isCompatibilityRendering()) {
-//			assert !isMixedParticleRendering.get();
-			AsyncRenderer.endAll(partialTick, camera, lightTexture);
+										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+										  LocalIntRef irm) {
+		switch (irm.get()) {
+			case SYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, false);
+			case COMPATIBILITY_ASYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
 		}
 	}
 
@@ -43,14 +42,13 @@ public abstract class MixinLevelRenderer_Late {
 										  float partialTick,
 										  Frustum frustum,
 										  Predicate<ParticleRenderType> predicate,
-										  @Share(namespace = "asyncparticles", value = "isRenderAsync")
-										  LocalBooleanRef isRenderAsync,
-										  @Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
-										  LocalBooleanRef isMixedParticleRendering) {
-		if (!isRenderAsync.get()) {
-			instance.render(lightTexture, camera, partialTick, frustum, predicate);
-		} else if (isMixedParticleRendering.get() || ConfigHelper.isCompatibilityRendering()) {
-			AsyncRenderer.endOpaque(partialTick, camera, lightTexture);
+										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+										  LocalIntRef irm) {
+		switch (irm.get()) {
+			case IRIS_MIXED_SYNC, SYNC -> AsyncRenderer.endOpaque(partialTick, camera, lightTexture, false);
+			case IRIS_MIXED_ASYNC, COMPATIBILITY_ASYNC ->
+				AsyncRenderer.endOpaque(partialTick, camera, lightTexture, true);
+			case IRIS_BEFORE_ASYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
 		}
 	}
 
@@ -62,14 +60,13 @@ public abstract class MixinLevelRenderer_Late {
 										  float partialTick,
 										  Frustum frustum,
 										  Predicate<ParticleRenderType> predicate,
-										  @Share(namespace = "asyncparticles", value = "isRenderAsync")
-										  LocalBooleanRef isRenderAsync,
-										  @Share(namespace = "asyncparticles", value = "isMixedParticleRendering")
-										  LocalBooleanRef isMixedParticleRendering) {
-		if (!isRenderAsync.get()) {
-			instance.render(lightTexture, camera, partialTick, frustum, predicate);
-		} else if (isMixedParticleRendering.get() || ConfigHelper.isCompatibilityRendering()) {
-			AsyncRenderer.endTranslucent(partialTick, camera, lightTexture);
+										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+										  LocalIntRef irm) {
+
+		switch (irm.get()) {
+			case IRIS_MIXED_SYNC, SYNC -> AsyncRenderer.endTranslucent(partialTick, camera, lightTexture, false);
+			case IRIS_MIXED_ASYNC, COMPATIBILITY_ASYNC ->
+				AsyncRenderer.endTranslucent(partialTick, camera, lightTexture, true);
 		}
 	}
 }

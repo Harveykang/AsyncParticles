@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = FullyBufferedMultiBufferSource.class)
+@Mixin(value = FullyBufferedMultiBufferSource.class, priority = 500)
 public class MixinFullyBufferedMultiBufferSource {
 	@Inject(method = "getBuffer", at = @At("HEAD"))
 	private void getBuffer(CallbackInfoReturnable<VertexConsumer> cir) {
