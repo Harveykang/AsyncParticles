@@ -26,7 +26,7 @@ public class AsyncParticlesClient {
 		if (ModListHelper.PARTICLERAIN_LOADED) {
 			if (ModListHelper.VS_LOADED) {
 				WeatherParticleAddon.Type.RAIN.register((level, location, v, aabb) -> {
-					Vec3 shipMovement = VSClientUtils.entityMovColShipOnly(null, v, aabb, level);
+					Vec3 shipMovement = VSClientUtils.entityMovColShipOnly(v, aabb, level);
 					if (shipMovement == null) {
 						return v;
 					}
@@ -34,7 +34,7 @@ public class AsyncParticlesClient {
 					return shipMovement;
 				});
 				WeatherParticleAddon.CollisionFunction function = (level, location, v, aabb) -> {
-					Vec3 shipMovement = VSClientUtils.entityMovColShipOnly(null, v, aabb, level);
+					Vec3 shipMovement = VSClientUtils.entityMovColShipOnly(v, aabb, level);
 					return shipMovement == null ? v : shipMovement;
 				};
 				WeatherParticleAddon.Type.SNOW.register(function);

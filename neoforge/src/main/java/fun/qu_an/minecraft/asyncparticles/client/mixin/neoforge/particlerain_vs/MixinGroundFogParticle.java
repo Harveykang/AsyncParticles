@@ -22,7 +22,7 @@ public abstract class MixinGroundFogParticle extends MixinWeatherParticle implem
 
 	@Inject(method = "tick", at = @At("RETURN"))
 	private void onTick(CallbackInfo ci) {
-		if (VSClientUtils.isEntityMovColShipOnly(null,
+		if (VSClientUtils.isEntityMovColShipOnly(
 			Vec3.ZERO,
 			getBoundingBox().inflate(6, 0, 6),
 			level)) {

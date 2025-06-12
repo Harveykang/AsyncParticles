@@ -6,8 +6,6 @@ import kotlin.Pair;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
@@ -27,7 +25,6 @@ import org.valkyrienskies.core.apigame.collision.EntityPolygonCollider;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.ValkyrienSkiesMod;
 import org.valkyrienskies.mod.common.util.EntityShipCollisionUtils;
-import org.valkyrienskies.mod.common.util.IEntityDraggingInformationProvider;
 import org.valkyrienskies.mod.util.BugFixUtil;
 
 import java.util.List;
@@ -63,34 +60,23 @@ public class VSClientUtils {
 	 * get ship
 	 */
 	public static Pair<Vec3, ClientShip> entityMovColShipOnlyAndGet(
-		@Nullable Entity entity,
 		Vec3 movement,
 		AABB entityBoundingBox,
 		ClientLevel world) {
-		// Inflate the bounding box more for players than other entities, to give players a better collision result.
-		// Note that this increases the cost of doing collision, so we only do it for the players
-		double inflation = (entity instanceof Player) ? 0.5 : 0.1;
-		double stepHeight = (entity != null) ? entity.maxUpStep() : 0.0;
-		// Add [max(stepHeight - inflation, 0.0)] to search for polygons we might collide with while stepping
-		double yMovement = movement.y() + Math.max(stepHeight - inflation, 0.0);
 		List<ConvexPolygonc> collidingShipPolygons =
 			((InvokerEntityShipCollisionUtils) (Object) EntityShipCollisionUtils.INSTANCE).invoker_getShipPolygonsCollidingWithEntity(
-				entity, new Vec3(movement.x(), yMovement, movement.z()),
-				entityBoundingBox.inflate(inflation), world);
+				null, new Vec3(movement.x(), movement.y(), movement.z()),
+				entityBoundingBox.inflate(0.1), world);
 		if (collidingShipPolygons.isEmpty()) {
 			return new Pair<>(movement, null);
 		}
 
 		Pair<Vector3dc, Long> pair = collider.adjustEntityMovementForPolygonCollisions(
-			toJOML(movement), toJOML(entityBoundingBox), stepHeight, collidingShipPolygons);
+			toJOML(movement), toJOML(entityBoundingBox), 0.0, collidingShipPolygons);
 		Vector3dc newMovement = pair.getFirst();
 		Long shipCollidingWith = pair.getSecond();
 
 		if (shipCollidingWith != null) {
-			if (entity != null) {
-				// Update the [IEntity.lastShipStoodOn]
-				((IEntityDraggingInformationProvider) entity).getDraggingInformation().setLastShipStoodOn(shipCollidingWith);
-			}
 			return new Pair<>(toMinecraft(newMovement), VSGameUtilsKt.getShipObjectWorld(world).getAllShips().getById(shipCollidingWith));
 		}
 		return new Pair<>(toMinecraft(newMovement), null);
@@ -100,23 +86,19 @@ public class VSClientUtils {
 	 * No vanilla collision check.
 	 */
 	public static boolean isEntityMovColShipOnly(
-		@Nullable Entity entity,
 		Vec3 movement,
 		AABB entityBoundingBox,
 		ClientLevel world,
 		double inflation) {
-		double stepHeight = (entity != null) ? entity.maxUpStep() : 0.0;
-		double yMovement = movement.y() + Math.max(stepHeight - inflation, 0.0);
-		Vec3 movement1 = new Vec3(movement.x(), yMovement, movement.z());
+		Vec3 movement1 = new Vec3(movement.x(), movement.y, movement.z());
 		AABB bb = entityBoundingBox.inflate(inflation);
-		return hasShipPolygonsCollidingWithEntity(entity, movement1, bb, world);
+		return hasShipPolygonsCollidingWithEntity(movement1, bb, world);
 	}
 
 	/**
 	 * @see EntityShipCollisionUtils#getShipPolygonsCollidingWithEntity
 	 */
-	public static boolean hasShipPolygonsCollidingWithEntity(Entity entity,
-															 Vec3 movement,
+	public static boolean hasShipPolygonsCollidingWithEntity(Vec3 movement,
 															 AABB entityBoundingBox,
 															 ClientLevel world) {
 		AABB entityBoxWithMovement = entityBoundingBox.expandTowards(movement);
@@ -135,7 +117,7 @@ public class VSClientUtils {
 				continue;
 			}
 
-			Iterable<VoxelShape> shipBlockCollisionStream = world.getBlockCollisions(entity, toMinecraft(entityBoundingBoxInShipCoordinates));
+			Iterable<VoxelShape> shipBlockCollisionStream = world.getBlockCollisions(null, toMinecraft(entityBoundingBoxInShipCoordinates));
 			if (shipBlockCollisionStream.iterator().hasNext()) {
 				return true;
 			}
@@ -147,12 +129,10 @@ public class VSClientUtils {
 	 * No vanilla collision check.
 	 */
 	public static boolean isEntityMovColShipOnly(
-		@Nullable Entity entity,
 		Vec3 movement,
 		AABB entityBoundingBox,
 		ClientLevel world) {
-		double inflation = (entity instanceof Player) ? 0.5 : 0.1;
-		return isEntityMovColShipOnly(entity, movement, entityBoundingBox, world, inflation);
+		return isEntityMovColShipOnly(movement, entityBoundingBox, world, 0.1d);
 	}
 
 	/**
@@ -160,7 +140,6 @@ public class VSClientUtils {
 	 */
 	@Nullable
 	public static Vec3 entityMovColShipOnly(
-		@Nullable Entity entity,
 		Vec3 movement,
 		AABB entityBoundingBox,
 		ClientLevel world,
@@ -168,14 +147,11 @@ public class VSClientUtils {
 		double stepHeight) {
 		// Inflate the bounding box more for players than other entities, to give players a better collision result.
 		// Note that this increases the cost of doing collision, so we only do it for the players
-		if (entity != null) {
-			stepHeight = entity.maxUpStep();
-		}
 		// Add [max(stepHeight - inflation, 0.0)] to search for polygons we might collide with while stepping
 		double yMovement = movement.y() + Math.max(stepHeight - inflation, 0.0);
 		List<ConvexPolygonc> collidingShipPolygons =
 			((InvokerEntityShipCollisionUtils) (Object) EntityShipCollisionUtils.INSTANCE).invoker_getShipPolygonsCollidingWithEntity(
-				entity, new Vec3(movement.x(), yMovement, movement.z()),
+				null, new Vec3(movement.x(), yMovement, movement.z()),
 				entityBoundingBox.inflate(inflation), world);
 		if (collidingShipPolygons.isEmpty()) {
 			return null;
@@ -190,19 +166,14 @@ public class VSClientUtils {
 			return null;
 		}
 
-		if (entity != null) {
-			((IEntityDraggingInformationProvider) entity).getDraggingInformation().setLastShipStoodOn(shipCollidingWith);
-			return toMinecraft(newMovement);
-		} else {
-			ClientShip ship = VSGameUtilsKt.getShipObjectWorld(world).getLoadedShips().getById(shipCollidingWith);
-			if (ship == null) {
-				return null;
-			}
-			Vector3dc velocity = ship.getVelocity();
-			return new Vec3(0.05 * velocity.x() + newMovement.x(),
-				0.05 * velocity.y() + newMovement.y(),
-				0.05 * velocity.z() + newMovement.z());
+		ClientShip ship = VSGameUtilsKt.getShipObjectWorld(world).getLoadedShips().getById(shipCollidingWith);
+		if (ship == null) {
+			return null;
 		}
+		Vector3dc velocity = ship.getVelocity();
+		return new Vec3(0.05 * velocity.x() + newMovement.x(),
+			0.05 * velocity.y() + newMovement.y(),
+			0.05 * velocity.z() + newMovement.z());
 	}
 
 	/**
@@ -210,16 +181,10 @@ public class VSClientUtils {
 	 */
 	@Nullable
 	public static Vec3 entityMovColShipOnly(
-		@Nullable Entity entity,
 		Vec3 movement,
 		AABB entityBoundingBox,
 		ClientLevel world) {
-		double inflation = (entity instanceof Player) ? 0.5 : 0.1;
-		return entityMovColShipOnly(entity, movement, entityBoundingBox, world, inflation, 0.0);
-	}
-
-	public static Vec3 entityMovColShipOnly(Vec3 movement, AABB entityBoundingBox, ClientLevel world, double inflation, double stepHeight) {
-		return entityMovColShipOnly(null, movement, entityBoundingBox, world, inflation, stepHeight);
+		return entityMovColShipOnly(movement, entityBoundingBox, world, 0.1d, 0.0);
 	}
 
 	/**

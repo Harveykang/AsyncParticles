@@ -53,7 +53,7 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 		double xsize = aABB.getXsize();
 		double ysize = aABB.getYsize();
 		double zsize = aABB.getZsize();
-		Vec3 mov = VSClientUtils.entityMovColShipOnly(null,
+		Vec3 mov = VSClientUtils.entityMovColShipOnly(
 			vec3,
 			aABB.inflate(xsize >= 0.1 ? 0.0 : 0.1 - xsize, ysize >= 0.1 ? 0.0 : 0.1 - ysize, zsize >= 0.1 ? 0.0 : 0.1 - zsize),
 			(ClientLevel) level);

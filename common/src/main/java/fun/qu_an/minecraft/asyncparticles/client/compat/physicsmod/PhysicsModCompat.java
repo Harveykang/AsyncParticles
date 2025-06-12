@@ -21,7 +21,7 @@ public class PhysicsModCompat {
 	public static boolean isCollideWithShip(ClientLevel level, Vec3 movement, AABB3D aabb) {
 		Vector3d min = aabb.getMin();
 		Vector3d max = aabb.getMax();
-		return VSClientUtils.isEntityMovColShipOnly(null,
+		return VSClientUtils.isEntityMovColShipOnly(
 			movement,
 			new AABB(min.x, min.y, min.z, max.x, max.y, max.z),
 			level);
