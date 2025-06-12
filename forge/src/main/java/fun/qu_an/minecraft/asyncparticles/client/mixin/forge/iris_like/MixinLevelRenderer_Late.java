@@ -36,6 +36,7 @@ public abstract class MixinLevelRenderer_Late {
 		switch (irm.get()) {
 			case IRIS_MIXED_ASYNC -> AsyncRenderer.irisCustom(poseStack, partialTick, camera, lightTexture);
 			case IRIS_MIXED_SYNC -> AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture, false);
+			case IRIS_BEFORE_SYNC -> AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, false);
 		}
 	}
 
