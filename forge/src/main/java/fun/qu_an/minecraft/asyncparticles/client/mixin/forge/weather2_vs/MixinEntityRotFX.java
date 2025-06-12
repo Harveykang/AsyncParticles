@@ -58,7 +58,7 @@ public abstract class MixinEntityRotFX extends TextureSheetParticle {
 		} else {
 			aabb1 = aabb;
 		}
-		Vec3 mov = VSClientUtils.entityMovColShipOnly(null,
+		Vec3 mov = VSClientUtils.entityMovColShipOnly(
 			vec3,
 			aabb1,
 			(ClientLevel) level);
