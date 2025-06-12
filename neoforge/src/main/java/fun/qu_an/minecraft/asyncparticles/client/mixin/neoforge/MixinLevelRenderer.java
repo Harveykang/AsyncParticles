@@ -48,6 +48,7 @@ public abstract class MixinLevelRenderer {
 			case IRIS_MIXED_SYNC, SYNC -> AsyncRenderer.endOpaque(partialTick, camera, lightTexture, false);
 			case IRIS_MIXED_ASYNC, COMPATIBILITY_ASYNC ->
 				AsyncRenderer.endOpaque(partialTick, camera, lightTexture, true);
+			case IRIS_BEFORE_SYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, false);
 			case IRIS_BEFORE_ASYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
 		}
 	}
