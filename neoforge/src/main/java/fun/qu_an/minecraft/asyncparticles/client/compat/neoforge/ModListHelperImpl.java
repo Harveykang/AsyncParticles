@@ -29,7 +29,7 @@ public class ModListHelperImpl {
 		IModFileInfo info = LoadingModList.get().getModFileById(modId);
 		String version = info == null || info.getMods().isEmpty() ? null : info.versionString();
 		if (version == null) {
-			throw new IllegalArgumentException("Mod " + modId + " is not loaded.");
+			return false;
 		}
 		ArtifactVersion currentVersion = new DefaultArtifactVersion(version);
 		ArtifactVersion min, max;
