@@ -14,7 +14,7 @@ public class ModListHelper {
 	public static final boolean VS_LOADED = isModLoaded("valkyrienskies");
 	public static final boolean FABRIC_VS_LOADED = isFabricModLoaded("valkyrienskies");
 	public static final boolean FORGE_VS_LOADED = isForgeModLoaded("valkyrienskies");
-	public static final boolean IS_LEGACY_VS = versionCheck("valkyrienskies", "2.3", "2.4");
+	public static final boolean IS_LEGACY_VS = VS_LOADED && versionCheck("valkyrienskies", "2.3", "2.4");
 	/* Sodium */
 	public static final boolean SODIUM_LIKE_LOADED = isModLoaded("sodium") || isModLoaded("embeddium");
 	public static final boolean SODIUM_LOADED = isModLoaded("sodium");

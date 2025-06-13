@@ -25,7 +25,6 @@ import org.valkyrienskies.core.apigame.collision.EntityPolygonCollider;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.ValkyrienSkiesMod;
 import org.valkyrienskies.mod.common.util.EntityShipCollisionUtils;
-import org.valkyrienskies.mod.util.BugFixUtil;
 
 import java.util.List;
 

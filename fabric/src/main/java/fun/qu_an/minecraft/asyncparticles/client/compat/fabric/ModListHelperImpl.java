@@ -5,6 +5,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.VersionParsingException;
 
+import java.util.Optional;
+
 @SuppressWarnings("unused")
 public class ModListHelperImpl {
 	public static boolean isForge() {
@@ -27,10 +29,13 @@ public class ModListHelperImpl {
 	 * Basically from <a href="https://github.com/Moulberry/MixinConstraints">MixinConstraints</a>
 	 */
 	public static boolean versionCheck(String modId, String minInclusive, String maxExclusive) {
-		Version currentVersion = FabricLoader.getInstance().getModContainer(modId)
+		Optional<Version> optional = FabricLoader.getInstance().getModContainer(modId)
 			.map(container -> container.getMetadata()
-				.getVersion())
-			.orElseThrow(() -> new IllegalArgumentException("Mod " + modId + " is not loaded."));
+				.getVersion());
+		if (optional.isEmpty()) {
+			return false;
+		}
+		Version currentVersion = optional.get();
 		Version min, max;
 		try {
 			min = minInclusive == null ? null : Version.parse(minInclusive);
