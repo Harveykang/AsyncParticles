@@ -15,6 +15,7 @@
     "a_good_place.InvokerBlocksParticlesManager",
     "a_good_place.MixinBlocksParticlesManager",
     "a_good_place.MixinPlacingBlockParticle",
+    "ae2.MixinLightningFX",
     "cloth_config.AbstractConfigEntryAccessor",
     "cloth_config.AbstractConfigListEntryAccessor",
     "cloth_config.BaseListEntryAccessor",

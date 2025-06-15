@@ -100,6 +100,8 @@ public class ModListHelper {
 	public static final boolean FABRIC_LOOT_BEAMS_UP_LOADED = isFabricModLoaded("lootbeams");
 	/* Shimmer */
 	public static final boolean SHIMMER_LOADED = isModLoaded("shimmer");
+	/* AE2 */
+	public static final boolean AE2_LOADED = isModLoaded("ae2");
 
 	@ExpectPlatform
 	private static boolean isForge() {
