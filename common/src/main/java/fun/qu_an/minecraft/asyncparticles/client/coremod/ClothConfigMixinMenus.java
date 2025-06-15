@@ -118,6 +118,23 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
 			.build()));
+		List<String> lastReplaceRandom = List.copyOf(lastConfig.getReplaceRandom());
+		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.replaceRandom"), lastReplaceRandom)
+			.setDefaultValue(lastReplaceRandom)
+			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getReplaceRandom().contains(s)))
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultConfig.getReplaceRandom());
+				newConfig.setReplaceRandom(Collections.unmodifiableSet(s));
+			})
+			.setTooltip(
+				Component.translatable("config.asyncparticles.mixin.replaceRandom.tooltip"),
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.tooltip"))
+			.requireRestart()
+			.build()));
 		return () -> {
 			try {
 				newConfig.flat();

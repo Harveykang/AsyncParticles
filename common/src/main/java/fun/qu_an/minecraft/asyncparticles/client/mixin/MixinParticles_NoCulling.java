@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 
 @Pseudo
-@Mixin(Particle.class) // Will be replaced by the actual targets
+@Mixin(Particle.class) // Will be replaced with the actual targets
 public abstract class MixinParticles_NoCulling implements ParticleAddon {
 	@Override
 	public boolean shouldCull() {

@@ -26,4 +26,8 @@ public class MixinConfigHelper {
 	public static Collection<String> getLockRequired() {
 		return CONFIG.getLockRequired();
 	}
+
+	public static Collection<String> getReplaceRandom() {
+		return CONFIG.getReplaceRandom();
+	}
 }

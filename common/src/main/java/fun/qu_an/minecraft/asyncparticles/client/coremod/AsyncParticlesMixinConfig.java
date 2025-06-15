@@ -9,10 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
@@ -133,12 +130,20 @@ public class AsyncParticlesMixinConfig {
 			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.trail.TrailEmitter");
 		}
 
+		private Set<String> replaceRandom = new LinkedHashSet<>();
+
+		{
+			replaceRandom.add("appeng.client.render.effects.LightningArcFX");
+			replaceRandom.add("appeng.client.render.effects.LightningFX");
+		}
+
 		private void fold() {
 			assertNotGlobal();
 			noCulling = toSaveConfig.noCulling;
 			noLightCache = toSaveConfig.noLightCache;
 			lockProvider = toSaveConfig.lockProvider;
 			lockRequired = toSaveConfig.lockRequired;
+			replaceRandom = toSaveConfig.replaceRandom;
 			redirectFleroviumCulling = toSaveConfig.redirectFleroviumCulling;
 		}
 
@@ -153,6 +158,7 @@ public class AsyncParticlesMixinConfig {
 			noLightCache = getSet(properties, "particle$noLightCache", defaultConfig.noLightCache);
 			lockProvider = getSet(properties, "particle$lockProvider", defaultConfig.lockProvider);
 			lockRequired = getSet(properties, "particle$lockRequired", defaultConfig.lockRequired);
+			replaceRandom = getSet(properties, "replaceRandom", defaultConfig.replaceRandom);
 			redirectFleroviumCulling =
 				getBoolean(properties, "particle$redirectFleroviumCulling", defaultConfig.redirectFleroviumCulling);
 		}
@@ -167,6 +173,7 @@ public class AsyncParticlesMixinConfig {
 			properties.setProperty("particle$noLightCache", String.join(",", noLightCache));
 			properties.setProperty("particle$lockProvider", String.join(",", lockProvider));
 			properties.setProperty("particle$lockRequired", String.join(",", lockRequired));
+			properties.setProperty("replaceRandom", String.join(",", replaceRandom));
 			properties.setProperty("particle$redirectFleroviumCulling", Boolean.toString(redirectFleroviumCulling));
 		}
 
@@ -175,7 +182,7 @@ public class AsyncParticlesMixinConfig {
 			if (value == null) {
 				return defaultValue;
 			}
-			value = value.replace("[\\s\\u0085\\u2028\\u2029]", "");
+			value = value.replaceAll("[\\s\\u0085\\u2028\\u2029]", "");
 			if (value.endsWith(",")) {
 				value = value.substring(0, value.length() - 1);
 			}
@@ -236,6 +243,16 @@ public class AsyncParticlesMixinConfig {
 		void setLockRequired(Set<String> lockRequired) {
 			assertNotGlobal();
 			this.lockRequired = lockRequired;
+		}
+
+		@Unmodifiable
+		Set<String>  getReplaceRandom() {
+			return Collections.unmodifiableSet(replaceRandom);
+		}
+
+		void setReplaceRandom(Set<String> replaceRandom) {
+			assertNotGlobal();
+			this.replaceRandom = replaceRandom;
 		}
 
 		boolean isRedirectFleroviumCulling() {

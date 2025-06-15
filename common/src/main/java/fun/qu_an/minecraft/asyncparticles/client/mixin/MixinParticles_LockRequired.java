@@ -10,7 +10,7 @@ import net.minecraft.client.particle.Particle;
 import org.spongepowered.asm.mixin.*;
 
 @Pseudo
-@Mixin(Particle.class) // Will be replaced by the actual targets
+@Mixin(Particle.class) // Will be replaced with the actual targets
 public abstract class MixinParticles_LockRequired implements ISpinLockProvider {
 	@WrapMethod(method = "tick")
 	public void wrapTick(Operation<Void> original) {

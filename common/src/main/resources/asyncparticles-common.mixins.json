@@ -12,6 +12,7 @@
     "MixinParticles_LockProvider",
     "MixinParticles_LockRequired",
     "MixinParticles_NoCulling",
+    "MixinParticles_ReplaceRandom",
     "a_good_place.InvokerBlocksParticlesManager",
     "a_good_place.MixinBlocksParticlesManager",
     "a_good_place.MixinPlacingBlockParticle",

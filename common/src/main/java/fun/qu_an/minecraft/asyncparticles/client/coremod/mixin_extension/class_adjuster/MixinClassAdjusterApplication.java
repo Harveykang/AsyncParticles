@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster;
 
+import com.bawnorton.mixinsquared.adjuster.tools.AdjustableAnnotationNode;
+import com.bawnorton.mixinsquared.adjuster.tools.type.RemappableAnnotationNode;
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.reflection.FieldReference;
 import org.objectweb.asm.ClassWriter;
@@ -15,6 +17,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfig;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.refmap.IReferenceMapper;
 import org.spongepowered.asm.mixin.refmap.ReferenceMapper;
 import org.spongepowered.asm.mixin.refmap.RemappingReferenceMapper;
@@ -279,6 +282,10 @@ public class MixinClassAdjusterApplication {
 					if (aNode1.values == null) {
 						continue;
 					}
+					AdjustableAnnotationNode aanode = AdjustableAnnotationNode.fromNode(aNode1);
+					if (!(aanode instanceof RemappableAnnotationNode raNode)) {
+						continue;
+					}
 					int i = aNode1.values.indexOf("method");
 					if (i == -1) {
 						continue;
@@ -302,6 +309,24 @@ public class MixinClassAdjusterApplication {
 							s1 = s1.substring(s1.indexOf(';') + 1);
 						}
 						iterator.set(s1);
+					}
+					// at = @At(target)
+					Object o1 = Annotations.getValue(aNode1, "at");
+					if (o1 == null) {
+						continue;
+					}
+					if (o1 instanceof AnnotationNode) {
+						remapAt((AnnotationNode) o1, mapper, internalClassName);
+					} else {
+						List<?> l2;
+						if (!(o1 instanceof List<?>) || (l2 = (List<?>) o1).isEmpty() || !(l2.get(0) instanceof AnnotationNode)) {
+							continue;
+						}
+						@SuppressWarnings("unchecked")
+						List<AnnotationNode> ats = (List<AnnotationNode>) l2;
+						for (AnnotationNode atNode : ats) {
+							remapAt(atNode, mapper, internalClassName);
+						}
 					}
 				}
 			}
@@ -354,6 +379,20 @@ public class MixinClassAdjusterApplication {
 					generatedToOriginalMixins.put(generatedTarget, mixinClassName);
 				}
 			}
+		}
+	}
+
+	private static void remapAt(AnnotationNode atNode, IReferenceMapper mapper, String internalClassName) {
+		if (atNode.values == null) {
+			return;
+		}
+		int j = atNode.values.indexOf("target");
+		if (j == -1) {
+			return;
+		}
+		Object at = atNode.values.get(j + 1);
+		if (at instanceof String) {
+			atNode.values.set(j + 1, mapper.remap(internalClassName, (String) at));
 		}
 	}
 

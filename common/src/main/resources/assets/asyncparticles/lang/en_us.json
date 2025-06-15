@@ -47,6 +47,8 @@
   "config.asyncparticles.mixin.particle.noLightCache": "Particles Light Cache Blacklist",
   "config.asyncparticles.mixin.particle.lockProvider": "Particles Lock Provider",
   "config.asyncparticles.mixin.particle.lockRequired": "Particles Lock Required",
+  "config.asyncparticles.mixin.replaceRandom": "Replace RandomSource",
+  "config.asyncparticles.mixin.replaceRandom.tooltip": "Suppress multithreaded access crashes.",
   "config.asyncparticles.mixin.particle.invalid-class": "Class not found or not a subclass of 'net.minecraft.client.particle.Particle'!",
   "config.asyncparticles.enum.RenderingMode.DELAYED": "Fastest",
   "config.asyncparticles.enum.RenderingMode.COMPATIBILITY": "Compatibility",

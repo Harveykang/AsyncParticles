@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Unique;
 
 @Pseudo
-@Mixin(Particle.class) // Will be replaced by the actual targets
+@Mixin(Particle.class) // Will be replaced with the actual targets
 public class MixinParticles_LockProvider implements ISpinLockProvider {
 	@Unique
 	protected SpinLock asyncparticles$lock = new ReentrantSpinLock();
