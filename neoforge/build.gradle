@@ -167,8 +167,8 @@ dependencies {
 //    }
 
     /* Physics Mod */
-    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v172b-neoforge-1.21.1.jar')
-//    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v172b-neoforge-1.21.1.jar')
+    modCompileOnly "maven.modrinth:physicsmod:yrd0ZUXh" // 3.0.22
+//    modLocalRuntime "maven.modrinth:physicsmod:yrd0ZUXh" // 3.0.22
 
     /* Simple Weather */
     modCompileOnly "curse.maven:simple-weather-983390:5984086" // 1.0.13
