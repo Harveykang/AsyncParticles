@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.Pseudo;
 	ShriekParticle.class,
 	TrialSpawnerDetectionParticle.class,
 	VibrationSignalParticle.class,
-}) // Will be replaced by the actual targets
+}) // Will be replaced with the actual targets
 public abstract class MixinParticles_LightCacheNoRefresh implements LightCachedParticleAddon {
 	@Override
 	public void asyncparticles$refresh() {

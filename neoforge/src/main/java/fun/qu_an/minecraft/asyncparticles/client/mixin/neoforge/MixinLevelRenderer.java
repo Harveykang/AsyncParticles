@@ -45,15 +45,15 @@ public abstract class MixinLevelRenderer {
 										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 										  LocalIntRef irm) {
 		switch (irm.get()) {
-			case IRIS_MIXED_SYNC, SYNC -> AsyncRenderer.endOpaque(partialTick, camera, lightTexture, false);
+			case IRIS_MIXED_SYNC, SYNC -> AsyncRenderer.endOpaque(lightTexture, camera, partialTick, false);
 			case IRIS_MIXED_ASYNC, COMPATIBILITY_ASYNC ->
-				AsyncRenderer.endOpaque(partialTick, camera, lightTexture, true);
+				AsyncRenderer.endOpaque(lightTexture, camera, partialTick, true);
 			case IRIS_BEFORE_SYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, false);
 			case IRIS_BEFORE_ASYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
 		}
 	}
 
-	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", remap = false, ordinal = 2,
+	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", ordinal = 2, remap = false,
 		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
 	private void redirectRenderParticles2(ParticleEngine instance,
 										  LightTexture lightTexture,
@@ -65,9 +65,9 @@ public abstract class MixinLevelRenderer {
 										  LocalIntRef irm) {
 
 		switch (irm.get()) {
-			case IRIS_MIXED_SYNC, SYNC -> AsyncRenderer.endTranslucent(partialTick, camera, lightTexture, false);
+			case IRIS_MIXED_SYNC, SYNC -> AsyncRenderer.endTranslucent(lightTexture, camera, partialTick, false);
 			case IRIS_MIXED_ASYNC, COMPATIBILITY_ASYNC ->
-				AsyncRenderer.endTranslucent(partialTick, camera, lightTexture, true);
+				AsyncRenderer.endTranslucent(lightTexture, camera, partialTick, true);
 		}
 	}
 }

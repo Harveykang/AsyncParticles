@@ -8,16 +8,14 @@ import com.mojang.logging.LogUtils;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.iris.IrisCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
-import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
-import net.irisshaders.iris.shaderpack.properties.ParticleRenderingSettings;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -259,12 +257,12 @@ public class AsyncRenderer {
 	}
 
 	@ExpectPlatform
-	public static void endOpaque(float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
+	public static void endOpaque(LightTexture lightTexture, Camera camera, float f, boolean isAsync) {
 		throw new AssertionError();
 	}
 
 	@ExpectPlatform
-	public static void endTranslucent(float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
+	public static void endTranslucent(LightTexture lightTexture, Camera camera, float f, boolean isAsync) {
 		throw new AssertionError();
 	}
 
@@ -298,24 +296,8 @@ public class AsyncRenderer {
 		return new ReportedException(crashReport);
 	}
 
-	public static void captureParticleRenderingSetting() {
-		if (ModListHelper.IRIS_LIKE_LOADED) {
-			mixedParticleRenderingSetting = Iris.isPackInUseQuick() &&
-											getParticleRenderingSettings0() == ParticleRenderingSettings.MIXED;
-		}
-	}
-
 	public static boolean isMixedParticleRendering() {
 		return mixedParticleRenderingSetting;
-	}
-
-	private static ParticleRenderingSettings getParticleRenderingSettings0() {
-		if (!Iris.isPackInUseQuick()) {
-			return ParticleRenderingSettings.UNSET;
-		}
-		return Iris.getPipelineManager().getPipeline()
-			.map(WorldRenderingPipeline::getParticleRenderingSettings)
-			.orElse(ParticleRenderingSettings.MIXED);
 	}
 
 	/* BufferBuilder */
@@ -430,8 +412,7 @@ public class AsyncRenderer {
 					BTESSELATORS.entrySet().stream()
 						.filter(e -> e.getValue().shouldSync)
 						.map(Map.Entry::getKey).toList(),
-					ModListHelper.IRIS_LIKE_LOADED && Iris.isPackInUseQuick()
-						? getParticleRenderingSettings0().name() : "disabled"));
+					ModListHelper.IRIS_LIKE_LOADED ? IrisCompat.getParticleRenderingSettings().name() : "disabled"));
 			debugConsumer = null;
 		}
 	}

@@ -2,10 +2,8 @@ package fun.qu_an.minecraft.asyncparticles.client.neoforge;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
@@ -13,13 +11,7 @@ import net.minecraft.client.renderer.RenderStateShard;
 
 @SuppressWarnings("unused")
 public class AsyncRendererImpl {
-	public static void endOpaque(float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
-//		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
-//			return;
-//		}
-//		if (!isMixedParticleRendering()) { // Tested outside.
-//			return;
-//		}
+	public static void endOpaque(LightTexture lightTexture, Camera camera, float f, boolean isAsync) {
 		Minecraft mc = Minecraft.getInstance();
 		mc.getProfiler().popPush("particles");
 
@@ -28,13 +20,7 @@ public class AsyncRendererImpl {
 		AsyncRenderer.renderAsync = false;
 	}
 
-	public static void endTranslucent(float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
-//		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
-//			return;
-//		}
-//		if (!isMixedParticleRendering()) { // Tested outside.
-//			return;
-//		}
+	public static void endTranslucent(LightTexture lightTexture, Camera camera, float f, boolean isAsync) {
 		Minecraft mc = Minecraft.getInstance();
 		mc.getProfiler().popPush("particles");
 		LevelRenderer levelRenderer = mc.levelRenderer;

@@ -3,10 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.coremod;
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.AdjusterParticlesLockProvider;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.AdjusterParticlesLockRequired;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.AdjusterParticlesNoCulling;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.AdjusterParticlesNoLightCache;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.*;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticlesMixinMemberCanceller;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticlesMixinCanceller;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.ExtensionMemberCancelApplication;
@@ -37,6 +34,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesNoLightCache());
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockProvider());
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired());
+		MixinClassAdjusterRegistrar.register(new AdjusterReplaceRandom());
 		MixinMemberCancellerRegistrar.register(new AsyncParticlesMixinMemberCanceller());
 		MixinCancellerRegistrar.register(new AsyncParticlesMixinCanceller());
 	}

@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin",
   "client": [
+    "Mixin_ReplaceRandom",
     "MixinParticle",
     "MixinParticle_LightCache",
     "MixinParticles_LightCacheNoRefresh",

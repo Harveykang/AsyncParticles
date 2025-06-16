@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Pseudo
-@Mixin(Particle.class) // Will be replaced by the actual targets
+@Mixin(Particle.class) // Will be replaced with the actual targets
 public abstract class MixinParticles_NoCulling implements ParticleAddon {
 	@Override
 	public AABB getRenderBoundingBox(float partialTick) {

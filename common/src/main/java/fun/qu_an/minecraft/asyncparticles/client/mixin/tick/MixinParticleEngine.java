@@ -46,7 +46,6 @@ public abstract class MixinParticleEngine {
 		trackedParticleCounts = new TrackedParticleCountsMap();
 		particlesToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 		trackingEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
-		random = new SingleThreadedRandomSource(ThreadLocalRandom.current().nextInt());
 	}
 
 	@Shadow
