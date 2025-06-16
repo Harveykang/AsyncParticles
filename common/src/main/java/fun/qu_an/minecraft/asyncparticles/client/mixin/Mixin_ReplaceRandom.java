@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Pseudo
 @Mixin(Particle.class) // Will be replaced with the actual targets
-public abstract class MixinParticles_ReplaceRandom {
+public abstract class Mixin_ReplaceRandom {
 	@WrapOperation(method = "*", require = 0, at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/util/RandomSource;create()Lnet/minecraft/util/RandomSource;"))
 	private static RandomSource onCreateRandomSource(Operation<RandomSource> original) {

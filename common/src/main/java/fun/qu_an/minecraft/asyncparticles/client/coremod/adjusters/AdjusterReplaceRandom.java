@@ -9,11 +9,11 @@ import java.util.List;
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.IS_FORGE;
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.isDevelopmentEnvironment;
 
-public class AdjusterParticlesReplaceRandom implements MixinClassAdjuster {
+public class AdjusterReplaceRandom implements MixinClassAdjuster {
 	@Override
 	public String getMixinClassName() {
 		return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
-			   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_ReplaceRandom";
+			   "fun.qu_an.minecraft.asyncparticles.client.mixin.Mixin_ReplaceRandom";
 	}
 
 	@Override
