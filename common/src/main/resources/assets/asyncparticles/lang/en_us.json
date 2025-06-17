@@ -51,7 +51,7 @@
   "config.asyncparticles.mixin.particle.lockRequired": "Particles Lock Required",
   "config.asyncparticles.mixin.replaceRandom": "Replace RandomSource",
   "config.asyncparticles.mixin.replaceRandom.tooltip": "Suppress concurrency crashes.",
-  "config.asyncparticles.mixin.particle.safeLegacyRandomSource": "Make 'LegacyRandomSource' thread-safe",
+  "config.asyncparticles.mixin.particle.safeLegacyRandomSource": "Make 'LegacyRandomSource' Thread-Safe",
   "config.asyncparticles.mixin.particle.safeLegacyRandomSource.tooltip": "Never enable this unless you're experiencing crashes,\ntry 'Replace RandomSource' first!\nMake LegacyRandomSource thread-safe to avoid concurrency crashes.",
   "config.asyncparticles.mixin.particle.invalid-class": "Class not found or not a subclass of 'net.minecraft.client.particle.Particle'!",
   "config.asyncparticles.enum.RenderingMode.DELAYED": "Fastest",
