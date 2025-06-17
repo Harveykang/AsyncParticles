@@ -281,10 +281,6 @@ public class MixinClassAdjusterApplication {
 					if (aNode1.values == null) {
 						continue;
 					}
-					AdjustableAnnotationNode aanode = AdjustableAnnotationNode.fromNode(aNode1);
-					if (!(aanode instanceof RemappableAnnotationNode raNode)) {
-						continue;
-					}
 					int i = aNode1.values.indexOf("method");
 					if (i == -1) {
 						continue;
