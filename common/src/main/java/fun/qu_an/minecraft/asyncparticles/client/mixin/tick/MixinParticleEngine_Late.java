@@ -40,10 +40,4 @@ public abstract class MixinParticleEngine_Late {
 		particlesToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 		trackingEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 	}
-
-	@WrapOperation(method = "<init>",
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;create()Lnet/minecraft/util/RandomSource;"))
-	private RandomSource onInit(Operation<RandomSource> original) {
-		return new SingleThreadedRandomSource(RandomSupport.generateUniqueSeed());
-	}
 }

@@ -2,7 +2,9 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
@@ -11,7 +13,11 @@ import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Pseudo
-@Mixin(Particle.class) // Will be replaced with the actual targets
+@Mixin(value = {
+	Particle.class,
+	ParticleEngine.class,
+	Font.class
+}, priority = 9000) // Will be replaced with the actual targets
 public abstract class Mixin_ReplaceRandom {
 	@WrapOperation(method = "*", require = 0, at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/util/RandomSource;create()Lnet/minecraft/util/RandomSource;"))

@@ -62,7 +62,6 @@
     "off_thread_access.MixinClassInstanceMultiMap",
     "off_thread_access.MixinClientChunkCache",
     "off_thread_access.MixinClientLevel",
-    "off_thread_access.MixinFont",
     "off_thread_access.MixinLevelChunk",
     "off_thread_access.MixinLevelRenderer",
     "off_thread_access.MixinSoundEngine",
