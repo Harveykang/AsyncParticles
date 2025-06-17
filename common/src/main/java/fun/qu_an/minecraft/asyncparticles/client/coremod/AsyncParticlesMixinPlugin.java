@@ -62,6 +62,10 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			return true;
 		}
 		return switch (split[0]) {
+			case "conditional" -> switch (split[1]) {
+				case "MixinLegacyRandomSource" -> MixinConfigHelper.isSafeLegacyRandomSource();
+				default -> true;
+			};
 			case "fabric" -> {
 				if (split.length == 2) {
 					yield !IS_FORGE;

@@ -30,4 +30,8 @@ public class MixinConfigHelper {
 	public static Collection<String> getReplaceRandom() {
 		return CONFIG.getReplaceRandom();
 	}
+
+	public static boolean isSafeLegacyRandomSource() {
+		return CONFIG.isSafeLegacyRandomSource();
+	}
 }

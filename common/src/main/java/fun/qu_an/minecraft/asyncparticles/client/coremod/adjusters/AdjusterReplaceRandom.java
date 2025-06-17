@@ -13,7 +13,7 @@ public class AdjusterReplaceRandom implements MixinClassAdjuster {
 	@Override
 	public String getMixinClassName() {
 		return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
-			   "fun.qu_an.minecraft.asyncparticles.client.mixin.Mixin_ReplaceRandom";
+			   "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.Mixin_ReplaceRandom";
 	}
 
 	@Override

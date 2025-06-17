@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.vulkanmod;
 
-import fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticle_LightCache;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticle_LightCache;
 import net.minecraft.client.particle.SingleQuadParticle;
 import org.spongepowered.asm.mixin.Mixin;
 

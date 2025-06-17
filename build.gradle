@@ -78,6 +78,7 @@ subprojects {
         maven {
             name = "Sinytra"
             url = "https://maven.su5ed.dev/releases"
+            content { includeGroupAndSubgroups("dev.su5ed") }
         }
         maven { // Cardinal-Components-API
             name = "Ladysnake Mods"
@@ -88,8 +89,7 @@ subprojects {
             url = uri("https://maven.fallenbreath.me/releases")
         }
         maven { // Fabric ASM for Porting Lib
-            url = "https://jitpack.io/"
-            content { includeGroupAndSubgroups("com.github") }
+            url 'https://jitpack.io'
         }
     }
 

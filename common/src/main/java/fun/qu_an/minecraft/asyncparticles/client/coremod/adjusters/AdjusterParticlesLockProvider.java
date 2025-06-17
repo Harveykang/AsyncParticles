@@ -12,7 +12,7 @@ public class AdjusterParticlesLockProvider implements MixinClassAdjuster {
 	@Override
 	public String getMixinClassName() {
 		return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
-			   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_LockProvider";
+			   "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LockProvider";
 	}
 
 	@Override

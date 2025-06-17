@@ -40,7 +40,7 @@ public class MixinRenderHandler {
 		"endBufferedRendering",
 		"endBatches*",
 		"copyDepthBuffer"
-	},
+	}, remap = false,
 		at = @At("HEAD"))
 	private static void assertion(CallbackInfo ci) {
 		ThreadUtil.assertNotParticleRendererThread();

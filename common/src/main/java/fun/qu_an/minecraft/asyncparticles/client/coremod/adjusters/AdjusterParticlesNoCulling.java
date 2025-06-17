@@ -12,7 +12,7 @@ public class AdjusterParticlesNoCulling implements MixinClassAdjuster {
 	@Override
 	public String getMixinClassName() {
 		return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
-			   "fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticles_NoCulling";
+			   "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_NoCulling";
 	}
 
 	@Override
