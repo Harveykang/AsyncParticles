@@ -12,8 +12,8 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.isD
 public class AdjusterReplaceRandom implements MixinClassAdjuster {
 	@Override
 	public String getMixinClassName() {
-		return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "forge." : "fabric.") +
-			   "fun.qu_an.minecraft.asyncparticles.client.mixin.Mixin_ReplaceRandom";
+		return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "neoforge." : "fabric.") +
+			   "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.Mixin_ReplaceRandom";
 	}
 
 	@Override

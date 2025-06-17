@@ -18,10 +18,11 @@ public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
 	public static final int VERSION = 2;
 	static String COMMENTS = """
-		particle$noCulling: comma-separated list of particle classes that should not be culled.
-		particle$noLightCache: comma-separated list of particle classes that should not use the light cache.
-		particle$lockRequired: comma-separated list of particle classes that require a spin lock.
-		particle$lockProvider: comma-separated list of particle classes that provide a spin lock.""";
+		particle$noCulling: A comma-separated list of particle classes that should not be culled.
+		particle$noLightCache: A comma-separated list of particle classes that should not use the light cache.
+		particle$lockRequired: A comma-separated list of particle classes that require a spin lock.
+		particle$lockProvider: A comma-separated list of particle classes that provide a spin lock.
+		replaceRandom: A comma-separated list of classes that require multithreaded random sources.""";
 	static final Mixin$Particle CONFIG;
 	private static Mixin$Particle toSaveConfig;
 
@@ -93,6 +94,7 @@ public class AsyncParticlesMixinConfig {
 
 	static class Mixin$Particle {
 		private int version = 0;
+		private boolean safeLegacyRandomSource = false;
 		private Set<String> noCulling = new LinkedHashSet<>();
 
 		{
@@ -141,6 +143,7 @@ public class AsyncParticlesMixinConfig {
 
 		private void fold() {
 			assertNotGlobal();
+			safeLegacyRandomSource = toSaveConfig.safeLegacyRandomSource;
 			noCulling = toSaveConfig.noCulling;
 			noLightCache = toSaveConfig.noLightCache;
 			lockProvider = toSaveConfig.lockProvider;
@@ -155,6 +158,8 @@ public class AsyncParticlesMixinConfig {
 			} catch (NumberFormatException ignored) {
 			}
 			Mixin$Particle defaultConfig = new Mixin$Particle();
+			safeLegacyRandomSource =
+				getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);
 			noCulling = getSet(properties, "particle$noCulling", defaultConfig.noCulling);
 			noLightCache = getSet(properties, "particle$noLightCache", defaultConfig.noLightCache);
 			lockProvider = getSet(properties, "particle$lockProvider", defaultConfig.lockProvider);
@@ -168,6 +173,7 @@ public class AsyncParticlesMixinConfig {
 
 		private void write(Properties properties) {
 			properties.setProperty("version", Integer.toString(version));
+			properties.setProperty("safeLegacyRandomSource", Boolean.toString(safeLegacyRandomSource));
 			properties.setProperty("particle$noCulling", String.join(",", noCulling));
 			properties.setProperty("particle$noLightCache", String.join(",", noLightCache));
 			properties.setProperty("particle$lockProvider", String.join(",", lockProvider));
@@ -201,6 +207,12 @@ public class AsyncParticlesMixinConfig {
 				return defaultValue;
 			}
 			return Boolean.parseBoolean(bool);
+		}
+
+		private void assertNotGlobal() {
+			if (this == toSaveConfig || this == CONFIG) {
+				throw new IllegalStateException("Cannot modify global config object");
+			}
 		}
 
 		@Unmodifiable
@@ -253,10 +265,13 @@ public class AsyncParticlesMixinConfig {
 			this.replaceRandom = replaceRandom;
 		}
 
-		private void assertNotGlobal() {
-			if (this == toSaveConfig || this == CONFIG) {
-				throw new IllegalStateException("Cannot modify global config object");
-			}
+		void setSafeLegacyRandomSource(boolean safeLegacyRandomSource) {
+			assertNotGlobal();
+			this.safeLegacyRandomSource = safeLegacyRandomSource;
+		}
+
+		public boolean isSafeLegacyRandomSource() {
+			return safeLegacyRandomSource;
 		}
 	}
 }
