@@ -50,10 +50,6 @@ subprojects {
                 includeGroup "curse.maven"
             }
         }
-        maven { // Fabric ASM for Porting Lib
-            url = "https://jitpack.io/"
-            content { includeGroupAndSubgroups("com.github") }
-        }
         maven {
             name = "Valkyrien Skies Internal"
             url = 'https://maven.valkyrienskies.org'
@@ -62,13 +58,21 @@ subprojects {
                 includeGroup "org.valkyrienskies.core"
             }
         }
+        maven { url = "https://repo.spongepowered.org/repository/maven-public" } // Mixin
         maven { url = "https://maven.bawnorton.com/releases" } // Mixin Squared
         maven { url "https://maven.shedaniel.me/" } // Cloth Config API
         maven { url "https://maven.terraformersmc.com/releases/" } // Cloth Config API
         maven { url = "https://mvn.devos.one/releases" } // Porting Lib releases
         maven { url = "https://mvn.devos.one/snapshots" } // Create and several dependencies
         maven { url = "https://maven.createmod.net" } // Create, Ponder, Flywheel
-        maven { url = "https://maven.tterrag.com" } // Registrate
+        maven {
+            url = "https://maven.tterrag.com"
+            content {
+                includeGroup "com.tterrag.registrate"
+                includeGroup "com.jozufozu.flywheel"
+                includeGroup "com.simibubi.create"
+            }
+        } // Registrate
         maven { url = "https://maven.jamieswhiteshirt.com/libs-release" } // Reach Entity Attributes
         maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven" } // Forge Config API Port
         maven {
@@ -83,7 +87,10 @@ subprojects {
             name = "FallenBreath"
             url = uri("https://maven.fallenbreath.me/releases")
         }
-        maven { url = "https://repo.spongepowered.org/repository/maven-public" } // Mixin
+        maven { // Fabric ASM for Porting Lib
+            url = "https://jitpack.io/"
+            content { includeGroupAndSubgroups("com.github") }
+        }
     }
 
     loom {

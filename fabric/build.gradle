@@ -94,9 +94,9 @@ dependencies {
     modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
 
     /* Physics Mod */
-    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171e-fabric-1.20.1.jar')
+    modCompileOnly "maven.modrinth:physicsmod:3.0.14"
     if (rootProject.physics_enabled == 'true'){
-        modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v171e-fabric-1.20.1.jar')
+        modLocalRuntime "maven.modrinth:physicsmod:3.0.14"
         return
     }
 

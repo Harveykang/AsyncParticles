@@ -120,8 +120,10 @@ dependencies {
 
     /* Effective */
 //    modLocalRuntime fileTree(dir: '../libs', include: 'effective-1.0.6-1.20.1-forge.jar')
-    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.6-1.20.1-forge.jar')
+//    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.6-1.20.1-forge.jar')
 //    modCompileOnly "com.github.ConcerroX:Effecticularity:31265b5750" // no they didn't publish 1.0.2 :(
+    modCompileOnly "com.github.ConcerroX:nuance-and-effective:1.0.3"
+//    modLocalRuntime "com.github.ConcerroX:nuance-and-effective:1.0.3"
 
     /* Particle Core */
 //    modCompileOnly "maven.modrinth:particle-core:0.2.5+1.20.1+forge"
@@ -159,8 +161,8 @@ dependencies {
     modCompileOnly "maven.modrinth:subtle-effects:lCMnqufi"
 
     /* Physics Mod */
-//    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v171e-forge-1.20.1.jar')
-    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v171e-forge-1.20.1.jar')
+//    modLocalRuntime "maven.modrinth:physicsmod:3.0.14"
+    modCompileOnly "maven.modrinth:physicsmod:3.0.14"
 
     /* Particular Reforged */
     modCompileOnly "maven.modrinth:particular-reforged:1.2.1"
@@ -170,6 +172,9 @@ dependencies {
 
     /* Wizards Reborn */
 //    modCompileOnly "maven.modrinth:wizards-reborn:1.20.1-0.2.9"
+
+    /* Lodestone */
+    modCompileOnly "maven.modrinth:lodestonelib:dRIycWqx" // 1.6.4.1
 }
 
 processResources {
