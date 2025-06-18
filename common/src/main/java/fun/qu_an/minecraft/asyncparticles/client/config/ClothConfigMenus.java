@@ -2,7 +2,6 @@ package fun.qu_an.minecraft.asyncparticles.client.config;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.compat.cooparticlesapi.CooTickMode;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.ClothConfigMixinMenus;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.TranslatableEnum;
@@ -196,18 +195,6 @@ class ClothConfigMenus {
 						.setSaveConsumer(newValue -> create$rainEffect = newValue)
 						// .setRequirement(() -> ModListHelper.CREATE_LOADED)
 						.setRequirement(() -> false)
-						.build()))
-				.build())
-			.addEntry(entryBuilder
-				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.cooparticlesapi"),
-					List.of(entryBuilder
-						.startEnumSelector(Component.translatable("config.asyncparticles.mod-compat.cooparticlesapi.tickMode"),
-							CooTickMode.class, cooparticlesapi$tickMode)
-						.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
-						.setDefaultValue(defaultConfig.cooParticlesAPI.tickMode)
-						.setTooltip(Component.translatable("config.asyncparticles.mod-compat.cooparticlesapi.tickMode.tooltip"))
-						.setSaveConsumer(newValue -> cooparticlesapi$tickMode = newValue)
-						.setRequirement(() -> ModListHelper.FABRIC_COO_PARTICLES_API_LOADED)
 						.build()))
 				.build());
 		// endregion

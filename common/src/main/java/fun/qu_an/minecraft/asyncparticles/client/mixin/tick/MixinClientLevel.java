@@ -27,8 +27,8 @@ import java.util.function.Supplier;
 
 @Mixin(value = ClientLevel.class, priority = 1100)
 public abstract class MixinClientLevel extends Level {
-	protected MixinClientLevel(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, RegistryAccess registryAccess, Holder<DimensionType> holder, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l, int i) {
-		super(writableLevelData, resourceKey, registryAccess, holder, supplier, bl, bl2, l, i);
+	protected MixinClientLevel(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, RegistryAccess registryAccess, Holder<DimensionType> holder, boolean bl, boolean bl2, long l, int i) {
+		super(writableLevelData, resourceKey, registryAccess, holder, bl, bl2, l, i);
 	}
 
 	@Inject(method = "<init>", at = @At(value = "RETURN"))

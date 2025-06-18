@@ -13,6 +13,7 @@ import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.ClickEvent;
@@ -74,11 +75,11 @@ public final class AsyncParticlesClientNeoForge {
 				.executes(context -> {
 					CommandSourceStack source = context.getSource();
 					AsyncTicker.debugLater(s -> source.sendSystemMessage(Component.literal(s)
-						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
-							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
+						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(s))
+							.withHoverEvent(new HoverEvent.ShowText(Component.literal("Copy to clipboard"))))));
 					AsyncRenderer.debugLater(s -> source.sendSystemMessage(Component.literal(s)
-						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
-							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
+						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(s))
+							.withHoverEvent(new HoverEvent.ShowText(Component.literal("Copy to clipboard"))))));
 					return 1;
 				}))
 			.then(literal("dump")

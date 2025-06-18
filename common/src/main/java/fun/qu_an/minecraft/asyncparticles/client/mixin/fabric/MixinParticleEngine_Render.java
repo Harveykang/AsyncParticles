@@ -1,49 +1,59 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.MeshData;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
+import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.util.profiling.ProfilerFiller;
 import org.spongepowered.asm.mixin.*;
 
 import java.util.*;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
-public abstract class MixinParticleEngine_Render implements ParticleEngineAddon {
+public abstract class MixinParticleEngine_Render {
 	@Shadow
 	public Map<ParticleRenderType, Queue<Particle>> particles;
 	@Shadow
-	protected ClientLevel level;
-	@Shadow
-	@Final
-	public TextureManager textureManager;
-	@Shadow
 	public static List<ParticleRenderType> RENDER_ORDER;
+	@SuppressWarnings({"unused", "AddedMixinMembersNamePattern", "MissingUnique"})
+	private Enum<?> phase; // Iris ParticleRenderingPhase
 
-	@Override
-	public void asyncparticle$addRenderType(ParticleRenderType particleRenderType) {
-		if (!RENDER_ORDER.contains(particleRenderType)) {
-			if (!(RENDER_ORDER instanceof ArrayList<ParticleRenderType>)) {
-				RENDER_ORDER = new ArrayList<>(RENDER_ORDER);
+	/**
+	 * @author
+	 * @reason
+	 */
+	@Overwrite
+	private static void renderParticleType(Camera camera,
+										   float f,
+										   MultiBufferSource.BufferSource bufferSource,
+										   ParticleRenderType particleRenderType,
+										   Queue<Particle> particles) {
+		VertexConsumer vertexconsumer = bufferSource.getBuffer(Objects.requireNonNull(particleRenderType.renderType()));
+		Frustum frustum = AsyncRenderer.frustum;
+		float f2 = f + 1f;
+		boolean enableCull = ConfigHelper.isCullParticles();
+		for (Particle particle : particles) {
+			if (!particle.isAlive()) {
+				continue;
 			}
-			RENDER_ORDER.add(particleRenderType);
+			float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
+			if (enableCull && !FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
+				continue;
+			}
+			try {
+				particle.render(vertexconsumer, camera, f3);
+			} catch (Throwable t) {
+				throw AsyncRenderer.constructCrashReport(particle, particleRenderType, t);
+			}
 		}
 	}
 
@@ -52,91 +62,57 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 	 * @reason
 	 */
 	@Overwrite
-	public void render(LightTexture lightTexture, Camera camera, float f) {
-		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-		boolean renderAsync = AsyncRenderer.isRenderAsync();
-		if (renderAsync) {
-			profiler.push("wait_for_async_tasks");
-			AsyncRenderer.tryWaitingForAsyncTasks();
-			profiler.pop();
-		}
-
-		profiler.push("prepare");
-		lightTexture.turnOnLightLayer();
-		profiler.pop();
-
+	// let it be public to avoid mixin conflict
+	// other mods may call this method directly
+	public static void renderCustomParticles(Camera camera,
+											 float f,
+											 MultiBufferSource.BufferSource bufferSource,
+											 Queue<Particle> particles) {
+		PoseStack poseStack = new PoseStack();
 		Frustum frustum = AsyncRenderer.frustum;
-		boolean cullParticles = ConfigHelper.isCullParticles();
-		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
-			// FABRIC skips NO_RENDER
-//				if (particleRenderType == ParticleRenderType.NO_RENDER) {
-//					continue;
-//				}
-			Queue<Particle> queue = this.particles.get(particleRenderType);
-			if (queue == null || queue.isEmpty()) {
+		float f2 = f + 1f;
+		boolean enableCull = ConfigHelper.isCullParticles();
+		for (Particle particle : particles) {
+			if (!particle.isAlive()) {
 				continue;
 			}
-			BindingTesselator tesselator = AsyncRenderer.getBTesselator(particleRenderType, textureManager);
-			profiler.push("render_sync");
-			Collection<? extends Particle> syncParticles;
-			boolean enableCull;
-			Tesselator toBegin;
-			if (!renderAsync || tesselator.shouldSync) {
-				enableCull = cullParticles;
-				syncParticles = queue;
-				toBegin = Tesselator.getInstance();
-			} else {
-				enableCull = false;
-				syncParticles = AsyncRenderer.getSync(particleRenderType);
-				toBegin = tesselator;
-			}
-			// why ParticleRenderType#end() removed?...
-			RenderSystem.enableCull();
-			RenderSystem.enableDepthTest();
-			// set shader before begin
-			RenderSystem.setShader(GameRenderer::getParticleShader);
-			// begin before sync particles to be compatible with some mod
-			// We must ensure only call begin once in this method,
-			// otherwise it will mess up some mod's mixins.
-			BufferBuilder bufferBuilder = particleRenderType.begin(toBegin, this.textureManager);
-			if (bufferBuilder == null) {
+			float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
+			if (enableCull && !FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
 				continue;
 			}
-			if (!syncParticles.isEmpty()) {
-				float f2 = f + 1f;
-				for (Particle particle : syncParticles) {
-					if (!particle.isAlive()) {
-						continue;
-					}
-					float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
-					if (enableCull && !frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(f3))) {
-						continue;
-					}
-					try {
-						particle.render(bufferBuilder, camera, f3);
-					} catch (Throwable t) {
-						throw AsyncRenderer.constructCrashReport(particle, particleRenderType, t);
-					}
+			try {
+				particle.renderCustom(poseStack, bufferSource, camera, f3);
+			} catch (Throwable t) {
+				throw AsyncRenderer.constructCrashReport(particle, particle.getRenderType(), t);
+			}
+		}
+	}
+
+	/**
+	 * @author
+	 * @reason
+	 */
+	@Overwrite
+	public void render(Camera camera, float partialTick, MultiBufferSource.BufferSource bufferSource) {
+		List<ParticleRenderType> renderOrder = RENDER_ORDER;
+		if (InternalRenderingMode.isAsync()) {
+			AsyncRenderer.endAll(camera, partialTick, renderOrder);
+		} else {
+			for (ParticleRenderType particleRenderType : renderOrder) {
+				Queue<Particle> queue = this.particles.get(particleRenderType);
+				if (queue != null && !queue.isEmpty()) {
+					renderParticleType(camera, partialTick, bufferSource, particleRenderType, queue);
 				}
 			}
-			profiler.popPush("build_buffer");
-			MeshData meshData = bufferBuilder.build();
-			if (meshData != null) {
-				profiler.popPush("upload_particles");
-				BufferUploader.drawWithShader(meshData);
-			}
-			profiler.pop();
 		}
 
-		profiler.push("cleanup");
-		RenderSystem.depthMask(true);
-		RenderSystem.disableBlend();
-		// reset blend func and culling state
-		// other mods may change them...
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.enableDepthTest();
-		RenderSystem.enableCull();
-		lightTexture.turnOffLightLayer();
-		profiler.pop();
+		if (!ModListHelper.IRIS_LIKE_LOADED || !AsyncRenderer.isTranslucentPhase(phase)) {
+			Queue<Particle> queue2 = this.particles.get(ParticleRenderType.CUSTOM);
+			if (queue2 != null && !queue2.isEmpty()) {
+				renderCustomParticles(camera, partialTick, bufferSource, queue2);
+			}
+		}
+
+		bufferSource.endBatch();
 	}
 }

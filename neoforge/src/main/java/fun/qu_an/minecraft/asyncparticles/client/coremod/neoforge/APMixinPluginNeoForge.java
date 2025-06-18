@@ -35,18 +35,11 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 			return true;
 		}
 		return switch (split[0]) {
-			case "off_thread_access" -> true;
+			case "iris_like" -> FORGE_IRIS_LIKE_LOADED;
 			case "particlerain" -> FORGE_PARTICLERAIN_LOADED;
-			case "particlerain_create" -> FORGE_PARTICLERAIN_LOADED && CREATE_LOADED;
-			case "particlerain_vs" -> FORGE_PARTICLERAIN_LOADED && VS_LOADED;
-			case "create" -> FORGE_CREATE_LOADED;
-			// TODO: 下面这个 mod 没有正式发布，且不确定是否是唯一的 forge 移植版
-			case "effecticularity" -> FORGE_EFFECTIVE_LOADED;
 			case "subtle_effects" -> FORGE_SUBTLE_EFFECTS_LOADED;
 			case "simple_weather" -> FORGE_SIMPLE_WEATHER_LOADED;
-			case "simple_weather_create" -> FORGE_SIMPLE_WEATHER_LOADED && CREATE_LOADED;
 			case "particular" -> FORGE_PARTICULAR_LOADED;
-			case "vs2_create" -> FORGE_VS_LOADED && CREATE_LOADED;
 			default -> throw new IllegalArgumentException("Unknown forge mixin: " + mixinClassName);
 		};
 	}

@@ -3,73 +3,91 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.iris;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.resource.ResourceHandle;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
+import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
+import net.irisshaders.iris.fantastic.PhasedParticleEngine;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LevelTargetBundle;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import org.joml.Matrix4f;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
 
-@Mixin(value = LevelRenderer.class, priority = 1500) // After mixin.render.MixinLevelRenderer
+@Mixin(value = LevelRenderer.class, priority = 1500)
 public abstract class MixinLevelRenderer {
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE",
-		target = "Lnet/minecraft/client/multiplayer/ClientLevel;entitiesForRendering()Ljava/lang/Iterable;"))
-	private void beforeRenderEntities(DeltaTracker deltaTracker,
-									  boolean renderBlockOutline,
-									  Camera camera,
-									  GameRenderer gameRenderer,
-									  LightTexture lightTexture,
-									  Matrix4f frustumMatrix,
-									  Matrix4f projectionMatrix,
-									  CallbackInfo ci,
-									  @Local(ordinal = 0) float partialTick,
-									  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
-									  LocalIntRef irm) {
+	@Shadow
+	@Final
+	private Minecraft minecraft;
+
+	// BEFORE
+	@Inject(method = "method_62214",
+		at = @At(value = "INVOKE", ordinal = 0, shift = At.Shift.AFTER,
+			// after crumbling buffer source endBatch()
+			target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V"))
+	private void onAddMain(GpuBufferSlice gpuBufferSlice,
+						   DeltaTracker deltaTracker,
+						   Camera camera,
+						   ProfilerFiller profilerFiller,
+						   Matrix4f matrix4f,
+						   ResourceHandle resourceHandle,
+						   ResourceHandle resourceHandle2,
+						   boolean bl,
+						   Frustum frustum,
+						   ResourceHandle resourceHandle3,
+						   ResourceHandle resourceHandle4,
+						   CallbackInfo ci,
+						   @Local(ordinal = 0) MultiBufferSource.BufferSource bufferSource,
+						   @Local(ordinal = 0) float f,
+						   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+						   LocalIntRef irm) {
 		switch (irm.get()) {
-			case IRIS_MIXED_SYNC -> AsyncRenderer.endOpaque(lightTexture, camera, partialTick, false);
-			case IRIS_BEFORE_SYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, false);
+			case IRIS_MIXED_ASYNC, IRIS_MIXED_SYNC -> {
+				ParticleEngine particleEngine = this.minecraft.particleEngine;
+				Profiler.get().popPush("opaque_particles");
+				((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
+				particleEngine.render(camera, f, bufferSource);
+			}
+			case IRIS_BEFORE_ASYNC, IRIS_BEFORE_SYNC -> {
+				ParticleEngine particleEngine = this.minecraft.particleEngine;
+				Profiler.get().popPush("opaque_particles");
+				((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
+				particleEngine.render(camera, f, bufferSource);
+			}
 		}
 	}
 
-	@Inject(method = "renderLevel", at = @At(value = "FIELD", ordinal = 0,
-		target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;"))
-	private void onRenderLevelTransparencyChain(DeltaTracker deltaTracker,
-												boolean renderBlockOutline,
-												Camera camera,
-												GameRenderer gameRenderer,
-												LightTexture lightTexture,
-												Matrix4f frustumMatrix,
-												Matrix4f projectionMatrix,
-												CallbackInfo ci,
-												@Local(ordinal = 0) float partialTick,
-												@Share(namespace = "asyncparticles", value = "internalRenderingMode")
-												LocalIntRef irm) {
+	// AFTER
+	@Inject(method = "method_62213", at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V"))
+	private void onRenderParticles(GpuBufferSlice gpuBufferSlice,
+								   ResourceHandle resourceHandle,
+								   ResourceHandle resourceHandle2,
+								   Camera camera,
+								   float f,
+								   CallbackInfo ci,
+								   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+								   LocalIntRef irm) {
 		switch (irm.get()) {
-			case IRIS_MIXED_ASYNC -> AsyncRenderer.endOpaque(lightTexture, camera, partialTick, true);
-			case IRIS_BEFORE_ASYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
-		}
-	}
-
-	@Redirect(method = "renderLevel", at = @At(value = "INVOKE",
-		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V"))
-	private void redirectRenderParticles(ParticleEngine instance,
-										 LightTexture lightTexture,
-										 Camera camera,
-										 float partialTick,
-										 @Share(namespace = "asyncparticles", value = "internalRenderingMode")
-										 LocalIntRef irm) {
-		switch (irm.get()) {
-			case SYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, false);
-			case COMPATIBILITY_ASYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
-			case IRIS_MIXED_SYNC -> AsyncRenderer.endTranslucent(lightTexture, camera, partialTick, false);
-			case IRIS_MIXED_ASYNC -> AsyncRenderer.endTranslucent(lightTexture, camera, partialTick, true);
+			case IRIS_MIXED_ASYNC, IRIS_MIXED_SYNC ->
+				((PhasedParticleEngine) minecraft.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
+			case DELAYED_ASYNC, COMPATIBILITY_ASYNC, SYNC ->
+				((PhasedParticleEngine) minecraft.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
 	}
 }

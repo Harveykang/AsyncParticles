@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -12,47 +12,26 @@ import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.PostChain;
-import net.minecraft.client.renderer.culling.Frustum;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.function.Predicate;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
 
 @Mixin(value = LevelRenderer.class, priority = 1500)
 public abstract class MixinLevelRenderer {
-	@WrapOperation(method = "lambda$addMainPass$3", remap = false,
-		at = @At(value = "INVOKE", remap = false,
-			target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
-	private void onAddMain(ParticleEngine instance,
-						   Camera camera,
-						   float v,
-						   MultiBufferSource.BufferSource bufferSource,
-						   Frustum frustum,
-						   Predicate<ParticleRenderType> predicate,
-						   Operation<Void> original) {
-		// do nothing
-	}
-
 	@WrapOperation(method = "renderLevel",
-		at = @At(value = "INVOKE", remap = false,
-			target = "Lnet/minecraft/client/renderer/LevelRenderer;addParticlesPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/client/Camera;FLcom/mojang/blaze3d/buffers/GpuBufferSlice;Lnet/minecraft/client/renderer/culling/Frustum;Lorg/joml/Matrix4f;)V"))
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;addParticlesPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/client/Camera;FLcom/mojang/blaze3d/buffers/GpuBufferSlice;)V"))
 	private void redirectAddParticlesPass(LevelRenderer instance,
 										  FrameGraphBuilder frameGraphBuilder,
 										  Camera camera,
 										  float partialTick,
 										  GpuBufferSlice gpuBufferSlice,
-										  Frustum frustum,
-										  Matrix4f matrix4f,
 										  Operation<Void> original,
 										  @Share("asyncparticles$addParticlesPassOperation")
 										  LocalRef<Operation<Void>> originalRef,
@@ -60,7 +39,7 @@ public abstract class MixinLevelRenderer {
 										  LocalIntRef irm) {
 		switch (irm.get()) {
 			case COMPATIBILITY_ASYNC, IRIS_MIXED_ASYNC, SYNC, IRIS_MIXED_SYNC ->
-				original.call(instance, frameGraphBuilder, camera, partialTick, gpuBufferSlice, frustum, matrix4f);
+				original.call(instance, frameGraphBuilder, camera, partialTick, gpuBufferSlice);
 			case IRIS_BEFORE_SYNC, IRIS_BEFORE_ASYNC -> {
 				// no-op
 			}
@@ -69,13 +48,13 @@ public abstract class MixinLevelRenderer {
 	}
 
 	@Inject(method = "renderLevel", order = 1500,
-		slice = @Slice(from = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/client/renderer/LevelRenderer;addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;FLcom/mojang/blaze3d/buffers/GpuBufferSlice;Lorg/joml/Matrix4f;Lnet/minecraft/client/Camera;)V")),
+		slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;FLcom/mojang/blaze3d/buffers/GpuBufferSlice;)V")),
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;addToFrame(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;IILnet/minecraft/client/renderer/PostChain$TargetBundle;)V"))
 	private void onRenderLevelTail1(GraphicsResourceAllocator graphicsResourceAllocator,
 									DeltaTracker deltaTracker,
 									boolean bl,
 									Camera camera,
-									Matrix4f modelViewMatrix, // first one
+									Matrix4f matrix4f,
 									Matrix4f matrix4f2,
 									GpuBufferSlice gpuBufferSlice,
 									Vector4f vector4f,
@@ -83,14 +62,13 @@ public abstract class MixinLevelRenderer {
 									CallbackInfo ci,
 									@Local(ordinal = 0) FrameGraphBuilder frameGraphBuilder,
 									@Local(ordinal = 0) float partialTick,
-									@Local(ordinal = 0) Frustum frustum,
 									@Share("asyncparticles$addParticlesPassOperation")
 									LocalRef<Operation<Void>> originalRef,
 									@Share(namespace = "asyncparticles", value = "internalRenderingMode")
 									LocalIntRef irm) {
 		// Fabulous graphics
 		if (irm.get() == DELAYED_ASYNC) {
-			originalRef.get().call(this, frameGraphBuilder, camera, partialTick, gpuBufferSlice, frustum, modelViewMatrix);
+			originalRef.get().call(this, frameGraphBuilder, camera, partialTick, gpuBufferSlice);
 		}
 	}
 
@@ -100,7 +78,7 @@ public abstract class MixinLevelRenderer {
 									DeltaTracker deltaTracker,
 									boolean bl,
 									Camera camera,
-									Matrix4f modelViewMatrix, // first one
+									Matrix4f matrix4f,
 									Matrix4f matrix4f2,
 									GpuBufferSlice gpuBufferSlice,
 									Vector4f vector4f,
@@ -108,34 +86,13 @@ public abstract class MixinLevelRenderer {
 									CallbackInfo ci,
 									@Local(ordinal = 0) FrameGraphBuilder frameGraphBuilder,
 									@Local(ordinal = 0) float partialTick,
-									@Local(ordinal = 0) Frustum frustum,
-									@Local(ordinal = 0) PostChain postChain,
 									@Share("asyncparticles$addParticlesPassOperation")
 									LocalRef<Operation<Void>> originalRef,
 									@Share(namespace = "asyncparticles", value = "internalRenderingMode")
 									LocalIntRef irm) {
 		// non-Fabulous graphics
 		if (irm.get() == DELAYED_ASYNC && !Minecraft.useShaderTransparency()) {
-			originalRef.get().call(this, frameGraphBuilder, camera, partialTick, gpuBufferSlice, frustum, modelViewMatrix);
-		}
-	}
-
-	// AFTER
-	@Redirect(method = "lambda$addParticlesPass$6", remap = false,
-		at = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
-	private void shouldRenderParticles(ParticleEngine instance,
-									   Camera camera,
-									   float partialTick,
-									   MultiBufferSource.BufferSource bufferSource,
-									   Frustum frustum,
-									   Predicate<ParticleRenderType> predicate,
-									   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
-									   LocalIntRef irm) {
-		switch (irm.get()) {
-			case IRIS_MIXED_ASYNC, IRIS_MIXED_SYNC ->
-				instance.render(camera, partialTick, bufferSource, frustum, ParticleRenderType::translucent);
-			case SYNC, DELAYED_ASYNC, COMPATIBILITY_ASYNC ->
-				instance.render(camera, partialTick, bufferSource, frustum, p -> true);
+			originalRef.get().call(this, frameGraphBuilder, camera, partialTick, gpuBufferSlice);
 		}
 	}
 }

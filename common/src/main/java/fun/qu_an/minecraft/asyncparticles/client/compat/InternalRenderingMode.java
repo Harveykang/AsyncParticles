@@ -43,15 +43,30 @@ public class InternalRenderingMode {
 		return mode;
 	}
 
+	public static boolean isShaderEnabled() {
+		return switch (mode) {
+			case IRIS_BEFORE_SYNC, IRIS_BEFORE_ASYNC, IRIS_MIXED_SYNC, IRIS_MIXED_ASYNC -> true;
+			default -> false;
+		};
+	}
+
 	public static boolean isDelayed() {
 		return mode == DELAYED_ASYNC;
 	}
 
-	public static boolean isASync() {
+	public static boolean isAsync() {
+		return (mode & 1) != 0;
+	}
+
+	public static boolean isAsync(int mode) {
 		return (mode & 1) != 0;
 	}
 
 	public static boolean isSync() {
+		return (mode & 1) == 0;
+	}
+
+	public static boolean isSync(int mode) {
 		return (mode & 1) == 0;
 	}
 }

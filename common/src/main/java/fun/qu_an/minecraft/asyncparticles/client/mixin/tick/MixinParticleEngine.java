@@ -12,6 +12,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.ParticleGroup;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import org.spongepowered.asm.mixin.*;
@@ -76,7 +77,7 @@ public abstract class MixinParticleEngine {
 		particles.forEach((particleRenderType, queue) -> {
 			// submit this task even though the queue is empty
 			// we'll add particles later
-			ProfilerFiller profiler = this.level.getProfiler();
+			ProfilerFiller profiler = Profiler.get();
 			profiler.push(particleRenderType.toString());
 			AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue));
 			profiler.pop();

@@ -64,19 +64,19 @@ subprojects {
             url = "https://jitpack.io/"
             content { includeGroupAndSubgroups("com.github") }
         }
-        maven {
-            name = "Valkyrien Skies Internal"
-            url = 'https://maven.valkyrienskies.org'
-            allowInsecureProtocol = true
-            content {
-                includeGroup "org.valkyrienskies.core"
-            }
-        }
+//        maven {
+//            name = "Valkyrien Skies Internal"
+//            url = 'https://maven.valkyrienskies.org'
+//            allowInsecureProtocol = true
+//            content {
+//                includeGroup "org.valkyrienskies.core"
+//            }
+//        }
         maven { url "https://maven.shedaniel.me/" }
-        maven { url = "https://mvn.devos.one/releases" } // Porting Lib releases
-        maven { url = "https://mvn.devos.one/snapshots" } // Create and several dependencies, Registrate
-        maven { url = "https://maven.createmod.net" } // Create, Ponder, Flywheel
-        maven { url = "https://maven.jamieswhiteshirt.com/libs-release" } // Reach Entity Attributes
+//        maven { url = "https://mvn.devos.one/releases" } // Porting Lib releases
+//        maven { url = "https://mvn.devos.one/snapshots" } // Create and several dependencies, Registrate
+//        maven { url = "https://maven.createmod.net" } // Create, Ponder, Flywheel
+//        maven { url = "https://maven.jamieswhiteshirt.com/libs-release" } // Reach Entity Attributes
         maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven" } // Forge Config API Port
         maven {
             name = "Sinytra"
@@ -97,18 +97,22 @@ subprojects {
             name = 'Kotlin for Forge'
             url = 'https://thedarkcolour.github.io/KotlinForForge/'
         }
-        maven { // NeoOculus dependency
-            name = "TauMC"
-            url = "https://maven.taumc.org/releases"
+//        maven { // NeoOculus dependency
+//            name = "TauMC"
+//            url = "https://maven.taumc.org/releases"
+//        }
+//        maven { url = "https://maven.blamejared.com/" } // Hex Casting
+        maven { // YetAnotherConfigLib
+            url = "https://maven.isxander.dev/releases"
+            name = "Xander Maven"
         }
-        maven { url = "https://maven.blamejared.com/" } // Hex Casting
     }
 
     dependencies {
-        minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
+        minecraft "net.minecraft:minecraft:$minecraft_version"
         mappings(loom.layered {
             it.officialMojangMappings { nameSyntheticMembers = false }
-//            it.parchment("org.parchmentmc.data:parchment-$minecraft_version:2024.11.17@zip")
+//            it.parchment("org.parchmentmc.data:parchment-$parchment_minecraft_version:$parchment_version")
         })
     }
 

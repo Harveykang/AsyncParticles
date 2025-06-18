@@ -72,20 +72,13 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					yield !IS_FORGE;
 				}
 				yield switch (split[1]) {
-					case "off_thread_access" -> !IS_FORGE;
-					case "particlerain_create" -> FABRIC_PARTICLERAIN_LOADED && CREATE_LOADED;
 					case "particlerain" -> FABRIC_PARTICLERAIN_LOADED;
-					case "particlerain_vs" -> FABRIC_PARTICLERAIN_LOADED && VS_LOADED;
-					case "create" -> FABRIC_CREATE_LOADED;
-					case "effective" -> FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
 					case "particular" -> FABRIC_PARTICULAR_LOADED;
 					case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
 					case "iris" -> FABRIC_IRIS_LOADED;
-					case "iris_else" -> !IS_FORGE && !FABRIC_IRIS_LOADED;
 					case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;
 					case "loot_beams_up" -> FABRIC_LOOT_BEAMS_UP_LOADED;
-					case "cooparticlesapi" -> FABRIC_COO_PARTICLES_API_LOADED;
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
@@ -94,9 +87,6 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				 "tick",
 				 "render" -> true;
 			case "modernui" -> MODERN_UI_LOADED;
-			case "create" -> CREATE_LOADED;
-//			case "sodium_0_6" -> ModListHelper.SODIUM_LOADED
-//								 && ModListHelper.versionCheck("sodium", "0.6", "0.7");
 			case "sodium_0_7" -> SODIUM_LOADED && versionCheck("sodium", "0.7", "0.8");
 			case "iris_like" -> IRIS_LIKE_LOADED;
 			case "a_good_place" -> A_GOOD_PLACE_LOADED;
@@ -111,11 +101,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			}
 			case "watut" -> WATUT_LOADED;
 			case "physicsmod" -> PHYSICSMOD_LOADED;
-			case "physicsmod_create" -> PHYSICSMOD_LOADED && CREATE_LOADED;
-			case "physicsmod_vs" -> PHYSICSMOD_LOADED && VS_LOADED;
-			case "lodestone" -> LODESTONE_LOADED;
 			case "cloth_config" -> CLOTH_CONFIG_LOADED;
-			case "vs2" -> VS_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

@@ -25,13 +25,13 @@ public class ModListHelperImpl {
 	 * Basically from <a href="https://github.com/Moulberry/MixinConstraints">MixinConstraints</a>
 	 */
 	public static boolean versionCheck(String modId, String minInclusive, String maxExclusive) {
-		Optional<Version> optional = FabricLoader.getInstance().getModContainer(modId)
+		Optional<Version> versionOptional = FabricLoader.getInstance().getModContainer(modId)
 			.map(container -> container.getMetadata()
 				.getVersion());
-		if (optional.isEmpty()) {
+		if (versionOptional.isEmpty()) {
 			return false;
 		}
-		Version currentVersion = optional.get();
+		Version currentVersion = versionOptional.get();
 		Version min, max;
 		try {
 			min = minInclusive == null ? null : Version.parse(minInclusive);

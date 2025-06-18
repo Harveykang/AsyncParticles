@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.renderer.RenderType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,15 +38,15 @@ public class MixinMinecraft {
 					if (o1 == o2) {
 						return 0;
 					}
-					BindingTesselator bTesselator1 = AsyncRenderer.getBTesselator(o1, particleEngine.textureManager);
-					BindingTesselator bTesselator2 = AsyncRenderer.getBTesselator(o2, particleEngine.textureManager);
-					if (bTesselator1.shouldSync && bTesselator2.shouldSync) {
+					boolean r1 = o1.renderType() == null;
+					boolean r2 = o2.renderType() == null;
+					if (r1 && r2) {
 						return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
 					}
-					if (bTesselator2.shouldSync) {
+					if (r1) {
 						return -1;
 					}
-					if (bTesselator1.shouldSync) {
+					if (r2) {
 						return 1;
 					}
 

@@ -2,7 +2,6 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -12,6 +11,7 @@ import net.minecraft.client.sounds.SoundEventListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -22,6 +22,9 @@ import java.util.Map;
 // TODO: Any better way to handle this?
 @Mixin(SoundEngine.class)
 public class MixinSoundEngine {
+	@Shadow
+	private boolean loaded;
+
 	@Inject(method = "tick", at = @At("HEAD"))
 	public void injectTick(CallbackInfo ci) {
 		ThreadUtil.assertNotParticleThread();
@@ -46,11 +49,13 @@ public class MixinSoundEngine {
 	}
 
 	@WrapMethod(method = "play")
-	public void wrapPlay(SoundInstance soundInstance, Operation<Void> original) {
+	public SoundEngine.PlayResult wrapPlay(SoundInstance soundInstance, Operation<SoundEngine.PlayResult> original) {
 		if (ThreadUtil.isOnMainThread()) {
-			original.call(soundInstance);
+			return original.call(soundInstance);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> original.call(soundInstance));
+			// FIXME
+			return this.loaded ? SoundEngine.PlayResult.STARTED_SILENTLY : SoundEngine.PlayResult.NOT_STARTED;
 		}
 	}
 

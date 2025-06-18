@@ -24,6 +24,7 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import org.apache.logging.log4j.LogManager;
@@ -34,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -63,7 +65,7 @@ public class AsyncTicker {
 		() -> 5000,
 		ConfigHelper::getTickFailurePerSecondThreshold
 	);
-	private static final LongRef timeUsageNano = new LongRef(0L);
+	private static final AtomicLong timeUsageNano = new AtomicLong(0L);
 
 	static {
 		AtomicInteger workerCount = new AtomicInteger(1);
@@ -113,7 +115,7 @@ public class AsyncTicker {
 			return;
 		}
 		// assert i < to;
-		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
+		ProfilerFiller profiler = Profiler.get();
 		profiler.push("async_particles");
 		Minecraft mc = Minecraft.getInstance();
 		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
@@ -198,7 +200,7 @@ public class AsyncTicker {
 			return;
 		}
 		// assert i < to;
-		ProfilerFiller profiler = mc.getProfiler();
+		ProfilerFiller profiler = Profiler.get();
 		profiler.push("async_particles");
 		if (levelRunning) {
 			profiler.push("particle_tick");
@@ -215,7 +217,7 @@ public class AsyncTicker {
 		// tick last, schedule async tasks
 		tryReload();
 		tryDebug();
-		CompletableFuture<Void> particleFuture = CompletableFuture.runAsync(() -> timeUsageNano.set(System.nanoTime()), EXECUTOR);
+		CompletableFuture<Void> particleFuture = CompletableFuture.runAsync(() -> timeUsageNano.setRelease(System.nanoTime()), EXECUTOR);
 		CompletableFuture<Void> sequencedTaskFuture = particleFuture;
 		CompletableFuture<?> parallelEventsFuture = Utils.NULL_FUTURE;
 		CompletableFuture<?> parallelOperationsFuture = Utils.NULL_FUTURE;
@@ -318,7 +320,7 @@ public class AsyncTicker {
 		}
 
 		AsyncTicker.particleFuture = sequencedTaskFuture
-			.thenRunAsync(() -> timeUsageNano.set(System.nanoTime() - timeUsageNano.get()), EXECUTOR);
+			.thenRunAsync(() -> timeUsageNano.setRelease(System.nanoTime() - timeUsageNano.getAcquire()), EXECUTOR);
 
 		profiler.pop();
 	}
@@ -366,7 +368,7 @@ public class AsyncTicker {
 					LOGGER.warn("Exception {} thrown while ticking particle {} exceeds the threshold, please contact the author: {}",
 						t.getClass().getSimpleName(),
 						particle,
-						AsyncParticlesClient.ISSUE_URL,
+						AsyncParticlesClient.ISSUE_URL_STR,
 						t);
 				}
 				markAsSync(particleClass);
@@ -375,18 +377,18 @@ public class AsyncTicker {
 		} else if (tolerable) {
 			LocalPlayer player = Minecraft.getInstance().player;
 			if (player != null) {
-				player.sendSystemMessage(Component.literal(
+				player.displayClientMessage(Component.literal(
 						"Exception %s thrown while ticking particle %s exceeds the threshold, please contact the author: "
 							.formatted(t.getClass().getSimpleName(), particleClass))
-					.append(Component.literal(AsyncParticlesClient.ISSUE_URL)
+					.append(Component.literal(AsyncParticlesClient.ISSUE_URL_STR)
 						.setStyle(Style.EMPTY
-							.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncParticlesClient.ISSUE_URL))
-							.withUnderlined(true))));
+							.withClickEvent(new ClickEvent.OpenUrl(AsyncParticlesClient.ISSUE_URI))
+							.withUnderlined(true))), false);
 			}
 			LOGGER.warn("Exception {} thrown while ticking particle {} exceeds the threshold, please contact the author: {}",
 				t.getClass().getSimpleName(),
 				particle,
-				AsyncParticlesClient.ISSUE_URL,
+				AsyncParticlesClient.ISSUE_URL_STR,
 				t);
 		} else {
 			throw constructCrashReport(particle, t);
@@ -493,7 +495,7 @@ public class AsyncTicker {
 			particles to add size: %d
 			sync particle count: %d,
 			sync particle types: %s,"""
-			.formatted(ConfigHelper.isTickAsync() ? timeUsageNano.get() / 1000000d : Double.NaN,
+			.formatted(ConfigHelper.isTickAsync() ? timeUsageNano.getAcquire() / 1000000d : Double.NaN,
 				debug_cancelled,
 				PARTICLE_OPERATIONS.size(),
 				SEQUENCED_END_TICK_EVENTS.size() + PARALLEL_END_TICK_EVENTS.size(),
