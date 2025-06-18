@@ -22,7 +22,7 @@ public class AdjusterParticlesLockProvider implements MixinClassAdjuster {
 
 	@Override
 	public String getRefMapperConfig() {
-		return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "neoforge-" : "fabric-") +
-			   "asyncparticles-common-refmap.json";
+		return IS_FORGE ? null : (isDevelopmentEnvironment() ? "" : "fabric-") +
+								 "asyncparticles-common-refmap.json";
 	}
 }
