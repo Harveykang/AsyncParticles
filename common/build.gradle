@@ -84,4 +84,7 @@ dependencies {
 
     /* Coo Particles API */
     modCompileOnly "com.github.CooStack:CooParticlesAPI:1.9.2"
+
+    /* Dynamic Surroundings */
+    modCompileOnly "maven.modrinth:dynamicsurroundingsfabric:0.4.2"
 }

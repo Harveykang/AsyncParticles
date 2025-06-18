@@ -89,6 +89,8 @@ public class ModListHelper {
 	public static final boolean FABRIC_LOOT_BEAMS_UP_LOADED = isFabricModLoaded("lootbeams");
 	/* Coo Particles API */
 	public static final boolean FABRIC_COO_PARTICLES_API_LOADED = isModLoaded("cooparticlesapi");
+	/* Dynamic Surroundings */
+	public static final boolean DSURROUND_LOADED = isModLoaded("dsurround");
 
 	@ExpectPlatform
 	private static boolean isForge() {
