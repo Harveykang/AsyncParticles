@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin({AirFlowParticle.class, AirParticle.class, SteamJetParticle.class})
 public abstract class MixinParticle_LightCache
-	extends fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticle_LightCache {
+	extends fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticle_LightCache {
 	@WrapMethod(method = "getLightColor")
 	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {
 		return ConfigHelper.particleLightCache()

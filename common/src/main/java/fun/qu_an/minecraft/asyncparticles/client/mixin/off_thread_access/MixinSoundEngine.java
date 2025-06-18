@@ -45,7 +45,7 @@ public class MixinSoundEngine {
 	}
 
 	@WrapMethod(method = "play")
-	public void wrapStop(SoundInstance soundInstance, Operation<Void> original) {
+	public void wrapPlay(SoundInstance soundInstance, Operation<Void> original) {
 		if (ThreadUtil.isOnMainThread()) {
 			original.call(soundInstance);
 		} else {

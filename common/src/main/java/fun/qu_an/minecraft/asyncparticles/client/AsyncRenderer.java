@@ -128,7 +128,7 @@ public class AsyncRenderer {
 				mixedParticleRenderingSetting = true;
 				return;
 			}
-			case SYNC, IRIS_BEFORE_SYNC, IRIS_AFTER_SYNC -> {
+			case SYNC, IRIS_BEFORE_SYNC -> {
 				mixedParticleRenderingSetting = false;
 				return;
 			}

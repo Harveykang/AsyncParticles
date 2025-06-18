@@ -64,7 +64,7 @@ dependencies {
     /* Performance */
     modLocalRuntime "maven.modrinth:spark:1.10.53-fabric"
     modLocalRuntime "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
-//    modLocalRuntime 'maven.modrinth:iris:1.7.6+1.20.1'
+    modLocalRuntime 'maven.modrinth:iris:1.7.6+1.20.1'
     if (rootProject.physics_enabled != 'true'){
         modLocalRuntime 'maven.modrinth:starlight:1.1.2+1.20'
     }

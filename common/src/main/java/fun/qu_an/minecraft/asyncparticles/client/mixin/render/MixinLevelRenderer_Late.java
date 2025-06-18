@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.*;
 import org.joml.Matrix4f;
@@ -14,6 +13,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
 
 @Mixin(value = LevelRenderer.class, priority = 1500)
 public abstract class MixinLevelRenderer_Late {
@@ -31,7 +32,7 @@ public abstract class MixinLevelRenderer_Late {
 									CallbackInfo ci,
 									@Share(namespace = "asyncparticles", value = "internalRenderingMode")
 									LocalIntRef irm) {
-		if (irm.get() == InternalRenderingMode.DELAYED_ASYNC) {
+		if (irm.get() == DELAYED_ASYNC) {
 			PoseStack stack = RenderSystem.getModelViewStack();
 			// so that we don't need to change the behavior of ParticleEngine.render()
 			PoseStack.Pose pose = stack.poseStack.removeLast();
