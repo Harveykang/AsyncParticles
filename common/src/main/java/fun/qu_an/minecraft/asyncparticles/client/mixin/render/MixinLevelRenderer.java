@@ -23,6 +23,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
+
 @Mixin(value = LevelRenderer.class, priority = 500)
 public abstract class MixinLevelRenderer {
 	@Shadow
@@ -110,8 +112,7 @@ public abstract class MixinLevelRenderer {
 								   @Local(ordinal = 0) float partialTick,
 								   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 								   LocalIntRef irm) {
-		if (irm.get() == InternalRenderingMode.DELAYED_ASYNC &&
-			transparencyChain == null) {
+		if (transparencyChain == null && irm.get() == DELAYED_ASYNC) {
 			AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
 		}
 	}
@@ -130,7 +131,7 @@ public abstract class MixinLevelRenderer {
 									@Local(ordinal = 0) float partialTick,
 									@Share(namespace = "asyncparticles", value = "internalRenderingMode")
 									LocalIntRef irm) {
-		if (irm.get() == InternalRenderingMode.DELAYED_ASYNC) {
+		if (irm.get() == DELAYED_ASYNC) {
 			AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
 		}
 	}

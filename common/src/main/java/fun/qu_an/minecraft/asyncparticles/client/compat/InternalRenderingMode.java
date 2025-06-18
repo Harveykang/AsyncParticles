@@ -13,8 +13,7 @@ public class InternalRenderingMode {
 		IRIS_MIXED_ASYNC = 7,
 		SYNC = 0, // RenderingMode.SYNCHRONOUSLY
 		IRIS_BEFORE_SYNC = 2,
-		IRIS_MIXED_SYNC = 4,
-		IRIS_AFTER_SYNC = 6;
+		IRIS_MIXED_SYNC = 4;
 	private static int mode = 0;
 
 	@ApiStatus.Internal
@@ -29,27 +28,19 @@ public class InternalRenderingMode {
 		ParticleRenderingSettings settings = IrisCompat.getParticleRenderingSettings();
 		int i = (settings.ordinal() << 2) | renderingMode.ordinal(); // UNSET.ordinal() == 0
 		return mode = switch (i) {
-			case 0 -> SYNC;
-			case 1, 0b1101, 0b1110 -> DELAYED_ASYNC; // IRIS_ASYNC_AFTER
-			case 2 -> COMPATIBILITY_ASYNC;
+			case 0, 0b1100 -> SYNC; // IRIS_SYNC_AFTER
+			case 1, 0b1101 -> DELAYED_ASYNC; // IRIS_ASYNC_AFTER
+			case 2, 0b1110 -> COMPATIBILITY_ASYNC; // IRIS_ASYNC_AFTER
 			case 0b100 -> IRIS_BEFORE_SYNC;
 			case 0b101, 0b110 -> IRIS_BEFORE_ASYNC;
 			case 0b1000 -> IRIS_MIXED_SYNC;
 			case 0b1001, 0b1010 -> IRIS_MIXED_ASYNC;
-			case 0b1100 -> IRIS_AFTER_SYNC;
 			default -> throw new IllegalStateException("Unexpected value: " + i);
 		};
 	}
 
 	public static int getMode() {
 		return mode;
-	}
-
-	public static boolean isShaderEnabled() {
-		return switch (mode) {
-			case IRIS_BEFORE_SYNC, IRIS_BEFORE_ASYNC, IRIS_MIXED_SYNC, IRIS_MIXED_ASYNC, IRIS_AFTER_SYNC -> true;
-			default -> false;
-		};
 	}
 
 	public static boolean isDelayed() {

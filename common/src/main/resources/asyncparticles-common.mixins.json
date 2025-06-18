@@ -14,7 +14,7 @@
     "cloth_config.BaseListEntryAccessor",
     "conditional.Mixin_ReplaceRandom",
     "conditional.MixinLegacyRandomSource",
-    "conditional.MixinParticle_LightCache",
+    "MixinParticle_LightCache",
     "conditional.MixinParticles_LightCacheNoRefresh",
     "conditional.MixinParticles_LockProvider",
     "conditional.MixinParticles_LockRequired",

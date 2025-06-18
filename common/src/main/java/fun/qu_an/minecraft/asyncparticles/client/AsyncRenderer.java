@@ -43,8 +43,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
-import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.IRIS_AFTER_SYNC;
-import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.IRIS_MIXED_ASYNC;
 
 // TODO: 整理这一坨
 @Environment(EnvType.CLIENT)
@@ -128,7 +126,7 @@ public class AsyncRenderer {
 				mixedParticleRenderingSetting = true;
 				return;
 			}
-			case SYNC, IRIS_BEFORE_SYNC, IRIS_AFTER_SYNC -> {
+			case SYNC, IRIS_BEFORE_SYNC -> {
 				mixedParticleRenderingSetting = false;
 				return;
 			}
