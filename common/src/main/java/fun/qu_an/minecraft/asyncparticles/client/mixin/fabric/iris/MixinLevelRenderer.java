@@ -40,7 +40,7 @@ public abstract class MixinLevelRenderer {
 		at = @At(value = "INVOKE", ordinal = 0, shift = At.Shift.AFTER,
 			// after crumbling buffer source endBatch()
 			target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V"))
-	private void onAddMain(GpuBufferSlice gpuBufferSlice,
+	private void onRenderMain(GpuBufferSlice gpuBufferSlice,
 						   DeltaTracker deltaTracker,
 						   Camera camera,
 						   ProfilerFiller profilerFiller,
@@ -53,7 +53,7 @@ public abstract class MixinLevelRenderer {
 						   ResourceHandle resourceHandle4,
 						   CallbackInfo ci,
 						   @Local(ordinal = 0) MultiBufferSource.BufferSource bufferSource,
-						   @Local(ordinal = 0) float f,
+						   @Local(ordinal = 0) float partialTick,
 						   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 						   LocalIntRef irm) {
 		switch (irm.get()) {
@@ -61,13 +61,13 @@ public abstract class MixinLevelRenderer {
 				ParticleEngine particleEngine = this.minecraft.particleEngine;
 				Profiler.get().popPush("opaque_particles");
 				((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
-				particleEngine.render(camera, f, bufferSource);
+				particleEngine.render(camera, partialTick, bufferSource);
 			}
 			case IRIS_BEFORE_ASYNC, IRIS_BEFORE_SYNC -> {
 				ParticleEngine particleEngine = this.minecraft.particleEngine;
 				Profiler.get().popPush("opaque_particles");
 				((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
-				particleEngine.render(camera, f, bufferSource);
+				particleEngine.render(camera, partialTick, bufferSource);
 			}
 		}
 	}
@@ -79,7 +79,7 @@ public abstract class MixinLevelRenderer {
 								   ResourceHandle resourceHandle,
 								   ResourceHandle resourceHandle2,
 								   Camera camera,
-								   float f,
+								   float partialTick,
 								   CallbackInfo ci,
 								   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 								   LocalIntRef irm) {

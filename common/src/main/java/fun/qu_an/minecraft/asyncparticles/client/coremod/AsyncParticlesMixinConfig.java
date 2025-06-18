@@ -104,11 +104,11 @@ public class AsyncParticlesMixinConfig {
 		private Set<String> noLightCache = new LinkedHashSet<>();
 
 		{
-			noLightCache.add("dev.shadowsoffire.gateways.client.GatewayParticle");
+//			noLightCache.add("dev.shadowsoffire.gateways.client.GatewayParticle");
 			noLightCache.add("com.chailotl.particular.particles.FireflyParticle");
 //			noLightCache.add("com.lowdragmc.photon.client.gameobject.FXObject");
 			noLightCache.add("net.diebuddies.minecraft.weather.WeatherParticle");
-			noLightCache.add("cn.coostack.cooparticlesapi.particles.ControlableParticle");
+//			noLightCache.add("cn.coostack.cooparticlesapi.particles.ControlableParticle");
 		}
 
 		private Set<String> lockProvider = new LinkedHashSet<>();
