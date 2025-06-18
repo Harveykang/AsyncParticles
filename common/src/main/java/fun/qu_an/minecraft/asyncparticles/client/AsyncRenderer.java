@@ -410,7 +410,7 @@ public class AsyncRenderer {
 				.formatted(asyncTasksSize,
 					BTESSELATORS.entrySet()
 						.stream()
-						.filter(e -> e.getValue() == BindingTesselator.EMPTY)
+						.filter(e -> e.getValue() != BindingTesselator.EMPTY)
 						.collect(Collectors.toMap(
 							Map.Entry::getKey,
 							e -> e.getValue().buffer.capacity)),
@@ -421,7 +421,8 @@ public class AsyncRenderer {
 					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList(),
 					BTESSELATORS.entrySet().stream()
 						.filter(e -> e.getValue() == BindingTesselator.EMPTY)
-						.map(Map.Entry::getKey).toList(),
+						.map(p -> p.getKey().name())
+						.toList(),
 					ModListHelper.IRIS_LIKE_LOADED ? IrisCompat.getParticleRenderingSettings().name() : "disabled"));
 			debugConsumer = null;
 		}

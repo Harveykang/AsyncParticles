@@ -137,8 +137,8 @@ public class AsyncParticlesMixinConfig {
 		private Set<String> replaceRandom = new LinkedHashSet<>();
 
 		{
-			replaceRandom.add("appeng.client.render.effects.LightningArcFX");
-			replaceRandom.add("appeng.client.render.effects.LightningFX");
+//			replaceRandom.add("appeng.client.render.effects.LightningArcFX");
+//			replaceRandom.add("appeng.client.render.effects.LightningFX");
 		}
 
 		private void fold() {
