@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.iris.IrisCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -110,7 +111,6 @@ public class AsyncRenderer {
 	public static Frustum frustum;
 	private static Consumer<String> debugConsumer;
 	private static CompletableFuture<Void> asyncTask;
-	private static boolean mixedParticleRenderingSetting = false;
 	private static int asyncTasksSize;
 	private static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
@@ -121,17 +121,8 @@ public class AsyncRenderer {
 
 	public static void start(float f, Camera camera, int irm) {
 		tryDebug();
-		switch (irm) {
-			case MIXED_SYNC -> {
-				mixedParticleRenderingSetting = true;
-				return;
-			}
-			case SYNC, BEFORE_SYNC -> {
-				mixedParticleRenderingSetting = false;
-				return;
-			}
-			case MIXED_ASYNC -> mixedParticleRenderingSetting = true;
-			default -> mixedParticleRenderingSetting = false;
+		if (InternalRenderingMode.isSync(irm)) {
+			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
@@ -292,10 +283,6 @@ public class AsyncRenderer {
 		crashReportCategory.setDetail("Particle", particle::toString);
 		crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
 		return new ReportedException(crashReport);
-	}
-
-	public static boolean isMixedParticleRendering() {
-		return mixedParticleRenderingSetting;
 	}
 
 	/* BufferBuilder */

@@ -28,7 +28,6 @@
     "fabric.cooparticlesapi.MixinParticleStyleManager",
     "fabric.effective.MixinEffective",
     "fabric.effectual.MixinAllEffects",
-    "fabric.effectual.MixinWaterDripEffect",
     "fabric.iris.MixinLevelRenderer",
     "fabric.iris_else.MixinLevelRenderer",
     "fabric.loot_beams_up.MixinParticleRenderType",

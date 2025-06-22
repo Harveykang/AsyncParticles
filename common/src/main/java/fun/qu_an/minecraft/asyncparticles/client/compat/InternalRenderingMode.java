@@ -54,4 +54,8 @@ public class InternalRenderingMode {
 	public static boolean isSync() {
 		return (mode & 1) == 0;
 	}
+
+	public static boolean isSync(int irm) {
+		return (irm & 1) == 0;
+	}
 }
