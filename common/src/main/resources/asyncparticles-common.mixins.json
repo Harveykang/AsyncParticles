@@ -7,6 +7,7 @@
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin",
   "client": [
     "MixinParticle",
+    "MixinParticle_LightCache",
     "a_good_place.InvokerBlocksParticlesManager",
     "a_good_place.MixinBlocksParticlesManager",
     "a_good_place.MixinPlacingBlockParticle",
@@ -15,7 +16,6 @@
     "cloth_config.BaseListEntryAccessor",
     "conditional.Mixin_ReplaceRandom",
     "conditional.MixinLegacyRandomSource",
-    "MixinParticle_LightCache",
     "conditional.MixinParticles_LightCacheNoRefresh",
     "conditional.MixinParticles_LockProvider",
     "conditional.MixinParticles_LockRequired",
@@ -28,7 +28,6 @@
     "fabric.effective.MixinEffective",
     "fabric.effective.MixinRippleParticle",
     "fabric.effectual.MixinAllEffects",
-    "fabric.effectual.MixinWaterDripEffect",
     "fabric.iris.MixinLevelRenderer_Late",
     "fabric.iris_else.MixinLevelRenderer_Late",
     "fabric.loot_beams_up.MixinParticleRenderType",
@@ -96,7 +95,9 @@
     "vs2.MixinVSAnimation",
     "vs2.MixinVSSoundEngine",
     "vs2_create.MixinParticle_LightCache",
-    "watut.MixinCustomParticleEngine"
+    "watut.MixinCustomParticleEngine",
+    "watut.MixinParticleItem",
+    "watut.MixinPlayerStatusManagerClient"
   ],
   "injectors": {
     "defaultRequire": 1

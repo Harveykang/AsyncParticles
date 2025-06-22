@@ -34,11 +34,9 @@ import java.util.*;
 public class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Shadow
 	public Map<ParticleRenderType, Queue<Particle>> particles;
-
 	@Shadow
 	@Final
 	public TextureManager textureManager;
-
 	@Override
 	public void asyncparticle$addRenderType(ParticleRenderType particleRenderType) {
 	}
@@ -71,7 +69,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 
 		// We don't use entrySet() to be compatible with iris.
 		boolean cullParticles = ConfigHelper.isCullParticles();
-		boolean mixedParticleRendering = AsyncRenderer.isMixedParticleRendering();
+		boolean irisEarlyOpaquePhase = AsyncRenderer.isIrisEarlyOpaquePhase();
 		for (ParticleRenderType particleRenderType : particles.keySet()) {
 			// FORGE doesn't skip NO_RENDER
 			if (particleRenderType == ParticleRenderType.NO_RENDER) {
@@ -95,7 +93,8 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			} else if ((bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager)) ==
 					   FakeBufferBuilder.INSTANCE) {
 				enableCull = cullParticles;
-				syncParticles = mixedParticleRendering ? Collections.emptyList() : queue;
+				// if irisEarlyOpaquePhase, we render custom particles in AsyncRenderer.irisCustom()
+				syncParticles = irisEarlyOpaquePhase ? Collections.emptyList() : queue;
 				tesselator = Tesselator.getInstance();
 				toBegin = bufferBuilder = tesselator.getBuilder();
 			} else {

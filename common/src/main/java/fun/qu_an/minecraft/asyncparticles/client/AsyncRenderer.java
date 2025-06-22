@@ -112,7 +112,7 @@ public class AsyncRenderer {
 	public static Frustum frustum;
 	private static Consumer<String> debugConsumer;
 	private static CompletableFuture<Void> asyncTask;
-	private static boolean mixedParticleRenderingSetting = false;
+	private static boolean irisEarlyOpaquePhase = false;
 	private static int asyncTasksSize;
 	private static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
@@ -124,16 +124,16 @@ public class AsyncRenderer {
 	public static void start(float f, Camera camera, int irm) {
 		tryDebug();
 		switch (irm) {
-			case IRIS_MIXED_SYNC -> {
-				mixedParticleRenderingSetting = true;
+			case MIXED_SYNC, BEFORE_SYNC -> {
+				irisEarlyOpaquePhase = true;
 				return;
 			}
-			case SYNC, IRIS_BEFORE_SYNC -> {
-				mixedParticleRenderingSetting = false;
+			case SYNC -> {
+				irisEarlyOpaquePhase = false;
 				return;
 			}
-			case IRIS_MIXED_ASYNC -> mixedParticleRenderingSetting = true;
-			default -> mixedParticleRenderingSetting = false;
+			case MIXED_ASYNC, BEFORE_ASYNC -> irisEarlyOpaquePhase = true;
+			default -> irisEarlyOpaquePhase = false;
 		}
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = mc.getProfiler();
@@ -256,8 +256,8 @@ public class AsyncRenderer {
 		}
 	}
 
-	public static boolean isMixedParticleRendering() {
-		return mixedParticleRenderingSetting;
+	public static boolean isIrisEarlyOpaquePhase() {
+		return irisEarlyOpaquePhase;
 	}
 
 	public static void irisOpaque(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture, boolean isAsync) {

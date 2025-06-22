@@ -27,18 +27,15 @@ import org.spongepowered.asm.mixin.*;
 import java.util.*;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
-public abstract class MixinParticleEngine_Render implements ParticleEngineAddon {
+public class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Shadow
 	public Map<ParticleRenderType, Queue<Particle>> particles;
-
 	@Shadow
 	@Final
 	public TextureManager textureManager;
-
 	@Shadow
 	@Mutable
 	public static List<ParticleRenderType> RENDER_ORDER;
-
 	@Override
 	public void asyncparticle$addRenderType(ParticleRenderType particleRenderType) {
 		if (!RENDER_ORDER.contains(particleRenderType)) {
@@ -74,7 +71,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 		profiler.pop();
 
 		boolean cullParticles = ConfigHelper.isCullParticles();
-		boolean mixedParticleRendering = AsyncRenderer.isMixedParticleRendering();
+		boolean irisEarlyOpaquePhase = AsyncRenderer.isIrisEarlyOpaquePhase();
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			// FABRIC skips NO_RENDER
 			//				if (particleRenderType == ParticleRenderType.NO_RENDER) {
@@ -98,7 +95,8 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 			} else if ((bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager)) ==
 					   FakeBufferBuilder.INSTANCE) {
 				enableCull = cullParticles;
-				syncParticles = mixedParticleRendering ? Collections.emptyList() : queue;
+				// if irisEarlyOpaquePhase, we render custom particles in AsyncRenderer.irisCustom()
+				syncParticles = irisEarlyOpaquePhase ? Collections.emptyList() : queue;
 				tesselator = Tesselator.getInstance();
 				toBegin = bufferBuilder = tesselator.getBuilder();
 			} else {

@@ -31,9 +31,9 @@ public abstract class MixinLevelRenderer_Late {
 									  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 									  LocalIntRef irm) {
 		switch (irm.get()) {
-			case IRIS_MIXED_ASYNC -> AsyncRenderer.irisCustom(poseStack, partialTick, camera, lightTexture);
-			case IRIS_MIXED_SYNC -> AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture, false);
-			case IRIS_BEFORE_SYNC -> AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, false);
+			case MIXED_ASYNC, BEFORE_ASYNC -> AsyncRenderer.irisCustom(poseStack, partialTick, camera, lightTexture);
+			case MIXED_SYNC -> AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture, false);
+			case BEFORE_SYNC -> AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, false);
 		}
 	}
 
@@ -51,8 +51,8 @@ public abstract class MixinLevelRenderer_Late {
 										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 										  LocalIntRef irm) {
 		switch (irm.get()) {
-			case IRIS_MIXED_ASYNC -> AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture, true);
-			case IRIS_BEFORE_ASYNC -> AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, true);
+			case MIXED_ASYNC -> AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture, true);
+			case BEFORE_ASYNC -> AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, true);
 		}
 	}
 
@@ -67,9 +67,9 @@ public abstract class MixinLevelRenderer_Late {
 										 @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 										 LocalIntRef irm) {
 		switch (irm.get()) {
-			case IRIS_MIXED_ASYNC -> AsyncRenderer.irisTranslucent(poseStack, partialTick, camera, lightTexture, true);
+			case MIXED_ASYNC -> AsyncRenderer.irisTranslucent(poseStack, partialTick, camera, lightTexture, true);
 			case COMPATIBILITY_ASYNC -> AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, true);
-			case IRIS_MIXED_SYNC -> AsyncRenderer.irisTranslucent(poseStack, partialTick, camera, lightTexture, false);
+			case MIXED_SYNC -> AsyncRenderer.irisTranslucent(poseStack, partialTick, camera, lightTexture, false);
 			case SYNC -> AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, false);
 		}
 	}

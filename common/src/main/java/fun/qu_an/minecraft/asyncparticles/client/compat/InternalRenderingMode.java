@@ -9,11 +9,11 @@ public class InternalRenderingMode {
 	public static final int
 		DELAYED_ASYNC = 1, // RenderingMode.DELAYED
 		COMPATIBILITY_ASYNC = 3, // RenderingMode.COMPATIBILITY
-		IRIS_BEFORE_ASYNC = 5,
-		IRIS_MIXED_ASYNC = 7,
+		BEFORE_ASYNC = 5,
+		MIXED_ASYNC = 7,
 		SYNC = 0, // RenderingMode.SYNCHRONOUSLY
-		IRIS_BEFORE_SYNC = 2,
-		IRIS_MIXED_SYNC = 4;
+		BEFORE_SYNC = 2,
+		MIXED_SYNC = 4;
 	private static int mode = 0;
 
 	@ApiStatus.Internal
@@ -34,10 +34,10 @@ public class InternalRenderingMode {
 			case 0, 0b1100 -> SYNC; // IRIS_SYNC_AFTER
 			case 1, 0b1101 -> DELAYED_ASYNC; // IRIS_ASYNC_AFTER
 			case 2, 0b1110 -> COMPATIBILITY_ASYNC; // IRIS_ASYNC_AFTER
-			case 0b100 -> IRIS_BEFORE_SYNC;
-			case 0b101, 0b110 -> IRIS_BEFORE_ASYNC;
-			case 0b1000 -> IRIS_MIXED_SYNC;
-			case 0b1001, 0b1010 -> IRIS_MIXED_ASYNC;
+			case 0b100 -> BEFORE_SYNC;
+			case 0b101, 0b110 -> BEFORE_ASYNC;
+			case 0b1000 -> MIXED_SYNC;
+			case 0b1001, 0b1010 -> MIXED_ASYNC;
 			default -> throw new IllegalStateException("Unexpected value: " + i);
 		};
 	}
@@ -56,5 +56,9 @@ public class InternalRenderingMode {
 
 	public static boolean isSync() {
 		return (mode & 1) == 0;
+	}
+
+	public static boolean isSync(int irm) {
+		return (irm & 1) == 0;
 	}
 }
