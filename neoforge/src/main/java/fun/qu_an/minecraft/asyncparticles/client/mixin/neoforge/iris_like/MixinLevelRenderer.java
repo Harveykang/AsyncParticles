@@ -63,9 +63,9 @@ public abstract class MixinLevelRenderer {
 		}
 		ParticleEngine particleEngine = minecraft.particleEngine;
 		switch (irm.get()) {
-			case IRIS_MIXED_ASYNC, IRIS_MIXED_SYNC ->
+			case MIXED_ASYNC, MIXED_SYNC ->
 				particleEngine.render(camera, partialTick, bufferSource, frustum, renderType -> !renderType.translucent());
-			case IRIS_BEFORE_ASYNC, IRIS_BEFORE_SYNC ->
+			case BEFORE_ASYNC, BEFORE_SYNC ->
 				particleEngine.render(camera, partialTick, bufferSource, frustum, p -> true);
 		}
 	}

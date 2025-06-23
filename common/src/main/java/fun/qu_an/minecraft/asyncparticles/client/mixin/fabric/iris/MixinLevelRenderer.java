@@ -5,8 +5,6 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.resource.ResourceHandle;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
 import net.minecraft.client.Camera;
@@ -14,7 +12,6 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LevelTargetBundle;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.util.profiling.Profiler;
@@ -57,13 +54,13 @@ public abstract class MixinLevelRenderer {
 						   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 						   LocalIntRef irm) {
 		switch (irm.get()) {
-			case IRIS_MIXED_ASYNC, IRIS_MIXED_SYNC -> {
+			case MIXED_ASYNC, MIXED_SYNC -> {
 				ParticleEngine particleEngine = this.minecraft.particleEngine;
 				Profiler.get().popPush("opaque_particles");
 				((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
 				particleEngine.render(camera, partialTick, bufferSource);
 			}
-			case IRIS_BEFORE_ASYNC, IRIS_BEFORE_SYNC -> {
+			case BEFORE_ASYNC, BEFORE_SYNC -> {
 				ParticleEngine particleEngine = this.minecraft.particleEngine;
 				Profiler.get().popPush("opaque_particles");
 				((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
@@ -84,7 +81,7 @@ public abstract class MixinLevelRenderer {
 								   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 								   LocalIntRef irm) {
 		switch (irm.get()) {
-			case IRIS_MIXED_ASYNC, IRIS_MIXED_SYNC ->
+			case MIXED_ASYNC, MIXED_SYNC ->
 				((PhasedParticleEngine) minecraft.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
 			case DELAYED_ASYNC, COMPATIBILITY_ASYNC, SYNC ->
 				((PhasedParticleEngine) minecraft.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);

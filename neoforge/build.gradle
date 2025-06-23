@@ -53,8 +53,8 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
 
     /* APIs */
-//    modLocalRuntime 'maven.modrinth:architectury-api:16.1.4+neoforge'
-//    modLocalRuntime "me.shedaniel.cloth:cloth-config-neoforge:18.0.145"
+    modLocalRuntime 'maven.modrinth:architectury-api:17.0.4+neoforge'
+    modLocalRuntime "me.shedaniel.cloth:cloth-config-neoforge:19.0.147"
 
     /* Performance */
 //    modLocalRuntime "maven.modrinth:spark:1.10.128-neoforge"

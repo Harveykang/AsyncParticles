@@ -23,7 +23,6 @@
     "fabric.MixinParticle",
     "fabric.MixinParticleEngine_Render",
     "fabric.effectual.MixinAllEffects",
-    "fabric.effectual.MixinWaterDripEffect",
     "fabric.iris.MixinLevelRenderer",
     "fabric.loot_beams_up.MixinParticleRenderType",
     "fabric.particlerain.MixinGroundFogParticle",

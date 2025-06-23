@@ -107,15 +107,15 @@ public class AsyncRenderer {
 	public static void start(float f, Camera camera, int irm) {
 		tryDebug();
 		switch (irm) {
-			case IRIS_MIXED_SYNC -> {
+			case MIXED_SYNC -> {
 				mixedParticleRenderingSetting = true;
 				return;
 			}
-			case SYNC, IRIS_BEFORE_SYNC -> {
+			case SYNC, BEFORE_SYNC -> {
 				mixedParticleRenderingSetting = false;
 				return;
 			}
-			case IRIS_MIXED_ASYNC -> mixedParticleRenderingSetting = true;
+			case MIXED_ASYNC -> mixedParticleRenderingSetting = true;
 			default -> mixedParticleRenderingSetting = false;
 		}
 		Minecraft mc = Minecraft.getInstance();

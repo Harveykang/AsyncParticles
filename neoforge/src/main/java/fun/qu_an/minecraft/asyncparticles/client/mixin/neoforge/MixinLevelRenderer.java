@@ -59,9 +59,9 @@ public abstract class MixinLevelRenderer {
 										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 										  LocalIntRef irm) {
 		switch (irm.get()) {
-			case COMPATIBILITY_ASYNC, IRIS_MIXED_ASYNC, SYNC, IRIS_MIXED_SYNC ->
+			case COMPATIBILITY_ASYNC, MIXED_ASYNC, SYNC, MIXED_SYNC ->
 				original.call(instance, frameGraphBuilder, camera, partialTick, gpuBufferSlice, frustum, matrix4f);
-			case IRIS_BEFORE_SYNC, IRIS_BEFORE_ASYNC -> {
+			case BEFORE_SYNC, BEFORE_ASYNC -> {
 				// no-op
 			}
 			case DELAYED_ASYNC -> originalRef.set(original);
@@ -132,7 +132,7 @@ public abstract class MixinLevelRenderer {
 									   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 									   LocalIntRef irm) {
 		switch (irm.get()) {
-			case IRIS_MIXED_ASYNC, IRIS_MIXED_SYNC ->
+			case MIXED_ASYNC, MIXED_SYNC ->
 				instance.render(camera, partialTick, bufferSource, frustum, ParticleRenderType::translucent);
 			case SYNC, DELAYED_ASYNC, COMPATIBILITY_ASYNC ->
 				instance.render(camera, partialTick, bufferSource, frustum, p -> true);
