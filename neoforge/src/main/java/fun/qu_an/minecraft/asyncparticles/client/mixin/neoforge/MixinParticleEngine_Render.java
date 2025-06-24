@@ -30,7 +30,7 @@ public abstract class MixinParticleEngine_Render {
 	@Shadow
 	public Map<ParticleRenderType, Queue<Particle>> particles;
 	@SuppressWarnings({"unused", "AddedMixinMembersNamePattern", "MissingUnique"})
-	private Enum<?> phase; // Iris ParticleRenderingPhase
+	private static Enum<?> phase; // Iris ParticleRenderingPhase
 
 	/**
 	 * @author

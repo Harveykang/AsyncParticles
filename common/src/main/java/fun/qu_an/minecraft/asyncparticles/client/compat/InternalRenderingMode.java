@@ -43,23 +43,16 @@ public class InternalRenderingMode {
 		return mode;
 	}
 
-	public static boolean isShaderEnabled() {
-		return switch (mode) {
-			case BEFORE_SYNC, BEFORE_ASYNC, MIXED_SYNC, MIXED_ASYNC -> true;
-			default -> false;
-		};
-	}
-
 	public static boolean isDelayed() {
 		return mode == DELAYED_ASYNC;
 	}
 
 	public static boolean isAsync() {
-		return (mode & 1) != 0;
+		return (mode & 1) == 1;
 	}
 
 	public static boolean isAsync(int mode) {
-		return (mode & 1) != 0;
+		return (mode & 1) == 1;
 	}
 
 	public static boolean isSync() {

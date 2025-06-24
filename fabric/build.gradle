@@ -42,7 +42,7 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 
     /* APIs */
-    modLocalRuntime 'maven.modrinth:architectury-api:17.0.4+fabric'
+//    modLocalRuntime 'maven.modrinth:architectury-api:17.0.6+fabric'
     modLocalRuntime("me.shedaniel.cloth:cloth-config-fabric:19.0.147") {
         exclude(group: "net.fabricmc.fabric-api")
     }

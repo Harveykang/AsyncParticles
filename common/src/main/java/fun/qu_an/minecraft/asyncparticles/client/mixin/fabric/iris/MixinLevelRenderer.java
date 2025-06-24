@@ -33,26 +33,23 @@ public abstract class MixinLevelRenderer {
 	private Minecraft minecraft;
 
 	// BEFORE
-	@Inject(method = "method_62214",
-		at = @At(value = "INVOKE", ordinal = 0, shift = At.Shift.AFTER,
-			// after crumbling buffer source endBatch()
-			target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V"))
+	@Inject(method = "method_62214", at = @At("TAIL"))
 	private void onRenderMain(GpuBufferSlice gpuBufferSlice,
-						   DeltaTracker deltaTracker,
-						   Camera camera,
-						   ProfilerFiller profilerFiller,
-						   Matrix4f matrix4f,
-						   ResourceHandle resourceHandle,
-						   ResourceHandle resourceHandle2,
-						   boolean bl,
-						   Frustum frustum,
-						   ResourceHandle resourceHandle3,
-						   ResourceHandle resourceHandle4,
-						   CallbackInfo ci,
-						   @Local(ordinal = 0) MultiBufferSource.BufferSource bufferSource,
-						   @Local(ordinal = 0) float partialTick,
-						   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
-						   LocalIntRef irm) {
+							  DeltaTracker deltaTracker,
+							  Camera camera,
+							  ProfilerFiller profilerFiller,
+							  Matrix4f matrix4f,
+							  ResourceHandle resourceHandle,
+							  ResourceHandle resourceHandle2,
+							  boolean bl,
+							  Frustum frustum,
+							  ResourceHandle resourceHandle3,
+							  ResourceHandle resourceHandle4,
+							  CallbackInfo ci,
+							  @Local(ordinal = 0) MultiBufferSource.BufferSource bufferSource,
+							  @Local(ordinal = 0) float partialTick,
+							  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+							  LocalIntRef irm) {
 		switch (irm.get()) {
 			case MIXED_ASYNC, MIXED_SYNC -> {
 				ParticleEngine particleEngine = this.minecraft.particleEngine;

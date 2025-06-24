@@ -35,10 +35,7 @@ public abstract class MixinLevelRenderer {
 	private LevelTargetBundle targets;
 
 	// BEFORE
-	@Inject(method = "lambda$addMainPass$3",
-		at = @At(value = "INVOKE", ordinal = 0, shift = At.Shift.AFTER,
-			// after crumbling buffer source endBatch()
-			target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V"))
+	@Inject(method = "lambda$addMainPass$3", remap = false, at = @At("TAIL"))
 	private void onAddMain(GpuBufferSlice gpuBufferSlice,
 						   DeltaTracker deltaTracker,
 						   Camera camera,

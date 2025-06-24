@@ -38,8 +38,7 @@ public abstract class MixinLevelRenderer {
 	public Frustum cullingFrustum;
 
 	// TODO: 有没有更好的方法？
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE_ASSIGN",
-		target = "Lnet/minecraft/client/DeltaTracker;getGameTimeDeltaPartialTick(Z)F"))
+	@Inject(method = "renderLevel", at = @At("HEAD"))
 	private void renderLevel(GraphicsResourceAllocator graphicsResourceAllocator,
 							 DeltaTracker deltaTracker,
 							 boolean bl,
@@ -50,9 +49,9 @@ public abstract class MixinLevelRenderer {
 							 Vector4f vector4f,
 							 boolean bl2,
 							 CallbackInfo ci,
-							 @Local(ordinal = 0) float partialTick,
 							 @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 							 LocalIntRef irm) {
+		float partialTick = deltaTracker.getGameTimeDeltaPartialTick(false);
 		boolean b = this.capturedFrustum != null;
 		Frustum frustum = AsyncRenderer.frustum = b ? this.capturedFrustum : this.cullingFrustum;
 		if (this.captureFrustum) {
