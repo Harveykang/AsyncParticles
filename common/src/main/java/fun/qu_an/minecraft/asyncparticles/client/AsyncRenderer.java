@@ -120,9 +120,8 @@ public class AsyncRenderer {
 		}
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = Profiler.get();
-		profiler.popPush("particles");
+		profiler.push("begin_particles");
 		clearSync();
-		profiler.push("render_async");
 		ParticleEngine particleEngine = mc.particleEngine;
 		ObjectArrayList<CompletableFuture<Void>> asyncTasks = new ObjectArrayList<>(asyncTasksSize);
 		for (ParticleRenderType particleRenderType
