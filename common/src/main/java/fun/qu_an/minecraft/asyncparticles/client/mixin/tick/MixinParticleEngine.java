@@ -177,6 +177,7 @@ public abstract class MixinParticleEngine {
 			return;
 		}
 		boolean enableLightCache = ConfigHelper.particleLightCache();
+		boolean isNotOnMainThread = !ThreadUtil.isOnMainThread();
 		for (Particle particle : collection) {
 			if (AsyncTicker.isCancelled() && !ConfigHelper.forceDoneParticleTick()) {
 				return;
@@ -187,7 +188,7 @@ public abstract class MixinParticleEngine {
 				Utils.DUMMY_ITERATOR.remove();
 				continue;
 			}
-			if (!ThreadUtil.isOnMainThread()) {
+			if (isNotOnMainThread) {
 				if (((ParticleAddon) particle).asyncparticles$isTicked()) {
 					// Skip the first tick that the particle is added to the queue.
 					if (enableLightCache) {
