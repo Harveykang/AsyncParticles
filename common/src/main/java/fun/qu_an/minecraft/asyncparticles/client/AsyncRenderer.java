@@ -381,7 +381,8 @@ public class AsyncRenderer {
 				sync particle count: %d,
 				sync particle types: %s,
 				sync particle render types: %s,
-				iris particle state: %s"""
+				particle mode: %s,
+				iris particle mode: %s"""
 				.formatted(asyncTasksSize,
 					BTESSELATORS.entrySet()
 						.stream()
@@ -397,7 +398,17 @@ public class AsyncRenderer {
 					BTESSELATORS.entrySet().stream()
 						.filter(e -> e.getValue().shouldSync)
 						.map(Map.Entry::getKey).toList(),
-					ModListHelper.IRIS_LIKE_LOADED ? IrisCompat.getParticleRenderingSettings().name() : "disabled"));
+					switch (InternalRenderingMode.getMode()) {
+						case SYNC -> "SYNC";
+						case DELAYED_ASYNC -> "DELAYED_ASYNC";
+						case BEFORE_SYNC -> "BEFORE_SYNC";
+						case COMPATIBILITY_ASYNC -> "COMPATIBILITY_ASYNC";
+						case MIXED_SYNC -> "MIXED_SYNC";
+						case BEFORE_ASYNC -> "BEFORE_ASYNC";
+						case MIXED_ASYNC -> "MIXED_ASYNC";
+						default -> "UNKNOWN";
+					},
+					ModListHelper.IRIS_LIKE_LOADED ? IrisCompat.getParticleRenderingSettings().name() : "DISABLED"));
 			debugConsumer = null;
 		}
 	}

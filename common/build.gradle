@@ -64,7 +64,7 @@ dependencies {
     modCompileOnly "maven.modrinth:particular:1.1.1+1.21"
 
     /* Particle Core */
-    modCompileOnly "maven.modrinth:particle-core:0.2.5+1.21"
+    modCompileOnly "maven.modrinth:particle-core:0.2.6+1.21"
 
     /* A Good Place */
     modCompileOnly "maven.modrinth:a-good-place:fabric_1.21-1.2.6"
