@@ -9,7 +9,6 @@
     "MixinMinecraft",
     "MixinModelDataManager",
     "MixinParticleEngine_Render",
-    "iris_like.MixinLevelRenderer",
     "particlerain.MixinGroundFogParticle",
     "particlerain.MixinModClientForgeEvents",
     "particlerain.MixinParticleRainClient",

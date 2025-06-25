@@ -549,6 +549,9 @@ public class AsyncTicker {
 				Queue<Particle> queue = entry.getValue();
 				Queue<Particle> newQueue = IterationSafeEvictingQueue.newInstance(queue.size(), ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 				newQueue.addAll(queue);
+				if (ConfigHelper.particleLightCache()){
+					newQueue.forEach(p -> ((LightCachedParticleAddon) p).asyncparticles$refresh());
+				}
 				entry.setValue(newQueue);
 			});
 		}

@@ -1,10 +1,9 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.iris;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.llamalad7.mixinextras.sugar.Share;
-import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.resource.ResourceHandle;
+import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
 import net.minecraft.client.Camera;
@@ -33,33 +32,22 @@ public abstract class MixinLevelRenderer {
 	private Minecraft minecraft;
 
 	// BEFORE
-	@Inject(method = "method_62214", at = @At("TAIL"))
-	private void onRenderMain(GpuBufferSlice gpuBufferSlice,
-							  DeltaTracker deltaTracker,
-							  Camera camera,
-							  ProfilerFiller profilerFiller,
-							  Matrix4f matrix4f,
-							  ResourceHandle resourceHandle,
-							  ResourceHandle resourceHandle2,
-							  boolean bl,
-							  Frustum frustum,
-							  ResourceHandle resourceHandle3,
-							  ResourceHandle resourceHandle4,
-							  CallbackInfo ci,
+	@Inject(method = "method_62214", at = @At(value = "INVOKE", ordinal = 1,
+		target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V"))
+	private void onRenderMain(CallbackInfo ci,
+							  @Local(argsOnly = true) Camera camera,
 							  @Local(ordinal = 0) MultiBufferSource.BufferSource bufferSource,
-							  @Local(ordinal = 0) float partialTick,
-							  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
-							  LocalIntRef irm) {
-		switch (irm.get()) {
-			case MIXED_ASYNC, MIXED_SYNC -> {
-				ParticleEngine particleEngine = this.minecraft.particleEngine;
+							  @Local(ordinal = 0) float partialTick) {
+		switch (InternalRenderingMode.getMode()) {
+			case MIXED_ASYNC, MIXED_SYNC, COMPATIBILITY_ASYNC, SYNC -> {
 				Profiler.get().popPush("opaque_particles");
+				ParticleEngine particleEngine = this.minecraft.particleEngine;
 				((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
 				particleEngine.render(camera, partialTick, bufferSource);
 			}
 			case BEFORE_ASYNC, BEFORE_SYNC -> {
-				ParticleEngine particleEngine = this.minecraft.particleEngine;
 				Profiler.get().popPush("opaque_particles");
+				ParticleEngine particleEngine = this.minecraft.particleEngine;
 				((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 				particleEngine.render(camera, partialTick, bufferSource);
 			}
@@ -74,13 +62,11 @@ public abstract class MixinLevelRenderer {
 								   ResourceHandle resourceHandle2,
 								   Camera camera,
 								   float partialTick,
-								   CallbackInfo ci,
-								   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
-								   LocalIntRef irm) {
-		switch (irm.get()) {
-			case MIXED_ASYNC, MIXED_SYNC ->
+								   CallbackInfo ci) {
+		switch (InternalRenderingMode.getMode()) {
+			case MIXED_ASYNC, MIXED_SYNC, COMPATIBILITY_ASYNC, SYNC ->
 				((PhasedParticleEngine) minecraft.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
-			case DELAYED_ASYNC, COMPATIBILITY_ASYNC, SYNC ->
+			case DELAYED_ASYNC ->
 				((PhasedParticleEngine) minecraft.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
 	}

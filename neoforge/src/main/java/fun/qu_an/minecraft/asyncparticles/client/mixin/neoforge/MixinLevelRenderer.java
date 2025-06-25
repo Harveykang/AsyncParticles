@@ -9,6 +9,8 @@ import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
+import com.mojang.blaze3d.resource.ResourceHandle;
+import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -30,19 +32,6 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRendering
 
 @Mixin(value = LevelRenderer.class, priority = 1500)
 public abstract class MixinLevelRenderer {
-	@WrapOperation(method = "lambda$addMainPass$3", remap = false,
-		at = @At(value = "INVOKE", remap = false,
-			target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
-	private void onAddMain(ParticleEngine instance,
-						   Camera camera,
-						   float v,
-						   MultiBufferSource.BufferSource bufferSource,
-						   Frustum frustum,
-						   Predicate<ParticleRenderType> predicate,
-						   Operation<Void> original) {
-		// do nothing
-	}
-
 	@WrapOperation(method = "renderLevel",
 		at = @At(value = "INVOKE", remap = false,
 			target = "Lnet/minecraft/client/renderer/LevelRenderer;addParticlesPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/client/Camera;FLcom/mojang/blaze3d/buffers/GpuBufferSlice;Lnet/minecraft/client/renderer/culling/Frustum;Lorg/joml/Matrix4f;)V"))
@@ -120,22 +109,36 @@ public abstract class MixinLevelRenderer {
 		}
 	}
 
+	// BEFORE
+	@Redirect(method = "lambda$addMainPass$3", remap = false, at = @At(value = "INVOKE", remap = false,
+		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
+	private void onRenderMain(ParticleEngine instance,
+							  Camera camera,
+							  float partialTick,
+							  MultiBufferSource.BufferSource bufferSource,
+							  Frustum frustum,
+							  Predicate predicate) {
+		switch (InternalRenderingMode.getMode()) {
+			case MIXED_ASYNC, MIXED_SYNC, COMPATIBILITY_ASYNC, SYNC ->
+				instance.render(camera, partialTick, bufferSource, frustum, t -> !t.translucent());
+			case BEFORE_ASYNC, BEFORE_SYNC -> instance.render(camera, partialTick, bufferSource, frustum, t -> true);
+		}
+	}
+
 	// AFTER
-	@Redirect(method = "lambda$addParticlesPass$6", remap = false,
-		at = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
-	private void shouldRenderParticles(ParticleEngine instance,
-									   Camera camera,
-									   float partialTick,
-									   MultiBufferSource.BufferSource bufferSource,
-									   Frustum frustum,
-									   Predicate<ParticleRenderType> predicate,
-									   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
-									   LocalIntRef irm) {
-		switch (irm.get()) {
-			case MIXED_ASYNC, MIXED_SYNC ->
-				instance.render(camera, partialTick, bufferSource, frustum, ParticleRenderType::translucent);
-			case SYNC, DELAYED_ASYNC, COMPATIBILITY_ASYNC ->
-				instance.render(camera, partialTick, bufferSource, frustum, p -> true);
+	@Redirect(method = "lambda$addParticlesPass$6", remap = false, at = @At(value = "INVOKE", remap = false,
+		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
+	private void onRenderParticles(ParticleEngine instance,
+								   Camera camera,
+								   float partialTick,
+								   MultiBufferSource.BufferSource bufferSource,
+								   Frustum frustum,
+								   Predicate<ParticleRenderType> predicate,
+								   @Local(argsOnly = true, ordinal = 0) ResourceHandle resourcehandle1) {
+		switch (InternalRenderingMode.getMode()) {
+			case MIXED_ASYNC, MIXED_SYNC, COMPATIBILITY_ASYNC, SYNC ->
+				instance.render(camera, partialTick, bufferSource, frustum, resourcehandle1 == null ? ParticleRenderType::translucent : t -> true);
+			case DELAYED_ASYNC -> instance.render(camera, partialTick, bufferSource, frustum, t -> true);
 		}
 	}
 }

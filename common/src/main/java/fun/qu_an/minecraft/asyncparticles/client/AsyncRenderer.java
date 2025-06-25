@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.iris.IrisCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -39,6 +40,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
+
 // TODO: 整理这一坨
 @Environment(EnvType.CLIENT)
 public class AsyncRenderer {
@@ -405,24 +407,36 @@ public class AsyncRenderer {
 				sync particle count: %d,
 				sync particle types: %s,
 				sync particle render types: %s,
-				iris particle state: %s"""
+				particle mode: %s,
+				iris particle mode: %s"""
 				.formatted(asyncTasksSize,
 					BTESSELATORS.entrySet()
 						.stream()
 						.filter(e -> e.getValue() != BindingTesselator.EMPTY)
 						.collect(Collectors.toMap(
-							Map.Entry::getKey,
+							entry -> entry.getKey().name(),
 							e -> e.getValue().buffer.capacity)),
-					ModListHelper.IS_FORGE
+					(ModListHelper.IS_FORGE
 						? Minecraft.getInstance().particleEngine.particles.keySet()
-						: ParticleEngine.RENDER_ORDER,
+						: ParticleEngine.RENDER_ORDER)
+						.stream().map(ParticleRenderType::name).toList(),
 					SYNC_PARTICLES.values().stream().mapToInt(Set::size).sum(),
 					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList(),
 					BTESSELATORS.entrySet().stream()
 						.filter(e -> e.getValue() == BindingTesselator.EMPTY)
 						.map(p -> p.getKey().name())
 						.toList(),
-					ModListHelper.IRIS_LIKE_LOADED ? IrisCompat.getParticleRenderingSettings().name() : "disabled"));
+					switch (InternalRenderingMode.getMode()) {
+						case SYNC -> "SYNC";
+						case DELAYED_ASYNC -> "DELAYED_ASYNC";
+						case BEFORE_SYNC -> "BEFORE_SYNC";
+						case COMPATIBILITY_ASYNC -> "COMPATIBILITY_ASYNC";
+						case MIXED_SYNC -> "MIXED_SYNC";
+						case BEFORE_ASYNC -> "BEFORE_ASYNC";
+						case MIXED_ASYNC -> "MIXED_ASYNC";
+						default -> "UNKNOWN";
+					},
+					ModListHelper.IRIS_LIKE_LOADED ? IrisCompat.getParticleRenderingSettings().name() : "DISABLED"));
 			debugConsumer = null;
 		}
 	}

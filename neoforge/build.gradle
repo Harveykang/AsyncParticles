@@ -57,11 +57,12 @@ dependencies {
     modLocalRuntime "me.shedaniel.cloth:cloth-config-neoforge:19.0.147"
 
     /* Performance */
-//    modLocalRuntime "maven.modrinth:spark:1.10.128-neoforge"
+    modLocalRuntime "maven.modrinth:spark:1.10.139-neoforge"
 //    modCompileOnly 'maven.modrinth:embeddium:1.0.12-beta.1+mc1.21.4'
     modCompileOnly 'maven.modrinth:sodium:mc1.21.6-0.6.13-neoforge'
 //    modLocalRuntime 'maven.modrinth:embeddium:1.0.12-beta.1+mc1.21.4'
     modLocalRuntime 'maven.modrinth:sodium:mc1.21.6-0.6.13-neoforge'
+    modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.6-0.6.6+neoforge'
     modLocalRuntime fileTree(dir: '../libs', include: 'fabric-renderer-api-v1-7.0.0.jar')
     modLocalRuntime fileTree(dir: '../libs', include: 'net.caffeinemc.sodium-neoforge-0.6.13+mc1.21.6-service.jar')
 
