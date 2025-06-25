@@ -1,7 +1,7 @@
 # AsyncParticles
 
 - [中文](./README_zh.md)|English
-- [Downloads](https://github.com/Harveykang/AsyncParticles/releases)
+- [Modrinth](https://modrinth.com/mod/asyncparticles)|[CurseForge](https://www.curseforge.com/minecraft/mc-mods/asyncparticles)
 
 ## Features
 
@@ -9,10 +9,9 @@
   - Particle culling.
   - Async particle ticking/rendering(buffer filling).
   - Async particle light cache.
-  - Async client block entity ticking.
-- Create/Valkyrien Skies + Pretty Rain/Particle Rain
-  - Weather particles now collide with contraptions/ships.
-- Pretty Rain/Particle Rain/Effectual/Particular
+- Valkyrien Skies/Create + Simple Weather/Pretty Rain/Particle Rain
+  - Weather particles can now collide with ships/contraptions.
+- Pretty Rain/Particle Rain/Effectual/Particular/Simple Weather
   - Async particle gen.
 
 ## Mods Recommended
@@ -24,38 +23,36 @@
 
 ## Mod Compatability
 
-🔄️: Work in progress  
-✅: Compatible  
-❔: Works fine, but not fully tested  
-⚠️: More testing needed  
-❌: Not Compatible
+### ✅ Compatible (Proactively)
 
-### Mods Tested
+- Sodium/Embeddium
+- Flerovium
+- Iris/Oculus
+- Create
+- Valkyrien Skies
+- Particle Rain/Pretty Rain
+- Simple Weather
+- Effectual
+- Effective
+- Particular
+- Particle Core
+  - Will disable most of ParticleCore's optimizations while retaining its other functionalities.  
+    (Due to incompatibilities with asynchronous optimizations.)
+- ...
 
-✅ Forge + Sinytra Connector  
-✅ Fabric  
-✅ ModernFix  
-✅ Sodium/Embeddium  
-✅ Flerovium  
-✅ Brute force Rendering Culling  
-✅ Iris/Oculus  
-✅ Startlight  
-✅ Valkyrien Skies  
-✅ Particle Rain/Pretty Rain  
-✅ MmmMmmMmmMmm (Target Dummy)  
-✅ Hex Casting  
-⚠️ Create  
-❔ Effectual  
-❔ Effective/Effecticularity  
-❔ Particular  
-❔ Epic Fight  
-❔ Draconic Evolution  
-❔ Gateways to Eternity  
-❌ MadParticle  
-⬜ ...
+### ❔ Works fine, but not fully tested
+- Epic Fight
+- Draconic Evolution
+
+### ❌ Incompatible
+- OptiFine
+- MadParticle
 
 ## Credits
 
-- [MixinSquared](https://github.com/Bawnorton/MixinSquared)
+- [Fabric](https://github.com/FabricMC/fabric-loader)
+- [NeoForge](https://github.com/neoforged/NeoForge)
+- [Mixin](https://github.com/SpongePowered/Mixin)
 - [MixinExtras](https://github.com/LlamaLad7/MixinExtras)
+- [MixinSquared](https://github.com/Bawnorton/MixinSquared)
 - [MixinConstraints](https://github.com/Moulberry/MixinConstraints)
