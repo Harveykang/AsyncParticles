@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.iris.IrisCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -516,7 +517,8 @@ public class AsyncRenderer {
 				sync particle count: %d,
 				sync particle types: %s,
 				sync particle render types: %s,
-				iris particle state: %s"""
+				particle mode: %s,
+				iris particle mode: %s"""
 				.formatted(asyncTasksSize,
 					BUFFER_BUILDERS.entrySet()
 						.stream()
@@ -531,6 +533,16 @@ public class AsyncRenderer {
 					FORMATS.entrySet().stream()
 						.filter(e -> e.getValue() == EMPTY_FORMAT)
 						.map(Map.Entry::getKey).toList(),
+					switch (InternalRenderingMode.getMode()) {
+						case SYNC -> "SYNC";
+						case DELAYED_ASYNC -> "DELAYED_ASYNC";
+						case BEFORE_SYNC -> "BEFORE_SYNC";
+						case COMPATIBILITY_ASYNC -> "COMPATIBILITY_ASYNC";
+						case MIXED_SYNC -> "MIXED_SYNC";
+						case BEFORE_ASYNC -> "BEFORE_ASYNC";
+						case MIXED_ASYNC -> "MIXED_ASYNC";
+						default -> "UNKNOWN";
+					},
 					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse()
 						? Optional.ofNullable(IrisCompat.getParticleRenderingSettings())
 						.map(ParticleRenderingSettings::name)
