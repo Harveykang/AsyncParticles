@@ -16,13 +16,6 @@ loom {
     mixin {
         defaultRefmapName = "asyncparticles-forge-refmap.json"
     }
-
-    runs {
-        configureEach {
-            vmArg("-Dmixin.env.remapRefMap=true")
-            vmArg("-Dmixin.env.refMapRemappingFile=${projectDir}/build/createSrgToMcp/output.srg")
-        }
-    }
 }
 
 architectury {
