@@ -1,18 +1,16 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters;
 
 import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinUtil;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.MixinClassAdjuster;
 
 import java.util.List;
 
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.IS_FORGE;
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.isDevelopmentEnvironment;
-
 public class AdjusterParticlesLockRequired implements MixinClassAdjuster {
+	private static final String CLASS_NAME = "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LockRequired";
 	@Override
 	public String getMixinClassName() {
-		return (isDevelopmentEnvironment() ? "" : IS_FORGE ? "neoforge." : "fabric.") +
-			   "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LockRequired";
+		return CLASS_NAME;
 	}
 
 	@Override
@@ -22,7 +20,6 @@ public class AdjusterParticlesLockRequired implements MixinClassAdjuster {
 
 	@Override
 	public String getRefMapperConfig() {
-		return IS_FORGE ? null : (isDevelopmentEnvironment() ? "" : "fabric-") +
-								 "asyncparticles-common-refmap.json";
+		return MixinUtil.getRefMapperName(CLASS_NAME,"asyncparticles-common-refmap.json");
 	}
 }

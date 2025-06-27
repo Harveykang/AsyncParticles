@@ -52,11 +52,6 @@ public abstract class MixinParticleEngine {
 	@Shadow
 	public abstract void tickParticle(Particle particle);
 
-	@Mutable
-	@Shadow
-	@Final
-	private RandomSource random;
-
 	@Shadow
 	public abstract void updateCount(ParticleGroup group, int count);
 

@@ -1,7 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster;
 
-import com.bawnorton.mixinsquared.adjuster.tools.AdjustableAnnotationNode;
-import com.bawnorton.mixinsquared.adjuster.tools.type.RemappableAnnotationNode;
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.reflection.FieldReference;
 import org.objectweb.asm.ClassWriter;
