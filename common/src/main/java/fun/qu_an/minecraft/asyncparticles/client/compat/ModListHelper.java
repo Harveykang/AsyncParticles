@@ -119,9 +119,8 @@ public class ModListHelper {
 
 	@ExpectPlatform
 	public static boolean versionCheck(String modId, @Nullable String minInclusive, @Nullable String maxExclusive) {
-		// Suppressing the ConstantValue check because this is a generated method.
 		ExceptionUtil.throwAssertionError();
-		return true;
+		return false;
 	}
 
 	@ExpectPlatform

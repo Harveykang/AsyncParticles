@@ -11,7 +11,7 @@ public class AdjusterParticlesLockProvider implements MixinClassAdjuster {
 
 	@Override
 	public String getMixinClassName() {
-		return MixinUtil.getMixinClassName(CLASS_NAME);
+		return CLASS_NAME;
 	}
 
 	@Override
