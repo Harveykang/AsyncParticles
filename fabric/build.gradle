@@ -49,15 +49,15 @@ dependencies {
 //    modLocalRuntime("io.wispforest:owo-lib:0.12.20+1.21.5") {
 //        exclude(group: "net.fabricmc.fabric-api")
 //    }
-    modCompileOnly 'maven.modrinth:modmenu:15.0.0-beta.1'
-    modLocalRuntime 'maven.modrinth:modmenu:15.0.0-beta.1'
+    modCompileOnly 'maven.modrinth:modmenu:15.0.0-beta.3'
+    modLocalRuntime 'maven.modrinth:modmenu:15.0.0-beta.3'
     modLocalRuntime 'maven.modrinth:fabric-permissions-api:0.4.0'
 
     /* Performance */
     modLocalRuntime "maven.modrinth:sodium:mc1.21.6-0.6.13-fabric"
     modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.6-0.6.6+fabric'
-    modCompileOnly 'maven.modrinth:iris:1.9.0+1.21.6-fabric'
-    modLocalRuntime 'maven.modrinth:iris:1.9.0+1.21.6-fabric'
+    modCompileOnly 'maven.modrinth:iris:l77DAK6U' // 1.9.1
+    modLocalRuntime 'maven.modrinth:iris:l77DAK6U' // 1.9.1
     localRuntime "org.antlr:antlr4-runtime:4.13.1"
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
     localRuntime "org.anarres:jcpp:1.4.14"
@@ -96,7 +96,7 @@ dependencies {
 //    modLocalRuntime "maven.modrinth:a-good-place:kD90q4La" // 1.2.10 // TODO:this is a 1.21.4 version
 
     /* Physics Mod */
-    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v176f-fabric-1.21.5.jar')
+    modCompileOnly "maven.modrinth:physicsmod:k8blA2yX" // 3.1.9
 //    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v176f-fabric-1.21.5.jar')
 
     /* Subtle Effects */

@@ -95,8 +95,8 @@ dependencies {
 //    }
 
     /* Simple Weather */
-    modCompileOnly "curse.maven:simple-weather-983390:6470536" // 1.1.0
-//    modLocalRuntime "curse.maven:simple-weather-983390:6470536" // 1.1.0
+    modCompileOnly "curse.maven:simple-weather-983390:6694711" // 1.1.2
+//    modLocalRuntime "curse.maven:simple-weather-983390:6694711" // 1.1.2
 //    modLocalRuntime "tv.soaryn:volumetrics:1.0.0"
 
     /* A Good Place */
@@ -104,7 +104,7 @@ dependencies {
 //    modLocalRuntime "maven.modrinth:a-good-place:1.21.4-1.2.10" // 1.2.10 // TODO:this is a 1.21.4 version
 
     /* Physics Mod */
-    modCompileOnly fileTree(dir: '../libs', include: 'physics-mod-pro-v176f-neoforge-1.21.5.jar')
+    modCompileOnly "maven.modrinth:physicsmod:idA1Lmwe" // 3.1.9
 //    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v176f-neoforge-1.21.5.jar')
 
     /* Particular Reforged */
