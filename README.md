@@ -37,7 +37,7 @@
 - Particular
 - Particle Core
   - Will disable most of ParticleCore's optimizations while retaining its other functionalities.  
-    (Due to incompatibilities with asynchronous optimizations.)
+    (Due to incompatibilities with AsyncParticles' asynchronous optimizations.)
 - ...
 
 ### ❔ Works fine, but not fully tested
