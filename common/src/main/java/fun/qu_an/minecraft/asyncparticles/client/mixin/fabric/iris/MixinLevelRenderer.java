@@ -32,7 +32,7 @@ public abstract class MixinLevelRenderer {
 	private Minecraft minecraft;
 
 	// BEFORE
-	@Inject(method = "method_62214", at = @At(value = "INVOKE", ordinal = 1,
+	@Inject(method = "method_62214", at = @At(value = "INVOKE", ordinal = 1, shift = At.Shift.AFTER,
 		target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V"))
 	private void onRenderMain(CallbackInfo ci,
 							  @Local(argsOnly = true) Camera camera,
