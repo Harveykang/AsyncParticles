@@ -69,10 +69,10 @@ public abstract class MixinParticleEngine {
 	@Overwrite
 	public void tick() {
 //		assert AsyncTicker.shouldTickParticles;
+		ProfilerFiller profiler = Profiler.get();
 		particles.forEach((particleRenderType, queue) -> {
 			// submit this task even though the queue is empty
 			// we'll add particles later
-			ProfilerFiller profiler = Profiler.get();
 			profiler.push(particleRenderType.toString());
 			AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue));
 			profiler.pop();

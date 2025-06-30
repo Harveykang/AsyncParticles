@@ -36,17 +36,18 @@ public abstract class MixinLevelRenderer {
 		target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V"))
 	private void onRenderMain(CallbackInfo ci,
 							  @Local(argsOnly = true) Camera camera,
+							  @Local(argsOnly = true) ProfilerFiller profiler,
 							  @Local(ordinal = 0) MultiBufferSource.BufferSource bufferSource,
 							  @Local(ordinal = 0) float partialTick) {
 		switch (InternalRenderingMode.getMode()) {
 			case MIXED_ASYNC, MIXED_SYNC, COMPATIBILITY_ASYNC, SYNC -> {
-				Profiler.get().popPush("opaque_particles");
+				profiler.popPush("opaque_particles");
 				ParticleEngine particleEngine = this.minecraft.particleEngine;
 				((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
 				particleEngine.render(camera, partialTick, bufferSource);
 			}
 			case BEFORE_ASYNC, BEFORE_SYNC -> {
-				Profiler.get().popPush("opaque_particles");
+				profiler.popPush("opaque_particles");
 				ParticleEngine particleEngine = this.minecraft.particleEngine;
 				((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 				particleEngine.render(camera, partialTick, bufferSource);

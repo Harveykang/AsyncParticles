@@ -107,15 +107,15 @@ public class AsyncTicker {
 	}
 
 	/**
-	 * @param i  Current index of tick loop
-	 * @param to Count of ticks to run
+	 * @param i        Current index of tick loop
+	 * @param to       Count of ticks to run
+	 * @param profiler
 	 */
-	public static void onTickBefore(int i, int to) {
+	public static void onTickBefore(int i, int to, ProfilerFiller profiler) {
 		if (!ConfigHelper.isTickAsync()) {
 			return;
 		}
 		// assert i < to;
-		ProfilerFiller profiler = Profiler.get();
 		profiler.push("async_particles");
 		Minecraft mc = Minecraft.getInstance();
 		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
@@ -182,10 +182,11 @@ public class AsyncTicker {
 	}
 
 	/**
-	 * @param i  Current index of tick loop
-	 * @param to Count of ticks to run
+	 * @param i        Current index of tick loop
+	 * @param to       Count of ticks to run
+	 * @param profiler
 	 */
-	public static void onTickAfter(int i, int to) {
+	public static void onTickAfter(int i, int to, ProfilerFiller profiler) {
 		Minecraft mc = Minecraft.getInstance();
 		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
 		if (!ConfigHelper.isTickAsync()) {
@@ -200,7 +201,6 @@ public class AsyncTicker {
 			return;
 		}
 		// assert i < to;
-		ProfilerFiller profiler = Profiler.get();
 		profiler.push("async_particles");
 		if (levelRunning) {
 			profiler.push("particle_tick");
