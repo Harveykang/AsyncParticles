@@ -22,7 +22,7 @@
   "config.asyncparticles.rendering.cullParticles": "Cull Particles",
   "config.asyncparticles.rendering.cullParticles.tooltip": "Cull particles outside the camera view.",
   "config.asyncparticles.rendering.particleRenderingMode": "Particle Rendering Mode",
-  "config.asyncparticles.rendering.particleRenderingMode.tooltip": "Choose how particles are rendered.\n'Compatibility' improves mod compatibility\nbut affects optimization. Automatically enabled\nwith shader packs.\n'Synchronously' disables all optimization.",
+  "config.asyncparticles.rendering.particleRenderingMode.tooltip": "Choose how particles are rendered.\n'Compatibility' improves mod compatibility\nbut reduce performance slightly.\nAutomatically enabled when using shader packs.\n'Synchronously' disables the optimization.\n'Compatibility' and 'Synchronously\nsupport rendering opaque particles underwater\n(Iris mod required on Fabric).",
   "config.asyncparticles.particle.cullUnderwaterParticleType": "Cull 'UNDERWATER' Particle Type",
   "config.asyncparticles.particle.cullUnderwaterParticleType.tooltip": "On non-Fabulous graphics, enabling this\nmakes 'UNDERWATER' particles appear only\nwhen you're actually underwater.",
   "config.asyncparticles.rendering.failPerSecLimit": "Fail Per Second Limit",
