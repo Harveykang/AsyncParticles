@@ -13,7 +13,7 @@ public class AdjusterParticlesNoCulling implements MixinClassAdjuster {
 	private static final String CLASS_NAME = "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_NoCulling";
 	@Override
 	public String getMixinClassName() {
-		return MixinUtil.getMixinClassName(CLASS_NAME);
+		return CLASS_NAME;
 	}
 
 	@Override

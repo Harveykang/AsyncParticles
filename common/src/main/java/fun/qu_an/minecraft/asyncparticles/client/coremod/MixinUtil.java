@@ -6,7 +6,6 @@ import org.spongepowered.asm.mixin.transformer.ext.ITargetClassContext;
 import java.util.Optional;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.IS_FORGE;
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.classExists;
 
 public class MixinUtil {
 	public static Optional<TargetClassContextExtension> tryAs(ITargetClassContext reference) {
@@ -16,11 +15,7 @@ public class MixinUtil {
 		return Optional.empty();
 	}
 
-	public static String getMixinClassName(String className) {
-		return classExists(className) ? className : (IS_FORGE ? "neoforge." : "fabric.") + className;
-	}
-
 	public static String getRefMapperName(String className, String refMapper) {
-		return classExists(className) ? refMapper : (IS_FORGE ? "neoforge-" : "fabric-") + refMapper;
+		return IS_FORGE ? null : className.startsWith("fabric") ? "fabric-" + refMapper : refMapper;
 	}
 }
