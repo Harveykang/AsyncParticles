@@ -52,7 +52,8 @@ public abstract class MixinLevelRenderer {
 												@Share(namespace = "asyncparticles", value = "internalRenderingMode")
 												LocalIntRef irm) {
 		switch (irm.get()) {
-			case MIXED_ASYNC -> AsyncRenderer.endOpaque(lightTexture, camera, partialTick, true);
+			case SYNC -> AsyncRenderer.endOpaque(lightTexture, camera, partialTick, false);
+			case MIXED_ASYNC, COMPATIBILITY_ASYNC -> AsyncRenderer.endOpaque(lightTexture, camera, partialTick, true);
 			case BEFORE_ASYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
 		}
 	}
@@ -66,10 +67,9 @@ public abstract class MixinLevelRenderer {
 										 @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 										 LocalIntRef irm) {
 		switch (irm.get()) {
-			case SYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, false);
-			case COMPATIBILITY_ASYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
-			case MIXED_SYNC -> AsyncRenderer.endTranslucent(lightTexture, camera, partialTick, false);
-			case MIXED_ASYNC -> AsyncRenderer.endTranslucent(lightTexture, camera, partialTick, true);
+			case MIXED_SYNC, SYNC -> AsyncRenderer.endTranslucent(lightTexture, camera, partialTick, false);
+			case MIXED_ASYNC, COMPATIBILITY_ASYNC ->
+				AsyncRenderer.endTranslucent(lightTexture, camera, partialTick, true);
 		}
 	}
 }
