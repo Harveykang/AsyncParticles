@@ -22,7 +22,7 @@
   "config.asyncparticles.rendering.cullParticles": "粒子剔除",
   "config.asyncparticles.rendering.cullParticles.tooltip": "启用时会剔除不可见（位于视锥体外）的粒子。",
   "config.asyncparticles.rendering.particleRenderingMode": "粒子渲染模式",
-  "config.asyncparticles.rendering.particleRenderingMode.tooltip": "设置粒子渲染模式。\n“兼容模式”可能和其他模组有更好的兼容性，\n但会损失些许性能，使用着色器时自动启用。\n“同步执行”意味着禁用优化。",
+  "config.asyncparticles.rendering.particleRenderingMode.tooltip": "设置粒子渲染模式。\n“兼容模式”可能和其他模组有更好的兼容性，\n但会损失些许性能，使用着色器时自动启用。\n“同步执行”意味着禁用优化。\n“兼容模式”和“同步执行”可以看到水下的不透明粒子\n（在 Fabric 上需要 Iris 模组）。",
   "config.asyncparticles.particle.cullUnderwaterParticleType": "剔除“UNDERWATER”类型的粒子",
   "config.asyncparticles.particle.cullUnderwaterParticleType.tooltip": "在非“极佳”画质下启用这个选项时，仅当玩家处于水下\n才会生成“UNDERWATER”类型的粒子。",
   "config.asyncparticles.rendering.failPerSecLimit": "每秒渲染异常上限",
