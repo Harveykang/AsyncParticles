@@ -102,6 +102,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "watut" -> WATUT_LOADED;
 			case "physicsmod" -> PHYSICSMOD_LOADED;
 			case "cloth_config" -> CLOTH_CONFIG_LOADED;
+			case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

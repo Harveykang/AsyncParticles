@@ -36,6 +36,7 @@
     "fabric.porting_lib_base.MixinMixinParticleEngine",
     "fabric.vulkanmod.MixinSingleQuadParticle",
     "fake_renders.MixinTesselator",
+    "immediatelyfast.MixinBatchableBufferSource",
     "iris_like.MixinFullyBufferedMultiBufferSource",
     "iris_like.MixinIris",
     "iris_like.MixinOldFullyBufferedMultiBufferSource",
