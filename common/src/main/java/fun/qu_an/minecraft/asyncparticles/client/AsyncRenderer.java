@@ -161,7 +161,7 @@ public class AsyncRenderer {
 				continue;
 			}
 			float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
-			if (enableCull && !frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(f3))) {
+			if (enableCull && !FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
 				continue;
 			}
 			if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
