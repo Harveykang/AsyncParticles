@@ -20,7 +20,7 @@ dependencies {
 
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
     modCompileOnly "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
-    compileOnly "org.sinytra:connector:2.0.0-beta.7+1.21.1"
+    modCompileOnly "org.sinytra:connector:2.0.0-beta.7+1.21.1"
     modCompileOnly("me.shedaniel.cloth:cloth-config:15.0.140")
 
     /* Performance */
@@ -87,4 +87,7 @@ dependencies {
 
     /* Dynamic Surroundings */
     modCompileOnly "maven.modrinth:dynamicsurroundingsfabric:0.4.2"
+
+    /* Immediately Fast */
+    modCompileOnly "maven.modrinth:immediatelyfast:1.6.5+1.21.1-fabric"
 }

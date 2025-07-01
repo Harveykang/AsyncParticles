@@ -91,6 +91,8 @@ public class ModListHelper {
 	public static final boolean FABRIC_COO_PARTICLES_API_LOADED = isModLoaded("cooparticlesapi");
 	/* Dynamic Surroundings */
 	public static final boolean DSURROUND_LOADED = isModLoaded("dsurround");
+	/* Immediately Fast */
+	public static final boolean IMMEDIATELY_FAST_LOADED = isModLoaded("immediatelyfast");
 
 	@ExpectPlatform
 	private static boolean isForge() {

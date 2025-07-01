@@ -9,17 +9,18 @@
   - Particle culling.
   - Async particle ticking/rendering(buffer filling).
   - Async particle light cache.
+  - Delay texture ticking by one frame to reduce client tick duration.
 - Valkyrien Skies/Create + Simple Weather/Pretty Rain/Particle Rain
-  - Weather particles can now collide with ships/contraptions.
+  - Modded weather particles can now collide with ships/contraptions.
 - Pretty Rain/Particle Rain/Effectual/Particular/Simple Weather
   - Async particle gen.
 
 ## Mods Recommended
 
-- ModernFix
 - Sodium/Embeddium
-- Flerovium
 - Startlight/ScalableLux
+- ModernFix
+- Flerovium
 
 ## Mod Compatability
 
