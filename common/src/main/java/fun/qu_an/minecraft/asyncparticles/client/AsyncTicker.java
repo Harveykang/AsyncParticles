@@ -118,19 +118,26 @@ public class AsyncTicker {
 		// assert i < to;
 		profiler.push("async_particles");
 		Minecraft mc = Minecraft.getInstance();
-		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
+		boolean levelRunning;
+		if (mc.level == null) {
+			levelRunning = false;
+		} else if (mc.level.tickRateManager().runsNormally()) {
+			levelRunning = mc.player != null && !mc.isPaused();
+		} else {
+			return;
+		}
 		if (i != 0) {
 			// tick non-zero, do nothing
 			shouldTickParticles = i == to - 1 && levelRunning; // tick particles only on last tick
 		} else {
 			// tick zero, wait for async tasks to complete, cleanup
-			cancelled = true;
-			debug_cancelled = false;
 			if (particleFuture != null) {
+				cancelled = true;
+				debug_cancelled = false;
 				particleFuture.join();
 				particleFuture = null;
+				cancelled = false;
 			}
-			cancelled = false;
 			shouldTickParticles = i == to - 1 && levelRunning;
 			if (levelRunning) {
 				ParticleEngine particleEngine = mc.particleEngine;
@@ -188,7 +195,14 @@ public class AsyncTicker {
 	 */
 	public static void onTickAfter(int i, int to, ProfilerFiller profiler) {
 		Minecraft mc = Minecraft.getInstance();
-		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
+		boolean levelRunning;
+		if (mc.level == null) {
+			levelRunning = false;
+		} else if (mc.level.tickRateManager().runsNormally()) {
+			levelRunning = mc.player != null && !mc.isPaused();
+		} else {
+			return;
+		}
 		if (!ConfigHelper.isTickAsync()) {
 			tryReload();
 			tryDebug();
@@ -549,7 +563,7 @@ public class AsyncTicker {
 				Queue<Particle> queue = entry.getValue();
 				Queue<Particle> newQueue = IterationSafeEvictingQueue.newInstance(queue.size(), ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 				newQueue.addAll(queue);
-				if (ConfigHelper.particleLightCache()){
+				if (ConfigHelper.particleLightCache()) {
 					newQueue.forEach(p -> ((LightCachedParticleAddon) p).asyncparticles$refresh());
 				}
 				entry.setValue(newQueue);

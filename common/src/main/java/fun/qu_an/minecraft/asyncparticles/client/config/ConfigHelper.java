@@ -98,4 +98,8 @@ public class ConfigHelper {
 	public static RenderingMode getParticleRenderingMode() {
 		return AsyncParticlesConfig.rendering$particleRenderingMode;
 	}
+
+	public static boolean isTickWeatherAsync() {
+		return true;
+	}
 }

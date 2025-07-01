@@ -5,15 +5,12 @@ import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -24,10 +21,6 @@ import java.util.Set;
 
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
-	@Shadow
-	@Final
-	public ParticleEngine particleEngine;
-
 	@Inject(method = "run", at = @At("HEAD"))
 	private void onRun(CallbackInfo ci) {
 		ThreadUtil.enqueueClientTask(() -> { // Do it later.

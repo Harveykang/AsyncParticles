@@ -59,6 +59,7 @@
     "subtle_effects.MixinAsyncRenderer",
     "subtle_effects.fabric.MixinParticleEngine",
     "tick.MixinClientLevel",
+    "tick.MixinGameRenderer",
     "tick.MixinMinecraft",
     "tick.MixinParticleEngine",
     "tick.MixinTextureManager",
