@@ -126,6 +126,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "cloth_config" -> CLOTH_CONFIG_LOADED;
 			case "photon_editor" -> PHOTON_EDITOR_LOADED;
 			case "shimmer" -> SHIMMER_LOADED;
+			case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

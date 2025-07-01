@@ -88,4 +88,7 @@ dependencies {
 
     /* Loot Beams */
 //    modCompileOnly fileTree(dir: '../libs', include: 'lootbeams-3.6.1-mc1.20-.4-de.jar')
+
+    /* Immediately Fast */
+    modCompileOnly "maven.modrinth:immediatelyfast:1.5.0+1.20.4-fabric"
 }

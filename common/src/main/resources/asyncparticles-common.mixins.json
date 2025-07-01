@@ -49,6 +49,7 @@
     "fabric_api.MixinLevelRenderer_Late",
     "fake_renders.MixinBufferBuilder",
     "fake_renders.MixinTesselator",
+    "immediatelyfast.MixinBatchableBufferSource",
     "iris_like.MixinFullyBufferedMultiBufferSource",
     "iris_like.MixinIris",
     "iris_like.MixinOldFullyBufferedMultiBufferSource",
