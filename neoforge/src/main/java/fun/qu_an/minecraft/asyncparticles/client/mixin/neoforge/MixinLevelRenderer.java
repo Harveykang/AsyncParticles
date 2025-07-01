@@ -6,7 +6,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import com.mojang.blaze3d.resource.ResourceHandle;
@@ -16,14 +15,14 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.PostChain;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import org.joml.Matrix4f;
-import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.Predicate;
@@ -34,14 +33,15 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRendering
 public abstract class MixinLevelRenderer {
 	@WrapOperation(method = "renderLevel",
 		at = @At(value = "INVOKE", remap = false,
-			target = "Lnet/minecraft/client/renderer/LevelRenderer;addParticlesPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/client/Camera;FLcom/mojang/blaze3d/buffers/GpuBufferSlice;Lnet/minecraft/client/renderer/culling/Frustum;Lorg/joml/Matrix4f;)V"))
+			target = "Lnet/minecraft/client/renderer/LevelRenderer;addParticlesPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/FogParameters;Lnet/minecraft/client/renderer/culling/Frustum;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V"))
 	private void redirectAddParticlesPass(LevelRenderer instance,
 										  FrameGraphBuilder frameGraphBuilder,
 										  Camera camera,
 										  float partialTick,
-										  GpuBufferSlice gpuBufferSlice,
+										  FogParameters fogParameters,
 										  Frustum frustum,
 										  Matrix4f matrix4f,
+										  Matrix4f matrix4f2,
 										  Operation<Void> original,
 										  @Share("asyncparticles$addParticlesPassOperation")
 										  LocalRef<Operation<Void>> originalRef,
@@ -49,7 +49,7 @@ public abstract class MixinLevelRenderer {
 										  LocalIntRef irm) {
 		switch (irm.get()) {
 			case COMPATIBILITY_ASYNC, MIXED_ASYNC, SYNC, MIXED_SYNC ->
-				original.call(instance, frameGraphBuilder, camera, partialTick, gpuBufferSlice, frustum, matrix4f);
+				original.call(instance, frameGraphBuilder, camera, partialTick, fogParameters, frustum, matrix4f, matrix4f2);
 			case BEFORE_SYNC, BEFORE_ASYNC -> {
 				// no-op
 			}
@@ -58,20 +58,19 @@ public abstract class MixinLevelRenderer {
 	}
 
 	@Inject(method = "renderLevel", order = 1500,
-		slice = @Slice(from = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/client/renderer/LevelRenderer;addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;FLcom/mojang/blaze3d/buffers/GpuBufferSlice;Lorg/joml/Matrix4f;Lnet/minecraft/client/Camera;)V")),
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;addToFrame(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;IILnet/minecraft/client/renderer/PostChain$TargetBundle;)V"))
-	private void onRenderLevelTail1(GraphicsResourceAllocator graphicsResourceAllocator,
-									DeltaTracker deltaTracker,
+		slice = @Slice(from = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/client/renderer/LevelRenderer;addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;FLnet/minecraft/client/renderer/FogParameters;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/Camera;)V")),
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;addToFrame(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;IILnet/minecraft/client/renderer/PostChain$TargetBundle;Ljava/util/function/Consumer;)V"))
+	private void onRenderLevelTail1(GraphicsResourceAllocator arg,
+									DeltaTracker arg2,
 									boolean bl,
 									Camera camera,
-									Matrix4f modelViewMatrix, // first one
+									GameRenderer arg4,
+									Matrix4f matrix4f,
 									Matrix4f matrix4f2,
-									GpuBufferSlice gpuBufferSlice,
-									Vector4f vector4f,
-									boolean bl2,
 									CallbackInfo ci,
 									@Local(ordinal = 0) FrameGraphBuilder frameGraphBuilder,
 									@Local(ordinal = 0) float partialTick,
+									@Local(ordinal = 0) FogParameters fogParameters,
 									@Local(ordinal = 0) Frustum frustum,
 									@Share("asyncparticles$addParticlesPassOperation")
 									LocalRef<Operation<Void>> originalRef,
@@ -79,24 +78,23 @@ public abstract class MixinLevelRenderer {
 									LocalIntRef irm) {
 		// Fabulous graphics
 		if (irm.get() == DELAYED_ASYNC) {
-			originalRef.get().call(this, frameGraphBuilder, camera, partialTick, gpuBufferSlice, frustum, modelViewMatrix);
+			originalRef.get().call(this, frameGraphBuilder, camera, partialTick, fogParameters, frustum, matrix4f, matrix4f2);
 		}
 	}
 
 	@Inject(method = "renderLevel", order = 1500, at = @At(value = "INVOKE",
-		target = "Lnet/minecraft/client/renderer/LevelRenderer;addLateDebugPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;Lcom/mojang/blaze3d/buffers/GpuBufferSlice;)V"))
-	private void onRenderLevelTail0(GraphicsResourceAllocator graphicsResourceAllocator,
-									DeltaTracker deltaTracker,
+		target = "Lnet/minecraft/client/renderer/LevelRenderer;addLateDebugPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/client/renderer/FogParameters;)V"))
+	private void onRenderLevelTail0(GraphicsResourceAllocator arg,
+									DeltaTracker arg2,
 									boolean bl,
 									Camera camera,
-									Matrix4f modelViewMatrix, // first one
+									GameRenderer arg4,
+									Matrix4f matrix4f,
 									Matrix4f matrix4f2,
-									GpuBufferSlice gpuBufferSlice,
-									Vector4f vector4f,
-									boolean bl2,
 									CallbackInfo ci,
 									@Local(ordinal = 0) FrameGraphBuilder frameGraphBuilder,
 									@Local(ordinal = 0) float partialTick,
+									@Local(ordinal = 0) FogParameters fogParameters,
 									@Local(ordinal = 0) Frustum frustum,
 									@Local(ordinal = 0) PostChain postChain,
 									@Share("asyncparticles$addParticlesPassOperation")
@@ -105,12 +103,12 @@ public abstract class MixinLevelRenderer {
 									LocalIntRef irm) {
 		// non-Fabulous graphics
 		if (irm.get() == DELAYED_ASYNC && !Minecraft.useShaderTransparency()) {
-			originalRef.get().call(this, frameGraphBuilder, camera, partialTick, gpuBufferSlice, frustum, modelViewMatrix);
+			originalRef.get().call(this, frameGraphBuilder, camera, partialTick, fogParameters, frustum, matrix4f, matrix4f2);
 		}
 	}
 
 	// BEFORE
-	@Redirect(method = "lambda$addMainPass$3", remap = false, at = @At(value = "INVOKE", remap = false,
+	@Redirect(method = "lambda$addMainPass$2", remap = false, at = @At(value = "INVOKE", remap = false,
 		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
 	private void onRenderMain(ParticleEngine instance,
 							  Camera camera,
@@ -126,7 +124,7 @@ public abstract class MixinLevelRenderer {
 	}
 
 	// AFTER
-	@Redirect(method = "lambda$addParticlesPass$6", remap = false, at = @At(value = "INVOKE", remap = false,
+	@Redirect(method = "lambda$addParticlesPass$5", remap = false, at = @At(value = "INVOKE", remap = false,
 		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"))
 	private void onRenderParticles(ParticleEngine instance,
 								   Camera camera,

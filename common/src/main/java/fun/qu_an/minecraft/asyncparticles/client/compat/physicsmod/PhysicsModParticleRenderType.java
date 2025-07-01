@@ -30,7 +30,7 @@ public class PhysicsModParticleRenderType {
 				false,
 				NO_CULL_TRANSLUCENT_PARTICLE,
 				RenderType.CompositeState.builder()
-					.setTextureState(new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_PARTICLES, false))
+					.setTextureState(new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_PARTICLES, TriState.FALSE, false))
 					.setOutputState(PARTICLES_TARGET)
 					.setLightmapState(LIGHTMAP)
 					.createCompositeState(false)

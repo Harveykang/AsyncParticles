@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.StringListListEntryFixRestart;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import me.shedaniel.clothconfig2.api.ConfigCategory;

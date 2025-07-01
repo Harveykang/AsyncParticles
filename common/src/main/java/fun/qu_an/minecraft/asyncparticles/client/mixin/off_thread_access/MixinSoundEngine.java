@@ -49,13 +49,11 @@ public class MixinSoundEngine {
 	}
 
 	@WrapMethod(method = "play")
-	public SoundEngine.PlayResult wrapPlay(SoundInstance soundInstance, Operation<SoundEngine.PlayResult> original) {
+	public void wrapPlay(SoundInstance soundInstance, Operation<Void> original) {
 		if (ThreadUtil.isOnMainThread()) {
-			return original.call(soundInstance);
+			original.call(soundInstance);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> original.call(soundInstance));
-			// FIXME
-			return this.loaded ? SoundEngine.PlayResult.STARTED_SILENTLY : SoundEngine.PlayResult.NOT_STARTED;
 		}
 	}
 

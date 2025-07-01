@@ -3,7 +3,6 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.render;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
@@ -14,7 +13,6 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
-import org.joml.Vector4f;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,11 +37,9 @@ public abstract class MixinLevelRenderer {
 							 DeltaTracker deltaTracker,
 							 boolean bl,
 							 Camera camera,
+							 GameRenderer gameRenderer,
 							 Matrix4f matrix4f,
 							 Matrix4f matrix4f2,
-							 GpuBufferSlice gpuBufferSlice,
-							 Vector4f vector4f,
-							 boolean bl2,
 							 CallbackInfo ci,
 							 @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 							 LocalIntRef irm) {

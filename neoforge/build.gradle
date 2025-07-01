@@ -53,20 +53,15 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
 
     /* APIs */
-    modLocalRuntime 'maven.modrinth:architectury-api:17.0.4+neoforge'
-    modLocalRuntime "me.shedaniel.cloth:cloth-config-neoforge:19.0.147"
+    modLocalRuntime 'maven.modrinth:architectury-api:16.1.4+neoforge'
+    modLocalRuntime "me.shedaniel.cloth:cloth-config-neoforge:18.0.145"
 
     /* Performance */
-    modLocalRuntime "maven.modrinth:spark:1.10.139-neoforge"
+    modLocalRuntime "maven.modrinth:spark:1.10.128-neoforge"
 //    modCompileOnly 'maven.modrinth:embeddium:1.0.12-beta.1+mc1.21.4'
-    modCompileOnly 'maven.modrinth:sodium:mc1.21.6-0.6.13-neoforge'
+    modCompileOnly 'maven.modrinth:sodium:mc1.21.5-0.6.13-neoforge'
 //    modLocalRuntime 'maven.modrinth:embeddium:1.0.12-beta.1+mc1.21.4'
-    modLocalRuntime 'maven.modrinth:sodium:mc1.21.6-0.6.13-neoforge'
-    modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.6-0.6.6+neoforge'
-    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-renderer-api-v1-7.0.0.jar')
-    modLocalRuntime fileTree(dir: '../libs', include: 'net.caffeinemc.sodium-neoforge-0.6.13+mc1.21.6-service.jar')
-
-    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-api-base-0.4.42+d1308ded19.jar')
+//    modLocalRuntime 'maven.modrinth:sodium:mc1.21.4-0.6.13-neoforge'
     modCompileOnly "maven.modrinth:iris:1.8.11+1.21.5-neoforge"
 //    modLocalRuntime 'maven.modrinth:monocle-iris:0.1.8' // no 1.21.4 version
 //    modLocalRuntime "maven.modrinth:iris:1.8.8+1.21.4-neoforge"
@@ -95,16 +90,16 @@ dependencies {
 //    }
 
     /* Simple Weather */
-    modCompileOnly "curse.maven:simple-weather-983390:6694711" // 1.1.2
-//    modLocalRuntime "curse.maven:simple-weather-983390:6694711" // 1.1.2
-//    modLocalRuntime "tv.soaryn:volumetrics:1.0.0"
+    modCompileOnly "curse.maven:simple-weather-983390:6470536" // 1.1.0
+    modLocalRuntime "curse.maven:simple-weather-983390:6470536" // 1.1.0
+    modLocalRuntime "tv.soaryn:volumetrics:1.0.0"
 
     /* A Good Place */
     modCompileOnly "maven.modrinth:a-good-place:1.21.4-1.2.10" // 1.2.10 // TODO:this is a 1.21.4 version
 //    modLocalRuntime "maven.modrinth:a-good-place:1.21.4-1.2.10" // 1.2.10 // TODO:this is a 1.21.4 version
 
     /* Physics Mod */
-    modCompileOnly "maven.modrinth:physicsmod:idA1Lmwe" // 3.1.9
+    modCompileOnly "maven.modrinth:physicsmod:3.1.8"
 //    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v176f-neoforge-1.21.5.jar')
 
     /* Particular Reforged */

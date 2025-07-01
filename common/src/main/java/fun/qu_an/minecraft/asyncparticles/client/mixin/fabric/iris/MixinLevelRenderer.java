@@ -1,21 +1,17 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.iris;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
 import net.minecraft.client.Camera;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -58,7 +54,7 @@ public abstract class MixinLevelRenderer {
 	// AFTER
 	@Inject(method = "method_62213", at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V"))
-	private void onRenderParticles(GpuBufferSlice gpuBufferSlice,
+	private void onRenderParticles(FogParameters fogParameters,
 								   ResourceHandle resourceHandle,
 								   ResourceHandle resourceHandle2,
 								   Camera camera,
