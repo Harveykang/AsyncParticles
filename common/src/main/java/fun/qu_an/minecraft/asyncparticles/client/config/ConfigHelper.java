@@ -82,6 +82,10 @@ public class ConfigHelper {
 		return AsyncParticlesConfig.rendering$cullParticles;
 	}
 
+	public static boolean isCullWeathers() {
+		return AsyncParticlesConfig.rendering$cullWeathers;
+	}
+
 	// TODO: implement weather particle config, which will not be spawn into physics structures
 	public static Set<ResourceLocation> getWeatherParticles() {
 		return Set.of();
@@ -100,6 +104,10 @@ public class ConfigHelper {
 	}
 
 	public static boolean isTickWeatherAsync() {
-		return true;
+		return AsyncParticlesConfig.tick$weatherTickMode != TickMode.SYNCHRONOUSLY;
+	}
+
+	public static boolean isRenderWeatherAsync() {
+		return AsyncParticlesConfig.rendering$weatherRenderingMode != RenderingMode.SYNCHRONOUSLY;
 	}
 }

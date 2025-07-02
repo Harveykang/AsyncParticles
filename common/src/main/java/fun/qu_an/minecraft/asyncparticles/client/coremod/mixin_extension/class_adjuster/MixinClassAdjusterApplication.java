@@ -95,7 +95,7 @@ public class MixinClassAdjusterApplication {
 		// FIXME: this is unsafe
 		List<IMixinConfig> pendingConfigs = MixinTransformerExtension.tryAs(activeTransformer)
 			.map(MixinTransformerExtension::getPendingConfigs)
-			.orElseThrow(() -> new UnsupportedOperationException("Unsupported mixin transformer: " + activeTransformer.getClass()));
+			.orElseThrow(() -> new MixinError("Unsupported mixin transformer: " + activeTransformer.getClass()));
 		// Find our mixin config
 		IMixinConfig mixinConfig = null;
 		String pluginClass = mixinSquaredPlugin.getClass().getName();

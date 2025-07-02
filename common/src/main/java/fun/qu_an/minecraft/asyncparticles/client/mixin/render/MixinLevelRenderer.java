@@ -10,17 +10,24 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import org.objectweb.asm.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mixin(value = LevelRenderer.class, priority = 500)
 public abstract class MixinLevelRenderer {
@@ -32,6 +39,10 @@ public abstract class MixinLevelRenderer {
 
 	@Shadow
 	public Frustum cullingFrustum;
+
+	@Shadow @Final private WeatherEffectRenderer weatherEffectRenderer;
+
+	@Shadow private int ticks;
 
 	// TODO: 有没有更好的方法？
 	@Inject(method = "renderLevel", at = @At("HEAD"))
@@ -50,15 +61,15 @@ public abstract class MixinLevelRenderer {
 		float partialTick = deltaTracker.getGameTimeDeltaPartialTick(false);
 		boolean b = this.capturedFrustum != null;
 		Frustum frustum = AsyncRenderer.frustum = b ? this.capturedFrustum : this.cullingFrustum;
+		Vec3 cameraPos = camera.getPosition();
 		if (this.captureFrustum) {
 			this.capturedFrustum = b ? new Frustum(matrix4f, matrix4f2) : frustum;
-			Vec3 vec3 = camera.getPosition();
-			this.capturedFrustum.prepare(vec3.x, vec3.y, vec3.z);
+			this.capturedFrustum.prepare(cameraPos.x, cameraPos.y, cameraPos.z);
 			this.captureFrustum = false;
 		}
 		int irmValue = InternalRenderingMode.updateInternalMode(ConfigHelper.getParticleRenderingMode());
 		irm.set(irmValue);
-		AsyncRenderer.start(partialTick, camera, irmValue);
+		AsyncRenderer.begin(partialTick, camera, irmValue, weatherEffectRenderer, ticks);
 	}
 
 	@ModifyExpressionValue(method = "renderLevel", at = @At(value = "FIELD", opcode = Opcodes.GETFIELD,

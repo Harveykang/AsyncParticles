@@ -83,6 +83,14 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> tick$particleTickMode = newValue)
 				.build())
 			.addEntry(entryBuilder
+				.startSelector(Component.translatable("config.asyncparticles.tick.weatherTickMode"),
+					new TickMode[]{TickMode.FORCE_COMPLETE, TickMode.SYNCHRONOUSLY}, tick$weatherTickMode)
+				.setNameProvider(TickMode::getComponent)
+				.setDefaultValue(defaultConfig.tick.weatherTickMode)
+				.setTooltip(Component.translatable("config.asyncparticles.tick.weatherTickMode.tooltip"))
+				.setSaveConsumer(newValue -> tick$weatherTickMode = newValue)
+				.build())
+			.addEntry(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.tick.failPerSecLimit"),
 					tick$failPerSecLimit)
 				.setDefaultValue(defaultConfig.tick.failPerSecLimit)
@@ -123,12 +131,27 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> rendering$cullParticles = newValue)
 				.build())
 			.addEntry(entryBuilder
+				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.cullWeathers"),
+					rendering$cullWeathers)
+				.setDefaultValue(defaultConfig.rendering.cullWeathers)
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.cullWeathers.tooltip"))
+				.setSaveConsumer(newValue -> rendering$cullWeathers = newValue)
+				.build())
+			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.particleRenderingMode"),
 					RenderingMode.class, rendering$particleRenderingMode)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
 				.setDefaultValue(defaultConfig.rendering.particleRenderingMode)
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.particleRenderingMode.tooltip"))
 				.setSaveConsumer(newValue -> rendering$particleRenderingMode = newValue)
+				.build())
+			.addEntry(entryBuilder
+				.startSelector(Component.translatable("config.asyncparticles.rendering.weatherRenderingMode"),
+					new RenderingMode[]{RenderingMode.DELAYED, RenderingMode.SYNCHRONOUSLY}, rendering$weatherRenderingMode)
+				.setNameProvider(RenderingMode::getComponent)
+				.setDefaultValue(defaultConfig.rendering.weatherRenderingMode)
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.weatherRenderingMode.tooltip"))
+				.setSaveConsumer(newValue -> rendering$weatherRenderingMode = newValue)
 				.build())
 			.addEntry(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.rendering.failPerSecLimit"),

@@ -31,7 +31,7 @@ public class MixinClassAdjusterRegistrar {
 			throw new IllegalStateException("Cannot register class provider after pre-launch!");
 		}
 		pendingProviders.add(mixinClassProvider);
-		LOGGER.debug("Registered target modifier {}", mixinClassProvider.getClass().getName());
+		LOGGER.debug("Registered mixin class provider {}", mixinClassProvider.getClass().getName());
 	}
 
 	static Map<String, MixinClassAdjuster> endAdjusters() {

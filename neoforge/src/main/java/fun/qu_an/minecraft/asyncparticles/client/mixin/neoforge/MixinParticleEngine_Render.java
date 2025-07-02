@@ -113,7 +113,7 @@ public abstract class MixinParticleEngine_Render {
 					   Predicate<ParticleRenderType> renderTypePredicate) {
 		Set<ParticleRenderType> renderOrder = particles.keySet();
 		if (InternalRenderingMode.isAsync()) {
-			AsyncRenderer.endAll(camera, partialTick, renderOrder, renderTypePredicate);
+			AsyncRenderer.endParticles(camera, partialTick, renderOrder, renderTypePredicate);
 		} else {
 			for (ParticleRenderType particleRenderType : renderOrder) {
 				if (particleRenderType.renderType() == null) {

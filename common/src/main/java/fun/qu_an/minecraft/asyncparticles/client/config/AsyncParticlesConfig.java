@@ -42,11 +42,14 @@ public class AsyncParticlesConfig {
 	public static boolean particle$cullUnderwaterParticleType;
 	public static TickMode tick$animationTickMode;
 	public static TickMode tick$particleTickMode;
+	public static TickMode tick$weatherTickMode;
 	public static int tick$failPerSecLimit;
 	public static FailBehavior tick$failBehavior;
 	public static boolean tick$suppressCME;
 	public static boolean rendering$cullParticles;
+	public static boolean rendering$cullWeathers;
 	public static RenderingMode rendering$particleRenderingMode;
+	public static RenderingMode rendering$weatherRenderingMode;
 	public static int rendering$failPerSecLimit;
 	public static FailBehavior rendering$failBehavior;
 	public static RainEffect valkyrienSkies$rainEffect;
@@ -250,6 +253,7 @@ public class AsyncParticlesConfig {
 		static class Tick {
 			TickMode animationTickMode = TickMode.INTERRUPTIBLE;
 			TickMode particleTickMode = TickMode.INTERRUPTIBLE;
+			TickMode weatherTickMode = TickMode.FORCE_COMPLETE;
 			int failPerSecLimit = 5;
 			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
 			boolean suppressCME = false;
@@ -257,6 +261,7 @@ public class AsyncParticlesConfig {
 			private void flat() {
 				tick$animationTickMode = requireNonNullElse(animationTickMode, TickMode.INTERRUPTIBLE);
 				tick$particleTickMode = requireNonNullElse(particleTickMode, TickMode.INTERRUPTIBLE);
+				tick$weatherTickMode = requireNonNullElse(weatherTickMode, TickMode.SYNCHRONOUSLY);
 				tick$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				tick$failBehavior = requireNonNullElse(failBehavior, FailBehavior.RAISE_CRASH);
 				tick$suppressCME = suppressCME;
@@ -265,6 +270,7 @@ public class AsyncParticlesConfig {
 			private void fold() {
 				animationTickMode = tick$animationTickMode;
 				particleTickMode = tick$particleTickMode;
+				weatherTickMode = tick$weatherTickMode;
 				failPerSecLimit = tick$failPerSecLimit;
 				failBehavior = tick$failBehavior;
 				suppressCME = tick$suppressCME;
@@ -273,20 +279,26 @@ public class AsyncParticlesConfig {
 
 		static class Rendering {
 			boolean cullParticles = true;
+			boolean cullWeathers = true;
 			RenderingMode particleRenderingMode = RenderingMode.DELAYED;
+			RenderingMode weatherRenderingMode = RenderingMode.DELAYED;
 			int failPerSecLimit = 20;
 			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
 
 			private void flat() {
 				rendering$cullParticles = cullParticles;
+				rendering$cullWeathers = cullWeathers;
 				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
+				rendering$weatherRenderingMode = requireNonNullElse(weatherRenderingMode, RenderingMode.DELAYED);
 				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
 			}
 
 			private void fold() {
 				cullParticles = rendering$cullParticles;
+				cullWeathers = rendering$cullWeathers;
 				particleRenderingMode = rendering$particleRenderingMode;
+				weatherRenderingMode = rendering$weatherRenderingMode;
 				failPerSecLimit = rendering$failPerSecLimit;
 				failBehavior = rendering$failBehavior;
 			}

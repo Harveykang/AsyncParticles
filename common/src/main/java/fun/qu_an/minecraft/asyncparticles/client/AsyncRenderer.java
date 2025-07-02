@@ -10,6 +10,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.iris.IrisCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -22,6 +23,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.WeatherEffectRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
@@ -96,7 +98,12 @@ public class AsyncRenderer {
 
 	public static Frustum frustum;
 	private static Consumer<String> debugConsumer;
-	private static CompletableFuture<Void> asyncTask;
+	private static CompletableFuture<Void> particlsTask;
+	private static CompletableFuture<Void> weatherTask;
+	private static WeatherEffectRenderer.ColumnInstance[] rainColumns = new WeatherEffectRenderer.ColumnInstance[0];
+	private static WeatherEffectRenderer.ColumnInstance[] snowColumns = new WeatherEffectRenderer.ColumnInstance[0];
+	private static List<WeatherEffectRenderer.ColumnInstance> rainColumnsList = null;
+	private static List<WeatherEffectRenderer.ColumnInstance> snowColumnsList = null;
 	private static boolean mixedParticleRenderingSetting = false;
 	private static int asyncTasksSize;
 	private static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
@@ -106,7 +113,7 @@ public class AsyncRenderer {
 
 	/* Renderer */
 
-	public static void start(float f, Camera camera, int irm) {
+	public static void begin(float partialTick, Camera camera, int irm, WeatherEffectRenderer weatherRenderer, int ticks) {
 		tryDebug();
 		switch (irm) {
 			case MIXED_SYNC -> {
@@ -122,6 +129,25 @@ public class AsyncRenderer {
 		}
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = Profiler.get();
+		if (ConfigHelper.isRenderWeatherAsync() && mc.level.getRainLevel(partialTick) > 0f) {
+			profiler.push("begin_weathers");
+			weatherTask = CompletableFuture.runAsync(() -> {
+				ObjectArrayList<WeatherEffectRenderer.ColumnInstance> rainColumns = ObjectArrayList.wrap(AsyncRenderer.rainColumns, 0);
+				ObjectArrayList<WeatherEffectRenderer.ColumnInstance> snowColumns = ObjectArrayList.wrap(AsyncRenderer.snowColumns, 0);
+				weatherRenderer.collectColumnInstances(mc.level,
+					ticks,
+					partialTick,
+					camera.getPosition(),
+					Minecraft.useFancyGraphics() ? 10 : 5, // Will be overridden if sodium is loaded, see sodium.MixinLevelRenderer
+					rainColumns,
+					snowColumns);
+				AsyncRenderer.rainColumns = rainColumns.elements();
+				AsyncRenderer.snowColumns = snowColumns.elements();
+				AsyncRenderer.rainColumnsList = rainColumns;
+				AsyncRenderer.snowColumnsList = snowColumns;
+			}, EXECUTOR);
+			profiler.pop();
+		}
 		profiler.push("begin_particles");
 		clearSync();
 		ParticleEngine particleEngine = mc.particleEngine;
@@ -139,12 +165,12 @@ public class AsyncRenderer {
 			if (bTesselator == BindingTesselator.EMPTY) {
 				continue;
 			}
-			asyncTasks.add(CompletableFuture.runAsync(() -> renderParticles(f, camera, queue, particleRenderType, bTesselator.begin()),
+			asyncTasks.add(CompletableFuture.runAsync(() -> renderParticles(partialTick, camera, queue, particleRenderType, bTesselator.begin()),
 					EXECUTOR)
 				.exceptionally(AsyncRenderer::renderAsyncExceptionally));
 		}
 		int size = asyncTasksSize = asyncTasks.size();
-		asyncTask = CompletableFuture.allOf(asyncTasks.toArray(new CompletableFuture[size]));
+		particlsTask = CompletableFuture.allOf(asyncTasks.toArray(new CompletableFuture[size]));
 		profiler.pop();
 	}
 
@@ -208,8 +234,8 @@ public class AsyncRenderer {
 	}
 
 	// Fabric
-	public static void endAll(Camera camera, float f, Collection<ParticleRenderType> renderOrder) {
-		tryWaitingForAsyncTasks();
+	public static void endParticles(Camera camera, float f, Collection<ParticleRenderType> renderOrder) {
+		tryWaitingForParticleTask();
 		for (ParticleRenderType particleRenderType : renderOrder) {
 			BindingTesselator tesselator = BTESSELATORS.get(particleRenderType);
 			if (tesselator == null || tesselator == BindingTesselator.EMPTY) {
@@ -253,8 +279,8 @@ public class AsyncRenderer {
 	}
 
 	// Forge
-	public static void endAll(Camera camera, float f, Collection<ParticleRenderType> renderOrder, Predicate<ParticleRenderType> renderTypePredicate) {
-		tryWaitingForAsyncTasks();
+	public static void endParticles(Camera camera, float f, Collection<ParticleRenderType> renderOrder, Predicate<ParticleRenderType> renderTypePredicate) {
+		tryWaitingForParticleTask();
 		for (ParticleRenderType particleRenderType : renderOrder) {
 			if (particleRenderType.renderType() == null) {
 				continue;
@@ -303,18 +329,38 @@ public class AsyncRenderer {
 		}
 	}
 
-	public static void waitForAsyncTasks() {
-		if (asyncTask != null) {
-			asyncTask.join();
-			asyncTask = null;
+	public static Pair<List<WeatherEffectRenderer.ColumnInstance>, List<WeatherEffectRenderer.ColumnInstance>>
+	endWeather() {
+		tryWaitingForWeatherTask();
+		return Pair.of(rainColumnsList, snowColumnsList);
+	}
+
+	private static void waitForWeatherTask() {
+		if (weatherTask != null) {
+			weatherTask.join();
+			weatherTask = null;
 		}
 	}
 
-	public static void tryWaitingForAsyncTasks() {
+	private static void tryWaitingForWeatherTask() {
+		if (!ConfigHelper.isRenderWeatherAsync()) {
+			throw new IllegalStateException("Can only wait for async tasks around translucent");
+		}
+		waitForWeatherTask();
+	}
+
+	private static void waitForParticleTask() {
+		if (particlsTask != null) {
+			particlsTask.join();
+			particlsTask = null;
+		}
+	}
+
+	private static void tryWaitingForParticleTask() {
 //		if (ConfigHelper.isRenderAsync() && stage != Stage.RENDERABLE) {
 //			throw new IllegalStateException("Can only wait for async tasks around translucent");
 //		}
-		waitForAsyncTasks();
+		waitForParticleTask();
 	}
 
 	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable t) {
@@ -408,7 +454,8 @@ public class AsyncRenderer {
 				sync particle types: %s,
 				sync particle render types: %s,
 				particle mode: %s,
-				iris particle mode: %s"""
+				iris particle mode: %s,
+				weather column array size(rain|snow): %d|%d"""
 				.formatted(asyncTasksSize,
 					BTESSELATORS.entrySet()
 						.stream()
@@ -436,7 +483,10 @@ public class AsyncRenderer {
 						case MIXED_ASYNC -> "MIXED_ASYNC";
 						default -> "UNKNOWN";
 					},
-					ModListHelper.IRIS_LIKE_LOADED ? IrisCompat.getParticleRenderingSettings().name() : "DISABLED"));
+					ModListHelper.IRIS_LIKE_LOADED ? IrisCompat.getParticleRenderingSettings().name() : "DISABLED",
+					rainColumns.length,
+					snowColumns.length
+				));
 			debugConsumer = null;
 		}
 	}
@@ -444,9 +494,12 @@ public class AsyncRenderer {
 	/* Destroy */
 
 	public static void reset() {
-		waitForAsyncTasks();
+		waitForParticleTask();
+		waitForWeatherTask();
 		closeBTesselators();
 		clearSync();
+		rainColumns = new WeatherEffectRenderer.ColumnInstance[0];
+		snowColumns = new WeatherEffectRenderer.ColumnInstance[0];
 	}
 
 	public static boolean isTranslucentPhase(Enum<?> phase) {
