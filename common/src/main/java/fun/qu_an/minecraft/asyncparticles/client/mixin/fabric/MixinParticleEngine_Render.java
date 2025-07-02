@@ -96,7 +96,7 @@ public abstract class MixinParticleEngine_Render {
 	public void render(Camera camera, float partialTick, MultiBufferSource.BufferSource bufferSource) {
 		List<ParticleRenderType> renderOrder = RENDER_ORDER;
 		if (InternalRenderingMode.isAsync()) {
-			AsyncRenderer.endAll(camera, partialTick, renderOrder);
+			AsyncRenderer.endParticles(camera, partialTick, renderOrder);
 		} else {
 			for (ParticleRenderType particleRenderType : renderOrder) {
 				Queue<Particle> queue = this.particles.get(particleRenderType);

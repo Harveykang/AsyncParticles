@@ -9,7 +9,6 @@ version = "${version}"
 displayName = "AsyncParticles"
 authors = "Harvey_Husky"
 description = '''
-This is an example description! Tell everyone what your mod is about!
 '''
 logoFile = "assets/asyncparticles/icon.png"
 

@@ -87,6 +87,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				 "tick",
 				 "render" -> true;
 			case "modernui" -> MODERN_UI_LOADED;
+			case "sodium" -> SODIUM_LOADED;
 			case "sodium_0_7" -> SODIUM_LOADED && versionCheck("sodium", "0.7", "0.8");
 			case "iris_like" -> IRIS_LIKE_LOADED;
 			case "a_good_place" -> A_GOOD_PLACE_LOADED;

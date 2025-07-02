@@ -29,4 +29,20 @@ public class FrustumUtil {
 			renderBoundingBox.maxY,
 			renderBoundingBox.maxZ);
 	}
+
+	public static boolean isColumnVisible(Frustum frustum, int x, int z, int bY, int tY) {
+		FrustumIntersection intersection = frustum.intersection;
+		double camX = frustum.camX;
+		double camY = frustum.camY;
+		double camZ = frustum.camZ;
+		float minX = (float) (x - camX);
+		float minZ = (float) (z - camZ);
+		return intersection.testAab(
+			minX,
+			(float) (bY - camY),
+			minZ,
+			minX + 1f,
+			(float) (tY - camY),
+			minZ + 1f);
+	}
 }

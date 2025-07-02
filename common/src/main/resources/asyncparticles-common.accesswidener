@@ -58,6 +58,8 @@ accessible field com/mojang/blaze3d/vertex/ByteBufferBuilder capacity I
 accessible field net/minecraft/client/renderer/RenderStateShard name Ljava/lang/String;
 accessible method net/minecraft/client/particle/ParticleEngine renderCustomParticles (Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Ljava/util/Queue;)V
 accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;
+accessible method net/minecraft/client/renderer/WeatherEffectRenderer collectColumnInstances (Lnet/minecraft/world/level/Level;IFLnet/minecraft/world/phys/Vec3;ILjava/util/List;Ljava/util/List;)V
+accessible class net/minecraft/client/renderer/WeatherEffectRenderer$ColumnInstance
 
 # for NeoForge
 accessible method net/minecraft/client/renderer/RenderPipelines register (Lcom/mojang/blaze3d/pipeline/RenderPipeline;)Lcom/mojang/blaze3d/pipeline/RenderPipeline;
