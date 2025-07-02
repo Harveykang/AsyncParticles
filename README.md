@@ -3,6 +3,9 @@
 - [中文](./README_zh.md)|English
 - [Modrinth](https://modrinth.com/mod/asyncparticles)|[CurseForge](https://www.curseforge.com/minecraft/mc-mods/asyncparticles)
 
+## Configuration
+- Settings can be accessed via the ModList/ModMenu.
+
 ## Features
 
 - Minecraft
@@ -10,6 +13,7 @@
   - Async particle ticking/rendering(buffer filling).
   - Async particle light cache.
   - Delay texture ticking by one frame to reduce client tick duration.
+  - Vanilla weather optimization. (Coming soon)
 - Valkyrien Skies/Create + Simple Weather/Pretty Rain/Particle Rain
   - Modded weather particles can now collide with ships/contraptions.
 - Pretty Rain/Particle Rain/Effectual/Particular/Simple Weather
