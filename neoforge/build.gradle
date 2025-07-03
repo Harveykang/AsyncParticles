@@ -77,6 +77,8 @@ dependencies {
 //    modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
 //    modCompileOnly "curse.maven:flerovium-1142875:6258259"
 //    modLocalRuntime "curse.maven:flerovium-1142875:6258259"
+    modCompileOnly 'maven.modrinth:moreculling:1.4.0-beta.1'
+    modLocalRuntime 'maven.modrinth:moreculling:1.4.0-beta.1'
 
     /* Particle Rain/Pretty Rain */
     modCompileOnly "maven.modrinth:pretty-rain:jhbyDOnc" // 1.1.4
@@ -113,6 +115,9 @@ dependencies {
 
     /* What Are They Up To */
     modCompileOnly "maven.modrinth:what-are-they-up-to:1.21.4-1.2.5" // 1.2.5 // TODO:this is a 1.21.4 version
+
+    /* Immediately Fast */
+    modCompileOnly "maven.modrinth:immediatelyfast:1.11.0+1.21.7-neoforge"
 }
 
 processResources {

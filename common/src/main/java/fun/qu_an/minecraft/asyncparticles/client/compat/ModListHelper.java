@@ -90,6 +90,8 @@ public class ModListHelper {
 	public static final boolean FABRIC_COO_PARTICLES_API_LOADED = isModLoaded("cooparticlesapi");
 	/* Immediately Fast */
 	public static final boolean IMMEDIATELY_FAST_LOADED = isModLoaded("immediatelyfast");
+	/* More Culling */
+	public static final boolean MORE_CULLING_LOADED = isModLoaded("moreculling");
 
 	@ExpectPlatform
 	private static boolean isForge() {

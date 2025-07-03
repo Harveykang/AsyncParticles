@@ -26,6 +26,7 @@ dependencies {
     /* Performance */
     modCompileOnly "maven.modrinth:sodium:mc1.21.6-0.6.13-fabric"
     modCompileOnly 'maven.modrinth:iris:l77DAK6U' // 1.9.1
+    modCompileOnly 'maven.modrinth:moreculling:ESxkwc6w' // 1.4.0-beta.1
 
     /* Particle Rain/Pretty Rain */
     modCompileOnly "maven.modrinth:particle-rain:3.3.4" // TODO 1.21.5 ver
