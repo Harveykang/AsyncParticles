@@ -19,7 +19,7 @@ allprojects {
                 (rootProject.snapshot == 'true' ?
                         '-SNAPSHOT.' + Long.toHexString(new Random().nextLong(0x10000000L, 0xFFFFFFFFL)) :
                         '') +
-                '+' + rootProject.supported_version + '.jar'
+                '+' + rootProject.minecraft_version + '.jar'
     }
 }
 

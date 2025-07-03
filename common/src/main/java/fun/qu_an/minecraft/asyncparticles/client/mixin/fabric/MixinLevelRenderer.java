@@ -48,8 +48,7 @@ public abstract class MixinLevelRenderer {
 	}
 
 	@Inject(method = "renderLevel", order = 1500,
-		slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;FLnet/minecraft/client/renderer/FogParameters;)V")),
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;addToFrame(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;IILnet/minecraft/client/renderer/PostChain$TargetBundle;Ljava/util/function/Consumer;)V"))
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;FLnet/minecraft/client/renderer/FogParameters;)V"))
 	private void onRenderLevelTail1(GraphicsResourceAllocator graphicsResourceAllocator,
 									DeltaTracker deltaTracker,
 									boolean bl,
@@ -67,29 +66,6 @@ public abstract class MixinLevelRenderer {
 									LocalIntRef irm) {
 		// Fabulous graphics
 		if (irm.get() == DELAYED_ASYNC) {
-			originalRef.get().call(this, frameGraphBuilder, camera, partialTick, fogParameters);
-		}
-	}
-
-	@Inject(method = "renderLevel", order = 1500, at = @At(value = "INVOKE",
-		target = "Lnet/minecraft/client/renderer/LevelRenderer;addLateDebugPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/client/renderer/FogParameters;)V"))
-	private void onRenderLevelTail0(GraphicsResourceAllocator graphicsResourceAllocator,
-									DeltaTracker deltaTracker,
-									boolean bl,
-									Camera camera,
-									GameRenderer gameRenderer,
-									Matrix4f matrix4f,
-									Matrix4f matrix4f2,
-									CallbackInfo ci,
-									@Local(ordinal = 0) FrameGraphBuilder frameGraphBuilder,
-									@Local(ordinal = 0) float partialTick,
-									@Local(ordinal = 0) FogParameters fogParameters,
-									@Share("asyncparticles$addParticlesPassOperation")
-									LocalRef<Operation<Void>> originalRef,
-									@Share(namespace = "asyncparticles", value = "internalRenderingMode")
-									LocalIntRef irm) {
-		// non-Fabulous graphics
-		if (irm.get() == DELAYED_ASYNC && !Minecraft.useShaderTransparency()) {
 			originalRef.get().call(this, frameGraphBuilder, camera, partialTick, fogParameters);
 		}
 	}

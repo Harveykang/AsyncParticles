@@ -20,11 +20,18 @@ public abstract class MixinBatchableBufferSource {
 
 	@Dynamic
 	@Inject(method = {
-		"drawCurrentLayer",
-		"draw*",
+		"endLastBatch",
+		"endBatch()V",
+		"endBatch(Lnet/minecraft/client/renderer/RenderType;)V"}, at = @At("HEAD"))
+	private void injectHeads0(CallbackInfo ci) {
+		ThreadUtil.assertNotParticleRendererThread();
+	}
+
+	@Dynamic
+	@Inject(method = {
 		"drawDirect",
 		"close"}, remap = false, at = @At("HEAD"))
-	private void endBatches(CallbackInfo ci) {
+	private void injectHeads1(CallbackInfo ci) {
 		ThreadUtil.assertNotParticleRendererThread();
 	}
 }
