@@ -67,9 +67,9 @@ dependencies {
     modLocalRuntime fileTree(dir: '../libs', include: 'net.caffeinemc.sodium-neoforge-0.6.13+mc1.21.6-service.jar')
 
     modLocalRuntime fileTree(dir: '../libs', include: 'fabric-api-base-0.4.42+d1308ded19.jar')
-    modCompileOnly "maven.modrinth:iris:1.8.11+1.21.5-neoforge"
+    modCompileOnly "maven.modrinth:iris:1.9.1+1.21.7-neoforge"
 //    modLocalRuntime 'maven.modrinth:monocle-iris:0.1.8' // no 1.21.4 version
-//    modLocalRuntime "maven.modrinth:iris:1.8.8+1.21.4-neoforge"
+    modLocalRuntime "maven.modrinth:iris:1.9.1+1.21.7-neoforge"
 //    modLocalRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
 //    localRuntime "org.antlr:antlr4-runtime:4.13.1"
 //    localRuntime "io.github.douira:glsl-transformer:2.0.1"

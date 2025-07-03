@@ -1,8 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
@@ -10,7 +9,6 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.iris.IrisCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
-import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -99,11 +97,6 @@ public class AsyncRenderer {
 	public static Frustum frustum;
 	private static Consumer<String> debugConsumer;
 	private static CompletableFuture<Void> particlsTask;
-	private static CompletableFuture<Void> weatherTask;
-	private static WeatherEffectRenderer.ColumnInstance[] rainColumns = new WeatherEffectRenderer.ColumnInstance[0];
-	private static WeatherEffectRenderer.ColumnInstance[] snowColumns = new WeatherEffectRenderer.ColumnInstance[0];
-	private static List<WeatherEffectRenderer.ColumnInstance> rainColumnsList = null;
-	private static List<WeatherEffectRenderer.ColumnInstance> snowColumnsList = null;
 	private static boolean mixedParticleRenderingSetting = false;
 	private static int asyncTasksSize;
 	private static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
@@ -129,25 +122,6 @@ public class AsyncRenderer {
 		}
 		Minecraft mc = Minecraft.getInstance();
 		ProfilerFiller profiler = Profiler.get();
-		if (ConfigHelper.isRenderWeatherAsync() && mc.level.getRainLevel(partialTick) > 0f) {
-			profiler.push("begin_weathers");
-			weatherTask = CompletableFuture.runAsync(() -> {
-				ObjectArrayList<WeatherEffectRenderer.ColumnInstance> rainColumns = ObjectArrayList.wrap(AsyncRenderer.rainColumns, 0);
-				ObjectArrayList<WeatherEffectRenderer.ColumnInstance> snowColumns = ObjectArrayList.wrap(AsyncRenderer.snowColumns, 0);
-				weatherRenderer.collectColumnInstances(mc.level,
-					ticks,
-					partialTick,
-					camera.getPosition(),
-					Minecraft.useFancyGraphics() ? 10 : 5, // Will be overridden if sodium is loaded, see sodium.MixinLevelRenderer
-					rainColumns,
-					snowColumns);
-				AsyncRenderer.rainColumns = rainColumns.elements();
-				AsyncRenderer.snowColumns = snowColumns.elements();
-				AsyncRenderer.rainColumnsList = rainColumns;
-				AsyncRenderer.snowColumnsList = snowColumns;
-			}, EXECUTOR);
-			profiler.pop();
-		}
 		profiler.push("begin_particles");
 		clearSync();
 		ParticleEngine particleEngine = mc.particleEngine;
@@ -329,26 +303,6 @@ public class AsyncRenderer {
 		}
 	}
 
-	public static Pair<List<WeatherEffectRenderer.ColumnInstance>, List<WeatherEffectRenderer.ColumnInstance>>
-	endWeather() {
-		tryWaitingForWeatherTask();
-		return Pair.of(rainColumnsList, snowColumnsList);
-	}
-
-	private static void waitForWeatherTask() {
-		if (weatherTask != null) {
-			weatherTask.join();
-			weatherTask = null;
-		}
-	}
-
-	private static void tryWaitingForWeatherTask() {
-		if (!ConfigHelper.isRenderWeatherAsync()) {
-			throw new IllegalStateException("Can only wait for async tasks around translucent");
-		}
-		waitForWeatherTask();
-	}
-
 	private static void waitForParticleTask() {
 		if (particlsTask != null) {
 			particlsTask.join();
@@ -484,8 +438,8 @@ public class AsyncRenderer {
 						default -> "UNKNOWN";
 					},
 					ModListHelper.IRIS_LIKE_LOADED ? IrisCompat.getParticleRenderingSettings().name() : "DISABLED",
-					rainColumns.length,
-					snowColumns.length
+					WeatherRenderer.rainColumns.length,
+					WeatherRenderer.snowColumns.length
 				));
 			debugConsumer = null;
 		}
@@ -495,11 +449,10 @@ public class AsyncRenderer {
 
 	public static void reset() {
 		waitForParticleTask();
-		waitForWeatherTask();
+		WeatherRenderer.waitForWeatherTask();
 		closeBTesselators();
 		clearSync();
-		rainColumns = new WeatherEffectRenderer.ColumnInstance[0];
-		snowColumns = new WeatherEffectRenderer.ColumnInstance[0];
+		WeatherRenderer.reset();
 	}
 
 	public static boolean isTranslucentPhase(Enum<?> phase) {
