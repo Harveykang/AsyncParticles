@@ -13,17 +13,17 @@ import com.mojang.blaze3d.resource.ResourceHandle;
 import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.culling.Frustum;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.Predicate;
@@ -58,8 +58,7 @@ public abstract class MixinLevelRenderer {
 	}
 
 	@Inject(method = "renderLevel", order = 1500,
-		slice = @Slice(from = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/client/renderer/LevelRenderer;addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;FLcom/mojang/blaze3d/buffers/GpuBufferSlice;Lorg/joml/Matrix4f;Lnet/minecraft/client/Camera;)V")),
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;addToFrame(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;IILnet/minecraft/client/renderer/PostChain$TargetBundle;)V"))
+		at = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/client/renderer/LevelRenderer;addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;FLcom/mojang/blaze3d/buffers/GpuBufferSlice;Lorg/joml/Matrix4f;Lnet/minecraft/client/Camera;)V"))
 	private void onRenderLevelTail1(GraphicsResourceAllocator graphicsResourceAllocator,
 									DeltaTracker deltaTracker,
 									boolean bl,
@@ -79,32 +78,6 @@ public abstract class MixinLevelRenderer {
 									LocalIntRef irm) {
 		// Fabulous graphics
 		if (irm.get() == DELAYED_ASYNC) {
-			originalRef.get().call(this, frameGraphBuilder, camera, partialTick, gpuBufferSlice, frustum, modelViewMatrix);
-		}
-	}
-
-	@Inject(method = "renderLevel", order = 1500, at = @At(value = "INVOKE",
-		target = "Lnet/minecraft/client/renderer/LevelRenderer;addLateDebugPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;Lcom/mojang/blaze3d/buffers/GpuBufferSlice;)V"))
-	private void onRenderLevelTail0(GraphicsResourceAllocator graphicsResourceAllocator,
-									DeltaTracker deltaTracker,
-									boolean bl,
-									Camera camera,
-									Matrix4f modelViewMatrix, // first one
-									Matrix4f matrix4f2,
-									GpuBufferSlice gpuBufferSlice,
-									Vector4f vector4f,
-									boolean bl2,
-									CallbackInfo ci,
-									@Local(ordinal = 0) FrameGraphBuilder frameGraphBuilder,
-									@Local(ordinal = 0) float partialTick,
-									@Local(ordinal = 0) Frustum frustum,
-									@Local(ordinal = 0) PostChain postChain,
-									@Share("asyncparticles$addParticlesPassOperation")
-									LocalRef<Operation<Void>> originalRef,
-									@Share(namespace = "asyncparticles", value = "internalRenderingMode")
-									LocalIntRef irm) {
-		// non-Fabulous graphics
-		if (irm.get() == DELAYED_ASYNC && !Minecraft.useShaderTransparency()) {
 			originalRef.get().call(this, frameGraphBuilder, camera, partialTick, gpuBufferSlice, frustum, modelViewMatrix);
 		}
 	}
