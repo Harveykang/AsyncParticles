@@ -1,141 +1,139 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.render;
 
-import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
-import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.WeatherRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.addon.WeatherEffectRendererAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
-import it.unimi.dsi.fastutil.Pair;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.WeatherEffectRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@Mixin(value = WeatherEffectRenderer.class, priority = 500)
-public abstract class MixinWeatherEffectRenderer {
-	@Shadow
-	protected abstract Biome.Precipitation getPrecipitationAt(Level level, BlockPos blockPos);
+@Mixin(value = WeatherEffectRenderer.class, priority = 1500)
+public abstract class MixinWeatherEffectRenderer implements WeatherEffectRendererAddon {
+	@Unique
+	private boolean asyncparticles$beginingPhase = false;
 
-	@Shadow
-	protected abstract WeatherEffectRenderer.ColumnInstance createRainColumnInstance(RandomSource randomSource, int i, int j, int k, int l, int m, int n, float f);
+	public void asyncparticles$onBegin() {
+		asyncparticles$beginingPhase = true;
+	}
 
-	@Shadow
-	protected abstract WeatherEffectRenderer.ColumnInstance createSnowColumnInstance(RandomSource randomSource, int i, int j, int k, int l, int m, int n, float f);
+	@Shadow protected abstract void render(MultiBufferSource multiBufferSource, Vec3 vec3, int i, float f, List<WeatherEffectRenderer.ColumnInstance> list, List<WeatherEffectRenderer.ColumnInstance> list2);
 
 	@Inject(method = "render(Lnet/minecraft/world/level/Level;Lnet/minecraft/client/renderer/MultiBufferSource;IFLnet/minecraft/world/phys/Vec3;)V",
-		order = 1500, at = @At(value = "NEW", ordinal = 0, target = "()Ljava/util/ArrayList;"))
-	private void onNewArrayList(CallbackInfo ci,
-								@Share("renderAsync") LocalBooleanRef renderAsync,
-								@Share("rainColumns") LocalRef<List<WeatherEffectRenderer.ColumnInstance>> rainColumns,
-								@Share("snowColumns") LocalRef<List<WeatherEffectRenderer.ColumnInstance>> snowColumns) {
-		boolean b = ConfigHelper.isRenderWeatherAsync();
-		renderAsync.set(b);
-		if (!b) {
-			return;
-		}
-		Pair<List<WeatherEffectRenderer.ColumnInstance>, List<WeatherEffectRenderer.ColumnInstance>>
-			pair = AsyncRenderer.endWeather();
-		rainColumns.set(pair.left());
-		snowColumns.set(pair.right());
-	}
-
-	@WrapOperation(method = "render(Lnet/minecraft/world/level/Level;Lnet/minecraft/client/renderer/MultiBufferSource;IFLnet/minecraft/world/phys/Vec3;)V",
-		at = @At(value = "NEW", target = "()Ljava/util/ArrayList;"))
-	private ArrayList<?> redirectNewArrayList(Operation<ArrayList<?>> original,
-											  @Share("renderAsync") LocalBooleanRef renderAsync) {
-		return renderAsync.get() ? null : new ArrayList<>();
-	}
-
-	@WrapWithCondition(method = "render(Lnet/minecraft/world/level/Level;Lnet/minecraft/client/renderer/MultiBufferSource;IFLnet/minecraft/world/phys/Vec3;)V",
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WeatherEffectRenderer;collectColumnInstances(Lnet/minecraft/world/level/Level;IFLnet/minecraft/world/phys/Vec3;ILjava/util/List;Ljava/util/List;)V"))
-	private boolean redirectCollectColumnInstances(WeatherEffectRenderer instance,
-												   Level level,
-												   int i,
-												   float f,
-												   Vec3 vec3,
-												   int j,
-												   List<WeatherEffectRenderer.ColumnInstance> list,
-												   List<WeatherEffectRenderer.ColumnInstance> list2,
-												   @Share("renderAsync") LocalBooleanRef renderAsync) {
-		// no-op
-		return !renderAsync.get();
-	}
-
-	@ModifyVariable(method = "render(Lnet/minecraft/world/level/Level;Lnet/minecraft/client/renderer/MultiBufferSource;IFLnet/minecraft/world/phys/Vec3;)V",
-		ordinal = 0,
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WeatherEffectRenderer;collectColumnInstances(Lnet/minecraft/world/level/Level;IFLnet/minecraft/world/phys/Vec3;ILjava/util/List;Ljava/util/List;)V"))
-	private List<WeatherEffectRenderer.ColumnInstance>
-	modifyRainColumns(List<WeatherEffectRenderer.ColumnInstance> original,
-					  @Share("renderAsync") LocalBooleanRef renderAsync,
-					  @Share("rainColumns") LocalRef<List<WeatherEffectRenderer.ColumnInstance>> rainColumns) {
-		return renderAsync.get() ? rainColumns.get() : original;
-	}
-
-	@ModifyVariable(method = "render(Lnet/minecraft/world/level/Level;Lnet/minecraft/client/renderer/MultiBufferSource;IFLnet/minecraft/world/phys/Vec3;)V",
-		ordinal = 1,
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WeatherEffectRenderer;collectColumnInstances(Lnet/minecraft/world/level/Level;IFLnet/minecraft/world/phys/Vec3;ILjava/util/List;Ljava/util/List;)V"))
-	private List<WeatherEffectRenderer.ColumnInstance>
-	modifySnowColumns(List<WeatherEffectRenderer.ColumnInstance> original,
-					  @Share("renderAsync") LocalBooleanRef renderAsync,
-					  @Share("snowColumns") LocalRef<List<WeatherEffectRenderer.ColumnInstance>> snowColumns) {
-		return renderAsync.get() ? snowColumns.get() : original;
-	}
-
-	/**
-	 * @author
-	 * @reason
-	 */
-	@Overwrite
-	public final void collectColumnInstances(
-		Level level, int i, float f, Vec3 vec3, int j, List<WeatherEffectRenderer.ColumnInstance> list, List<WeatherEffectRenderer.ColumnInstance> list2
-	) {
-		int k = Mth.floor(vec3.x);
-		int l = Mth.floor(vec3.y);
-		int m = Mth.floor(vec3.z);
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		RandomSource randomSource = RandomSource.create();
-
-		boolean enableCull = ConfigHelper.isCullWeathers();
-		for (int z = m - j; z <= m + j; z++) {
-			for (int x = k - j; x <= k + j; x++) {
-				int p = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
-				int bY = Math.max(l - j, p);
-				int tY = Math.max(l + j, p);
-				if (tY - bY == 0 ||
-					(enableCull && !FrustumUtil.isColumnVisible(AsyncRenderer.frustum, x, z, bY, tY))) {
-					continue;
-				}
-				Biome.Precipitation precipitation = this.getPrecipitationAt(level, mutableBlockPos.set(x, l, z));
-				if (precipitation == Biome.Precipitation.NONE) {
-					continue;
-				}
-				int s = x * x * 3121 + x * 45238971 ^ z * z * 418711 + z * 13761;
-				randomSource.setSeed(s);
-				int t = Math.max(l, p);
-				int u = LevelRenderer.getLightColor(level, mutableBlockPos.set(x, t, z));
-				if (precipitation == Biome.Precipitation.RAIN) {
-					list.add(this.createRainColumnInstance(randomSource, i, x, bY, tY, z, u, f));
-				} else if (precipitation == Biome.Precipitation.SNOW) {
-					list2.add(this.createSnowColumnInstance(randomSource, i, x, bY, tY, z, u, f));
-				}
+		order = 1500, at = @At(value = "NEW", ordinal = 0, target = "()Ljava/util/ArrayList;"), cancellable = true)
+	private void onNewArrayList(Level level,
+								MultiBufferSource multiBufferSource,
+								int ticks,
+								float partialTick,
+								Vec3 cameraPos,
+								CallbackInfo ci,
+								@Local(ordinal = 1) int rainDistance,
+								@Local(ordinal = 1) float rainLevel) {
+		if (ConfigHelper.isRenderWeatherAsync()) {
+			ci.cancel();
+			if (asyncparticles$beginingPhase) {
+				WeatherRenderer.beginWeather(partialTick, cameraPos, rainDistance, (WeatherEffectRenderer) (Object) this, ticks);
+				asyncparticles$beginingPhase = false;
+			} else {
+				render(null, cameraPos, rainDistance, rainLevel, null, null);
 			}
+		}
+	}
+
+	@Redirect(method = "render(Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/world/phys/Vec3;IFLjava/util/List;Ljava/util/List;)V",
+		at = @At(value = "INVOKE", ordinal = 0, target = "Ljava/util/List;isEmpty()Z"))
+	private boolean redirectIsEmpty0(List<WeatherEffectRenderer.ColumnInstance> list) {
+		return list != null ? list.isEmpty() : !WeatherRenderer.shouldRenderRain();
+	}
+
+	@Redirect(method = "render(Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/world/phys/Vec3;IFLjava/util/List;Ljava/util/List;)V",
+		at = @At(value = "INVOKE", ordinal = 1, target = "Ljava/util/List;isEmpty()Z"))
+	private boolean redirectIsEmpty1(List<WeatherEffectRenderer.ColumnInstance> list) {
+		return list != null ? list.isEmpty() : !WeatherRenderer.shouldRenderSnow();
+	}
+
+	@WrapOperation(method = "render(Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/world/phys/Vec3;IFLjava/util/List;Ljava/util/List;)V",
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource;getBuffer(Lnet/minecraft/client/renderer/RenderType;)Lcom/mojang/blaze3d/vertex/VertexConsumer;"))
+	private VertexConsumer redirectGetBuffer(MultiBufferSource instance, RenderType renderType, Operation<VertexConsumer> original) {
+		if (instance == null) {
+			return null;
+		}
+		return original.call(instance, renderType);
+	}
+
+	@WrapOperation(method = "render(Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/world/phys/Vec3;IFLjava/util/List;Ljava/util/List;)V",
+		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/client/renderer/WeatherEffectRenderer;renderInstances(Lcom/mojang/blaze3d/vertex/VertexConsumer;Ljava/util/List;Lnet/minecraft/world/phys/Vec3;FIF)V"))
+	private void wrapRenderRainInstances(WeatherEffectRenderer instance,
+										 VertexConsumer vertexConsumer,
+										 List<WeatherEffectRenderer.ColumnInstance> list,
+										 Vec3 vec3,
+										 float f,
+										 int i,
+										 float g,
+										 Operation<Void> original,
+										 @Local(ordinal = 0) RenderType renderType) {
+		if (vertexConsumer == null) {
+			WeatherRenderer.endRain(renderType);
+		} else {
+			original.call(instance, vertexConsumer, list, vec3, f, i, g);
+		}
+	}
+
+	@WrapOperation(method = "render(Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/world/phys/Vec3;IFLjava/util/List;Ljava/util/List;)V",
+		at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/client/renderer/WeatherEffectRenderer;renderInstances(Lcom/mojang/blaze3d/vertex/VertexConsumer;Ljava/util/List;Lnet/minecraft/world/phys/Vec3;FIF)V"))
+	private void wrapRenderSnowInstances(WeatherEffectRenderer instance,
+										 VertexConsumer vertexConsumer,
+										 List<WeatherEffectRenderer.ColumnInstance> list,
+										 Vec3 vec3,
+										 float f,
+										 int i,
+										 float g,
+										 Operation<Void> original,
+										 @Local(ordinal = 0) RenderType renderType) {
+		if (vertexConsumer == null) {
+			WeatherRenderer.endSnow(renderType);
+		} else {
+			original.call(instance, vertexConsumer, list, vec3, f, i, g);
+		}
+	}
+
+	@Inject(method = "collectColumnInstances", at = @At(value = "HEAD"))
+	private void onCollectColumnInstances(CallbackInfo ci, @Share("enableCull") LocalBooleanRef enableCull) {
+		enableCull.set(ConfigHelper.isCullWeathers());
+	}
+
+	@WrapOperation(method = "collectColumnInstances", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WeatherEffectRenderer;getPrecipitationAt(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/biome/Biome$Precipitation;"))
+	private Biome.Precipitation wrapGetPrecipitationAt(WeatherEffectRenderer instance,
+													   Level level,
+													   BlockPos blockPos,
+													   Operation<Biome.Precipitation> original,
+													   @Share("enableCull") LocalBooleanRef enableCull,
+													   @Local(ordinal = 8) int bY,
+													   @Local(ordinal = 9) int tY) {
+		if (enableCull.get() && !FrustumUtil.isColumnVisible(AsyncRenderer.frustum, blockPos.getX(), blockPos.getZ(), bY, tY)) {
+			return Biome.Precipitation.NONE;
+		} else {
+			return original.call(instance, level, blockPos);
 		}
 	}
 }

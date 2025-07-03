@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.addon.WeatherEffectRendererAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.Camera;
@@ -19,28 +20,31 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Mixin(value = LevelRenderer.class, priority = 500)
 public abstract class MixinLevelRenderer {
 	@Shadow
-	public Frustum capturedFrustum;
+	private Frustum capturedFrustum;
 
 	@Shadow
-	public boolean captureFrustum;
+	private boolean captureFrustum;
 
 	@Shadow
-	public Frustum cullingFrustum;
+	private Frustum cullingFrustum;
 
-	@Shadow @Final private WeatherEffectRenderer weatherEffectRenderer;
+	@Shadow
+	@Final
+	private WeatherEffectRenderer weatherEffectRenderer;
 
-	@Shadow private int ticks;
+	@Shadow
+	private int ticks;
+
+	@Shadow
+	@Nullable
+	private ClientLevel level;
 
 	// TODO: 有没有更好的方法？
 	@Inject(method = "renderLevel", at = @At("HEAD"))
@@ -66,6 +70,10 @@ public abstract class MixinLevelRenderer {
 		int irmValue = InternalRenderingMode.updateInternalMode(ConfigHelper.getParticleRenderingMode());
 		irm.set(irmValue);
 		AsyncRenderer.begin(partialTick, camera, irmValue, weatherEffectRenderer, ticks);
+		if (ConfigHelper.isRenderWeatherAsync()) {
+			((WeatherEffectRendererAddon) weatherEffectRenderer).asyncparticles$onBegin();
+			weatherEffectRenderer.render(level, null, ticks, partialTick, cameraPos);
+		}
 	}
 
 	@ModifyExpressionValue(method = "renderLevel", at = @At(value = "FIELD", opcode = Opcodes.GETFIELD,
