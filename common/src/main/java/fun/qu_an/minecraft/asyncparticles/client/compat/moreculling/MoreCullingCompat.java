@@ -6,7 +6,7 @@ public class MoreCullingCompat {
 	public static void init() {
 		ConfigAdditions.disableOption(
 			"moreculling.config.option.rainCulling",
-			"Replaced by AsyncParticles mod.",
+			"Redirected by AsyncParticles mod.",
 			() -> false
 		);
 	}
