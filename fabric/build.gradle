@@ -55,6 +55,7 @@ dependencies {
 
     /* Performance */
     modLocalRuntime "maven.modrinth:sodium:mc1.21.5-0.6.13-fabric"
+    modLocalRuntime "maven.modrinth:sodium-extra:mc1.21.5-0.6.3+fabric"
     modCompileOnly 'maven.modrinth:iris:1.8.11+1.21.5-fabric'
     modLocalRuntime 'maven.modrinth:iris:1.8.11+1.21.5-fabric'
     localRuntime "org.antlr:antlr4-runtime:4.13.1"
