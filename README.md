@@ -10,10 +10,10 @@
 
 - Minecraft
   - Particle culling.
-  - Async particle ticking/rendering(buffer filling).
+  - Async particle tick/rendering(buffer filling).
   - Async particle light cache.
-  - Delay texture ticking by one frame to reduce client tick duration.
-  - Vanilla weather optimization. (Coming soon)
+  - Delayed texture tick by one frame to reduce client tick duration.
+  - Async rain&snow tick/rendering. (currently only available >=MC1.21.5)
 - Valkyrien Skies/Create + Simple Weather/Pretty Rain/Particle Rain
   - Modded weather particles can now collide with ships/contraptions.
 - Pretty Rain/Particle Rain/Effectual/Particular/Simple Weather
