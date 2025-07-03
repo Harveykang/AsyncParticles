@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 
 import com.bawnorton.mixinsquared.TargetHandler;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeArrayList;
@@ -59,7 +59,7 @@ public class MixinClassInstanceMultiMap {
 
 	@Dynamic
 	@TargetHandler(
-		mixin = "net.caffeinemc.mods.lithium.mixin.collections.entity_filtering.TypeFilterableListMixin",
+		mixin = "net.caffeinemc.mods.lithium.mixin.collections.entity_filtering.ClassInstanceMultiMapMixin",
 		name = "createAllOfType"
 	)
 	@ModifyVariable(method = "@MixinSquared:Handler", name = "list", require = 0,
