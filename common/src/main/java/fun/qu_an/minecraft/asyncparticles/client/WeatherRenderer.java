@@ -25,14 +25,20 @@ public class WeatherRenderer {
 	private static BindingTesselator rainBTesselator;
 	@Nullable
 	private static BindingTesselator snowBTesselator;
+	private static boolean weatherEnabled;
 
 	public static void beginWeather(float partialTick, Vec3 cameraPos, int rainDistance, WeatherEffectRenderer weatherRenderer, int ticks) {
-		if (weatherTask != null) {
-			throw new IllegalStateException("Weather rendering was not ended properly!");
+		if (!ConfigHelper.isRenderWeatherAsync()) {
+			return;
 		}
+		if (!weatherEnabled) {
+			waitForWeatherTask();
+			return;
+		}
+		weatherEnabled = false;
 		Minecraft mc = Minecraft.getInstance();
-		float rainLevel;
-		if (ConfigHelper.isRenderWeatherAsync() && (rainLevel = mc.level.getRainLevel(partialTick)) > 0f) {
+		float rainLevel = mc.level.getRainLevel(partialTick);
+		if (rainLevel > 0f) {
 			weatherTask = CompletableFuture.runAsync(() -> {
 				ObjectArrayList<WeatherEffectRenderer.ColumnInstance> rainColumns = ObjectArrayList.wrap(WeatherRenderer.rainColumns, 0);
 				ObjectArrayList<WeatherEffectRenderer.ColumnInstance> snowColumns = ObjectArrayList.wrap(WeatherRenderer.snowColumns, 0);
@@ -99,6 +105,7 @@ public class WeatherRenderer {
 	}
 
 	public static void reset() {
+		weatherEnabled = false;
 		if (rainBTesselator != null) {
 			rainBTesselator.close();
 			rainBTesselator = null;
@@ -121,5 +128,9 @@ public class WeatherRenderer {
 		waitForWeatherTask();
 		BufferBuilder builder;
 		return snowBTesselator != null && (builder = snowBTesselator.getBuilder()) != null && builder.building;
+	}
+
+	public static void markWeatherEnabled() {
+		weatherEnabled = true;
 	}
 }

@@ -63,6 +63,8 @@ public abstract class MixinWeatherEffectRenderer implements WeatherEffectRendere
 	@Redirect(method = "render(Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/world/phys/Vec3;IFLjava/util/List;Ljava/util/List;)V",
 		at = @At(value = "INVOKE", ordinal = 0, target = "Ljava/util/List;isEmpty()Z"))
 	private boolean redirectIsEmpty0(List<WeatherEffectRenderer.ColumnInstance> list) {
+		// To be compatible with the mods that can disable weather.
+		WeatherRenderer.markWeatherEnabled();
 		return list != null ? list.isEmpty() : !WeatherRenderer.shouldRenderRain();
 	}
 
