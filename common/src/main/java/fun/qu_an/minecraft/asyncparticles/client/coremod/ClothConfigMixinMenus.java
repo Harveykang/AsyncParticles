@@ -26,6 +26,17 @@ public class ClothConfigMixinMenus {
 		Mixin$Particle defaultConfig = new Mixin$Particle();
 		Mixin$Particle newConfig = new Mixin$Particle();
 		Mixin$Particle lastConfig = getToSaveConfig();
+		mixinCategory.addEntry(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap"),
+				lastConfig.isSafeClassInstanceMultiMap())
+			.setDefaultValue(defaultConfig.isSafeClassInstanceMultiMap())
+			.setSaveConsumer(newConfig::setSafeClassInstanceMultiMap)
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+				.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip"))
+			.requireRestart()
+			.build());
 		List<String> lastNoCulling = List.copyOf(lastConfig.getNoCulling());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noCulling"),

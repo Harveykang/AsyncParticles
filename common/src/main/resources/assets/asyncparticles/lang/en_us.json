@@ -51,6 +51,8 @@
   "config.asyncparticles.mixin.particle.redirectFleroviumCulling": "Redirect Flerovium's Particle Culling",
   "config.asyncparticles.mixin.particle.redirectFleroviumCulling.tooltip": "Replace our particle culling with Flerovium's.\n(Only available when Flerovium is installed.)",
   "config.asyncparticles.mixin.tooltip": "Default entries can't be deleted.\n(Reset to default by removing all entries.)",
+  "config.asyncparticles.mixin.safeClassInstanceMultiMap": "Make 'ClassInstanceMultiMap' Thread-Safe",
+  "config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip": "Enable this if you're encountering crashes related\nto non-standard particle implementations in your\ninstalled mods that access entities in the world.",
   "config.asyncparticles.mixin.particle.noCulling": "Particle Culling Blacklist",
   "config.asyncparticles.mixin.particle.noLightCache": "Particles Light Cache Blacklist",
   "config.asyncparticles.mixin.particle.lockProvider": "Particles Lock Provider",

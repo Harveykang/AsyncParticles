@@ -64,6 +64,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		}
 		return switch (split[0]) {
 			case "conditional" -> switch (split[1]) {
+				case "MixinClassInstanceMultiMap" -> MixinConfigHelper.isSafeClassInstanceMultiMap();
 				case "MixinLegacyRandomSource" -> MixinConfigHelper.isSafeLegacyRandomSource();
 				default -> true;
 			};
