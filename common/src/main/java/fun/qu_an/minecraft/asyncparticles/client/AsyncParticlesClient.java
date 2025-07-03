@@ -1,9 +1,12 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.moreculling.MoreCullingCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 
 import java.net.URI;
+
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.MORE_CULLING_LOADED;
 
 public class AsyncParticlesClient {
 	public static final String MOD_ID = "asyncparticles";
@@ -18,6 +21,9 @@ public class AsyncParticlesClient {
 			ConfigHelper.load();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+		if (MORE_CULLING_LOADED) {
+			MoreCullingCompat.init();
 		}
 	}
 }
