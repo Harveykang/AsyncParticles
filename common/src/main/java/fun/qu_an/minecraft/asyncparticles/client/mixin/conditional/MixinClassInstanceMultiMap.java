@@ -1,13 +1,10 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 
 import com.bawnorton.mixinsquared.TargetHandler;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeArrayList;
 import net.minecraft.util.ClassInstanceMultiMap;
 import org.spongepowered.asm.mixin.*;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
@@ -17,7 +14,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 // some mod get entities when ticking particles, may cause a CME
-@Mixin(value = ClassInstanceMultiMap.class, priority = 1500) // higher priority to run after VMP's mixin
+@Mixin(value = ClassInstanceMultiMap.class, priority = 1100) // higher priority to run after VMP's mixin
 public class MixinClassInstanceMultiMap {
 	@Final
 	@Mutable

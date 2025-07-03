@@ -103,6 +103,7 @@ public class ModListHelper {
 	public static final boolean SHIMMER_LOADED = isModLoaded("shimmer");
 	/* Immediately Fast */
 	public static final boolean IMMEDIATELY_FAST_LOADED = isModLoaded("immediatelyfast");
+	public static final boolean IRONS_SPELLBOOKS_LOADED = isModLoaded("irons_spellbooks");
 
 	@ExpectPlatform
 	private static boolean isForge() {

@@ -28,13 +28,9 @@ public class ClothConfigMixinMenus {
 		Mixin$Particle lastConfig = getToSaveConfig();
 		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.particle.redirectFleroviumCulling"),
-				!ModListHelper.SHIMMER_LOADED && lastConfig.isRedirectFleroviumCulling())
-			.setDefaultValue(!ModListHelper.SHIMMER_LOADED && defaultConfig.isRedirectFleroviumCulling())
-			.setSaveConsumer(redirectFleroviumCulling -> {
-				if (!ModListHelper.SHIMMER_LOADED) {
-					newConfig.setRedirectFleroviumCulling(redirectFleroviumCulling);
-				}
-			})
+				lastConfig.isRedirectFleroviumCulling())
+			.setDefaultValue(defaultConfig.isRedirectFleroviumCulling())
+			.setSaveConsumer(newConfig::setRedirectFleroviumCulling)
 			.setTooltipSupplier(() -> {
 				if (!ModListHelper.FORGE_FLEROVIUM_LOADED || !ModListHelper.SHIMMER_LOADED) {
 					return Optional.of(new Component[]{
@@ -55,6 +51,36 @@ public class ClothConfigMixinMenus {
 			})
 			.requireRestart()
 			.setRequirement(() -> ModListHelper.FORGE_FLEROVIUM_LOADED && !ModListHelper.SHIMMER_LOADED)
+			.build());
+		mixinCategory.addEntry(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap"),
+				lastConfig.isSafeClassInstanceMultiMap())
+			.setDefaultValue(defaultConfig.isSafeClassInstanceMultiMap())
+			.setSaveConsumer(newConfig::setSafeClassInstanceMultiMap)
+			.setTooltipSupplier(() -> {
+				if (!ModListHelper.IRONS_SPELLBOOKS_LOADED) {
+					return Optional.of(new Component[]{
+						Component.translatable("text.cloth-config.restart_required")
+							.withStyle(ChatFormatting.DARK_RED),
+						Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip")
+					});
+				} else {
+					return Optional.of(new Component[]{
+						Component.translatable("text.cloth-config.restart_required")
+							.withStyle(ChatFormatting.DARK_RED),
+						Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip")
+							.withStyle(ChatFormatting.STRIKETHROUGH),
+						Component.translatable("config.asyncparticles.limited", "Iron's Spells 'n Spellbooks")
+							.withStyle(ChatFormatting.DARK_RED)
+					});
+				}
+			})
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip"))
+			.requireRestart()
+			.setRequirement(() -> !ModListHelper.IRONS_SPELLBOOKS_LOADED)
 			.build());
 		List<String> lastNoCulling = List.copyOf(lastConfig.getNoCulling());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
@@ -168,10 +194,10 @@ public class ClothConfigMixinMenus {
 		try {
 			aClass = Class.forName(s);
 		} catch (ClassNotFoundException e) {
-			return java.util.Optional.of(Component.translatable("config.asyncparticles.mixin.particle.invalid-class"));
+			return Optional.of(Component.translatable("config.asyncparticles.mixin.particle.invalid-class"));
 		}
 		if (!Particle.class.isAssignableFrom(aClass)) {
-			return java.util.Optional.of(Component.translatable("config.asyncparticles.mixin.particle.invalid-class"));
+			return Optional.of(Component.translatable("config.asyncparticles.mixin.particle.invalid-class"));
 		}
 		return Optional.empty();
 	}

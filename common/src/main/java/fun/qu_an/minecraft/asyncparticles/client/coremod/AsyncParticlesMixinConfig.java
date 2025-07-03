@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import org.spongepowered.asm.mixin.throwables.MixinError;
@@ -15,6 +16,8 @@ public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
 	public static final int VERSION = 1;
 	static String COMMENTS = """
+		safeClassInstanceMultiMap: Boolean. Make ClassInstanceMultiMap thread-safe.
+		safeLegacyRandomSource: Boolean. Make LegacyRandomSource thread-safe.
 		particle$noCulling: A comma-separated list of particle classes that should not be culled.
 		particle$noLightCache: A comma-separated list of particle classes that should not use the light cache.
 		particle$lockRequired: A comma-separated list of particle classes that require a spin lock.
@@ -91,7 +94,8 @@ public class AsyncParticlesMixinConfig {
 
 	static class Mixin$Particle {
 		private int version = 0;
-		private boolean redirectFleroviumCulling = true;
+		private boolean redirectFleroviumCulling =  ModListHelper.FORGE_FLEROVIUM_LOADED && !ModListHelper.SHIMMER_LOADED;
+		private boolean safeClassInstanceMultiMap = ModListHelper.IRONS_SPELLBOOKS_LOADED;
 		private boolean safeLegacyRandomSource = false;
 		private Set<String> noCulling = new LinkedHashSet<>();
 
@@ -142,6 +146,7 @@ public class AsyncParticlesMixinConfig {
 		private void fold() {
 			assertNotGlobal();
 			redirectFleroviumCulling = toSaveConfig.redirectFleroviumCulling;
+			safeClassInstanceMultiMap = toSaveConfig.safeClassInstanceMultiMap;
 			safeLegacyRandomSource = toSaveConfig.safeLegacyRandomSource;
 			noCulling = toSaveConfig.noCulling;
 			noLightCache = toSaveConfig.noLightCache;
@@ -157,8 +162,10 @@ public class AsyncParticlesMixinConfig {
 			} catch (NumberFormatException ignored) {
 			}
 			Mixin$Particle defaultConfig = new Mixin$Particle();
-			redirectFleroviumCulling =
+			redirectFleroviumCulling = ModListHelper.FORGE_FLEROVIUM_LOADED && !ModListHelper.SHIMMER_LOADED &&
 				getBoolean(properties, "particle$redirectFleroviumCulling", defaultConfig.redirectFleroviumCulling);
+			safeClassInstanceMultiMap = ModListHelper.IRONS_SPELLBOOKS_LOADED ||
+				getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
 			safeLegacyRandomSource =
 				getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);
 			noCulling = getSet(properties, "particle$noCulling", defaultConfig.noCulling);
@@ -175,6 +182,7 @@ public class AsyncParticlesMixinConfig {
 		private void write(Properties properties) {
 			properties.setProperty("version", Integer.toString(version));
 			properties.setProperty("particle$redirectFleroviumCulling", Boolean.toString(redirectFleroviumCulling));
+			properties.setProperty("safeClassInstanceMultiMap", Boolean.toString(safeClassInstanceMultiMap));
 			properties.setProperty("safeLegacyRandomSource", Boolean.toString(safeLegacyRandomSource));
 			properties.setProperty("particle$noCulling", String.join(",", noCulling));
 			properties.setProperty("particle$noLightCache", String.join(",", noLightCache));
@@ -258,7 +266,7 @@ public class AsyncParticlesMixinConfig {
 		}
 
 		@Unmodifiable
-		Set<String>  getReplaceRandom() {
+		Set<String> getReplaceRandom() {
 			return Collections.unmodifiableSet(replaceRandom);
 		}
 
@@ -273,7 +281,8 @@ public class AsyncParticlesMixinConfig {
 
 		void setRedirectFleroviumCulling(boolean redirectFleroviumCulling) {
 			assertNotGlobal();
-			this.redirectFleroviumCulling = redirectFleroviumCulling;
+			this.redirectFleroviumCulling =  ModListHelper.FORGE_FLEROVIUM_LOADED && !ModListHelper.SHIMMER_LOADED &&
+											 redirectFleroviumCulling;
 		}
 
 		void setSafeLegacyRandomSource(boolean safeLegacyRandomSource) {
@@ -283,6 +292,15 @@ public class AsyncParticlesMixinConfig {
 
 		public boolean isSafeLegacyRandomSource() {
 			return safeLegacyRandomSource;
+		}
+
+		public boolean isSafeClassInstanceMultiMap() {
+			return safeClassInstanceMultiMap;
+		}
+
+		public void setSafeClassInstanceMultiMap(boolean safeClassInstanceMultiMap) {
+			assertNotGlobal();
+			this.safeClassInstanceMultiMap = ModListHelper.IRONS_SPELLBOOKS_LOADED || safeClassInstanceMultiMap;
 		}
 	}
 }
