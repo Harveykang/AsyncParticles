@@ -59,7 +59,7 @@ public abstract class MixinLevelRenderer {
 
 	@Inject(method = "renderLevel", order = 1500,
 		at = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/client/renderer/LevelRenderer;addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;FLnet/minecraft/client/renderer/FogParameters;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/Camera;)V"))
-	private void onRenderLevelTail1(GraphicsResourceAllocator arg,
+	private void beforeRenderWeather(GraphicsResourceAllocator arg,
 									DeltaTracker arg2,
 									boolean bl,
 									Camera camera,
