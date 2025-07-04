@@ -62,10 +62,6 @@ public class ConfigHelper {
 		return AsyncParticlesConfig.tick$failPerSecLimit;
 	}
 
-	public static RenderingMode particleRenderingMode() {
-		return AsyncParticlesConfig.rendering$particleRenderingMode;
-	}
-
 	public static boolean isRenderAsync() {
 		return AsyncParticlesConfig.rendering$particleRenderingMode != RenderingMode.SYNCHRONOUSLY;
 	}

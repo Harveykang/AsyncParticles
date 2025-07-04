@@ -59,7 +59,7 @@ public abstract class MixinLevelRenderer {
 
 	@Inject(method = "renderLevel", order = 1500,
 		at = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/client/renderer/LevelRenderer;addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;FLcom/mojang/blaze3d/buffers/GpuBufferSlice;Lorg/joml/Matrix4f;Lnet/minecraft/client/Camera;)V"))
-	private void onRenderLevelTail1(GraphicsResourceAllocator graphicsResourceAllocator,
+	private void beforeRenderWeather(GraphicsResourceAllocator graphicsResourceAllocator,
 									DeltaTracker deltaTracker,
 									boolean bl,
 									Camera camera,
@@ -71,6 +71,7 @@ public abstract class MixinLevelRenderer {
 									CallbackInfo ci,
 									@Local(ordinal = 0) FrameGraphBuilder frameGraphBuilder,
 									@Local(ordinal = 0) float partialTick,
+									@Local(ordinal = 0) FogParameters fogParameters,
 									@Local(ordinal = 0) Frustum frustum,
 									@Share("asyncparticles$addParticlesPassOperation")
 									LocalRef<Operation<Void>> originalRef,

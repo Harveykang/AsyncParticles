@@ -54,7 +54,7 @@ public class AsyncParticlesMixinConfig {
 		configObj.read(properties);
 		configObj = upgrade(configObj.version, configObj);
 
-		toSaveConfig = configObj;
+		configObj.flat();
 		save(configObj);
 	}
 
