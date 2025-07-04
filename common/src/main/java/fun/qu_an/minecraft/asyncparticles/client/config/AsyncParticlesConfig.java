@@ -46,7 +46,7 @@ public class AsyncParticlesConfig {
 	public static int tick$failPerSecLimit;
 	public static FailBehavior tick$failBehavior;
 	public static boolean tick$suppressCME;
-	public static boolean rendering$cullParticles;
+	public static ParticleCullingMode rendering$particleCulling;
 	public static boolean rendering$cullWeathers;
 	public static RenderingMode rendering$particleRenderingMode;
 	public static RenderingMode rendering$weatherRenderingMode;
@@ -278,7 +278,7 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Rendering {
-			boolean cullParticles = true;
+			ParticleCullingMode particleCulling = ParticleCullingMode.SPHERE;
 			boolean cullWeathers = true;
 			RenderingMode particleRenderingMode = RenderingMode.DELAYED;
 			RenderingMode weatherRenderingMode = RenderingMode.DELAYED;
@@ -286,7 +286,7 @@ public class AsyncParticlesConfig {
 			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
 
 			private void flat() {
-				rendering$cullParticles = cullParticles;
+				rendering$particleCulling = requireNonNullElse(particleCulling, ParticleCullingMode.SPHERE);
 				rendering$cullWeathers = cullWeathers;
 				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
 				rendering$weatherRenderingMode = requireNonNullElse(weatherRenderingMode, RenderingMode.DELAYED);
@@ -295,7 +295,7 @@ public class AsyncParticlesConfig {
 			}
 
 			private void fold() {
-				cullParticles = rendering$cullParticles;
+				particleCulling = rendering$particleCulling;
 				cullWeathers = rendering$cullWeathers;
 				particleRenderingMode = rendering$particleRenderingMode;
 				weatherRenderingMode = rendering$weatherRenderingMode;

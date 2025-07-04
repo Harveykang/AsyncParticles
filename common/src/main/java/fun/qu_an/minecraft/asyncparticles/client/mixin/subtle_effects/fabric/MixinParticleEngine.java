@@ -25,10 +25,7 @@ public class MixinParticleEngine {
 												VertexConsumer vertexConsumer,
 												Camera camera,
 												float v,
-												@SuppressWarnings("UnresolvedLocalCapture")
-												@Local(name = "enableCull") boolean enableCull,
 												@Local(argsOnly = true) ParticleRenderType renderType) {
-		// if shouldSync is false, the particles are already culled.
-		return !enableCull || SubtleEffectsCompat.shouldRenderParticle(renderType, instance, camera, Minecraft.getInstance().level);
+		return SubtleEffectsCompat.shouldRenderParticle(renderType, instance, camera, Minecraft.getInstance().level);
 	}
 }

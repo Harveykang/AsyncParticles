@@ -132,11 +132,66 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		return size == 0;
 	}
 
-	//	@Override
-	//	public @NotNull Spliterator<E> spliterator() {
-	//		// FIXME: implement a Spliterator
-	//		throw new UnsupportedOperationException();
-	//	}
+	@Override
+	public @NotNull Spliterator<E> spliterator() {
+		return new aSpliterator();
+	}
+
+	private final class aSpliterator implements Spliterator<E> {
+		int pos;
+		int max;
+
+		public aSpliterator() {
+			this(head, head + size);
+		}
+
+		private aSpliterator(int pos, int max) {
+			assert pos <= max : "pos " + pos + " must be <= max " + max;
+			this.pos = pos;
+			this.max = max;
+		}
+
+		@Override
+		public int characteristics() {
+			return Spliterator.ORDERED | Spliterator.SIZED | Spliterator.SUBSIZED;
+		}
+
+		@Override
+		public long estimateSize() {
+			return max - pos;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public boolean tryAdvance(final Consumer<? super E> action) {
+			int mask = queue.length - 1;
+			action.accept((E) queue[pos++ & mask]);
+			return true;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void forEachRemaining(final Consumer<? super E> action) {
+			final Object[] a = queue;
+			for (final int max = this.max, mask = queue.length - 1;
+				 pos < max; ++pos) {
+				action.accept((E) a[pos & mask]);
+			}
+		}
+
+		@Override
+		public Spliterator<E> trySplit() {
+			final int max = this.max;
+			final int pos = this.pos;
+			int retLen = (max - pos) >> 1;
+			if (retLen <= 1) {
+				return null;
+			}
+			int newPos = pos + retLen;
+			this.pos = newPos;
+			return new aSpliterator(pos, newPos);
+		}
+	}
 
 	private Object[] resize(int newCapacity) {
 		if (newCapacity > this.maxCapacityPowerOfTwo) {

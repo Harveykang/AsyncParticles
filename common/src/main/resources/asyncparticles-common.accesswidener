@@ -61,6 +61,9 @@ accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables L
 accessible method net/minecraft/client/renderer/WeatherEffectRenderer collectColumnInstances (Lnet/minecraft/world/level/Level;IFLnet/minecraft/world/phys/Vec3;ILjava/util/List;Ljava/util/List;)V
 accessible class net/minecraft/client/renderer/WeatherEffectRenderer$ColumnInstance
 accessible method net/minecraft/client/renderer/WeatherEffectRenderer renderInstances (Lcom/mojang/blaze3d/vertex/VertexConsumer;Ljava/util/List;Lnet/minecraft/world/phys/Vec3;FIF)V
+accessible field net/minecraft/client/particle/Particle xd D
+accessible field net/minecraft/client/particle/Particle yd D
+accessible field net/minecraft/client/particle/Particle zd D
 
 # for NeoForge
 accessible method net/minecraft/client/renderer/RenderPipelines register (Lcom/mojang/blaze3d/pipeline/RenderPipeline;)Lcom/mojang/blaze3d/pipeline/RenderPipeline;

@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(RainParticle.class)
 public abstract class MixinRainParticle extends MixinWeatherParticle {
 	@Unique
-	private boolean asyncparticles$innvisible = false;
+	private boolean asyncparticles$invisible = false;
 	protected MixinRainParticle(ClientLevel level, double x, double y, double z) {
 		super(level, x, y, z);
 	}
@@ -21,13 +21,13 @@ public abstract class MixinRainParticle extends MixinWeatherParticle {
 	@Inject(method = "tick", at = @At("TAIL"))
 	private void onTick(CallbackInfo ci) {
 		if (isAlive() && !level.getFluidState(this.pos.below(2)).isEmpty()) {
-			asyncparticles$innvisible = true;
+			asyncparticles$invisible = true;
 		}
 	}
 
 	@Inject(method = "render", at = @At("HEAD"), cancellable = true)
 	public void render(VertexConsumer vertexConsumer, Camera camera, float tickPercentage, CallbackInfo ci) {
-		if (asyncparticles$innvisible) {
+		if (asyncparticles$invisible) {
 			ci.cancel();
 		}
 	}

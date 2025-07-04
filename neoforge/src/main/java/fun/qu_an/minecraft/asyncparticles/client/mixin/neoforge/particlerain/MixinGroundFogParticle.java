@@ -25,9 +25,4 @@ public abstract class MixinGroundFogParticle extends MixinWeatherParticle {
 	private void onRemove(CallbackInfo ci) {
 		ParticleRainCompat.asyncparticles$fogCount.getAndDecrement();
 	}
-
-	@Override
-	public @NotNull AABB getRenderBoundingBox(float partialTicks) {
-		return this.getBoundingBox().inflate(4.0);
-	}
 }

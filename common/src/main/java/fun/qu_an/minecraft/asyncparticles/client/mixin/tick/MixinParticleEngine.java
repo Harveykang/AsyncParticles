@@ -1,27 +1,24 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.tick;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.ParticleGroup;
-import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class MixinParticleEngine {
@@ -172,8 +169,9 @@ public abstract class MixinParticleEngine {
 		if (collection.isEmpty()) {
 			return;
 		}
-		boolean enableLightCache = ConfigHelper.particleLightCache();
+		boolean enableLightCache = ConfigHelper.isParticleLightCache();
 		boolean isNotOnMainThread = !ThreadUtil.isOnMainThread();
+		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		for (Particle particle : collection) {
 			if (AsyncTicker.isCancelled() && !ConfigHelper.forceDoneParticleTick()) {
 				return;
@@ -184,27 +182,36 @@ public abstract class MixinParticleEngine {
 				Utils.DUMMY_ITERATOR.remove();
 				continue;
 			}
+			ParticleAddon particleAddon = (ParticleAddon) particle;
 			if (isNotOnMainThread) {
-				if (((ParticleAddon) particle).asyncparticles$isTicked()) {
+				if (particleAddon.asyncparticles$isTicked()) {
 					// Skip the first tick that the particle is added to the queue.
 					if (enableLightCache) {
 						((LightCachedParticleAddon) particle).asyncparticles$refresh();
 					}
+					switch (particleCullingMode) {
+						case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
+						case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
+					}
 					continue;
 				}
-				if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
+				if (particleAddon.asyncparticles$isTickSync()) {
 					AsyncTicker.recordSync(particle);
 					continue;
 				}
 			}
 			try {
 				tickParticle(particle);
-				if (enableLightCache) {
-					((LightCachedParticleAddon) particle).asyncparticles$refresh();
-				}
-				((ParticleAddon) particle).asyncparticles$setTicked();
 			} catch (Throwable t) {
 				AsyncTicker.onTickingParticleException(particle, t);
+			}
+			particleAddon.asyncparticles$setTicked();
+			if (enableLightCache) {
+				((LightCachedParticleAddon) particle).asyncparticles$refresh();
+			}
+			switch (particleCullingMode) {
+				case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
+				case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
 			}
 		}
 	}
@@ -215,8 +222,14 @@ public abstract class MixinParticleEngine {
 			particle.remove(); // to compatible with some mods...
 			// don't cancel it,
 			// otherwise it may cause memory leak with some mods
-		} else if (ConfigHelper.particleLightCache()) {
-			((LightCachedParticleAddon) particle).asyncparticles$refresh();
+		} else {
+			if (ConfigHelper.isParticleLightCache()) {
+				((LightCachedParticleAddon) particle).asyncparticles$refresh();
+			}
+			switch (ConfigHelper.getParticleCullingMode()) {
+				case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
+				case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
+			}
 		}
 	}
 
