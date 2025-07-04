@@ -1,15 +1,13 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.api.INoCullingParticle;
+import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.levelgen.RandomSupport;
-import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -29,10 +27,16 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Shadow
 	@Final
 	public ClientLevel level;
+	@Shadow
+	protected double xd;
+	@Shadow
+	protected double yd;
+	@Shadow
+	protected double zd;
 	@Unique
 	private boolean asyncparticles$ticked = true;
 	@Unique
-	private boolean asyncparticles$renderSync;
+	private byte asyncparticles$renderFlag = 0b10;
 	@Unique
 	private boolean asyncparticles$tickSync;
 
@@ -44,6 +48,9 @@ public abstract class MixinParticle implements ParticleAddon {
 		}
 		if (AsyncRenderer.shouldSync(aClass)) {
 			asyncparticles$setRenderSync();
+		}
+		if (INoCullingParticle.class.isAssignableFrom(aClass)) {
+			asyncparticles$renderFlag |= 0b10;
 		}
 	}
 
@@ -64,12 +71,12 @@ public abstract class MixinParticle implements ParticleAddon {
 
 	@Override
 	public void asyncparticles$setRenderSync() {
-		asyncparticles$renderSync = true;
+		asyncparticles$renderFlag |= 1;
 	}
 
 	@Override
 	public boolean asyncparticles$isRenderSync() {
-		return asyncparticles$renderSync;
+		return (asyncparticles$renderFlag & 1) != 0;
 	}
 
 	@Override
@@ -86,5 +93,30 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Override
 	public Class<? extends Particle> asyncparticles$getRealClass() {
 		return (Class) this.getClass();
+	}
+
+	public boolean shouldCull() {
+		return (asyncparticles$renderFlag & 2) != 0;
+	}
+
+	public boolean asyncparticles$isVisibleOnScreen() {
+		return (asyncparticles$renderFlag & 4) != 0;
+	}
+
+	public void asyncparticles$tickAABBCulling() {
+		AABB aabb = getRenderBoundingBox(0f).inflate(xd, yd, zd);
+		if (FrustumUtil.isVisible(AsyncRenderer.frustum, aabb)) {
+			asyncparticles$renderFlag |= 4;
+		} else {
+			asyncparticles$renderFlag &= ~4;
+		}
+	}
+
+	public void asyncparticles$tickSphereCulling() {
+		if (FrustumUtil.isVisible(AsyncRenderer.frustum, (Particle) (Object) this)) {
+			asyncparticles$renderFlag |= 4;
+		} else {
+			asyncparticles$renderFlag &= ~4;
+		}
 	}
 }

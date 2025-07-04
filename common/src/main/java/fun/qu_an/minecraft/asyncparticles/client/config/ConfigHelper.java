@@ -22,7 +22,7 @@ public class ConfigHelper {
 		return false;
 	}
 
-	public static boolean particleLightCache() {
+	public static boolean isParticleLightCache() {
 		return AsyncParticlesConfig.particle$particleLightCache;
 	}
 
@@ -74,10 +74,6 @@ public class ConfigHelper {
 		return AsyncParticlesConfig.rendering$particleRenderingMode == RenderingMode.DELAYED;
 	}
 
-	public static boolean isCullParticles() {
-		return AsyncParticlesConfig.rendering$cullParticles;
-	}
-
 	public static boolean isCullWeathers() {
 		return AsyncParticlesConfig.rendering$cullWeathers;
 	}
@@ -105,5 +101,9 @@ public class ConfigHelper {
 
 	public static boolean isRenderWeatherAsync() {
 		return AsyncParticlesConfig.rendering$weatherRenderingMode != RenderingMode.SYNCHRONOUSLY;
+	}
+
+	public static ParticleCullingMode getParticleCullingMode() {
+		return AsyncParticlesConfig.rendering$particleCulling;
 	}
 }

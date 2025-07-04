@@ -7,6 +7,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.Particle;
@@ -40,14 +41,33 @@ public abstract class MixinParticleEngine_Render {
 		VertexConsumer vertexconsumer = bufferSource.getBuffer(Objects.requireNonNull(particleRenderType.renderType()));
 		Frustum frustum = AsyncRenderer.frustum;
 		float f2 = f + 1f;
-		boolean enableCull = ConfigHelper.isCullParticles();
+		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		for (Particle particle : particles) {
 			if (!particle.isAlive()) {
 				continue;
 			}
-			float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
-			if (enableCull && !FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
-				continue;
+			float f3;
+			switch (particleCullingMode) {
+				case AABB -> {
+					f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
+					if (((ParticleAddon) particle).shouldCull() &&
+						!FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
+						continue;
+					}
+				}
+				case SPHERE -> {
+					if (((ParticleAddon) particle).shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
+						continue;
+					}
+					f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
+				}
+				case ASYNC_AABB, ASYNC_SPHERE -> {
+					if (!((ParticleAddon) particle).asyncparticles$isVisibleOnScreen()) {
+						continue;
+					}
+					f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
+				}
+				default -> f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
 			}
 			try {
 				particle.render(vertexconsumer, camera, f3);
@@ -71,14 +91,33 @@ public abstract class MixinParticleEngine_Render {
 		PoseStack poseStack = new PoseStack();
 		Frustum frustum = AsyncRenderer.frustum;
 		float f2 = f + 1f;
-		boolean enableCull = ConfigHelper.isCullParticles();
+		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		for (Particle particle : particles) {
 			if (!particle.isAlive()) {
 				continue;
 			}
-			float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
-			if (enableCull && !FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
-				continue;
+			float f3;
+			switch (particleCullingMode) {
+				case AABB -> {
+					f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
+					if (((ParticleAddon) particle).shouldCull() &&
+						!FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
+						continue;
+					}
+				}
+				case SPHERE -> {
+					if (((ParticleAddon) particle).shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
+						continue;
+					}
+					f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
+				}
+				case ASYNC_AABB, ASYNC_SPHERE -> {
+					if (!((ParticleAddon) particle).asyncparticles$isVisibleOnScreen()) {
+						continue;
+					}
+					f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
+				}
+				default -> f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
 			}
 			try {
 				particle.renderCustom(poseStack, bufferSource, camera, f3);

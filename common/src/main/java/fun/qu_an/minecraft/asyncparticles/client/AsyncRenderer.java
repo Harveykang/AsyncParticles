@@ -8,6 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.iris.IrisCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
@@ -27,6 +28,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4f;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -94,7 +96,8 @@ public class AsyncRenderer {
 		}, Util::onThreadException, true);
 	}
 
-	public static Frustum frustum;
+	@NotNull
+	public static Frustum frustum = new Frustum(new Matrix4f(), new Matrix4f());
 	private static Consumer<String> debugConsumer;
 	private static CompletableFuture<Void> particlsTask;
 	private static boolean mixedParticleRenderingSetting = false;
@@ -154,17 +157,38 @@ public class AsyncRenderer {
 										ParticleRenderType particleRenderType,
 										BufferBuilder bufferBuilder) {
 		Frustum frustum = AsyncRenderer.frustum;
-		boolean enableCull = ConfigHelper.isCullParticles();
+		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		float f2 = f + 1f;
 		for (Particle particle : particles) {
 			if (!particle.isAlive()) {
 				continue;
 			}
-			float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
-			if (enableCull && !FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
-				continue;
+			float f3;
+			ParticleAddon particleAddon = (ParticleAddon) particle;
+			switch (particleCullingMode) {
+				case AABB -> {
+					f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+					if (particleAddon.shouldCull() &&
+						!FrustumUtil.isVisible(frustum, particleAddon.getRenderBoundingBox(f3))) {
+						continue;
+					}
+				}
+				case SPHERE -> {
+					if (particleAddon.shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
+						continue;
+					}
+					f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+				}
+				case ASYNC_AABB, ASYNC_SPHERE -> {
+					if (particleAddon.shouldCull() &&
+						!particleAddon.asyncparticles$isVisibleOnScreen()) {
+						continue;
+					}
+					f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+				}
+				default -> f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
 			}
-			if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
+			if (particleAddon.asyncparticles$isRenderSync()) {
 				recordSync(particleRenderType, particle);
 				continue;
 			}

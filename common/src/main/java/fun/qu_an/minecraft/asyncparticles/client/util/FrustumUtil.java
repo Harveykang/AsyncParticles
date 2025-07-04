@@ -1,9 +1,12 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
+import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.joml.FrustumIntersection;
+
+import static java.lang.Math.max;
 
 public class FrustumUtil {
 	public static boolean isVisible(Frustum frustum, double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
@@ -44,5 +47,13 @@ public class FrustumUtil {
 			minX + 1f,
 			(float) (tY - camY),
 			minZ + 1f);
+	}
+
+	public static boolean isVisible(Frustum frustum, Particle particle) {
+		return frustum.intersection.testSphere(
+			(float) (particle.x - frustum.camX),
+			(float) (particle.y - frustum.camY),
+			(float) (particle.z - frustum.camZ),
+			max(particle.bbWidth, particle.bbHeight) * 0.866f);
 	}
 }
