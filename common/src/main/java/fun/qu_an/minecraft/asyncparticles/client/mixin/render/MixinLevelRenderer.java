@@ -50,7 +50,7 @@ public abstract class MixinLevelRenderer {
 
 	// TODO: 有没有更好的方法？
 	@Inject(method = "renderLevel", at = @At("HEAD"))
-	private void renderLevel(GraphicsResourceAllocator graphicsResourceAllocator,
+	private void onRenderLevelHead(GraphicsResourceAllocator graphicsResourceAllocator,
 							 DeltaTracker deltaTracker,
 							 boolean bl,
 							 Camera camera,
@@ -82,7 +82,7 @@ public abstract class MixinLevelRenderer {
 
 	@ModifyExpressionValue(method = "renderLevel", at = @At(value = "FIELD", opcode = Opcodes.GETFIELD,
 		target = "Lnet/minecraft/client/renderer/LevelRenderer;captureFrustum:Z"))
-	private static boolean redirectPrepare(boolean original) {
+	private static boolean disableFrustumPrepare(boolean original) {
 		return false;
 	}
 }

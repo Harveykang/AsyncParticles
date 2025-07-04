@@ -77,6 +77,7 @@
   "config.asyncparticles.enum.cooparticles.CooTickMode.ASYNC_IN_PARALLEL": "Async In Parallel",
   "config.asyncparticles.enum.cooparticles.CooTickMode.ASYNC_IN_SEQUENCED": "Async In Sequenced",
   "config.asyncparticles.incompatibility": "Incompatible with %s mod.",
+  "config.asyncparticles.limited": "Limited by %s mod.",
   "gui.asyncparticles.reset-confirmation": "Do you want to reset all configurations?",
   "gui.asyncparticles": "Async Particles",
   "gui.asyncparticles.error": "Error!",
