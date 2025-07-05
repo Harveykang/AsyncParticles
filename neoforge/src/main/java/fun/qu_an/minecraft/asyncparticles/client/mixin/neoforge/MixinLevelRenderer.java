@@ -71,7 +71,6 @@ public abstract class MixinLevelRenderer {
 									CallbackInfo ci,
 									@Local(ordinal = 0) FrameGraphBuilder frameGraphBuilder,
 									@Local(ordinal = 0) float partialTick,
-									@Local(ordinal = 0) FogParameters fogParameters,
 									@Local(ordinal = 0) Frustum frustum,
 									@Share("asyncparticles$addParticlesPassOperation")
 									LocalRef<Operation<Void>> originalRef,
