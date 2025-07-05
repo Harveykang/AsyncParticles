@@ -104,7 +104,7 @@ public abstract class MixinParticle implements ParticleAddon {
 	}
 
 	public void asyncparticles$tickAABBCulling() {
-		AABB aabb = getRenderBoundingBox(0f).inflate(xd, yd, zd);
+		AABB aabb = getRenderBoundingBox(0f).expandTowards(xd, yd, zd);
 		if (FrustumUtil.isVisible(AsyncRenderer.frustum, aabb)) {
 			asyncparticles$renderFlag |= 4;
 		} else {
