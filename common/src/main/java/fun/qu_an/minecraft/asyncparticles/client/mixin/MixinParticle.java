@@ -36,7 +36,7 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Unique
 	private boolean asyncparticles$ticked = true;
 	@Unique
-	private byte asyncparticles$renderFlag = 0b10;
+	private byte asyncparticles$renderFlag = 2;
 	@Unique
 	private boolean asyncparticles$tickSync;
 
@@ -50,7 +50,7 @@ public abstract class MixinParticle implements ParticleAddon {
 			asyncparticles$setRenderSync();
 		}
 		if (INoCullingParticle.class.isAssignableFrom(aClass)) {
-			asyncparticles$renderFlag |= 0b10;
+			asyncparticles$renderFlag &= ~2;
 		}
 	}
 
