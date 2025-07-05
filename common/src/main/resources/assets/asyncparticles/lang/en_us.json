@@ -22,7 +22,7 @@
   "config.asyncparticles.tick.suppressCME.tooltip": "Ignore 'ConcurrentModificationException'\nwhile under 'Fail Per Second Limit'.",
   "config.asyncparticles.category.rendering": "Rendering",
   "config.asyncparticles.rendering.particleCulling": "Particle Culling",
-  "config.asyncparticles.rendering.particleCulling.tooltip": "Cull particles outside the camera view.\n'Sphere (Real Time)' is recommended.\n'Box (Real Time)' is the legacy implementation,\nslower but more accurate.\n'Sphere (Async, Per Tick)' and 'Box (Async, Per Tick)'\nare fastest, but may delay rendering of particles near\nscreen edges when turning the camera too quickly.\n'Sphere' modes may be incompatible with certain mods.\n'Disable' disables particle culling.",
+  "config.asyncparticles.rendering.particleCulling.tooltip": "Cull particles outside the camera view.\n'Sphere (Real Time)' is recommended.\n'Box (Real Time)' is the legacy implementation,\nslower but more accurate.\n'Sphere (Async, Per Tick)' and 'Box (Async, Per Tick)'\nare faster, but may delay rendering of particles near\nscreen edges when turning the camera too quickly.\n'Sphere' modes may be incompatible with certain mods.\n'Disable' disables particle culling.",
   "config.asyncparticles.rendering.cullWeathers": "Cull Weathers",
   "config.asyncparticles.rendering.cullWeathers.tooltip": "Cull weathers outside the camera view.",
   "config.asyncparticles.rendering.particleRenderingMode": "Particle Rendering",
