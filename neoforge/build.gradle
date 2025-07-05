@@ -81,8 +81,8 @@ dependencies {
     modLocalRuntime 'maven.modrinth:moreculling:1.4.0-beta.1'
 
     /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:pretty-rain:jhbyDOnc" // 1.1.4
-//    modLocalRuntime "maven.modrinth:pretty-rain:jhbyDOnc" // 1.1.4
+    modCompileOnly "maven.modrinth:pretty-rain:2tO4FX8T" // 1.1.4
+//    modLocalRuntime "maven.modrinth:pretty-rain:2tO4FX8T" // 1.1.4
 
     /* Particle Core */
     modCompileOnly "maven.modrinth:particle-core:0.2.6+1.21.5+neoforge"
