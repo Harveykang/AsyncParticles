@@ -17,11 +17,6 @@ public class AsyncParticlesClient {
 		if (!ModListHelper.IS_CLIENT) {
 			return;
 		}
-		try {
-			ConfigHelper.load();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 		if (MORE_CULLING_LOADED) {
 			MoreCullingCompat.init();
 		}

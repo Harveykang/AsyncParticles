@@ -11,11 +11,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.RandomSupport;
-import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.level.storage.WritableLevelData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -23,19 +20,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.function.Supplier;
-
 @Mixin(value = ClientLevel.class, priority = 1100)
 public abstract class MixinClientLevel extends Level {
 	protected MixinClientLevel(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, RegistryAccess registryAccess, Holder<DimensionType> holder, boolean bl, boolean bl2, long l, int i) {
 		super(writableLevelData, resourceKey, registryAccess, holder, bl, bl2, l, i);
-	}
-
-	@Inject(method = "<init>", at = @At(value = "RETURN"))
-	public void onInit(CallbackInfo ci) {
-		if (this.random.getClass() != SingleThreadedRandomSource.class) {
-			this.random = new SingleThreadedRandomSource(RandomSupport.generateUniqueSeed());
-		}
 	}
 
 	@Unique

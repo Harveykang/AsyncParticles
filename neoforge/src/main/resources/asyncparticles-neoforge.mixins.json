@@ -7,7 +7,6 @@
   "client": [
     "MixinLevelRenderer",
     "MixinMinecraft",
-    "MixinModelDataManager",
     "MixinParticleEngine_Render",
     "particlerain.MixinGroundFogParticle",
     "particlerain.MixinModClientForgeEvents",
