@@ -8,7 +8,6 @@ import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -23,9 +22,9 @@ public class ClothConfigMixinMenus {
 	public static Runnable buildCategory(ConfigCategory mixinCategory,
 										 ConfigEntryBuilder entryBuilder,
 										 ConfigEntryBuilder revertEntryBuilder) {
-		Mixin$Particle defaultConfig = new Mixin$Particle();
-		Mixin$Particle newConfig = new Mixin$Particle();
-		Mixin$Particle lastConfig = getToSaveConfig();
+		MixinConfigObj defaultConfig = new MixinConfigObj();
+		MixinConfigObj newConfig = new MixinConfigObj();
+		MixinConfigObj lastConfig = getToSaveConfig();
 		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.particle.redirectFleroviumCulling"),
 				lastConfig.isRedirectFleroviumCulling())
@@ -75,10 +74,6 @@ public class ClothConfigMixinMenus {
 					});
 				}
 			})
-			.setTooltip(
-				Component.translatable("text.cloth-config.restart_required")
-					.withStyle(ChatFormatting.DARK_RED),
-				Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip"))
 			.requireRestart()
 			.setRequirement(() -> !ModListHelper.IRONS_SPELLBOOKS_LOADED)
 			.build());

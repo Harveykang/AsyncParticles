@@ -23,8 +23,8 @@ public class AsyncParticlesMixinConfig {
 		particle$lockRequired: A comma-separated list of particle classes that require a spin lock.
 		particle$lockProvider: A comma-separated list of particle classes that provide a spin lock.
 		replaceRandom: A comma-separated list of classes that require multithreaded random sources.""";
-	static final Mixin$Particle CONFIG;
-	private static Mixin$Particle toSaveConfig;
+	static final MixinConfigObj CONFIG;
+	private static MixinConfigObj toSaveConfig;
 
 	static {
 		try {
@@ -48,7 +48,7 @@ public class AsyncParticlesMixinConfig {
 			properties.load(is);
 		}
 
-		Mixin$Particle configObj = new Mixin$Particle();
+		MixinConfigObj configObj = new MixinConfigObj();
 		configObj.read(properties);
 		configObj = upgrade(configObj.version, configObj);
 
@@ -57,29 +57,29 @@ public class AsyncParticlesMixinConfig {
 	}
 
 	@Contract
-	private static Mixin$Particle upgrade(int ver, Mixin$Particle configObj) {
+	private static MixinConfigObj upgrade(int ver, MixinConfigObj configObj) {
 		if (VERSION != 1) {
 			throw new RuntimeException("I forgot to update the upgrade method.");
 		}
 		return switch (ver) {
 			case 1 -> configObj;
-			default -> new Mixin$Particle();
+			default -> new MixinConfigObj();
 		};
 	}
 
 	static void save() throws IOException {
-		Mixin$Particle configObj = new Mixin$Particle();
+		MixinConfigObj configObj = new MixinConfigObj();
 		configObj.fold();
 		save(configObj);
 	}
 
 	static void reset() throws IOException {
-		Mixin$Particle configObj = new Mixin$Particle();
+		MixinConfigObj configObj = new MixinConfigObj();
 		configObj.flat();
 		save(configObj);
 	}
 
-	static void save(Mixin$Particle configObj) throws IOException {
+	static void save(MixinConfigObj configObj) throws IOException {
 		configObj.version = VERSION;
 		Properties properties = new Properties();
 		configObj.write(properties);
@@ -88,11 +88,11 @@ public class AsyncParticlesMixinConfig {
 		}
 	}
 
-	static Mixin$Particle getToSaveConfig() {
+	static MixinConfigObj getToSaveConfig() {
 		return toSaveConfig;
 	}
 
-	static class Mixin$Particle {
+	static class MixinConfigObj {
 		private int version = 0;
 		private boolean redirectFleroviumCulling =  ModListHelper.FORGE_FLEROVIUM_LOADED && !ModListHelper.SHIMMER_LOADED;
 		private boolean safeClassInstanceMultiMap = ModListHelper.IRONS_SPELLBOOKS_LOADED;
@@ -141,6 +141,7 @@ public class AsyncParticlesMixinConfig {
 		{
 			replaceRandom.add("appeng.client.render.effects.LightningArcFX");
 			replaceRandom.add("appeng.client.render.effects.LightningFX");
+			replaceRandom.add("de.cheaterpaul.fallingleaves.util.LeafUtil");
 		}
 
 		private void fold() {
@@ -161,7 +162,7 @@ public class AsyncParticlesMixinConfig {
 				version = Integer.parseInt(properties.getProperty("version"));
 			} catch (NumberFormatException ignored) {
 			}
-			Mixin$Particle defaultConfig = new Mixin$Particle();
+			MixinConfigObj defaultConfig = new MixinConfigObj();
 			redirectFleroviumCulling = ModListHelper.FORGE_FLEROVIUM_LOADED && !ModListHelper.SHIMMER_LOADED &&
 				getBoolean(properties, "particle$redirectFleroviumCulling", defaultConfig.redirectFleroviumCulling);
 			safeClassInstanceMultiMap = ModListHelper.IRONS_SPELLBOOKS_LOADED ||

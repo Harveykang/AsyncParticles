@@ -30,13 +30,6 @@ public abstract class MixinClientLevel extends Level {
 		super(writableLevelData, resourceKey, registryAccess, holder, supplier, bl, bl2, l, i);
 	}
 
-	@Inject(method = "<init>", at = @At(value = "RETURN"))
-	public void onInit(CallbackInfo ci) {
-		if (this.random.getClass() != SingleThreadedRandomSource.class) {
-			this.random = new SingleThreadedRandomSource(RandomSupport.generateUniqueSeed());
-		}
-	}
-
 	@Unique
 	private static final ResourceLocation asyncparticles$ANIMATE_TICK =
 		new ResourceLocation("asyncparticles", "animate_tick");

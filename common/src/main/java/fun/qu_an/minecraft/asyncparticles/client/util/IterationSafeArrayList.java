@@ -198,6 +198,7 @@ public class IterationSafeArrayList<E> extends ObjectArrayList<E> {
 	public @NotNull ObjectListIterator<E> listIterator(int i) {
 		int s = size();
 		if (i < 0 || i > s) {
+			// FIXME: Thread-safe issue if i != 0
 			throw new IndexOutOfBoundsException("Index: " + i + ", Size: " + s);
 		}
 		if (s == 0) {

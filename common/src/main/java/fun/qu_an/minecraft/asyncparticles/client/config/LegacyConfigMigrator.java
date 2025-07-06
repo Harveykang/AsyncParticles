@@ -29,12 +29,15 @@ class LegacyConfigMigrator {
 		AsyncParticlesConfig.ConfigObj defaultConfig = new AsyncParticlesConfig.ConfigObj();
 
 		particle$particleLimit = getInt(properties, "limit", 32768);
-		if (particle$particleLimit == 32768) {
+		if (particle$particleLimit == 32768 || particle$particleLimit < 1024 || particle$particleLimit > 262144) {
 			particle$particleLimit = defaultConfig.particle.particleLimit;
 		}
 		particle$particleLightCache = getBoolean(properties, "particleLightCache", defaultConfig.particle.particleLightCache);
 
 		tick$failPerSecLimit = getInt(properties, "tickFailurePerSecondThreshold", defaultConfig.tick.failPerSecLimit);
+		if (tick$failPerSecLimit < 0 || tick$failPerSecLimit > 256) {
+			tick$failPerSecLimit = defaultConfig.tick.failPerSecLimit;
+		}
 		tick$suppressCME = getBoolean(properties, "suppressCME", defaultConfig.tick.suppressCME);
 		if (!getBoolean(properties, "asyncClientBlockEntityAnimate",
 			defaultConfig.tick.animationTickMode != TickMode.SYNCHRONOUSLY)) {
@@ -53,13 +56,15 @@ class LegacyConfigMigrator {
 		}
 
 		rendering$failPerSecLimit = getInt(properties, "renderFailurePerSecondThreshold", defaultConfig.rendering.failPerSecLimit);
-
+		if (rendering$failPerSecLimit < 0 || rendering$failPerSecLimit > 256) {
+			rendering$failPerSecLimit = defaultConfig.rendering.failPerSecLimit;
+		}
 		valkyrienSkies$fixParticleLights = getBoolean(properties, "fixParticleLightOnVsShips", defaultConfig.valkyrienSkies.fixParticleLights);
 		valkyrienSkies$rainEffect = getBoolean(properties, "doVsShipRainEffectsIfMoving",
 			defaultConfig.valkyrienSkies.rainEffect == RainEffect.ALWAYS)
 			? RainEffect.ALWAYS : RainEffect.STATIONARY;
 
-		properties.setProperty("migrated" , "");
+		properties.setProperty("migrated", "");
 		try (OutputStream os = Files.newOutputStream(legacyConfigFile)) {
 			properties.store(os, null);
 		} catch (IOException e) {

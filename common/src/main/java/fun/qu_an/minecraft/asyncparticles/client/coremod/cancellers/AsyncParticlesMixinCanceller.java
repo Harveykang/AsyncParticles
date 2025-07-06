@@ -8,7 +8,7 @@ import java.util.List;
 public class AsyncParticlesMixinCanceller implements MixinCanceller {
 	@Override
 	public boolean shouldCancel(List<String> targetClassNames, String mixinClassName) {
-		if (mixinClassName.startsWith("me.jellysquid.mods.lithium.mixin.collections.entity_filtering")) {
+		if (mixinClassName.startsWith("me.jellysquid.mods.lithium.mixin.collections.entity_by_type")) {
 			return MixinConfigHelper.isSafeClassInstanceMultiMap();
 		}
 		return switch (mixinClassName) {

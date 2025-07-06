@@ -10,6 +10,8 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.RandomSupport;
+import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.level.storage.WritableLevelData;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.*;
@@ -35,6 +37,9 @@ public abstract class MixinClientLevel extends Level {
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
 		players = new IterationSafeArrayList<>();
+		if (this.random.getClass() != SingleThreadedRandomSource.class) {
+			this.random = new SingleThreadedRandomSource(RandomSupport.generateUniqueSeed());
+		}
 	}
 
 	@Override
