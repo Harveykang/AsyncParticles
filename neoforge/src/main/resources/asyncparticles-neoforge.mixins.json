@@ -6,7 +6,6 @@
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.neoforge.APMixinPluginNeoForge",
   "client": [
     "MixinMinecraft",
-    "MixinModelDataManager",
     "MixinParticleEngine_Render",
     "create.InvokerContraptionCollider",
     "create.MixinParticle",

@@ -93,6 +93,8 @@ public class ModListHelper {
 	public static final boolean DSURROUND_LOADED = isModLoaded("dsurround");
 	/* Immediately Fast */
 	public static final boolean IMMEDIATELY_FAST_LOADED = isModLoaded("immediatelyfast");
+	/* Iron's Spells 'n Spellbooks */
+	public static final boolean IRONS_SPELLBOOKS_LOADED = isModLoaded("irons_spellbooks");
 
 	@ExpectPlatform
 	private static boolean isForge() {
