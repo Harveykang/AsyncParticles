@@ -109,7 +109,7 @@ public class AsyncRenderer {
 
 	/* Renderer */
 
-	public static void begin(float partialTick, Camera camera, int irm, WeatherEffectRenderer weatherRenderer, int ticks) {
+	public static void begin(float partialTick, Camera camera, int irm) {
 		tryDebug();
 		switch (irm) {
 			case MIXED_SYNC -> {

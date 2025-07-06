@@ -73,7 +73,7 @@ public abstract class MixinLevelRenderer {
 		}
 		int irmValue = InternalRenderingMode.updateInternalMode(ConfigHelper.getParticleRenderingMode());
 		irm.set(irmValue);
-		AsyncRenderer.begin(partialTick, camera, irmValue, weatherEffectRenderer, ticks);
+		AsyncRenderer.begin(partialTick, camera, irmValue);
 		if (ConfigHelper.isRenderWeatherAsync()) {
 			((WeatherEffectRendererAddon) weatherEffectRenderer).asyncparticles$onBegin();
 			weatherEffectRenderer.render(level, null, ticks, partialTick, cameraPos);

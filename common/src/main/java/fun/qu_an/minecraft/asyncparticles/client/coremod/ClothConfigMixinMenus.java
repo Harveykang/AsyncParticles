@@ -15,7 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
-import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.Mixin$Particle;
+import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.MixinConfigObj;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.getToSaveConfig;
 
 // No more NoClassDefFoundError
@@ -23,9 +23,9 @@ public class ClothConfigMixinMenus {
 	public static Runnable buildCategory(ConfigCategory mixinCategory,
 										 ConfigEntryBuilder entryBuilder,
 										 ConfigEntryBuilder revertEntryBuilder) {
-		Mixin$Particle defaultConfig = new Mixin$Particle();
-		Mixin$Particle newConfig = new Mixin$Particle();
-		Mixin$Particle lastConfig = getToSaveConfig();
+		MixinConfigObj defaultConfig = new MixinConfigObj();
+		MixinConfigObj newConfig = new MixinConfigObj();
+		MixinConfigObj lastConfig = getToSaveConfig();
 		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap"),
 				lastConfig.isSafeClassInstanceMultiMap())
