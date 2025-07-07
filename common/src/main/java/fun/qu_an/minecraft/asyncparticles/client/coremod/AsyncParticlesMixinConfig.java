@@ -29,7 +29,7 @@ public class AsyncParticlesMixinConfig {
 	static {
 		try {
 			load();
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			throw new MixinError(e);
 		}
 		CONFIG = toSaveConfig;

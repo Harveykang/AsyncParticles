@@ -28,7 +28,7 @@ class LegacyConfigMigrator {
 		}
 		AsyncParticlesConfig.ConfigObj defaultConfig = new AsyncParticlesConfig.ConfigObj();
 
-		particle$particleLimit = getInt(properties, "limit", 32768);
+		particle$particleLimit = getInt(properties, "limit", defaultConfig.particle.particleLimit);
 		if (particle$particleLimit == 32768 || particle$particleLimit < 1024 || particle$particleLimit > 262144) {
 			particle$particleLimit = defaultConfig.particle.particleLimit;
 		}

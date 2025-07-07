@@ -53,6 +53,15 @@ public class AsyncParticlesConfig {
 	public static boolean valkyrienSkies$fixParticleLights;
 	public static RainEffect create$rainEffect;
 
+	static {
+		try {
+			load();
+			LOGGER.debug("AsyncParticlesConfig initialized.");
+		} catch (Throwable e) {
+			throw new ExceptionInInitializerError(e);
+		}
+	}
+
 	public static Screen newConfigScreen(Screen parent) {
 		if (ModListHelper.CLOTH_CONFIG_LOADED) {
 			return ClothConfigMenus.screenBuilder(parent).build();
@@ -170,6 +179,7 @@ public class AsyncParticlesConfig {
 
 		configObj.flat();
 		save(configObj);
+		LOGGER.debug("asyncparticles.json loaded.");
 	}
 
 	@Contract
