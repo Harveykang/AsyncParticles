@@ -12,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.*;
+
 public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
 	public static final int VERSION = 1;
@@ -27,9 +29,10 @@ public class AsyncParticlesMixinConfig {
 	private static MixinConfigObj toSaveConfig;
 
 	static {
+		LOGGER.debug("AsyncParticlesMixinConfig initialized.");
 		try {
 			load();
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			throw new MixinError(e);
 		}
 		CONFIG = toSaveConfig;
