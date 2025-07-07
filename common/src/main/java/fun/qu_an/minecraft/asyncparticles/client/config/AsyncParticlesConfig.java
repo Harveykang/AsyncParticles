@@ -55,6 +55,15 @@ public class AsyncParticlesConfig {
 	public static RainEffect create$rainEffect;
 	public static CooTickMode cooparticlesapi$tickMode;
 
+	static {
+		LOGGER.debug("AsyncParticlesConfig initialized.");
+		try {
+			load();
+		} catch (Throwable e) {
+			throw new ExceptionInInitializerError(e);
+		}
+	}
+
 	public static Screen newConfigScreen(Screen parent) {
 		if (ModListHelper.CLOTH_CONFIG_LOADED) {
 			return ClothConfigMenus.screenBuilder(parent).build();

@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import org.spongepowered.asm.mixin.throwables.MixinError;
@@ -14,6 +13,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
+
+import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.LOGGER;
 
 public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
@@ -30,9 +31,10 @@ public class AsyncParticlesMixinConfig {
 	private static MixinConfigObj toSaveConfig;
 
 	static {
+		LOGGER.debug("AsyncParticlesConfig initialized.");
 		try {
 			load();
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			throw new MixinError(e);
 		}
 		CONFIG = toSaveConfig;
@@ -55,7 +57,7 @@ public class AsyncParticlesMixinConfig {
 		configObj.read(properties);
 		configObj = upgrade(configObj.version, configObj);
 
-		toSaveConfig = configObj;
+		configObj.flat();
 		save(configObj);
 	}
 

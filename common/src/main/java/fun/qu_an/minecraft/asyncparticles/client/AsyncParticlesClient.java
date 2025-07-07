@@ -18,11 +18,6 @@ public class AsyncParticlesClient {
 		if (!ModListHelper.IS_CLIENT) {
 			return;
 		}
-		try {
-			ConfigHelper.load();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 		if (ModListHelper.PARTICLERAIN_LOADED) {
 			if (ModListHelper.VS_LOADED) {
 				WeatherParticleAddon.Type.RAIN.register((level, location, v, aabb) -> {
