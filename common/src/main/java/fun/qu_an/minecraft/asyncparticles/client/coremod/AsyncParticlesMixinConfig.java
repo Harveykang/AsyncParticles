@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import org.spongepowered.asm.mixin.throwables.MixinError;
@@ -32,7 +31,7 @@ public class AsyncParticlesMixinConfig {
 	static {
 		try {
 			load();
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			throw new MixinError(e);
 		}
 		CONFIG = toSaveConfig;
@@ -55,7 +54,7 @@ public class AsyncParticlesMixinConfig {
 		configObj.read(properties);
 		configObj = upgrade(configObj.version, configObj);
 
-		toSaveConfig = configObj;
+		configObj.flat();
 		save(configObj);
 	}
 
