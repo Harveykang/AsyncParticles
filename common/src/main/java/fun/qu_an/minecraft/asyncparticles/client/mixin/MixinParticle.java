@@ -3,12 +3,14 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.api.INoCullingParticle;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.world.phys.AABB;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -48,9 +50,6 @@ public abstract class MixinParticle implements ParticleAddon {
 		}
 		if (AsyncRenderer.shouldSync(aClass)) {
 			asyncparticles$setRenderSync();
-		}
-		if (INoCullingParticle.class.isAssignableFrom(aClass)) {
-			asyncparticles$renderFlag &= ~2;
 		}
 	}
 
@@ -97,6 +96,10 @@ public abstract class MixinParticle implements ParticleAddon {
 
 	public boolean shouldCull() {
 		return (asyncparticles$renderFlag & 2) != 0;
+	}
+
+	public void asyncparticles$setNoCulling() {
+		asyncparticles$renderFlag &= ~2;
 	}
 
 	public boolean asyncparticles$isVisibleOnScreen() {

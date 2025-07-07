@@ -70,7 +70,7 @@ public abstract class MixinParticleEngine {
 		particles.forEach((particleRenderType, queue) -> {
 			// submit this task even though the queue is empty
 			// we'll add particles later
-			profiler.push(particleRenderType.toString());
+			profiler.push(particleRenderType.name());
 			AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue));
 			profiler.pop();
 		});

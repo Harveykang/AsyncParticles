@@ -17,13 +17,13 @@ import java.util.Queue;
 @Mixin(value = CustomParticleEngine.class, remap = false)
 public class MixinCustomParticleEngine {
 	@WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
-	private boolean onAdd(Queue<Particle> instance, Object e, Operation<Boolean> original) {
-		((LightCachedParticleAddon) e).asyncparticles$refresh();
+	private boolean onAdd(Queue<Particle> instance, Object p, Operation<Boolean> original) {
+		((LightCachedParticleAddon) p).asyncparticles$refresh();
 		switch (ConfigHelper.getParticleCullingMode()) {
-			case ASYNC_AABB -> ((ParticleAddon) e).asyncparticles$tickAABBCulling();
-			case ASYNC_SPHERE -> ((ParticleAddon) e).asyncparticles$tickSphereCulling();
+			case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();
+			case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();
 		}
-		return original.call(instance, e);
+		return original.call(instance, p);
 	}
 
 	@Inject(method = "tickParticle", at = @At(value = "HEAD"))

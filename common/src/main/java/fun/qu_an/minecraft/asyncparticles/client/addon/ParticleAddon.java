@@ -31,9 +31,12 @@ public interface ParticleAddon extends IParticleCulling {
 	 */
 	boolean shouldCull();
 
+	void asyncparticles$setNoCulling();
+
 	boolean asyncparticles$isVisibleOnScreen();
 
 	void asyncparticles$tickAABBCulling();
+
 	void asyncparticles$tickSphereCulling();
 
 	Class<? extends Particle> asyncparticles$getRealClass();
