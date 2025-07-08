@@ -9,7 +9,9 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
+import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -66,7 +68,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 		profiler.pop();
 
 		Frustum frustum = AsyncRenderer.frustum;
-		boolean cullParticles = ConfigHelper.isCullParticles();
+		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			// FABRIC skips NO_RENDER
 //				if (particleRenderType == ParticleRenderType.NO_RENDER) {
@@ -79,14 +81,14 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 			BindingTesselator tesselator = AsyncRenderer.getBTesselator(particleRenderType, textureManager);
 			profiler.push("render_sync");
 			Collection<? extends Particle> syncParticles;
-			boolean enableCull;
+			ParticleCullingMode realCullMode;
 			Tesselator toBegin;
 			if (!renderAsync || tesselator.shouldSync) {
-				enableCull = cullParticles;
+				realCullMode = particleCullingMode;
 				syncParticles = queue;
 				toBegin = Tesselator.getInstance();
 			} else {
-				enableCull = false;
+				realCullMode = ParticleCullingMode.DISABLED;
 				syncParticles = AsyncRenderer.getSync(particleRenderType);
 				toBegin = tesselator;
 			}
@@ -108,9 +110,30 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 					if (!particle.isAlive()) {
 						continue;
 					}
-					float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
-					if (enableCull && !frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(f3))) {
-						continue;
+					float f3;
+					ParticleAddon particleAddon = (ParticleAddon) particle;
+					switch (realCullMode) {
+						case AABB -> {
+							f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+							if (particleAddon.asyncparticles$shouldCull() &&
+								!FrustumUtil.isVisible(frustum, particleAddon.getRenderBoundingBox(f3))) {
+								continue;
+							}
+						}
+						case SPHERE -> {
+							if (particleAddon.asyncparticles$shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
+								continue;
+							}
+							f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+						}
+						case ASYNC_AABB, ASYNC_SPHERE -> {
+							if (particleAddon.asyncparticles$shouldCull() &&
+								!particleAddon.asyncparticles$isVisibleOnScreen()) {
+								continue;
+							}
+							f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+						}
+						default -> f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
 					}
 					try {
 						particle.render(bufferBuilder, camera, f3);

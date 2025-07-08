@@ -1,16 +1,16 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.levelgen.RandomSupport;
-import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
-import org.spongepowered.asm.mixin.*;
+import net.minecraft.world.phys.AABB;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -29,10 +29,13 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Shadow
 	@Final
 	public ClientLevel level;
+	@Shadow public double xd;
+	@Shadow public double yd;
+	@Shadow public double zd;
 	@Unique
 	private boolean asyncparticles$ticked = true;
 	@Unique
-	private boolean asyncparticles$renderSync;
+	private byte asyncparticles$renderFlag = 2;
 	@Unique
 	private boolean asyncparticles$tickSync;
 
@@ -64,12 +67,12 @@ public abstract class MixinParticle implements ParticleAddon {
 
 	@Override
 	public void asyncparticles$setRenderSync() {
-		asyncparticles$renderSync = true;
+		asyncparticles$renderFlag |= 1;
 	}
 
 	@Override
 	public boolean asyncparticles$isRenderSync() {
-		return asyncparticles$renderSync;
+		return (asyncparticles$renderFlag & 1) != 0;
 	}
 
 	@Override
@@ -80,6 +83,35 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Override
 	public boolean asyncparticles$isTickSync() {
 		return asyncparticles$tickSync;
+	}
+
+	public boolean asyncparticles$shouldCull() {
+		return (asyncparticles$renderFlag & 2) != 0;
+	}
+
+	public void asyncparticles$setNoCulling() {
+		asyncparticles$renderFlag &= ~2;
+	}
+
+	public boolean asyncparticles$isVisibleOnScreen() {
+		return (asyncparticles$renderFlag & 4) != 0;
+	}
+
+	public void asyncparticles$tickAABBCulling() {
+		AABB aabb = getRenderBoundingBox(0f).expandTowards(xd, yd, zd);
+		if (FrustumUtil.isVisible(AsyncRenderer.frustum, aabb)) {
+			asyncparticles$renderFlag |= 4;
+		} else {
+			asyncparticles$renderFlag &= ~4;
+		}
+	}
+
+	public void asyncparticles$tickSphereCulling() {
+		if (FrustumUtil.isVisible(AsyncRenderer.frustum, (Particle) (Object) this)) {
+			asyncparticles$renderFlag |= 4;
+		} else {
+			asyncparticles$renderFlag &= ~4;
+		}
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})

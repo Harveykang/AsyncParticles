@@ -6,6 +6,7 @@ import fun.qu_an.minecraft.asyncparticles.client.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -50,11 +51,6 @@ public abstract class MixinParticleEngine {
 
 	@Shadow
 	public abstract void tickParticle(Particle particle);
-
-	@Mutable
-	@Shadow
-	@Final
-	private RandomSource random;
 
 	@Shadow
 	public abstract void updateCount(ParticleGroup group, int count);
@@ -178,6 +174,7 @@ public abstract class MixinParticleEngine {
 		}
 		boolean enableLightCache = ConfigHelper.particleLightCache();
 		boolean isNotOnMainThread = !ThreadUtil.isOnMainThread();
+		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		for (Particle particle : collection) {
 			if (AsyncTicker.isCancelled() && !ConfigHelper.forceDoneParticleTick()) {
 				return;
@@ -188,27 +185,36 @@ public abstract class MixinParticleEngine {
 				Utils.DUMMY_ITERATOR.remove();
 				continue;
 			}
+			ParticleAddon particleAddon = (ParticleAddon) particle;
 			if (isNotOnMainThread) {
-				if (((ParticleAddon) particle).asyncparticles$isTicked()) {
+				if (particleAddon.asyncparticles$isTicked()) {
 					// Skip the first tick that the particle is added to the queue.
 					if (enableLightCache) {
 						((LightCachedParticleAddon) particle).asyncparticles$refresh();
 					}
+					switch (particleCullingMode) {
+						case ASYNC_AABB -> particleAddon.asyncparticles$tickAABBCulling();
+						case ASYNC_SPHERE -> particleAddon.asyncparticles$tickSphereCulling();
+					}
 					continue;
 				}
-				if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
+				if (particleAddon.asyncparticles$isTickSync()) {
 					AsyncTicker.recordSync(particle);
 					continue;
 				}
 			}
 			try {
 				tickParticle(particle);
-				if (enableLightCache) {
-					((LightCachedParticleAddon) particle).asyncparticles$refresh();
-				}
-				((ParticleAddon) particle).asyncparticles$setTicked();
 			} catch (Throwable t) {
 				AsyncTicker.onTickingParticleException(particle, t);
+			}
+			particleAddon.asyncparticles$setTicked();
+			if (enableLightCache) {
+				((LightCachedParticleAddon) particle).asyncparticles$refresh();
+			}
+			switch (particleCullingMode) {
+				case ASYNC_AABB -> particleAddon.asyncparticles$tickAABBCulling();
+				case ASYNC_SPHERE -> particleAddon.asyncparticles$tickSphereCulling();
 			}
 		}
 	}
@@ -219,8 +225,14 @@ public abstract class MixinParticleEngine {
 			particle.remove(); // to compatible with some mods...
 			// don't cancel it,
 			// otherwise it may cause memory leak with some mods
-		} else if (ConfigHelper.particleLightCache()) {
-			((LightCachedParticleAddon) particle).asyncparticles$refresh();
+		} else {
+			if (ConfigHelper.particleLightCache()) {
+				((LightCachedParticleAddon) particle).asyncparticles$refresh();
+			}
+			switch (ConfigHelper.getParticleCullingMode()) {
+				case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
+				case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
+			}
 		}
 	}
 

@@ -8,6 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -34,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -63,7 +65,7 @@ public class AsyncTicker {
 		() -> 5000,
 		ConfigHelper::getTickFailurePerSecondThreshold
 	);
-	private static final LongRef timeUsageNano = new LongRef(0L);
+	private static final AtomicLong timeUsageNano = new AtomicLong(0L);
 
 	static {
 		AtomicInteger workerCount = new AtomicInteger(1);
@@ -215,7 +217,7 @@ public class AsyncTicker {
 		// tick last, schedule async tasks
 		tryReload();
 		tryDebug();
-		CompletableFuture<Void> particleFuture = CompletableFuture.runAsync(() -> timeUsageNano.set(System.nanoTime()), EXECUTOR);
+		CompletableFuture<Void> particleFuture = CompletableFuture.runAsync(() -> timeUsageNano.setRelease(System.nanoTime()), EXECUTOR);
 		CompletableFuture<Void> sequencedTaskFuture = particleFuture;
 		CompletableFuture<?> parallelEventsFuture = Utils.NULL_FUTURE;
 		CompletableFuture<?> parallelOperationsFuture = Utils.NULL_FUTURE;
@@ -318,7 +320,7 @@ public class AsyncTicker {
 		}
 
 		AsyncTicker.particleFuture = sequencedTaskFuture
-			.thenRunAsync(() -> timeUsageNano.set(System.nanoTime() - timeUsageNano.get()), EXECUTOR);
+			.thenRunAsync(() -> timeUsageNano.setRelease(System.nanoTime() - timeUsageNano.getAcquire()), EXECUTOR);
 
 		profiler.pop();
 	}
@@ -431,6 +433,7 @@ public class AsyncTicker {
 		}
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 		boolean enableLightCache = ConfigHelper.particleLightCache();
+		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		for (Iterator<Particle> iterator = SYNC_PARTICLES.iterator(); iterator.hasNext(); ) {
 			Particle particle = iterator.next();
 			try {
@@ -438,6 +441,10 @@ public class AsyncTicker {
 				if (!(particle instanceof TrackingEmitter)) {
 					if (enableLightCache) {
 						((LightCachedParticleAddon) particle).asyncparticles$refresh();
+					}
+					switch (particleCullingMode) {
+						case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
+						case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
 					}
 					((ParticleAddon) particle).asyncparticles$setTicked();
 				}
@@ -493,7 +500,7 @@ public class AsyncTicker {
 			particles to add size: %d
 			sync particle count: %d,
 			sync particle types: %s,"""
-			.formatted(ConfigHelper.isTickAsync() ? timeUsageNano.get() / 1000000d : Double.NaN,
+			.formatted(ConfigHelper.isTickAsync() ? timeUsageNano.getAcquire() / 1000000d : Double.NaN,
 				debug_cancelled,
 				PARTICLE_OPERATIONS.size(),
 				SEQUENCED_END_TICK_EVENTS.size() + PARALLEL_END_TICK_EVENTS.size(),
@@ -542,13 +549,21 @@ public class AsyncTicker {
 			Queue<TrackingEmitter> newEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 			newEmitters.addAll(particleEngine.trackingEmitters);
 			particleEngine.trackingEmitters = newEmitters;
+			boolean enableLightCache = ConfigHelper.particleLightCache();
+			ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 			particleEngine.particles.entrySet().forEach(entry -> {
 				Queue<Particle> queue = entry.getValue();
 				Queue<Particle> newQueue = IterationSafeEvictingQueue.newInstance(queue.size(), ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 				newQueue.addAll(queue);
-				if (ConfigHelper.particleLightCache()){
-					newQueue.forEach(p -> ((LightCachedParticleAddon) p).asyncparticles$refresh());
-				}
+				newQueue.forEach(p -> {
+					if (enableLightCache) {
+						((LightCachedParticleAddon) p).asyncparticles$refresh();
+					}
+					switch (particleCullingMode) {
+						case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();
+						case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();
+					}
+				});
 				entry.setValue(newQueue);
 			});
 		}

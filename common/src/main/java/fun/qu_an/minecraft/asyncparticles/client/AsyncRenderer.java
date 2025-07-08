@@ -11,6 +11,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.iris.IrisCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
@@ -160,15 +161,36 @@ public class AsyncRenderer {
 										ParticleRenderType particleRenderType,
 										BufferBuilder bufferBuilder) {
 		Frustum frustum = AsyncRenderer.frustum;
-		boolean enableCull = ConfigHelper.isCullParticles();
+		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		float f2 = f + 1f;
 		for (Particle particle : particles) {
 			if (!particle.isAlive()) {
 				continue;
 			}
-			float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
-			if (enableCull && !frustum.isVisible(((ParticleAddon) particle).getRenderBoundingBox(f3))) {
-				continue;
+			float f3;
+			ParticleAddon particleAddon = (ParticleAddon) particle;
+			switch (particleCullingMode) {
+				case AABB -> {
+					f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+					if (particleAddon.asyncparticles$shouldCull() &&
+						!FrustumUtil.isVisible(frustum, particleAddon.getRenderBoundingBox(f3))) {
+						continue;
+					}
+				}
+				case SPHERE -> {
+					if (particleAddon.asyncparticles$shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
+						continue;
+					}
+					f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+				}
+				case ASYNC_AABB, ASYNC_SPHERE -> {
+					if (particleAddon.asyncparticles$shouldCull() &&
+						!particleAddon.asyncparticles$isVisibleOnScreen()) {
+						continue;
+					}
+					f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+				}
+				default -> f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
 			}
 			if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
 				recordSync(particleRenderType, particle);
@@ -311,8 +333,6 @@ public class AsyncRenderer {
 
 		TryAndStoreFakeBufferBuilder fakeBufferBuilder = new TryAndStoreFakeBufferBuilder();
 
-		// FIXME: This will mess up the title screen render state
-		//  because in 1.21.1 the ParticleRenderType#end method is removed
 		BufferBuilder builder = particleRenderType.begin(fakeBufferBuilder, textureManager);
 
 		RenderSystem.disableBlend();

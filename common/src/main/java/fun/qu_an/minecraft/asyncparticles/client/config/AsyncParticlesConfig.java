@@ -46,7 +46,7 @@ public class AsyncParticlesConfig {
 	public static int tick$failPerSecLimit;
 	public static FailBehavior tick$failBehavior;
 	public static boolean tick$suppressCME;
-	public static boolean rendering$cullParticles;
+	public static ParticleCullingMode rendering$particleCulling;
 	public static RenderingMode rendering$particleRenderingMode;
 	public static int rendering$failPerSecLimit;
 	public static FailBehavior rendering$failBehavior;
@@ -286,20 +286,20 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Rendering {
-			boolean cullParticles = true;
+			ParticleCullingMode particleCulling = ParticleCullingMode.SPHERE;
 			RenderingMode particleRenderingMode = RenderingMode.DELAYED;
 			int failPerSecLimit = 20;
 			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
 
 			private void flat() {
-				rendering$cullParticles = cullParticles;
+				rendering$particleCulling = requireNonNullElse(particleCulling, ParticleCullingMode.SPHERE);
 				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
 				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
 			}
 
 			private void fold() {
-				cullParticles = rendering$cullParticles;
+				particleCulling = rendering$particleCulling;
 				particleRenderingMode = rendering$particleRenderingMode;
 				failPerSecLimit = rendering$failPerSecLimit;
 				failBehavior = rendering$failBehavior;
