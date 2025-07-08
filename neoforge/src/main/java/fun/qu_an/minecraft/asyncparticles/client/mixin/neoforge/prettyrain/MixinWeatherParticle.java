@@ -1,6 +1,6 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.prettyrain;
 
-import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import com.leclowndu93150.particlerain.particle.WeatherParticle;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TextureSheetParticle;
@@ -12,10 +12,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import pigcart.particlerain.particle.WeatherParticle;
 
 @Mixin(value = WeatherParticle.class)
-public abstract class MixinWeatherParticle extends TextureSheetParticle implements ParticleAddon {
+public abstract class MixinWeatherParticle extends TextureSheetParticle {
 	@Shadow
 	public abstract void remove();
 
@@ -26,7 +25,7 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 		ParticleRainCompat.asyncparticles$particleCount.getAndIncrement();
 	}
 
-	@Inject(method = "remove", at = @At(value = "FIELD", remap = false, ordinal = 0, target = "Lpigcart/particlerain/WeatherParticleManager;particleCount:I"))
+	@Inject(method = "remove", at = @At(value = "FIELD", remap = false, ordinal = 0, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;particleCount:I"))
 	private void onRemove(CallbackInfo ci) {
 		ParticleRainCompat.asyncparticles$particleCount.getAndDecrement();
 	}

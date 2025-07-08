@@ -1,7 +1,6 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_3;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.api.EndTickEvent;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;

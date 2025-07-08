@@ -1,7 +1,6 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.particlerain;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.prettyrain;
 
 import com.leclowndu93150.particlerain.ParticleRainClient;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.api.EndTickEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientTickEvent;

@@ -36,7 +36,10 @@ public class ModListHelper {
 	/* Particle Rain */
 	public static final boolean PARTICLERAIN_LOADED = isModLoaded("particlerain");
 	public static final boolean FABRIC_PARTICLERAIN_LOADED = isFabricModLoaded("particlerain");
-	public static final boolean FORGE_PARTICLERAIN_LOADED = isForgeModLoaded("particlerain");
+	public static final boolean FORGE_PRETTY_RAIN_LOADED = isForgeModLoaded("particlerain") &&
+														   versionCheck("particlerain", null, "1.999999");
+	public static final boolean FORGE_PARTICLERAIN_LOADED = isForgeModLoaded("particlerain") &&
+														   versionCheck("particlerain", "3.999999", null);
 	/* Flywheel */
 	public static final boolean FLYWHEEL_LOADED = isModLoaded("flywheel");
 	/* Create */
