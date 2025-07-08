@@ -21,18 +21,18 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
     modCompileOnly "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 //    compileOnly "org.sinytra:connector:2.0.0-beta.7+1.21.1"
-    modCompileOnly("me.shedaniel.cloth:cloth-config:19.0.147")
+    modCompileOnly("me.shedaniel.cloth:cloth-config:18.0.145")
 
     /* Performance */
-    modCompileOnly "maven.modrinth:sodium:mc1.21.6-0.6.13-fabric"
-    modCompileOnly 'maven.modrinth:iris:l77DAK6U' // 1.9.1
-    modCompileOnly 'maven.modrinth:moreculling:ESxkwc6w' // 1.4.0-beta.1
+    modCompileOnly "maven.modrinth:sodium:mc1.21.5-0.6.13-fabric"
+    modCompileOnly 'maven.modrinth:iris:1.8.11+1.21.5-fabric'
+    modCompileOnly 'maven.modrinth:moreculling:MDkI6Huh' // 1.3.1
 
     /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:particle-rain:3.3.6"
+    modCompileOnly "maven.modrinth:particle-rain:3.3.4"
 
     /* Effectual */
-    modCompileOnly 'maven.modrinth:effectual:0.7.0-1.21.5' // TODO 1.21.5 ver
+    modCompileOnly 'maven.modrinth:effectual:1.1.0-1.21.7'
 
     /* Lodestone */
 //    modCompileOnly "maven.modrinth:lodestonelib:1.21.1-1.7.0.5-fabric" // no 1.21.4 version
@@ -45,17 +45,16 @@ dependencies {
     modCompileOnly "maven.modrinth:particular:1.1.1+1.21.4" // TODO:this is a 1.21.4 version
 
     /* Particle Core */
-    modCompileOnly "maven.modrinth:particle-core:0.2.6+1.21.5" // TODO 1.21.5 ver
-//    modCompileOnly("me.fallenbreath:conditional-mixin-fabric:0.6.4")
+    modCompileOnly "maven.modrinth:particle-core:0.2.6+1.21.5"
 
     /* A Good Place */
     modCompileOnly "maven.modrinth:a-good-place:kD90q4La" // 1.2.10 // TODO:this is a 1.21.4 version
 
     /* Physics Mod */
-    modCompileOnly "maven.modrinth:physicsmod:k8blA2yX" // 3.1.9
+    modCompileOnly "maven.modrinth:physicsmod:AHrXzQdA" // 3.1.8
 
     /* Subtle Effects */
-    modCompileOnly "maven.modrinth:subtle-effects:Ox1EUgbF" // fabric 1.11.0
+    modCompileOnly "maven.modrinth:subtle-effects:EhcPsdf1" // fabric 1.10.0
 
     /* What Are They Up To */
     modCompileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5 // TODO:this is a 1.21.4 version
