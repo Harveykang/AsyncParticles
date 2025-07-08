@@ -44,6 +44,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 	"com.imeetake.effectual.effects.SparksSoul.SoulFireImprovements",
 	"com.imeetake.effectual.effects.SteamEffect.SteamEffect",
 	"com.imeetake.effectual.effects.WaterDrip.WaterDripEffect",
+	"com.imeetake.effectual.effects.AirTrail.AirTrailEffect",
+	"com.imeetake.effectual.effects.Levitation.LevitationAuraEffect",
+	"com.imeetake.effectual.effects.SpeedAura.SpeedAuraEffect",
+	"com.imeetake.effectual.effects.WitherDecay.WitherDecayEffect",
 })
 public abstract class MixinAllEffects {
 	@Redirect(method = "register", remap = false, at = @At(value = "INVOKE", remap = false, target = "Lnet/fabricmc/fabric/api/event/Event;register(Ljava/lang/Object;)V"))
