@@ -22,7 +22,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.WeatherEffectRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
@@ -168,19 +167,19 @@ public class AsyncRenderer {
 			switch (particleCullingMode) {
 				case AABB -> {
 					f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
-					if (particleAddon.shouldCull() &&
+					if (particleAddon.asyncparticles$shouldCull() &&
 						!FrustumUtil.isVisible(frustum, particleAddon.getRenderBoundingBox(f3))) {
 						continue;
 					}
 				}
 				case SPHERE -> {
-					if (particleAddon.shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
+					if (particleAddon.asyncparticles$shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
 						continue;
 					}
 					f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
 				}
 				case ASYNC_AABB, ASYNC_SPHERE -> {
-					if (particleAddon.shouldCull() &&
+					if (particleAddon.asyncparticles$shouldCull() &&
 						!particleAddon.asyncparticles$isVisibleOnScreen()) {
 						continue;
 					}
