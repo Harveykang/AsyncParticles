@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import org.spongepowered.asm.mixin.throwables.MixinError;
@@ -100,7 +101,8 @@ public class AsyncParticlesMixinConfig {
 	static class MixinConfigObj {
 		private int version = 0;
 		private boolean safeLegacyRandomSource = false;
-		private boolean safeClassInstanceMultiMap = false;
+		private boolean safeClassInstanceMultiMap = ModListHelper.IRONS_SPELLBOOKS_LOADED &&
+													ModListHelper.IRONS_SPELLBOOKS_LESS_THAN_3_13_0;
 		private Set<String> noCulling = new LinkedHashSet<>();
 
 		{
@@ -166,8 +168,9 @@ public class AsyncParticlesMixinConfig {
 			} catch (NumberFormatException ignored) {
 			}
 			MixinConfigObj defaultConfig = new MixinConfigObj();
-			safeClassInstanceMultiMap =
-				getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
+			safeClassInstanceMultiMap = (ModListHelper.IRONS_SPELLBOOKS_LOADED &&
+										ModListHelper.IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
+										getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
 			safeLegacyRandomSource =
 				getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);
 			noCulling = getSet(properties, "particle$noCulling", defaultConfig.noCulling);
@@ -267,7 +270,7 @@ public class AsyncParticlesMixinConfig {
 		}
 
 		@Unmodifiable
-		Set<String>  getReplaceRandom() {
+		Set<String> getReplaceRandom() {
 			return Collections.unmodifiableSet(replaceRandom);
 		}
 

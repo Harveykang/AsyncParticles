@@ -37,6 +37,7 @@ public class ClothConfigMixinMenus {
 					.withStyle(ChatFormatting.DARK_RED),
 				Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip"))
 			.requireRestart()
+			.setRequirement(() -> !ModListHelper.IRONS_SPELLBOOKS_LOADED || !ModListHelper.IRONS_SPELLBOOKS_LESS_THAN_3_13_0)
 			.build());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noCulling"),

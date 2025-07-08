@@ -95,6 +95,9 @@ public class ModListHelper {
 	public static final boolean IMMEDIATELY_FAST_LOADED = isModLoaded("immediatelyfast");
 	/* Iron's Spells 'n Spellbooks */
 	public static final boolean IRONS_SPELLBOOKS_LOADED = isModLoaded("irons_spellbooks");
+	public static final boolean IRONS_SPELLBOOKS_LESS_THAN_3_13_0 =
+		IRONS_SPELLBOOKS_LOADED &&
+		ModListHelper.versionCheck("irons_spellbooks", null, "1.21.1-3.13.0");
 
 	@ExpectPlatform
 	private static boolean isForge() {
