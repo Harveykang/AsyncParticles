@@ -165,8 +165,9 @@ public class AsyncParticlesMixinConfig {
 			} catch (NumberFormatException ignored) {
 			}
 			MixinConfigObj defaultConfig = new MixinConfigObj();
-			safeClassInstanceMultiMap =
-				getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
+			safeClassInstanceMultiMap = (ModListHelper.IRONS_SPELLBOOKS_LOADED &&
+										ModListHelper.IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
+										getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
 			safeLegacyRandomSource =
 				getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);
 			noCulling = getSet(properties, "particle$noCulling", defaultConfig.noCulling);
