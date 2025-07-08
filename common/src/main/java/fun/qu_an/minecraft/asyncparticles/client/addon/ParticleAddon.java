@@ -29,7 +29,7 @@ public interface ParticleAddon extends IParticleCulling {
 	/**
 	 * This has way better performance than instanceof/getRenderBoundingBox
 	 */
-	boolean shouldCull();
+	boolean asyncparticles$shouldCull();
 
 	void asyncparticles$setNoCulling();
 

@@ -94,7 +94,7 @@ public abstract class MixinParticle implements ParticleAddon {
 		return (Class) this.getClass();
 	}
 
-	public boolean shouldCull() {
+	public boolean asyncparticles$shouldCull() {
 		return (asyncparticles$renderFlag & 2) != 0;
 	}
 

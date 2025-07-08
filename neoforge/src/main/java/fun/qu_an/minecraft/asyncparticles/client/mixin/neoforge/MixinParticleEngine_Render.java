@@ -58,13 +58,13 @@ public abstract class MixinParticleEngine_Render {
 			switch (particleCullingMode) {
 				case AABB -> {
 					f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
-					if (((ParticleAddon) particle).shouldCull() &&
+					if (((ParticleAddon) particle).asyncparticles$shouldCull() &&
 						!FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
 						continue;
 					}
 				}
 				case SPHERE -> {
-					if (((ParticleAddon) particle).shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
+					if (((ParticleAddon) particle).asyncparticles$shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
 						continue;
 					}
 					f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
@@ -113,13 +113,13 @@ public abstract class MixinParticleEngine_Render {
 			switch (particleCullingMode) {
 				case AABB -> {
 					f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
-					if (((ParticleAddon) particle).shouldCull() &&
+					if (((ParticleAddon) particle).asyncparticles$shouldCull() &&
 						!FrustumUtil.isVisible(frustum, ((ParticleAddon) particle).getRenderBoundingBox(f3))) {
 						continue;
 					}
 				}
 				case SPHERE -> {
-					if (((ParticleAddon) particle).shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
+					if (((ParticleAddon) particle).asyncparticles$shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
 						continue;
 					}
 					f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
