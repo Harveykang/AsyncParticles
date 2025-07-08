@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.particlerain;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.prettyrain;
 
 import com.leclowndu93150.particlerain.particle.SnowParticle;
 import com.mojang.blaze3d.vertex.VertexConsumer;

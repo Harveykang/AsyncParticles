@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.particlerain;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.prettyrain;
 
 import com.leclowndu93150.particlerain.WeatherParticleSpawner;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
