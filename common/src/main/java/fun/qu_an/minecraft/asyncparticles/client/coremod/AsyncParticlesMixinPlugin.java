@@ -72,9 +72,14 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					yield !IS_FORGE;
 				}
 				yield switch (split[1]) {
-					case "particlerain_vs" -> FABRIC_PARTICLERAIN_LOADED && VS_LOADED;
-					case "particlerain_create" -> FABRIC_PARTICLERAIN_LOADED && CREATE_LOADED;
-					case "particlerain" -> FABRIC_PARTICLERAIN_LOADED;
+					case "particlerain_3_vs" -> FABRIC_PARTICLERAIN_LOADED &&
+												versionCheck("particlerain", null, "3.999999") &&
+												VS_LOADED;
+					case "particlerain_3_create" -> FABRIC_PARTICLERAIN_LOADED &&
+													versionCheck("particlerain", null, "3.999999") &&
+													CREATE_LOADED;
+					case "particlerain_3" -> FABRIC_PARTICLERAIN_LOADED &&
+											 versionCheck("particlerain", null, "3.999999");
 					case "effective" -> FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
 					case "particular" -> FABRIC_PARTICULAR_LOADED;
