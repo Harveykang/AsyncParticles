@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import org.spongepowered.asm.mixin.throwables.MixinError;
@@ -98,6 +97,7 @@ public class AsyncParticlesMixinConfig {
 		private int version = 0;
 		private boolean redirectFleroviumCulling = FORGE_FLEROVIUM_LOADED && !SHIMMER_LOADED;
 		private boolean safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED;
+		private boolean safeBlockEntityMap = false;
 		private boolean safeLegacyRandomSource = false;
 		private Set<String> noCulling = new LinkedHashSet<>();
 
@@ -150,6 +150,7 @@ public class AsyncParticlesMixinConfig {
 			assertNotGlobal();
 			redirectFleroviumCulling = toSaveConfig.redirectFleroviumCulling;
 			safeClassInstanceMultiMap = toSaveConfig.safeClassInstanceMultiMap;
+			safeBlockEntityMap = toSaveConfig.safeBlockEntityMap;
 			safeLegacyRandomSource = toSaveConfig.safeLegacyRandomSource;
 			noCulling = toSaveConfig.noCulling;
 			noLightCache = toSaveConfig.noLightCache;
@@ -169,8 +170,8 @@ public class AsyncParticlesMixinConfig {
 									   getBoolean(properties, "particle$redirectFleroviumCulling", defaultConfig.redirectFleroviumCulling);
 			safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED ||
 										getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
-			safeLegacyRandomSource =
-				getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);
+			safeBlockEntityMap = getBoolean(properties, "safeBlockEntityMap", defaultConfig.safeBlockEntityMap);
+			safeLegacyRandomSource = getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);
 			noCulling = getSet(properties, "particle$noCulling", defaultConfig.noCulling);
 			noLightCache = getSet(properties, "particle$noLightCache", defaultConfig.noLightCache);
 			lockProvider = getSet(properties, "particle$lockProvider", defaultConfig.lockProvider);
@@ -186,6 +187,7 @@ public class AsyncParticlesMixinConfig {
 			properties.setProperty("version", Integer.toString(version));
 			properties.setProperty("particle$redirectFleroviumCulling", Boolean.toString(redirectFleroviumCulling));
 			properties.setProperty("safeClassInstanceMultiMap", Boolean.toString(safeClassInstanceMultiMap));
+			properties.setProperty("safeBlockEntityMap", Boolean.toString(safeBlockEntityMap));
 			properties.setProperty("safeLegacyRandomSource", Boolean.toString(safeLegacyRandomSource));
 			properties.setProperty("particle$noCulling", String.join(",", noCulling));
 			properties.setProperty("particle$noLightCache", String.join(",", noLightCache));
@@ -305,6 +307,15 @@ public class AsyncParticlesMixinConfig {
 			assertNotGlobal();
 			this.safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED ||
 											 safeClassInstanceMultiMap;
+		}
+
+		public boolean isSafeBlockEntityMap() {
+			return safeBlockEntityMap;
+		}
+
+		public void setSafeBlockEntityMap(boolean safeBlockEntityMap) {
+			assertNotGlobal();
+			this.safeBlockEntityMap = safeBlockEntityMap;
 		}
 	}
 }

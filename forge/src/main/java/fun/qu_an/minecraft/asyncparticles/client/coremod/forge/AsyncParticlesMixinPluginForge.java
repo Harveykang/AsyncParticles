@@ -36,9 +36,9 @@ public class AsyncParticlesMixinPluginForge implements IMixinConfigPlugin {
 			return true;
 		}
 		return switch (split[0]) {
-			case "prettyrain_1_vs" -> FORGE_PRETTY_RAIN_LOADED && VS_LOADED;
-			case "prettyrain_1_create" -> FORGE_PRETTY_RAIN_LOADED && CREATE_LOADED;
-			case "prettyrain_1" -> {
+			case "prettyrain_vs" -> FORGE_PRETTY_RAIN_LOADED && VS_LOADED;
+			case "prettyrain_create" -> FORGE_PRETTY_RAIN_LOADED && CREATE_LOADED;
+			case "prettyrain" -> {
 				if (!FORGE_PRETTY_RAIN_LOADED) {
 					yield false;
 				}

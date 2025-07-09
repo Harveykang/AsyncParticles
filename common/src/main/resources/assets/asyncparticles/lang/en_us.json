@@ -53,6 +53,8 @@
   "config.asyncparticles.mixin.tooltip": "Default entries can't be deleted.\n(Reset to default by removing all entries.)",
   "config.asyncparticles.mixin.safeClassInstanceMultiMap": "Make 'ClassInstanceMultiMap' Thread-Safe",
   "config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip": "Enable this if you're encountering crashes related\nto non-standard particle implementations in your\ninstalled mods that access entities in the world.",
+  "config.asyncparticles.mixin.safeBlockEntityMap": "Make 'LevelChunk#blockEntities' Thread-Safe",
+  "config.asyncparticles.mixin.safeBlockEntityMap.tooltip": "Enable this if you're encountering crashes related\nto non-standard particle implementations in your\ninstalled mods that access block entities in the world.",
   "config.asyncparticles.mixin.particle.noCulling": "Particle Culling Blacklist",
   "config.asyncparticles.mixin.particle.noLightCache": "Particles Light Cache Blacklist",
   "config.asyncparticles.mixin.particle.lockProvider": "Particles Lock Provider",

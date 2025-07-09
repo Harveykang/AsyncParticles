@@ -83,6 +83,17 @@ public class ClothConfigMixinMenus {
 			.setRequirement(() -> !IRONS_SPELLBOOKS_LOADED &&
 								  !MAKE_BUBBLES_POP_LOADED)
 			.build());
+		mixinCategory.addEntry(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap"),
+				lastConfig.isSafeBlockEntityMap())
+			.setDefaultValue(defaultConfig.isSafeBlockEntityMap())
+			.setSaveConsumer(newConfig::setSafeBlockEntityMap)
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap.tooltip"))
+			.requireRestart()
+			.build());
 		List<String> lastNoCulling = List.copyOf(lastConfig.getNoCulling());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noCulling"),
@@ -160,9 +171,9 @@ public class ClothConfigMixinMenus {
 				newConfig.setReplaceRandom(Collections.unmodifiableSet(s));
 			})
 			.setTooltip(
-				Component.translatable("config.asyncparticles.mixin.replaceRandom.tooltip"),
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.replaceRandom.tooltip"),
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
 			.build()));

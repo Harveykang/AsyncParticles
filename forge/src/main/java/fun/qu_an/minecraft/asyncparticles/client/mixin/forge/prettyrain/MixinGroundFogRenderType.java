@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.prettyrain_1;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.prettyrain;
 
 import com.leclowndu93150.particlerain.particle.render.GroundFogRenderType;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;

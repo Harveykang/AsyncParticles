@@ -1,9 +1,9 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.prettyrain_1_vs;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.prettyrain_vs;
 
 import com.leclowndu93150.particlerain.particle.GroundFogParticle;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
-import fun.qu_an.minecraft.asyncparticles.client.mixin.forge.prettyrain_1.MixinWeatherParticle;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.forge.prettyrain.MixinWeatherParticle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;

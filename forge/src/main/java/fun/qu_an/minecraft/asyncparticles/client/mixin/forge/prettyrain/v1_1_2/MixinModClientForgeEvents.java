@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.prettyrain_1.v1_1_2;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.prettyrain.v1_1_2;
 
 import com.leclowndu93150.particlerain.ClientStuff;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;

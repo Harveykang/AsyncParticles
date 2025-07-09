@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.ChunkPos;
@@ -20,13 +20,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-@Mixin(value = LevelChunk.class, priority = 1100)
-public abstract class MixinLevelChunk extends ChunkAccess {
+@Mixin(value = LevelChunk.class, priority = 1500)
+public abstract class MixinLevelChunk_BlockEntityMap extends ChunkAccess {
 	@Shadow
 	@Final
 	Level level;
 
-	public MixinLevelChunk(ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, Registry<Biome> biomeRegistry, long inhabitedTime, @Nullable LevelChunkSection[] sections, @Nullable BlendingData blendingData) {
+	public MixinLevelChunk_BlockEntityMap(ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, Registry<Biome> biomeRegistry, long inhabitedTime, @Nullable LevelChunkSection[] sections, @Nullable BlendingData blendingData) {
 		super(chunkPos, upgradeData, levelHeightAccessor, biomeRegistry, inhabitedTime, sections, blendingData);
 	}
 
@@ -35,8 +35,8 @@ public abstract class MixinLevelChunk extends ChunkAccess {
 		at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
 		if (level.isClientSide) {
-			// sodium copy block entities in setupTerrain()
 			blockEntities = new ConcurrentHashMap<>(blockEntities);
+			pendingBlockEntities = new ConcurrentHashMap<>(pendingBlockEntities);
 		}
 	}
 }
