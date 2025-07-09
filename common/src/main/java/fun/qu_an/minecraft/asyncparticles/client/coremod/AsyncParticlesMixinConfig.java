@@ -12,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
+
 public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
 	public static final int VERSION = 1;
@@ -94,8 +96,8 @@ public class AsyncParticlesMixinConfig {
 
 	static class MixinConfigObj {
 		private int version = 0;
-		private boolean redirectFleroviumCulling =  ModListHelper.FORGE_FLEROVIUM_LOADED && !ModListHelper.SHIMMER_LOADED;
-		private boolean safeClassInstanceMultiMap = ModListHelper.IRONS_SPELLBOOKS_LOADED;
+		private boolean redirectFleroviumCulling = FORGE_FLEROVIUM_LOADED && !SHIMMER_LOADED;
+		private boolean safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED;
 		private boolean safeLegacyRandomSource = false;
 		private Set<String> noCulling = new LinkedHashSet<>();
 
@@ -163,10 +165,10 @@ public class AsyncParticlesMixinConfig {
 			} catch (NumberFormatException ignored) {
 			}
 			MixinConfigObj defaultConfig = new MixinConfigObj();
-			redirectFleroviumCulling = ModListHelper.FORGE_FLEROVIUM_LOADED && !ModListHelper.SHIMMER_LOADED &&
-				getBoolean(properties, "particle$redirectFleroviumCulling", defaultConfig.redirectFleroviumCulling);
-			safeClassInstanceMultiMap = ModListHelper.IRONS_SPELLBOOKS_LOADED ||
-				getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
+			redirectFleroviumCulling = FORGE_FLEROVIUM_LOADED && !SHIMMER_LOADED &&
+									   getBoolean(properties, "particle$redirectFleroviumCulling", defaultConfig.redirectFleroviumCulling);
+			safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED ||
+										getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
 			safeLegacyRandomSource =
 				getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);
 			noCulling = getSet(properties, "particle$noCulling", defaultConfig.noCulling);
@@ -282,8 +284,8 @@ public class AsyncParticlesMixinConfig {
 
 		void setRedirectFleroviumCulling(boolean redirectFleroviumCulling) {
 			assertNotGlobal();
-			this.redirectFleroviumCulling =  ModListHelper.FORGE_FLEROVIUM_LOADED && !ModListHelper.SHIMMER_LOADED &&
-											 redirectFleroviumCulling;
+			this.redirectFleroviumCulling = FORGE_FLEROVIUM_LOADED && !SHIMMER_LOADED &&
+											redirectFleroviumCulling;
 		}
 
 		void setSafeLegacyRandomSource(boolean safeLegacyRandomSource) {
@@ -301,7 +303,8 @@ public class AsyncParticlesMixinConfig {
 
 		public void setSafeClassInstanceMultiMap(boolean safeClassInstanceMultiMap) {
 			assertNotGlobal();
-			this.safeClassInstanceMultiMap = ModListHelper.IRONS_SPELLBOOKS_LOADED || safeClassInstanceMultiMap;
+			this.safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED ||
+											 safeClassInstanceMultiMap;
 		}
 	}
 }

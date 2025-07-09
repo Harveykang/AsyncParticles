@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.StringListListEntryFixRestart;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
@@ -10,11 +9,9 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.network.chat.Component;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.*;
 
 // No more NoClassDefFoundError
@@ -31,7 +28,7 @@ public class ClothConfigMixinMenus {
 			.setDefaultValue(defaultConfig.isRedirectFleroviumCulling())
 			.setSaveConsumer(newConfig::setRedirectFleroviumCulling)
 			.setTooltipSupplier(() -> {
-				if (!ModListHelper.FORGE_FLEROVIUM_LOADED || !ModListHelper.SHIMMER_LOADED) {
+				if (!FORGE_FLEROVIUM_LOADED || !SHIMMER_LOADED) {
 					return Optional.of(new Component[]{
 						Component.translatable("text.cloth-config.restart_required")
 							.withStyle(ChatFormatting.DARK_RED),
@@ -49,7 +46,7 @@ public class ClothConfigMixinMenus {
 				}
 			})
 			.requireRestart()
-			.setRequirement(() -> ModListHelper.FORGE_FLEROVIUM_LOADED && !ModListHelper.SHIMMER_LOADED)
+			.setRequirement(() -> FORGE_FLEROVIUM_LOADED && !SHIMMER_LOADED)
 			.build());
 		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap"),
@@ -57,25 +54,34 @@ public class ClothConfigMixinMenus {
 			.setDefaultValue(defaultConfig.isSafeClassInstanceMultiMap())
 			.setSaveConsumer(newConfig::setSafeClassInstanceMultiMap)
 			.setTooltipSupplier(() -> {
-				if (!ModListHelper.IRONS_SPELLBOOKS_LOADED) {
+				if (!IRONS_SPELLBOOKS_LOADED &&
+					!MAKE_BUBBLES_POP_LOADED) {
 					return Optional.of(new Component[]{
 						Component.translatable("text.cloth-config.restart_required")
 							.withStyle(ChatFormatting.DARK_RED),
 						Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip")
 					});
 				} else {
-					return Optional.of(new Component[]{
-						Component.translatable("text.cloth-config.restart_required")
-							.withStyle(ChatFormatting.DARK_RED),
-						Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip")
-							.withStyle(ChatFormatting.STRIKETHROUGH),
-						Component.translatable("config.asyncparticles.limited", "Iron's Spells 'n Spellbooks")
-							.withStyle(ChatFormatting.DARK_RED)
-					});
+					ArrayList<Component> list = new ArrayList<>();
+
+					list.add(Component.translatable("text.cloth-config.restart_required")
+						.withStyle(ChatFormatting.DARK_RED));
+					list.add(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip")
+						.withStyle(ChatFormatting.STRIKETHROUGH));
+					if (IRONS_SPELLBOOKS_LOADED) {
+						list.add(Component.translatable("config.asyncparticles.limited", "Iron's Spells 'n Spellbooks")
+							.withStyle(ChatFormatting.DARK_RED));
+					}
+					if (MAKE_BUBBLES_POP_LOADED) {
+						list.add(Component.translatable("config.asyncparticles.limited", "Make Bubbles Pop")
+							.withStyle(ChatFormatting.DARK_RED));
+					}
+					return Optional.of(list.toArray(new Component[0]));
 				}
 			})
 			.requireRestart()
-			.setRequirement(() -> !ModListHelper.IRONS_SPELLBOOKS_LOADED)
+			.setRequirement(() -> !IRONS_SPELLBOOKS_LOADED &&
+								  !MAKE_BUBBLES_POP_LOADED)
 			.build());
 		List<String> lastNoCulling = List.copyOf(lastConfig.getNoCulling());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
