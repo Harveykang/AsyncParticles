@@ -20,6 +20,7 @@ public abstract class MixinGroundFogParticle extends MixinWeatherParticle implem
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
 		ParticleRainCompat.asyncparticles$fogCount.getAndIncrement();
+		setSize(8f, 0.01f);
 	}
 
 	@Inject(method = "remove", at = @At(value = "FIELD", ordinal = 0, remap = false, target = "Lpigcart/particlerain/WeatherParticleManager;fogCount:I"))
