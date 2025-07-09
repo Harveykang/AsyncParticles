@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import org.spongepowered.asm.mixin.throwables.MixinError;
@@ -96,7 +97,7 @@ public class AsyncParticlesMixinConfig {
 
 	static class MixinConfigObj {
 		private int version = 0;
-		private boolean safeClassInstanceMultiMap = false;
+		private boolean safeClassInstanceMultiMap = ModListHelper.MAKE_BUBBLES_POP_LOADED;
 		private boolean safeLegacyRandomSource = false;
 		private Set<String> noCulling = new LinkedHashSet<>();
 
@@ -162,7 +163,7 @@ public class AsyncParticlesMixinConfig {
 			} catch (NumberFormatException ignored) {
 			}
 			MixinConfigObj defaultConfig = new MixinConfigObj();
-			safeClassInstanceMultiMap =
+			safeClassInstanceMultiMap = ModListHelper.MAKE_BUBBLES_POP_LOADED ||
 				getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
 			safeLegacyRandomSource =
 				getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);
@@ -287,7 +288,8 @@ public class AsyncParticlesMixinConfig {
 
 		public void setSafeClassInstanceMultiMap(boolean safeClassInstanceMultiMap) {
 			assertNotGlobal();
-			this.safeClassInstanceMultiMap = safeClassInstanceMultiMap;
+			this.safeClassInstanceMultiMap = ModListHelper.MAKE_BUBBLES_POP_LOADED ||
+											 safeClassInstanceMultiMap;
 		}
 	}
 }
