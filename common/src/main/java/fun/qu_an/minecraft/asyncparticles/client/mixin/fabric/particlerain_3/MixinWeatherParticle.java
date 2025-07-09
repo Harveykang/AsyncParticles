@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_3;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;

@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_3;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;

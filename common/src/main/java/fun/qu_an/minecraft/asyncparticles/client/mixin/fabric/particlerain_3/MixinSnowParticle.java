@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_3;
 
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
 import net.minecraft.client.multiplayer.ClientLevel;

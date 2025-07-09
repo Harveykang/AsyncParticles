@@ -1,15 +1,13 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.prettyrain;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.TextureSheetParticle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import pigcart.particlerain.particle.*;
+import com.leclowndu93150.particlerain.particle.*;
 
 @Mixin(value = {
 	DustParticle.class,
@@ -19,7 +17,8 @@ import pigcart.particlerain.particle.*;
 	StreakParticle.class,
 	ShrubParticle.class,
 	RippleParticle.class})
-public abstract class MixinWeatherParticles extends TextureSheetParticle implements WeatherParticleAddon {
+public abstract class MixinWeatherParticles extends MixinWeatherParticle {
+
 	protected MixinWeatherParticles(ClientLevel clientLevel, double d, double e, double f) {
 		super(clientLevel, d, e, f);
 	}

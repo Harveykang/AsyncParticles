@@ -1,5 +1,6 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.prettyrain;
 
+import com.leclowndu93150.particlerain.WeatherParticleSpawner;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -11,16 +12,15 @@ import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import pigcart.particlerain.WeatherParticleSpawner;
 
 @Mixin(value = WeatherParticleSpawner.class)
 public class MixinWeatherParticleSpawner {
-	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", remap = false, target = "Lpigcart/particlerain/ParticleRainClient;particleCount:I"))
+	@ModifyExpressionValue(method = "spawnParticle", remap = false, at = @At(value = "FIELD", remap = false, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;particleCount:I"))
 	private static int modifyParticleCount(int original) {
 		return ParticleRainCompat.asyncparticles$particleCount.get();
 	}
 
-	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", remap = false, target = "Lpigcart/particlerain/ParticleRainClient;fogCount:I"))
+	@ModifyExpressionValue(method = "spawnParticle", remap = false, at = @At(value = "FIELD", remap = false, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;fogCount:I"))
 	private static int modifyFogCount(int original) {
 		return ParticleRainCompat.asyncparticles$fogCount.get();
 	}
@@ -28,8 +28,8 @@ public class MixinWeatherParticleSpawner {
 	@Unique
 	private static final ResourceLocation PARTICLE_RAIN$UPDATE =
 		ResourceLocation.fromNamespaceAndPath("particlerain", "update");
-	@WrapMethod(method = "update")
-	private static void wrapUpdate(ClientLevel level, Entity entity, float f, Operation<Void> original) {
+	@WrapMethod(method = "update", remap = false)
+	private static void onUpdate(ClientLevel level, Entity entity, float f, Operation<Void> original) {
 		EndTickOperation.schedule(PARTICLE_RAIN$UPDATE, false, () -> original.call(level, entity, f));
 	}
 

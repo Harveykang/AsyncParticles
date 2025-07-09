@@ -36,9 +36,9 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 		}
 		return switch (split[0]) {
 			case "off_thread_access" -> true;
-			case "particlerain" -> FORGE_PARTICLERAIN_LOADED;
-			case "particlerain_create" -> FORGE_PARTICLERAIN_LOADED && CREATE_LOADED;
-			case "particlerain_vs" -> FORGE_PARTICLERAIN_LOADED && VS_LOADED;
+			case "prettyrain" -> FORGE_PRETTY_RAIN_LOADED;
+			case "prettyrain_create" -> FORGE_PRETTY_RAIN_LOADED && CREATE_LOADED;
+			case "prettyrain_vs" -> FORGE_PRETTY_RAIN_LOADED && VS_LOADED;
 			case "create" -> FORGE_CREATE_LOADED;
 			// TODO: 下面这个 mod 没有正式发布，且不确定是否是唯一的 forge 移植版
 			case "effecticularity" -> FORGE_EFFECTIVE_LOADED;

@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_vs;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_3_vs;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;

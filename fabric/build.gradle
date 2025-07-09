@@ -69,7 +69,7 @@ dependencies {
 //    modLocalRuntime "maven.modrinth:pretty-rain:TGjK6ChS"
 
     /* Effectual */
-    modLocalRuntime 'maven.modrinth:tlib:1.2.0-1.21.1'
+    modLocalRuntime 'maven.modrinth:tlib:1.3.0-1.21.1'
     modLocalRuntime 'maven.modrinth:effectual:1.1.0-1.21.1'
 
     /* Mmmmmmmmmmmm */
