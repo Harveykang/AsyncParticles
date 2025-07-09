@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.StringListListEntryFixRestart;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
@@ -10,11 +9,9 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.network.chat.Component;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.MixinConfigObj;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.getToSaveConfig;
 
@@ -32,12 +29,38 @@ public class ClothConfigMixinMenus {
 				lastConfig.isSafeClassInstanceMultiMap())
 			.setDefaultValue(defaultConfig.isSafeClassInstanceMultiMap())
 			.setSaveConsumer(newConfig::setSafeClassInstanceMultiMap)
-			.setTooltip(
-				Component.translatable("text.cloth-config.restart_required")
-					.withStyle(ChatFormatting.DARK_RED),
-				Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip"))
+			.setTooltipSupplier(() -> {
+				if ((!IRONS_SPELLBOOKS_LOADED ||
+					 !IRONS_SPELLBOOKS_LESS_THAN_3_13_0) &&
+					!MAKE_BUBBLES_POP_LOADED) {
+					return Optional.of(new Component[]{
+						Component.translatable("text.cloth-config.restart_required")
+							.withStyle(ChatFormatting.DARK_RED),
+						Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip")
+					});
+				} else {
+					ArrayList<Component> list = new ArrayList<>();
+
+					list.add(Component.translatable("text.cloth-config.restart_required")
+						.withStyle(ChatFormatting.DARK_RED));
+					list.add(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip")
+						.withStyle(ChatFormatting.STRIKETHROUGH));
+					if (IRONS_SPELLBOOKS_LOADED &&
+						IRONS_SPELLBOOKS_LESS_THAN_3_13_0) {
+						list.add(Component.translatable("config.asyncparticles.limited", "Iron's Spells 'n Spellbooks")
+							.withStyle(ChatFormatting.DARK_RED));
+					}
+					if (MAKE_BUBBLES_POP_LOADED) {
+						list.add(Component.translatable("config.asyncparticles.limited", "Make Bubbles Pop")
+							.withStyle(ChatFormatting.DARK_RED));
+					}
+					return Optional.of(list.toArray(new Component[0]));
+				}
+			})
 			.requireRestart()
-			.setRequirement(() -> !ModListHelper.IRONS_SPELLBOOKS_LOADED || !ModListHelper.IRONS_SPELLBOOKS_LESS_THAN_3_13_0)
+			.setRequirement(() -> (!IRONS_SPELLBOOKS_LOADED ||
+								   !IRONS_SPELLBOOKS_LESS_THAN_3_13_0) &&
+								  !MAKE_BUBBLES_POP_LOADED)
 			.build());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noCulling"),

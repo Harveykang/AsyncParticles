@@ -98,6 +98,8 @@ public class ModListHelper {
 	public static final boolean IRONS_SPELLBOOKS_LESS_THAN_3_13_0 =
 		IRONS_SPELLBOOKS_LOADED &&
 		ModListHelper.versionCheck("irons_spellbooks", null, "1.21.1-3.13.0");
+	/* Make Bubbles Pop */
+	public static final boolean MAKE_BUBBLES_POP_LOADED = isModLoaded("make_bubbles_pop");
 
 	@ExpectPlatform
 	private static boolean isForge() {

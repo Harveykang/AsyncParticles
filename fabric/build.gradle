@@ -70,7 +70,7 @@ dependencies {
 
     /* Effectual */
     modLocalRuntime 'maven.modrinth:tlib:1.2.0-1.21.1'
-    modLocalRuntime 'maven.modrinth:effectual:1.0.0-1.21.1'
+    modLocalRuntime 'maven.modrinth:effectual:1.1.0-1.21.1'
 
     /* Mmmmmmmmmmmm */
 //    modLocalRuntime 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'

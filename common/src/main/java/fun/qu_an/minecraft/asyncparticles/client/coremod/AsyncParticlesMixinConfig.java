@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import org.spongepowered.asm.mixin.throwables.MixinError;
@@ -14,6 +13,9 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
+
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
+import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.LOGGER;
 
 public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
@@ -30,6 +32,7 @@ public class AsyncParticlesMixinConfig {
 	private static MixinConfigObj toSaveConfig;
 
 	static {
+		LOGGER.debug("AsyncParticlesConfig initialized.");
 		try {
 			load();
 		} catch (Throwable e) {
@@ -98,8 +101,8 @@ public class AsyncParticlesMixinConfig {
 	static class MixinConfigObj {
 		private int version = 0;
 		private boolean safeLegacyRandomSource = false;
-		private boolean safeClassInstanceMultiMap = ModListHelper.IRONS_SPELLBOOKS_LOADED &&
-													ModListHelper.IRONS_SPELLBOOKS_LESS_THAN_3_13_0;
+		private boolean safeClassInstanceMultiMap = (IRONS_SPELLBOOKS_LOADED && IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
+													MAKE_BUBBLES_POP_LOADED;
 		private Set<String> noCulling = new LinkedHashSet<>();
 
 		{
@@ -165,8 +168,8 @@ public class AsyncParticlesMixinConfig {
 			} catch (NumberFormatException ignored) {
 			}
 			MixinConfigObj defaultConfig = new MixinConfigObj();
-			safeClassInstanceMultiMap = (ModListHelper.IRONS_SPELLBOOKS_LOADED &&
-										ModListHelper.IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
+			safeClassInstanceMultiMap = (IRONS_SPELLBOOKS_LOADED && IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
+										MAKE_BUBBLES_POP_LOADED ||
 										getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
 			safeLegacyRandomSource =
 				getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);
@@ -285,13 +288,15 @@ public class AsyncParticlesMixinConfig {
 			return safeLegacyRandomSource;
 		}
 
-		void setSafeClassInstanceMultiMap(boolean safeClassInstanceMultiMap) {
-			assertNotGlobal();
-			this.safeClassInstanceMultiMap = safeClassInstanceMultiMap;
-		}
-
 		public boolean isSafeClassInstanceMultiMap() {
 			return safeClassInstanceMultiMap;
+		}
+
+		public void setSafeClassInstanceMultiMap(boolean safeClassInstanceMultiMap) {
+			assertNotGlobal();
+			this.safeClassInstanceMultiMap = (IRONS_SPELLBOOKS_LOADED && IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
+											 MAKE_BUBBLES_POP_LOADED ||
+											 safeClassInstanceMultiMap;
 		}
 	}
 }
