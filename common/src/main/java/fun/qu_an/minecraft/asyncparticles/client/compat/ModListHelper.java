@@ -95,6 +95,8 @@ public class ModListHelper {
 	public static final boolean IMMEDIATELY_FAST_LOADED = isModLoaded("immediatelyfast");
 	/* More Culling */
 	public static final boolean MORE_CULLING_LOADED = isModLoaded("moreculling");
+	/* Make Bubbles Pop */
+	public static final boolean MAKE_BUBBLES_POP_LOADED = isModLoaded("make_bubbles_pop");
 
 	@ExpectPlatform
 	private static boolean isForge() {

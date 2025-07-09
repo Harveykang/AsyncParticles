@@ -10,11 +10,9 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.network.chat.Component;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.MAKE_BUBBLES_POP_LOADED;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.MixinConfigObj;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.getToSaveConfig;
 
@@ -31,11 +29,27 @@ public class ClothConfigMixinMenus {
 				lastConfig.isSafeClassInstanceMultiMap())
 			.setDefaultValue(defaultConfig.isSafeClassInstanceMultiMap())
 			.setSaveConsumer(newConfig::setSafeClassInstanceMultiMap)
-			.setTooltip(
-				Component.translatable("text.cloth-config.restart_required")
-				.withStyle(ChatFormatting.DARK_RED),
-				Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip"))
+			.setTooltipSupplier(() -> {
+				if (!MAKE_BUBBLES_POP_LOADED) {
+					return Optional.of(new Component[]{
+						Component.translatable("text.cloth-config.restart_required")
+							.withStyle(ChatFormatting.DARK_RED),
+						Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip")
+					});
+				} else {
+					ArrayList<Component> list = new ArrayList<>();
+
+					list.add(Component.translatable("text.cloth-config.restart_required")
+						.withStyle(ChatFormatting.DARK_RED));
+					list.add(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip")
+						.withStyle(ChatFormatting.STRIKETHROUGH));
+					list.add(Component.translatable("config.asyncparticles.limited", "Make Bubbles Pop")
+						.withStyle(ChatFormatting.DARK_RED));
+					return Optional.of(list.toArray(new Component[0]));
+				}
+			})
 			.requireRestart()
+				.setRequirement(() -> !ModListHelper.MAKE_BUBBLES_POP_LOADED)
 			.build());
 		List<String> lastNoCulling = List.copyOf(lastConfig.getNoCulling());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
