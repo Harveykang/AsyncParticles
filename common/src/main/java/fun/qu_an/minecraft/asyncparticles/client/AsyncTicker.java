@@ -258,36 +258,32 @@ public class AsyncTicker {
 			EndTickOperation[] endTickTasks = endTickOperations.toArray(new EndTickOperation[0]);
 			endTickOperations.clear();
 			sequencedTaskFuture = sequencedTaskFuture.thenRun(() -> {
-				// 每 tick 添加的不固定操作
 				for (EndTickOperation endTickTask : endTickTasks) {
 					if (!endTickTask.isParallel()) {
-						continue;
-					}
-					try {
-						endTickTask.run();
-					} catch (Exception e) {
-						if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickTask.getId(), e)) {
-							throw e;
+						try {
+							endTickTask.run();
+						} catch (Exception e) {
+							if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickTask.getId(), e)) {
+								throw e;
+							}
 						}
 					}
 				}
 			}).exceptionally(AsyncTicker::tickExceptionally);
 			parallelOperationsFuture = particleFuture.thenCompose(v -> {
-				// 每 tick 结束时都要执行的固定事件，可在 tick 间的任意时刻执行
 				@SuppressWarnings("rawtypes")
 				CompletableFuture[] futures = new CompletableFuture[endTickTasks.length];
 				int j = 0;
 				for (EndTickOperation endTickTask : endTickTasks) {
 					if (endTickTask.isParallel()) {
-						continue;
+						futures[j++] = CompletableFuture.runAsync(endTickTask, EXECUTOR)
+							.exceptionally(e -> {
+								if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickTask.getId(), e)) {
+									throw toThrowDirectly(e);
+								}
+								return null;
+							});
 					}
-					futures[j++] = CompletableFuture.runAsync(endTickTask, EXECUTOR)
-						.exceptionally(e -> {
-							if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickTask.getId(), e)) {
-								throw toThrowDirectly(e);
-							}
-							return null;
-						});
 				}
 				return j == 0 ? Utils.nullFuture() : CompletableFuture.allOf(Arrays.copyOf(futures, j));
 			}).exceptionally(AsyncTicker::tickExceptionally);

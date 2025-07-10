@@ -83,6 +83,13 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> tick$particleTickMode = newValue)
 				.build())
 			.addEntry(entryBuilder
+				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.tickWeatherAsync"),
+					tick$tickWeatherAsync)
+				.setDefaultValue(defaultConfig.tick.tickWeatherAsync)
+				.setTooltip(Component.translatable("config.asyncparticles.tick.tickWeatherAsync.tooltip"))
+				.setSaveConsumer(newValue -> tick$tickWeatherAsync = newValue)
+				.build())
+			.addEntry(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.tick.failPerSecLimit"),
 					tick$failPerSecLimit)
 				.setDefaultValue(defaultConfig.tick.failPerSecLimit)
@@ -116,6 +123,14 @@ class ClothConfigMenus {
 		ConfigCategory renderingCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.rendering"));
 		renderingCategory
 			.addEntry(entryBuilder
+				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.particleRenderingMode"),
+					RenderingMode.class, rendering$particleRenderingMode)
+				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
+				.setDefaultValue(defaultConfig.rendering.particleRenderingMode)
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.particleRenderingMode.tooltip"))
+				.setSaveConsumer(newValue -> rendering$particleRenderingMode = newValue)
+				.build())
+			.addEntry(entryBuilder
 				.startSelector(Component.translatable("config.asyncparticles.rendering.particleCulling"),
 					ParticleCullingMode.values(), rendering$particleCulling)
 				.setNameProvider(ParticleCullingMode::getComponent)
@@ -124,12 +139,11 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> rendering$particleCulling = newValue)
 				.build())
 			.addEntry(entryBuilder
-				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.particleRenderingMode"),
-					RenderingMode.class, rendering$particleRenderingMode)
-				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
-				.setDefaultValue(defaultConfig.rendering.particleRenderingMode)
-				.setTooltip(Component.translatable("config.asyncparticles.rendering.particleRenderingMode.tooltip"))
-				.setSaveConsumer(newValue -> rendering$particleRenderingMode = newValue)
+				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.cullWeathers"),
+					rendering$cullWeathers)
+				.setDefaultValue(defaultConfig.rendering.cullWeathers)
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.cullWeathers.tooltip"))
+				.setSaveConsumer(newValue -> rendering$cullWeathers = newValue)
 				.build())
 			.addEntry(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.rendering.failPerSecLimit"),

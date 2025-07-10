@@ -91,4 +91,7 @@ dependencies {
 
     /* Immediately Fast */
     modCompileOnly "maven.modrinth:immediatelyfast:1.5.0+1.20.4-fabric"
+
+    /* More Culling */
+    modCompileOnly "maven.modrinth:moreculling:0.24.0"
 }

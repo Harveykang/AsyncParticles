@@ -13,7 +13,7 @@ public class MixinClientTickHandler {
 	@Shadow @Final public static ClientTickHandler INSTANCE;
 
 	static {
-		EndTickEvent.register(false, () -> INSTANCE.onTickInGame());
+		EndTickEvent.register(() -> INSTANCE.onTickInGame());
 	}
 
 	/**

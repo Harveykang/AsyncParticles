@@ -14,7 +14,7 @@ public interface EndTickOperation extends Runnable {
 	}
 
 	static void schedule(ResourceLocation id, Runnable task) {
-		schedule(id, true, task);
+		schedule(id, false, task);
 	}
 
 	static void schedule(ResourceLocation id, boolean parallel, MinecraftConsumer task) {

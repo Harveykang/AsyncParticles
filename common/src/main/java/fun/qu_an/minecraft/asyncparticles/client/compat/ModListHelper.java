@@ -109,6 +109,8 @@ public class ModListHelper {
 	public static final boolean IRONS_SPELLBOOKS_LOADED = isModLoaded("irons_spellbooks");
 	/* Make Bubbles Pop */
 	public static final boolean MAKE_BUBBLES_POP_LOADED = isModLoaded("make_bubbles_pop");
+	/* More Culling */
+	public static final boolean MORE_CULLING_LOADED = isModLoaded("moreculling");
 
 	@ExpectPlatform
 	private static boolean isForge() {

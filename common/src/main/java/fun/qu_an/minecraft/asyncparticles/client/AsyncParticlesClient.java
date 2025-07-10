@@ -2,13 +2,15 @@ package fun.qu_an.minecraft.asyncparticles.client;
 
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.moreculling.MoreCullingCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
-import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.phys.Vec3;
+
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 
 @Environment(EnvType.CLIENT)
 public class AsyncParticlesClient {
@@ -16,8 +18,11 @@ public class AsyncParticlesClient {
 	public static final String ISSUE_URL = "https://github.com/Harveykang/AsyncParticles/issues";
 
 	public static void init() {
-		if (!ModListHelper.IS_CLIENT) {
+		if (!IS_CLIENT) {
 			return;
+		}
+		if (MORE_CULLING_LOADED) {
+			MoreCullingCompat.init();
 		}
 		if (ModListHelper.PARTICLERAIN_LOADED) {
 			if (ModListHelper.VS_LOADED) {

@@ -30,7 +30,7 @@ public class MixinWeatherParticleSpawner {
 		new ResourceLocation("particlerain", "update");
 	@WrapMethod(method = "update")
 	private static void wrapUpdate(ClientLevel level, Entity entity, float f, Operation<Void> original){
-		EndTickOperation.schedule(asyncparticles$PARTICLE_RAIN$UPDATE, false, () -> original.call(level, entity, f));
+		EndTickOperation.schedule(asyncparticles$PARTICLE_RAIN$UPDATE, () -> original.call(level, entity, f));
 	}
 
 	@ModifyExpressionValue(method = "update", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/core/BlockPos$MutableBlockPos;getY()I"))
