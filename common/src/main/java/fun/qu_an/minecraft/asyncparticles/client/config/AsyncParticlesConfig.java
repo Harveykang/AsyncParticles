@@ -282,7 +282,7 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Rendering {
-			ParticleCullingMode particleCulling = ParticleCullingMode.SPHERE;
+			ParticleCullingMode particleCulling = ParticleCullingMode.AABB;
 			RenderingMode particleRenderingMode = RenderingMode.DELAYED;
 			int failPerSecLimit = 20;
 			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;

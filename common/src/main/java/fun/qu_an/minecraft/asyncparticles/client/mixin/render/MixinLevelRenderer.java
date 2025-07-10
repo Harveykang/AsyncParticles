@@ -96,22 +96,4 @@ public abstract class MixinLevelRenderer {
 	private void redirectClearRenderState(RenderStateShard.OutputStateShard instance) {
 		// no-op
 	}
-
-	@Inject(method = "renderLevel", // priority = 499, inject earlier
-		at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/renderer/LevelRenderer;renderDebug(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/Camera;)V"))
-	private void onRenderLevelTail(PoseStack poseStack,
-								   float partialTick,
-								   long l,
-								   boolean bl,
-								   Camera camera,
-								   GameRenderer gameRenderer,
-								   LightTexture lightTexture,
-								   Matrix4f matrix4f,
-								   CallbackInfo ci,
-								   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
-								   LocalIntRef irm) {
-		if (transparencyChain == null && irm.get() == DELAYED_ASYNC) {
-			AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, true);
-		}
-	}
 }

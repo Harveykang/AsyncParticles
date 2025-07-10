@@ -6,21 +6,21 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.DELAYED_ASYNC;
 
 @Mixin(value = LevelRenderer.class, priority = 1500)
 public abstract class MixinLevelRenderer_Late {
 	@Inject(method = "renderLevel", // inject later
-		slice = @Slice(from = @At(value = "FIELD", ordinal = 1, target = "Lnet/minecraft/client/renderer/RenderStateShard;WEATHER_TARGET:Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;")),
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;process(F)V"))
+		at = @At(value = "FIELD", ordinal = 2, target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;"))
 	private void onRenderLevelTail2(PoseStack poseStack,
 									float partialTick,
 									long l,
@@ -38,6 +38,7 @@ public abstract class MixinLevelRenderer_Late {
 			PoseStack.Pose pose = stack.poseStack.removeLast();
 			AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, true);
 			stack.poseStack.addLast(pose);
+			RenderSystem.applyModelViewMatrix();
 		}
 	}
 }
