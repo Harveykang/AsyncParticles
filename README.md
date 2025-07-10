@@ -9,7 +9,7 @@
 ## Features
 
 - Minecraft
-  - Particle culling.
+  - Fast particle culling.
   - Async particle tick/rendering(buffer filling).
   - Async particle light cache.
   - Delayed texture tick by one frame to reduce client tick duration.

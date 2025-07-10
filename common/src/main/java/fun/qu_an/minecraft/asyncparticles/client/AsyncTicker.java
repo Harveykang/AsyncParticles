@@ -262,13 +262,12 @@ public class AsyncTicker {
 				// 每 tick 添加的不固定操作
 				for (EndTickOperation endTickTask : endTickTasks) {
 					if (!endTickTask.isParallel()) {
-						continue;
-					}
-					try {
-						endTickTask.run();
-					} catch (Exception e) {
-						if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickTask.getId(), e)) {
-							throw e;
+						try {
+							endTickTask.run();
+						} catch (Exception e) {
+							if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickTask.getId(), e)) {
+								throw e;
+							}
 						}
 					}
 				}
@@ -280,15 +279,14 @@ public class AsyncTicker {
 				int j = 0;
 				for (EndTickOperation endTickTask : endTickTasks) {
 					if (endTickTask.isParallel()) {
-						continue;
+						futures[j++] = CompletableFuture.runAsync(endTickTask, EXECUTOR)
+							.exceptionally(e -> {
+								if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickTask.getId(), e)) {
+									throw toThrowDirectly(e);
+								}
+								return null;
+							});
 					}
-					futures[j++] = CompletableFuture.runAsync(endTickTask, EXECUTOR)
-						.exceptionally(e -> {
-							if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickTask.getId(), e)) {
-								throw toThrowDirectly(e);
-							}
-							return null;
-						});
 				}
 				return j == 0 ? Utils.nullFuture() : CompletableFuture.allOf(Arrays.copyOf(futures, j));
 			}).exceptionally(AsyncTicker::tickExceptionally);

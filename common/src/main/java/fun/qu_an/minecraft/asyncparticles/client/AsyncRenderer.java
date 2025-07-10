@@ -192,7 +192,7 @@ public class AsyncRenderer {
 				}
 				default -> f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
 			}
-			if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
+			if (particleAddon.asyncparticles$isRenderSync()) {
 				recordSync(particleRenderType, particle);
 				continue;
 			}

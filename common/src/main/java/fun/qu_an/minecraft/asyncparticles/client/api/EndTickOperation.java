@@ -26,7 +26,7 @@ public interface EndTickOperation extends Runnable {
 	 * @apiNote Execution is not guaranteed.
 	 */
 	static void schedule(ResourceLocation id, Runnable task) {
-		schedule(id, true, task);
+		schedule(id, false, task);
 	}
 
 	/**

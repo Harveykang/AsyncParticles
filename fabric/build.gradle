@@ -65,7 +65,7 @@ dependencies {
 
     /* Particle Rain/Pretty Rain */
     modCompileOnly "maven.modrinth:particle-rain:3.0.5"
-    modLocalRuntime "maven.modrinth:particle-rain:3.0.5"
+//    modLocalRuntime "maven.modrinth:particle-rain:3.0.5"
 //    modLocalRuntime "maven.modrinth:pretty-rain:TGjK6ChS"
 
     /* Effectual */

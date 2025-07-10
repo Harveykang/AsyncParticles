@@ -138,9 +138,9 @@ public class ClothConfigMixinMenus {
 				newConfig.setReplaceRandom(Collections.unmodifiableSet(s));
 			})
 			.setTooltip(
-				Component.translatable("config.asyncparticles.mixin.replaceRandom.tooltip"),
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.replaceRandom.tooltip"),
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
 			.build()));
