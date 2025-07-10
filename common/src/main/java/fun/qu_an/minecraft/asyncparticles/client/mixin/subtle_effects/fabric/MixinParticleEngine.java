@@ -24,9 +24,7 @@ public class MixinParticleEngine {
 										 VertexConsumer vertexConsumer,
 										 Camera camera,
 										 float v,
-										 @SuppressWarnings("UnresolvedLocalCapture")
-										 @Local(name = "enableCull") boolean enableCull,
 										 @Local(ordinal = 0) ParticleRenderType renderType) {
-		return !enableCull || SubtleEffectsCompat.shouldRenderParticle(renderType, instance, camera, level);
+		return SubtleEffectsCompat.shouldRenderParticle(renderType, instance, camera, level);
 	}
 }

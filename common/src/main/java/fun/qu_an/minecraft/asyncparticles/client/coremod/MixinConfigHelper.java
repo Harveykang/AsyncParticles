@@ -7,10 +7,6 @@ import java.util.Collection;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.CONFIG;
 
 public class MixinConfigHelper {
-	public static boolean isRedirectFleroviumCulling() {
-		return !ModListHelper.SHIMMER_LOADED && CONFIG.isRedirectFleroviumCulling();
-	}
-
 	public static Collection<String> getNoCulling() {
 		return CONFIG.getNoCulling();
 	}

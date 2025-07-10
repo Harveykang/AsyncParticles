@@ -12,6 +12,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.iris.IrisCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -171,21 +172,37 @@ public class AsyncRenderer {
 										ParticleRenderType particleRenderType,
 										BufferBuilder bufferBuilder) {
 		Frustum frustum = AsyncRenderer.frustum;
-		boolean enableCull = ConfigHelper.isCullParticles();
+		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		float f2 = f + 1f;
 		for (Particle particle : particles) {
 			if (!particle.isAlive()) {
 				continue;
 			}
-			if (enableCull && ((ParticleAddon) particle).shouldCull() &&
-				!frustum.isVisible(particle.getBoundingBox())) {
-				continue;
+			ParticleAddon particleAddon = (ParticleAddon) particle;
+			switch (particleCullingMode) {
+				case AABB -> {
+					if (particleAddon.shouldCull() &&
+						!FrustumUtil.isVisible(frustum, particle.getBoundingBox())) {
+						continue;
+					}
+				}
+				case SPHERE -> {
+					if (particleAddon.shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
+						continue;
+					}
+				}
+				case ASYNC_AABB, ASYNC_SPHERE -> {
+					if (particleAddon.shouldCull() &&
+						!particleAddon.asyncparticles$isVisibleOnScreen()) {
+						continue;
+					}
+				}
 			}
-			if (((ParticleAddon) particle).asyncparticles$isRenderSync()) {
+			if (particleAddon.asyncparticles$isRenderSync()) {
 				recordSync(particleRenderType, particle);
 				continue;
 			}
-			float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
+			float f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
 			try {
 				particle.render(bufferBuilder, camera, f3);
 			} catch (Throwable t) {
@@ -319,7 +336,7 @@ public class AsyncRenderer {
 		Minecraft mc = Minecraft.getInstance();
 		ParticleEngine particleEngine = mc.particleEngine;
 		Frustum frustum = AsyncRenderer.frustum;
-		boolean enableCull = ConfigHelper.isCullParticles();
+		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		float f2 = f + 1f;
 		for (Map.Entry<ParticleRenderType, Queue<Particle>> entry : particleEngine.particles.entrySet()) {
 			ParticleRenderType particleRenderType = entry.getKey();
@@ -353,15 +370,31 @@ public class AsyncRenderer {
 				if (!particle.isAlive()) {
 					continue;
 				}
-				if (enableCull && ((ParticleAddon) particle).shouldCull() &&
-					!frustum.isVisible(particle.getBoundingBox())) {
-					continue;
+				ParticleAddon particleAddon = (ParticleAddon) particle;
+				switch (particleCullingMode) {
+					case AABB -> {
+						if (particleAddon.shouldCull() &&
+							!FrustumUtil.isVisible(frustum, particle.getBoundingBox())) {
+							continue;
+						}
+					}
+					case SPHERE -> {
+						if (particleAddon.shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
+							continue;
+						}
+					}
+					case ASYNC_AABB, ASYNC_SPHERE -> {
+						if (particleAddon.shouldCull() &&
+							!particleAddon.asyncparticles$isVisibleOnScreen()) {
+							continue;
+						}
+					}
 				}
 				if (!began) {
 					particleRenderType.begin(bufferBuilder, particleEngine.textureManager);
 					began = true;
 				}
-				float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
+				float f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
 				try {
 					particle.render(bufferBuilder, camera, f3);
 				} catch (Throwable t) {

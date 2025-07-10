@@ -23,32 +23,6 @@ public class ClothConfigMixinMenus {
 		MixinConfigObj newConfig = new MixinConfigObj();
 		MixinConfigObj lastConfig = getToSaveConfig();
 		mixinCategory.addEntry(entryBuilder
-			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.particle.redirectFleroviumCulling"),
-				lastConfig.isRedirectFleroviumCulling())
-			.setDefaultValue(defaultConfig.isRedirectFleroviumCulling())
-			.setSaveConsumer(newConfig::setRedirectFleroviumCulling)
-			.setTooltipSupplier(() -> {
-				if (!FORGE_FLEROVIUM_LOADED || !SHIMMER_LOADED) {
-					return Optional.of(new Component[]{
-						Component.translatable("text.cloth-config.restart_required")
-							.withStyle(ChatFormatting.DARK_RED),
-						Component.translatable("config.asyncparticles.mixin.particle.redirectFleroviumCulling.tooltip")
-					});
-				} else {
-					return Optional.of(new Component[]{
-						Component.translatable("text.cloth-config.restart_required")
-							.withStyle(ChatFormatting.DARK_RED),
-						Component.translatable("config.asyncparticles.mixin.particle.redirectFleroviumCulling.tooltip")
-							.withStyle(ChatFormatting.STRIKETHROUGH),
-						Component.translatable("config.asyncparticles.incompatibility", "Shimmer")
-							.withStyle(ChatFormatting.DARK_RED)
-					});
-				}
-			})
-			.requireRestart()
-			.setRequirement(() -> FORGE_FLEROVIUM_LOADED && !SHIMMER_LOADED)
-			.build());
-		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap"),
 				lastConfig.isSafeClassInstanceMultiMap())
 			.setDefaultValue(defaultConfig.isSafeClassInstanceMultiMap())

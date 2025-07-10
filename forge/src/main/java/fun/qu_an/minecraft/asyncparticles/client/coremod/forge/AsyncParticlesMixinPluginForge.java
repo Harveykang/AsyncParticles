@@ -55,16 +55,7 @@ public class AsyncParticlesMixinPluginForge implements IMixinConfigPlugin {
 			// TODO: 下面这个 mod 没有正式发布，且不确定是否是唯一的 forge 移植版
 			case "effecticularity_v1_0_2" -> FORGE_EFFECTICULARITY_LOADED &&
 											 versionCheck("effective", "1.0.0", "1.0.3");
-			case "flerovium" -> {
-				if (!FORGE_FLEROVIUM_LOADED) {
-					yield false;
-				}
-				yield switch (split[1]) {
-					case "MixinAsyncRenderer",
-						 "MixinMixinParticleEngine" -> MixinConfigHelper.isRedirectFleroviumCulling();
-					default -> true;
-				};
-			}
+			case "flerovium" -> FORGE_FLEROVIUM_LOADED;
 			case "embeddium" -> FORGE_EMBEDDIUM_LOADED;
 			case "epicfight" -> FORGE_EPICFIGHT_LOADED;
 			case "epicacg" -> FORGE_EPICACG_LOADED;

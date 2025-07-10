@@ -1,13 +1,20 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.shimmer;
 
 import com.lowdragmc.shimmer.client.postprocessing.PostParticle;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticle;
+import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PostParticle.class)
@@ -15,6 +22,17 @@ public abstract class MixinPostParticle extends MixinParticle implements LightCa
 	@Shadow
 	@Final
 	public Particle parent;
+
+	@Inject(method = "tick", at = @At("RETURN"))
+	protected void onTick(CallbackInfo ci) {
+		if (ConfigHelper.getParticleCullingMode() == ParticleCullingMode.SPHERE){
+			x = parent.x;
+			y = parent.y;
+			z = parent.z;
+			bbWidth = parent.bbWidth;
+			bbHeight = parent.bbHeight;
+		}
+	}
 
 	@Override
 	protected void onInit(CallbackInfo ci) {
@@ -83,6 +101,18 @@ public abstract class MixinPostParticle extends MixinParticle implements LightCa
 	@Override
 	public boolean shouldCull() {
 		return ((ParticleAddon) parent).shouldCull();
+	}
+
+	public boolean asyncparticles$isVisibleOnScreen() {
+		return ((ParticleAddon) parent).asyncparticles$isVisibleOnScreen();
+	}
+
+	public void asyncparticles$tickAABBCulling() {
+		((ParticleAddon) parent).asyncparticles$tickAABBCulling();
+	}
+
+	public void asyncparticles$tickSphereCulling() {
+		((ParticleAddon) parent).asyncparticles$tickSphereCulling();
 	}
 
 	@Override

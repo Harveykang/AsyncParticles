@@ -116,11 +116,12 @@ class ClothConfigMenus {
 		ConfigCategory renderingCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.rendering"));
 		renderingCategory
 			.addEntry(entryBuilder
-				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.cullParticles"),
-					rendering$cullParticles)
-				.setDefaultValue(defaultConfig.rendering.cullParticles)
-				.setTooltip(Component.translatable("config.asyncparticles.rendering.cullParticles.tooltip"))
-				.setSaveConsumer(newValue -> rendering$cullParticles = newValue)
+				.startSelector(Component.translatable("config.asyncparticles.rendering.particleCulling"),
+					ParticleCullingMode.values(), rendering$particleCulling)
+				.setNameProvider(ParticleCullingMode::getComponent)
+				.setDefaultValue(defaultConfig.rendering.particleCulling)
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.particleCulling.tooltip"))
+				.setSaveConsumer(newValue -> rendering$particleCulling = newValue)
 				.build())
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.particleRenderingMode"),

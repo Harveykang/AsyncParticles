@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -78,6 +79,10 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 		if (!asyncparticles$isOnShip()) {
 			asyncparticles$setShip(ship);
 			asyncparticles$refresh();
+			switch (ConfigHelper.getParticleCullingMode()) {
+				case ASYNC_AABB -> ((ParticleAddon) this).asyncparticles$tickAABBCulling();
+				case ASYNC_SPHERE -> ((ParticleAddon) this).asyncparticles$tickSphereCulling();
+			}
 		}
 	}
 

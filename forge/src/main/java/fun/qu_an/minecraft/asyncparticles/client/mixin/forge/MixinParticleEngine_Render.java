@@ -9,8 +9,10 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.CustomTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
+import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -56,7 +58,6 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 		}
 
 		profiler.push("prepare");
-		Frustum frustum = AsyncRenderer.frustum;
 		lightTexture.turnOnLightLayer();
 		RenderSystem.enableDepthTest();
 		RenderSystem.activeTexture(33986);
@@ -67,9 +68,10 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 		RenderSystem.applyModelViewMatrix();
 		profiler.pop();
 
-		// We don't use entrySet() to be compatible with iris.
-		boolean cullParticles = ConfigHelper.isCullParticles();
+		Frustum frustum = AsyncRenderer.frustum;
+		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		boolean irisEarlyOpaquePhase = AsyncRenderer.isIrisEarlyOpaquePhase();
+		// We don't use entrySet() to be compatible with iris.
 		for (ParticleRenderType particleRenderType : particles.keySet()) {
 			// FORGE doesn't skip NO_RENDER
 			if (particleRenderType == ParticleRenderType.NO_RENDER) {
@@ -83,22 +85,22 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			profiler.push("render_sync");
 			Collection<? extends Particle> syncParticles;
 			Tesselator tesselator;
-			boolean enableCull;
+			ParticleCullingMode realCullMode;
 			BufferBuilder toBegin;
 			if (!renderAsync) {
-				enableCull = cullParticles;
+				realCullMode = particleCullingMode;
 				syncParticles = queue;
 				tesselator = Tesselator.getInstance();
 				toBegin = bufferBuilder = tesselator.getBuilder();
 			} else if ((bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager)) ==
 					   FakeBufferBuilder.INSTANCE) {
-				enableCull = cullParticles;
+				realCullMode = particleCullingMode;
 				// if irisEarlyOpaquePhase, we render custom particles in AsyncRenderer.irisCustom()
 				syncParticles = irisEarlyOpaquePhase ? Collections.emptyList() : queue;
 				tesselator = Tesselator.getInstance();
 				toBegin = bufferBuilder = tesselator.getBuilder();
 			} else {
-				enableCull = false;
+				realCullMode = ParticleCullingMode.DISABLED;
 				syncParticles = AsyncRenderer.getSync(particleRenderType);
 				tesselator = null;
 				toBegin = FakeBufferBuilder.INSTANCE;
@@ -112,10 +114,25 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 					if (!particle.isAlive()) {
 						continue;
 					}
-					if (enableCull && particle.shouldCull() &&
-						// Flerovium will Redirect isVisible invocation.
-						!frustum.isVisible(particle.getBoundingBox())) {
-						continue;
+					ParticleAddon particleAddon = (ParticleAddon) particle;
+					switch (realCullMode) {
+						case AABB -> {
+							if (particleAddon.shouldCull() &&
+								!FrustumUtil.isVisible(frustum, particle.getBoundingBox())) {
+								continue;
+							}
+						}
+						case SPHERE -> {
+							if (particleAddon.shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
+								continue;
+							}
+						}
+						case ASYNC_AABB, ASYNC_SPHERE -> {
+							if (particleAddon.shouldCull() &&
+								!particleAddon.asyncparticles$isVisibleOnScreen()) {
+								continue;
+							}
+						}
 					}
 					float f3 = ((ParticleAddon) particle).asyncparticles$isTicked() ? f : f2;
 					try {

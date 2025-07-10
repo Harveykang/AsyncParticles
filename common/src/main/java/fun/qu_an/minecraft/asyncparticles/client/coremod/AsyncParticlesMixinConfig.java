@@ -95,7 +95,6 @@ public class AsyncParticlesMixinConfig {
 
 	static class MixinConfigObj {
 		private int version = 0;
-		private boolean redirectFleroviumCulling = FORGE_FLEROVIUM_LOADED && !SHIMMER_LOADED;
 		private boolean safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED;
 		private boolean safeBlockEntityMap = false;
 		private boolean safeLegacyRandomSource = false;
@@ -148,7 +147,6 @@ public class AsyncParticlesMixinConfig {
 
 		private void fold() {
 			assertNotGlobal();
-			redirectFleroviumCulling = toSaveConfig.redirectFleroviumCulling;
 			safeClassInstanceMultiMap = toSaveConfig.safeClassInstanceMultiMap;
 			safeBlockEntityMap = toSaveConfig.safeBlockEntityMap;
 			safeLegacyRandomSource = toSaveConfig.safeLegacyRandomSource;
@@ -166,8 +164,6 @@ public class AsyncParticlesMixinConfig {
 			} catch (NumberFormatException ignored) {
 			}
 			MixinConfigObj defaultConfig = new MixinConfigObj();
-			redirectFleroviumCulling = FORGE_FLEROVIUM_LOADED && !SHIMMER_LOADED &&
-									   getBoolean(properties, "particle$redirectFleroviumCulling", defaultConfig.redirectFleroviumCulling);
 			safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED ||
 										getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
 			safeBlockEntityMap = getBoolean(properties, "safeBlockEntityMap", defaultConfig.safeBlockEntityMap);
@@ -185,7 +181,6 @@ public class AsyncParticlesMixinConfig {
 
 		private void write(Properties properties) {
 			properties.setProperty("version", Integer.toString(version));
-			properties.setProperty("particle$redirectFleroviumCulling", Boolean.toString(redirectFleroviumCulling));
 			properties.setProperty("safeClassInstanceMultiMap", Boolean.toString(safeClassInstanceMultiMap));
 			properties.setProperty("safeBlockEntityMap", Boolean.toString(safeBlockEntityMap));
 			properties.setProperty("safeLegacyRandomSource", Boolean.toString(safeLegacyRandomSource));
@@ -278,16 +273,6 @@ public class AsyncParticlesMixinConfig {
 		void setReplaceRandom(Set<String> replaceRandom) {
 			assertNotGlobal();
 			this.replaceRandom = replaceRandom;
-		}
-
-		boolean isRedirectFleroviumCulling() {
-			return redirectFleroviumCulling;
-		}
-
-		void setRedirectFleroviumCulling(boolean redirectFleroviumCulling) {
-			assertNotGlobal();
-			this.redirectFleroviumCulling = FORGE_FLEROVIUM_LOADED && !SHIMMER_LOADED &&
-											redirectFleroviumCulling;
 		}
 
 		void setSafeLegacyRandomSource(boolean safeLegacyRandomSource) {

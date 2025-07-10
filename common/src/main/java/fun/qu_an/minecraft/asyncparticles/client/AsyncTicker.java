@@ -8,6 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -431,6 +432,7 @@ public class AsyncTicker {
 		}
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 		boolean enableLightCache = ConfigHelper.particleLightCache();
+		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		for (Iterator<Particle> iterator = SYNC_PARTICLES.iterator(); iterator.hasNext(); ) {
 			Particle particle = iterator.next();
 			try {
@@ -438,6 +440,10 @@ public class AsyncTicker {
 				if (!(particle instanceof TrackingEmitter)) {
 					if (enableLightCache) {
 						((LightCachedParticleAddon) particle).asyncparticles$refresh();
+					}
+					switch (particleCullingMode) {
+						case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
+						case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
 					}
 					((ParticleAddon) particle).asyncparticles$setTicked();
 				}
@@ -542,13 +548,21 @@ public class AsyncTicker {
 			Queue<TrackingEmitter> newEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 			newEmitters.addAll(particleEngine.trackingEmitters);
 			particleEngine.trackingEmitters = newEmitters;
+			boolean enableLightCache = ConfigHelper.particleLightCache();
+			ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 			particleEngine.particles.entrySet().forEach(entry -> {
 				Queue<Particle> queue = entry.getValue();
 				Queue<Particle> newQueue = IterationSafeEvictingQueue.newInstance(queue.size(), ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 				newQueue.addAll(queue);
-				if (ConfigHelper.particleLightCache()){
-					newQueue.forEach(p -> ((LightCachedParticleAddon) p).asyncparticles$refresh());
-				}
+				newQueue.forEach(p -> {
+					if (enableLightCache) {
+						((LightCachedParticleAddon) p).asyncparticles$refresh();
+					}
+					switch (particleCullingMode) {
+						case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();
+						case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();
+					}
+				});
 				entry.setValue(newQueue);
 			});
 		}

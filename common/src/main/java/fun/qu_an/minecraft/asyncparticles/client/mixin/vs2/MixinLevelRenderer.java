@@ -3,7 +3,9 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.vs2;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -39,6 +41,10 @@ public class MixinLevelRenderer {
 		if (ship != null) {
 			((VSParticleAddon) particle).asyncparticles$setShip(ship);
 			((LightCachedParticleAddon) particle).asyncparticles$refresh();
+			switch (ConfigHelper.getParticleCullingMode()) {
+				case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
+				case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
+			}
 		}
 		return particle;
 	}
