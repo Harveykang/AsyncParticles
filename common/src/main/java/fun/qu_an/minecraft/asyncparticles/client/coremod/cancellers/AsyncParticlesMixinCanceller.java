@@ -23,9 +23,9 @@ public class AsyncParticlesMixinCanceller implements MixinCanceller {
 				 "me.fzzyhmstrs.particle_core.mixins.WorldRendererFrustumMixin",
 				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerCachedLightMixin",
 				 "me.fzzyhmstrs.particle_core.mixins.BillboardParticleMixin",
-				 "me.fzzyhmstrs.particle_core.mixins.ParticleMixin"
-//				 , "net.diebuddies.mixins.ocean.MixinParticleEngine" // Physics mod
-				-> true;
+				 "me.fzzyhmstrs.particle_core.mixins.ParticleMixin",
+//				 "net.diebuddies.mixins.ocean.MixinParticleEngine", // Physics mod
+				 "ca.fxco.moreculling.mixin.LevelRenderer_rainMixin" -> true;
 			default -> false;
 		};
 	}

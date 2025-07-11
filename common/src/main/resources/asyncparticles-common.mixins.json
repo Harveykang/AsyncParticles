@@ -57,7 +57,7 @@
     "off_thread_access.MixinActiveProfiler",
     "off_thread_access.MixinClientChunkCache",
     "off_thread_access.MixinClientLevel",
-    "off_thread_access.MixinLevelChunk",
+    "conditional.MixinLevelChunk_BlockEntityMap",
     "off_thread_access.MixinLevelRenderer",
     "off_thread_access.MixinSoundEngine",
     "physicsmod.MixinClientLevel",

@@ -12,8 +12,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
-import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.MixinConfigObj;
-import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.getToSaveConfig;
+import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.*;
 
 // No more NoClassDefFoundError
 public class ClothConfigMixinMenus {
@@ -23,7 +22,6 @@ public class ClothConfigMixinMenus {
 		MixinConfigObj defaultConfig = new MixinConfigObj();
 		MixinConfigObj newConfig = new MixinConfigObj();
 		MixinConfigObj lastConfig = getToSaveConfig();
-		List<String> lastNoCulling = List.copyOf(lastConfig.getNoCulling());
 		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap"),
 				lastConfig.isSafeClassInstanceMultiMap())
@@ -62,6 +60,18 @@ public class ClothConfigMixinMenus {
 								   !IRONS_SPELLBOOKS_LESS_THAN_3_13_0) &&
 								  !MAKE_BUBBLES_POP_LOADED)
 			.build());
+		mixinCategory.addEntry(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap"),
+				lastConfig.isSafeBlockEntityMap())
+			.setDefaultValue(defaultConfig.isSafeBlockEntityMap())
+			.setSaveConsumer(newConfig::setSafeBlockEntityMap)
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap.tooltip"))
+			.requireRestart()
+			.build());
+		List<String> lastNoCulling = List.copyOf(lastConfig.getNoCulling());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noCulling"),
 				lastNoCulling)

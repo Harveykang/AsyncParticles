@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client;
 
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
+import fun.qu_an.minecraft.asyncparticles.client.compat.moreculling.MoreCullingCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
@@ -10,13 +11,18 @@ import net.minecraft.world.phys.Vec3;
 
 import java.io.IOException;
 
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
+
 public class AsyncParticlesClient {
 	public static final String MOD_ID = "asyncparticles";
 	public static final String ISSUE_URL = "https://github.com/Harveykang/AsyncParticles/issues";
 
 	public static void init() {
-		if (!ModListHelper.IS_CLIENT) {
+		if (!IS_CLIENT) {
 			return;
+		}
+		if (MORE_CULLING_LOADED) {
+			MoreCullingCompat.init();
 		}
 		if (ModListHelper.PARTICLERAIN_LOADED) {
 			if (ModListHelper.VS_LOADED) {
