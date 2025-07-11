@@ -14,7 +14,7 @@ public class MixinWeatherFX {
 	@WrapMethod(method = "renderWeather", remap = false)
 	private static void renderWeather(ClientTickEvent.Pre event, Operation<Void> original) {
 		if (SimpleWeatherConfigs.Client.OverrideWeather.get()) {
-			EndTickOperation.schedule(SimpleWeatherCompat.SIMPLE_WEATHER$RENDER_WEATHER, false, () -> original.call((Object) null));
+			EndTickOperation.schedule(SimpleWeatherCompat.SIMPLE_WEATHER$RENDER_WEATHER, () -> original.call((Object) null));
 		}
 	}
 }

@@ -5,10 +5,24 @@ import net.minecraft.client.Minecraft;
 
 public interface EndTickEvent extends Runnable {
 	/**
-	 * Equivalent to {@link EndTickEvent#register(boolean true, Runnable)}
+	 * Equivalent to {@link EndTickEvent#register(boolean false, Runnable)}
 	 */
 	static void register(EndTickEvent task) {
 		AsyncTicker.registerEvent(task);
+	}
+
+	/**
+	 * Equivalent to {@link EndTickEvent#register(boolean false, MinecraftConsumer)}
+	 */
+	static void register(MinecraftConsumer task) {
+		AsyncTicker.registerEvent(() -> task.accept(Minecraft.getInstance()));
+	}
+
+	/**
+	 * Equivalent to {@link EndTickEvent#register(boolean false, ClientLevelConsumer)}
+	 */
+	static void register(ClientLevelConsumer task) {
+		AsyncTicker.registerEvent(() -> task.accept(Minecraft.getInstance().level));
 	}
 
 	static void register(boolean parallel, Runnable task) {
@@ -28,6 +42,6 @@ public interface EndTickEvent extends Runnable {
 	}
 
 	default boolean isParallel() {
-		return true;
+		return false;
 	}
 }

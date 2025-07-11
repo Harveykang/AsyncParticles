@@ -19,7 +19,7 @@ public class MixinClientStuff {
 		ResourceLocation.fromNamespaceAndPath("particular", "on_client_tick");
 	@WrapMethod(method = "onClientTick", remap = false)
 	private static void onClientTick(ClientTickEvent.Pre event, Operation<Void> original) {
-		EndTickOperation.schedule(PARTICULAR$ON_CLIENT_TICK, false, () -> original.call((Object) null));
+		EndTickOperation.schedule(PARTICULAR$ON_CLIENT_TICK, () -> original.call((Object) null));
 	}
 
 	@Unique
@@ -28,6 +28,6 @@ public class MixinClientStuff {
 	@Redirect(method = "lambda$onChunkLoad$3", remap = false,
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;execute(Ljava/lang/Runnable;)V"))
 	private static void onChunkLoad(Minecraft mc, Runnable runnable) {
-		EndTickOperation.schedule(PARTICULAR$ON_CHUNK_LOAD, false, runnable);
+		EndTickOperation.schedule(PARTICULAR$ON_CHUNK_LOAD, runnable);
 	}
 }

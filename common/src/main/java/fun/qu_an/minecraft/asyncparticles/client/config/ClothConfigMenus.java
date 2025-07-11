@@ -82,12 +82,11 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> tick$particleTickMode = newValue)
 				.build())
 			.addEntry(entryBuilder
-				.startSelector(Component.translatable("config.asyncparticles.tick.weatherTickMode"),
-					new TickMode[]{TickMode.FORCE_COMPLETE, TickMode.SYNCHRONOUSLY}, tick$weatherTickMode)
-				.setNameProvider(TickMode::getComponent)
-				.setDefaultValue(defaultConfig.tick.weatherTickMode)
-				.setTooltip(Component.translatable("config.asyncparticles.tick.weatherTickMode.tooltip"))
-				.setSaveConsumer(newValue -> tick$weatherTickMode = newValue)
+				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.tickWeatherAsync"),
+					tick$tickWeatherAsync)
+				.setDefaultValue(defaultConfig.tick.tickWeatherAsync)
+				.setTooltip(Component.translatable("config.asyncparticles.tick.tickWeatherAsync.tooltip"))
+				.setSaveConsumer(newValue -> tick$tickWeatherAsync = newValue)
 				.build())
 			.addEntry(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.tick.failPerSecLimit"),
@@ -123,6 +122,14 @@ class ClothConfigMenus {
 		ConfigCategory renderingCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.rendering"));
 		renderingCategory
 			.addEntry(entryBuilder
+				.startSelector(Component.translatable("config.asyncparticles.rendering.particleRenderingMode"),
+					RenderingMode.values(), rendering$particleRenderingMode)
+				.setNameProvider(RenderingMode::getComponent)
+				.setDefaultValue(defaultConfig.rendering.particleRenderingMode)
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.particleRenderingMode.tooltip"))
+				.setSaveConsumer(newValue -> rendering$particleRenderingMode = newValue)
+				.build())
+			.addEntry(entryBuilder
 				.startSelector(Component.translatable("config.asyncparticles.rendering.particleCulling"),
 					ParticleCullingMode.values(), rendering$particleCulling)
 				.setNameProvider(ParticleCullingMode::getComponent)
@@ -138,20 +145,10 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> rendering$cullWeathers = newValue)
 				.build())
 			.addEntry(entryBuilder
-				.startSelector(Component.translatable("config.asyncparticles.rendering.particleRenderingMode"),
-					RenderingMode.values(), rendering$particleRenderingMode)
-				.setNameProvider(RenderingMode::getComponent)
-				.setDefaultValue(defaultConfig.rendering.particleRenderingMode)
-				.setTooltip(Component.translatable("config.asyncparticles.rendering.particleRenderingMode.tooltip"))
-				.setSaveConsumer(newValue -> rendering$particleRenderingMode = newValue)
-				.build())
-			.addEntry(entryBuilder
-				.startSelector(Component.translatable("config.asyncparticles.rendering.weatherRenderingMode"),
-					new RenderingMode[]{RenderingMode.DELAYED, RenderingMode.SYNCHRONOUSLY}, rendering$weatherRenderingMode)
-				.setNameProvider(RenderingMode::getComponent)
-				.setDefaultValue(defaultConfig.rendering.weatherRenderingMode)
-				.setTooltip(Component.translatable("config.asyncparticles.rendering.weatherRenderingMode.tooltip"))
-				.setSaveConsumer(newValue -> rendering$weatherRenderingMode = newValue)
+				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.renderWeatherAsync"), AsyncParticlesConfig.rendering$renderWeatherAsync)
+				.setDefaultValue(defaultConfig.rendering.renderWeatherAsync)
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.renderWeatherAsync.tooltip"))
+				.setSaveConsumer(newValue -> AsyncParticlesConfig.rendering$renderWeatherAsync = newValue)
 				.build())
 			.addEntry(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.rendering.failPerSecLimit"),
