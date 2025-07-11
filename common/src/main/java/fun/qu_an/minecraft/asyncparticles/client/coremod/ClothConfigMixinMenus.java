@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 import java.io.IOException;
 import java.util.*;
 
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.MAKE_BUBBLES_POP_LOADED;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.MixinConfigObj;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.getToSaveConfig;
 
@@ -50,7 +50,7 @@ public class ClothConfigMixinMenus {
 				}
 			})
 			.requireRestart()
-			.setRequirement(() -> !ModListHelper.MAKE_BUBBLES_POP_LOADED)
+			.setRequirement(() -> !MAKE_BUBBLES_POP_LOADED)
 			.build());
 		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap"),

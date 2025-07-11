@@ -28,9 +28,9 @@ public class WeatherRenderer {
 	private static boolean weatherEnabled;
 
 	public static void beginWeather(float partialTick, Vec3 cameraPos, int rainDistance, WeatherEffectRenderer weatherRenderer, int ticks) {
-		if (!ConfigHelper.isRenderWeatherAsync()) {
-			return;
-		}
+//		if (!ConfigHelper.isRenderWeatherAsync()) { // checked outside
+//			return;
+//		}
 		if (!weatherEnabled) {
 			waitForWeatherTask();
 			return;
