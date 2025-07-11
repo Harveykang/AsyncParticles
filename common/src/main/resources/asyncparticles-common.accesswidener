@@ -49,6 +49,8 @@ accessible class net/minecraft/client/multiplayer/ClientChunkCache$Storage
 accessible field net/minecraft/client/multiplayer/ClientChunkCache$Storage chunks Ljava/util/concurrent/atomic/AtomicReferenceArray;
 accessible field net/minecraft/world/level/chunk/ChunkAccess blockEntities Ljava/util/Map;
 transitive-mutable field net/minecraft/world/level/chunk/ChunkAccess blockEntities Ljava/util/Map;
+accessible field net/minecraft/world/level/chunk/ChunkAccess pendingBlockEntities Ljava/util/Map;
+transitive-mutable field net/minecraft/world/level/chunk/ChunkAccess pendingBlockEntities Ljava/util/Map;
 accessible field com/mojang/blaze3d/vertex/Tesselator buffer Lcom/mojang/blaze3d/vertex/ByteBufferBuilder;
 accessible field com/mojang/blaze3d/vertex/ByteBufferBuilder pointer J
 accessible field com/mojang/blaze3d/vertex/BufferBuilder building Z

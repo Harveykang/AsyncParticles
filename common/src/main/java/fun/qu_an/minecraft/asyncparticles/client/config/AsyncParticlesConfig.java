@@ -57,12 +57,12 @@ public class AsyncParticlesConfig {
 	public static RainEffect create$rainEffect;
 
 	static {
+		LOGGER.debug("AsyncParticlesConfig initialized.");
 		try {
 			load();
 		} catch (Throwable e) {
 			throw new ExceptionInInitializerError(e);
 		}
-		LOGGER.debug("AsyncParticlesConfig initialized.");
 	}
 
 	public static Screen newConfigScreen(Screen parent) {
