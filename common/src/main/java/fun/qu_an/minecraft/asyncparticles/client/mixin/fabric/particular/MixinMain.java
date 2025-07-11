@@ -15,6 +15,6 @@ public class MixinMain {
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/fabricmc/fabric/api/client/event/lifecycle/v1/ClientTickEvents;START_WORLD_TICK:Lnet/fabricmc/fabric/api/event/Event;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/fabricmc/fabric/api/event/Event;register(Ljava/lang/Object;)V"))
 	private void onRegister(Event<ClientTickEvents.StartWorldTick> instance, Object t) {
-		EndTickEvent.register(false, ((ClientTickEvents.StartWorldTick) t)::onStartTick);
+		EndTickEvent.register(((ClientTickEvents.StartWorldTick) t)::onStartTick);
 	}
 }

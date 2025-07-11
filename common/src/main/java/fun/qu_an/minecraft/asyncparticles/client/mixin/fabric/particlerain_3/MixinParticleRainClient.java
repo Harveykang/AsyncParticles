@@ -34,6 +34,6 @@ public class MixinParticleRainClient {
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/fabricmc/fabric/api/client/event/lifecycle/v1/ClientTickEvents;END_CLIENT_TICK:Lnet/fabricmc/fabric/api/event/Event;")),
 		at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/fabricmc/fabric/api/event/Event;register(Ljava/lang/Object;)V"))
 	private void onRegister(Event<?> instance, Object t) {
-		EndTickEvent.register(false, ((ClientTickEvents.EndTick) t)::onEndTick);
+		EndTickEvent.register(((ClientTickEvents.EndTick) t)::onEndTick);
 	}
 }
