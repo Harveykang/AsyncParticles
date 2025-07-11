@@ -43,13 +43,26 @@ public class ClothConfigMixinMenus {
 						.withStyle(ChatFormatting.DARK_RED));
 					list.add(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip")
 						.withStyle(ChatFormatting.STRIKETHROUGH));
-					list.add(Component.translatable("config.asyncparticles.limited", "Make Bubbles Pop")
-						.withStyle(ChatFormatting.DARK_RED));
+					if (MAKE_BUBBLES_POP_LOADED) {
+						list.add(Component.translatable("config.asyncparticles.limited", "Make Bubbles Pop")
+							.withStyle(ChatFormatting.DARK_RED));
+					}
 					return Optional.of(list.toArray(new Component[0]));
 				}
 			})
 			.requireRestart()
-				.setRequirement(() -> !ModListHelper.MAKE_BUBBLES_POP_LOADED)
+			.setRequirement(() -> !ModListHelper.MAKE_BUBBLES_POP_LOADED)
+			.build());
+		mixinCategory.addEntry(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap"),
+				lastConfig.isSafeBlockEntityMap())
+			.setDefaultValue(defaultConfig.isSafeBlockEntityMap())
+			.setSaveConsumer(newConfig::setSafeBlockEntityMap)
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap.tooltip"))
+			.requireRestart()
 			.build());
 		List<String> lastNoCulling = List.copyOf(lastConfig.getNoCulling());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
@@ -128,9 +141,9 @@ public class ClothConfigMixinMenus {
 				newConfig.setReplaceRandom(Collections.unmodifiableSet(s));
 			})
 			.setTooltip(
-				Component.translatable("config.asyncparticles.mixin.replaceRandom.tooltip"),
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.replaceRandom.tooltip"),
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
 			.build()));

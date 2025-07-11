@@ -32,4 +32,8 @@ public class MixinConfigHelper {
 	public static boolean isSafeClassInstanceMultiMap() {
 		return CONFIG.isSafeClassInstanceMultiMap();
 	}
+
+	public static boolean isSafeBlockEntityMap() {
+		return CONFIG.isSafeBlockEntityMap();
+	}
 }

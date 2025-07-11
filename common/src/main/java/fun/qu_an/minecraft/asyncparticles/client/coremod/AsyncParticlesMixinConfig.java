@@ -15,6 +15,8 @@ import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
 
+import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.*;
+
 public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
 	public static final int VERSION = 2;
@@ -30,6 +32,7 @@ public class AsyncParticlesMixinConfig {
 	private static MixinConfigObj toSaveConfig;
 
 	static {
+		LOGGER.debug("AsyncParticlesMixinConfig initialized.");
 		try {
 			load();
 		} catch (Throwable e) {
@@ -98,6 +101,7 @@ public class AsyncParticlesMixinConfig {
 	static class MixinConfigObj {
 		private int version = 0;
 		private boolean safeClassInstanceMultiMap = ModListHelper.MAKE_BUBBLES_POP_LOADED;
+		private boolean safeBlockEntityMap = false;
 		private boolean safeLegacyRandomSource = false;
 		private Set<String> noCulling = new LinkedHashSet<>();
 
@@ -148,6 +152,7 @@ public class AsyncParticlesMixinConfig {
 		private void fold() {
 			assertNotGlobal();
 			safeClassInstanceMultiMap = toSaveConfig.safeClassInstanceMultiMap;
+			safeBlockEntityMap = toSaveConfig.safeBlockEntityMap;
 			safeLegacyRandomSource = toSaveConfig.safeLegacyRandomSource;
 			noCulling = toSaveConfig.noCulling;
 			noLightCache = toSaveConfig.noLightCache;
@@ -165,8 +170,8 @@ public class AsyncParticlesMixinConfig {
 			MixinConfigObj defaultConfig = new MixinConfigObj();
 			safeClassInstanceMultiMap = ModListHelper.MAKE_BUBBLES_POP_LOADED ||
 				getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
-			safeLegacyRandomSource =
-				getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);
+			safeBlockEntityMap = getBoolean(properties, "safeBlockEntityMap", defaultConfig.safeBlockEntityMap);
+			safeLegacyRandomSource = getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);
 			noCulling = getSet(properties, "particle$noCulling", defaultConfig.noCulling);
 			noLightCache = getSet(properties, "particle$noLightCache", defaultConfig.noLightCache);
 			lockProvider = getSet(properties, "particle$lockProvider", defaultConfig.lockProvider);
@@ -181,6 +186,7 @@ public class AsyncParticlesMixinConfig {
 		private void write(Properties properties) {
 			properties.setProperty("version", Integer.toString(version));
 			properties.setProperty("safeClassInstanceMultiMap", Boolean.toString(safeClassInstanceMultiMap));
+			properties.setProperty("safeBlockEntityMap", Boolean.toString(safeBlockEntityMap));
 			properties.setProperty("safeLegacyRandomSource", Boolean.toString(safeLegacyRandomSource));
 			properties.setProperty("particle$noCulling", String.join(",", noCulling));
 			properties.setProperty("particle$noLightCache", String.join(",", noLightCache));
@@ -290,6 +296,15 @@ public class AsyncParticlesMixinConfig {
 			assertNotGlobal();
 			this.safeClassInstanceMultiMap = ModListHelper.MAKE_BUBBLES_POP_LOADED ||
 											 safeClassInstanceMultiMap;
+		}
+
+		public boolean isSafeBlockEntityMap() {
+			return safeBlockEntityMap;
+		}
+
+		public void setSafeBlockEntityMap(boolean safeBlockEntityMap) {
+			assertNotGlobal();
+			this.safeBlockEntityMap = safeBlockEntityMap;
 		}
 	}
 }
