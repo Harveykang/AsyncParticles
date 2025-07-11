@@ -1,10 +1,13 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -16,11 +19,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.concurrent.ConcurrentHashMap;
-
-@Mixin(value = LevelChunk.class, priority = 1500)
+@Mixin(value = LevelChunk.class, priority = 500)
 public abstract class MixinLevelChunk_BlockEntityMap extends ChunkAccess {
 	@Shadow
 	@Final
@@ -30,13 +31,13 @@ public abstract class MixinLevelChunk_BlockEntityMap extends ChunkAccess {
 		super(chunkPos, upgradeData, levelHeightAccessor, biomeRegistry, inhabitedTime, sections, blendingData);
 	}
 
-	// FIXME: any better way to do this?
-	@Inject(method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/chunk/UpgradeData;Lnet/minecraft/world/ticks/LevelChunkTicks;Lnet/minecraft/world/ticks/LevelChunkTicks;J[Lnet/minecraft/world/level/chunk/LevelChunkSection;Lnet/minecraft/world/level/chunk/LevelChunk$PostLoadProcessor;Lnet/minecraft/world/level/levelgen/blending/BlendingData;)V",
-		at = @At("RETURN"))
-	private void onInit(CallbackInfo ci) {
-		if (level.isClientSide) {
-			blockEntities = new ConcurrentHashMap<>(blockEntities);
-			pendingBlockEntities = new ConcurrentHashMap<>(pendingBlockEntities);
+	@Inject(method = "getBlockEntity(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/chunk/LevelChunk$EntityCreationType;)Lnet/minecraft/world/level/block/entity/BlockEntity;",
+		at = @At("HEAD"), cancellable = true)
+	private void onGetBlockEntity(BlockPos pos,
+								  LevelChunk.EntityCreationType creationType,
+								  CallbackInfoReturnable<BlockEntity> cir) {
+		if (level.isClientSide && ThreadUtil.isOnParticleThread()) {
+			cir.setReturnValue(blockEntities.get(pos));
 		}
 	}
 }

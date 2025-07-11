@@ -17,6 +17,7 @@
     "conditional.Mixin_ReplaceRandom",
     "conditional.MixinClassInstanceMultiMap",
     "conditional.MixinLegacyRandomSource",
+    "conditional.MixinLevelChunk_BlockEntityMap_Late",
     "conditional.MixinLevelChunk_BlockEntityMap",
     "conditional.MixinParticles_LightCacheNoRefresh",
     "conditional.MixinParticles_LockProvider",
