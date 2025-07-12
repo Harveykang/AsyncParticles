@@ -41,6 +41,8 @@ public class ModListHelper {
 	/* Particle Rain */
 	public static final boolean PARTICLERAIN_LOADED = isModLoaded("particlerain");
 	public static final boolean FABRIC_PARTICLERAIN_LOADED = isFabricModLoaded("particlerain");
+	public static final boolean IS_LEGACY_PARTICLERAIN = FABRIC_PARTICLERAIN_LOADED &&
+														 versionCheck("particlerain", null, "3.999999");
 	public static final boolean FORGE_PARTICLERAIN_LOADED = isForgeModLoaded("particlerain");
 	public static final boolean FORGE_PRETTY_RAIN_LOADED = isForgeModLoaded("particlerain") &&
 														   versionCheck("particlerain", null, "1.999999");
@@ -111,6 +113,8 @@ public class ModListHelper {
 	public static final boolean MAKE_BUBBLES_POP_LOADED = isModLoaded("make_bubbles_pop");
 	/* More Culling */
 	public static final boolean MORE_CULLING_LOADED = isModLoaded("moreculling");
+	/* Figura */
+	public static final boolean FIGURA_LOADED = isModLoaded("figura");
 
 	@ExpectPlatform
 	private static boolean isForge() {

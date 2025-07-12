@@ -150,6 +150,9 @@ dependencies {
 
     /* More Culling */
     modLocalRuntime "maven.modrinth:moreculling:0.24.0"
+
+    /* Real Camera */
+    modLocalRuntime "maven.modrinth:real-camera:XZ9lHrLr"
 }
 
 processResources {

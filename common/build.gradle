@@ -94,4 +94,7 @@ dependencies {
 
     /* More Culling */
     modCompileOnly "maven.modrinth:moreculling:0.24.0"
+
+    /* Figura */
+    modCompileOnly "maven.modrinth:figura:4HqSmvZ6" // 0.1.5
 }

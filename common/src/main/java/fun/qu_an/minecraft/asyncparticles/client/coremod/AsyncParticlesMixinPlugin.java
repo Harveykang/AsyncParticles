@@ -74,14 +74,11 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					yield !IS_FORGE;
 				}
 				yield switch (split[1]) {
-					case "particlerain_3_vs" -> FABRIC_PARTICLERAIN_LOADED &&
-												versionCheck("particlerain", null, "3.999999") &&
+					case "particlerain_3_vs" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN &&
 												VS_LOADED;
-					case "particlerain_3_create" -> FABRIC_PARTICLERAIN_LOADED &&
-													versionCheck("particlerain", null, "3.999999") &&
+					case "particlerain_3_create" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN &&
 													CREATE_LOADED;
-					case "particlerain_3" -> FABRIC_PARTICLERAIN_LOADED &&
-											 versionCheck("particlerain", null, "3.999999");
+					case "particlerain_3" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN;
 					case "effective" -> FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
 					case "particular" -> FABRIC_PARTICULAR_LOADED;
@@ -135,6 +132,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "photon_editor" -> PHOTON_EDITOR_LOADED;
 			case "shimmer" -> SHIMMER_LOADED;
 			case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
+			case "figura" -> FIGURA_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}
