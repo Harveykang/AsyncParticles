@@ -92,6 +92,10 @@ subprojects {
         maven { // Fabric ASM for Porting Lib
             url 'https://jitpack.io'
         }
+        maven {
+            name = "Xander Maven"
+            url = "https://maven.isxander.dev/releases"
+        }
     }
 
     loom {

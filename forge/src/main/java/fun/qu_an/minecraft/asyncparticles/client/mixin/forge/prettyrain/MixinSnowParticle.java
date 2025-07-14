@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.prettyrain;
 
 import com.leclowndu93150.particlerain.particle.SnowParticle;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v3.ParticleRainAddon;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;

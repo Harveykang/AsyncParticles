@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.compat.particlerain;
+package fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v3;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.phys.AABB;

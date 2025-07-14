@@ -1,8 +1,8 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_3;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.legacy.fabric.particlerain;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v3.ParticleRainAddon;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;

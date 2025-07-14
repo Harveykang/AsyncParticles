@@ -45,7 +45,6 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		return null;
 	}
 
-	//	private static final int L = "fun.qu_an.minecraft.asyncparticles.client.mixin.".length();
 	private static final int PACKAGE_LENGTH = AsyncParticlesClient.class.getPackage().getName().length() +
 											  ".mixin.".length();
 
@@ -75,11 +74,10 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					yield !IS_FORGE;
 				}
 				yield switch (split[1]) {
-					case "particlerain_3_vs" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN &&
+					case "particlerain_vs" -> FABRIC_PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN &&
 												VS_LOADED;
-					case "particlerain_3_create" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN &&
+					case "particlerain_create" -> FABRIC_PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN &&
 													CREATE_LOADED;
-					case "particlerain_3" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN;
 					case "effective" -> FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
 					case "particular" -> FABRIC_PARTICULAR_LOADED;
@@ -89,16 +87,6 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;
 					case "loot_beams_up" -> FABRIC_LOOT_BEAMS_UP_LOADED;
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
-				};
-			}
-			case "legacy" -> {
-				if (split.length == 2) {
-					throw new IllegalArgumentException("Unknown legacy mixin: " + mixinClassName);
-				}
-				yield switch (split[1]) {
-					case "flywheel" -> FLYWHEEL_LOADED &&
-									   versionCheck("flywheel", "0.6", "1.0");
-					default -> throw new IllegalArgumentException("Unknown legacy mod mixin: " + mixinClassName);
 				};
 			}
 			case "fake_renders",

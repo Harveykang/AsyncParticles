@@ -10,6 +10,13 @@ loom {
     }
 }
 
+configurations {
+    shadowBundle {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+}
+
 dependencies {
     // We depend on Fabric Loader here to use the Fabric @Environment annotations,
     // which get remapped to the correct annotations on each platform.
@@ -34,8 +41,7 @@ dependencies {
     modCompileOnly 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
 
     /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:particle-rain:3.0.6-1.20"
-//    modCompileOnly "maven.modrinth:pretty-rain:TGjK6ChS"
+    modCompileOnly "maven.modrinth:particle-rain:4-alpha.2+1.20.1-fabric"
 
     /* Effectual */
     modCompileOnly 'maven.modrinth:effectual:0.6.0-1.20.1'

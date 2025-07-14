@@ -1,8 +1,8 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_3_vs;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.legacy.fabric.particlerain_vs;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
-import fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_3.MixinWeatherParticle;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.legacy.fabric.particlerain.MixinWeatherParticle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;

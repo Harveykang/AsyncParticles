@@ -1,7 +1,7 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_3;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.legacy.fabric.particlerain;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v3.ParticleRainAddon;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TextureSheetParticle;

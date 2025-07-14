@@ -1,10 +1,10 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_3;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.legacy.fabric.particlerain;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.api.EndTickOperation;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v3.ParticleRainCompat;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -17,12 +17,12 @@ import pigcart.particlerain.WeatherParticleSpawner;
 public class MixinWeatherParticleSpawner {
 	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", remap = false, target = "Lpigcart/particlerain/ParticleRainClient;particleCount:I"))
 	private static int modifyParticleCount(int original) {
-		return ParticleRainCompat.asyncparticles$particleCount.get();
+		return ParticleRainCompat.INSTANCE.particleCount.get();
 	}
 
 	@ModifyExpressionValue(method = "spawnParticle", at = @At(value = "FIELD", remap = false, target = "Lpigcart/particlerain/ParticleRainClient;fogCount:I"))
 	private static int modifyFogCount(int original) {
-		return ParticleRainCompat.asyncparticles$fogCount.get();
+		return ParticleRainCompat.INSTANCE.fogCount.get();
 	}
 
 	@Unique

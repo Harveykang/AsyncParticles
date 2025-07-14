@@ -36,6 +36,8 @@ dependencies {
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
+    common(project(path: ':common_legacy_mod_compat', configuration: 'namedElements')) { transitive false }
+    shadowBundle project(path: ':common_legacy_mod_compat', configuration: 'transformProductionFabric')
 
     modCompileOnly 'maven.modrinth:modmenu:7.2.2'
     modLocalRuntime 'maven.modrinth:modmenu:7.2.2'
@@ -101,8 +103,9 @@ dependencies {
     }
 
     /* Particle Rain/Pretty Rain */
-    modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
-    modCompileOnly "maven.modrinth:particle-rain:3.0.6-1.20"
+//    modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
+    modLocalRuntime "dev.isxander:yet-another-config-lib:3.6.6+1.20.1-fabric"
+    modLocalRuntime "maven.modrinth:particle-rain:4-alpha.2+1.20.1-fabric"
 
     /* Mmmmmmmmmmmm */
 //    modLocalRuntime 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
@@ -152,7 +155,7 @@ dependencies {
     modLocalRuntime "maven.modrinth:moreculling:0.24.0"
 
     /* Real Camera */
-    modLocalRuntime "maven.modrinth:real-camera:XZ9lHrLr"
+//    modLocalRuntime "maven.modrinth:real-camera:XZ9lHrLr"
 }
 
 processResources {

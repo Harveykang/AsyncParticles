@@ -1,7 +1,7 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_3_vs;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.legacy.fabric.particlerain_create;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.ParticleOptions;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,6 +19,6 @@ public class MixinWeatherParticleSpawner {
 										   double xSpeed,
 										   double ySpeed,
 										   double zSpeed) {
-		return VSCompat.canCreateWeatherParticle(instance, x, y, z, 2.0);
+		return CreateCompat.canSpawnWeatherParticle(instance, x, y, z, 2.0);
 	}
 }

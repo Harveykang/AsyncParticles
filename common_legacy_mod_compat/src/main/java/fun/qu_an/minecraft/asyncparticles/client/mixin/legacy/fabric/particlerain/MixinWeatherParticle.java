@@ -1,8 +1,8 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_3;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.legacy.fabric.particlerain;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v3.ParticleRainCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v3.ParticleRainAddon;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TextureSheetParticle;
@@ -57,7 +57,7 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 	@SuppressWarnings("ConstantValue")
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
-		ParticleRainCompat.asyncparticles$particleCount.getAndIncrement();
+		ParticleRainCompat.INSTANCE.particleCount.getAndIncrement();
 		if (StreakParticle.class.isInstance(this) ||
 			RippleParticle.class.isInstance(this)) {
 			asyncparticles$setWeatherAABB(AABB.ofSize(new Vec3(x, y, z), 0.01, 0.01, 0.01));
@@ -68,7 +68,7 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 
 	@Inject(method = "remove", at = @At(value = "FIELD", remap = false, ordinal = 0, target = "Lpigcart/particlerain/ParticleRainClient;particleCount:I"))
 	private void onRemove(CallbackInfo ci) {
-		ParticleRainCompat.asyncparticles$particleCount.getAndDecrement();
+		ParticleRainCompat.INSTANCE.particleCount.getAndDecrement();
 	}
 
 	protected MixinWeatherParticle(ClientLevel clientLevel, double d, double e, double f) {

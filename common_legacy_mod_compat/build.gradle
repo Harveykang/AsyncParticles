@@ -1,0 +1,29 @@
+architectury {
+    common rootProject.enabled_platforms.split(',')
+}
+
+loom {
+    accessWidenerPath = project(":common").loom.accessWidenerPath
+
+    mixin {
+        defaultRefmapName = "asyncparticles-common_legacy_mod_compat-refmap.json"
+    }
+}
+
+dependencies {
+    // We depend on Fabric Loader here to use the Fabric @Environment annotations,
+    // which get remapped to the correct annotations on each platform.
+    // Do NOT use other classes from Fabric Loader.
+
+    implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:0.3.3"))
+
+    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+
+    compileOnly(project(':common')) { transitive false }
+
+    /* Particle Rain */
+    modCompileOnly "maven.modrinth:particle-rain:3.0.6-1.20"
+
+    // 0.5.0
+    modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
+}
