@@ -4,6 +4,8 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.RainEffect;
+import fun.qu_an.minecraft.asyncparticles.client.util.CollisionType;
 import net.diebuddies.physics.snow.math.AABB3D;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -11,6 +13,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
@@ -28,7 +31,8 @@ public class PhysicsModCompat {
 	}
 
 	public static void onShipCollide(ClientLevel level, Vec3 location, Vec3 movement) {
-		if (level.random.nextFloat() > 0.1) {
+		RainEffect vsRainEffect = ConfigHelper.getVSRainEffect();
+		if (vsRainEffect == RainEffect.NONE || level.random.nextFloat() > 0.1) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -45,7 +49,7 @@ public class PhysicsModCompat {
 			return;
 		}
 		Vec3 shipMotion = hit.shipMotion;
-		if (!ConfigHelper.alwaysSpawnRainParticlesOnVsShips() && abs(shipMotion.lengthSqr()) > 0.01) {
+		if (vsRainEffect != RainEffect.ALWAYS && abs(shipMotion.lengthSqr()) > 0.01) {
 			return;
 		}
 		Vec3 spawnPos = hit.getLocation().add(shipMotion);
@@ -55,23 +59,23 @@ public class PhysicsModCompat {
 		}
 	}
 
-	public static boolean collideWithContraptions(ClientLevel level, Vec3 movement, AABB3D aabb, boolean rain) {
-		Vector3d min = aabb.getMin();
-		Vector3d max = aabb.getMax();
-		Vec3 clipMotion = CreateUtil.collideMotionWithContraptions(level,
-			movement,
-			new AABB(min.x - 0.1, min.y - 0.1, min.z - 0.1, max.x + 0.1, max.y + 0.1, max.z + 0.1));
-		if (clipMotion == null) {
-			return false;
+	public static CollisionType isCollideWithContraption(ClientLevel level, Vec3 movement, AABB aabb) {
+		return CreateUtil.isCollideWithContraption(level, movement, aabb, true);
+	}
+
+	public static void onContraptionCollide(ClientLevel level, Vec3 location, Vec3 movement, CollisionType collisionType) {
+		RainEffect createRainEffect = ConfigHelper.getCreateRainEffect();
+		if (createRainEffect == RainEffect.NONE ||
+			level.random.nextFloat() > 0.1) {
+			return;
 		}
-		if (!rain || level.random.nextFloat() > 0.1) {
-			return true;
+		BlockHitResult hit = CreateUtil.clip(level, location, location.add(movement.scale(2)));
+		if (hit == null || hit.getType() != HitResult.Type.BLOCK ||
+			!collisionType.canSpawnRainEffect(createRainEffect)) {
+			return;
 		}
-		double centerX = min.x + aabb.getWidth() / 2;
-		double centerZ = min.z + aabb.getDepth() / 2;
-		Vec3 startPos = new Vec3(centerX, min.y, centerZ);
-		Vec3 spawnPos = startPos.add(clipMotion);
-		Minecraft.getInstance().particleEngine.createParticle(
+		Vec3 spawnPos = hit.location;
+		Minecraft.getInstance().level.addParticle(
 			ParticleTypes.RAIN,
 			spawnPos.x,
 			spawnPos.y,
@@ -79,6 +83,5 @@ public class PhysicsModCompat {
 			0,
 			0,
 			0);
-		return true;
 	}
 }

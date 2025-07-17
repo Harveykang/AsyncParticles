@@ -22,8 +22,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.DELAYED_ASYNC;
-
 @Mixin(value = LevelRenderer.class, priority = 499)
 public abstract class MixinLevelRenderer {
 	@Shadow
@@ -35,10 +33,6 @@ public abstract class MixinLevelRenderer {
 
 	@Shadow
 	private Frustum cullingFrustum;
-
-	@Shadow
-	@Nullable
-	public PostChain transparencyChain;
 
 	@Inject(method = "renderLevel", at = @At(value = "HEAD"))
 	private void onRenderLevelHead(PoseStack poseStack,

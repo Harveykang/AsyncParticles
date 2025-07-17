@@ -7,6 +7,6 @@ public interface ISpinLockProvider {
 	 * Mark as default for calling in Mixins.
 	 */
 	default SpinLock asyncparticles$getSpinLock() {
-		throw new UnsupportedOperationException("Missing implementation.");
+		throw new AssertionError("Missing implementation.");
 	}
 }

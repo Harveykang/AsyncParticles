@@ -59,3 +59,4 @@ accessible field net/minecraft/client/particle/ParticleEngine textureManager Lne
 accessible field net/minecraft/client/particle/ParticleEngine RENDER_ORDER Ljava/util/List;
 transitive-mutable field net/minecraft/client/particle/ParticleEngine RENDER_ORDER Ljava/util/List;
 accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;
+accessible method net/minecraft/world/entity/Entity collideWithShapes (Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/List;)Lnet/minecraft/world/phys/Vec3;

@@ -127,8 +127,9 @@ public abstract class MixinParticleEngine {
 
 	@Unique
 	private void asyncparticles$tickEmitters() {
+		boolean forceDone = ConfigHelper.forceDoneParticleTick();
 		for (TrackingEmitter emitter : this.trackingEmitters) {
-			if (AsyncTicker.isCancelled() && !ConfigHelper.forceDoneParticleTick()) {
+			if (AsyncTicker.isCancelled() && !forceDone) {
 				return;
 			}
 			if (!emitter.isAlive()) {
@@ -159,8 +160,9 @@ public abstract class MixinParticleEngine {
 		boolean enableLightCache = ConfigHelper.particleLightCache();
 		boolean isNotOnMainThread = !ThreadUtil.isOnMainThread();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
+		boolean forceDone = ConfigHelper.forceDoneParticleTick();
 		for (Particle particle : collection) {
-			if (AsyncTicker.isCancelled() && !ConfigHelper.forceDoneParticleTick()) {
+			if (AsyncTicker.isCancelled() && !forceDone) {
 				return;
 			}
 			if (!particle.isAlive()) {

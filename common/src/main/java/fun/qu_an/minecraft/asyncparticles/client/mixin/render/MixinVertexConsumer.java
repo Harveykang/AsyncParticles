@@ -1,14 +1,12 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.render;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import fun.qu_an.minecraft.asyncparticles.client.util.VertexHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(VertexConsumer.class)
 public interface MixinVertexConsumer {
-	@Shadow VertexConsumer color(int red, int green, int blue, int alpha);
-
 	/**
 	 * @author Harvey_Husky
 	 * @reason Fix negative particle alpha.
@@ -17,7 +15,6 @@ public interface MixinVertexConsumer {
 	 */
 	@Overwrite
 	default VertexConsumer color(float red, float green, float blue, float alpha) {
-		return this.color((int) (red * 255.0F), (int) (green * 255.0F), (int) (blue * 255.0F),
-			Math.max(0, (int) (alpha * 255.0F)));
+		return VertexHelper.setColor((VertexConsumer) this, red, green, blue, alpha);
 	}
 }

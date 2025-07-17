@@ -87,7 +87,7 @@ dependencies {
     modCompileOnly 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
 
     /* Create */
-    modLocalRuntime("com.simibubi.create:create-fabric-1.20.1:0.5.1-f-build.1417+mc1.20.1")
+    modLocalRuntime("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
 //    modLocalRuntime 'maven.modrinth:iris-flw-compat:1.1.4'
     // keep this line to compile properly
     // 否则被模组重写的原版方法不会正确重映射...
@@ -101,7 +101,7 @@ dependencies {
     }
 
     /* Particle Rain/Pretty Rain */
-//    modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
+    modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
     modCompileOnly "maven.modrinth:particle-rain:3.0.6-1.20"
 
     /* Mmmmmmmmmmmm */

@@ -5,6 +5,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.ClothConfigMixinMenus;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.TranslatableEnum;
+import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
@@ -13,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
@@ -168,55 +170,61 @@ class ClothConfigMenus {
 				.setRequirement(() -> false)
 				.build());
 		// endregion
-		// region Mod Compat Category
-		ConfigCategory modCompatCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mod-compat"));
-		modCompatCategory
-			.addEntry(entryBuilder
-				// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
-				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
-					List.of(entryBuilder
-						// .startEnumSelector(Component.translatable("config.asyncparticles.valkyrienskies.rainEffect"),
-						// 	RainEffect.class, valkyrienSkies$rainEffect)
-						.startSelector(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect"),
-							new RainEffect[]{RainEffect.ALWAYS, RainEffect.STATIONARY}, valkyrienSkies$rainEffect)
-						.setNameProvider(RainEffect::getComponent)
-						.setDefaultValue(defaultConfig.valkyrienSkies.rainEffect)
-						.setTooltip(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect.tooltip"))
-						.setSaveConsumer(newValue -> valkyrienSkies$rainEffect = newValue)
-						.setRequirement(() -> ModListHelper.VS_LOADED)
-						.build(), entryBuilder
-						.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.fixParticleLights"),
-							valkyrienSkies$fixParticleLights)
-						.setDefaultValue(defaultConfig.valkyrienSkies.fixParticleLights)
-						.setTooltip(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.fixParticleLights.tooltip"))
-						.setSaveConsumer(newValue -> valkyrienSkies$fixParticleLights = newValue)
-						.setRequirement(() -> ModListHelper.VS_LOADED)
-						.build()
-					))
-				.build())
-			.addEntry(entryBuilder
-				// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
-				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
-					List.of(entryBuilder
-						.startEnumSelector(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect"),
-							RainEffect.class, create$rainEffect)
-						.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
-						.setDefaultValue(defaultConfig.create.rainEffect)
-						.setTooltip(
-							Component.translatable("config.asyncparticles.mod-compat.create.rainEffect.tooltip")
-								.withStyle(ChatFormatting.STRIKETHROUGH),
-							Component.translatable("config.asyncparticles.not-implemented")
-								.withStyle(ChatFormatting.DARK_RED))
-						.setSaveConsumer(newValue -> create$rainEffect = newValue)
-						// .setRequirement(() -> ModListHelper.CREATE_LOADED)
-						.setRequirement(() -> false)
-						.build()))
-				.build());
-		// endregion
-		// region Mixin Category
-		ConfigCategory mixinCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mixin"));
+		// region Compat Category
+
+		// Mixin
 		ConfigEntryBuilder mixinEntryBuilder = builder.entryBuilder();
 		mixinEntryBuilder.setResetButtonKey(Component.translatable("gui.asyncparticles.revert"));
+
+		@SuppressWarnings("rawtypes")
+		List<AbstractConfigListEntry> vsEntries = new ArrayList<>();
+		vsEntries.add(entryBuilder
+			.startSelector(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect"),
+				RainEffect.values(), valkyrienSkies$rainEffect)
+			.setNameProvider(RainEffect::getComponent)
+			.setDefaultValue(defaultConfig.valkyrienSkies.rainEffect)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect.tooltip"))
+			.setSaveConsumer(newValue -> valkyrienSkies$rainEffect = newValue)
+			.setRequirement(() -> ModListHelper.VS_LOADED)
+			.build());
+		vsEntries.add(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.fixParticleLights"),
+				valkyrienSkies$fixParticleLights)
+			.setDefaultValue(defaultConfig.valkyrienSkies.fixParticleLights)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.fixParticleLights.tooltip"))
+			.setSaveConsumer(newValue -> valkyrienSkies$fixParticleLights = newValue)
+			.setRequirement(() -> ModListHelper.VS_LOADED)
+			.build());
+
+		@SuppressWarnings("rawtypes")
+		List<AbstractConfigListEntry> createEntries = new ArrayList<>();
+		createEntries.add(entryBuilder
+			.startEnumSelector(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect"),
+				RainEffect.class, create$rainEffect)
+			.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
+			.setDefaultValue(defaultConfig.create.rainEffect)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect.tooltip"))
+			.setSaveConsumer(newValue -> create$rainEffect = newValue)
+			.setRequirement(() -> ModListHelper.CREATE_LOADED)
+			.build());
+
+		// Mixin
+		ClothConfigMixinMenus.addModCompatCategory(entryBuilder, mixinEntryBuilder, vsEntries, createEntries);
+
+		ConfigCategory modCompatCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mod-compat"));
+		modCompatCategory
+			.addEntry(new SubCategoryListEntryFix(entryBuilder
+				// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
+				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
+					vsEntries)
+				.build()))
+			.addEntry(new SubCategoryListEntryFix(entryBuilder
+				// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
+				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
+					createEntries)
+				.build()));
+
+		ConfigCategory mixinCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mixin"));
 		Runnable mixinSaveRunnable = ClothConfigMixinMenus.buildCategory(mixinCategory, entryBuilder, mixinEntryBuilder);
 		// endregion
 

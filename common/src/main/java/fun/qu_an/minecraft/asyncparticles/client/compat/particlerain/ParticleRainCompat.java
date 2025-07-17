@@ -2,6 +2,8 @@ package fun.qu_an.minecraft.asyncparticles.client.compat.particlerain;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.RainEffect;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -27,11 +29,12 @@ public class ParticleRainCompat {
 	}
 
 	public static void onCreateCollision(@NotNull ClientLevel level, Vec3 originalMotion, @NotNull Vec3 clipMotion, @NotNull AABB aabb) {
-		if (onCreateCollision0()) {
+		RainEffect createRainEffect = ConfigHelper.getCreateRainEffect();
+		if (createRainEffect != RainEffect.NONE && onCreateCollision0()) {
 			Vec3 center = aabb.getCenter();
 			AABB aabb1 = new AABB(center.x, aabb.minY - 1, center.z, center.x, aabb.minY, center.z);
 			Vec3 motion1 = originalMotion.scale(2);
-			if (CreateUtil.isCollideWithContraption(level, motion1, aabb1, false)) {
+			if (CreateUtil.isCollideWithContraption(level, motion1, aabb1, false).canSpawnRainEffect(createRainEffect)) {
 				Vec3 startPos = new Vec3(center.x, aabb.minY, center.z);
 				Vec3 spawnPos = startPos.add(clipMotion);
 				Minecraft.getInstance().particleEngine

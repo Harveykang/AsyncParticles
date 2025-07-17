@@ -44,6 +44,14 @@ public class ConfigHelper {
 		return valkyrienSkies$fixParticleLights;
 	}
 
+	public static RainEffect getCreateRainEffect() {
+		return AsyncParticlesConfig.create$rainEffect;
+	}
+
+	public static RainEffect getVSRainEffect() {
+		return AsyncParticlesConfig.valkyrienSkies$rainEffect;
+	}
+
 	public static int getParticleLimit() {
 		return particle$particleLimit;
 	}

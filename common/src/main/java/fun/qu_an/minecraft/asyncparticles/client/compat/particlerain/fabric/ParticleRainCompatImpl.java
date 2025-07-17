@@ -1,10 +1,10 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.fabric;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.RippleParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.RainEffect;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -16,9 +16,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
-import org.spongepowered.asm.mixin.Unique;
 import pigcart.particlerain.ParticleRainClient;
 
 import static java.lang.Math.abs;
@@ -27,7 +25,9 @@ import static pigcart.particlerain.ParticleRainClient.config;
 @SuppressWarnings("unused")
 public class ParticleRainCompatImpl {
 	public static void onShipCollision(ClientLevel level, Vec3 location, Vec3 movement, AABB aabb) {
-		if (!config.doRippleParticles && !config.doSplashParticles) {
+		RainEffect vsRainEffect = ConfigHelper.getVSRainEffect();
+		if (vsRainEffect == RainEffect.NONE ||
+			(!config.doRippleParticles && !config.doSplashParticles)) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -44,7 +44,7 @@ public class ParticleRainCompatImpl {
 			return;
 		}
 		Vec3 shipMotion = hit.shipMotion;
-		if (!ConfigHelper.alwaysSpawnRainParticlesOnVsShips() && abs(shipMotion.lengthSqr()) > 0.01) {
+		if (vsRainEffect != RainEffect.ALWAYS && abs(shipMotion.lengthSqr()) > 0.01) {
 			return;
 		}
 		Vec3 spawnPos = hit.getLocation().add(shipMotion);
