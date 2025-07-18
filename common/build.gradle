@@ -62,4 +62,7 @@ dependencies {
 
     /* Immediately Fast */
     modCompileOnly "maven.modrinth:immediatelyfast:1.9.5+1.21.5-fabric"
+
+    /* Figura */
+    modCompileOnly "maven.modrinth:figura:0.1.5b+1.21.4" // TODO 1.21.4 version
 }

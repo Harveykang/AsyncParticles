@@ -107,6 +107,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "physicsmod" -> PHYSICSMOD_LOADED;
 			case "cloth_config" -> CLOTH_CONFIG_LOADED;
 			case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
+			case "figura" -> FIGURA_LOADED;
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}
