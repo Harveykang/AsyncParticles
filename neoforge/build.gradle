@@ -118,7 +118,7 @@ dependencies {
     /* Particle Rain/Pretty Rain */
     modCompileOnly "maven.modrinth:pretty-rain:1.1.4"
 //    if (rootProject.use_connector_mod == "true") {
-//    modLocalRuntime "maven.modrinth:pretty-rain:1.1.4"
+    modLocalRuntime "maven.modrinth:pretty-rain:1.1.4"
 //    } else {
 //        modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
 //    }
@@ -171,11 +171,14 @@ dependencies {
 
     /* Simple Weather */
     modCompileOnly "curse.maven:simple-weather-983390:5984086" // 1.0.13
-    modLocalRuntime "curse.maven:simple-weather-983390:5984086"
+//    modLocalRuntime "curse.maven:simple-weather-983390:5984086"
 
     /* Particular Reforged */
     modCompileOnly "maven.modrinth:particular-reforged:1.21.1" // 1.1.0
     modLocalRuntime "maven.modrinth:particular-reforged:1.21.1" // 1.1.0
+
+    /* Weather2 */
+    modCompileOnly "maven.modrinth:weather-storms-tornadoes:1.21.0-2.8.5"
 }
 
 processResources {

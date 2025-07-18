@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.neoforge;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.MixinClassAdjusterRegistrar;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -13,6 +14,7 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 	@Override
 	public void onLoad(String mixinPackage) {
+		MixinClassAdjusterRegistrar.register(new AdjusterContraptionNoParticleCollision());
 	}
 
 	@Override
@@ -40,13 +42,15 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 			case "prettyrain_create" -> FORGE_PRETTY_RAIN_LOADED && CREATE_LOADED;
 			case "prettyrain_vs" -> FORGE_PRETTY_RAIN_LOADED && VS_LOADED;
 			case "create" -> FORGE_CREATE_LOADED;
-			// TODO: 下面这个 mod 没有正式发布，且不确定是否是唯一的 forge 移植版
+			case "vs2_create" -> FORGE_VS_LOADED && CREATE_LOADED;
 			case "effecticularity" -> FORGE_EFFECTIVE_LOADED;
 			case "subtle_effects" -> FORGE_SUBTLE_EFFECTS_LOADED;
 			case "simple_weather" -> FORGE_SIMPLE_WEATHER_LOADED;
 			case "simple_weather_create" -> FORGE_SIMPLE_WEATHER_LOADED && CREATE_LOADED;
 			case "particular" -> FORGE_PARTICULAR_LOADED;
-			case "vs2_create" -> FORGE_VS_LOADED && CREATE_LOADED;
+			case "weather2" -> FORGE_WEATHER2_LOADED;
+			case "weather2_create" -> FORGE_WEATHER2_LOADED && CREATE_LOADED;
+			case "weather2_vs" -> FORGE_WEATHER2_LOADED && VS_LOADED;
 			default -> throw new IllegalArgumentException("Unknown forge mixin: " + mixinClassName);
 		};
 	}

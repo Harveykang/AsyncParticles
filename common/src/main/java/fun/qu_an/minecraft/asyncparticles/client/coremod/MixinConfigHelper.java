@@ -36,4 +36,8 @@ public class MixinConfigHelper {
 	public static boolean isSafeBlockEntityMap() {
 		return CONFIG.isSafeBlockEntityMap();
 	}
+
+	public static Collection<String> getContraptionNoParticleCollision() {
+		return CONFIG.getContraptionNoParticleCollision();
+	}
 }

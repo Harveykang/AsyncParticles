@@ -37,10 +37,11 @@ public class ModListHelper {
 	/* Particle Rain */
 	public static final boolean PARTICLERAIN_LOADED = isModLoaded("particlerain");
 	public static final boolean FABRIC_PARTICLERAIN_LOADED = isFabricModLoaded("particlerain");
+	public static final boolean IS_LEGACY_PARTICLERAIN = FABRIC_PARTICLERAIN_LOADED &&
+														 versionCheck("particlerain", null, "3.999999");
+	public static final boolean FORGE_PARTICLERAIN_LOADED = isForgeModLoaded("particlerain");
 	public static final boolean FORGE_PRETTY_RAIN_LOADED = isForgeModLoaded("particlerain") &&
 														   versionCheck("particlerain", null, "1.999999");
-	public static final boolean FORGE_PARTICLERAIN_LOADED = isForgeModLoaded("particlerain") &&
-															versionCheck("particlerain", "3.999999", null);
 	/* Flywheel */
 	public static final boolean FLYWHEEL_LOADED = isModLoaded("flywheel");
 	/* Create */
@@ -70,6 +71,8 @@ public class ModListHelper {
 	public static final boolean FORGE_SUBTLE_EFFECTS_LOADED = isForgeModLoaded("subtle_effects");
 	/* What Are They Up To */
 	public static final boolean WATUT_LOADED = isModLoaded("watut");
+	/* Weather2 */
+	public static final boolean FORGE_WEATHER2_LOADED = isForgeModLoaded("weather2");
 	/* Simple Weather */
 	public static final boolean FORGE_SIMPLE_WEATHER_LOADED = isForgeModLoaded("simple_weather");
 	/* Vulkan Mod */

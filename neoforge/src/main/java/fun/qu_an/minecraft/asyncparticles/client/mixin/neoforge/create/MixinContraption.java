@@ -14,8 +14,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,66 +28,27 @@ public class MixinContraption implements ContraptionAddon {
 	protected Map<BlockPos, StructureTemplate.StructureBlockInfo> blocks;
 	@Shadow(remap = false)
 	protected ContraptionWorld world;
-	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	@Shadow public Optional<List<AABB>> simplifiedEntityColliders;
-	@Unique
-	private VoxelShape asyncparticles$optimizedShape;
-	@Unique
-	private List<VoxelShape> asyncparticles$colliders;
 	@Unique
 	private List<AABB> asyncparticles$aabbs;
 	@Unique
 	private final Object asyncparticles$lock = new Object();
 
 	@WrapOperation(method = {
-		"lambda$gatherBBsOffThread$17()Ljava/util/List;",
 		"lambda$gatherBBsOffThread$25()Ljava/util/List;",
-		"lambda$gatherBBsOffThread$26()Ljava/util/List;"
-	}, remap = false, at = @At(value = "INVOKE",
+		"lambda$gatherBBsOffThread$26()Ljava/util/List;",
+		"lambda$gatherBBsOffThread$27()Ljava/util/List;"
+	}, at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/world/phys/shapes/VoxelShape;toAabbs()Ljava/util/List;"))
 	private List<AABB> optimizeVoxelShape(VoxelShape instance, Operation<List<AABB>> original) {
-		asyncparticles$optimizedShape = instance;
 		return original.call(instance);
 	}
 
 	@WrapOperation(method = "gatherBBsOffThread", remap = false, at = @At(value = "INVOKE", target = "Ljava/util/concurrent/CompletableFuture;thenAccept(Ljava/util/function/Consumer;)Ljava/util/concurrent/CompletableFuture;"))
 	private CompletableFuture<Void> gatherBBsOffThread(CompletableFuture<?> instance, Consumer<?> action, Operation<CompletableFuture<Void>> original) {
 		return original.call(instance, action).thenRun(() -> {
-			asyncparticles$colliders = null;
 			asyncparticles$aabbs = null;
 		});
-	}
-
-	@Inject(method = "invalidateColliders", remap = false, at = @At(value = "FIELD", remap = false,
-		target = "Lcom/simibubi/create/content/contraptions/Contraption;simplifiedEntityColliders:Ljava/util/Optional;"))
-	private void invalidateColliders(CallbackInfo ci) {
-		asyncparticles$optimizedShape = null;
-		asyncparticles$colliders = null;
-	}
-
-	@Override
-	public List<VoxelShape> asyncparticles$getShapes() {
-		if (asyncparticles$optimizedShape != null) {
-			return List.of(asyncparticles$optimizedShape);
-		}
-		if (asyncparticles$colliders != null) {
-			return asyncparticles$colliders;
-		}
-		synchronized (asyncparticles$lock) {
-			if (asyncparticles$colliders != null) {
-				return asyncparticles$colliders;
-			}
-			List<VoxelShape> colliders = new ArrayList<>(blocks.size());
-			for (Map.Entry<BlockPos, StructureTemplate.StructureBlockInfo> entry : blocks.entrySet()) {
-				StructureTemplate.StructureBlockInfo info = entry.getValue();
-				BlockPos localPos = entry.getKey();
-				VoxelShape collisionShape = info.state().getCollisionShape(this.world, localPos, CollisionContext.empty());
-				if (!collisionShape.isEmpty()) {
-					colliders.add(collisionShape.move(localPos.getX(), localPos.getY(), localPos.getZ()));
-				}
-			}
-			return this.asyncparticles$colliders = colliders;
-		}
 	}
 
 	@Override

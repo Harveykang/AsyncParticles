@@ -75,14 +75,11 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				}
 				yield switch (split[1]) {
 					case "off_thread_access" -> !IS_FORGE;
-					case "particlerain_3_vs" -> FABRIC_PARTICLERAIN_LOADED &&
-												versionCheck("particlerain", null, "3.999999") &&
+					case "particlerain_3_vs" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN &&
 												VS_LOADED;
-					case "particlerain_3_create" -> FABRIC_PARTICLERAIN_LOADED &&
-													versionCheck("particlerain", null, "3.999999") &&
+					case "particlerain_3_create" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN &&
 													CREATE_LOADED;
-					case "particlerain_3" -> FABRIC_PARTICLERAIN_LOADED &&
-											 versionCheck("particlerain", null, "3.999999");
+					case "particlerain_3" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN;
 					case "create" -> FABRIC_CREATE_LOADED;
 					case "effective" -> FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
@@ -123,6 +120,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "lodestone" -> LODESTONE_LOADED;
 			case "cloth_config" -> CLOTH_CONFIG_LOADED;
 			case "vs2" -> VS_LOADED;
+			case "vs2_create" -> VS_LOADED && CREATE_LOADED;
 			case "dsurround" -> DSURROUND_LOADED;
 			case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
 			case "figura" -> FIGURA_LOADED;

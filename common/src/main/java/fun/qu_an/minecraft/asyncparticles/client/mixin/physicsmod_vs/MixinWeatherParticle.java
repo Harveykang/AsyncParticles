@@ -27,10 +27,9 @@ public abstract class MixinWeatherParticle extends FastTextureSheetParticle {
 		cancellable = true)
 	private void onTick(CallbackInfo ci) {
 		Vec3 movement = new Vec3(xd, yd, zd);
-		Vec3 pos = new Vec3(x, y, z);
 		if (PhysicsModCompat.isCollideWithShip(level, movement, aabb)) {
 			if ((Object) this instanceof RainParticle) {
-				PhysicsModCompat.onShipCollide(level, pos, movement);
+				PhysicsModCompat.onShipCollide(level, new Vec3(x, y, z), movement);
 			}
 			remove();
 			ci.cancel();

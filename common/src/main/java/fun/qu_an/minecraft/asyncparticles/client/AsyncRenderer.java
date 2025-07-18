@@ -52,6 +52,7 @@ public class AsyncRenderer {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 	public static boolean renderAsync = false;
+	private static boolean particlePhase = false;
 
 	static {
 		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
@@ -92,17 +93,7 @@ public class AsyncRenderer {
 		AtomicInteger workerCount = new AtomicInteger(1);
 		int clamp = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 		EXECUTOR = new ForkJoinPool(clamp, (forkJoinPool) -> {
-			ForkJoinWorkerThread forkJoinWorkerThread = new ForkJoinWorkerThread(forkJoinPool) {
-				protected void onTermination(Throwable throwable) {
-					if (throwable != null) {
-						LOGGER.warn("{} died", this.getName(), throwable);
-					} else {
-						LOGGER.debug("{} shutdown", this.getName());
-					}
-
-					super.onTermination(throwable);
-				}
-			};
+			ForkJoinWorkerThread forkJoinWorkerThread = new AsyncRendererThread(forkJoinPool);
 			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());
 			forkJoinWorkerThread.setDaemon(true);
 			return forkJoinWorkerThread;
@@ -255,12 +246,14 @@ public class AsyncRenderer {
 
 		ParticleEngine particleEngine = mc.particleEngine;
 
-		AsyncRenderer.renderAsync = isAsync;
 		if (ModListHelper.FABRIC_IRIS_LOADED) {
 			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
 		}
+		renderAsync = isAsync;
+		particlePhase = true;
 		particleEngine.render(lightTexture, camera, f);
-		AsyncRenderer.renderAsync = false;
+		renderAsync = false;
+		particlePhase = false;
 
 		if (levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();
@@ -279,6 +272,10 @@ public class AsyncRenderer {
 
 	public static boolean isRenderAsync() {
 		return renderAsync;
+	}
+
+	public static boolean isParticlePhase() {
+		return particlePhase;
 	}
 
 	public static void waitForAsyncTasks() {
@@ -436,8 +433,26 @@ public class AsyncRenderer {
 	/* Destroy */
 
 	public static void reset() {
+		renderAsync = false;
+		particlePhase = false;
 		waitForAsyncTasks();
 		closeBTesselators();
 		clearSync();
+	}
+
+	public static class AsyncRendererThread extends AsyncParticleWorkerThread {
+		public AsyncRendererThread(ForkJoinPool forkJoinPool) {
+			super(forkJoinPool);
+		}
+
+		protected void onTermination(Throwable throwable) {
+			if (throwable != null) {
+				LOGGER.warn("{} died", this.getName(), throwable);
+			} else {
+				LOGGER.debug("{} shutdown", this.getName());
+			}
+
+			super.onTermination(throwable);
+		}
 	}
 }
