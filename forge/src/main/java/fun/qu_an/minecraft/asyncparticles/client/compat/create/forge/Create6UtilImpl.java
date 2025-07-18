@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.compat.create.forge;
 
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import com.simibubi.create.content.contraptions.ContraptionHandler;
+import net.createmod.catnip.data.WorldAttached;
 import net.minecraft.world.level.LevelAccessor;
 
 import java.lang.ref.WeakReference;
@@ -15,6 +16,8 @@ public class Create6UtilImpl {
 //			return fun.qu_an.minecraft.asyncparticles.client.compat.create.fabric.Create6CompatImpl
 //				.loadedContraptions(level);
 //		}
-		return ContraptionHandler.loadedContraptions.get(level);
+		net.createmod.catnip.data.WorldAttached<Map<Integer, WeakReference<AbstractContraptionEntity>>>
+			loadedContraptions = ContraptionHandler.loadedContraptions;
+		return loadedContraptions.get(level);
 	}
 }

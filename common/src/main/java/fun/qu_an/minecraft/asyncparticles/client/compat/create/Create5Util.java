@@ -9,6 +9,8 @@ import java.util.Map;
 
 class Create5Util {
 	static Map<Integer, WeakReference<AbstractContraptionEntity>> loadedContraptions(LevelAccessor level) {
-		return ContraptionHandler.loadedContraptions.get(level);
+		com.simibubi.create.foundation.utility.WorldAttached<Map<Integer, WeakReference<AbstractContraptionEntity>>>
+			loadedContraptions = ContraptionHandler.loadedContraptions;
+		return loadedContraptions.get(level);
 	}
 }
