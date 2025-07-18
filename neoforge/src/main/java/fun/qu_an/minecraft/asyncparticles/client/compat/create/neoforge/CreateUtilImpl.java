@@ -1,20 +1,19 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge;
 
-import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
-import com.simibubi.create.content.contraptions.Contraption;
-import com.simibubi.create.content.contraptions.ContraptionCollider;
-import com.simibubi.create.content.contraptions.ContraptionHandler;
+import com.simibubi.create.content.contraptions.*;
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import com.simibubi.create.foundation.collision.Matrix3d;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.ContraptionAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.ContraptionEntityAddon;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.create.InvokerContraptionCollider;
-import net.createmod.catnip.math.VecHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +23,6 @@ import org.joml.Vector3d;
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 import static java.lang.Math.*;
 
@@ -43,36 +41,23 @@ public class CreateUtilImpl {
 	public static Vec3 collideMotionWithContraptions(ClientLevel level, Vec3 motion, AABB bounds) {
 		Vector3d result = new Vector3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 		AABB finalBounds = bounds.inflate(0.1);
-		forEachContraption(level, contraptionEntity -> {
-			Vec3 vec3 = collideMotionWithContraption(level, motion, finalBounds, contraptionEntity);
+		for (Iterator<AbstractContraptionEntity> it = forEachContraption(level); it.hasNext(); ) {
+			AbstractContraptionEntity entity = it.next();
+			if (!((ContraptionEntityAddon) entity).asyncparticles$doParticleCollision()) {
+				continue;
+			}
+			Vec3 vec3 = collideMotionWithContraption(motion, finalBounds, entity, false);
 			if (vec3 != null) {
 				result.set(abs(result.x) < abs(vec3.x) ? result.x : vec3.x,
 					abs(result.y) < abs(vec3.y) ? result.y : vec3.y,
 					abs(result.z) < abs(vec3.z) ? result.z : vec3.z);
 			}
-			return true;
-		});
+		}
 		if (result.x == Double.MAX_VALUE
 			|| (motion.x == result.x && motion.y == result.y && motion.z == result.z)) {
 			return null;
 		}
 		return new Vec3(result.x, result.y, result.z);
-	}
-
-	public static void forEachContraption(LevelAccessor level, Predicate<AbstractContraptionEntity> consumer) {
-		try {
-			for (WeakReference<AbstractContraptionEntity> r : contraptions(level)) {
-				AbstractContraptionEntity contraptionEntity = r.get();
-				if (contraptionEntity == null || !contraptionEntity.isAliveOrStale()) {
-					continue;
-				}
-				if (!consumer.test(contraptionEntity)) {
-					return;
-				}
-			}
-		} catch (ConcurrentModificationException ignored) {
-			// Ignore as they are not critical
-		}
 	}
 
 	public static Iterator<AbstractContraptionEntity> forEachContraption(LevelAccessor level) {
@@ -213,23 +198,8 @@ public class CreateUtilImpl {
 		return false;
 	}
 
-	/**
-	 * 完全没搞懂，先能用，后面再优化吧
-	 */
 	@Nullable
-	public static Vec3 collideMotionWithContraption(ClientLevel level,
-													Vec3 originalMotion,
-													AABB bounds,
-													AbstractContraptionEntity contraptionEntity) {
-		return collideMotionWithContraption(level, originalMotion, bounds, contraptionEntity, false);
-	}
-
-	/**
-	 * 完全没搞懂，先能用，后面再优化吧
-	 */
-	@Nullable
-	public static Vec3 collideMotionWithContraption(ClientLevel level,
-													Vec3 originalMotion,
+	public static Vec3 collideMotionWithContraption(Vec3 originalMotion,
 													AABB entityBounds,
 													AbstractContraptionEntity contraptionEntity,
 													boolean estimate) {
@@ -257,28 +227,21 @@ public class CreateUtilImpl {
 		Vec3 localMotion = rotationMatrix.transform(originalMotion.subtract(contactPointMotion));
 
 		// Prepare entity bounds
-		AABB localBB = entityBounds.move(toLocalTranslation).inflate(1.0E-7D);
+		AABB localBB = entityBounds.move(toLocalTranslation);
 
 		// Use simplified bbs when present
 //		final Vec3 motionCopy = motion;
 		Contraption contraption = contraptionEntity.getContraption();
 
 		// Use simplified bbs if present
-		AABB localExpanded = localBB.expandTowards(localMotion);
 		Optional<List<AABB>> collisionShapes = contraption.getSimplifiedEntityColliders();
 		List<AABB> collidableBBs;
 		if (collisionShapes.isPresent()) {
 			collidableBBs = collisionShapes.get();
 		} else if (estimate) {
-			return Vec3.ZERO; // No simplified bbs, use full entity bounds, this is a fallback for better performance
+			return Vec3.ZERO;
 		} else {
-			List<VoxelShape> shapes = InvokerContraptionCollider.invoker_getPotentiallyCollidedShapes(
-				level, contraption, localExpanded);
-			// TODO 这里完全不需要高精度形状，重写一个类似方法
-			collidableBBs = new ArrayList<>();
-			shapes.forEach(shape ->
-				shape.forAllBoxes((d, e, f, g, h, i) ->
-					collidableBBs.add(new AABB(d, e, f, g, h, i))));
+			collidableBBs = ((ContraptionAddon) contraption).asyncparticles$getAabbs();
 		}
 
 		Vec3 localCenter = localBB.getCenter();
@@ -293,6 +256,7 @@ public class CreateUtilImpl {
 		double localYsize = localBB.getYsize();
 		double localZsize = localBB.getZsize();
 		// this is buggy, but works
+		AABB localExpanded = localBB.expandTowards(localMotion);
 		for (AABB bb : collidableBBs) {
 			if (!localExpanded.intersects(bb)) {
 				continue;
@@ -407,28 +371,6 @@ public class CreateUtilImpl {
 		}
 	}
 
-	public static Vec3 bounceEntity(Vec3 originalMotion, Vec3 contactPointMotion, Vec3 normal, double factor) {
-		if (factor == 0) {
-			return null;
-		}
-		Vec3 motion = originalMotion.subtract(contactPointMotion);
-		Vec3 deltav = normal.scale(factor * 2 * motion.dot(normal));
-		if (deltav.dot(deltav) < 0.1f) {
-			return null;
-		}
-		return originalMotion.subtract(deltav);
-	}
-
-	public static Vec3 rotate(Vec3 collisionLocation, float yawOffset, Direction.Axis axis) {
-		return VecHelper.rotate(collisionLocation, yawOffset, axis);
-	}
-
-	public static Vec3 getCenterOf(BlockPos blockPos) {
-		if (blockPos.equals(Vec3i.ZERO))
-			return VecHelper.CENTER_OF_ORIGIN;
-		return Vec3.atLowerCornerWithOffset(blockPos, 0.5, 0.5, 0.5);
-	}
-
 	public static Map<Integer, WeakReference<AbstractContraptionEntity>> loadedContraptions(LevelAccessor level) {
 		return ContraptionHandler.loadedContraptions.get(level);
 	}
@@ -461,5 +403,27 @@ public class CreateUtilImpl {
 			}
 		}
 		return null;
+	}
+
+	public static BlockHitResult clip(ClientLevel level, Vec3 start, Vec3 end) {
+		double shortestDistance = Double.MAX_VALUE;
+		BlockHitResult hitResult = null;
+		Vec3 hit = null;
+		for (Iterator<AbstractContraptionEntity> it = forEachContraption(level); it.hasNext(); ) {
+			AbstractContraptionEntity entity = it.next();
+			BlockHitResult hitResult1 = ContraptionHandlerClient.rayTraceContraption(start, end, entity);
+			if (hitResult1 != null && hitResult1.getType() != HitResult.Type.MISS) {
+				Vec3 hit1 = entity.toGlobalVector(hitResult1.getLocation(), 1.0F);
+				double hitDiff = start.y - hit1.y;
+				if (shortestDistance > hitDiff) {
+					hitResult = hitResult1;
+					hit = hit1;
+				}
+			}
+		}
+		if (hitResult == null || hitResult.getType() == HitResult.Type.MISS) {
+			return null;
+		}
+		return new BlockHitResult(hit, hitResult.getDirection(), BlockPos.containing(hit), hitResult.isInside());
 	}
 }

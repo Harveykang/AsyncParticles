@@ -143,8 +143,9 @@ public abstract class MixinParticleEngine {
 
 	@Unique
 	private void asyncparticles$tickEmitters() {
+		boolean forceDone = ConfigHelper.forceDoneParticleTick();
 		for (TrackingEmitter emitter : this.trackingEmitters) {
-			if (AsyncTicker.isCancelled() && !ConfigHelper.forceDoneParticleTick()) {
+			if (AsyncTicker.isCancelled() && !forceDone) {
 				return;
 			}
 			if (!emitter.isAlive()) {
@@ -173,10 +174,11 @@ public abstract class MixinParticleEngine {
 			return;
 		}
 		boolean enableLightCache = ConfigHelper.particleLightCache();
-		boolean isNotOnMainThread = !ThreadUtil.isOnMainThread();
+		boolean onMainThread = ThreadUtil.isOnMainThread();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
+		boolean forceDone = ConfigHelper.forceDoneParticleTick();
 		for (Particle particle : collection) {
-			if (AsyncTicker.isCancelled() && !ConfigHelper.forceDoneParticleTick()) {
+			if (AsyncTicker.isCancelled() && !forceDone) {
 				return;
 			}
 			if (!particle.isAlive()) {
@@ -186,7 +188,7 @@ public abstract class MixinParticleEngine {
 				continue;
 			}
 			ParticleAddon particleAddon = (ParticleAddon) particle;
-			if (isNotOnMainThread) {
+			if (!onMainThread) {
 				if (particleAddon.asyncparticles$isTicked()) {
 					// Skip the first tick that the particle is added to the queue.
 					if (enableLightCache) {

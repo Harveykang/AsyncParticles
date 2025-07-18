@@ -83,7 +83,7 @@ dependencies {
     modCompileOnly "maven.modrinth:loot-beams-up:3.6.1-mc1.21-.1"
 
     /* Coo Particles API */
-    modCompileOnly "com.github.CooStack:CooParticlesAPI:1.10.1"
+    modCompileOnly "maven.modrinth:cooparticlesapi:1.10.2"
 
     /* Dynamic Surroundings */
     modCompileOnly "maven.modrinth:dynamicsurroundingsfabric:0.4.2"
@@ -93,4 +93,7 @@ dependencies {
 
     /* More Culling */
     modCompileOnly "maven.modrinth:moreculling:1V6UtDhN" // 1.0.6
+
+    /* Figura */
+    modCompileOnly "maven.modrinth:figura:yXFi1fed" // 0.1.5
 }

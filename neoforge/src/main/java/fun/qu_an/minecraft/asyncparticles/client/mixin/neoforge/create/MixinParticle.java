@@ -18,16 +18,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import java.util.List;
 
 @Mixin(Particle.class)
-public abstract class MixinParticle {
+public class MixinParticle {
 	@Shadow
 	@Final
 	public ClientLevel level;
 
-	@Shadow public double x;
+	@Shadow
+	public double x;
 
-	@Shadow public double y;
+	@Shadow
+	public double y;
 
-	@Shadow public double z;
+	@Shadow
+	public double z;
 
 	/**
 	 * See {@link fun.qu_an.minecraft.asyncparticles.client.mixin.vs2.MixinParticle#collideBoundingBox}
@@ -36,8 +39,6 @@ public abstract class MixinParticle {
 	private Vec3 collideBoundingBox(Entity entity, Vec3 motion, AABB aABB, Level level, List<VoxelShape> list, Operation<Vec3> original) {
 		// we do it in another thread, so we don't need to worry about costly collision checks
 		Vec3 mov = CreateUtil.collideMotionWithContraptions((ClientLevel) level, motion, aABB);
-		return original.call(entity,
-			mov == null ? motion : mov,
-			aABB, level, list);
+		return original.call(entity, mov == null ? motion : mov, aABB, level, list);
 	}
 }

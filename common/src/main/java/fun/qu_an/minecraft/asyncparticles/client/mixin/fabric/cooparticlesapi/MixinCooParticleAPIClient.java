@@ -29,22 +29,33 @@ public class MixinCooParticleAPIClient {
 				event.onStartTick(level);
 			}
 		});
-		EndTickEvent.register(() -> {
+		EndTickEvent.register(true, () -> {
 			switch (ConfigHelper.cooparticlesapi$getTickMode()) {
 				case ASYNC_IN_PARALLEL -> ClientParticleGroupManager.INSTANCE.doClientTick();
 				case ASYNC_IN_SEQUENCED -> event.onStartTick(null);
 			}
 		});
-		EndTickEvent.register(() -> {
+		EndTickEvent.register(true, () -> {
 			if (ConfigHelper.cooparticlesapi$getTickMode() == CooTickMode.ASYNC_IN_PARALLEL) {
 				ParticleStyleManager.INSTANCE.doTickClient();
 			}
 		});
-		EndTickEvent.register(() -> {
+		EndTickEvent.register(true, () -> {
 			if (ConfigHelper.cooparticlesapi$getTickMode() == CooTickMode.ASYNC_IN_PARALLEL) {
 				ParticleEmittersManager.INSTANCE.doTickClient();
 			}
 		});
+		try {
+			//noinspection ConstantValue
+			if (CooParticleAPIClient.scheduler != null) {
+				EndTickEvent.register(true, () -> {
+					if (ConfigHelper.cooparticlesapi$getTickMode() == CooTickMode.ASYNC_IN_PARALLEL) {
+						CooParticleAPIClient.scheduler.doTick$coo_particles_api();
+					}
+				});
+			}
+		} catch (Throwable ignored) {
+		}
 
 		return false;
 	}
