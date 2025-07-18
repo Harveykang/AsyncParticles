@@ -55,21 +55,22 @@ dependencies {
     /* APIs */
     modLocalRuntime 'maven.modrinth:architectury-api:17.0.4+neoforge'
     modLocalRuntime "me.shedaniel.cloth:cloth-config-neoforge:19.0.147"
+    modLocalRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
 
     /* Performance */
-    modLocalRuntime "maven.modrinth:spark:1.10.139-neoforge"
+//    modLocalRuntime "maven.modrinth:spark:1.10.139-neoforge"
 //    modCompileOnly 'maven.modrinth:embeddium:1.0.12-beta.1+mc1.21.4'
     modCompileOnly 'maven.modrinth:sodium:mc1.21.6-0.6.13-neoforge'
 //    modLocalRuntime 'maven.modrinth:embeddium:1.0.12-beta.1+mc1.21.4'
-    modLocalRuntime 'maven.modrinth:sodium:mc1.21.6-0.6.13-neoforge'
-    modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.6-0.6.6+neoforge'
-    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-renderer-api-v1-7.0.0.jar')
-    modLocalRuntime fileTree(dir: '../libs', include: 'net.caffeinemc.sodium-neoforge-0.6.13+mc1.21.6-service.jar')
+//    modLocalRuntime 'maven.modrinth:sodium:mc1.21.6-0.6.13-neoforge'
+//    modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.6-0.6.6+neoforge'
+//    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-renderer-api-v1-7.0.0.jar')
+//    modLocalRuntime fileTree(dir: '../libs', include: 'net.caffeinemc.sodium-neoforge-0.6.13+mc1.21.6-service.jar')
 
-    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-api-base-0.4.42+d1308ded19.jar')
+//    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-api-base-0.4.42+d1308ded19.jar')
     modCompileOnly "maven.modrinth:iris:1.9.1+1.21.7-neoforge"
 //    modLocalRuntime 'maven.modrinth:monocle-iris:0.1.8' // no 1.21.4 version
-    modLocalRuntime "maven.modrinth:iris:1.9.1+1.21.7-neoforge"
+//    modLocalRuntime "maven.modrinth:iris:1.9.1+1.21.7-neoforge"
 //    modLocalRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
 //    localRuntime "org.antlr:antlr4-runtime:4.13.1"
 //    localRuntime "io.github.douira:glsl-transformer:2.0.1"
@@ -88,7 +89,6 @@ dependencies {
     modCompileOnly "maven.modrinth:particle-core:0.2.6+1.21.5+neoforge"
 //    modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.21.4+neoforge"
 //    modLocalRuntime "maven.modrinth:fzzy-config:0.6.8+1.21.3+neoforge"
-//    modLocalRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
 //    modLocalRuntime 'thedarkcolour:kfflang:5.7.0'
 //    modLocalRuntime 'thedarkcolour:kfflib:5.7.0'
 //    modLocalRuntime 'thedarkcolour:kffmod:5.7.0'
