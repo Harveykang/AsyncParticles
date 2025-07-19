@@ -34,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -49,7 +50,7 @@ public class AsyncTicker {
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 	private static final Set<Particle> SYNC_PARTICLES = Collections.newSetFromMap(new IdentityHashMap<>());
 	public static final List<Runnable> PARTICLE_OPERATIONS = new ArrayList<>();
-	private static boolean cancelled = false;
+	private static final AtomicBoolean cancelled = new AtomicBoolean(false);
 	public static boolean shouldTickParticles = false;
 	public static CompletableFuture<Void> particleCleanup;
 	private final static List<EndTickEvent> SEQUENCED_END_TICK_EVENTS = new ArrayList<>();
@@ -71,17 +72,7 @@ public class AsyncTicker {
 		AtomicInteger workerCount = new AtomicInteger(1);
 		int clamp = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 		EXECUTOR = new ForkJoinPool(clamp, (forkJoinPool) -> {
-			ForkJoinWorkerThread forkJoinWorkerThread = new ForkJoinWorkerThread(forkJoinPool) {
-				protected void onTermination(Throwable throwable) {
-					if (throwable != null) {
-						LOGGER.warn("{} died", this.getName(), throwable);
-					} else {
-						LOGGER.debug("{} shutdown", this.getName());
-					}
-
-					super.onTermination(throwable);
-				}
-			};
+			ForkJoinWorkerThread forkJoinWorkerThread = new AsyncTickerThread(forkJoinPool);
 			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());
 			forkJoinWorkerThread.setDaemon(true);
 			return forkJoinWorkerThread;
@@ -99,7 +90,7 @@ public class AsyncTicker {
 	/* Ticker */
 
 	public static boolean isCancelled() {
-		if (!cancelled) {
+		if (!cancelled.getOpaque()) {
 			return false;
 		}
 		debug_cancelled = true;
@@ -132,11 +123,11 @@ public class AsyncTicker {
 		} else {
 			// tick zero, wait for async tasks to complete, cleanup
 			if (particleFuture != null) {
-				cancelled = true;
+				cancelled.setOpaque(true);
 				debug_cancelled = false;
 				particleFuture.join();
 				particleFuture = null;
-				cancelled = false;
+				cancelled.setOpaque(false);
 			}
 			shouldTickParticles = i == to - 1 && levelRunning;
 			if (levelRunning) {
@@ -583,16 +574,16 @@ public class AsyncTicker {
 	}
 
 	public static void reset() {
-		cancelled = true;
 		waitForCleanUp();
 		if (particleFuture != null) {
+			cancelled.setOpaque(true);
 			particleFuture.join();
 			particleFuture = null;
 		}
+		cancelled.setOpaque(false);
 		PARTICLE_OPERATIONS.clear();
 		END_TICK_OPERATIONS.clear();
 		SYNC_PARTICLES.clear();
-		cancelled = false;
 	}
 
 	/* Events */
@@ -622,6 +613,22 @@ public class AsyncTicker {
 			END_TICK_OPERATIONS.add(task);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> END_TICK_OPERATIONS.add(task));
+		}
+	}
+
+	public static class AsyncTickerThread extends AsyncParticleWorkerThread {
+		public AsyncTickerThread(ForkJoinPool forkJoinPool) {
+			super(forkJoinPool);
+		}
+
+		protected void onTermination(Throwable throwable) {
+			if (throwable != null) {
+				LOGGER.warn("{} died", this.getName(), throwable);
+			} else {
+				LOGGER.debug("{} shutdown", this.getName());
+			}
+
+			super.onTermination(throwable);
 		}
 	}
 }

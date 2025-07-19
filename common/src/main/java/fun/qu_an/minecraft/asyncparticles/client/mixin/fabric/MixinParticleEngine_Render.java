@@ -133,6 +133,7 @@ public abstract class MixinParticleEngine_Render {
 	 */
 	@Overwrite
 	public void render(Camera camera, float partialTick, MultiBufferSource.BufferSource bufferSource) {
+		AsyncRenderer.particlePhase = true;
 		List<ParticleRenderType> renderOrder = RENDER_ORDER;
 		if (InternalRenderingMode.isAsync()) {
 			AsyncRenderer.endParticles(camera, partialTick, renderOrder);
@@ -153,5 +154,6 @@ public abstract class MixinParticleEngine_Render {
 		}
 
 		bufferSource.endBatch();
+		AsyncRenderer.particlePhase = false;
 	}
 }

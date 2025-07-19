@@ -78,17 +78,7 @@ public class AsyncRenderer {
 		AtomicInteger workerCount = new AtomicInteger(1);
 		int clamp = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 		EXECUTOR = new ForkJoinPool(clamp, (forkJoinPool) -> {
-			ForkJoinWorkerThread forkJoinWorkerThread = new ForkJoinWorkerThread(forkJoinPool) {
-				protected void onTermination(Throwable throwable) {
-					if (throwable != null) {
-						LOGGER.warn("{} died", this.getName(), throwable);
-					} else {
-						LOGGER.debug("{} shutdown", this.getName());
-					}
-
-					super.onTermination(throwable);
-				}
-			};
+			ForkJoinWorkerThread forkJoinWorkerThread = new AsyncRendererThread(forkJoinPool);
 			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());
 			forkJoinWorkerThread.setDaemon(true);
 			return forkJoinWorkerThread;
@@ -101,6 +91,7 @@ public class AsyncRenderer {
 	private static CompletableFuture<Void> particlsTask;
 	private static boolean mixedParticleRenderingSetting = false;
 	private static int asyncTasksSize;
+	public static boolean particlePhase = false;
 	private static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
 		ConfigHelper::getRenderFailurePerSecondThreshold
@@ -326,6 +317,10 @@ public class AsyncRenderer {
 		}
 	}
 
+	public static boolean isParticlePhase() {
+		return particlePhase;
+	}
+
 	private static void waitForParticleTask() {
 		if (particlsTask != null) {
 			particlsTask.join();
@@ -480,5 +475,21 @@ public class AsyncRenderer {
 
 	public static boolean isTranslucentPhase(Enum<?> phase) {
 		return phase == ParticleRenderingPhase.TRANSLUCENT;
+	}
+
+	public static class AsyncRendererThread extends AsyncParticleWorkerThread {
+		public AsyncRendererThread(ForkJoinPool forkJoinPool) {
+			super(forkJoinPool);
+		}
+
+		protected void onTermination(Throwable throwable) {
+			if (throwable != null) {
+				LOGGER.warn("{} died", this.getName(), throwable);
+			} else {
+				LOGGER.debug("{} shutdown", this.getName());
+			}
+
+			super.onTermination(throwable);
+		}
 	}
 }

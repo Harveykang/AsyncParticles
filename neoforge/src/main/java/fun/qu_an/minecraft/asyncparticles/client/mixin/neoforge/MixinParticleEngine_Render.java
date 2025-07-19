@@ -150,6 +150,7 @@ public abstract class MixinParticleEngine_Render {
 					   MultiBufferSource.BufferSource bufferSource,
 					   @Nullable Frustum frustum,
 					   Predicate<ParticleRenderType> renderTypePredicate) {
+		AsyncRenderer.particlePhase = true;
 		Set<ParticleRenderType> renderOrder = particles.keySet();
 		if (InternalRenderingMode.isAsync()) {
 			AsyncRenderer.endParticles(camera, partialTick, renderOrder, renderTypePredicate);
@@ -176,5 +177,6 @@ public abstract class MixinParticleEngine_Render {
 		}
 
 		bufferSource.endBatch();
+		AsyncRenderer.particlePhase = false;
 	}
 }

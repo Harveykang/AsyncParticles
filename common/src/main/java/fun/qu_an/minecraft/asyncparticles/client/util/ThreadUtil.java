@@ -5,9 +5,6 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import net.minecraft.client.Minecraft;
 
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinWorkerThread;
-
 public class ThreadUtil {
 	public static void assertNotParticleThread() {
 		if (isOnParticleThread()) {
@@ -40,17 +37,16 @@ public class ThreadUtil {
 	}
 
 	public static boolean isOnParticleThread() {
-		ForkJoinPool pool;
-		return Thread.currentThread() instanceof ForkJoinWorkerThread t &&
-			   ((pool = t.getPool()) == AsyncRenderer.EXECUTOR || pool == AsyncTicker.EXECUTOR);
+		Class<? extends Thread> tClass = Thread.currentThread().getClass();
+		return tClass == AsyncRenderer.AsyncRendererThread.class || tClass == AsyncTicker.AsyncTickerThread.class;
 	}
 
 	public static boolean isOnParticleRendererThread() {
-		return Thread.currentThread() instanceof ForkJoinWorkerThread t && t.getPool() == AsyncRenderer.EXECUTOR;
+		return Thread.currentThread().getClass() == AsyncRenderer.AsyncRendererThread.class;
 	}
 
 	public static boolean isOnParticleTickerThread() {
-		return Thread.currentThread() instanceof ForkJoinWorkerThread t && t.getPool() == AsyncTicker.EXECUTOR;
+		return Thread.currentThread().getClass() == AsyncTicker.AsyncTickerThread.class;
 	}
 
 	public static boolean isOnClientTickThread() {
