@@ -18,7 +18,8 @@ public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
 	public static final int VERSION = 1;
 	static String COMMENTS = """
-		safeClassInstanceMultiMap: Boolean. Make ClassInstanceMultiMap thread-safe.
+		safeBlockEntityMap: Boolean. Make 'LevelChunk#blockEntities' thread-safe.
+		safeClassInstanceMultiMap: Boolean. Make 'ClassInstanceMultiMap' thread-safe.
 		safeLegacyRandomSource: Boolean. Make LegacyRandomSource thread-safe.
 		particle$noCulling: A comma-separated list of classes extending 'Particle' that should not be culled.
 		particle$noLightCache: A comma-separated list of classes extending 'Particle' that should not use the light cache.
