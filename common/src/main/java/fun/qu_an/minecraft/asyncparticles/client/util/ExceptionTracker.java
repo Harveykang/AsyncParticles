@@ -1,13 +1,16 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongPriorityQueue;
+import org.slf4j.Logger;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.IntSupplier;
 
 public class ExceptionTracker<T> {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Map<T, Map<Class<? extends Throwable>, ExceptionQueue>> exceptions = new ConcurrentHashMap<>();
 	private final IntSupplier duration;
 	private final IntSupplier failurePerSecThreshold;
@@ -26,9 +29,13 @@ public class ExceptionTracker<T> {
 	 * @apiNote MUST pay attention to memory leak, cause the obj will be KEPT IN MEMORY
 	 */
 	public boolean addException(T obj, Throwable t) {
+		Throwable rootCause = ExceptionUtil.getRootCause(t);
 		return exceptions
 			.computeIfAbsent(obj, k -> new ConcurrentHashMap<>())
-			.computeIfAbsent(ExceptionUtil.getRootCause(t).getClass(), k -> new ExceptionQueue())
+			.computeIfAbsent(rootCause.getClass(), k -> {
+				LOGGER.warn("Captured exception: ", t); // Print the exception once.
+				return new ExceptionQueue();
+			})
 			.push();
 	}
 

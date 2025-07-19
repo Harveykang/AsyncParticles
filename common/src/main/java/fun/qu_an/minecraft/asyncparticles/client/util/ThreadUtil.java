@@ -5,9 +5,6 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import net.minecraft.client.Minecraft;
 
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinWorkerThread;
-
 public class ThreadUtil {
 	public static void assertNotParticleThread() {
 		if (isOnParticleThread()) {

@@ -355,7 +355,7 @@ public class AsyncTicker {
 					LOGGER.warn("Exception while ticking particle {}, marking as sync", particle, t);
 				} else {
 					LOGGER.warn("Exception {} thrown while ticking particle {} exceeds the threshold, please contact the author: {}",
-						t.getClass().getSimpleName(),
+						t.getClass().getName(),
 						particle,
 						AsyncParticlesClient.ISSUE_URL,
 						t);
@@ -368,14 +368,14 @@ public class AsyncTicker {
 			if (player != null) {
 				player.sendSystemMessage(Component.literal(
 						"Exception %s thrown while ticking particle %s exceeds the threshold, please contact the author: "
-							.formatted(t.getClass().getSimpleName(), particleClass))
+							.formatted(t.getClass().getName(), particleClass))
 					.append(Component.literal(AsyncParticlesClient.ISSUE_URL)
 						.setStyle(Style.EMPTY
 							.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncParticlesClient.ISSUE_URL))
 							.withUnderlined(true))));
 			}
 			LOGGER.warn("Exception {} thrown while ticking particle {} exceeds the threshold, please contact the author: {}",
-				t.getClass().getSimpleName(),
+				t.getClass().getName(),
 				particle,
 				AsyncParticlesClient.ISSUE_URL,
 				t);
