@@ -6,7 +6,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,10 +33,8 @@ public abstract class MixinLevelRenderer_Late {
 									  CallbackInfo ci,
 									  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 									  LocalIntRef irm) {
-		switch (irm.get()) {
-			case MIXED_ASYNC, BEFORE_ASYNC -> AsyncRenderer.irisCustom(poseStack, partialTick, camera, lightTexture);
-			case MIXED_SYNC -> AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture, false);
-			case BEFORE_SYNC -> AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, false);
+		if (irm.get() != DELAYED_ASYNC){
+			AsyncRenderer.irisCustom(poseStack, partialTick, camera, lightTexture);
 		}
 	}
 
@@ -51,7 +52,8 @@ public abstract class MixinLevelRenderer_Late {
 										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 										  LocalIntRef irm) {
 		switch (irm.get()) {
-			case SYNC -> AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture, false);
+			case BEFORE_SYNC -> AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, false);
+			case MIXED_SYNC, SYNC -> AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture, false);
 			case MIXED_ASYNC, COMPATIBILITY_ASYNC ->
 				AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture, true);
 			case BEFORE_ASYNC -> AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, true);

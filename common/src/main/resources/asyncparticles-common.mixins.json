@@ -27,9 +27,9 @@
     "create.InvokerContraptionCollider",
     "create.MixinAbstractContraptionEntity",
     "create.MixinAbstractContraptionEntity_NoParticleCollision",
+    "create.MixinContraption",
     "create.MixinParticle",
     "create.MixinParticle_LightCache",
-    "create.MixinContraption",
     "fabric.MixinParticle",
     "fabric.MixinParticleEngine_Render",
     "fabric.effective.MixinEffective",
@@ -111,5 +111,7 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "create.MixinPonderWorldParticles",
+    "ponder.MixinPonderWorldParticles"
   ]
 }

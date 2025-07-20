@@ -40,7 +40,9 @@ public class MixinLevelRenderer {
 		final ClientShip ship = VSGameUtilsKt.getShipObjectManagingPos(level, (int) x >> 4, (int) z >> 4);
 		if (ship != null) {
 			((VSParticleAddon) particle).asyncparticles$setShip(ship);
-			((LightCachedParticleAddon) particle).asyncparticles$refresh();
+			if (ConfigHelper.particleLightCache()) {
+				((LightCachedParticleAddon) particle).asyncparticles$refresh();
+			}
 			switch (ConfigHelper.getParticleCullingMode()) {
 				case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
 				case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();

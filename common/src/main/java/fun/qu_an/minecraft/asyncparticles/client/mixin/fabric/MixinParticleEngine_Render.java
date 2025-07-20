@@ -21,12 +21,14 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.spongepowered.asm.mixin.*;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
 public class MixinParticleEngine_Render implements ParticleEngineAddon {
@@ -38,6 +40,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Shadow
 	@Mutable
 	public static List<ParticleRenderType> RENDER_ORDER;
+
 	@Override
 	public void asyncparticle$addRenderType(ParticleRenderType particleRenderType) {
 		if (!RENDER_ORDER.contains(particleRenderType)) {
@@ -89,16 +92,16 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			BufferBuilder bufferBuilder;
 			ParticleCullingMode realCullMode;
 			BufferBuilder toBegin;
-			if (!renderAsync) {
-				realCullMode = particleCullingMode;
-				syncParticles = queue;
-				tesselator = Tesselator.getInstance();
-				toBegin = bufferBuilder = tesselator.getBuilder();
-			} else if ((bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager)) ==
-					   FakeBufferBuilder.INSTANCE) {
+			if ((bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager)) ==
+				FakeBufferBuilder.INSTANCE) {
 				realCullMode = particleCullingMode;
 				// if irisEarlyOpaquePhase, we render custom particles in AsyncRenderer.irisCustom()
 				syncParticles = irisEarlyOpaquePhase ? Collections.emptyList() : queue;
+				tesselator = Tesselator.getInstance();
+				toBegin = bufferBuilder = tesselator.getBuilder();
+			} else if (!renderAsync) {
+				realCullMode = particleCullingMode;
+				syncParticles = queue;
 				tesselator = Tesselator.getInstance();
 				toBegin = bufferBuilder = tesselator.getBuilder();
 			} else {

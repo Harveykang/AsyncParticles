@@ -39,6 +39,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Shadow
 	@Final
 	public TextureManager textureManager;
+
 	@Override
 	public void asyncparticle$addRenderType(ParticleRenderType particleRenderType) {
 	}
@@ -87,16 +88,16 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			Tesselator tesselator;
 			ParticleCullingMode realCullMode;
 			BufferBuilder toBegin;
-			if (!renderAsync) {
-				realCullMode = particleCullingMode;
-				syncParticles = queue;
-				tesselator = Tesselator.getInstance();
-				toBegin = bufferBuilder = tesselator.getBuilder();
-			} else if ((bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager)) ==
-					   FakeBufferBuilder.INSTANCE) {
+			if ((bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager)) ==
+				FakeBufferBuilder.INSTANCE) {
 				realCullMode = particleCullingMode;
 				// if irisEarlyOpaquePhase, we render custom particles in AsyncRenderer.irisCustom()
 				syncParticles = irisEarlyOpaquePhase ? Collections.emptyList() : queue;
+				tesselator = Tesselator.getInstance();
+				toBegin = bufferBuilder = tesselator.getBuilder();
+			} else if (!renderAsync) {
+				realCullMode = particleCullingMode;
+				syncParticles = queue;
 				tesselator = Tesselator.getInstance();
 				toBegin = bufferBuilder = tesselator.getBuilder();
 			} else {

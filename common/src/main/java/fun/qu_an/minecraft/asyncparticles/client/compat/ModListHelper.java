@@ -48,6 +48,8 @@ public class ModListHelper {
 														   versionCheck("particlerain", null, "1.999999");
 	/* Flywheel */
 	public static final boolean FLYWHEEL_LOADED = isModLoaded("flywheel");
+	/* Ponder */
+	public static final boolean PONDER_LOADED = isModLoaded("ponder");
 	/* Create */
 	public static final boolean CREATE_LOADED = isModLoaded("create");
 	public static final boolean IS_LEGACY_CREATE = CREATE_LOADED && versionCheck("create", "0.5", "6.0");

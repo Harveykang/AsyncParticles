@@ -122,10 +122,11 @@ public class AsyncRenderer {
 				return;
 			}
 			case SYNC -> {
-				irisEarlyOpaquePhase = false;
+				irisEarlyOpaquePhase = ModListHelper.IRIS_LIKE_LOADED;
 				return;
 			}
 			case MIXED_ASYNC, BEFORE_ASYNC -> irisEarlyOpaquePhase = true;
+			case COMPATIBILITY_ASYNC -> irisEarlyOpaquePhase = ModListHelper.IRIS_LIKE_LOADED;
 			default -> irisEarlyOpaquePhase = false;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -582,7 +583,7 @@ public class AsyncRenderer {
 					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse()
 						? Optional.ofNullable(IrisCompat.getParticleRenderingSettings())
 						.map(ParticleRenderingSettings::name)
-						.orElse("disabled"): "disabled"));
+						.orElse("disabled") : "disabled"));
 			debugConsumer = null;
 		}
 	}
@@ -590,6 +591,7 @@ public class AsyncRenderer {
 	/* Destroy */
 
 	public static void reset() {
+		irisEarlyOpaquePhase = false;
 		renderAsync = false;
 		particlePhase = false;
 		waitForAsyncTasks();

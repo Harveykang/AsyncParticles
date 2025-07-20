@@ -30,29 +30,28 @@ public abstract class MixinLevelRenderer_Late {
 									  Matrix4f projectionMatrix,
 									  CallbackInfo ci,
 									  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
-										  LocalIntRef irm) {
-		switch (irm.get()) {
-			case MIXED_ASYNC, BEFORE_ASYNC -> AsyncRenderer.irisCustom(poseStack, partialTick, camera, lightTexture);
-			case MIXED_SYNC -> AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture, false);
-			case BEFORE_SYNC -> AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, false);
+									  LocalIntRef irm) {
+		if (irm.get() != DELAYED_ASYNC){
+			AsyncRenderer.irisCustom(poseStack, partialTick, camera, lightTexture);
 		}
 	}
 
 	@Inject(method = "renderLevel",
 		at = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;"))
-	private void onRenderLevelTransparencyChain(PoseStack poseStack,
-												float partialTick,
-												long l,
-												boolean bl,
-												Camera camera,
-												GameRenderer gameRenderer,
-												LightTexture lightTexture,
-												Matrix4f projectionMatrix,
-												CallbackInfo ci,
-												@Share(namespace = "asyncparticles", value = "internalRenderingMode")
-													LocalIntRef irm) {
+	private void onRenderLevelTranslucent(PoseStack poseStack,
+										  float partialTick,
+										  long l,
+										  boolean bl,
+										  Camera camera,
+										  GameRenderer gameRenderer,
+										  LightTexture lightTexture,
+										  Matrix4f projectionMatrix,
+										  CallbackInfo ci,
+										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+										  LocalIntRef irm) {
 		switch (irm.get()) {
-			case SYNC -> AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture, false);
+			case BEFORE_SYNC -> AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, false);
+			case MIXED_SYNC, SYNC -> AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture, false);
 			case MIXED_ASYNC, COMPATIBILITY_ASYNC ->
 				AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture, true);
 			case BEFORE_ASYNC -> AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, true);
