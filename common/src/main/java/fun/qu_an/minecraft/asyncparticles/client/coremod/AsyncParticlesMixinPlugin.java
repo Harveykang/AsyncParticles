@@ -109,7 +109,6 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "vs2" -> VS_LOADED;
 			case "vs2_create" -> VS_LOADED && CREATE_LOADED;
 			case "create" -> CREATE_LOADED;
-			case "ponder" -> PONDER_LOADED;
 			case "iris_like" -> IRIS_LIKE_LOADED;
 			case "flywheel" -> FLYWHEEL_LOADED &&
 							   versionCheck("flywheel", "1.0", "2.0");

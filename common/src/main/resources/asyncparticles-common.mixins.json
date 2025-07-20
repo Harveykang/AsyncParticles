@@ -111,7 +111,5 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "create.MixinPonderWorldParticles",
-    "ponder.MixinPonderWorldParticles"
   ]
 }

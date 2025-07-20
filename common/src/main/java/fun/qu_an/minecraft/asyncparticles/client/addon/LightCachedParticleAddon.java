@@ -29,4 +29,10 @@ public interface LightCachedParticleAddon extends ILightCachedParticle {
 	void asyncparticles$refresh();
 
 	int asyncparticles$invoke_getLightColor(float partialTick);
+
+	void asyncparticles$enableLightCache();
+
+	void asyncparticles$disableLightCache();
+
+	boolean asyncparticles$isEnabledLightCache();
 }

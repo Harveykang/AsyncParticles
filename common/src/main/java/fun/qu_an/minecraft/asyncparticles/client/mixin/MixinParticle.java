@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -13,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Particle.class)
-public abstract class MixinParticle implements ParticleAddon {
+public abstract class MixinParticle implements ParticleAddon, LightCachedParticleAddon {
 	@Shadow
 	public abstract void remove();
 
@@ -31,7 +32,7 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Unique
 	private byte asyncparticles$renderFlag = 2; // 2 is unused
 	@Unique
-	private boolean asyncparticles$tickSync;
+	private byte asyncparticles$tickFlag;
 
 	@Inject(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V", at = @At("RETURN"))
 	protected void onInit(CallbackInfo ci) {
@@ -60,9 +61,11 @@ public abstract class MixinParticle implements ParticleAddon {
 	@Shadow
 	protected double zd;
 
-	@Shadow public float bbWidth;
+	@Shadow
+	public float bbWidth;
 
-	@Shadow public float bbHeight;
+	@Shadow
+	public float bbHeight;
 
 	@Override
 	public void asyncparticles$setTicked() {
@@ -91,12 +94,24 @@ public abstract class MixinParticle implements ParticleAddon {
 
 	@Override
 	public void asyncparticles$setTickSync() {
-		asyncparticles$tickSync = true;
+		asyncparticles$tickFlag |= 1;
 	}
 
 	@Override
 	public boolean asyncparticles$isTickSync() {
-		return asyncparticles$tickSync;
+		return (asyncparticles$tickFlag & 1) != 0;
+	}
+
+	public void asyncparticles$enableLightCache() {
+		asyncparticles$tickFlag |= 2;
+	}
+
+	public void asyncparticles$disableLightCache() {
+		asyncparticles$tickFlag &= ~2;
+	}
+
+	public boolean asyncparticles$isEnabledLightCache() {
+		return (asyncparticles$tickFlag & 2) != 0;
 	}
 
 	public boolean asyncparticles$isVisibleOnScreen() {

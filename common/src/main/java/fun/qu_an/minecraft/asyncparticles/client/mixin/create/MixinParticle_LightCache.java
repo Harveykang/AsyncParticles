@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.simibubi.create.content.kinetics.fan.AirFlowParticle;
 import com.simibubi.create.content.kinetics.steamEngine.SteamJetParticle;
 import com.simibubi.create.foundation.particle.AirParticle;
-import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
@@ -16,7 +15,7 @@ public abstract class MixinParticle_LightCache
 	extends fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticle_LightCache {
 	@WrapMethod(method = "getLightColor")
 	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {
-		return ConfigHelper.particleLightCache()
+		return asyncparticles$isEnabledLightCache()
 			? asyncparticles$getCachedLight()
 			: original.call(partialTick);
 	}

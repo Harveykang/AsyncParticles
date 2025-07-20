@@ -1,15 +1,12 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.shimmer;
 
 import com.lowdragmc.shimmer.client.postprocessing.PostParticle;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticle;
-import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -96,6 +93,18 @@ public abstract class MixinPostParticle extends MixinParticle implements LightCa
 	@Override
 	public boolean asyncparticles$isTickSync() {
 		return ((ParticleAddon) parent).asyncparticles$isTickSync();
+	}
+
+	public void asyncparticles$enableLightCache() {
+		((LightCachedParticleAddon) parent).asyncparticles$enableLightCache();
+	}
+
+	public void asyncparticles$disableLightCache() {
+		((LightCachedParticleAddon) parent).asyncparticles$disableLightCache();
+	}
+
+	public boolean asyncparticles$isEnabledLightCache() {
+		return ((LightCachedParticleAddon) parent).asyncparticles$isEnabledLightCache();
 	}
 
 	@Override

@@ -3,7 +3,6 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -13,7 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
-import static fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon.*;
+import static fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon.compress;
 
 @Mixin(Particle.class)
 public abstract class MixinParticle_LightCache implements LightCachedParticleAddon {
@@ -30,7 +29,7 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 
 	@WrapMethod(method = "getLightColor")
 	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {
-		return ConfigHelper.particleLightCache()
+		return asyncparticles$isEnabledLightCache()
 			? asyncparticles$getCachedLight()
 			: original.call(partialTick);
 	}
