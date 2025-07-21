@@ -39,6 +39,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -68,7 +69,7 @@ public class AsyncTicker {
 		() -> 5000,
 		ConfigHelper::getTickFailurePerSecondThreshold
 	);
-	private static final LongRef timeUsageNano = new LongRef(0L);
+	private static final AtomicLong timeUsageNano = new AtomicLong(0L);
 
 	static {
 		AtomicInteger workerCount = new AtomicInteger(1);
@@ -210,7 +211,7 @@ public class AsyncTicker {
 		// tick last, schedule async tasks
 		tryReload();
 		tryDebug();
-		CompletableFuture<Void> particleFuture = CompletableFuture.runAsync(() -> timeUsageNano.set(System.nanoTime()), EXECUTOR);
+		CompletableFuture<Void> particleFuture = CompletableFuture.runAsync(() -> timeUsageNano.setRelease(System.nanoTime()), EXECUTOR);
 		CompletableFuture<Void> sequencedTaskFuture = particleFuture;
 		CompletableFuture<?> parallelEventsFuture = Utils.NULL_FUTURE;
 		CompletableFuture<?> parallelOperationsFuture = Utils.NULL_FUTURE;
@@ -309,7 +310,7 @@ public class AsyncTicker {
 		}
 
 		AsyncTicker.particleFuture = sequencedTaskFuture
-			.thenRunAsync(() -> timeUsageNano.set(System.nanoTime() - timeUsageNano.get()), EXECUTOR);
+			.thenRunAsync(() -> timeUsageNano.setRelease(System.nanoTime() - timeUsageNano.getAcquire()), EXECUTOR);
 
 		profiler.pop();
 	}
@@ -489,7 +490,7 @@ public class AsyncTicker {
 			particles to add size: %d
 			sync particle count: %d,
 			sync particle types: %s,"""
-			.formatted(ConfigHelper.isTickAsync() ? timeUsageNano.get() / 1000000d : Double.NaN,
+			.formatted(ConfigHelper.isTickAsync() ? timeUsageNano.getAcquire() / 1000000d : Double.NaN,
 				debug_cancelled,
 				PARTICLE_OPERATIONS.size(),
 				SEQUENCED_END_TICK_EVENTS.size() + PARALLEL_END_TICK_EVENTS.size(),
@@ -569,6 +570,7 @@ public class AsyncTicker {
 			particleFuture = null;
 		}
 		cancelled.setOpaque(false);
+		timeUsageNano.set(0L);
 		PARTICLE_OPERATIONS.clear();
 		END_TICK_OPERATIONS.clear();
 		SYNC_PARTICLES.clear();
