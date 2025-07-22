@@ -83,6 +83,7 @@
     "render.MixinLevelRenderer",
     "render.MixinLevelRenderer_Late",
     "render.MixinLevelRenderer_WeatherCulling",
+    "render.MixinLevelRenderer_WeatherCulling_Early",
     "render.MixinMultiBufferSource$BufferSource",
     "render.MixinTesselator",
     "render.MixinVertexConsumer",
