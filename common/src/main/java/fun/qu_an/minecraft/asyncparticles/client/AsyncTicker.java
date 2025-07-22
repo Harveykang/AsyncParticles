@@ -546,7 +546,10 @@ public class AsyncTicker {
 				newQueue.addAll(queue);
 				newQueue.forEach(p -> {
 					if (enableLightCache) {
+						((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
 						((LightCachedParticleAddon) p).asyncparticles$refresh();
+					} else {
+						((LightCachedParticleAddon) p).asyncparticles$disableLightCache();
 					}
 					switch (particleCullingMode) {
 						case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();
@@ -566,6 +569,7 @@ public class AsyncTicker {
 			particleFuture = null;
 		}
 		cancelled.setOpaque(false);
+		timeUsageNano.set(0L);
 		PARTICLE_OPERATIONS.clear();
 		END_TICK_OPERATIONS.clear();
 		SYNC_PARTICLES.clear();

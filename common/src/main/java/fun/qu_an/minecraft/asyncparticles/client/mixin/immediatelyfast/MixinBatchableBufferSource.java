@@ -13,17 +13,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(value = BatchableBufferSource.class, priority = 500)
 public abstract class MixinBatchableBufferSource {
 	@Dynamic
-	@Inject(method = "getBuffer", at = @At("HEAD"))
+	@Inject(method = {
+		"getBuffer",
+		"endLastBatch",
+		"endBatch*"
+	}, at = @At("HEAD"))
 	private void getBuffer(CallbackInfoReturnable<VertexConsumer> cir) {
 		ThreadUtil.assertNotParticleRendererThread();
 	}
 
 	@Dynamic
 	@Inject(method = {
-		"drawCurrentLayer",
-		"draw*",
-		"drawDirect",
-		"close"}, remap = false, at = @At("HEAD"))
+		"close",
+		"drawDirect"
+	}, remap = false, at = @At("HEAD"))
 	private void endBatches(CallbackInfo ci) {
 		ThreadUtil.assertNotParticleRendererThread();
 	}

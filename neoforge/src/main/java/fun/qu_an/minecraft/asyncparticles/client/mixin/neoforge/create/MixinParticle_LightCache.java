@@ -18,7 +18,7 @@ public abstract class MixinParticle_LightCache
 	extends fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticle_LightCache {
 	@WrapMethod(method = "getLightColor")
 	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {
-		return ConfigHelper.particleLightCache()
+		return asyncparticles$isEnabledLightCache()
 			? decompress(asyncparticles$getCompressedLight())
 			: original.call(partialTick);
 	}

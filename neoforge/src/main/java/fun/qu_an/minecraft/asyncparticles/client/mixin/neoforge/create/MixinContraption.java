@@ -10,6 +10,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -28,12 +29,14 @@ public class MixinContraption implements ContraptionAddon {
 	protected Map<BlockPos, StructureTemplate.StructureBlockInfo> blocks;
 	@Shadow(remap = false)
 	protected ContraptionWorld world;
-	@Shadow public Optional<List<AABB>> simplifiedEntityColliders;
+	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+	@Shadow(remap = false) public Optional<List<AABB>> simplifiedEntityColliders;
 	@Unique
 	private List<AABB> asyncparticles$aabbs;
 	@Unique
 	private final Object asyncparticles$lock = new Object();
 
+	@Dynamic
 	@WrapOperation(method = {
 		"lambda$gatherBBsOffThread$25()Ljava/util/List;",
 		"lambda$gatherBBsOffThread$26()Ljava/util/List;",

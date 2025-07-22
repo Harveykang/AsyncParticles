@@ -7,9 +7,6 @@ transitive-mutable field net/minecraft/client/particle/ParticleEngine particles 
 accessible field net/minecraft/client/particle/Particle x D
 accessible field net/minecraft/client/particle/Particle y D
 accessible field net/minecraft/client/particle/Particle z D
-accessible field net/minecraft/client/particle/Particle xd D
-accessible field net/minecraft/client/particle/Particle yd D
-accessible field net/minecraft/client/particle/Particle zd D
 accessible field net/minecraft/client/particle/Particle level Lnet/minecraft/client/multiplayer/ClientLevel;
 accessible field net/minecraft/world/phys/HitResult location Lnet/minecraft/world/phys/Vec3;
 transitive-mutable field net/minecraft/world/phys/HitResult location Lnet/minecraft/world/phys/Vec3;

@@ -32,32 +32,32 @@ public abstract class MixinLevelRenderer_WeatherCulling {
 	private static final Holder<Biome> asyncparticles$NULL = Holder.direct(null);
 
 	@Inject(method = "renderSnowAndRain", at = @At(value = "HEAD"))
-	public void beforeRenderSnowAndRain(CallbackInfo ci, @Share("enableCull") LocalBooleanRef enableCull){
+	public void beforeRenderSnowAndRain(CallbackInfo ci, @Share("enableCull") LocalBooleanRef enableCull) {
 		enableCull.set(ConfigHelper.isCullWeathers());
 	}
 
-	@Inject(method = "renderSnowAndRain", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getBiome(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/core/Holder;"))
+	@Inject(method = "renderSnowAndRain", at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/world/level/Level;getBiome(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/core/Holder;"))
 	public void beforeGetBiome(LightTexture lightTexture,
-								  float partialTick,
-								  double camX,
-								  double camY,
-								  double camZ,
-								  CallbackInfo ci,
-								  @Local(ordinal = 0) Level level,
-								  @Local(ordinal = 0) BlockPos.MutableBlockPos mutableBlockPos,
-								  @Local(ordinal = 1) int j,
-								  @Local(ordinal = 3) int l,
-								  @Local(ordinal = 5) int n,
-								  @Local(ordinal = 6) int o,
-								  @Share(value = "height_map") LocalIntRef qRef,
-								  @Share(value = "isVisible") LocalBooleanRef isVisible,
-								  @Share(value = "enableCull") LocalBooleanRef enableCull) {
-		int q = level.getHeight(Heightmap.Types.MOTION_BLOCKING, o, n);
+							   float partialTick,
+							   double camX,
+							   double camY,
+							   double camZ,
+							   CallbackInfo ci,
+							   @Local(ordinal = 0) Level level,
+							   @Local(ordinal = 0) BlockPos.MutableBlockPos mutableBlockPos,
+							   @Local(ordinal = 1) int j,
+							   @Local(ordinal = 3) int l,
+							   @Local(ordinal = 5) int n,
+							   @Local(ordinal = 6) int o,
+							   @Share(value = "height_map") LocalIntRef qRef,
+							   @Share(value = "isVisible") LocalBooleanRef isVisible,
+							   @Share(value = "enableCull") LocalBooleanRef enableCull) {
 		if (!enableCull.get()) {
-			qRef.set(q);
 			isVisible.set(true);
 			return;
 		}
+		int q = level.getHeight(Heightmap.Types.MOTION_BLOCKING, o, n);
 		int s = j + l;
 		if (s < q) {
 			isVisible.set(false);
@@ -75,25 +75,30 @@ public abstract class MixinLevelRenderer_WeatherCulling {
 		}
 	}
 
-	@WrapOperation(method = "renderSnowAndRain", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getBiome(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/core/Holder;"))
+	@WrapOperation(method = "renderSnowAndRain", at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/world/level/Level;getBiome(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/core/Holder;"))
 	public Holder<Biome> wrapGetBiome(Level instance, BlockPos pos,
-								  Operation<Holder<Biome>> original,
-								  @Share(value = "isVisible") LocalBooleanRef isVisible) {
+									  Operation<Holder<Biome>> original,
+									  @Share(value = "isVisible") LocalBooleanRef isVisible) {
 		return isVisible.get() ? original.call(instance, pos) : asyncparticles$NULL;
 	}
 
-	@WrapOperation(method = "renderSnowAndRain", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/biome/Biome;hasPrecipitation()Z"))
+	@WrapOperation(method = "renderSnowAndRain", at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/world/level/biome/Biome;hasPrecipitation()Z"))
 	public boolean shouldRenderWeatherColumn(Biome instance, Operation<Boolean> original,
-									@Share(value = "isVisible") LocalBooleanRef isVisible) {
+											 @Share(value = "isVisible") LocalBooleanRef isVisible) {
 		return isVisible.get() && original.call(instance);
 	}
 
-	@Redirect(method = "renderSnowAndRain", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getHeight(Lnet/minecraft/world/level/levelgen/Heightmap$Types;II)I"))
+	// It's ok if this redirect is not applied, just reduce a little of performance.
+	@Redirect(method = "renderSnowAndRain", order = 500, require = 0, at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/world/level/Level;getHeight(Lnet/minecraft/world/level/levelgen/Heightmap$Types;II)I"))
 	public int onGetHeight(Level instance,
-						 Heightmap.Types types,
-						 int i,
-						 int j,
-						 @Share(value = "height_map") LocalIntRef qRef) {
-		return qRef.get();
+						   Heightmap.Types types,
+						   int i,
+						   int j,
+						   @Share(value = "enableCull") LocalBooleanRef enableCull,
+						   @Share(value = "height_map") LocalIntRef qRef) {
+		return enableCull.get() ? qRef.get() : instance.getHeight(types, i, j);
 	}
 }

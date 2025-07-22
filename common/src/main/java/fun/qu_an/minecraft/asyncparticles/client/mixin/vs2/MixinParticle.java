@@ -75,7 +75,9 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 								 ClientShip ship) {
 		if (!asyncparticles$isOnShip()) {
 			asyncparticles$setShip(ship);
-			asyncparticles$refresh();
+			if (ConfigHelper.particleLightCache()) {
+				asyncparticles$refresh();
+			}
 			switch (ConfigHelper.getParticleCullingMode()) {
 				case ASYNC_AABB -> ((ParticleAddon) this).asyncparticles$tickAABBCulling();
 				case ASYNC_SPHERE -> ((ParticleAddon) this).asyncparticles$tickSphereCulling();
