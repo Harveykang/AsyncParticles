@@ -1,12 +1,15 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.particlerain_create;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.particlerain_create;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.simibubi.create.content.contraptions.ContraptionHandlerClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v4.ParticleRainCompat;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -29,44 +32,13 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle {
 							 @Local(ordinal = 0) Vec3 quadCenterPos,
 							 @Local(ordinal = 1) Vec3 quadEdgePos){
 		BlockHitResult clip = CreateUtil.clip(level, quadCenterPos, quadEdgePos);
-		return clip != null ? clip : original.call(instance, clipContext);
+		if (clip == null) {
+			return original.call(instance, clipContext);
+		}
+		if (!clip.isInside()){
+			ParticleRainCompat.onCreateCollision(level, clip.location);
+		}
+		return clip;
 	}
 
-//	@Override
-//	public void move(double x, double y, double z) {
-//		if (!this.stoppedByCollision) {
-//			double d = x;
-//			double e = y;
-//			double f = z;
-//
-//			float size = Math.max(Math.max(bbHeight, bbWidth), quadSize) * 0.5f;
-//			AABB aabb = new AABB(this.x - size, this.y - size, this.z - size, this.x + size, this.y + size, this.z + size);
-//			Vec3 vec3 = CreateUtil.collideMotionWithContraptions(this.level, new Vec3(x, y, z), aabb);
-//
-//			if (vec3 != null) {
-//				x = vec3.x;
-//				y = vec3.y;
-//				z = vec3.z;
-//			}
-//
-//			if (x != 0.0d || y != 0.0d || z != 0.0d) {
-//				this.setBoundingBox(this.getBoundingBox().move(x, y, z));
-//				this.setLocationFromBoundingbox();
-//			}
-//
-//			if (Math.abs(e) >= 1.0E-5d && Math.abs(y) < 1.0E-5d) {
-//				this.stoppedByCollision = true;
-//			}
-//
-//			this.onGround = e != y && e < 0.0d;
-//			if (d != x) {
-//				this.xd = 0.0d;
-//			}
-//
-//			if (f != z) {
-//				this.zd = 0.0d;
-//			}
-//
-//		}
-//	}
 }

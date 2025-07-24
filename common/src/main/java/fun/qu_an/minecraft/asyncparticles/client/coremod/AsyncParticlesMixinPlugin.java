@@ -74,10 +74,6 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					yield !IS_FORGE;
 				}
 				yield switch (split[1]) {
-					case "particlerain_vs" -> FABRIC_PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN &&
-												VS_LOADED;
-					case "particlerain_create" -> FABRIC_PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN &&
-													CREATE_LOADED;
 					case "effective" -> FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
 					case "particular" -> FABRIC_PARTICULAR_LOADED;
@@ -93,6 +89,9 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				 "off_thread_access",
 				 "tick",
 				 "render" -> true;
+			case "particlerain" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN;
+			case "particlerain_vs" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && VS_LOADED;
+			case "particlerain_create" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && CREATE_LOADED;
 			case "modernui" -> MODERN_UI_LOADED;
 			case "vs2" -> VS_LOADED;
 			case "vs2_create" -> VS_LOADED && CREATE_LOADED;

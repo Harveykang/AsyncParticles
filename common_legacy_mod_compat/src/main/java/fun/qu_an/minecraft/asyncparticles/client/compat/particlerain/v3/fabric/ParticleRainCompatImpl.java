@@ -8,6 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v3.RipplePa
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.RainEffect;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -27,44 +28,14 @@ import static java.lang.Math.abs;
 import static pigcart.particlerain.ParticleRainClient.config;
 
 public class ParticleRainCompatImpl extends ParticleRainCompat {
-	public static ParticleRainCompat init0() {
-		if (ModListHelper.VS_LOADED) {
-			ParticleRainAddon.Type.RAIN.register((level, location, originalMovement, aabb) -> {
-				Vec3 shipMovement = VSClientUtils.entityMovColShipOnly(originalMovement, aabb, level);
-				if (shipMovement == null) {
-					return originalMovement;
-				}
-				ParticleRainCompat.INSTANCE.onShipCollision(level, location, shipMovement, aabb);
-				return shipMovement;
-			});
-			ParticleRainAddon.CollisionFunction function = (level, location, v, aabb) -> {
-				Vec3 shipMovement = VSClientUtils.entityMovColShipOnly(v, aabb, level);
-				return shipMovement == null ? v : shipMovement;
-			};
-			ParticleRainAddon.Type.SNOW.register(function);
-			ParticleRainAddon.Type.OTHER.register(function);
-		}
-		if (ModListHelper.CREATE_LOADED) {
-			ParticleRainAddon.Type.RAIN.register((level, position, motion, aabb) -> {
-				Vec3 collide = CreateUtil.collideMotionWithContraptions(level, motion, aabb);
-				if (collide == null) {
-					return motion;
-				}
-				ParticleRainCompat.INSTANCE.onCreateCollision(level, motion, collide, aabb);
-				return collide;
-			});
-			ParticleRainAddon.CollisionFunction function = (level, position, motion, aabb) -> {
-				Vec3 collide = CreateUtil.collideMotionWithContraptions(level, motion, aabb);
-				return collide == null ? motion : collide;
-			};
-			ParticleRainAddon.Type.SNOW.register(function);
-			ParticleRainAddon.Type.OTHER.register(function);
-		}
+	public static ParticleRainCompat newInstance() {
 		return new ParticleRainCompatImpl();
 	}
 
 	public void onShipCollision(ClientLevel level, Vec3 location, Vec3 movement, AABB aabb) {
-		if (!config.doRippleParticles && !config.doSplashParticles) {
+		RainEffect vsRainEffect = ConfigHelper.getVSRainEffect();
+		if (vsRainEffect == RainEffect.NONE ||
+			(!config.doRippleParticles && !config.doSplashParticles)) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -81,7 +52,7 @@ public class ParticleRainCompatImpl extends ParticleRainCompat {
 			return;
 		}
 		Vec3 shipMotion = hit.shipMotion;
-		if (!ConfigHelper.alwaysSpawnRainParticlesOnVsShips() && abs(shipMotion.lengthSqr()) > 0.01) {
+		if (vsRainEffect != RainEffect.ALWAYS && abs(shipMotion.lengthSqr()) > 0.01) {
 			return;
 		}
 		Vec3 spawnPos = hit.getLocation().add(shipMotion);
@@ -109,11 +80,12 @@ public class ParticleRainCompatImpl extends ParticleRainCompat {
 
 	@Override
 	public void onCreateCollision(@NotNull ClientLevel level, Vec3 originalMotion, @NotNull Vec3 clipMotion, @NotNull AABB aabb) {
-		if (config.doSplashParticles) {
+		RainEffect createRainEffect = ConfigHelper.getCreateRainEffect();
+		if (createRainEffect != RainEffect.NONE && config.doSplashParticles) {
 			Vec3 center = aabb.getCenter();
 			AABB aabb1 = new AABB(center.x, aabb.minY - 1, center.z, center.x, aabb.minY, center.z);
 			Vec3 motion1 = originalMotion.scale(2);
-			if (CreateUtil.isCollideWithContraption(level, motion1, aabb1, false)) {
+			if (CreateUtil.isCollideWithContraption(level, motion1, aabb1, false).canSpawnRainEffect(createRainEffect)) {
 				Vec3 startPos = new Vec3(center.x, aabb.minY, center.z);
 				Vec3 spawnPos = startPos.add(clipMotion);
 				Minecraft.getInstance().particleEngine
