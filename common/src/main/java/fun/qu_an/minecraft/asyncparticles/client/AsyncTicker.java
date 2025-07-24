@@ -391,7 +391,7 @@ public class AsyncTicker {
 			AGoodPlaceCompat.onParticleEngineClear();
 		}
 		// this fix particlerain's particle count management bug
-		if (ModListHelper.PARTICLERAIN_LOADED) {
+		if (ModListHelper.PARTICLERAIN_LOADED && ModListHelper.IS_LEGACY_PARTICLERAIN) {
 			ParticleRainCompat.clearCounters();
 		}
 	}
