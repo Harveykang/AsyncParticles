@@ -45,7 +45,6 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		return IS_FORGE ? null : "fabric-asyncparticles-common-refmap.json";
 	}
 
-	//	private static final int L = "fun.qu_an.minecraft.asyncparticles.client.mixin.".length();
 	private static final int PACKAGE_LENGTH = AsyncParticlesClient.class.getPackage().getName().length() +
 											  ".mixin.".length();
 
@@ -75,11 +74,6 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				}
 				yield switch (split[1]) {
 					case "off_thread_access" -> !IS_FORGE;
-					case "particlerain_3_vs" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN &&
-												VS_LOADED;
-					case "particlerain_3_create" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN &&
-													CREATE_LOADED;
-					case "particlerain_3" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN;
 					case "create" -> FABRIC_CREATE_LOADED;
 					case "effective" -> FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
@@ -97,6 +91,9 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				 "off_thread_access",
 				 "tick",
 				 "render" -> true;
+			case "particlerain" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN;
+			case "particlerain_vs" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && VS_LOADED;
+			case "particlerain_create" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && CREATE_LOADED;
 			case "modernui" -> MODERN_UI_LOADED;
 			case "create" -> CREATE_LOADED;
 //			case "sodium_0_6" -> ModListHelper.SODIUM_LOADED

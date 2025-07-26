@@ -42,9 +42,8 @@ dependencies {
     modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.6.13-fabric"
     modCompileOnly 'maven.modrinth:iris:1.8.8+1.21.1-fabric'
 
-    /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:particle-rain:3.0.5"
-//    modCompileOnly "maven.modrinth:pretty-rain:TGjK6ChS"
+    /* Particle Rain */
+    modCompileOnly "maven.modrinth:particle-rain:v4-alpha.3+1.21.1-fabric"
 
     /* Effectual */
     modCompileOnly 'maven.modrinth:effectual:1.1.0-1.21.1'

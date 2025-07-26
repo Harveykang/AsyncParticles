@@ -330,7 +330,7 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Create {
-			RainEffect rainEffect = RainEffect.ALWAYS;
+			RainEffect rainEffect = RainEffect.STATIONARY;
 
 			private void flat() {
 				create$rainEffect = requireNonNullElse(rainEffect, RainEffect.ALWAYS);

@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.prettyrain_vs;
 
 import com.leclowndu93150.particlerain.particle.RippleParticle;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.RippleParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v3.RippleParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.prettyrain.MixinWeatherParticle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import org.joml.AxisAngle4d;

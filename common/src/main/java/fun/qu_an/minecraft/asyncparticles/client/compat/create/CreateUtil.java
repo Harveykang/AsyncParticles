@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.create;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import fun.qu_an.minecraft.asyncparticles.client.util.CollisionType;
+import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
@@ -341,7 +341,8 @@ public class CreateUtil {
 
 	@ExpectPlatform
 	public static CollisionType isCollideWithContraption(ClientLevel level, Vec3 motion, AABB bb, boolean estimate) {
-		throw new AssertionError();
+		ExceptionUtil.throwAssertionError();
+		return CollisionType.NONE;
 	}
 
 	@ExpectPlatform
@@ -353,6 +354,12 @@ public class CreateUtil {
 	@ExpectPlatform
 	@Nullable
 	public static BlockHitResult clip(ClientLevel level, Vec3 start, Vec3 end) {
+		throw new AssertionError();
+	}
+
+	@ExpectPlatform
+	@Nullable
+	public static ContraptionHitResult clipWithContactPointMotion(ClientLevel level, Vec3 start, Vec3 end) {
 		throw new AssertionError();
 	}
 }

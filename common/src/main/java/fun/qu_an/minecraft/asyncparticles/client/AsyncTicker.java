@@ -6,7 +6,7 @@ import fun.qu_an.minecraft.asyncparticles.client.api.EndTickEvent;
 import fun.qu_an.minecraft.asyncparticles.client.api.EndTickOperation;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v3.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
@@ -390,8 +390,8 @@ public class AsyncTicker {
 			AGoodPlaceCompat.onParticleEngineClear();
 		}
 		// this fix particlerain's particle count management bug
-		if (ModListHelper.PARTICLERAIN_LOADED) {
-			ParticleRainCompat.clearCounters();
+		if (ModListHelper.PARTICLERAIN_LOADED && ModListHelper.IS_LEGACY_PARTICLERAIN) {
+			ParticleRainCompat.INSTANCE.clearCounters();
 		}
 	}
 

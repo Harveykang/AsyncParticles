@@ -33,7 +33,7 @@ public class ExceptionTracker<T> {
 		return exceptions
 			.computeIfAbsent(obj, k -> new ConcurrentHashMap<>())
 			.computeIfAbsent(rootCause.getClass(), k -> {
-				LOGGER.warn("Captured exception: ", t); // Print the exception once.
+				LOGGER.warn("Captured exception: (Note: If you encountered a crash, this exception is likely not the cause, please check the crash report for details)", t); // Print the exception once.
 				return new ExceptionQueue();
 			})
 			.push();

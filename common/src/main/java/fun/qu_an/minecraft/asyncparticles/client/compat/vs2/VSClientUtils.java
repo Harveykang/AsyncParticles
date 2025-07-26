@@ -9,9 +9,11 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4dc;
 import org.joml.Vector3d;
@@ -54,6 +56,47 @@ public class VSClientUtils {
 	}
 
 	private static final EntityPolygonCollider collider = ValkyrienSkiesMod.vsCore.getEntityPolygonCollider();
+
+	/**
+	 * include matrices in hit result.
+	 */
+	@NotNull
+	public static BlockHitResult clipVanillaAndShip(ClientLevel level, ClipContext ctx, boolean shouldTransformHitPos) {
+		var vanillaHit = InvokerRaycastUtils.invoker_vanillaClip(level, ctx);
+		var shipObjectWorld = VSGameUtilsKt.getShipObjectWorld(level);
+		var closestHit = vanillaHit;
+		var closestHitPos = vanillaHit.getLocation();
+		var closestHitDist = closestHitPos.distanceToSqr(ctx.getFrom());
+		AABBd clipAABB = new AABBd(toJOML(ctx.getFrom()), toJOML(ctx.getTo())).correctBounds();
+		for (var ship : shipObjectWorld.getLoadedShips().getIntersecting(clipAABB)) {
+			Matrix4dc worldToShip = ship.getWorldToShip();
+			Matrix4dc shipToWorld = ship.getShipToWorld();
+			var shipStart = toMinecraft(worldToShip.transformPosition(toJOML(ctx.getFrom())));
+			var shipEnd = toMinecraft(worldToShip.transformPosition(toJOML(ctx.getTo())));
+
+			var shipHit = InvokerRaycastUtils.invoker_clip(level, ctx, shipStart, shipEnd);
+			Vector3d worldPos = shipToWorld.transformPosition(toJOML(shipHit.getLocation()));
+			var shipHitPos = toMinecraft(worldPos);
+
+			var shipHitDist = shipHitPos.distanceToSqr(ctx.getFrom());
+
+			if (shipHitDist < closestHitDist && shipHit.getType() != HitResult.Type.MISS) {
+				var newPosInShipLocal = worldPos
+					.sub(ship.getTransform().getPositionInWorld());
+				var shipVelocity = new Vector3d(ship.getVelocity())
+					.add(new Vector3d(ship.getOmega()).cross(newPosInShipLocal))
+					.mul(0.05);
+				closestHit = ShipHitResult.of(shipHit, worldToShip, shipToWorld,
+					new Vec3(shipVelocity.x(), shipVelocity.y(), shipVelocity.z()));
+				closestHitPos = shipHitPos;
+				closestHitDist = shipHitDist;
+			}
+		}
+		if (shouldTransformHitPos) {
+			closestHit.location = closestHitPos;
+		}
+		return closestHit;
+	}
 
 	/**
 	 * No vanilla collision check.

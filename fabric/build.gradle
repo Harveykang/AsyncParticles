@@ -40,6 +40,8 @@ dependencies {
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
+    common(project(path: ':common_legacy_mod_compat', configuration: 'namedElements')) { transitive false }
+    shadowBundle project(path: ':common_legacy_mod_compat', configuration: 'transformProductionFabric')
 
     /* APIs */
     modCompileOnly 'maven.modrinth:modmenu:11.0.3'
@@ -66,6 +68,7 @@ dependencies {
     /* Particle Rain/Pretty Rain */
     modCompileOnly "maven.modrinth:particle-rain:3.0.5"
 //    modLocalRuntime "maven.modrinth:particle-rain:3.0.5"
+    modLocalRuntime "maven.modrinth:particle-rain:v4-alpha.3+1.21.1-fabric"
 //    modLocalRuntime "maven.modrinth:pretty-rain:TGjK6ChS"
 
     /* Effectual */
@@ -150,6 +153,7 @@ runClient {
         main {
             resources {
                 srcDirs += "../common/src/main/resources"
+                srcDirs += "../common_legacy_mod_compat/src/main/resources"
             }
         }
     }

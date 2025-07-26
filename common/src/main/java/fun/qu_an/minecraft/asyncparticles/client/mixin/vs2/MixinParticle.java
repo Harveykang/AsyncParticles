@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -18,11 +17,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -41,6 +38,14 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 	public double y;
 	@Shadow
 	public double z;
+
+	@Shadow public abstract AABB getBoundingBox();
+
+	@Shadow public abstract void remove();
+
+	@Shadow protected double xd;
+	@Shadow protected double yd;
+	@Shadow protected double zd;
 	@Unique
 	protected ClientShip asyncparticles$vsShip;
 
@@ -49,18 +54,24 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 	 * See {@link fun.qu_an.minecraft.asyncparticles.client.mixin.forge.weather2_vs.MixinEntityRotFX#collideBoundingBox}
 	 */
 	@WrapOperation(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;collideBoundingBox(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Lnet/minecraft/world/level/Level;Ljava/util/List;)Lnet/minecraft/world/phys/Vec3;"))
-	private Vec3 collideBoundingBox(Entity entity, Vec3 vec3, AABB aABB, Level level, List<VoxelShape> list, Operation<Vec3> original) {
+	protected Vec3 collideBoundingBox(Entity entity, Vec3 vec3, AABB aabb, Level level, List<VoxelShape> list, Operation<Vec3> original) {
 		// we do it in another thread, so we don't need to worry about costly collision checks
-		double xsize = aABB.getXsize();
-		double ysize = aABB.getYsize();
-		double zsize = aABB.getZsize();
+		double xsize = aabb.getXsize();
+		double ysize = aabb.getYsize();
+		double zsize = aabb.getZsize();
+		AABB aabb1;
+		if (xsize < 0.1 || ysize < 0.1 || zsize < 0.1) {
+			aabb1 = aabb.inflate(xsize < 0.1 ? 0.1 - xsize : 0.0, ysize < 0.1 ? 0.1 - ysize : 0.0, zsize < 0.1 ? 0.1 - zsize : 0.0);
+		} else {
+			aabb1 = aabb;
+		}
 		Vec3 mov = VSClientUtils.entityMovColShipOnly(
 			vec3,
-			aABB.inflate(xsize >= 0.1 ? 0.0 : 0.1 - xsize, ysize >= 0.1 ? 0.0 : 0.1 - ysize, zsize >= 0.1 ? 0.0 : 0.1 - zsize),
+			aabb1,
 			(ClientLevel) level);
 		return original.call(entity,
 			mov == null ? vec3 : mov,
-			aABB, level, list);
+			aabb, level, list);
 	}
 
 	@TargetHandler(
@@ -72,16 +83,10 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 	private void checkShipCoords(CallbackInfo ci,
 								 @SuppressWarnings("LocalMayBeArgsOnly")
 								 @Local(ordinal = 0)
+								 @Nullable
 								 ClientShip ship) {
 		if (!asyncparticles$isOnShip()) {
 			asyncparticles$setShip(ship);
-			if (ConfigHelper.particleLightCache()) {
-				asyncparticles$refresh();
-			}
-			switch (ConfigHelper.getParticleCullingMode()) {
-				case ASYNC_AABB -> ((ParticleAddon) this).asyncparticles$tickAABBCulling();
-				case ASYNC_SPHERE -> ((ParticleAddon) this).asyncparticles$tickSphereCulling();
-			}
 		}
 	}
 
@@ -106,7 +111,7 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 	}
 
 	@Override
-	public void asyncparticles$setShip(ClientShip ship) {
+	public void asyncparticles$setShip(@Nullable ClientShip ship) {
 		asyncparticles$vsShip = ship;
 	}
 

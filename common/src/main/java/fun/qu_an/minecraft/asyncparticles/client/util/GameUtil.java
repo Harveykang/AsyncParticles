@@ -5,6 +5,9 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import net.minecraft.ReportedException;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+
+import static java.lang.Math.abs;
 
 public class GameUtil {
 	@ExpectPlatform
@@ -22,5 +25,9 @@ public class GameUtil {
 		}
 		Throwable cause = t.getCause();
 		return cause == null ? null : getReportedException(cause);
+	}
+
+	public static double manhattanLength(Vec3 vec3) {
+		return abs(vec3.x) + abs(vec3.y) + abs(vec3.z);
 	}
 }

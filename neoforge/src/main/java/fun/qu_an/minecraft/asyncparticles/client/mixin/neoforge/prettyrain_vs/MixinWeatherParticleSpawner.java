@@ -12,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.At;
 public class MixinWeatherParticleSpawner {
 	@WrapWithCondition(method = "spawnParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"))
 	private static boolean onSpawnParticle(ClientLevel instance, ParticleOptions particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-		return VSCompat.canCreateWeatherParticle(instance, x, y, z, 2.0);
+		return VSCompat.canSpawnWeatherParticle(instance, x, y, z, 2.0);
 	}
 }

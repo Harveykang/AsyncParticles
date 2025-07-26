@@ -38,6 +38,7 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 		}
 		return switch (split[0]) {
 			case "off_thread_access" -> true;
+			case "particlerain_create" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN;
 			case "prettyrain" -> FORGE_PRETTY_RAIN_LOADED;
 			case "prettyrain_create" -> FORGE_PRETTY_RAIN_LOADED && CREATE_LOADED;
 			case "prettyrain_vs" -> FORGE_PRETTY_RAIN_LOADED && VS_LOADED;

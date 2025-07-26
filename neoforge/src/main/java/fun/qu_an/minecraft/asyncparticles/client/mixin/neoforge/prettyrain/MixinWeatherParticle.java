@@ -2,8 +2,8 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.prettyrain;
 
 import com.leclowndu93150.particlerain.particle.*;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.WeatherParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v3.ParticleRainAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v3.ParticleRainCompat;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TextureSheetParticle;
@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Collections;
 
 @Mixin(value = WeatherParticle.class)
-public abstract class MixinWeatherParticle extends TextureSheetParticle implements WeatherParticleAddon {
+public abstract class MixinWeatherParticle extends TextureSheetParticle implements ParticleRainAddon {
 	@Unique
 	private boolean asyncparticles$invisible;
 	@Unique
@@ -58,7 +58,7 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 	@SuppressWarnings("ConstantValue")
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(CallbackInfo ci) {
-		ParticleRainCompat.asyncparticles$particleCount.getAndIncrement();
+		ParticleRainCompat.INSTANCE.particleCount.getAndIncrement();
 		if (StreakParticle.class.isInstance(this) ||
 			RippleParticle.class.isInstance(this)) {
 			asyncparticles$setWeatherAABB(AABB.ofSize(new Vec3(x, y, z), 0.01, 0.01, 0.01));
@@ -69,7 +69,7 @@ public abstract class MixinWeatherParticle extends TextureSheetParticle implemen
 
 	@Inject(method = "remove", at = @At(value = "FIELD", remap = false, ordinal = 0, target = "Lcom/leclowndu93150/particlerain/ParticleRainClient;particleCount:I"))
 	private void onRemove(CallbackInfo ci) {
-		ParticleRainCompat.asyncparticles$particleCount.getAndDecrement();
+		ParticleRainCompat.INSTANCE.particleCount.getAndDecrement();
 	}
 
 	@SuppressWarnings("ConstantValue")

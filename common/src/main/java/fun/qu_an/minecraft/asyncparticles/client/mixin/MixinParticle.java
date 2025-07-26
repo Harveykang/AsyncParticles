@@ -54,6 +54,8 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	@Shadow
 	protected double zd;
 
+	@Shadow public abstract AABB getBoundingBox();
+
 	@Override
 	public void asyncparticles$setTicked() {
 		this.asyncparticles$ticked = true;
