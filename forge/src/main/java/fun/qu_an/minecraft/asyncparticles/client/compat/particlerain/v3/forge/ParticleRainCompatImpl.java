@@ -10,6 +10,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.RainEffect;
+import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -53,7 +54,7 @@ public class ParticleRainCompatImpl extends ParticleRainCompat {
 			return;
 		}
 		Vec3 shipMotion = hit.shipMotion;
-		if (vsRainEffect != RainEffect.ALWAYS && abs(shipMotion.lengthSqr()) > 0.01) {
+		if (vsRainEffect == RainEffect.STATIONARY && GameUtil.manhattanLength(shipMotion) > 0.05) {
 			return;
 		}
 		Vec3 spawnPos = hit.getLocation().add(shipMotion);

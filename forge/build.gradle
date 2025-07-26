@@ -86,8 +86,9 @@ dependencies {
     /* Particle Rain/Pretty Rain */
     modCompileOnly "maven.modrinth:pretty-rain:yIvOKPKZ" // 1.1.3
     modLocalRuntime "maven.modrinth:pretty-rain:yIvOKPKZ" // 1.1.3
-    modCompileOnly "maven.modrinth:particle-rain:4-alpha.2+1.20.1-forge"
-//    modLocalRuntime "maven.modrinth:particle-rain:4-alpha.2+1.20.1-forge"
+    modCompileOnly "maven.modrinth:particle-rain:v4-alpha.3+1.20.1-forge"
+    modLocalRuntime "maven.modrinth:particle-rain:v4-alpha.3+1.20.1-forge"
+//    modLocalRuntime "maven.modrinth:particle-rain:v4-alpha.3+1.20.1-forge"
 
     /* Effectual */
 //    if (rootProject.use_connector_mod == "true") {

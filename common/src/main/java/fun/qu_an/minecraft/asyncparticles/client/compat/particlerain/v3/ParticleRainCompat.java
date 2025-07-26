@@ -12,7 +12,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class ParticleRainCompat {
-	public static final ParticleRainCompat INSTANCE = init0();
+	public static final ParticleRainCompat INSTANCE;
+
+	static {
+		init0();
+		INSTANCE = newInstance();
+	}
+
 	public final AtomicInteger particleCount = new AtomicInteger(0);
 	public final AtomicInteger fogCount = new AtomicInteger(0);
 
@@ -23,7 +29,7 @@ public abstract class ParticleRainCompat {
 		}
 	}
 
-	private static ParticleRainCompat init0() {
+	private static void init0() {
 		if (ModListHelper.VS_LOADED) {
 			ParticleRainAddon.Type.RAIN.register((level, location, originalMovement, aabb) -> {
 				Vec3 shipMovement = VSClientUtils.entityMovColShipOnly(originalMovement, aabb, level);
@@ -56,7 +62,6 @@ public abstract class ParticleRainCompat {
 			ParticleRainAddon.Type.SNOW.register(function);
 			ParticleRainAddon.Type.OTHER.register(function);
 		}
-		return newInstance();
 	}
 
 	@ExpectPlatform

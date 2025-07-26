@@ -24,7 +24,6 @@ import org.valkyrienskies.core.api.ships.ClientShip;
 import org.valkyrienskies.core.api.ships.properties.ShipTransform;
 import org.valkyrienskies.core.apigame.collision.ConvexPolygonc;
 import org.valkyrienskies.core.apigame.collision.EntityPolygonCollider;
-import org.valkyrienskies.core.impl.game.ships.ShipObjectClient;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.ValkyrienSkiesMod;
 import org.valkyrienskies.mod.common.util.EntityShipCollisionUtils;
@@ -61,7 +60,7 @@ public class VSClientUtils {
 	 * include matrices in hit result.
 	 */
 	@NotNull
-	public static BlockHitResult clipIncludeShips(ClientLevel level, ClipContext ctx, boolean shouldTransformHitPos) {
+	public static BlockHitResult clipVanillaAndShip(ClientLevel level, ClipContext ctx, boolean shouldTransformHitPos) {
 		var vanillaHit = InvokerRaycastUtils.invoker_vanillaClip(level, ctx);
 		var shipObjectWorld = VSGameUtilsKt.getShipObjectWorld(level);
 		var closestHit = vanillaHit;

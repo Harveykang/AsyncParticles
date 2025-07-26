@@ -37,11 +37,9 @@ public class APMixinLegacyModCompatPlugin implements IMixinConfigPlugin {
 					yield !IS_FORGE;
 				}
 				yield switch (split[1]) {
-					case "particlerain_vs" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN &&
-											  VS_LOADED;
-					case "particlerain_create" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN &&
-												  CREATE_LOADED;
 					case "particlerain" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN;
+					case "particlerain_vs" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN && VS_LOADED;
+					case "particlerain_create" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN && CREATE_LOADED;
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}

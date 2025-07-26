@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.util;
+package fun.qu_an.minecraft.asyncparticles.client.compat.create;
 
 import fun.qu_an.minecraft.asyncparticles.client.config.RainEffect;
 
