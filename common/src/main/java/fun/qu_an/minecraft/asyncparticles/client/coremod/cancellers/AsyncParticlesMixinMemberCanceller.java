@@ -10,7 +10,8 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 		return switch (mixinClassName) {
 			case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin",
 				 "net.irisshaders.iris.mixin.fabric.MixinParticleEngine",
-				 "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin" -> true;
+				 "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin",
+				 "net.diebuddies.mixins.weather.MixinParticleEngine" -> true;
 			default -> false;
 		};
 	}
@@ -24,6 +25,8 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 				mixinMethodName.equals("iris$cancel");
 			case "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin" ->
 				"addCustomRenderTypes".equals(mixinMethodName);
+			case "net.diebuddies.mixins.weather.MixinParticleEngine" ->
+				"tick".equals(mixinMethodName);
 			default -> false;
 		};
 	}

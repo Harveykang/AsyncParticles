@@ -581,6 +581,7 @@ public class AsyncTicker {
 			particleFuture = null;
 		}
 		cancelled.setOpaque(false);
+		timeUsageNano.set(0L);
 		PARTICLE_OPERATIONS.clear();
 		END_TICK_OPERATIONS.clear();
 		SYNC_PARTICLES.clear();

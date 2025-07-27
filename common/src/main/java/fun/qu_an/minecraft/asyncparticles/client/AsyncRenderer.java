@@ -466,6 +466,7 @@ public class AsyncRenderer {
 	/* Destroy */
 
 	public static void reset() {
+		particlePhase = false;
 		waitForParticleTask();
 		WeatherRenderer.waitForWeatherTask();
 		closeBTesselators();
