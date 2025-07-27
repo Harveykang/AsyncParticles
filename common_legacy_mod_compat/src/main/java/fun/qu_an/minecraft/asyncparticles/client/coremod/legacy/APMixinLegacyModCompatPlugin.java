@@ -43,6 +43,7 @@ public class APMixinLegacyModCompatPlugin implements IMixinConfigPlugin {
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
+			case "veil" -> VEIL_LOADED && versionCheck("veil", "0.999999", "1.999999");
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

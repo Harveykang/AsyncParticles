@@ -25,8 +25,10 @@ public class AsyncRendererImpl {
 			throw new UnsupportedOperationException("endOpaque");
 		}
 		AsyncRenderer.renderAsync = isAsync;
+		AsyncRenderer.particlePhase = true;
 		particleEngine.render(lightTexture, camera, f);
 		AsyncRenderer.renderAsync = false;
+		AsyncRenderer.particlePhase = false;
 	}
 
 	public static void endTranslucent(LightTexture lightTexture, Camera camera, float f, boolean isAsync) {
@@ -48,8 +50,10 @@ public class AsyncRendererImpl {
 			throw new UnsupportedOperationException("endOpaque");
 		}
 		AsyncRenderer.renderAsync = isAsync;
+		AsyncRenderer.particlePhase = true;
 		particleEngine.render(lightTexture, camera, f);
 		AsyncRenderer.renderAsync = false;
+		AsyncRenderer.particlePhase = false;
 
 		if (levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();

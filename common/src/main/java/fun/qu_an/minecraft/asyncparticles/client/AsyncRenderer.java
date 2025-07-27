@@ -52,7 +52,7 @@ public class AsyncRenderer {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 	public static boolean renderAsync = false;
-	private static boolean particlePhase = false;
+	public static boolean particlePhase = false;
 
 	static {
 		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);

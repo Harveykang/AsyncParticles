@@ -9,7 +9,9 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 	public boolean preCancel(List<String> targetClassNames, String mixinClassName) {
 		return switch (mixinClassName) {
 			case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin",
-				 "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin" -> true;
+				 "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin",
+				 "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
+				 "net.diebuddies.mixins.weather.MixinParticleEngine" -> true;
 			default -> false;
 		};
 	}
@@ -19,8 +21,13 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 		return switch (mixinClassName) {
 			case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin" ->
 				"shouldRenderParticle".equals(mixinMethodName);
+			// See mixin.fabric.porting_lib_base.MixinMixinParticleEngine
 			case "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin" ->
 				"addCustomRenderTypes".equals(mixinMethodName);
+			case "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin" ->
+				"skipGeneratingAABB".equals(mixinMethodName) || "FastFrustumCheck".equals(mixinMethodName);
+			case "net.diebuddies.mixins.weather.MixinParticleEngine" ->
+				"tick".equals(mixinMethodName);
 			default -> false;
 		};
 	}

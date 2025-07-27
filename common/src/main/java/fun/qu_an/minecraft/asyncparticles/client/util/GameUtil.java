@@ -20,11 +20,13 @@ public class GameUtil {
 	}
 
 	public static ReportedException getReportedException(Throwable t) {
-		if (t instanceof ReportedException re) {
-			return re;
+		while (t != null) {
+			if (t instanceof ReportedException re) {
+				return re;
+			}
+			t = t.getCause();
 		}
-		Throwable cause = t.getCause();
-		return cause == null ? null : getReportedException(cause);
+		return null;
 	}
 
 	public static double manhattanLength(Vec3 vec3) {

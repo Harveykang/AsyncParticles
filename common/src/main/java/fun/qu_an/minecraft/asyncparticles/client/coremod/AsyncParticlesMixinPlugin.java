@@ -98,7 +98,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "create" -> CREATE_LOADED;
 //			case "sodium_0_6" -> ModListHelper.SODIUM_LOADED
 //								 && ModListHelper.versionCheck("sodium", "0.6", "0.7");
-			case "sodium_0_7" -> SODIUM_LOADED && versionCheck("sodium", "0.7", "0.8");
+			case "sodium_0_7" -> SODIUM_LOADED && versionCheck("sodium", "0.6.999999", "0.8");
 			case "iris_like" -> IRIS_LIKE_LOADED;
 			case "a_good_place" -> A_GOOD_PLACE_LOADED;
 			case "subtle_effects" -> {
@@ -121,6 +121,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "dsurround" -> DSURROUND_LOADED;
 			case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
 			case "figura" -> FIGURA_LOADED;
+			case "veil" -> VEIL_LOADED && versionCheck("veil", "1.999999", null);
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

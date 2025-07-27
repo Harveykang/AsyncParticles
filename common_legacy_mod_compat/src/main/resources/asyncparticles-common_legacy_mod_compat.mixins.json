@@ -14,10 +14,11 @@
     "fabric.particlerain.MixinWeatherParticle",
     "fabric.particlerain.MixinWeatherParticles",
     "fabric.particlerain.MixinWeatherParticleSpawner",
+    "fabric.particlerain_create.MixinWeatherParticleSpawner",
     "fabric.particlerain_vs.MixinGroundFogParticle",
     "fabric.particlerain_vs.MixinRippleParticle",
     "fabric.particlerain_vs.MixinWeatherParticleSpawner",
-    "fabric.particlerain_create.MixinWeatherParticleSpawner"
+    "veil.MixinLightRenderer"
   ],
   "injectors": {
     "defaultRequire": 1

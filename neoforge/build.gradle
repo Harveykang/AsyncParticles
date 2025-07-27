@@ -83,7 +83,7 @@ dependencies {
     /* Sodium */
     modCompileOnly 'maven.modrinth:sodium:mc1.21.1-0.6.13-neoforge'
     modCompileOnly "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
-    modCompileOnly "curse.maven:flerovium-1142875:6359527" // 1.0.4
+    modCompileOnly "maven.modrinth:flerovium:1.0.9"
 
     // Iris
 //    modLocalRuntime "maven.modrinth:iris:1.8.8+1.21.1-neoforge"

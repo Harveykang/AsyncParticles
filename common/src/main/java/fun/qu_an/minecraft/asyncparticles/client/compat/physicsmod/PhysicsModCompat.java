@@ -46,7 +46,7 @@ public class PhysicsModCompat {
 				ClipContext.Fluid.ANY,
 				mc.player),
 			true);
-		if (hit == null || hit.getType() != HitResult.Type.BLOCK) {
+		if (hit == null || hit.getType() != HitResult.Type.BLOCK || hit.isInside()) {
 			return;
 		}
 		Vec3 shipMotion = hit.shipMotion;
@@ -71,7 +71,7 @@ public class PhysicsModCompat {
 			return;
 		}
 		BlockHitResult hit = CreateUtil.clip(level, location, location.add(movement.scale(2)));
-		if (hit == null || hit.getType() != HitResult.Type.BLOCK ||
+		if (hit == null || hit.getType() != HitResult.Type.BLOCK || hit.isInside() ||
 			!collisionType.canSpawnRainEffect(createRainEffect)) {
 			return;
 		}

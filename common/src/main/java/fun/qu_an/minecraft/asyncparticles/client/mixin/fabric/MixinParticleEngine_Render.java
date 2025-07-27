@@ -83,6 +83,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 			Collection<? extends Particle> syncParticles;
 			ParticleCullingMode realCullMode;
 			Tesselator toBegin;
+			// With renderAsync check we behave like vanilla if this method is called from other mod.
 			if (!renderAsync || tesselator.shouldSync) {
 				realCullMode = particleCullingMode;
 				syncParticles = queue;
