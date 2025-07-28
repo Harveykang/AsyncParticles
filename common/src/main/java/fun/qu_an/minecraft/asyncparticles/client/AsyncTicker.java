@@ -34,7 +34,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -46,7 +45,7 @@ import java.util.stream.Collectors;
 
 import static fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil.toThrowDirectly;
 
-// TODO: 整理这一坨
+// TODO: Organize this shit
 @Environment(EnvType.CLIENT)
 public class AsyncTicker {
 	public static final Logger LOGGER = LogManager.getLogger();

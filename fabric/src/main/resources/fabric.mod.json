@@ -36,6 +36,7 @@
   },
   "suggests": {
     "fabric": "*",
-    "cloth-config": "*"
+    "cloth-config": "*",
+    "modmenu": "*"
   }
 }

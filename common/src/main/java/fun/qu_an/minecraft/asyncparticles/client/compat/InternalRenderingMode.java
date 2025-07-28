@@ -5,6 +5,7 @@ import fun.qu_an.minecraft.asyncparticles.client.config.RenderingMode;
 import net.irisshaders.iris.shaderpack.properties.ParticleRenderingSettings;
 import org.jetbrains.annotations.ApiStatus;
 
+// TODO: Bad design
 public class InternalRenderingMode {
 	public static final int
 		DELAYED_ASYNC = 1, // RenderingMode.DELAYED

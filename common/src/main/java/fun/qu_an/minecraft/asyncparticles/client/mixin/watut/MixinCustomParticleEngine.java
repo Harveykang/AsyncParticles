@@ -17,26 +17,26 @@ import java.util.Queue;
 @Mixin(value = CustomParticleEngine.class, remap = false)
 public class MixinCustomParticleEngine {
 	@WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
-	private boolean onAdd(Queue<Particle> instance, Object particle, Operation<Boolean> original) {
+	private boolean onAdd(Queue<Particle> instance, Object p, Operation<Boolean> original) {
 		if (ConfigHelper.particleLightCache()) {
-			((LightCachedParticleAddon) particle).asyncparticles$enableLightCache();
-			((LightCachedParticleAddon) particle).asyncparticles$refresh();
+			((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
+			((LightCachedParticleAddon) p).asyncparticles$refresh();
 		}
 		switch (ConfigHelper.getParticleCullingMode()) {
-			case ASYNC_AABB -> ((ParticleAddon) this).asyncparticles$tickAABBCulling();
-			case ASYNC_SPHERE -> ((ParticleAddon) this).asyncparticles$tickSphereCulling();
+			case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();
+			case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();
 		}
-		return original.call(instance, particle);
+		return original.call(instance, p);
 	}
 
 	@Inject(method = "tickParticle", at = @At(value = "HEAD"))
-	private void onTickParticle(Particle particle, CallbackInfo ci) {
+	private void onTickParticle(Particle p, CallbackInfo ci) {
 		if (ConfigHelper.particleLightCache()) {
-			((LightCachedParticleAddon) particle).asyncparticles$refresh();
+			((LightCachedParticleAddon) p).asyncparticles$refresh();
 		}
 		switch (ConfigHelper.getParticleCullingMode()) {
-			case ASYNC_AABB -> ((ParticleAddon) this).asyncparticles$tickAABBCulling();
-			case ASYNC_SPHERE -> ((ParticleAddon) this).asyncparticles$tickSphereCulling();
+			case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();
+			case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();
 		}
 	}
 }

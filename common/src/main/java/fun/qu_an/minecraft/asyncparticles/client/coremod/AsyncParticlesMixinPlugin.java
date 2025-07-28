@@ -113,7 +113,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					default -> SUBTLE_EFFECTS_LOADED;
 				};
 			}
-			case "watut" -> WATUT_LOADED;
+			case "watut" -> WATUT_LOADED && versionCheck("watut", "1.2.0", null);
 			case "lodestone" -> LODESTONE_LOADED;
 			case "fabric_api" -> FABRIC_API_LOADED; // Includes Forge version
 			case "cloth_config" -> CLOTH_CONFIG_LOADED;

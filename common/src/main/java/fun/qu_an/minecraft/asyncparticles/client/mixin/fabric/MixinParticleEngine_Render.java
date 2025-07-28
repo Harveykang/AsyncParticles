@@ -46,7 +46,26 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 				RENDER_ORDER = new ArrayList<>(RENDER_ORDER);
 			}
 			RENDER_ORDER.add(particleRenderType);
+			asyncparticle$sortRenderOrder();
 		}
+	}
+
+	@Override
+	public void asyncparticle$sortRenderOrder() {
+		// make custom types render after non-customs
+		// Remove duplicated render types, (e.g. Hex Casting mod's bug)
+		Set<ParticleRenderType> renderTypes = new LinkedHashSet<>((int) (RENDER_ORDER.size() * 1.34) + 1);
+		for (ParticleRenderType type : RENDER_ORDER) {
+			if (AsyncRenderer.getVertexFormatPair(type, textureManager) != AsyncRenderer.EMPTY_FORMAT) {
+				renderTypes.add(type);
+			}
+		}
+		for (ParticleRenderType type : RENDER_ORDER) {
+			if (AsyncRenderer.getVertexFormatPair(type, textureManager) == AsyncRenderer.EMPTY_FORMAT) {
+				renderTypes.add(type);
+			}
+		}
+		RENDER_ORDER = new ArrayList<>(renderTypes);
 	}
 
 	/**
