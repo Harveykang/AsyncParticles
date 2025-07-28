@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.*;
 import java.util.*;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
-public abstract class MixinParticleEngine_Render implements ParticleEngineAddon {
+public class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Shadow
 	public Map<ParticleRenderType, Queue<Particle>> particles;
 	@Shadow
@@ -46,7 +46,26 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 				RENDER_ORDER = new ArrayList<>(RENDER_ORDER);
 			}
 			RENDER_ORDER.add(particleRenderType);
+			asyncparticle$sortRenderOrder();
 		}
+	}
+
+	@Override
+	public void asyncparticle$sortRenderOrder() {
+		// make custom types render after non-customs
+		// Remove duplicated render types, (e.g. Hex Casting mod's bug)
+		Set<ParticleRenderType> renderTypes = new LinkedHashSet<>((int) (RENDER_ORDER.size() * 1.34) + 1);
+		for (ParticleRenderType type : RENDER_ORDER) {
+			if (!AsyncRenderer.getBTesselator(type, textureManager).shouldSync) {
+				renderTypes.add(type);
+			}
+		}
+		for (ParticleRenderType type : RENDER_ORDER) {
+			if (AsyncRenderer.getBTesselator(type, textureManager).shouldSync) {
+				renderTypes.add(type);
+			}
+		}
+		RENDER_ORDER = new ArrayList<>(renderTypes);
 	}
 
 	/**

@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
 
-// TODO: 整理这一坨
+// TODO: Organize this shit
 @Environment(EnvType.CLIENT)
 public class AsyncRenderer {
 	private static final Logger LOGGER = LogUtils.getLogger();

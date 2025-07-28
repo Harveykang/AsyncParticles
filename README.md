@@ -45,10 +45,6 @@
     (Due to incompatibilities with AsyncParticles' asynchronous optimizations.)
 - ...
 
-### ❔ Works fine, but not fully tested
-- Epic Fight
-- Draconic Evolution
-
 ### ❌ Incompatible
 - OptiFine
 - MadParticle

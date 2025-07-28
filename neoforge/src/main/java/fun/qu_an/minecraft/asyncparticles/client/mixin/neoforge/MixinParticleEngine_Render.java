@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -22,20 +24,16 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 // TODO: 分为两个 Mixin
 @Mixin(value = ParticleEngine.class, priority = 500)
-public abstract class MixinParticleEngine_Render implements ParticleEngineAddon {
+public class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Shadow
 	public Map<ParticleRenderType, Queue<Particle>> particles;
 
@@ -43,8 +41,81 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 	@Final
 	public TextureManager textureManager;
 
+	@Shadow
+	public static List<ParticleRenderType> RENDER_ORDER;
+
 	@Override
 	public void asyncparticle$addRenderType(ParticleRenderType particleRenderType) {
+	}
+
+	@Override
+	public void asyncparticle$sortRenderOrder() {
+		// make custom types render after non-customs
+		// Remove duplicated render types, (e.g. Hex Casting mod's bug)
+		Set<ParticleRenderType> renderTypes = new LinkedHashSet<>((int) (RENDER_ORDER.size() * 1.34) + 1);
+		for (ParticleRenderType type : RENDER_ORDER) {
+			if (!AsyncRenderer.getBTesselator(type, textureManager).shouldSync) {
+				renderTypes.add(type);
+			}
+		}
+		for (ParticleRenderType type : RENDER_ORDER) {
+			if (AsyncRenderer.getBTesselator(type, textureManager).shouldSync) {
+				renderTypes.add(type);
+			}
+		}
+
+		List<ParticleRenderType> renderOrder = RENDER_ORDER = ImmutableList.copyOf(renderTypes);
+		AtomicInteger orderGenerator = new AtomicInteger();
+		Map<ParticleRenderType, Integer> insertionOrder = Collections.synchronizedMap(new IdentityHashMap<>(0));
+		Map<ParticleRenderType, Queue<Particle>> newTreeMap =
+			Maps.newTreeMap((o1, o2) -> {
+				// FIXME: why do i have to write this shit?
+				if (o1 == o2) {
+					return 0;
+				}
+				BindingTesselator bTesselator1 = AsyncRenderer.getBTesselator(o1, textureManager);
+				BindingTesselator bTesselator2 = AsyncRenderer.getBTesselator(o2, textureManager);
+				if (bTesselator1.shouldSync && bTesselator2.shouldSync) {
+					return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
+				}
+				if (bTesselator1.shouldSync) {
+					return 1;
+				}
+				if (bTesselator2.shouldSync) {
+					return -1;
+				}
+
+				int vanillaOne = -1;
+				int vanillaTwo = -1;
+				for (int i = 0; i < renderOrder.size(); i++) {
+					ParticleRenderType geti = renderOrder.get(i);
+					if (vanillaOne == -1 && geti == o1) {
+						vanillaOne = i;
+					} else if (vanillaTwo == -1 && geti == o2) {
+						vanillaTwo = i;
+					}
+					if (vanillaOne >= 0 && vanillaTwo >= 0) {
+						return Integer.compare(vanillaOne, vanillaTwo);
+					}
+				}
+
+				if (vanillaOne == -1 && vanillaTwo == -1) {
+					return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
+				}
+				return vanillaOne >= 0 ? -1 : 1;
+			});
+		newTreeMap.putAll(particles);
+		particles = newTreeMap;
+	}
+
+	@Unique
+	private static int asyncparticles$compareWithIdentityHashCode(ParticleRenderType o1, ParticleRenderType o2, Map<ParticleRenderType, Integer> insertionOrder, AtomicInteger orderGenerator) {
+		int hashCompare = Integer.compare(System.identityHashCode(o1), System.identityHashCode(o2));
+		if (hashCompare != 0) {
+			return hashCompare;
+		}
+		return Integer.compare(insertionOrder.computeIfAbsent(o1, k -> orderGenerator.getAndIncrement()),
+			insertionOrder.computeIfAbsent(o2, k -> orderGenerator.getAndIncrement()));
 	}
 
 	/**
