@@ -103,7 +103,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			} else {
 				realCullMode = ParticleCullingMode.DISABLED;
 				syncParticles = AsyncRenderer.getSync(particleRenderType);
-				tesselator = null;
+				tesselator = CustomTesselator.of(bufferBuilder, b -> BufferUploader.drawWithShader(b.end()));
 				toBegin = FakeBufferBuilder.INSTANCE;
 			}
 			// must set shader before begin
@@ -144,9 +144,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 				}
 			}
 			profiler.popPush("upload_particles");
-			// use fake, mod compatibility
-			particleRenderType.end(tesselator != null
-				? tesselator : CustomTesselator.of(bufferBuilder, b -> BufferUploader.drawWithShader(b.end())));
+			particleRenderType.end(tesselator);
 			if (bufferBuilder.building()) {
 				bufferBuilder.end().release(); // release buffer manually if not released by particleRenderType.end()
 			}

@@ -5,7 +5,8 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.RainEffect;
-import fun.qu_an.minecraft.asyncparticles.client.util.CollisionType;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollisionType;
+import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.diebuddies.physics.snow.math.AABB3D;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -45,11 +46,11 @@ public class PhysicsModCompat {
 				ClipContext.Fluid.ANY,
 				mc.player),
 			true);
-		if (hit == null || hit.getType() != HitResult.Type.BLOCK) {
+		if (hit == null || hit.getType() != HitResult.Type.BLOCK || hit.isInside()) {
 			return;
 		}
 		Vec3 shipMotion = hit.shipMotion;
-		if (vsRainEffect != RainEffect.ALWAYS && abs(shipMotion.lengthSqr()) > 0.01) {
+		if (vsRainEffect == RainEffect.STATIONARY && GameUtil.manhattanLength(shipMotion) > 0.05) {
 			return;
 		}
 		Vec3 spawnPos = hit.getLocation().add(shipMotion);
@@ -70,7 +71,7 @@ public class PhysicsModCompat {
 			return;
 		}
 		BlockHitResult hit = CreateUtil.clip(level, location, location.add(movement.scale(2)));
-		if (hit == null || hit.getType() != HitResult.Type.BLOCK ||
+		if (hit == null || hit.getType() != HitResult.Type.BLOCK || hit.isInside() ||
 			!collisionType.canSpawnRainEffect(createRainEffect)) {
 			return;
 		}

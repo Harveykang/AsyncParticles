@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -18,8 +17,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -75,16 +78,10 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 	private void checkShipCoords(CallbackInfo ci,
 								 @SuppressWarnings("LocalMayBeArgsOnly")
 								 @Local(ordinal = 0)
+								 @Nullable
 								 ClientShip ship) {
 		if (!asyncparticles$isOnShip()) {
 			asyncparticles$setShip(ship);
-			if (ConfigHelper.particleLightCache()) {
-				asyncparticles$refresh();
-			}
-			switch (ConfigHelper.getParticleCullingMode()) {
-				case ASYNC_AABB -> ((ParticleAddon) this).asyncparticles$tickAABBCulling();
-				case ASYNC_SPHERE -> ((ParticleAddon) this).asyncparticles$tickSphereCulling();
-			}
 		}
 	}
 
@@ -109,7 +106,7 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 	}
 
 	@Override
-	public void asyncparticles$setShip(ClientShip ship) {
+	public void asyncparticles$setShip(@Nullable ClientShip ship) {
 		asyncparticles$vsShip = ship;
 	}
 

@@ -25,21 +25,7 @@ public class ExceptionUtil {
 		}
 	}
 
-	public static RuntimeException getReportedException(Throwable t) {
-		return PostLaunch.getReportedException(t);
-	}
-
 	public static void throwAssertionError() {
 		throw new AssertionError();
-	}
-
-	private static class PostLaunch {
-		public static ReportedException getReportedException(Throwable t) {
-			if (t instanceof ReportedException re) {
-				return re;
-			}
-			Throwable cause = t.getCause();
-			return cause == null ? null : getReportedException(cause);
-		}
 	}
 }

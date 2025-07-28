@@ -36,6 +36,8 @@ dependencies {
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
+    common(project(path: ':common_legacy_mod_compat', configuration: 'namedElements')) { transitive false }
+    shadowBundle project(path: ':common_legacy_mod_compat', configuration: 'transformProductionFabric')
 
     modCompileOnly 'maven.modrinth:modmenu:7.2.2'
     modLocalRuntime 'maven.modrinth:modmenu:7.2.2'
@@ -60,6 +62,7 @@ dependencies {
 
     /* APIs */
     modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
+    modLocalRuntime "dev.isxander:yet-another-config-lib:3.6.6+1.20.1-fabric"
 
     /* Performance */
     modLocalRuntime "maven.modrinth:spark:1.10.53-fabric"
@@ -79,11 +82,11 @@ dependencies {
     modCompileOnly 'maven.modrinth:iris:1.7.6+1.20.1'
     /* Valkyrien Skies */
     modLocalRuntime "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
-    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.7"
+    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.8"
     modLocalRuntime 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
 
     modCompileOnly "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
-    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.7"
+    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.8"
     modCompileOnly 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
 
     /* Create */
@@ -101,8 +104,9 @@ dependencies {
     }
 
     /* Particle Rain/Pretty Rain */
-    modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
     modCompileOnly "maven.modrinth:particle-rain:3.0.6-1.20"
+    modCompileOnly "maven.modrinth:particle-rain:v4-alpha.3+1.20.1-fabric"
+    modLocalRuntime "maven.modrinth:particle-rain:v4-alpha.3+1.20.1-fabric"
 
     /* Mmmmmmmmmmmm */
 //    modLocalRuntime 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
@@ -152,7 +156,7 @@ dependencies {
     modLocalRuntime "maven.modrinth:moreculling:0.24.0"
 
     /* Real Camera */
-    modLocalRuntime "maven.modrinth:real-camera:XZ9lHrLr"
+//    modLocalRuntime "maven.modrinth:real-camera:XZ9lHrLr"
 }
 
 processResources {
@@ -177,6 +181,7 @@ runClient {
         main {
             resources {
                 srcDirs += "../common/src/main/resources"
+                srcDirs += "../common_legacy_mod_compat/src/main/resources"
             }
         }
     }

@@ -32,7 +32,7 @@ public abstract class MixinEntityRotFX extends TextureSheetParticle {
 
 	@Inject(method = "spawnAsWeatherEffect", remap = false, at = @At(value = "HEAD"), cancellable = true)
 	private void spawnAsWeatherEffect(CallbackInfo ci) {
-		if (!VSCompat.canCreateWeatherParticle(level, x, y, z)) {
+		if (!VSCompat.canSpawnWeatherParticle(level, x, y, z)) {
 			remove();
 			ci.cancel();
 		}

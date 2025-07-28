@@ -7,6 +7,7 @@ loom {
 
     forge {
         mixinConfig "asyncparticles-common.mixins.json"
+        mixinConfig "asyncparticles-common_legacy_mod_compat.mixins.json"
         mixinConfig "asyncparticles-forge.mixins.json"
         mixinConfig "asyncparticles.target-modifier.mixins.json"
         convertAccessWideners.set(true)
@@ -49,6 +50,8 @@ dependencies {
     forge "net.minecraftforge:forge:$rootProject.forge_version"
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')
+    common(project(path: ':common_legacy_mod_compat', configuration: 'namedElements')) { transitive false }
+    shadowBundle project(path: ':common_legacy_mod_compat', configuration: 'transformProductionForge')
 
 //    modLocalRuntime "org.sinytra:Connector:1.0.0-beta.46+1.20.1"
 //    modLocalRuntime "dev.su5ed.sinytra.fabric-api:fabric-api:0.92.2+1.11.9+1.20.1"
@@ -71,26 +74,21 @@ dependencies {
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
     localRuntime "org.anarres:jcpp:1.4.14"
     modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
-    modCompileOnly "maven.modrinth:flerovium:1.2.14"
-    modLocalRuntime "maven.modrinth:flerovium:1.2.14"
+    modCompileOnly "maven.modrinth:flerovium:1.2.15"
+    modLocalRuntime "maven.modrinth:flerovium:1.2.15"
 
     /* Valkyrien Skies */
     modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'
-    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.7"
-    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.7"
+    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.8"
+    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.8"
     modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.5.1-beta.3'
 
     /* Particle Rain/Pretty Rain */
-//    modCompileOnly "maven.modrinth:pretty-rain:96kQ9rp3" // 1.0.8
-//    modCompileOnly "maven.modrinth:pretty-rain:TGjK6ChS" // 1.1.0
     modCompileOnly "maven.modrinth:pretty-rain:yIvOKPKZ" // 1.1.3
-//    if (rootProject.use_connector_mod == "true") {
-//        modLocalRuntime "maven.modrinth:pretty-rain:96kQ9rp3" // 1.0.8
-//    modLocalRuntime "maven.modrinth:pretty-rain:TGjK6ChS" // 1.1.0
     modLocalRuntime "maven.modrinth:pretty-rain:yIvOKPKZ" // 1.1.3
-//    } else {
-//        modLocalRuntime "maven.modrinth:particle-rain:3.0.6-1.20"
-//    }
+    modCompileOnly "maven.modrinth:particle-rain:v4-alpha.3+1.20.1-forge"
+    modLocalRuntime "maven.modrinth:particle-rain:v4-alpha.3+1.20.1-forge"
+//    modLocalRuntime "maven.modrinth:particle-rain:v4-alpha.3+1.20.1-forge"
 
     /* Effectual */
 //    if (rootProject.use_connector_mod == "true") {
@@ -156,7 +154,7 @@ dependencies {
 
     /* Physics Mod */
 //    modLocalRuntime "maven.modrinth:physicsmod:3.0.14"
-    modCompileOnly "maven.modrinth:physicsmod:3.0.14"
+    modCompileOnly "maven.modrinth:physicsmod:JkM3OTEl" // Forge 3.0.14
 
     /* Particular Reforged */
     modCompileOnly "maven.modrinth:particular-reforged:1.2.1"

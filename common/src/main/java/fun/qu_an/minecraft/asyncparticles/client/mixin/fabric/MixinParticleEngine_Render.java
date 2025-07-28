@@ -21,14 +21,12 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.spongepowered.asm.mixin.*;
 
 import java.util.*;
-import java.util.function.Supplier;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
 public class MixinParticleEngine_Render implements ParticleEngineAddon {
@@ -99,7 +97,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 				syncParticles = irisEarlyOpaquePhase ? Collections.emptyList() : queue;
 				tesselator = Tesselator.getInstance();
 				toBegin = bufferBuilder = tesselator.getBuilder();
-			} else if (!renderAsync) {
+			} else if (!renderAsync) { // With this check we behave like vanilla if this method is called from other mod.
 				realCullMode = particleCullingMode;
 				syncParticles = queue;
 				tesselator = Tesselator.getInstance();
@@ -107,7 +105,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			} else {
 				realCullMode = ParticleCullingMode.DISABLED;
 				syncParticles = AsyncRenderer.getSync(particleRenderType);
-				tesselator = null;
+				tesselator = CustomTesselator.of(bufferBuilder, b -> BufferUploader.drawWithShader(b.end()));
 				toBegin = FakeBufferBuilder.INSTANCE;
 			}
 			// must set shader before begin
@@ -148,9 +146,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 				}
 			}
 			profiler.popPush("upload_particles");
-			// use fake, mod compatibility
-			particleRenderType.end(tesselator != null
-				? tesselator : CustomTesselator.of(bufferBuilder, b -> BufferUploader.drawWithShader(b.end())));
+			particleRenderType.end(tesselator);
 			if (bufferBuilder.building()) {
 				bufferBuilder.end().release(); // release buffer manually if not released by particleRenderType.end()
 			}
