@@ -25,52 +25,57 @@ public class MixinMinecraft {
 	@Shadow
 	@Final
 	public ParticleEngine particleEngine;
+	@Unique
+	private boolean asyncparticles$sortedForge = false;
 
 	@Inject(method = "setLevel", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
 		target = "Lnet/minecraft/client/Minecraft;updateLevelInEngines(Lnet/minecraft/client/multiplayer/ClientLevel;)V"))
 	private void afterSetLevel(CallbackInfo ci) { // Later than mixin.tick.MixinMinecraft
-		List<ParticleRenderType> renderOrder = ParticleEngine.RENDER_ORDER;
-		AtomicInteger orderGenerator = new AtomicInteger();
-		Map<ParticleRenderType, Integer> insertionOrder = Collections.synchronizedMap(new IdentityHashMap<>(0));
-		Map<ParticleRenderType, Queue<Particle>> newTreeMap =
-			Maps.newTreeMap((o1, o2) -> {
-				// FIXME: why do i have to write this shit?
-				if (o1 == o2) {
-					return 0;
-				}
-				Pair<VertexFormat.Mode, VertexFormat> bTesselator1 = AsyncRenderer.getVertexFormatPair(o1, particleEngine.textureManager);
-				Pair<VertexFormat.Mode, VertexFormat> bTesselator2 = AsyncRenderer.getVertexFormatPair(o2, particleEngine.textureManager);
-				if (bTesselator1 == AsyncRenderer.EMPTY_FORMAT && bTesselator2 == AsyncRenderer.EMPTY_FORMAT) {
-					return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
-				}
-				if (bTesselator2 == AsyncRenderer.EMPTY_FORMAT) {
-					return -1;
-				}
-				if (bTesselator1 == AsyncRenderer.EMPTY_FORMAT) {
-					return 1;
-				}
-
-				int vanillaOne = -1;
-				int vanillaTwo = -1;
-				for (int i = 0; i < renderOrder.size(); i++) {
-					ParticleRenderType geti = renderOrder.get(i);
-					if (vanillaOne == -1 && geti == o1) {
-						vanillaOne = i;
-					} else if (vanillaTwo == -1 && geti == o2) {
-						vanillaTwo = i;
+		if (!asyncparticles$sortedForge) {
+			asyncparticles$sortedForge = true;
+			List<ParticleRenderType> renderOrder = ParticleEngine.RENDER_ORDER;
+			AtomicInteger orderGenerator = new AtomicInteger();
+			Map<ParticleRenderType, Integer> insertionOrder = Collections.synchronizedMap(new IdentityHashMap<>(0));
+			Map<ParticleRenderType, Queue<Particle>> newTreeMap =
+				Maps.newTreeMap((o1, o2) -> {
+					// FIXME: why do i have to write this shit?
+					if (o1 == o2) {
+						return 0;
 					}
-					if (vanillaOne >= 0 && vanillaTwo >= 0) {
-						return Integer.compare(vanillaOne, vanillaTwo);
+					Pair<VertexFormat.Mode, VertexFormat> bTesselator1 = AsyncRenderer.getVertexFormatPair(o1, particleEngine.textureManager);
+					Pair<VertexFormat.Mode, VertexFormat> bTesselator2 = AsyncRenderer.getVertexFormatPair(o2, particleEngine.textureManager);
+					if (bTesselator1 == AsyncRenderer.EMPTY_FORMAT && bTesselator2 == AsyncRenderer.EMPTY_FORMAT) {
+						return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
 					}
-				}
+					if (bTesselator2 == AsyncRenderer.EMPTY_FORMAT) {
+						return -1;
+					}
+					if (bTesselator1 == AsyncRenderer.EMPTY_FORMAT) {
+						return 1;
+					}
 
-				if (vanillaOne == -1 && vanillaTwo == -1) {
-					return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
-				}
-				return vanillaOne >= 0 ? -1 : 1;
-			});
-		newTreeMap.putAll(particleEngine.particles);
-		particleEngine.particles = newTreeMap;
+					int vanillaOne = -1;
+					int vanillaTwo = -1;
+					for (int i = 0; i < renderOrder.size(); i++) {
+						ParticleRenderType geti = renderOrder.get(i);
+						if (vanillaOne == -1 && geti == o1) {
+							vanillaOne = i;
+						} else if (vanillaTwo == -1 && geti == o2) {
+							vanillaTwo = i;
+						}
+						if (vanillaOne >= 0 && vanillaTwo >= 0) {
+							return Integer.compare(vanillaOne, vanillaTwo);
+						}
+					}
+
+					if (vanillaOne == -1 && vanillaTwo == -1) {
+						return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
+					}
+					return vanillaOne >= 0 ? -1 : 1;
+				});
+			newTreeMap.putAll(particleEngine.particles);
+			particleEngine.particles = newTreeMap;
+		}
 	}
 
 	@Unique

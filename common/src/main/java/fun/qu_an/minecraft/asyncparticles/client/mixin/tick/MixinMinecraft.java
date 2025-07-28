@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -28,7 +27,7 @@ public class MixinMinecraft {
 	@Final
 	public ParticleEngine particleEngine;
 	@Unique
-	private boolean asyncparticles$isPrepared = false;
+	private boolean asyncparticles$sorted = false;
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
 	private void onRunTick(boolean bl, CallbackInfo ci, @Local(ordinal = 0) int i, @Local(ordinal = 1) int j) {
@@ -50,8 +49,8 @@ public class MixinMinecraft {
 	@Inject(method = "setLevel", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
 		target = "Lnet/minecraft/client/Minecraft;updateLevelInEngines(Lnet/minecraft/client/multiplayer/ClientLevel;)V"))
 	private void afterSetLevel(CallbackInfo ci) {
-		if (!asyncparticles$isPrepared) {
-			asyncparticles$isPrepared = true;
+		if (!asyncparticles$sorted) {
+			asyncparticles$sorted = true;
 			// make custom types render after non-customs
 			// Remove duplicated render types, (e.g. Hex Casting mod's bug)
 			Set<ParticleRenderType> renderTypes = new LinkedHashSet<>((int) (ParticleEngine.RENDER_ORDER.size() * 1.34) + 1);
