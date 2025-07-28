@@ -52,7 +52,7 @@ public abstract class MixinEntityRotFX extends TextureSheetParticle {
 		Vec3 mov = CreateUtil.collideMotionWithContraptions(
 			(ClientLevel) level,
 			new Vec3(xd, yd, zd),
-			getBoundingBox()
+			aABB
 		);
 		return original.call(entity,
 			mov == null ? vec3 : mov,
