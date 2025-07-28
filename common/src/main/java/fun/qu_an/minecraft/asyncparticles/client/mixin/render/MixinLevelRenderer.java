@@ -29,10 +29,6 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRendering
 public abstract class MixinLevelRenderer {
 	@Shadow
 	@Nullable
-	public PostChain transparencyChain;
-
-	@Shadow
-	@Nullable
 	private Frustum capturedFrustum;
 
 	@Shadow
@@ -99,8 +95,8 @@ public abstract class MixinLevelRenderer {
 		// no-op
 	}
 
-	@Inject(method = "renderLevel", // priority = 500, inject earlier
-		at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/renderer/LevelRenderer;renderDebug(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/Camera;)V"))
+	@Inject(method = "renderLevel", order = 1500, // inject later
+		at = @At(value = "FIELD", ordinal = 2, target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;"))
 	private void onRenderLevelTail(DeltaTracker deltaTracker,
 								   boolean renderBlockOutline,
 								   Camera camera,
@@ -112,25 +108,6 @@ public abstract class MixinLevelRenderer {
 								   @Local(ordinal = 0) float partialTick,
 								   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 								   LocalIntRef irm) {
-		if (transparencyChain == null && irm.get() == DELAYED_ASYNC) {
-			AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
-		}
-	}
-
-	@Inject(method = "renderLevel", order = 1500, // inject later
-		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderStateShard;WEATHER_TARGET:Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;")),
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;process(F)V"))
-	private void onRenderLevelTail2(DeltaTracker deltaTracker,
-									boolean renderBlockOutline,
-									Camera camera,
-									GameRenderer gameRenderer,
-									LightTexture lightTexture,
-									Matrix4f frustumMatrix,
-									Matrix4f projectionMatrix,
-									CallbackInfo ci,
-									@Local(ordinal = 0) float partialTick,
-									@Share(namespace = "asyncparticles", value = "internalRenderingMode")
-									LocalIntRef irm) {
 		if (irm.get() == DELAYED_ASYNC) {
 			AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
 		}
