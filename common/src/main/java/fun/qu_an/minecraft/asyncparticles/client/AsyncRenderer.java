@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
 
-// TODO: 整理这一坨
+// TODO: Organize this shit
 @Environment(EnvType.CLIENT)
 public class AsyncRenderer {
 	private static final Logger LOGGER = LogUtils.getLogger();
@@ -222,8 +222,9 @@ public class AsyncRenderer {
 	}
 
 	// Fabric
-	public static void endParticles(Camera camera, float f, Collection<ParticleRenderType> renderOrder) {
+	public static void endAll(Camera camera, float f, Collection<ParticleRenderType> renderOrder) {
 		tryWaitingForParticleTask();
+		float f2 = f + 1f;
 		for (ParticleRenderType particleRenderType : renderOrder) {
 			BindingTesselator tesselator = BTESSELATORS.get(particleRenderType);
 			if (tesselator == null || tesselator == BindingTesselator.EMPTY) {
@@ -239,7 +240,6 @@ public class AsyncRenderer {
 				}
 			} else {
 				builder = tesselator.begin();
-				float f2 = f + 1f;
 				for (Particle particle : sync) {
 					if (!particle.isAlive()) {
 						continue;
@@ -267,8 +267,9 @@ public class AsyncRenderer {
 	}
 
 	// Forge
-	public static void endParticles(Camera camera, float f, Collection<ParticleRenderType> renderOrder, Predicate<ParticleRenderType> renderTypePredicate) {
+	public static void endAll(Camera camera, float f, Collection<ParticleRenderType> renderOrder, Predicate<ParticleRenderType> renderTypePredicate) {
 		tryWaitingForParticleTask();
+		float f2 = f + 1f;
 		for (ParticleRenderType particleRenderType : renderOrder) {
 			if (particleRenderType.renderType() == null) {
 				continue;
@@ -290,7 +291,6 @@ public class AsyncRenderer {
 				}
 			} else {
 				builder = tesselator.begin();
-				float f2 = f + 1f;
 				for (Particle particle : sync) {
 					if (!particle.isAlive()) {
 						continue;

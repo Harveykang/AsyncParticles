@@ -110,8 +110,8 @@ dependencies {
 //    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v176f-neoforge-1.21.5.jar')
 
     /* Particular Reforged */
-    modCompileOnly "maven.modrinth:particular-reforged:1.1.1"
-//    modLocalRuntime "maven.modrinth:particular-reforged:1.1.1"
+    modCompileOnly "maven.modrinth:particular-reforged:3b3pvTk0" // 1.1.4
+//    modLocalRuntime "maven.modrinth:particular-reforged:3b3pvTk0"
 
     /* What Are They Up To */
     modCompileOnly "maven.modrinth:what-are-they-up-to:1.21.4-1.2.5" // 1.2.5 // TODO:this is a 1.21.4 version

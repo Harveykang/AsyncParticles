@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 
 import static fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil.toThrowDirectly;
 
-// TODO: 整理这一坨
+// TODO: Organize this shit
 @Environment(EnvType.CLIENT)
 public class AsyncTicker {
 	public static final Logger LOGGER = LogManager.getLogger();

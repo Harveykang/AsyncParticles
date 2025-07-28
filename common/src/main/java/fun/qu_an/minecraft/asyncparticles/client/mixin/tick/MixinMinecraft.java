@@ -4,14 +4,16 @@ import com.google.common.collect.ImmutableList;
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.objectweb.asm.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -23,8 +25,9 @@ import java.util.Set;
 
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
+	@Shadow @Final public ParticleEngine particleEngine;
 	@Unique
-	private boolean asyncparticles$isPrepared = false;
+	private boolean asyncparticles$sorted = false;
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
 	private void onRunTick(boolean bl,
@@ -54,22 +57,9 @@ public class MixinMinecraft {
 	@Inject(method = "setLevel", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
 		target = "Lnet/minecraft/client/Minecraft;updateLevelInEngines(Lnet/minecraft/client/multiplayer/ClientLevel;)V"))
 	private void afterSetLevel(CallbackInfo ci) {
-		if (!asyncparticles$isPrepared) {
-			asyncparticles$isPrepared = true;
-			// make custom types render after non-customs
-			// Remove duplicated render types, (e.g. Hex Casting mod's bug)
-			Set<ParticleRenderType> renderTypes = new LinkedHashSet<>((int) (ParticleEngine.RENDER_ORDER.size() * 1.34) + 1);
-			for (ParticleRenderType type : ParticleEngine.RENDER_ORDER) {
-				if (type.renderType() != null) {
-					renderTypes.add(type);
-				}
-			}
-			for (ParticleRenderType type : ParticleEngine.RENDER_ORDER) {
-				if (type.renderType() == null) {
-					renderTypes.add(type);
-				}
-			}
-			ParticleEngine.RENDER_ORDER = ImmutableList.copyOf(renderTypes);
+		if (!asyncparticles$sorted) {
+			asyncparticles$sorted = true;
+			((ParticleEngineAddon) particleEngine).asyncparticle$sortRenderOrder();
 		}
 	}
 
