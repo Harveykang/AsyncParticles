@@ -53,7 +53,7 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
 
     /* APIs */
-    modLocalRuntime 'maven.modrinth:architectury-api:17.0.4+neoforge'
+    modLocalRuntime 'maven.modrinth:architectury-api:17.0.8+neoforge'
     modLocalRuntime "me.shedaniel.cloth:cloth-config-neoforge:19.0.147"
     modLocalRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
 

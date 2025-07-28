@@ -10,7 +10,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.util.profiling.ProfilerFiller;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -21,12 +23,42 @@ import java.util.Set;
 
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
-	@Inject(method = "run", at = @At("HEAD"))
-	private void onRun(CallbackInfo ci) {
-		ThreadUtil.enqueueClientTask(() -> { // Do it later.
+	@Unique
+	private boolean asyncparticles$isPrepared = false;
+
+	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
+	private void onRunTick(boolean bl,
+						   CallbackInfo ci,
+						   @Local(ordinal = 0) int i,
+						   @Local(ordinal = 1) int j,
+						   @Local(ordinal = 0) ProfilerFiller profiler) {
+		AsyncTicker.onTickBefore(j, Math.min(10, i), profiler);
+	}
+
+	@Inject(method = "runTick", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/Minecraft;tick()V"))
+	private void onRunTickAfter(boolean bl,
+								CallbackInfo ci,
+								@Local(ordinal = 0) int i,
+								@Local(ordinal = 1) int j,
+								@Local(ordinal = 0) ProfilerFiller profiler) {
+		AsyncTicker.onTickAfter(j, Math.min(10, i), profiler);
+	}
+
+	@Inject(method = "setLevel", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, ordinal = 0,
+		target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;"))
+	private void onSetLevel(CallbackInfo ci) {
+		AsyncTicker.reset();
+		AsyncRenderer.reset();
+	}
+
+	@Inject(method = "setLevel", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
+		target = "Lnet/minecraft/client/Minecraft;updateLevelInEngines(Lnet/minecraft/client/multiplayer/ClientLevel;)V"))
+	private void afterSetLevel(CallbackInfo ci) {
+		if (!asyncparticles$isPrepared) {
+			asyncparticles$isPrepared = true;
 			// make custom types render after non-customs
 			// Remove duplicated render types, (e.g. Hex Casting mod's bug)
-			Set<ParticleRenderType> renderTypes = new LinkedHashSet<>((int) (ParticleEngine.RENDER_ORDER.size() * 1.34 + 1));
+			Set<ParticleRenderType> renderTypes = new LinkedHashSet<>((int) (ParticleEngine.RENDER_ORDER.size() * 1.34) + 1);
 			for (ParticleRenderType type : ParticleEngine.RENDER_ORDER) {
 				if (type.renderType() != null) {
 					renderTypes.add(type);
@@ -38,33 +70,7 @@ public class MixinMinecraft {
 				}
 			}
 			ParticleEngine.RENDER_ORDER = ImmutableList.copyOf(renderTypes);
-		});
-	}
-
-	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
-	private void onRunTick(boolean bl,
-						   CallbackInfo ci,
-						   @Local(ordinal = 0) int i,
-						   @Local(ordinal = 1) int j,
-						   @Local(ordinal = 0)ProfilerFiller profiler) {
-		AsyncTicker.onTickBefore(j, Math.min(10, i), profiler);
-	}
-
-	@Inject(method = "runTick", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/Minecraft;tick()V"))
-	private void onRunTickAfter(boolean bl,
-								CallbackInfo ci,
-								@Local(ordinal = 0) int i,
-								@Local(ordinal = 1) int j,
-								@Local(ordinal = 0)ProfilerFiller profiler) {
-		AsyncTicker.onTickAfter(j, Math.min(10, i), profiler);
-	}
-
-	@Inject(method = "setLevel", at = @At(value = "FIELD", ordinal = 0,
-		target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;"))
-	private void onSetLevel(CallbackInfo ci) {
-		// TODO: 这玩意到底有没有用？？
-		AsyncTicker.reset();
-		AsyncRenderer.reset();
+		}
 	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;tick()V"))

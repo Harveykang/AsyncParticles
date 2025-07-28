@@ -32,7 +32,7 @@ dependencies {
     modCompileOnly "maven.modrinth:particle-rain:3.3.6"
 
     /* Effectual */
-    modCompileOnly 'maven.modrinth:effectual:1.1.0-1.21.7'
+    modCompileOnly 'maven.modrinth:effectual:1.1.0-1.21.8'
 
     /* Lodestone */
 //    modCompileOnly "maven.modrinth:lodestonelib:1.21.1-1.7.0.5-fabric" // no 1.21.4 version
