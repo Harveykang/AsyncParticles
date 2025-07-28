@@ -74,13 +74,13 @@ dependencies {
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
     localRuntime "org.anarres:jcpp:1.4.14"
     modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
-    modCompileOnly "maven.modrinth:flerovium:1.2.14"
-    modLocalRuntime "maven.modrinth:flerovium:1.2.14"
+    modCompileOnly "maven.modrinth:flerovium:1.2.15"
+    modLocalRuntime "maven.modrinth:flerovium:1.2.15"
 
     /* Valkyrien Skies */
     modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'
-    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.7"
-    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.7"
+    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.8"
+    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.8"
     modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.5.1-beta.3'
 
     /* Particle Rain/Pretty Rain */
@@ -154,7 +154,7 @@ dependencies {
 
     /* Physics Mod */
 //    modLocalRuntime "maven.modrinth:physicsmod:3.0.14"
-    modCompileOnly "maven.modrinth:physicsmod:3.0.14"
+    modCompileOnly "maven.modrinth:physicsmod:JkM3OTEl" // Forge 3.0.14
 
     /* Particular Reforged */
     modCompileOnly "maven.modrinth:particular-reforged:1.2.1"

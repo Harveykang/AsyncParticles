@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
+import net.minecraft.ReportedException;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 
@@ -9,6 +10,16 @@ import static java.lang.Math.abs;
 public class GameUtil {
 	public static ResourceLocation id(String path) {
 		return new ResourceLocation(AsyncParticlesClient.MOD_ID, path);
+	}
+
+	public static ReportedException getReportedException(Throwable t) {
+		while (t != null) {
+			if (t instanceof ReportedException re) {
+				return re;
+			}
+			t = t.getCause();
+		}
+		return null;
 	}
 
 	public static double manhattanLength(Vec3 vec3) {

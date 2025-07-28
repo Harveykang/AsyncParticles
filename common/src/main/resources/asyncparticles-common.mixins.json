@@ -66,6 +66,7 @@
     "particlerain_vs.MixinWeatherParticleManager",
     "photon_editor.MixinParticleQueueRenderType",
     "physicsmod.MixinClientLevel",
+    "physicsmod.MixinLevelRenderer",
     "physicsmod.MixinRainParticle",
     "physicsmod.MixinSnowParticle",
     "physicsmod.MixinWeatherParticle",

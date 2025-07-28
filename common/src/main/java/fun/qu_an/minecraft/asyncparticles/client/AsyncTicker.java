@@ -63,7 +63,7 @@ public class AsyncTicker {
 	private static boolean debug_cancelled = false;
 	private static Consumer<String> debugConsumer;
 	private static boolean shouldReload;
-	public static final ExecutorService EXECUTOR;
+	public static final ForkJoinPool EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleTicker";
 	private static final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
