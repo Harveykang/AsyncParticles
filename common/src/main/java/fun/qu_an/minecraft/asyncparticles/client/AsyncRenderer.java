@@ -35,6 +35,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4f;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -102,7 +103,8 @@ public class AsyncRenderer {
 		}, Util::onThreadException, true);
 	}
 
-	public static Frustum frustum;
+	@NotNull
+	public static Frustum frustum = new Frustum(new Matrix4f(), new Matrix4f());
 	private static Consumer<String> debugConsumer;
 	private static CompletableFuture<Void> asyncTask;
 	private static boolean irisEarlyOpaquePhase = false;
