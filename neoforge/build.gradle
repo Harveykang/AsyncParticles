@@ -63,7 +63,6 @@ dependencies {
 //    }
 
     /* ===Performance=== */
-    // Why no one works in dev environment?
 
     /* Embeddium */
 //    modCompileOnly 'maven.modrinth:embeddium:1.0.15+mc1.21.1'
@@ -86,18 +85,12 @@ dependencies {
     modCompileOnly "maven.modrinth:flerovium:1.0.9"
 
     // Iris
-//    modLocalRuntime "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
+    localRuntime "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
 //    // decompressed jarjars
 //    localRuntime fileTree(dir: '../libs', include: 'jcpp-1.4.14.jar')
 //    localRuntime fileTree(dir: '../libs', include: 'glsl-transformer-2.0.1.jar')
     // Sodium
-    modLocalRuntime('maven.modrinth:sodium:mc1.21.1-0.6.13-neoforge')
-    // decompressed jarjars
-    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-api-base-0.4.42+d1308ded19.jar')
-    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-rendering-data-attachment-v1-0.3.48+73761d2e19.jar')
-    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-renderer-api-v1-3.4.0+9c40919e19.jar')
-    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-block-view-api-v2-1.0.10+9afaaf8c19.jar')
-    modLocalRuntime fileTree(dir: '../libs', include: 'net.caffeinemc.sodium-neoforge-0.6.13+mc1.21.1-service.jar')
+    localRuntime('maven.modrinth:sodium:mc1.21.1-0.6.13-neoforge')
 
 //    localRuntime "org.antlr:antlr4-runtime:4.13.1"
 //    localRuntime "io.github.douira:glsl-transformer:2.0.1"
@@ -182,6 +175,9 @@ dependencies {
 
     /* Weather2 */
     modCompileOnly "maven.modrinth:weather-storms-tornadoes:1.21.0-2.8.5"
+
+    /* Epic Fight */
+    modCompileOnly "maven.modrinth:epic-fight:21.11.2"
 }
 
 processResources {

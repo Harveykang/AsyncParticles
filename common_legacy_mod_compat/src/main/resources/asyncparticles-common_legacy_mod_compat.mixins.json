@@ -3,7 +3,6 @@
   "minVersion": "0.8",
   "package": "fun.qu_an.minecraft.asyncparticles.client.mixin.legacy",
   "compatibilityLevel": "JAVA_17",
-  "refmap": "asyncparticles-common_legacy_mod_compat-refmap.json",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.legacy.APMixinLegacyModCompatPlugin",
   "client": [
     "fabric.particlerain.MixinGroundFogParticle",
@@ -18,6 +17,8 @@
     "fabric.particlerain_vs.MixinGroundFogParticle",
     "fabric.particlerain_vs.MixinRippleParticle",
     "fabric.particlerain_vs.MixinWeatherParticleSpawner",
+    "subtle_effects.MixinAsyncRenderer",
+    "subtle_effects.fabric.MixinParticleEngine",
     "veil.MixinLightRenderer"
   ],
   "injectors": {

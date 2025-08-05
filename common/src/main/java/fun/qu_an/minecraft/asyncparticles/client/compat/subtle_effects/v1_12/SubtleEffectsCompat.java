@@ -1,16 +1,16 @@
-package fun.qu_an.minecraft.asyncparticles.client.compat.subtle_effects;
+package fun.qu_an.minecraft.asyncparticles.client.compat.subtle_effects.v1_12;
 
 import einstein.subtle_effects.init.ModConfigs;
 import einstein.subtle_effects.util.ParticleAccessor;
 import einstein.subtle_effects.util.Util;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import net.minecraft.client.Camera;
-import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
 
 public class SubtleEffectsCompat {
-	public static boolean shouldRenderParticle(ParticleRenderType renderType, Particle particle, Camera camera, ClientLevel level) {
+	public static boolean shouldRenderParticle(Particle instance, Camera camera, ParticleRenderType renderType) {
 		if (!ModConfigs.GENERAL.enableParticleCulling) {
 			return true;
 		}
@@ -19,16 +19,17 @@ public class SubtleEffectsCompat {
 			return true;
 		}
 
-		ParticleAccessor accessor = (ParticleAccessor) particle;
 		if (!ModListHelper.VS_LOADED &&
 			ModConfigs.GENERAL.cullParticlesInUnloadedChunks &&
-			!Util.isChunkLoaded(level, particle.x, particle.z)) {
+			!Util.isChunkLoaded(Minecraft.getInstance().level, instance.x, instance.z)) {
 			return false;
 		}
 
-		int distance = ModConfigs.GENERAL.particleRenderDistance << 4;
+		ParticleAccessor accessor = (ParticleAccessor) instance;
+		int distance = ModConfigs.GENERAL.particleRenderDistance.get() << 4;
 		return accessor.subtleEffects$wasForced() ||
 			   camera.getPosition().distanceToSqr(accessor.getX(), accessor.getY(), accessor.getZ()) <
 			   (double) (distance * distance);
 	}
+
 }

@@ -364,21 +364,13 @@ public class AsyncTicker {
 			}
 			recordSync(particle);
 		} else if (tolerable) {
-			LocalPlayer player = Minecraft.getInstance().player;
-			if (player != null) {
-				player.sendSystemMessage(Component.literal(
-						"Exception %s thrown while ticking particle %s exceeds the threshold, please contact the author: "
-							.formatted(t.getClass().getName(), particleClass))
-					.append(Component.literal(AsyncParticlesClient.ISSUE_URL)
-						.setStyle(Style.EMPTY
-							.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncParticlesClient.ISSUE_URL))
-							.withUnderlined(true))));
-			}
-			LOGGER.warn("Exception {} thrown while ticking particle {} exceeds the threshold, please contact the author: {}",
-				t.getClass().getName(),
-				particle,
-				AsyncParticlesClient.ISSUE_URL,
-				t);
+			throw constructCrashReport(particle, new RuntimeException(
+				"Exception %s thrown while ticking particle %s, exceeds the threshold, please contact the author: %s"
+					.formatted(
+						t.getClass().getName(),
+						particle,
+						AsyncParticlesClient.ISSUE_URL),
+				t));
 		} else {
 			throw constructCrashReport(particle, t);
 		}

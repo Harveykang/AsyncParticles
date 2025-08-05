@@ -6,6 +6,7 @@ loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
 
     mixin {
+        useLegacyMixinAp = true
         defaultRefmapName = "asyncparticles-common_legacy_mod_compat-refmap.json"
     }
 }
@@ -23,4 +24,7 @@ dependencies {
 
     /* Particle Rain */
     modCompileOnly "maven.modrinth:particle-rain:3.0.5"
+
+    /* Subtle Effects */
+    modCompileOnly "maven.modrinth:subtle-effects:1.11.0"
 }

@@ -107,7 +107,7 @@ public class AsyncParticlesMixinConfig {
 		private Set<String> particle$noCulling = new LinkedHashSet<>();
 
 		{
-//			noCulling.add("com.lowdragmc.photon.client.gameobject.FXObject");
+			particle$noCulling.add("com.lowdragmc.photon.client.gameobject.FXObject");
 		}
 
 		private Set<String> particle$noLightCache = new LinkedHashSet<>();
@@ -115,7 +115,7 @@ public class AsyncParticlesMixinConfig {
 		{
 			particle$noLightCache.add("dev.shadowsoffire.gateways.client.GatewayParticle");
 			particle$noLightCache.add("com.chailotl.particular.particles.FireflyParticle");
-//			noLightCache.add("com.lowdragmc.photon.client.gameobject.FXObject");
+			particle$noLightCache.add("com.lowdragmc.photon.client.gameobject.FXObject");
 			particle$noLightCache.add("net.diebuddies.minecraft.weather.WeatherParticle");
 			particle$noLightCache.add("cn.coostack.cooparticlesapi.particles.ControlableParticle");
 		}
@@ -123,24 +123,13 @@ public class AsyncParticlesMixinConfig {
 		private Set<String> particle$lockProvider = new LinkedHashSet<>();
 
 		{
-//			lockProvider.add("yesman.epicfight.client.particle.TrailParticle");
-//			lockProvider.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
-//			lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
-//			lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
-//			lockProvider.add("com.lowdragmc.photon.client.gameobject.FXObject");
+			particle$lockProvider.add("com.lowdragmc.photon.client.gameobject.FXObject");
 		}
 
 		private Set<String> particle$lockRequired = new LinkedHashSet<>();
 
 		{
-//			lockRequired.add("yesman.epicfight.client.particle.TrailParticle");
-//			lockRequired.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
-//			lockRequired.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
-//			lockRequired.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
-//			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.Emitter");
-//			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.particle.ParticleEmitter");
-//			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.beam.BeamEmitter");
-//			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.trail.TrailEmitter");
+			particle$lockRequired.add("com.lowdragmc.photon.client.gameobject.FXObject");
 		}
 
 		private Set<String> replaceRandom = new LinkedHashSet<>();

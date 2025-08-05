@@ -18,7 +18,8 @@ public class APMixinLegacyModCompatPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public String getRefMapperConfig() {
-		return null;
+		// this fixes the useless refmap (crash) on neoforge
+		return IS_FORGE ? null : "fabric-asyncparticles-common_legacy_mod_compat-refmap.json";
 	}
 
 	private static final int PACKAGE_LENGTH = AsyncParticlesClient.class.getPackage().getName().length() +
@@ -44,6 +45,15 @@ public class APMixinLegacyModCompatPlugin implements IMixinConfigPlugin {
 				};
 			}
 			case "veil" -> VEIL_LOADED && versionCheck("veil", "0.999999", "1.999999");
+			case "subtle_effects" -> {
+				if (split.length == 2) {
+					yield SUBTLE_EFFECTS_LOADED;
+				}
+				yield switch (split[1]) {
+					case "fabric" -> !IS_FORGE && FABRIC_SUBTLE_EFFECTS_LOADED;
+					default -> SUBTLE_EFFECTS_LOADED;
+				};
+			}
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

@@ -75,8 +75,6 @@
     "render.MixinTesselator",
     "render.MixinVertexConsumer",
     "sodium_0_7.MixinSingleQuadParticle",
-    "subtle_effects.MixinAsyncRenderer",
-    "subtle_effects.fabric.MixinParticleEngine",
     "tick.MixinClientLevel",
     "tick.MixinGameRenderer",
     "tick.MixinMinecraft",

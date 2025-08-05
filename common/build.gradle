@@ -11,21 +11,6 @@ loom {
     }
 }
 
-repositories {
-    maven {
-        url "https://maven.neoforged.net/releases"
-        content {
-            includeGroup "net.neoforged"
-        }
-    }
-    maven {
-        url "https://maven.neoforged.net/snapshots"
-        content {
-            includeGroup "net.neoforged"
-        }
-    }
-}
-
 dependencies {
     // We depend on Fabric Loader here to use the Fabric @Environment annotations,
     // which get remapped to the correct annotations on each platform.
@@ -37,6 +22,9 @@ dependencies {
     modCompileOnly "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
     modCompileOnly "org.sinytra:connector:2.0.0-beta.7+1.21.1"
     modCompileOnly("me.shedaniel.cloth:cloth-config:15.0.140")
+
+    /* APIs */
+    modCompileOnly "maven.modrinth:fzzy-config:0.6.8+1.21"
 
     /* Performance */
     modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.6.13-fabric"
@@ -87,7 +75,7 @@ dependencies {
     modCompileOnly "maven.modrinth:physicsmod:W6xWq9WM" // 3.0.23
 
     /* Subtle Effects */
-    modCompileOnly "maven.modrinth:subtle-effects:1.10.0" // fabric 1.10.0
+    modCompileOnly "maven.modrinth:subtle-effects:1.12.0"
 
     /* What Are They Up To */
     modCompileOnly "maven.modrinth:what-are-they-up-to:y1ZYGDCs" // 1.2.6

@@ -47,6 +47,8 @@ public class ModListHelper {
 	public static final boolean CREATE_LOADED = isModLoaded("create");
 	public static final boolean FABRIC_CREATE_LOADED = isFabricModLoaded("create");
 	public static final boolean FORGE_CREATE_LOADED = isForgeModLoaded("create");
+	/* Epic Fight */
+	public static final boolean FORGE_EPICFIGHT_LOADED = isForgeModLoaded("epicfight");
 	/* Tombstone */
 	public static final boolean TOMBSTONE_LOADED = isModLoaded("tombstone");
 	/* Hexcasting */
@@ -68,6 +70,7 @@ public class ModListHelper {
 	public static final boolean SUBTLE_EFFECTS_LOADED = isModLoaded("subtle_effects");
 	public static final boolean FABRIC_SUBTLE_EFFECTS_LOADED = isFabricModLoaded("subtle_effects");
 	public static final boolean FORGE_SUBTLE_EFFECTS_LOADED = isForgeModLoaded("subtle_effects");
+	public static final boolean IS_SUBTLE_EFFECTS_LATER_THAN_1_12 = SUBTLE_EFFECTS_LOADED && versionCheck("subtle_effects", "1.12.0", null);
 	/* What Are They Up To */
 	public static final boolean WATUT_LOADED = isModLoaded("watut");
 	/* Weather2 */
