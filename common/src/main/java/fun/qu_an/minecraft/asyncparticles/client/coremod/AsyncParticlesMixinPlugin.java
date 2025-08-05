@@ -104,15 +104,6 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "physicsmod_create" -> PHYSICSMOD_LOADED && CREATE_LOADED;
 			case "physicsmod_vs" -> PHYSICSMOD_LOADED && VS_LOADED;
 			case "a_good_place" -> A_GOOD_PLACE_LOADED;
-			case "subtle_effects" -> {
-				if (split.length == 2) {
-					yield SUBTLE_EFFECTS_LOADED;
-				}
-				yield switch (split[1]) {
-					case "fabric" -> !IS_FORGE && FABRIC_SUBTLE_EFFECTS_LOADED;
-					default -> SUBTLE_EFFECTS_LOADED;
-				};
-			}
 			case "watut" -> WATUT_LOADED && versionCheck("watut", "1.2.0", null);
 			case "lodestone" -> LODESTONE_LOADED;
 			case "fabric_api" -> FABRIC_API_LOADED; // Includes Forge version

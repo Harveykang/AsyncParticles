@@ -19,8 +19,10 @@ public abstract class MixinLevelRenderer_WeatherCulling_Early {
 						   Heightmap.Types types,
 						   int i,
 						   int j,
-						   @Share(value = "enableCull") LocalBooleanRef enableCull,
-						   @Share(value = "height_map") LocalIntRef qRef) {
+						   @Share(namespace = "asyncparticles", value = "enableCull")
+						   LocalBooleanRef enableCull,
+						   @Share(namespace = "asyncparticles", value = "height_map")
+						   LocalIntRef qRef) {
 		return enableCull.get() ? qRef.get() : instance.getHeight(types, i, j);
 	}
 }

@@ -129,12 +129,12 @@ dependencies {
 
     /* Particle Core */
     modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.20.1"
-    modLocalRuntime "maven.modrinth:fzzy-config:0.6.8+1.20.1"
+    modLocalRuntime "maven.modrinth:fzzy-config:0.7.2+1.20.1"
     modLocalRuntime "me.fallenbreath:conditional-mixin:0.5.1"
 
     /* Subtle Effects */
     localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"
-    modLocalRuntime "maven.modrinth:subtle-effects:Mgx7dpV7" // fabric 1.10.0
+    modLocalRuntime "maven.modrinth:subtle-effects:244jLJZn" // fabric 1.12.0
 
     /* A Good Place */
     modLocalRuntime "maven.modrinth:a-good-place:1.20-1.2.7"

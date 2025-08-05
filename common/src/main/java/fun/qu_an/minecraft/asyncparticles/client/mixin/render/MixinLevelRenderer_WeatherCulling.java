@@ -31,7 +31,9 @@ public abstract class MixinLevelRenderer_WeatherCulling {
 	private static final Holder<Biome> asyncparticles$NULL = Holder.direct(null);
 
 	@Inject(method = "renderSnowAndRain", at = @At(value = "HEAD"))
-	public void beforeRenderSnowAndRain(CallbackInfo ci, @Share("enableCull") LocalBooleanRef enableCull) {
+	public void beforeRenderSnowAndRain(CallbackInfo ci,
+										@Share(namespace = "asyncparticles", value = "enableCull")
+										LocalBooleanRef enableCull) {
 		enableCull.set(ConfigHelper.isCullWeathers());
 	}
 
@@ -49,9 +51,11 @@ public abstract class MixinLevelRenderer_WeatherCulling {
 							   @Local(ordinal = 3) int l,
 							   @Local(ordinal = 5) int n,
 							   @Local(ordinal = 6) int o,
-							   @Share(value = "height_map") LocalIntRef qRef,
-							   @Share(value = "isVisible") LocalBooleanRef isVisible,
-							   @Share(value = "enableCull") LocalBooleanRef enableCull) {
+							   @Share(namespace = "asyncparticles", value = "enableCull")
+							   LocalBooleanRef enableCull,
+							   @Share(namespace = "asyncparticles", value = "height_map")
+							   LocalIntRef qRef,
+							   @Share(value = "isVisible") LocalBooleanRef isVisible) {
 		if (!enableCull.get()) {
 			isVisible.set(true);
 			return;

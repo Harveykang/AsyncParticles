@@ -19,7 +19,9 @@
     "fabric.particlerain_vs.MixinRippleParticle",
     "fabric.particlerain_vs.MixinWeatherParticleSpawner",
     "flywheel.MixinClientLevelMixin",
-    "flywheel.MixinLightUpdater"
+    "flywheel.MixinLightUpdater",
+    "subtle_effects.MixinAsyncRenderer",
+    "subtle_effects.fabric.MixinParticleEngine"
   ],
   "injectors": {
     "defaultRequire": 1

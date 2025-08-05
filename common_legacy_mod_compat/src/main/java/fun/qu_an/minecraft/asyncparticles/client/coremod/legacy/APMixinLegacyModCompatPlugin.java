@@ -45,6 +45,15 @@ public class APMixinLegacyModCompatPlugin implements IMixinConfigPlugin {
 			}
 			case "flywheel" -> FLYWHEEL_LOADED &&
 							   versionCheck("flywheel", "0.6", "1.0");
+			case "subtle_effects" -> {
+				if (split.length == 2) {
+					yield SUBTLE_EFFECTS_LOADED;
+				}
+				yield switch (split[1]) {
+					case "fabric" -> !IS_FORGE && FABRIC_SUBTLE_EFFECTS_LOADED;
+					default -> SUBTLE_EFFECTS_LOADED;
+				};
+			}
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

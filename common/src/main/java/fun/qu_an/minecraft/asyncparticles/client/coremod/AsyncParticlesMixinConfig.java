@@ -140,6 +140,7 @@ public class AsyncParticlesMixinConfig {
 			particle$lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.particle.ParticleEmitter");
 			particle$lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.beam.BeamEmitter");
 			particle$lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.trail.TrailEmitter");
+			particle$lockProvider.add("com.lowdragmc.photon.client.gameobject.FXObject");
 		}
 
 		private Set<String> replaceRandom = new LinkedHashSet<>();

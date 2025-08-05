@@ -83,8 +83,6 @@
     "render.MixinTesselator",
     "render.MixinVertexConsumer",
     "shimmer.MixinPostParticle",
-    "subtle_effects.MixinAsyncRenderer",
-    "subtle_effects.fabric.MixinParticleEngine",
     "tick.MixinClientLevel",
     "tick.MixinGameRenderer",
     "tick.MixinMinecraft",

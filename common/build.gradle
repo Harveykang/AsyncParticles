@@ -29,6 +29,9 @@ dependencies {
     compileOnly "org.sinytra:Connector:1.0.0-beta.46+1.20.1"
     modCompileOnly("me.shedaniel.cloth:cloth-config:11.1.136")
 
+    /* APIs */
+    modCompileOnly "maven.modrinth:fzzy-config:0.7.2+1.20.1"
+
     /* Performance */
     modCompileOnly 'maven.modrinth:vulkanmod:0.5.2'
     modCompileOnly "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
@@ -82,13 +85,13 @@ dependencies {
     modCompileOnly "maven.modrinth:physicsmod:3.0.14"
 
     /* Subtle Effects */
-    modCompileOnly "maven.modrinth:subtle-effects:Mgx7dpV7" // fabric 1.10.0
+    modCompileOnly "maven.modrinth:subtle-effects:244jLJZn" // fabric 1.12.0
 
     /* What Are They Up To */
     modCompileOnly "maven.modrinth:what-are-they-up-to:1.20.1-1.2.3"
 
     /* Photon Editor */
-    modCompileOnly "maven.modrinth:photon-editor:mc1.20.1-1.1.8-fabric"
+    modCompileOnly "maven.modrinth:photon-editor:mc1.20.1-1.1.12-fabric"
 
     /* Shimmer */
     modCompileOnly "curse.maven:shimmer-627824:5685942" // 0.2.4

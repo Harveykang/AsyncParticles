@@ -82,6 +82,7 @@ public class ModListHelper {
 	public static final boolean SUBTLE_EFFECTS_LOADED = isModLoaded("subtle_effects");
 	public static final boolean FABRIC_SUBTLE_EFFECTS_LOADED = isFabricModLoaded("subtle_effects");
 	public static final boolean FORGE_SUBTLE_EFFECTS_LOADED = isForgeModLoaded("subtle_effects");
+	public static final boolean IS_SUBTLE_EFFECTS_LATER_THAN_1_12 = SUBTLE_EFFECTS_LOADED && versionCheck("subtle_effects", "1.12.0", null);
 	/* What Are They Up To */
 	public static final boolean WATUT_LOADED = isModLoaded("watut");
 	/* Weather2 */

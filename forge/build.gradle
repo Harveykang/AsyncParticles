@@ -150,7 +150,7 @@ dependencies {
     modCompileOnly "maven.modrinth:aquamirae:7lX4KLFc"
 
     /* Subtle Effects */
-    modCompileOnly "maven.modrinth:subtle-effects:lCMnqufi"
+    modCompileOnly "maven.modrinth:subtle-effects:mCGyoqDx" // 1.12.0
 
     /* Physics Mod */
 //    modLocalRuntime "maven.modrinth:physicsmod:3.0.14"
