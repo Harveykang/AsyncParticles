@@ -11,8 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
-import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.*;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.IRONS_SPELLBOOKS_LOADED;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.MAKE_BUBBLES_POP_LOADED;
+import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.LOGGER;
 
 public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
@@ -140,7 +141,7 @@ public class AsyncParticlesMixinConfig {
 			particle$lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.particle.ParticleEmitter");
 			particle$lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.beam.BeamEmitter");
 			particle$lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.trail.TrailEmitter");
-			particle$lockProvider.add("com.lowdragmc.photon.client.gameobject.FXObject");
+			particle$lockRequired.add("com.lowdragmc.photon.client.gameobject.FXObject");
 		}
 
 		private Set<String> replaceRandom = new LinkedHashSet<>();

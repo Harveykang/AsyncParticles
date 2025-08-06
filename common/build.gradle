@@ -91,7 +91,7 @@ dependencies {
     modCompileOnly "maven.modrinth:what-are-they-up-to:1.20.1-1.2.3"
 
     /* Photon Editor */
-    modCompileOnly "maven.modrinth:photon-editor:mc1.20.1-1.1.12-fabric"
+    modCompileOnly "maven.modrinth:photon-editor:mc1.20.1-1.1.13-fabric"
 
     /* Shimmer */
     modCompileOnly "curse.maven:shimmer-627824:5685942" // 0.2.4
