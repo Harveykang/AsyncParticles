@@ -6,4 +6,6 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Internal
 public interface ParticleEngineAddon {
 	void asyncparticle$addRenderType(ParticleRenderType particleRenderType);
+
+	void asyncparticle$sortRenderOrder();
 }

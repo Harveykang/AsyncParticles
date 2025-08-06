@@ -67,6 +67,7 @@ public class ModListHelper {
 	public static final boolean SUBTLE_EFFECTS_LOADED = isModLoaded("subtle_effects");
 	public static final boolean FABRIC_SUBTLE_EFFECTS_LOADED = isFabricModLoaded("subtle_effects");
 	public static final boolean FORGE_SUBTLE_EFFECTS_LOADED = isForgeModLoaded("subtle_effects");
+	public static final boolean IS_SUBTLE_EFFECTS_LATER_THAN_1_12 = SUBTLE_EFFECTS_LOADED && versionCheck("subtle_effects", "1.12.0", null);
 	/* What Are They Up To */
 	public static final boolean WATUT_LOADED = isModLoaded("watut");
 	/* Simple Weather */
@@ -97,6 +98,8 @@ public class ModListHelper {
 	public static final boolean MORE_CULLING_LOADED = isModLoaded("moreculling");
 	/* Make Bubbles Pop */
 	public static final boolean MAKE_BUBBLES_POP_LOADED = isModLoaded("make_bubbles_pop");
+	/* Figura */
+	public static final boolean FIGURA_LOADED = isModLoaded("figura");
 
 	@ExpectPlatform
 	private static boolean isForge() {

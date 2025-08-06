@@ -140,8 +140,9 @@ public abstract class MixinParticleEngine {
 
 	@Unique
 	private void asyncparticles$tickEmitters() {
+		boolean forceDone = ConfigHelper.forceDoneParticleTick();
 		for (TrackingEmitter emitter : this.trackingEmitters) {
-			if (AsyncTicker.isCancelled() && !ConfigHelper.forceDoneParticleTick()) {
+			if (AsyncTicker.isCancelled() && !forceDone) {
 				return;
 			}
 			if (!emitter.isAlive()) {
@@ -172,8 +173,9 @@ public abstract class MixinParticleEngine {
 		boolean enableLightCache = ConfigHelper.isParticleLightCache();
 		boolean isNotOnMainThread = !ThreadUtil.isOnMainThread();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
+		boolean forceDone = ConfigHelper.forceDoneParticleTick();
 		for (Particle particle : collection) {
-			if (AsyncTicker.isCancelled() && !ConfigHelper.forceDoneParticleTick()) {
+			if (AsyncTicker.isCancelled() && !forceDone) {
 				return;
 			}
 			if (!particle.isAlive()) {
@@ -224,6 +226,10 @@ public abstract class MixinParticleEngine {
 			// otherwise it may cause memory leak with some mods
 		} else {
 			if (ConfigHelper.isParticleLightCache()) {
+				// Enable the light only if the particle is added to the current ParticleEngine instance.
+				((LightCachedParticleAddon) particle).asyncparticles$enableLightCache();
+				// refresh the light cache here since this method can run in other threads.
+				// so it can avoid to slower the main thread.
 				((LightCachedParticleAddon) particle).asyncparticles$refresh();
 			}
 			switch (ConfigHelper.getParticleCullingMode()) {

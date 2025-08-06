@@ -21,13 +21,15 @@ public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
 	public static final int VERSION = 2;
 	static String COMMENTS = """
-		safeClassInstanceMultiMap: Boolean. Make ClassInstanceMultiMap thread-safe.
+		safeBlockEntityMap: Boolean. Make 'LevelChunk#blockEntities' thread-safe.
+		safeClassInstanceMultiMap: Boolean. Make 'ClassInstanceMultiMap' thread-safe.
 		safeLegacyRandomSource: Boolean. Make LegacyRandomSource thread-safe.
-		particle$noCulling: A comma-separated list of particle classes that should not be culled.
-		particle$noLightCache: A comma-separated list of particle classes that should not use the light cache.
-		particle$lockRequired: A comma-separated list of particle classes that require a spin lock.
-		particle$lockProvider: A comma-separated list of particle classes that provide a spin lock.
-		replaceRandom: A comma-separated list of classes that require multithreaded random sources.""";
+		particle$noCulling: A comma-separated list of classes extending 'Particle' that should not be culled.
+		particle$noLightCache: A comma-separated list of classes extending 'Particle' that should not use the light cache.
+		particle$lockRequired: A comma-separated list of classes extending 'Particle' that require a spin lock.
+		particle$lockProvider: A comma-separated list of classes extending 'Particle' that provide a spin lock.
+		replaceRandom: A comma-separated list of classes that require multithreaded random sources.
+		""";
 	static final MixinConfigObj CONFIG;
 	private static MixinConfigObj toSaveConfig;
 

@@ -23,6 +23,9 @@ dependencies {
 //    compileOnly "org.sinytra:connector:2.0.0-beta.7+1.21.1"
     modCompileOnly("me.shedaniel.cloth:cloth-config:18.0.145")
 
+    /* APIs */
+    modCompileOnly "maven.modrinth:fzzy-config:0.7.2+1.21.6" // TODO
+
     /* Performance */
     modCompileOnly "maven.modrinth:sodium:mc1.21.5-0.6.13-fabric"
     modCompileOnly 'maven.modrinth:iris:1.8.11+1.21.5-fabric'
@@ -42,7 +45,7 @@ dependencies {
 //    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
 
     /* Particular */
-    modCompileOnly "maven.modrinth:particular:1.1.1+1.21.4" // TODO:this is a 1.21.4 version
+    modCompileOnly "maven.modrinth:particular-reforged:1.1.1+1.21.5"
 
     /* Particle Core */
     modCompileOnly "maven.modrinth:particle-core:0.2.6+1.21.5"
@@ -54,11 +57,14 @@ dependencies {
     modCompileOnly "maven.modrinth:physicsmod:AHrXzQdA" // 3.1.8
 
     /* Subtle Effects */
-    modCompileOnly "maven.modrinth:subtle-effects:EhcPsdf1" // fabric 1.10.0
+    modCompileOnly "maven.modrinth:subtle-effects:244jLJZn" // fabric 1.12.0
 
     /* What Are They Up To */
     modCompileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5 // TODO:this is a 1.21.4 version
 
     /* Immediately Fast */
     modCompileOnly "maven.modrinth:immediatelyfast:1.9.5+1.21.5-fabric"
+
+    /* Figura */
+    modCompileOnly "maven.modrinth:figura:0.1.5b+1.21.4" // TODO 1.21.4 version
 }

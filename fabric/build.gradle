@@ -33,13 +33,15 @@ configurations {
 }
 
 dependencies {
-    include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.2.0")))
+    include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.3.3")))
 
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
+    common(project(path: ':common_legacy_mod_compat', configuration: 'namedElements')) { transitive false }
+    shadowBundle project(path: ':common_legacy_mod_compat', configuration: 'transformProductionFabric')
 
     /* APIs */
     modLocalRuntime 'maven.modrinth:architectury-api:16.1.4+fabric'
@@ -51,13 +53,15 @@ dependencies {
     }
     modImplementation 'maven.modrinth:modmenu:14.0.0-rc.2'
     modLocalRuntime 'maven.modrinth:fabric-permissions-api:0.3.3'
-    modLocalRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.2")
+    modLocalRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
+    modLocalRuntime 'maven.modrinth:fabric-permissions-api:0.4.0'
 
     /* Performance */
     modLocalRuntime "maven.modrinth:sodium:mc1.21.5-0.6.13-fabric"
     modLocalRuntime "maven.modrinth:sodium-extra:mc1.21.5-0.6.3+fabric"
     modCompileOnly 'maven.modrinth:iris:1.8.11+1.21.5-fabric'
     modLocalRuntime 'maven.modrinth:iris:1.8.11+1.21.5-fabric'
+    modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.5-0.6.3+fabric'
     localRuntime "org.antlr:antlr4-runtime:4.13.1"
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
     localRuntime "org.anarres:jcpp:1.4.14"
@@ -136,6 +140,7 @@ runClient {
         main {
             resources {
                 srcDirs += "../common/src/main/resources"
+                srcDirs += "../common_legacy_mod_compat/src/main/resources"
             }
         }
     }

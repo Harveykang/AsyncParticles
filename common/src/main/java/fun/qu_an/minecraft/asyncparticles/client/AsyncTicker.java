@@ -20,10 +20,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.TrackingEmitter;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
@@ -33,7 +29,10 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinWorkerThread;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -42,14 +41,14 @@ import java.util.stream.Collectors;
 
 import static fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil.toThrowDirectly;
 
-// TODO: 整理这一坨
+// TODO: Organize this shit
 @Environment(EnvType.CLIENT)
 public class AsyncTicker {
 	public static final Logger LOGGER = LogManager.getLogger();
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 	private static final Set<Particle> SYNC_PARTICLES = Collections.newSetFromMap(new IdentityHashMap<>());
 	public static final List<Runnable> PARTICLE_OPERATIONS = new ArrayList<>();
-	private static boolean cancelled = false;
+	private static final AtomicBoolean cancelled = new AtomicBoolean(false);
 	public static boolean shouldTickParticles = false;
 	public static CompletableFuture<Void> particleCleanup;
 	private final static List<EndTickEvent> SEQUENCED_END_TICK_EVENTS = new ArrayList<>();
@@ -71,17 +70,7 @@ public class AsyncTicker {
 		AtomicInteger workerCount = new AtomicInteger(1);
 		int clamp = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 		EXECUTOR = new ForkJoinPool(clamp, (forkJoinPool) -> {
-			ForkJoinWorkerThread forkJoinWorkerThread = new ForkJoinWorkerThread(forkJoinPool) {
-				protected void onTermination(Throwable throwable) {
-					if (throwable != null) {
-						LOGGER.warn("{} died", this.getName(), throwable);
-					} else {
-						LOGGER.debug("{} shutdown", this.getName());
-					}
-
-					super.onTermination(throwable);
-				}
-			};
+			ForkJoinWorkerThread forkJoinWorkerThread = new AsyncTickerThread(forkJoinPool);
 			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());
 			forkJoinWorkerThread.setDaemon(true);
 			return forkJoinWorkerThread;
@@ -99,7 +88,7 @@ public class AsyncTicker {
 	/* Ticker */
 
 	public static boolean isCancelled() {
-		if (!cancelled) {
+		if (!cancelled.getOpaque()) {
 			return false;
 		}
 		debug_cancelled = true;
@@ -132,11 +121,11 @@ public class AsyncTicker {
 		} else {
 			// tick zero, wait for async tasks to complete, cleanup
 			if (particleFuture != null) {
-				cancelled = true;
+				cancelled.setOpaque(true);
 				debug_cancelled = false;
 				particleFuture.join();
 				particleFuture = null;
-				cancelled = false;
+				cancelled.setOpaque(false);
 			}
 			shouldTickParticles = i == to - 1 && levelRunning;
 			if (levelRunning) {
@@ -387,21 +376,13 @@ public class AsyncTicker {
 			}
 			recordSync(particle);
 		} else if (tolerable) {
-			LocalPlayer player = Minecraft.getInstance().player;
-			if (player != null) {
-				player.displayClientMessage(Component.literal(
-						"Exception %s thrown while ticking particle %s exceeds the threshold, please contact the author: "
-							.formatted(t.getClass().getSimpleName(), particleClass))
-					.append(Component.literal(AsyncParticlesClient.ISSUE_URL_STR)
-						.setStyle(Style.EMPTY
-							.withClickEvent(new ClickEvent.OpenUrl(AsyncParticlesClient.ISSUE_URI))
-							.withUnderlined(true))), false);
-			}
-			LOGGER.warn("Exception {} thrown while ticking particle {} exceeds the threshold, please contact the author: {}",
-				t.getClass().getSimpleName(),
-				particle,
-				AsyncParticlesClient.ISSUE_URL_STR,
-				t);
+			throw constructCrashReport(particle, new RuntimeException(
+				"Exception %s thrown while ticking particle %s, exceeds the threshold, please contact the author: %s"
+					.formatted(
+						t.getClass().getName(),
+						particle,
+						AsyncParticlesClient.ISSUE_URL_STR),
+				t));
 		} else {
 			throw constructCrashReport(particle, t);
 		}
@@ -562,15 +543,18 @@ public class AsyncTicker {
 			Queue<TrackingEmitter> newEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 			newEmitters.addAll(particleEngine.trackingEmitters);
 			particleEngine.trackingEmitters = newEmitters;
-			boolean particleLightCache = ConfigHelper.isParticleLightCache();
+			boolean enableLightCache = ConfigHelper.isParticleLightCache();
 			ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 			particleEngine.particles.entrySet().forEach(entry -> {
 				Queue<Particle> queue = entry.getValue();
 				Queue<Particle> newQueue = IterationSafeEvictingQueue.newInstance(queue.size(), ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 				newQueue.addAll(queue);
 				newQueue.forEach(p -> {
-					if (particleLightCache) {
+					if (enableLightCache) {
+						((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
 						((LightCachedParticleAddon) p).asyncparticles$refresh();
+					} else {
+						((LightCachedParticleAddon) p).asyncparticles$disableLightCache();
 					}
 					switch (particleCullingMode) {
 						case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();
@@ -583,16 +567,17 @@ public class AsyncTicker {
 	}
 
 	public static void reset() {
-		cancelled = true;
 		waitForCleanUp();
 		if (particleFuture != null) {
+			cancelled.setOpaque(true);
 			particleFuture.join();
 			particleFuture = null;
 		}
+		cancelled.setOpaque(false);
+		timeUsageNano.set(0L);
 		PARTICLE_OPERATIONS.clear();
 		END_TICK_OPERATIONS.clear();
 		SYNC_PARTICLES.clear();
-		cancelled = false;
 	}
 
 	/* Events */
@@ -622,6 +607,22 @@ public class AsyncTicker {
 			END_TICK_OPERATIONS.add(task);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> END_TICK_OPERATIONS.add(task));
+		}
+	}
+
+	public static class AsyncTickerThread extends AsyncParticleWorkerThread {
+		public AsyncTickerThread(ForkJoinPool forkJoinPool) {
+			super(forkJoinPool);
+		}
+
+		protected void onTermination(Throwable throwable) {
+			if (throwable != null) {
+				LOGGER.warn("{} died", this.getName(), throwable);
+			} else {
+				LOGGER.debug("{} shutdown", this.getName());
+			}
+
+			super.onTermination(throwable);
 		}
 	}
 }

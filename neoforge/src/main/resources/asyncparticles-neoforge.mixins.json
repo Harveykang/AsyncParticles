@@ -6,8 +6,8 @@
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.neoforge.APMixinPluginNeoForge",
   "client": [
     "MixinLevelRenderer",
-    "MixinMinecraft",
     "MixinParticleEngine_Render",
+    "particular.MixinClientStuff",
     "prettyrain.MixinGroundFogParticle",
     "prettyrain.MixinModClientForgeEvents",
     "prettyrain.MixinParticleRainClient",
@@ -16,7 +16,6 @@
     "prettyrain.MixinSnowParticle",
     "prettyrain.MixinWeatherParticle",
     "prettyrain.MixinWeatherParticleSpawner",
-    "particular.MixinClientStuff",
     "simple_weather.MixinRainParticle",
     "simple_weather.MixinWeatherFX",
     "subtle_effects.MixinParticleEngine"

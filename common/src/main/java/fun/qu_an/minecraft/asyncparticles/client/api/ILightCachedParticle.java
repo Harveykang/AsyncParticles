@@ -14,4 +14,14 @@ public interface ILightCachedParticle {
 	}
 
 	void asyncparticles$refresh();
+
+	@ApiStatus.NonExtendable
+	default void asyncparticles$enableLightCache() {
+		throw new AssertionError("Missing implementation.");
+	}
+
+	@ApiStatus.NonExtendable
+	default void asyncparticles$disableLightCache() {
+		throw new AssertionError("Missing implementation.");
+	}
 }

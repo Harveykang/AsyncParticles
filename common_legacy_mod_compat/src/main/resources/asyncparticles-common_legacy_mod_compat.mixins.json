@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "fun.qu_an.minecraft.asyncparticles.client.mixin.legacy",
+  "compatibilityLevel": "JAVA_17",
+  "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.legacy.APMixinLegacyModCompatPlugin",
+  "client": [
+    "subtle_effects.MixinAsyncRenderer",
+    "subtle_effects.fabric.MixinParticleEngine"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+  ]
+}

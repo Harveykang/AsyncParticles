@@ -46,15 +46,17 @@ dependencies {
     // MixinSquared's annotationProcessor MUST be registered BEFORE Mixin's one.
     compileOnly(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:0.3.3"))
     implementation(include("com.github.bawnorton.mixinsquared:mixinsquared-neoforge:0.3.3"))
-    implementation(include("io.github.llamalad7:mixinextras-neoforge:0.4.1"))
 
     neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
+    common(project(path: ':common_legacy_mod_compat', configuration: 'namedElements')) { transitive false }
+    shadowBundle project(path: ':common_legacy_mod_compat', configuration: 'transformProductionNeoForge')
 
     /* APIs */
     modLocalRuntime 'maven.modrinth:architectury-api:16.1.4+neoforge'
     modLocalRuntime "me.shedaniel.cloth:cloth-config-neoforge:18.0.145"
+    modLocalRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
 
     /* Performance */
     modLocalRuntime "maven.modrinth:spark:1.10.128-neoforge"
@@ -83,7 +85,6 @@ dependencies {
     modCompileOnly "maven.modrinth:particle-core:0.2.6+1.21.5+neoforge"
 //    modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.21.4+neoforge"
 //    modLocalRuntime "maven.modrinth:fzzy-config:0.6.8+1.21.3+neoforge"
-//    modLocalRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
 //    modLocalRuntime 'thedarkcolour:kfflang:5.7.0'
 //    modLocalRuntime 'thedarkcolour:kfflib:5.7.0'
 //    modLocalRuntime 'thedarkcolour:kffmod:5.7.0'

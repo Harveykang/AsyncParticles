@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
 
-// TODO: 整理这一坨
+// TODO: Organize this shit
 @Environment(EnvType.CLIENT)
 public class AsyncRenderer {
 	private static final Logger LOGGER = LogUtils.getLogger();
@@ -78,17 +78,7 @@ public class AsyncRenderer {
 		AtomicInteger workerCount = new AtomicInteger(1);
 		int clamp = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 		EXECUTOR = new ForkJoinPool(clamp, (forkJoinPool) -> {
-			ForkJoinWorkerThread forkJoinWorkerThread = new ForkJoinWorkerThread(forkJoinPool) {
-				protected void onTermination(Throwable throwable) {
-					if (throwable != null) {
-						LOGGER.warn("{} died", this.getName(), throwable);
-					} else {
-						LOGGER.debug("{} shutdown", this.getName());
-					}
-
-					super.onTermination(throwable);
-				}
-			};
+			ForkJoinWorkerThread forkJoinWorkerThread = new AsyncRendererThread(forkJoinPool);
 			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());
 			forkJoinWorkerThread.setDaemon(true);
 			return forkJoinWorkerThread;
@@ -101,6 +91,7 @@ public class AsyncRenderer {
 	private static CompletableFuture<Void> particlsTask;
 	private static boolean mixedParticleRenderingSetting = false;
 	private static int asyncTasksSize;
+	public static boolean particlePhase = false;
 	private static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
 		ConfigHelper::getRenderFailurePerSecondThreshold
@@ -231,8 +222,9 @@ public class AsyncRenderer {
 	}
 
 	// Fabric
-	public static void endParticles(Camera camera, float f, Collection<ParticleRenderType> renderOrder) {
+	public static void endAll(Camera camera, float f, Collection<ParticleRenderType> renderOrder) {
 		tryWaitingForParticleTask();
+		float f2 = f + 1f;
 		for (ParticleRenderType particleRenderType : renderOrder) {
 			BindingTesselator tesselator = BTESSELATORS.get(particleRenderType);
 			if (tesselator == null || tesselator == BindingTesselator.EMPTY) {
@@ -248,7 +240,6 @@ public class AsyncRenderer {
 				}
 			} else {
 				builder = tesselator.begin();
-				float f2 = f + 1f;
 				for (Particle particle : sync) {
 					if (!particle.isAlive()) {
 						continue;
@@ -276,8 +267,9 @@ public class AsyncRenderer {
 	}
 
 	// Forge
-	public static void endParticles(Camera camera, float f, Collection<ParticleRenderType> renderOrder, Predicate<ParticleRenderType> renderTypePredicate) {
+	public static void endAll(Camera camera, float f, Collection<ParticleRenderType> renderOrder, Predicate<ParticleRenderType> renderTypePredicate) {
 		tryWaitingForParticleTask();
+		float f2 = f + 1f;
 		for (ParticleRenderType particleRenderType : renderOrder) {
 			if (particleRenderType.renderType() == null) {
 				continue;
@@ -299,7 +291,6 @@ public class AsyncRenderer {
 				}
 			} else {
 				builder = tesselator.begin();
-				float f2 = f + 1f;
 				for (Particle particle : sync) {
 					if (!particle.isAlive()) {
 						continue;
@@ -324,6 +315,10 @@ public class AsyncRenderer {
 			}
 			renderType.draw(meshData);
 		}
+	}
+
+	public static boolean isParticlePhase() {
+		return particlePhase;
 	}
 
 	private static void waitForParticleTask() {
@@ -471,6 +466,7 @@ public class AsyncRenderer {
 	/* Destroy */
 
 	public static void reset() {
+		particlePhase = false;
 		waitForParticleTask();
 		WeatherRenderer.waitForWeatherTask();
 		closeBTesselators();
@@ -480,5 +476,21 @@ public class AsyncRenderer {
 
 	public static boolean isTranslucentPhase(Enum<?> phase) {
 		return phase == ParticleRenderingPhase.TRANSLUCENT;
+	}
+
+	public static class AsyncRendererThread extends AsyncParticleWorkerThread {
+		public AsyncRendererThread(ForkJoinPool forkJoinPool) {
+			super(forkJoinPool);
+		}
+
+		protected void onTermination(Throwable throwable) {
+			if (throwable != null) {
+				LOGGER.warn("{} died", this.getName(), throwable);
+			} else {
+				LOGGER.debug("{} shutdown", this.getName());
+			}
+
+			super.onTermination(throwable);
+		}
 	}
 }
