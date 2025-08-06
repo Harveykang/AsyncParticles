@@ -94,15 +94,6 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "sodium_0_7" -> SODIUM_LOADED && versionCheck("sodium", "0.7", "0.8");
 			case "iris_like" -> IRIS_LIKE_LOADED;
 			case "a_good_place" -> A_GOOD_PLACE_LOADED;
-			case "subtle_effects" -> {
-				if (split.length == 2) {
-					yield SUBTLE_EFFECTS_LOADED;
-				}
-				yield switch (split[1]) {
-					case "fabric" -> !IS_FORGE && FABRIC_SUBTLE_EFFECTS_LOADED;
-					default -> SUBTLE_EFFECTS_LOADED;
-				};
-			}
 			case "watut" -> WATUT_LOADED;
 			case "physicsmod" -> PHYSICSMOD_LOADED;
 			case "cloth_config" -> CLOTH_CONFIG_LOADED;

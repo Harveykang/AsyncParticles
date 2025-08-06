@@ -25,6 +25,7 @@
   },
   "mixins": [
     "asyncparticles-common.mixins.json",
+    "asyncparticles-common_legacy_mod_compat.mixins.json",
     "asyncparticles.target-modifier.mixins.json"
   ],
   "depends": {

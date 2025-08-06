@@ -41,10 +41,13 @@ side = "CLIENT"
 #side = "CLIENT"
 
 [[mixins]]
-config = "asyncparticles-neoforge.mixins.json"
+config = "asyncparticles-common.mixins.json"
 
 [[mixins]]
-config = "asyncparticles-common.mixins.json"
+config = "asyncparticles-common_legacy_mod_compat.mixins.json"
+
+[[mixins]]
+config = "asyncparticles-neoforge.mixins.json"
 
 [[mixins]]
 config = "asyncparticles.target-modifier.mixins.json"

@@ -20,10 +20,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.TrackingEmitter;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
@@ -33,7 +29,9 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -378,21 +376,13 @@ public class AsyncTicker {
 			}
 			recordSync(particle);
 		} else if (tolerable) {
-			LocalPlayer player = Minecraft.getInstance().player;
-			if (player != null) {
-				player.displayClientMessage(Component.literal(
-						"Exception %s thrown while ticking particle %s exceeds the threshold, please contact the author: "
-							.formatted(t.getClass().getSimpleName(), particleClass))
-					.append(Component.literal(AsyncParticlesClient.ISSUE_URL_STR)
-						.setStyle(Style.EMPTY
-							.withClickEvent(new ClickEvent.OpenUrl(AsyncParticlesClient.ISSUE_URI))
-							.withUnderlined(true))), false);
-			}
-			LOGGER.warn("Exception {} thrown while ticking particle {} exceeds the threshold, please contact the author: {}",
-				t.getClass().getSimpleName(),
-				particle,
-				AsyncParticlesClient.ISSUE_URL_STR,
-				t);
+			throw constructCrashReport(particle, new RuntimeException(
+				"Exception %s thrown while ticking particle %s, exceeds the threshold, please contact the author: %s"
+					.formatted(
+						t.getClass().getName(),
+						particle,
+						AsyncParticlesClient.ISSUE_URL_STR),
+				t));
 		} else {
 			throw constructCrashReport(particle, t);
 		}
@@ -553,15 +543,18 @@ public class AsyncTicker {
 			Queue<TrackingEmitter> newEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 			newEmitters.addAll(particleEngine.trackingEmitters);
 			particleEngine.trackingEmitters = newEmitters;
-			boolean particleLightCache = ConfigHelper.isParticleLightCache();
+			boolean enableLightCache = ConfigHelper.isParticleLightCache();
 			ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 			particleEngine.particles.entrySet().forEach(entry -> {
 				Queue<Particle> queue = entry.getValue();
 				Queue<Particle> newQueue = IterationSafeEvictingQueue.newInstance(queue.size(), ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
 				newQueue.addAll(queue);
 				newQueue.forEach(p -> {
-					if (particleLightCache) {
+					if (enableLightCache) {
+						((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
 						((LightCachedParticleAddon) p).asyncparticles$refresh();
+					} else {
+						((LightCachedParticleAddon) p).asyncparticles$disableLightCache();
 					}
 					switch (particleCullingMode) {
 						case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();

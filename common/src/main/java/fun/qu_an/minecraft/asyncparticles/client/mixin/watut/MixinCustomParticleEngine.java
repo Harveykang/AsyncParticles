@@ -18,7 +18,10 @@ import java.util.Queue;
 public class MixinCustomParticleEngine {
 	@WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
 	private boolean onAdd(Queue<Particle> instance, Object p, Operation<Boolean> original) {
-		((LightCachedParticleAddon) p).asyncparticles$refresh();
+		if (ConfigHelper.isParticleLightCache()) {
+			((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
+			((LightCachedParticleAddon) p).asyncparticles$refresh();
+		}
 		switch (ConfigHelper.getParticleCullingMode()) {
 			case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();
 			case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();
@@ -28,7 +31,9 @@ public class MixinCustomParticleEngine {
 
 	@Inject(method = "tickParticle", at = @At(value = "HEAD"))
 	private void onTickParticle(Particle p, CallbackInfo ci) {
-		((LightCachedParticleAddon) p).asyncparticles$refresh();
+		if (ConfigHelper.isParticleLightCache()) {
+			((LightCachedParticleAddon) p).asyncparticles$refresh();
+		}
 		switch (ConfigHelper.getParticleCullingMode()) {
 			case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();
 			case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();

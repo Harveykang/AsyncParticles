@@ -215,7 +215,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			Object left, right;
 			if (renderTypeA == renderTypeB) {
 				// If both render types are the same, sort by particle type index
-				l = renderOrder;
+				l = original;
 				left = a;
 				right = b;
 			} else {

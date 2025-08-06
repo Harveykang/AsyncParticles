@@ -23,6 +23,9 @@ dependencies {
 //    compileOnly "org.sinytra:connector:2.0.0-beta.7+1.21.1"
     modCompileOnly("me.shedaniel.cloth:cloth-config:19.0.147")
 
+    /* APIs */
+    modCompileOnly "maven.modrinth:fzzy-config:0.7.2+1.21.6"
+
     /* Performance */
     modCompileOnly "maven.modrinth:sodium:mc1.21.6-0.6.13-fabric"
     modCompileOnly 'maven.modrinth:iris:l77DAK6U' // 1.9.1
@@ -55,7 +58,7 @@ dependencies {
     modCompileOnly "maven.modrinth:physicsmod:k8blA2yX" // 3.1.9
 
     /* Subtle Effects */
-    modCompileOnly "maven.modrinth:subtle-effects:Ox1EUgbF" // fabric 1.11.0
+    modCompileOnly "maven.modrinth:subtle-effects:HP8Dccia" // fabric 1.12.0
 
     /* What Are They Up To */
     modCompileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5 // TODO:this is a 1.21.4 version

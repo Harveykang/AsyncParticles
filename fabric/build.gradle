@@ -40,6 +40,8 @@ dependencies {
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
+    common(project(path: ':common_legacy_mod_compat', configuration: 'namedElements')) { transitive false }
+    shadowBundle project(path: ':common_legacy_mod_compat', configuration: 'transformProductionFabric')
 
     /* APIs */
 //    modLocalRuntime 'maven.modrinth:architectury-api:17.0.6+fabric'
@@ -138,6 +140,7 @@ runClient {
         main {
             resources {
                 srcDirs += "../common/src/main/resources"
+                srcDirs += "../common_legacy_mod_compat/src/main/resources"
             }
         }
     }
