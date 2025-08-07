@@ -58,6 +58,7 @@
     "render.MixinTesselator",
     "render.MixinVertexConsumer",
     "render.MixinWeatherEffectRenderer",
+    "sodium_0_6.MixinSingleQuadParticle",
     "sodium_0_7.MixinSingleQuadParticle",
     "tick.MixinClientLevel",
     "tick.MixinGameRenderer",
