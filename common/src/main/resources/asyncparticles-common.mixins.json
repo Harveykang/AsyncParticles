@@ -74,6 +74,7 @@
     "render.MixinMultiBufferSource$BufferSource",
     "render.MixinTesselator",
     "render.MixinVertexConsumer",
+    "sodium_0_6.MixinSingleQuadParticle",
     "sodium_0_7.MixinSingleQuadParticle",
     "tick.MixinClientLevel",
     "tick.MixinGameRenderer",

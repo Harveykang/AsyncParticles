@@ -4,11 +4,11 @@ import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.*;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticlesMixinMemberCanceller;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticlesMixinCanceller;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticlesMixinMemberCanceller;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.MixinClassAdjusterRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.ExtensionMemberCancelApplication;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.MixinMemberCancellerRegistrar;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.MixinClassAdjusterRegistrar;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -97,12 +97,11 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "particlerain_create" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && CREATE_LOADED;
 			case "modernui" -> MODERN_UI_LOADED;
 			case "create" -> CREATE_LOADED;
-//			case "sodium_0_6" -> ModListHelper.SODIUM_LOADED
-//								 && ModListHelper.versionCheck("sodium", "0.6", "0.7");
+			case "sodium_0_6" -> SODIUM_LOADED && versionCheck("sodium", "0.6", "0.7");
 			case "sodium_0_7" -> SODIUM_LOADED && versionCheck("sodium", "0.6.999999", "0.8");
 			case "iris_like" -> IRIS_LIKE_LOADED;
 			case "a_good_place" -> A_GOOD_PLACE_LOADED;
-			case "watut" -> WATUT_LOADED;
+			case "watut" -> WATUT_LOADED && versionCheck("watut", "1.2.0", null);
 			case "physicsmod" -> PHYSICSMOD_LOADED;
 			case "physicsmod_create" -> PHYSICSMOD_LOADED && CREATE_LOADED;
 			case "physicsmod_vs" -> PHYSICSMOD_LOADED && VS_LOADED;

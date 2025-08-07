@@ -447,6 +447,7 @@ public class AsyncRenderer {
 			super(forkJoinPool);
 		}
 
+		@Override
 		protected void onTermination(Throwable throwable) {
 			if (throwable != null) {
 				LOGGER.warn("{} died", this.getName(), throwable);

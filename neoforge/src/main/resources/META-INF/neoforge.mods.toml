@@ -15,7 +15,7 @@ logoFile = "assets/asyncparticles/icon.png"
 [[dependencies.asyncparticles]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21,)"
+versionRange = "[21.1.22,)"
 ordering = "NONE"
 side = "CLIENT"
 

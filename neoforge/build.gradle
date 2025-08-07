@@ -44,7 +44,6 @@ dependencies {
     // MixinSquared's annotationProcessor MUST be registered BEFORE Mixin's one.
     compileOnly(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:0.3.3"))
     implementation(include("com.github.bawnorton.mixinsquared:mixinsquared-neoforge:0.3.3"))
-    implementation(include("io.github.llamalad7:mixinextras-neoforge:0.4.1"))
 
     neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
@@ -91,6 +90,7 @@ dependencies {
 //    localRuntime fileTree(dir: '../libs', include: 'glsl-transformer-2.0.1.jar')
     // Sodium
     localRuntime('maven.modrinth:sodium:mc1.21.1-0.6.13-neoforge')
+    modLocalRuntime('maven.modrinth:sodium-extra:mc1.21.1-0.6.0+neoforge')
 
 //    localRuntime "org.antlr:antlr4-runtime:4.13.1"
 //    localRuntime "io.github.douira:glsl-transformer:2.0.1"
