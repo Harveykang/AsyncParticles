@@ -54,7 +54,6 @@ dependencies {
     modImplementation 'maven.modrinth:modmenu:14.0.0-rc.2'
     modLocalRuntime 'maven.modrinth:fabric-permissions-api:0.3.3'
     modLocalRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
-    modLocalRuntime 'maven.modrinth:fabric-permissions-api:0.4.0'
 
     /* Performance */
     modLocalRuntime "maven.modrinth:sodium:mc1.21.5-0.6.13-fabric"

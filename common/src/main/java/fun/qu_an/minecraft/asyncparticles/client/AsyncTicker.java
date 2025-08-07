@@ -305,18 +305,9 @@ public class AsyncTicker {
 				Runnable[] particleTasks = particleOperations.toArray(new Runnable[0]);
 				particleOperations.clear();
 				Function<Void, CompletableFuture<Void>> function = v -> CompletableFuture.allOf(Arrays.stream(particleTasks)
-					.map(runnable -> CompletableFuture
-						.runAsync(runnable, EXECUTOR)
-						.exceptionally(e -> {
-							if (!ConfigHelper.markSyncIfTickFailed()
-								&& isTolerable(e)) {
-								LOGGER.warn("Exception while executing particle operation, you can ignore it if it doesn't happen frequently.", e);
-								return null;
-							}
-							throw toThrowDirectly(e);
-						}))
-					.toArray(CompletableFuture[]::new));
-				sequencedTaskFuture = sequencedTaskFuture.thenCompose(function).exceptionally(AsyncTicker::tickExceptionally);
+					.map(runnable -> CompletableFuture.runAsync(runnable, EXECUTOR))
+					.toArray(CompletableFuture[]::new)).exceptionally(AsyncTicker::tickExceptionally);
+				sequencedTaskFuture = sequencedTaskFuture.thenCompose(function);
 			}
 		}
 
@@ -331,11 +322,11 @@ public class AsyncTicker {
 			throw toThrowDirectly(e);
 		}
 		Minecraft mc = Minecraft.getInstance();
-		if (!isTolerable(e) &&
-			mc.level != null && mc.player != null) {
+		if (!isTolerable(e) ||
+			(mc.level != null && mc.player != null)) {
 			throw toThrowDirectly(e);
 		}
-		LOGGER.warn("Exception while executing before particle operation", e);
+		LOGGER.warn("Exception while executing tick tasks.", e);
 		return null;
 	}
 
