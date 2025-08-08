@@ -8,7 +8,7 @@ public class ModListHelper {
 	public static final boolean IS_FORGE = isForge();
 	public static final boolean IS_CLIENT = isClient();
 	public static final boolean FABRIC_API_LOADED = isModLoaded("fabric-api") || isModLoaded("fabric_api");
-	public static final boolean CONNECTORMOD_LOADED = isModLoaded("connectormod");
+	public static final boolean CONNECTOR_LOADED = isModLoaded("connector");
 	/* Valkyrien Skies */
 	public static final boolean VS_LOADED = isModLoaded("valkyrienskies");
 	public static final boolean FABRIC_VS_LOADED = isFabricModLoaded("valkyrienskies");
@@ -144,11 +144,11 @@ public class ModListHelper {
 
 	@SuppressWarnings("ConstantValue")
 	public static boolean isForgeModLoaded(String modId) {
-		return IS_FORGE && isModLoaded(modId) && (!CONNECTORMOD_LOADED || !ConnectorEarlyLoader.isConnectorMod(modId));
+		return IS_FORGE && isModLoaded(modId) && (!CONNECTOR_LOADED || !ConnectorEarlyLoader.isConnectorMod(modId));
 	}
 
 	public static boolean isFabricModLoaded(String modId) {
-		return IS_FORGE ? CONNECTORMOD_LOADED && ConnectorEarlyLoader.isConnectorMod(modId) : isModLoaded(modId);
+		return IS_FORGE ? CONNECTOR_LOADED && ConnectorEarlyLoader.isConnectorMod(modId) : isModLoaded(modId);
 	}
 
 	@ExpectPlatform
