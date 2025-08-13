@@ -7,7 +7,6 @@
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.forge.AsyncParticlesMixinPluginForge",
   "client": [
     "MixinParticleEngine_Render",
-    "effecticularity_v1_0_2.MixinRippleParticle",
     "epicacg.MixinAsyncRenderer",
     "epicfight.MixinEpicFightRenderTypes",
     "epicfight.MixinTexturedCustomModelParticle",

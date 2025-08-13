@@ -67,7 +67,7 @@ subprojects {
         maven { url = "https://mvn.devos.one/snapshots" } // Create and several dependencies
         maven { url = "https://maven.createmod.net" } // Create, Ponder, Flywheel
         maven {
-            url = "https://maven.tterrag.com"
+            url = "https://modmaven.dev/"
             content {
                 includeGroup "com.tterrag.registrate"
                 includeGroup "com.jozufozu.flywheel"

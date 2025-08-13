@@ -113,7 +113,7 @@ dependencies {
 
     /* Effective */
 //    modLocalRuntime fileTree(dir: '../libs', include: 'effective-1.0.6-1.20.1-forge.jar')
-    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.6-1.20.1-forge.jar')
+//    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.6-1.20.1-forge.jar')
 //    modCompileOnly "com.github.ConcerroX.nuance-and-effective:01f518d9b9"
 //    modLocalRuntime "com.github.ConcerroX.nuance-and-effective:01f518d9b9"
 
