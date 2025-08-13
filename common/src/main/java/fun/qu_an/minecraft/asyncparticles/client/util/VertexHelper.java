@@ -12,7 +12,7 @@ public class VertexHelper {
 	public static VertexConsumer setColor(VertexConsumer vertexConsumer, float red, float green, float blue, float alpha) {
 		if (alpha < 0f) {
 			if (!warnedNegativeAlpha) {
-				LOGGER.warn("Negative alpha value {} detected. This may cause unexpected behavior.", alpha, new IllegalStateException(""));
+				LOGGER.warn("Negative alpha value {} detected. This may cause unexpected behavior. You can ignore it if nothing is broken.", alpha, new IllegalStateException(""));
 				warnedNegativeAlpha = true;
 			}
 			if ((AsyncRenderer.isParticlePhase() && ThreadUtil.isOnMainThread()) ||

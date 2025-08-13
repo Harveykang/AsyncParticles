@@ -104,7 +104,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "physicsmod_create" -> PHYSICSMOD_LOADED && CREATE_LOADED;
 			case "physicsmod_vs" -> PHYSICSMOD_LOADED && VS_LOADED;
 			case "a_good_place" -> A_GOOD_PLACE_LOADED;
-			case "watut" -> WATUT_LOADED && versionCheck("watut", "1.2.0", null);
+			case "watut" -> WATUT_LOADED && versionCheck("watut", "1.20.1-1.2.0", null);
 			case "lodestone" -> LODESTONE_LOADED;
 			case "fabric_api" -> FABRIC_API_LOADED; // Includes Forge version
 			case "cloth_config" -> CLOTH_CONFIG_LOADED;

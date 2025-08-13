@@ -105,5 +105,6 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "iris_like.MixinDSAUnsupported"
   ]
 }
