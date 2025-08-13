@@ -507,7 +507,9 @@ public class AsyncTicker {
 	}
 
 	public static void dumpParticles() {
-		LOGGER.info(Minecraft.getInstance().particleEngine.particles);
+		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
+		LOGGER.info(ModListHelper.IS_FORGE ? particleEngine.particles.keySet() : ParticleEngine.RENDER_ORDER);
+		LOGGER.info(particleEngine.particles);
 	}
 
 	public static void reloadLater() {

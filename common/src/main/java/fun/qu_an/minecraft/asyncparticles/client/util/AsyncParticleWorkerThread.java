@@ -24,9 +24,10 @@ public class AsyncParticleWorkerThread extends ForkJoinWorkerThread {
 	}
 
 	private void ensureIndex(int index) {
-		if (index >= data.length) {
-			Object[] newArray = new Object[index << 1];
-			System.arraycopy(data, 0, newArray, 0, data.length);
+		int length = data.length;
+		if (index >= length) {
+			Object[] newArray = new Object[HashCommon.nextPowerOfTwo(index + 1)];
+			System.arraycopy(data, 0, newArray, 0, length);
 			data = newArray;
 		}
 	}
