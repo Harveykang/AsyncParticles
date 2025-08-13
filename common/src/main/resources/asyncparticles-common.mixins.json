@@ -41,6 +41,7 @@
     "fake_renders.MixinTesselator",
     "figura.MixinParticleEngine",
     "immediatelyfast.MixinBatchableBufferSource",
+    "iris_like.MixinDSAUnsupported",
     "iris_like.MixinFullyBufferedMultiBufferSource",
     "iris_like.MixinIris",
     "iris_like.MixinOldFullyBufferedMultiBufferSource",

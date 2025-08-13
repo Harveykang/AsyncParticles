@@ -19,6 +19,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TrackingEmitter;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -492,7 +493,11 @@ public class AsyncTicker {
 	}
 
 	public static void dumpParticles() {
-		LOGGER.info(Minecraft.getInstance().particleEngine.particles);
+		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
+		LOGGER.info((ModListHelper.IS_FORGE ? particleEngine.particles.keySet() : ParticleEngine.RENDER_ORDER)
+			.stream()
+			.collect(Collectors.toMap(ParticleRenderType::getClass, Object::toString)));
+		LOGGER.info(particleEngine.particles);
 	}
 
 	public static void reloadLater() {
