@@ -10,8 +10,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = IrisRenderSystem.DSAUnsupported.class, remap = false)
 public class MixinDSAUnsupported {
-	@Inject(method = "bindTextureToUnit", require = 0, at = @At(value = "TAIL"))
-	public void bindTextureToUnit(int target, int unit, int texture, CallbackInfo ci) {
+	// Once Iris fixes the bug, this injection point will fail-safe with no side effects.
+	@Inject(method = "bindTextureToUnit", require = 0, at = @At(value = "INVOKE", shift = At.Shift.AFTER,
+		target = "Lnet/irisshaders/iris/gl/IrisRenderSystem;bindTextureForSetup(II)V"))
+	public void fixBindingTexture(int target, int unit, int texture, CallbackInfo ci) {
 		if (target == GlConst.GL_TEXTURE_2D) {
 			GlStateManagerAccessor.getTEXTURES()[unit].binding = texture;
 		}
