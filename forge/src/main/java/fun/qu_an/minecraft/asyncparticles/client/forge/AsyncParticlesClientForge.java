@@ -98,9 +98,20 @@ public final class AsyncParticlesClientForge {
 					.executes(context -> {
 						String className = StringArgumentType.getString(context, "className");
 						if (ModListHelper.classExists(className)) {
-							context.getSource().sendSystemMessage(Component.literal("Class " + className + " found!"));
+							context.getSource().sendSystemMessage(Component.literal("Class " + className + " exists!"));
 						} else {
-							context.getSource().sendSystemMessage(Component.literal("Class " + className + " not found."));
+							context.getSource().sendSystemMessage(Component.literal("Class " + className + " not exists."));
+						}
+						return 1;
+					})))
+			.then(literal("load_class")
+				.then(argument("className", StringArgumentType.string())
+					.executes(context -> {
+						String className = StringArgumentType.getString(context, "className");
+						if (ModListHelper.loadClass(className)) {
+							context.getSource().sendSystemMessage(Component.literal("Class " + className + " exists!"));
+						} else {
+							context.getSource().sendSystemMessage(Component.literal("Class " + className + " not exists."));
 						}
 						return 1;
 					})))

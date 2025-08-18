@@ -81,9 +81,20 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 							.executes(context -> {
 								String className = StringArgumentType.getString(context, "className");
 								if (ModListHelper.classExists(className)) {
-									context.getSource().sendFeedback(Component.literal("Class " + className + " found!"));
+									context.getSource().sendFeedback(Component.literal("Class " + className + " exists!"));
 								} else {
-									context.getSource().sendFeedback(Component.literal("Class " + className + " not found."));
+									context.getSource().sendFeedback(Component.literal("Class " + className + " not exists."));
+								}
+								return 1;
+							})))
+					.then(literal("load_class")
+						.then(argument("className", StringArgumentType.string())
+							.executes(context -> {
+								String className = StringArgumentType.getString(context, "className");
+								if (ModListHelper.loadClass(className)) {
+									context.getSource().sendFeedback(Component.literal("Class " + className + " exists!"));
+								} else {
+									context.getSource().sendFeedback(Component.literal("Class " + className + " not exists."));
 								}
 								return 1;
 							})))

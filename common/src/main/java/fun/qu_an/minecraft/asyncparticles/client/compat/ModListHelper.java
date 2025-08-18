@@ -162,4 +162,13 @@ public class ModListHelper {
 	public static boolean classExists(String className) {
 		return ModListHelper.class.getClassLoader().getResource(className.replace(".", "/") + ".class") != null;
 	}
+
+	public static boolean loadClass(String className) {
+		try {
+			Class.forName(className);
+			return true;
+		} catch (Throwable e) {
+			return false;
+		}
+	}
 }
