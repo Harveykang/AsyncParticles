@@ -21,21 +21,21 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
     modCompileOnly "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 //    compileOnly "org.sinytra:connector:2.0.0-beta.7+1.21.1"
-    modCompileOnly("me.shedaniel.cloth:cloth-config:18.0.145")
+    modCompileOnly("me.shedaniel.cloth:cloth-config:17.0.144")
 
     /* APIs */
-    modCompileOnly "maven.modrinth:fzzy-config:0.7.2+1.21.6" // TODO
+    modCompileOnly "maven.modrinth:fzzy-config:0.7.2+1.21.3"
 
     /* Performance */
-    modCompileOnly "maven.modrinth:sodium:mc1.21.5-0.6.13-fabric"
-    modCompileOnly 'maven.modrinth:iris:1.8.11+1.21.5-fabric'
-    modCompileOnly 'maven.modrinth:moreculling:MDkI6Huh' // 1.3.1
+    modCompileOnly "maven.modrinth:sodium:mc1.21.4-0.6.13-fabric"
+    modCompileOnly 'maven.modrinth:iris:1.8.8+1.21.4-fabric'
+    modCompileOnly 'maven.modrinth:moreculling:gWgOJqk8' // 1.2.10
 
     /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:particle-rain:3.3.4"
+    modCompileOnly "maven.modrinth:particle-rain:3.3.3"
 
     /* Effectual */
-    modCompileOnly 'maven.modrinth:effectual:1.1.0-1.21.5'
+    modCompileOnly 'maven.modrinth:effectual:1.1.0-1.21.4'
 
     /* Lodestone */
 //    modCompileOnly "maven.modrinth:lodestonelib:1.21.1-1.7.0.5-fabric" // no 1.21.4 version
@@ -45,26 +45,26 @@ dependencies {
 //    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
 
     /* Particular */
-    modCompileOnly "maven.modrinth:particular-reforged:1.1.1+1.21.5"
+    modCompileOnly "maven.modrinth:particular:1.1.1+1.21.4" // fabric
 
     /* Particle Core */
-    modCompileOnly "maven.modrinth:particle-core:0.2.6+1.21.5"
+    modCompileOnly "maven.modrinth:particle-core:0.2.6+1.21.4"
 
     /* A Good Place */
-    modCompileOnly "maven.modrinth:a-good-place:kD90q4La" // 1.2.10 // TODO:this is a 1.21.4 version
+    modCompileOnly "maven.modrinth:a-good-place:kD90q4La" // 1.2.10
 
     /* Physics Mod */
-    modCompileOnly "maven.modrinth:physicsmod:AHrXzQdA" // 3.1.8
+    modCompileOnly "maven.modrinth:physicsmod:tODZWubs" // 3.0.24
 
     /* Subtle Effects */
-    modCompileOnly "maven.modrinth:subtle-effects:244jLJZn" // fabric 1.12.0
+    modCompileOnly "maven.modrinth:subtle-effects:244jLJZn" // fabric 1.12.0 // TODO 1.21.5 ver
 
     /* What Are They Up To */
-    modCompileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5 // TODO:this is a 1.21.4 version
+    modCompileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5
 
     /* Immediately Fast */
-    modCompileOnly "maven.modrinth:immediatelyfast:1.9.5+1.21.5-fabric"
+    modCompileOnly "maven.modrinth:immediatelyfast:1.8.1+1.21.4-fabric"
 
     /* Figura */
-    modCompileOnly "maven.modrinth:figura:0.1.5b+1.21.4" // TODO 1.21.4 version
+    modCompileOnly "maven.modrinth:figura:0.1.5b+1.21.4"
 }

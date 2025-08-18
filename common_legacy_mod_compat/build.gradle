@@ -23,5 +23,5 @@ dependencies {
     compileOnly(project(':common')) { transitive false }
 
     /* Subtle Effects */
-    modCompileOnly "maven.modrinth:subtle-effects:Ox1EUgbF" // 1.11.0
+    modCompileOnly "maven.modrinth:subtle-effects:NA1rBYFJ" // 1.9.4-hf.1
 }
