@@ -171,8 +171,8 @@ dependencies {
 //    modLocalRuntime "curse.maven:simple-weather-983390:5984086"
 
     /* Particular Reforged */
-    modCompileOnly "maven.modrinth:particular-reforged:1.21.1" // 1.1.0
-    modLocalRuntime "maven.modrinth:particular-reforged:1.21.1" // 1.1.0
+    modCompileOnly "curse.maven:particular-reforged-1219053:6912479" // 1.1.5
+    modLocalRuntime "curse.maven:particular-reforged-1219053:6912479" // 1.1.5
 
     /* Weather2 */
     modCompileOnly "maven.modrinth:weather-storms-tornadoes:1.21.0-2.8.5"

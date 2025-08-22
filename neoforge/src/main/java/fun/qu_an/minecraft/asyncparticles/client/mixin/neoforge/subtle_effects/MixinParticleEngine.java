@@ -20,7 +20,6 @@ public class MixinParticleEngine {
 										 Camera camera,
 										 float v,
 										 @Local(ordinal = 0) ParticleRenderType renderType) {
-		// if shouldSync is false, the particles are already culled.
 		return SubtleEffectsCompat.shouldRenderParticle(instance, camera, renderType);
 	}
 }
