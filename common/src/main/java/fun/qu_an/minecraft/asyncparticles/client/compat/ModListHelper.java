@@ -88,8 +88,6 @@ public class ModListHelper {
 	public static final boolean FORGE_WIZARDS_REBORN_LOADED = isForgeModLoaded("wizards_reborn");
 	/* Porting Lib Base */
 	public static final boolean FABRIC_PORTING_LIB_BASE_LOADED = isFabricModLoaded("porting_lib_base");
-	/* Loot Beams Up */
-	public static final boolean FABRIC_LOOT_BEAMS_UP_LOADED = isFabricModLoaded("lootbeams");
 	/* Coo Particles API */
 	public static final boolean FABRIC_COO_PARTICLES_API_LOADED = isModLoaded("cooparticlesapi");
 	/* Immediately Fast */

@@ -16,7 +16,6 @@
     "prettyrain.MixinSnowParticle",
     "prettyrain.MixinWeatherParticle",
     "prettyrain.MixinWeatherParticleSpawner",
-    "simple_weather.MixinRainParticle",
     "simple_weather.MixinWeatherFX",
     "subtle_effects.MixinParticleEngine"
   ],
