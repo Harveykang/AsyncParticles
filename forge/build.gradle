@@ -123,8 +123,8 @@ dependencies {
 //    modLocalRuntime "maven.modrinth:fzzy-config:0.6.4+1.20.1+forge"
 //    modLocalRuntime("com.github.Fallen-Breath.conditional-mixin:conditional-mixin-forge:0.6.2")
     /* Epic Fight */
-    modCompileOnly "maven.modrinth:epic-fight:20.12.4"
-    modLocalRuntime "maven.modrinth:epic-fight:20.12.4"
+    modCompileOnly "maven.modrinth:epic-fight:20.12.5"
+    modLocalRuntime "maven.modrinth:epic-fight:20.12.5"
 
     /* Gateways to Eternity */
     modCompileOnly "curse.maven:gateway-to-eternity-417802:5703251"
