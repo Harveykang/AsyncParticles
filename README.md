@@ -3,6 +3,9 @@
 - [中文](./README_zh.md)|English
 - [Modrinth](https://modrinth.com/mod/asyncparticles)|[CurseForge](https://www.curseforge.com/minecraft/mc-mods/asyncparticles)
 
+## In Progress
+- Use transform feedback for regular particle rendering.
+
 ## Configuration
 - Settings can be accessed via the ModList/ModMenu.
 
