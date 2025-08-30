@@ -84,6 +84,7 @@
     "tick.MixinTextureManager",
     "tick.MixinWaterFluid",
     "veil.MixinLightRenderer",
+    "veil.MixinPerformanceLevelRendererMixin",
     "vs2.InvokerEntityShipCollisionUtils",
     "vs2.InvokerRaycastUtils",
     "vs2.MixinLevelRenderer",
