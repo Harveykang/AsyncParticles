@@ -3,7 +3,10 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.forge;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
@@ -12,7 +15,6 @@ import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.CustomTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
-import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -27,7 +29,6 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import org.spongepowered.asm.mixin.*;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 // TODO: 分为两个 Mixin
 @Mixin(value = ParticleEngine.class, priority = 500)
@@ -61,57 +62,33 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 		}
 
 		List<ParticleRenderType> renderOrder = RENDER_ORDER = ImmutableList.copyOf(renderTypes);
-		AtomicInteger orderGenerator = new AtomicInteger();
-		Map<ParticleRenderType, Integer> insertionOrder = Collections.synchronizedMap(new IdentityHashMap<>(0));
-		Map<ParticleRenderType, Queue<Particle>> newTreeMap =
-			Maps.newTreeMap((o1, o2) -> {
-				// FIXME: why do i have to write this shit?
-				if (o1 == o2) {
-					return 0;
-				}
-				Pair<VertexFormat.Mode, VertexFormat> bTesselator1 = AsyncRenderer.getVertexFormatPair(o1, textureManager);
-				Pair<VertexFormat.Mode, VertexFormat> bTesselator2 = AsyncRenderer.getVertexFormatPair(o2, textureManager);
-				if (bTesselator1 == AsyncRenderer.EMPTY_FORMAT && bTesselator2 == AsyncRenderer.EMPTY_FORMAT) {
-					return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
-				}
-				if (bTesselator1 == AsyncRenderer.EMPTY_FORMAT) {
-					return 1;
-				}
-				if (bTesselator2 == AsyncRenderer.EMPTY_FORMAT) {
-					return -1;
-				}
-
-				int vanillaOne = -1;
-				int vanillaTwo = -1;
-				for (int i = 0; i < renderOrder.size(); i++) {
-					ParticleRenderType geti = renderOrder.get(i);
-					if (vanillaOne == -1 && geti == o1) {
-						vanillaOne = i;
-					} else if (vanillaTwo == -1 && geti == o2) {
-						vanillaTwo = i;
-					}
-					if (vanillaOne >= 0 && vanillaTwo >= 0) {
-						return Integer.compare(vanillaOne, vanillaTwo);
-					}
-				}
-
-				if (vanillaOne == -1 && vanillaTwo == -1) {
-					return asyncparticles$compareWithIdentityHashCode(o1, o2, insertionOrder, orderGenerator);
-				}
-				return vanillaOne >= 0 ? -1 : 1;
-			});
+		Map<ParticleRenderType, Queue<Particle>> newTreeMap = Maps.newTreeMap(asyncparticles$makeComparator(renderOrder));
 		newTreeMap.putAll(particles);
 		particles = newTreeMap;
 	}
 
 	@Unique
-	private static int asyncparticles$compareWithIdentityHashCode(ParticleRenderType o1, ParticleRenderType o2, Map<ParticleRenderType, Integer> insertionOrder, AtomicInteger orderGenerator) {
-		int hashCompare = Integer.compare(System.identityHashCode(o1), System.identityHashCode(o2));
-		if (hashCompare != 0) {
-			return hashCompare;
-		}
-		return Integer.compare(insertionOrder.computeIfAbsent(o1, k -> orderGenerator.getAndIncrement()),
-			insertionOrder.computeIfAbsent(o2, k -> orderGenerator.getAndIncrement()));
+	private static Comparator<ParticleRenderType> asyncparticles$makeComparator(List<ParticleRenderType> renderOrder) {
+		return (o1, o2) -> {
+			int i1 = -1;
+			int i2 = -1;
+			for (int i = 0; i < renderOrder.size(); i++) {
+				ParticleRenderType geti = renderOrder.get(i);
+				if (i1 == -1 && geti == o1) {
+					i1 = i;
+				} else if (i2 == -1 && geti == o2) {
+					i2 = i;
+				}
+				if (i1 >= 0 && i2 >= 0) {
+					return Integer.compare(i1, i2);
+				}
+			}
+
+			if (i1 == -1 && i2 == -1) {
+				return Integer.compare(System.identityHashCode(o1), System.identityHashCode(o2));
+			}
+			return i1 >= 0 ? -1 : 1;
+		};
 	}
 
 	/**
