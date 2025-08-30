@@ -69,7 +69,7 @@ public abstract class MixinLevelRenderer {
 
 	@Redirect(method = "renderLevel",
 		slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;particlesTarget:Lcom/mojang/blaze3d/pipeline/RenderTarget;")),
-		at = @At(value = "INVOKE", ordinal = 0, target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;clear(Z)V"))
+		at = @At(value = "INVOKE", ordinal = 0, target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;clear(Z)V"), require = 0)
 	private void redirectClearRenderTarget(RenderTarget instance, boolean bl) {
 		// no-op
 	}
