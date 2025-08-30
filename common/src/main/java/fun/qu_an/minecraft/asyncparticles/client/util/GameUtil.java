@@ -1,8 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTicker;
 import net.minecraft.ReportedException;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.resources.ResourceLocation;
@@ -31,7 +31,7 @@ public class GameUtil {
 		return abs(vec3.x) + abs(vec3.y) + abs(vec3.z);
 	}
 
-	public static Queue<Particle> newParticleQueue() {
+	public static <T extends Particle> Queue<T> newParticleQueue() {
 		return IterationSafeEvictingQueue.newInstance(
 			16,
 			ConfigHelper.getParticleLimit(),

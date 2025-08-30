@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderer;
 import org.slf4j.Logger;
 
 public class VertexHelper {

@@ -132,7 +132,8 @@ public class ModListHelper {
 
 	@ExpectPlatform
 	public static boolean isModLoaded(String modId) {
-		throw new AssertionError();
+		ExceptionUtil.throwAssertionError();
+		return false;
 	}
 
 	@ExpectPlatform

@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.legacy.subtle_effects;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.compat.subtle_effects.SubtleEffectsCompat;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.Particle;

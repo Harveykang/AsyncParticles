@@ -4,8 +4,8 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
@@ -38,6 +38,7 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 		if (!ModListHelper.IS_CLIENT) {
 			return;
 		}
+
 		AsyncParticlesClient.init();
 		if (ModListHelper.FABRIC_API_LOADED) { // assert !IS_FORGE
 			ClientCommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {

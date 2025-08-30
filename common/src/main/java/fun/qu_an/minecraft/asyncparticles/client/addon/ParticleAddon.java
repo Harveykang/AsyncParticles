@@ -1,11 +1,10 @@
 package fun.qu_an.minecraft.asyncparticles.client.addon;
 
-import fun.qu_an.minecraft.asyncparticles.client.api.IParticleCullingPredicate;
 import net.minecraft.client.particle.Particle;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
-public interface ParticleAddon extends IParticleCullingPredicate {
+public interface ParticleAddon {
 	void asyncparticles$setTicked();
 	void asyncparticles$resetTicked();
 	boolean asyncparticles$isTicked();
@@ -17,7 +16,6 @@ public interface ParticleAddon extends IParticleCullingPredicate {
 	/**
 	 * Forge shouldCull()
 	 */
-	@Override
 	boolean shouldCull();
 
 	boolean asyncparticles$isVisibleOnScreen();

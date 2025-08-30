@@ -1,8 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTicker;
 import net.minecraft.client.Minecraft;
 
 public class ThreadUtil {
@@ -67,5 +67,11 @@ public class ThreadUtil {
 
 	public static void assertOnMainThread() {
 		RenderSystem.assertOnRenderThread();
+	}
+
+	public static void assertNotMainThread() {
+		if (isOnMainThread()) {
+			throw new IllegalStateException("Cannot call this method from main thread");
+		}
 	}
 }

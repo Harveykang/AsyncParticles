@@ -7,8 +7,21 @@ transitive-mutable field net/minecraft/client/particle/ParticleEngine particles 
 accessible field net/minecraft/client/particle/Particle x D
 accessible field net/minecraft/client/particle/Particle y D
 accessible field net/minecraft/client/particle/Particle z D
+accessible field net/minecraft/client/particle/Particle xo D
+accessible field net/minecraft/client/particle/Particle yo D
+accessible field net/minecraft/client/particle/Particle zo D
 accessible field net/minecraft/client/particle/Particle alpha F
+accessible method net/minecraft/client/particle/TextureSheetParticle getU0 ()F
+accessible method net/minecraft/client/particle/TextureSheetParticle getU1 ()F
+accessible method net/minecraft/client/particle/TextureSheetParticle getV0 ()F
+accessible method net/minecraft/client/particle/TextureSheetParticle getV1 ()F
+accessible field net/minecraft/client/particle/Particle bCol F
+accessible field net/minecraft/client/particle/Particle gCol F
+accessible field net/minecraft/client/particle/Particle rCol F
+accessible field net/minecraft/client/particle/Particle oRoll F
+accessible field net/minecraft/client/particle/Particle roll F
 accessible field net/minecraft/client/particle/Particle level Lnet/minecraft/client/multiplayer/ClientLevel;
+accessible method net/minecraft/client/particle/ParticleEngine makeParticle (Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)Lnet/minecraft/client/particle/Particle;
 accessible field net/minecraft/world/phys/HitResult location Lnet/minecraft/world/phys/Vec3;
 transitive-mutable field net/minecraft/world/phys/HitResult location Lnet/minecraft/world/phys/Vec3;
 accessible field net/minecraft/client/particle/Particle stoppedByCollision Z
@@ -62,3 +75,8 @@ accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables L
 accessible method net/minecraft/world/entity/Entity collideWithShapes (Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/List;)Lnet/minecraft/world/phys/Vec3;
 
 accessible class com/mojang/blaze3d/platform/GlStateManager$TextureState
+accessible field com/mojang/blaze3d/vertex/VertexBuffer vertexBufferId I
+accessible method com/mojang/blaze3d/vertex/VertexBuffer uploadVertexBuffer (Lcom/mojang/blaze3d/vertex/BufferBuilder$DrawState;Ljava/nio/ByteBuffer;)Lcom/mojang/blaze3d/vertex/VertexFormat;
+accessible field com/mojang/blaze3d/vertex/VertexBuffer arrayObjectId I
+accessible class com/mojang/blaze3d/systems/RenderSystem$AutoStorageIndexBuffer$IndexGenerator
+accessible method com/mojang/blaze3d/systems/RenderSystem$AutoStorageIndexBuffer <init> (IILcom/mojang/blaze3d/systems/RenderSystem$AutoStorageIndexBuffer$IndexGenerator;)V

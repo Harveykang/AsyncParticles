@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.ClothConfigMixinMenus;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
@@ -48,6 +49,20 @@ class ClothConfigMenus {
 				.setDefaultValue(defaultConfig.particle.removeIfMissedTick)
 				.setTooltip(Component.translatable("config.asyncparticles.particle.removeIfMissedTick.tooltip"))
 				.setSaveConsumer(newValue -> particle$removeIfMissedTick = newValue)
+				.build())
+			.addEntry(entryBuilder
+				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.parallelQueueRemoval"),
+					particle$parallelQueueRemoval)
+				.setDefaultValue(defaultConfig.particle.parallelQueueRemoval)
+				.setTooltip(Component.translatable("config.asyncparticles.particle.parallelQueueRemoval.tooltip"))
+				.setSaveConsumer(newValue -> particle$parallelQueueRemoval = newValue)
+				.build())
+			.addEntry(entryBuilder
+				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.parallelQueueEviction"),
+					particle$parallelQueueEviction)
+				.setDefaultValue(defaultConfig.particle.parallelQueueEviction)
+				.setTooltip(Component.translatable("config.asyncparticles.particle.parallelQueueEviction.tooltip"))
+				.setSaveConsumer(newValue -> particle$parallelQueueEviction = newValue)
 				.build())
 			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.particleLightCache"),
@@ -131,6 +146,22 @@ class ClothConfigMenus {
 				.setDefaultValue(defaultConfig.rendering.particleRenderingMode)
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.particleRenderingMode.tooltip"))
 				.setSaveConsumer(newValue -> rendering$particleRenderingMode = newValue)
+				.build())
+			.addEntry(entryBuilder
+				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.gpuAcceleration"),
+					rendering$gpuAcceleration)
+				.setDefaultValue(defaultConfig.rendering.gpuAcceleration)
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.gpuAcceleration.tooltip"))
+				// todo add gpu acceleration requirement
+				.setSaveConsumer(newValue -> rendering$gpuAcceleration = newValue)
+				.setRequirement(GLCaps::supportsGpuAcceleration)
+				.build())
+			.addEntry(entryBuilder
+				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.appendNewParticlesToRenderer"),
+					rendering$appendNewParticlesToRenderer)
+				.setDefaultValue(defaultConfig.rendering.appendNewParticlesToRenderer)
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.appendNewParticlesToRenderer.tooltip"))
+				.setSaveConsumer(newValue -> rendering$appendNewParticlesToRenderer = newValue)
 				.build())
 			.addEntry(entryBuilder
 				.startSelector(Component.translatable("config.asyncparticles.rendering.particleCulling"),

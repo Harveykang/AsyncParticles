@@ -6,6 +6,7 @@
 ## 特性
 
 - Minecraft
+  - 高性能/兼容性的GPU粒子加速渲染
   - 粒子剔除
   - 异步粒子刻/渲染（缓冲区填充）
   - 异步粒子光照缓存
@@ -52,6 +53,9 @@
 
 ## 致谢
 
-- [MixinSquared](https://github.com/Bawnorton/MixinSquared)
-- [MixinExtras](https://github.com/LlamaLad7/MixinExtras)
-- [MixinConstraints](https://github.com/Moulberry/MixinConstraints)
+- [Flerovium](https://github.com/MoePus/Flerovium) 关于快速粒子渲染的代码。
+- [MixinSquared](https://github.com/Bawnorton/MixinSquared) 惊人的基于 mixin 的框架。
+- [MixinConstraints](https://github.com/Moulberry/MixinConstraints) 关于版本号检查的代码。
+
+# 备忘
+- 如果启动不了游戏，报ijKotlinCoroutineJvmDebugInit1相关错误，把 Debugger/Attach Coroutine Agent关了

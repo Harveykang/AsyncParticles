@@ -57,37 +57,22 @@ dependencies {
 //    modLocalRuntime "dev.su5ed.sinytra.fabric-api:fabric-api:0.92.2+1.11.9+1.20.1"
 
     /* APIs */
-    modLocalRuntime 'maven.modrinth:architectury-api:9.2.14+forge'
     modCompileOnly("me.shedaniel.cloth:cloth-config-forge:11.1.136")
 //    if (rootProject.use_connector_mod == "true") {
 //        modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
 //    }
 
     /* Performance */
-    modLocalRuntime "maven.modrinth:spark:1.10.53-forge"
-    modLocalRuntime 'maven.modrinth:starlight-forge:1.1.2+1.20'
     modCompileOnly 'maven.modrinth:embeddium:0.3.31+mc1.20.1'
     modCompileOnly "maven.modrinth:oculus:1.20.1-1.8.0"
-    modLocalRuntime 'maven.modrinth:embeddium:0.3.31+mc1.20.1'
-    modLocalRuntime "maven.modrinth:oculus:1.20.1-1.8.0"
-    localRuntime "org.antlr:antlr4-runtime:4.13.1"
-    localRuntime "io.github.douira:glsl-transformer:2.0.1"
-    localRuntime "org.anarres:jcpp:1.4.14"
-    modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
     modCompileOnly "maven.modrinth:flerovium:1.2.15"
-    modLocalRuntime "maven.modrinth:flerovium:1.2.15"
 
     /* Valkyrien Skies */
-    modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'
-    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.9"
     modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.9"
-    modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.5.1-beta.3'
 
     /* Particle Rain/Pretty Rain */
     modCompileOnly "maven.modrinth:pretty-rain:yIvOKPKZ" // 1.1.3
-    modLocalRuntime "maven.modrinth:pretty-rain:yIvOKPKZ" // 1.1.3
     modCompileOnly "maven.modrinth:particle-rain:v4-beta.1+1.20.1-forge"
-    modLocalRuntime "maven.modrinth:particle-rain:v4-beta.1+1.20.1-forge"
 //    modLocalRuntime "maven.modrinth:particle-rain:v4-beta.1+1.20.1-forge"
 
     /* Effectual */
@@ -105,11 +90,8 @@ dependencies {
     modCompileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
 //    modLocalRuntime("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
     modCompileOnly("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}")
-    modLocalRuntime("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}")
     modCompileOnly("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}")
-    modLocalRuntime("dev.engine-room.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}")
     modCompileOnly("com.tterrag.registrate:Registrate:${registrate_version}")
-    modLocalRuntime("com.tterrag.registrate:Registrate:${registrate_version}")
 
     /* Effective */
 //    modLocalRuntime fileTree(dir: '../libs', include: 'effective-1.0.6-1.20.1-forge.jar')
@@ -124,27 +106,21 @@ dependencies {
 //    modLocalRuntime("com.github.Fallen-Breath.conditional-mixin:conditional-mixin-forge:0.6.2")
     /* Epic Fight */
     modCompileOnly "maven.modrinth:epic-fight:20.12.5"
-    modLocalRuntime "maven.modrinth:epic-fight:20.12.5"
 
     /* Gateways to Eternity */
     modCompileOnly "curse.maven:gateway-to-eternity-417802:5703251"
-    modLocalRuntime "curse.maven:gateway-to-eternity-417802:5703251"
 
     /* Epic ACG */
     modCompileOnly "curse.maven:epic-acg-665625:6106647"
-    modLocalRuntime "curse.maven:epic-acg-665625:6106647"
 
     /* Draconic Evolution */
     modCompileOnly "maven.modrinth:draconic-evolution:3.1.2.604"
-    modLocalRuntime "maven.modrinth:draconic-evolution:3.1.2.604"
 
     /* Iron's Spells and Spellbooks */
     modCompileOnly "maven.modrinth:irons-spells-n-spellbooks:1.20.1-3.4.0.7"
-    modLocalRuntime "maven.modrinth:curios:5.12.1+1.20.1"
 
     /* Weather2 */
     modCompileOnly "curse.maven:weather2-237746:5244118" // 2.8.3
-    modLocalRuntime "curse.maven:weather2-237746:5244118" // 2.8.3
 
     /* Aquaculture */
     modCompileOnly "maven.modrinth:aquamirae:7lX4KLFc"
@@ -167,6 +143,34 @@ dependencies {
 
     /* Lodestone */
     modCompileOnly "maven.modrinth:lodestonelib:dRIycWqx" // 1.6.4.1
+
+
+
+    modLocalRuntime 'maven.modrinth:architectury-api:9.2.14+forge'
+    modLocalRuntime "maven.modrinth:spark:1.10.53-forge"
+    modLocalRuntime 'maven.modrinth:starlight-forge:1.1.2+1.20'
+    modLocalRuntime 'maven.modrinth:embeddium:0.3.31+mc1.20.1'
+    modLocalRuntime "maven.modrinth:oculus:1.20.1-1.8.0"
+    localRuntime "org.antlr:antlr4-runtime:4.13.1"
+    localRuntime "io.github.douira:glsl-transformer:2.0.1"
+    localRuntime "org.anarres:jcpp:1.4.14"
+    modLocalRuntime "maven.modrinth:flerovium:1.2.15"
+
+    modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'
+    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.9"
+    modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.5.1-beta.3'
+//    modLocalRuntime "maven.modrinth:pretty-rain:yIvOKPKZ" // 1.1.3
+    modLocalRuntime "maven.modrinth:particle-rain:v4-beta.1+1.20.1-forge"
+    modLocalRuntime("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}")
+    modLocalRuntime("dev.engine-room.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}")
+    modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
+    modLocalRuntime("com.tterrag.registrate:Registrate:${registrate_version}")
+    modLocalRuntime "maven.modrinth:epic-fight:20.12.5"
+    modLocalRuntime "curse.maven:gateway-to-eternity-417802:5703251"
+    modLocalRuntime "curse.maven:epic-acg-665625:6106647"
+    modLocalRuntime "maven.modrinth:draconic-evolution:3.1.2.604"
+    modLocalRuntime "maven.modrinth:curios:5.12.1+1.20.1"
+    modLocalRuntime "curse.maven:weather2-237746:5244118" // 2.8.3
 }
 
 processResources {

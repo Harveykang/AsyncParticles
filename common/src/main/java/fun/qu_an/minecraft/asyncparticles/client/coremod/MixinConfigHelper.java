@@ -1,7 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-
 import java.util.Collection;
 
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.CONFIG;
@@ -41,5 +39,9 @@ public class MixinConfigHelper {
 
 	public static Collection<String> getContraptionNoParticleCollision() {
 		return CONFIG.getContraptionNoParticleCollision();
+	}
+
+	public static boolean isParticleSplitTick() {
+		return CONFIG.isParticleSplitTick();
 	}
 }

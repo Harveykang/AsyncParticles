@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.weather2;
 
-import fun.qu_an.minecraft.asyncparticles.client.api.EndTickEvent;
+import fun.qu_an.minecraft.asyncparticles.client.task.EndTickEvent;
 import net.minecraftforge.event.TickEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

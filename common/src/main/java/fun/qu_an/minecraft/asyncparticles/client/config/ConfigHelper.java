@@ -28,6 +28,30 @@ public class ConfigHelper {
 		return particle$particleLightCache;
 	}
 
+	public static int getParticleLimit() {
+		return particle$particleLimit;
+	}
+
+	public static boolean isCullUnderwaterParticleType() {
+		return particle$cullUnderwaterParticleType;
+	}
+
+	public static boolean isRemoveIfMissedTick() {
+		return particle$removeIfMissedTick;
+	}
+
+	public static boolean isParallelQueueRemoval() {
+		return particle$parallelQueueRemoval;
+	}
+
+	public static boolean isParallelQueueEviction() {
+		return particle$parallelQueueEviction;
+	}
+
+	public static boolean isAppendNewParticlesToRenderer() {
+		return rendering$appendNewParticlesToRenderer;
+	}
+
 	public static boolean suppressCME() {
 		return tick$suppressCME;
 	}
@@ -38,6 +62,42 @@ public class ConfigHelper {
 
 	public static boolean forceDoneParticleTick() {
 		return tick$particleTickMode == TickMode.FORCE_COMPLETE;
+	}
+
+	public static boolean isTickWeatherAsync() {
+		return tick$tickWeatherAsync;
+	}
+
+	public static int getTickFailurePerSecondThreshold() {
+		return tick$failPerSecLimit;
+	}
+
+	public static int getRenderFailurePerSecondThreshold() {
+		return rendering$failPerSecLimit;
+	}
+
+	public static RenderingMode particleRenderingMode() {
+		return rendering$particleRenderingMode;
+	}
+
+	public static boolean isRenderAsync() {
+		return rendering$particleRenderingMode != RenderingMode.SYNCHRONOUSLY;
+	}
+
+	public static boolean isCullWeathers() {
+		return rendering$cullWeathers;
+	}
+
+	public static RenderingMode getParticleRenderingMode() {
+		return rendering$particleRenderingMode;
+	}
+
+	public static ParticleCullingMode getParticleCullingMode() {
+		return rendering$particleCulling;
+	}
+
+	public static boolean isGpuParticles() {
+		return rendering$gpuAcceleration;
 	}
 
 	public static boolean fixParticleLightOnVsShips() {
@@ -52,60 +112,12 @@ public class ConfigHelper {
 		return AsyncParticlesConfig.valkyrienSkies$rainEffect;
 	}
 
-	public static int getParticleLimit() {
-		return particle$particleLimit;
-	}
-
 	public static boolean alwaysSpawnRainParticlesOnVsShips() {
 		return valkyrienSkies$rainEffect == RainEffect.ALWAYS;
-	}
-
-	public static boolean doCreateRainEffectsIfMoving() {
-		return true;
-	}
-
-	public static int getRenderFailurePerSecondThreshold() {
-		return rendering$failPerSecLimit;
-	}
-
-	public static int getTickFailurePerSecondThreshold() {
-		return tick$failPerSecLimit;
-	}
-
-	public static RenderingMode particleRenderingMode() {
-		return rendering$particleRenderingMode;
-	}
-
-	public static boolean isRenderAsync() {
-		return rendering$particleRenderingMode != RenderingMode.SYNCHRONOUSLY;
 	}
 
 	// TODO: implement weather particle config, which will not be spawn into physics structures
 	public static Set<ResourceLocation> getWeatherParticles() {
 		return Set.of();
-	}
-
-	public static boolean isCullUnderwaterParticleType() {
-		return particle$cullUnderwaterParticleType;
-	}
-
-	public static boolean isRemoveIfMissedTick() {
-		return particle$removeIfMissedTick;
-	}
-
-	public static boolean isCullWeathers() {
-		return rendering$cullWeathers;
-	}
-
-	public static boolean isTickWeatherAsync() {
-		return tick$tickWeatherAsync;
-	}
-
-	public static RenderingMode getParticleRenderingMode() {
-		return rendering$particleRenderingMode;
-	}
-
-	public static ParticleCullingMode getParticleCullingMode() {
-		return rendering$particleCulling;
 	}
 }

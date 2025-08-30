@@ -16,7 +16,7 @@ import com.imeetake.effects.SparksSoul.SoulCampfireImprovements;
 import com.imeetake.effects.SparksSoul.SoulFireImprovements;
 import com.imeetake.effects.SteamEffect.SteamEffect;
 import com.imeetake.effects.WaterDrip.WaterDripEffect;
-import fun.qu_an.minecraft.asyncparticles.client.api.EndTickEvent;
+import fun.qu_an.minecraft.asyncparticles.client.task.EndTickEvent;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.Event;
 import org.spongepowered.asm.mixin.Mixin;

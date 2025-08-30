@@ -6,6 +6,7 @@
 ## Features
 
 - Minecraft
+  - High performance/compatibility gpu particle acceleration.
   - Particle culling.
   - Async particle ticking/rendering(buffer filling).
   - Async particle light cache.
@@ -52,6 +53,6 @@
 
 ## Credits
 
-- [MixinSquared](https://github.com/Bawnorton/MixinSquared)
-- [MixinExtras](https://github.com/LlamaLad7/MixinExtras)
-- [MixinConstraints](https://github.com/Moulberry/MixinConstraints)
+- [Flerovium](https://github.com/MoePus/Flerovium) for the faster particle rendering code.
+- [MixinSquared](https://github.com/Bawnorton/MixinSquared) for the amazing mixin-based framework.
+- [MixinConstraints](https://github.com/Moulberry/MixinConstraints) for the version checking code.

@@ -5,7 +5,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
-import fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticle;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.MixinParticle;
 import net.minecraft.client.particle.Particle;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

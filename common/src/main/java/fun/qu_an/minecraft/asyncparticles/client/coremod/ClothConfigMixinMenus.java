@@ -12,8 +12,10 @@ import net.minecraft.network.chat.Component;
 import java.io.IOException;
 import java.util.*;
 
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
-import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.*;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.IRONS_SPELLBOOKS_LOADED;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.MAKE_BUBBLES_POP_LOADED;
+import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.MixinConfigObj;
+import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.getToSaveConfig;
 
 // No more NoClassDefFoundError
 public class ClothConfigMixinMenus {
@@ -23,6 +25,17 @@ public class ClothConfigMixinMenus {
 		MixinConfigObj defaultConfig = new MixinConfigObj();
 		MixinConfigObj newConfig = new MixinConfigObj();
 		MixinConfigObj lastConfig = getToSaveConfig();
+		mixinCategory.addEntry(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.particle.splitTick"),
+				lastConfig.isParticleSplitTick())
+			.setDefaultValue(defaultConfig.isParticleSplitTick())
+			.setSaveConsumer(newConfig::setParticleSplitTick)
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.particle.splitTick.tooltip"))
+			.requireRestart()
+			.build());
 		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap"),
 				lastConfig.isSafeClassInstanceMultiMap())

@@ -5,19 +5,20 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
-import fun.qu_an.minecraft.asyncparticles.client.util.CustomTesselator;
-import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
-import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticles;
+import fun.qu_an.minecraft.asyncparticles.client.particle.ParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -29,7 +30,7 @@ import org.spongepowered.asm.mixin.*;
 import java.util.*;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
-public class MixinParticleEngine_Render implements ParticleEngineAddon {
+public abstract class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Shadow
 	public Map<ParticleRenderType, Queue<Particle>> particles;
 	@Shadow
@@ -91,26 +92,46 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 		RenderSystem.applyModelViewMatrix();
 		profiler.pop();
 
+		GpuParticles.runTfs(camera, f);
+
 		Frustum frustum = AsyncRenderer.frustum;
-		boolean irisEarlyOpaquePhase = AsyncRenderer.isIrisEarlyOpaquePhase();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
+		boolean irisEarlyOpaquePhase = AsyncRenderer.isIrisEarlyOpaquePhase();
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			// FABRIC skips NO_RENDER
 			//				if (particleRenderType == ParticleRenderType.NO_RENDER) {
 			//					continue;
 			//				}
 			Queue<Particle> queue = this.particles.get(particleRenderType);
-			if (queue == null || queue.isEmpty()) {
+			Queue<TextureSheetParticle> gpuQueue = GpuParticles.gpuParticles.get(particleRenderType);
+			boolean hasGpu = gpuQueue != null && !gpuQueue.isEmpty();
+			boolean hasCpu = queue != null && !queue.isEmpty();
+			profiler.push("render_particles");
+			ParticleRenderer gpuParticleRenderer;
+			if (!hasGpu) {
+				gpuParticleRenderer = null;
+			} else {
+				gpuParticleRenderer = GpuParticles.getRenderer(particleRenderType);
+				if (gpuParticleRenderer == null || gpuParticleRenderer.isShouldSkip()) {
+					hasGpu = false;
+				}
+			}
+			if (!hasCpu && !hasGpu) {
 				continue;
 			}
-			profiler.push("render_sync");
 			Collection<? extends Particle> syncParticles;
 			Tesselator tesselator;
 			BufferBuilder bufferBuilder;
 			ParticleCullingMode realCullMode;
 			BufferBuilder toBegin;
-			if ((bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager)) ==
-				FakeBufferBuilder.INSTANCE) {
+			if (!hasCpu) {
+				syncParticles = null;
+				toBegin = FakeBufferBuilder.INSTANCE;
+				tesselator = FakeTesselator.INSTANCE;
+				realCullMode = null;
+				bufferBuilder = FakeBufferBuilder.INSTANCE;
+			} else if ((bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager)) ==
+					   FakeBufferBuilder.INSTANCE) {
 				realCullMode = particleCullingMode;
 				// if irisEarlyOpaquePhase, we render custom particles in AsyncRenderer.irisCustom()
 				syncParticles = irisEarlyOpaquePhase ? Collections.emptyList() : queue;
@@ -130,7 +151,10 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			// must set shader before begin
 			RenderSystem.setShader(GameRenderer::getParticleShader);
 			particleRenderType.begin(toBegin, textureManager);
-			if (!syncParticles.isEmpty()) {
+			if (hasGpu) {
+				gpuParticleRenderer.render();
+			}
+			if (hasCpu && !syncParticles.isEmpty()) {
 				float f2 = f + 1f;
 				for (Particle particle : syncParticles) {
 					if (!particle.isAlive()) {
@@ -164,9 +188,9 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 					}
 				}
 			}
-			profiler.popPush("upload_particles");
 			particleRenderType.end(tesselator);
 			if (bufferBuilder.building()) {
+				profiler.popPush("upload_particles");
 				bufferBuilder.end().release(); // release buffer manually if not released by particleRenderType.end()
 			}
 			profiler.pop();

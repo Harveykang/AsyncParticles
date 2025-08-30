@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.vs2;
 
 import com.bawnorton.mixinsquared.TargetHandler;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import org.spongepowered.asm.mixin.Dynamic;

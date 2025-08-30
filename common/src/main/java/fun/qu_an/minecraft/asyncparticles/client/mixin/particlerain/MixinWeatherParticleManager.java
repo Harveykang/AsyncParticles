@@ -3,7 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.particlerain;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import fun.qu_an.minecraft.asyncparticles.client.api.EndTickOperation;
+import fun.qu_an.minecraft.asyncparticles.client.task.EndTickOperation;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;

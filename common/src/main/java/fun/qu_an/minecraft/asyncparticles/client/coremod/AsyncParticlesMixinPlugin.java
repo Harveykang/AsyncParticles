@@ -6,9 +6,9 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.*;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticlesMixinCanceller;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticlesMixinMemberCanceller;
+import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.MixinClassAdjusterRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.ExtensionMemberCancelApplication;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.MixinMemberCancellerRegistrar;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.MixinClassAdjusterRegistrar;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -59,7 +59,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		String mixinPackageName = mixinClassName.substring(PACKAGE_LENGTH);
 		String[] split = mixinPackageName.split("\\.");
 		if (split.length == 1) {
-			return true;
+			throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		}
 		return switch (split[0]) {
 			case "conditional" -> switch (split[1]) {
@@ -67,6 +67,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "MixinLevelChunk_BlockEntityMap", "MixinLevelChunk_BlockEntityMap_Late" ->
 					MixinConfigHelper.isSafeBlockEntityMap();
 				case "MixinLegacyRandomSource" -> MixinConfigHelper.isSafeLegacyRandomSource();
+				case "MixinParticleEngine_SplitTick" -> MixinConfigHelper.isParticleSplitTick();
 				default -> true;
 			};
 			case "fabric" -> {
@@ -86,10 +87,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
-			case "fake_renders",
-				 "off_thread_access",
-				 "tick",
-				 "render" -> true;
+			case "core" -> true;
 			case "particlerain" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN;
 			case "particlerain_vs" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && VS_LOADED;
 			case "particlerain_create" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && CREATE_LOADED;

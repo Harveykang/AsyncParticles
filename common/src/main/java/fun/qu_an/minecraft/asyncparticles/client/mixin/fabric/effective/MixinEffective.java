@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.effective;
 
-import fun.qu_an.minecraft.asyncparticles.client.api.EndTickEvent;
+import fun.qu_an.minecraft.asyncparticles.client.task.EndTickEvent;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.Event;
 import org.ladysnake.effective.core.Effective;

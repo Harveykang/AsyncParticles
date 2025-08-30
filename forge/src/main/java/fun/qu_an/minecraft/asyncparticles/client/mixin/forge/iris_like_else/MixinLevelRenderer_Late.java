@@ -3,7 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.iris_like_else;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.vertex.PoseStack;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.*;

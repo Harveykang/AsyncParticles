@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.epicfight;
 
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import net.minecraft.client.particle.Particle;
 import org.spongepowered.asm.mixin.Mixin;
