@@ -28,6 +28,7 @@ dependencies {
 
     /* Performance */
     modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.6.13-fabric"
+    modCompileOnly "maven.modrinth:sodium-extra:mc1.21.1-0.6.0+fabric"
     modCompileOnly 'maven.modrinth:iris:1.8.8+1.21.1-fabric'
 
     /* Particle Rain */

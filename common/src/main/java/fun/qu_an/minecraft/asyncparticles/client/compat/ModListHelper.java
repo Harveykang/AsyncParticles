@@ -18,6 +18,8 @@ public class ModListHelper {
 	public static final boolean FABRIC_SODIUM_LOADED = isFabricModLoaded("sodium");
 	public static final boolean FORGE_SODIUM_LOADED = isForgeModLoaded("sodium");
 	public static final boolean FORGE_EMBEDDIUM_LOADED = isForgeModLoaded("embeddium");
+	/* Sodium Extra */
+	public static final boolean SODIUM_EXTRA_LOADED = isModLoaded("sodium-extra") || isModLoaded("sodium_extra");
 	/* IRIS */
 	// What the hell of compatibility is this!
 	public static final boolean IRIS_LIKE_LOADED = isModLoaded("iris") || isModLoaded("oculus");

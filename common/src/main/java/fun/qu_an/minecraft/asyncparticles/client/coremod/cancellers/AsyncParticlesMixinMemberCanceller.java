@@ -11,7 +11,8 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 			case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin",
 				 "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin",
 				 "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
-				 "net.diebuddies.mixins.weather.MixinParticleEngine" -> true;
+				 "net.diebuddies.mixins.weather.MixinParticleEngine",
+				 "foundry.veil.mixin.performance.client.PerformanceLevelRendererMixin" -> true;
 			default -> false;
 		};
 	}
@@ -26,8 +27,9 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 				"addCustomRenderTypes".equals(mixinMethodName);
 			case "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin" ->
 				"skipGeneratingAABB".equals(mixinMethodName) || "FastFrustumCheck".equals(mixinMethodName);
-			case "net.diebuddies.mixins.weather.MixinParticleEngine" ->
-				"tick".equals(mixinMethodName);
+			case "net.diebuddies.mixins.weather.MixinParticleEngine" -> "tick".equals(mixinMethodName);
+			case "foundry.veil.mixin.performance.client.PerformanceLevelRendererMixin" ->
+				"clearParticlesColor".equals(mixinMethodName);
 			default -> false;
 		};
 	}
