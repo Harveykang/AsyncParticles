@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -14,6 +13,7 @@ import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
+import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -24,7 +24,10 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -51,46 +54,21 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 	public void asyncparticle$sortRenderOrder() {
 		// make custom types render after non-customs
 		// Remove duplicated render types, (e.g. Hex Casting mod's bug)
-		Set<ParticleRenderType> renderTypes = new LinkedHashSet<>((int) (RENDER_ORDER.size() * 1.34) + 1);
+		Map<ParticleRenderType, Queue<Particle>> particles = new LinkedHashMap<>((int) (RENDER_ORDER.size() * 1.34) + 1);
 		for (ParticleRenderType type : RENDER_ORDER) {
 			if (!AsyncRenderer.getBTesselator(type, textureManager).shouldSync) {
-				renderTypes.add(type);
+				particles.put(type, GameUtil.newParticleQueue());
 			}
 		}
 		for (ParticleRenderType type : RENDER_ORDER) {
 			if (AsyncRenderer.getBTesselator(type, textureManager).shouldSync) {
-				renderTypes.add(type);
+				particles.put(type, GameUtil.newParticleQueue());
 			}
 		}
 
-		List<ParticleRenderType> renderOrder = RENDER_ORDER = ImmutableList.copyOf(renderTypes);
-		Map<ParticleRenderType, Queue<Particle>> newTreeMap = Maps.newTreeMap(asyncparticles$makeComparator(renderOrder));
-		newTreeMap.putAll(particles);
-		particles = newTreeMap;
-	}
-
-	@Unique
-	private static Comparator<ParticleRenderType> asyncparticles$makeComparator(List<ParticleRenderType> renderOrder) {
-		return (o1, o2) -> {
-			int i1 = -1;
-			int i2 = -1;
-			for (int i = 0; i < renderOrder.size(); i++) {
-				ParticleRenderType geti = renderOrder.get(i);
-				if (i1 == -1 && geti == o1) {
-					i1 = i;
-				} else if (i2 == -1 && geti == o2) {
-					i2 = i;
-				}
-				if (i1 >= 0 && i2 >= 0) {
-					return Integer.compare(i1, i2);
-				}
-			}
-
-			if (i1 == -1 && i2 == -1) {
-				return Integer.compare(System.identityHashCode(o1), System.identityHashCode(o2));
-			}
-			return i1 >= 0 ? -1 : 1;
-		};
+		RENDER_ORDER = ImmutableList.copyOf(particles.keySet());
+		particles.putAll(this.particles);
+		this.particles = particles;
 	}
 
 	/**

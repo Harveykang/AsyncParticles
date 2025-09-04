@@ -1,13 +1,10 @@
 package fun.qu_an.minecraft.asyncparticles.client.neoforge;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderStateShard;
 
 @SuppressWarnings("unused")
 public class AsyncRendererImpl {
@@ -25,14 +22,8 @@ public class AsyncRendererImpl {
 	public static void endTranslucent(LightTexture lightTexture, Camera camera, float f, boolean isAsync) {
 		Minecraft mc = Minecraft.getInstance();
 		mc.getProfiler().popPush("particles");
-		LevelRenderer levelRenderer = mc.levelRenderer;
 
-		if (levelRenderer.transparencyChain != null) {
-			RenderTarget particlesTarget = levelRenderer.getParticlesTarget();
-			particlesTarget.clear(Minecraft.ON_OSX);
-			particlesTarget.copyDepthFrom(mc.getMainRenderTarget());
-			RenderStateShard.PARTICLES_TARGET.setupRenderState();
-		}
+		AsyncRenderer.onTranslucent(mc);
 
 		AsyncRenderer.renderAsync = isAsync;
 		AsyncRenderer.particlePhase = true;
@@ -40,8 +31,6 @@ public class AsyncRendererImpl {
 		AsyncRenderer.renderAsync = false;
 		AsyncRenderer.particlePhase = false;
 
-		if (levelRenderer.transparencyChain != null) {
-			RenderStateShard.PARTICLES_TARGET.clearRenderState();
-		}
+		AsyncRenderer.postTranslucent(mc);
 	}
 }

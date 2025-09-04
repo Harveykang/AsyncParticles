@@ -1,8 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.tick;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.systems.RenderSystem;
-import fun.qu_an.minecraft.asyncparticles.client.*;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -10,18 +9,21 @@ import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.*;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.TrackingEmitter;
 import net.minecraft.core.particles.ParticleGroup;
-import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Queue;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class MixinParticleEngine {
@@ -113,10 +115,7 @@ public abstract class MixinParticleEngine {
 				}
 				Queue<Particle> queue = this.particles.computeIfAbsent(particle.getRenderType(),
 					k -> {
-						Queue<Particle> queue1 = IterationSafeEvictingQueue.newInstance(
-							16,
-							ConfigHelper.getParticleLimit(),
-							AsyncTicker::onEvicted);
+						Queue<Particle> queue1 = GameUtil.newParticleQueue();
 						// fix the first added particle not ticked.
 						if (tickAsync) {
 							AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue1));

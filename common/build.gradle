@@ -101,5 +101,5 @@ dependencies {
     modCompileOnly "maven.modrinth:figura:yXFi1fed" // 0.1.5
 
     /* Veil */
-//    modCompileOnly "maven.modrinth:veil:R5ikM9Ga" // 2.2.0
+    modCompileOnly "maven.modrinth:veil:V9mVgVIC" // 2.3.2
 }

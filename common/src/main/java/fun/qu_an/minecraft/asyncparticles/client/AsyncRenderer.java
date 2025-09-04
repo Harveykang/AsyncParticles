@@ -25,7 +25,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -238,13 +237,8 @@ public class AsyncRenderer {
 		Minecraft mc = Minecraft.getInstance();
 		mc.getProfiler().popPush("particles");
 
-		LevelRenderer levelRenderer = mc.levelRenderer;
-		if (levelRenderer.transparencyChain != null) {
-			RenderTarget particlesTarget = levelRenderer.getParticlesTarget();
-			particlesTarget.clear(Minecraft.ON_OSX);
-			particlesTarget.copyDepthFrom(mc.getMainRenderTarget());
-			RenderStateShard.PARTICLES_TARGET.setupRenderState();
-		}
+
+		onTranslucent(mc);
 
 		ParticleEngine particleEngine = mc.particleEngine;
 
@@ -257,9 +251,7 @@ public class AsyncRenderer {
 		renderAsync = false;
 		particlePhase = false;
 
-		if (levelRenderer.transparencyChain != null) {
-			RenderStateShard.PARTICLES_TARGET.clearRenderState();
-		}
+		postTranslucent(mc);
 	}
 
 	@ExpectPlatform
@@ -440,6 +432,21 @@ public class AsyncRenderer {
 		waitForAsyncTasks();
 		closeBTesselators();
 		clearSync();
+	}
+
+	public static void onTranslucent(Minecraft mc) {
+		if (mc.levelRenderer.transparencyChain != null) {
+			RenderTarget particlesTarget = mc.levelRenderer.getParticlesTarget();
+			particlesTarget.clear(Minecraft.ON_OSX);
+			particlesTarget.copyDepthFrom(mc.getMainRenderTarget());
+			RenderStateShard.PARTICLES_TARGET.setupRenderState();
+		}
+	}
+
+	public static void postTranslucent(Minecraft mc) {
+		if (mc.levelRenderer.transparencyChain != null) {
+			RenderStateShard.PARTICLES_TARGET.clearRenderState();
+		}
 	}
 
 	public static class AsyncRendererThread extends AsyncParticleWorkerThread {
