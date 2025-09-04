@@ -246,13 +246,7 @@ public class AsyncRenderer {
 		Minecraft mc = Minecraft.getInstance();
 		mc.getProfiler().popPush("particles");
 
-		LevelRenderer levelRenderer = mc.levelRenderer;
-		if (levelRenderer.transparencyChain != null) {
-			RenderTarget particlesTarget = levelRenderer.getParticlesTarget();
-			particlesTarget.clear(Minecraft.ON_OSX);
-			particlesTarget.copyDepthFrom(mc.getMainRenderTarget());
-			RenderStateShard.PARTICLES_TARGET.setupRenderState();
-		}
+		onTranslucent(mc);
 
 		MultiBufferSource.BufferSource bufferSource = mc.levelRenderer.renderBuffers.bufferSource();
 		ParticleEngine particleEngine = mc.particleEngine;
@@ -265,9 +259,7 @@ public class AsyncRenderer {
 		renderAsync = false;
 		particlePhase = false;
 
-		if (levelRenderer.transparencyChain != null) {
-			RenderStateShard.PARTICLES_TARGET.clearRenderState();
-		}
+		postTranslucent(mc);
 	}
 
 	public static boolean isIrisEarlyOpaquePhase() {
@@ -308,12 +300,7 @@ public class AsyncRenderer {
 		LevelRenderer levelRenderer = mc.levelRenderer;
 		MultiBufferSource.BufferSource bufferSource = levelRenderer.renderBuffers.bufferSource();
 
-		if (levelRenderer.transparencyChain != null) {
-			RenderTarget particlesTarget = levelRenderer.getParticlesTarget();
-			particlesTarget.clear(Minecraft.ON_OSX);
-			particlesTarget.copyDepthFrom(mc.getMainRenderTarget());
-			RenderStateShard.PARTICLES_TARGET.setupRenderState();
-		}
+		onTranslucent(mc);
 
 		ParticleEngine particleEngine = mc.particleEngine;
 		((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
@@ -323,9 +310,7 @@ public class AsyncRenderer {
 		renderAsync = false;
 		particlePhase = false;
 
-		if (levelRenderer.transparencyChain != null) {
-			RenderStateShard.PARTICLES_TARGET.clearRenderState();
-		}
+		postTranslucent(mc);
 	}
 
 	public static void irisCustom(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
@@ -599,6 +584,22 @@ public class AsyncRenderer {
 		waitForAsyncTasks();
 		FORMATS.clear();
 		clearSync();
+	}
+
+	public static void onTranslucent(Minecraft mc) {
+		if (mc.levelRenderer.transparencyChain != null) {
+			RenderTarget particlesTarget = mc.levelRenderer.getParticlesTarget();
+			particlesTarget.clear(Minecraft.ON_OSX);
+			particlesTarget.copyDepthFrom(mc.getMainRenderTarget());
+			RenderStateShard.PARTICLES_TARGET.setupRenderState();
+		}
+
+	}
+
+	public static void postTranslucent(Minecraft mc) {
+		if (mc.levelRenderer.transparencyChain != null) {
+			RenderStateShard.PARTICLES_TARGET.clearRenderState();
+		}
 	}
 
 	public static class AsyncRendererThread extends AsyncParticleWorkerThread {

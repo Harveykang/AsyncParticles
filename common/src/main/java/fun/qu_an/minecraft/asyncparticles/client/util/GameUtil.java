@@ -1,9 +1,14 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.ReportedException;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.Queue;
 
 import static java.lang.Math.abs;
 
@@ -24,5 +29,12 @@ public class GameUtil {
 
 	public static double manhattanLength(Vec3 vec3) {
 		return abs(vec3.x) + abs(vec3.y) + abs(vec3.z);
+	}
+
+	public static Queue<Particle> newParticleQueue() {
+		return IterationSafeEvictingQueue.newInstance(
+			16,
+			ConfigHelper.getParticleLimit(),
+			AsyncTicker::onEvicted);
 	}
 }

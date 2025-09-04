@@ -97,10 +97,7 @@ public abstract class MixinParticleEngine {
 				}
 				Queue<Particle> queue = this.particles.computeIfAbsent(particle.getRenderType(),
 					k -> {
-						Queue<Particle> queue1 = IterationSafeEvictingQueue.newInstance(
-							16,
-							ConfigHelper.getParticleLimit(),
-							AsyncTicker::onEvicted);
+						Queue<Particle> queue1 = GameUtil.newParticleQueue();
 						// fix the first added particle not ticked.
 						if (tickAsync) {
 							AsyncTicker.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue1));
