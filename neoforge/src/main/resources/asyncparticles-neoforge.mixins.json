@@ -14,7 +14,7 @@
     "create.MixinParticle",
     "create.MixinParticle_LightCache",
     "epicfight.MixinEpicFightRenderTypes",
-    "epicfight.MixinTexturedCustomModelParticle",
+    "epicfight.MixinCustomModelParticle",
     "particular.MixinClientStuff",
     "prettyrain.MixinGroundFogParticle",
     "prettyrain.MixinModClientForgeEvents",

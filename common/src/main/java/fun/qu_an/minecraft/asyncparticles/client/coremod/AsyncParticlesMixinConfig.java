@@ -123,12 +123,16 @@ public class AsyncParticlesMixinConfig {
 		private Set<String> particle$lockProvider = new LinkedHashSet<>();
 
 		{
+			particle$lockProvider.add("yesman.epicfight.client.particle.TrailParticle");
+			particle$lockProvider.add("yesman.epicfight.client.particle.AbstractTrailParticle");
 			particle$lockProvider.add("com.lowdragmc.photon.client.gameobject.FXObject");
 		}
 
 		private Set<String> particle$lockRequired = new LinkedHashSet<>();
 
 		{
+			particle$lockRequired.add("yesman.epicfight.client.particle.TrailParticle");
+			particle$lockRequired.add("yesman.epicfight.client.particle.AbstractTrailParticle");
 			particle$lockRequired.add("com.lowdragmc.photon.client.gameobject.FXObject");
 		}
 
