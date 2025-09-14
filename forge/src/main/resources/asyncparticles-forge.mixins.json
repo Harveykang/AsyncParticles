@@ -9,7 +9,7 @@
     "MixinParticleEngine_Render",
     "epicacg.MixinAsyncRenderer",
     "epicfight.MixinEpicFightRenderTypes",
-    "epicfight.MixinTexturedCustomModelParticle",
+    "epicfight.MixinCustomModelParticle",
     "flerovium.MixinSingleQuadParticleMixin",
     "fluffy_fur.MixinShadersIntegration",
     "gateways.MixinGatewayParticle",

@@ -124,6 +124,7 @@ public class AsyncParticlesMixinConfig {
 
 		{
 			particle$lockProvider.add("yesman.epicfight.client.particle.TrailParticle");
+			particle$lockProvider.add("yesman.epicfight.client.particle.AbstractTrailParticle");
 			particle$lockProvider.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
 			particle$lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
 			particle$lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
@@ -134,6 +135,7 @@ public class AsyncParticlesMixinConfig {
 
 		{
 			particle$lockRequired.add("yesman.epicfight.client.particle.TrailParticle");
+			particle$lockRequired.add("yesman.epicfight.client.particle.AbstractTrailParticle");
 			particle$lockRequired.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
 			particle$lockRequired.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
 			particle$lockRequired.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
