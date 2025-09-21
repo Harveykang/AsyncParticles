@@ -49,7 +49,12 @@
 
 ### ❌ Incompatible
 - OptiFine
-- MadParticle  
+- MadParticle
+
+## License
+-   1.x   MIT
+- < ?.4.0 MIT
+- >=?.4.0 LGPL-3.0
 
 ## Credits
 
