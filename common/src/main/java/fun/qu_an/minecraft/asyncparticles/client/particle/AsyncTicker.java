@@ -58,7 +58,7 @@ public class AsyncTicker {
 	private static Consumer<String> debugConsumer;
 	private static boolean shouldReload;
 	public static final ForkJoinPool EXECUTOR;
-	public static final int THREADS;
+	public static final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 	public static final String THREAD_PREFIX = "AsyncParticleTicker";
 	private static final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
@@ -68,7 +68,6 @@ public class AsyncTicker {
 
 	static {
 		AtomicInteger workerCount = new AtomicInteger(1);
-		THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 		EXECUTOR = new ForkJoinPool(THREADS, (forkJoinPool) -> {
 			ForkJoinWorkerThread forkJoinWorkerThread = new AsyncTickerThread(forkJoinPool);
 			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());

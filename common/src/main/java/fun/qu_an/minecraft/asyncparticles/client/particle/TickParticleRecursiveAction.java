@@ -4,6 +4,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
+import it.unimi.dsi.fastutil.HashCommon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
@@ -12,10 +13,8 @@ import java.util.Spliterator;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveAction;
 
-/**
- * I put this class here for now, but it should be moved to a more appropriate package.
- */
 public class TickParticleRecursiveAction extends RecursiveAction {
+	private static final int MAX_DEPTH = (int) Math.round(Math.log(HashCommon.nextPowerOfTwo(AsyncTicker.THREADS)) / Math.log(2)) + 2;
 	private final Spliterator<Particle> spliterator;
 	private final int depth;
 
@@ -31,7 +30,7 @@ public class TickParticleRecursiveAction extends RecursiveAction {
 	@Override
 	public void compute() {
 		Spliterator<Particle> sub;
-		if (spliterator.estimateSize() > 192 && depth < 5 && (sub = spliterator.trySplit()) != null) {
+		if (spliterator.estimateSize() > 192 && depth < MAX_DEPTH && (sub = spliterator.trySplit()) != null) {
 			ForkJoinTask<Void> left = new TickParticleRecursiveAction(sub, depth + 1).fork();
 			ForkJoinTask<Void> right = new TickParticleRecursiveAction(spliterator, depth + 1).fork();
 			left.join();
@@ -45,27 +44,18 @@ public class TickParticleRecursiveAction extends RecursiveAction {
 				if (AsyncTicker.isCancelled() && !forceDone) {
 					return;
 				}
-				if (((ParticleAddon) particle).asyncparticles$isTicked()) {
-					// Skip the first tick that the particle is added to the queue.
-					if (enableLightCache) {
-						((LightCachedParticleAddon) particle).asyncparticles$refresh();
+				if (!((ParticleAddon) particle).asyncparticles$isTicked()) {
+					if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
+						AsyncTicker.recordSync(particle);
+						return;
 					}
-					switch (particleCullingMode) {
-						case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
-						case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
+					try {
+						particleEngine.tickParticle(particle);
+					} catch (Throwable t) {
+						AsyncTicker.onTickingParticleException(particle, t);
 					}
-					return;
+					((ParticleAddon) particle).asyncparticles$setTicked();
 				}
-				if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
-					AsyncTicker.recordSync(particle);
-					return;
-				}
-				try {
-					particleEngine.tickParticle(particle);
-				} catch (Throwable t) {
-					AsyncTicker.onTickingParticleException(particle, t);
-				}
-				((ParticleAddon) particle).asyncparticles$setTicked();
 				if (enableLightCache) {
 					((LightCachedParticleAddon) particle).asyncparticles$refresh();
 				}

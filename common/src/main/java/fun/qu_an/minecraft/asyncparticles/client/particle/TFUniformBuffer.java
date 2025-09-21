@@ -18,20 +18,20 @@ public class TFUniformBuffer {
 	public final int ubo;
 	private ByteBuffer buffer;
 
-	public TFUniformBuffer() {
+	protected TFUniformBuffer() {
 		ubo = GL15C.glGenBuffers();
 		GL15C.glBindBuffer(GL31C.GL_UNIFORM_BUFFER, ubo);
 		GL15C.glBufferData(GL31C.GL_UNIFORM_BUFFER, SIZE, GL15C.GL_DYNAMIC_DRAW);
 		GL15C.glBindBuffer(GL31C.GL_UNIFORM_BUFFER, 0);
 	}
 
-	public void linkUniformBlock(int prog, String name, int bindingPoint) {
-		int blockIndex = GL31C.glGetUniformBlockIndex(prog, name);
+	public void linkUniformBlock(int prog) {
+		int blockIndex = GL31C.glGetUniformBlockIndex(prog, "FrameInfo");
 		if (blockIndex == GL31C.GL_INVALID_INDEX) {
-			throw new RuntimeException("Uniform block '" + name + "' not found in program!");
+			throw new RuntimeException("Uniform block 'FrameInfo' not found in program!");
 		}
 
-		GL31C.glUniformBlockBinding(prog, blockIndex, bindingPoint);
+		GL31C.glUniformBlockBinding(prog, blockIndex, 0);
 	}
 
 	public void update(Camera camera, float partialTicks, Vec3 lastCamPos) {

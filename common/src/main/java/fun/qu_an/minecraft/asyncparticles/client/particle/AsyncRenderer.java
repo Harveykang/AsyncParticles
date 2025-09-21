@@ -91,11 +91,10 @@ public class AsyncRenderer {
 
 	public static final ForkJoinPool EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
-
+	public static final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 	static {
 		AtomicInteger workerCount = new AtomicInteger(1);
-		int clamp = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
-		EXECUTOR = new ForkJoinPool(clamp, (forkJoinPool) -> {
+		EXECUTOR = new ForkJoinPool(THREADS, (forkJoinPool) -> {
 			ForkJoinWorkerThread forkJoinWorkerThread = new AsyncRendererThread(forkJoinPool);
 			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());
 			forkJoinWorkerThread.setDaemon(true);

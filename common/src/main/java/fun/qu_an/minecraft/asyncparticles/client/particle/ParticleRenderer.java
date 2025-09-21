@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.util.BufferHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;

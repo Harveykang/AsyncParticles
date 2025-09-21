@@ -19,7 +19,7 @@ public class TFShader {
 	public final int CameraUp;
 	public final int PartialCameraPos;
 
-	public TFShader() {
+	protected TFShader() {
 		// Shader
 		int tsh = GL20.glCreateShader(GlConst.GL_VERTEX_SHADER);
 		try (InputStream is = TFShader.class.getResourceAsStream("/assets/asyncparticles/transform_feedback/particle_tf.vsh")) {
@@ -53,7 +53,7 @@ public class TFShader {
 			throw new RuntimeException("Shader Program linking failed: " + infoLog);
 		}
 //		if (GLCaps.supportsUniformBufferObject) {
-//			TFUniformBuffer.TF_UNIFORM_BUFFER.linkUniformBlock(tshProg, "FrameInfo", 0);
+//			TFUniformBuffer.TF_UNIFORM_BUFFER.linkUniformBlock(tshProg);
 //		}
 
 		GL20C.glDeleteShader(tsh);

@@ -117,6 +117,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 					}
 				} else {
 					queue = this.particles.computeIfAbsent(renderType, this::asyncparticles$newQueue);
+					// mark cpu particles as ticked
 					((ParticleAddon) particle).asyncparticles$setTicked();
 				}
 				queue.add(particle);

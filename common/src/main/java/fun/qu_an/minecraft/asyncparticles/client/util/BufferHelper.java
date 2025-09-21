@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.particle;
+package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import com.mojang.blaze3d.platform.MemoryTracker;
 import it.unimi.dsi.fastutil.HashCommon;
