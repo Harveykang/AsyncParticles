@@ -58,6 +58,7 @@
 
 ## Credits
 
+- [wahfl2/sodium-fabric](https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16) for the approach to detect GPU-acceleratable particles.
 - [Flerovium](https://github.com/MoePus/Flerovium) for the faster particle rendering code.
 - [MixinSquared](https://github.com/Bawnorton/MixinSquared) for the amazing mixin-based framework.
 - [MixinConstraints](https://github.com/Moulberry/MixinConstraints) for the version checking code.
