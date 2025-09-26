@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.ClothConfigMixinMenus;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
@@ -279,7 +279,7 @@ class ClothConfigMenus {
 						current -> Minecraft.getInstance().setScreen(prevScreen)));
 				});
 			}
-			AsyncTicker.reloadLater();
+			AsyncTickBehavior.reloadLater();
 		});
 
 		return builder;

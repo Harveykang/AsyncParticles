@@ -11,6 +11,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v3.Particle
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -41,7 +42,7 @@ import static fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil.toThr
 
 // TODO: Organize this shit
 @Environment(EnvType.CLIENT)
-public class AsyncTicker {
+public class AsyncTickBehavior {
 	public static final Logger LOGGER = LogManager.getLogger();
 	public static final Map<ParticleRenderType, ByteBuffer> UNUPLOADED_BUFFERS = new ConcurrentHashMap<>();
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -141,12 +142,12 @@ public class AsyncTicker {
 	public static void doRemoveIf(Queue<? extends Particle> queue) {
 		if (ConfigHelper.isParallelQueueRemoval()) {
 			((IterationSafeEvictingQueue<? extends Particle>) queue)
-				.parallelRemoveIf(particle -> AsyncTicker.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()),
+				.parallelRemoveIf(particle -> AsyncTickBehavior.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()),
 					ConfigHelper.isParallelQueueEviction(),
-					AsyncTicker.THREADS,
-					AsyncTicker.EXECUTOR);
+					AsyncTickBehavior.THREADS,
+					AsyncTickBehavior.EXECUTOR);
 		} else {
-			queue.removeIf(particle -> AsyncTicker.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()));
+			queue.removeIf(particle -> AsyncTickBehavior.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()));
 		}
 	}
 
@@ -155,10 +156,10 @@ public class AsyncTicker {
 			((IterationSafeEvictingQueue<? extends TrackingEmitter>) queue)
 				.parallelRemoveIf(particle -> !particle.isAlive(),
 					ConfigHelper.isParallelQueueEviction(),
-					AsyncTicker.THREADS,
-					AsyncTicker.EXECUTOR);
+					AsyncTickBehavior.THREADS,
+					AsyncTickBehavior.EXECUTOR);
 		} else {
-			queue.removeIf(particle -> AsyncTicker.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()));
+			queue.removeIf(particle -> AsyncTickBehavior.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()));
 		}
 	}
 
@@ -230,7 +231,7 @@ public class AsyncTicker {
 						}
 					}
 				}
-			}).exceptionally(AsyncTicker::tickExceptionally);
+			}).exceptionally(AsyncTickBehavior::tickExceptionally);
 			parallelEventsFuture = particleFuture.thenCompose(v -> {
 				// 每 tick 结束时都要执行的固定事件，可在 tick 间的任意时刻执行
 				@SuppressWarnings("rawtypes")
@@ -246,7 +247,7 @@ public class AsyncTicker {
 						});
 				}
 				return CompletableFuture.allOf(completableFutures);
-			}).exceptionally(AsyncTicker::tickExceptionally);
+			}).exceptionally(AsyncTickBehavior::tickExceptionally);
 		}
 
 		// end tick operations
@@ -266,7 +267,7 @@ public class AsyncTicker {
 						}
 					}
 				}
-			}).exceptionally(AsyncTicker::tickExceptionally);
+			}).exceptionally(AsyncTickBehavior::tickExceptionally);
 			parallelOperationsFuture = particleFuture.thenCompose(v -> {
 				@SuppressWarnings("rawtypes")
 				CompletableFuture[] futures = new CompletableFuture[endTickTasks.length];
@@ -283,7 +284,7 @@ public class AsyncTicker {
 					}
 				}
 				return j == 0 ? Utils.nullFuture() : CompletableFuture.allOf(Arrays.copyOf(futures, j));
-			}).exceptionally(AsyncTicker::tickExceptionally);
+			}).exceptionally(AsyncTickBehavior::tickExceptionally);
 		}
 		sequencedTaskFuture = CompletableFuture.allOf(sequencedTaskFuture, parallelEventsFuture, parallelOperationsFuture);
 
@@ -297,12 +298,12 @@ public class AsyncTicker {
 				particleOperations.clear();
 				Function<Void, CompletableFuture<Void>> function = v -> CompletableFuture.allOf(Arrays.stream(particleTasks)
 					.map(runnable -> CompletableFuture.runAsync(runnable, EXECUTOR))
-					.toArray(CompletableFuture[]::new)).exceptionally(AsyncTicker::tickExceptionally);
+					.toArray(CompletableFuture[]::new)).exceptionally(AsyncTickBehavior::tickExceptionally);
 				sequencedTaskFuture = sequencedTaskFuture.thenCompose(function);
 			}
 		}
 
-		AsyncTicker.particleFuture = sequencedTaskFuture
+		AsyncTickBehavior.particleFuture = sequencedTaskFuture
 			.thenRunAsync(() -> timeUsageNano.setRelease(System.nanoTime() - timeUsageNano.getAcquire()), EXECUTOR);
 
 		profiler.pop();
@@ -327,14 +328,14 @@ public class AsyncTicker {
 		}
 		Throwable rootCause = ExceptionUtil.getRootCause(e);
 		return rootCause instanceof MissingPaletteEntryException
-			   || rootCause instanceof NullPointerException
-			   || rootCause instanceof IndexOutOfBoundsException
-			   || rootCause instanceof ArrayIndexOutOfBoundsException
-			   || (rootCause instanceof ConcurrentModificationException && ConfigHelper.suppressCME());
+			|| rootCause instanceof NullPointerException
+			|| rootCause instanceof IndexOutOfBoundsException
+			|| rootCause instanceof ArrayIndexOutOfBoundsException
+			|| (rootCause instanceof ConcurrentModificationException && ConfigHelper.suppressCME());
 	}
 
 	public static void onTickingParticleException(Particle particle, Throwable t) {
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			throw constructCrashReport(particle, t);
 		}
 		boolean tolerable = isTolerable(t);
@@ -382,17 +383,17 @@ public class AsyncTicker {
 	}
 
 	public static void waitForCleanUp() {
-		if (AsyncTicker.particleCleanup != null) {
-			AsyncTicker.particleCleanup.join();
-			AsyncTicker.particleCleanup = null;
+		if (AsyncTickBehavior.particleCleanup != null) {
+			AsyncTickBehavior.particleCleanup.join();
+			AsyncTickBehavior.particleCleanup = null;
 		}
 	}
 
 	public static ReportedException constructCrashReport(Particle particle, Throwable t) {
 		debugLater(LOGGER::info);
 		tryDebug();
-		AsyncRenderer.debugLater(LOGGER::info);
-		AsyncRenderer.tryDebug();
+		AsyncRenderBehavior.debugLater(LOGGER::info);
+		AsyncRenderBehavior.tryDebug();
 		CrashReport crashReport = CrashReport.forThrowable(t, "Ticking Particle");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being ticked");
 		crashReportCategory.setDetail("Particle", particle::toString);
@@ -488,7 +489,7 @@ public class AsyncTicker {
 						Queue<Particle> queue = e.getValue();
 						return queue.size() + "/" + ((IterationSafeEvictingQueue<Particle>) queue).arraySize();
 					})),
-				GpuParticles.gpuParticles.entrySet()
+				GpuParticleBehavior.gpuParticles.entrySet()
 					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
 						Queue<TextureSheetParticle> queue = e.getValue();
 						return queue.size() + "/" + ((IterationSafeEvictingQueue<TextureSheetParticle>) queue).arraySize();
@@ -509,7 +510,7 @@ public class AsyncTicker {
 			.stream()
 			.collect(Collectors.toMap(ParticleRenderType::getClass, Object::toString)));
 		LOGGER.info(particleEngine.particles);
-		LOGGER.info(GpuParticles.gpuParticles);
+		LOGGER.info(GpuParticleBehavior.gpuParticles);
 	}
 
 	public static void reloadLater() {
@@ -524,25 +525,27 @@ public class AsyncTicker {
 	}
 
 	public static void reload(boolean clearParticles) {
-		AsyncRenderer.reset();
+		AsyncRenderBehavior.reset();
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 		if (clearParticles) {
 			reset();
 			particleEngine.clearParticles();
 		} else {
-			Queue<Particle> newToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
+			Queue<Particle> newToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getParticleLimit(), AsyncTickBehavior::onEvicted);
 			newToAdd.addAll(particleEngine.particlesToAdd);
 			particleEngine.particlesToAdd = newToAdd;
-			Queue<TrackingEmitter> newEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
+			Queue<TrackingEmitter> newEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTickBehavior::onEvicted);
 			newEmitters.addAll(particleEngine.trackingEmitters);
 			particleEngine.trackingEmitters = newEmitters;
 			boolean enableLightCache = ConfigHelper.particleLightCache();
 			ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
-			Map<ParticleRenderType, Queue<Particle>> particles = new LinkedHashMap<>();
+			Map<ParticleRenderType, Queue<Particle>> particles = new Reference2ObjectOpenHashMap<>();
+			Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = new Reference2ObjectOpenHashMap<>();
+			boolean tickAsync = ConfigHelper.isTickAsync();
+			boolean enableGpuAcceleration = ConfigHelper.isGpuParticles();
 			particleEngine.particles.forEach((key, queue) -> {
-				Queue<Particle> newQueue = IterationSafeEvictingQueue.newInstance(queue.size(), ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
-				newQueue.addAll(queue);
-				newQueue.forEach(p -> {
+				Queue<Particle> newQueue = ParticleHelper.newParticleQueue();
+				queue.forEach(p -> {
 					if (enableLightCache) {
 						((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
 						((LightCachedParticleAddon) p).asyncparticles$refresh();
@@ -553,22 +556,28 @@ public class AsyncTicker {
 						case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();
 						case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();
 					}
+					if (tickAsync && enableGpuAcceleration &&
+						p instanceof TextureSheetParticle tsp && GpuParticleBehavior.canRenderFast(tsp)) {
+						gpuParticles.computeIfAbsent(key, k -> {
+							GpuParticleBehavior.initParticleRenderType(k);
+							return ParticleHelper.newParticleQueue();
+						}).add(tsp);
+					} else {
+						newQueue.add(p);
+					}
 				});
 				particles.put(key, newQueue);
 			});
 			particleEngine.particles.putAll(particles);
 
-			if (!ConfigHelper.isTickAsync() || !ConfigHelper.isGpuParticles()) {
-				GpuParticles.gpuParticles.forEach((t, q) -> {
-					q.forEach(AsyncTicker::onEvicted);
+			if (!tickAsync || !enableGpuAcceleration) {
+				GpuParticleBehavior.gpuParticles.forEach((t, q) -> {
+					particles.get(t).addAll(q);
 				});
-				GpuParticles.gpuParticles.clear();
+				GpuParticleBehavior.gpuParticles.clear();
 			} else {
-				Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = new LinkedHashMap<>();
-				GpuParticles.gpuParticles.forEach((key, queue) -> {
-					Queue<TextureSheetParticle> newQueue = IterationSafeEvictingQueue.newInstance(queue.size(), ConfigHelper.getParticleLimit(), AsyncTicker::onEvicted);
-					newQueue.addAll(queue);
-					newQueue.forEach(p -> {
+				GpuParticleBehavior.gpuParticles.forEach((key, queue) -> {
+					queue.forEach(p -> {
 						if (enableLightCache) {
 							((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
 							((LightCachedParticleAddon) p).asyncparticles$refresh();
@@ -580,9 +589,12 @@ public class AsyncTicker {
 							case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();
 						}
 					});
-					gpuParticles.put(key, newQueue);
+					gpuParticles.computeIfAbsent(key, k -> {
+						GpuParticleBehavior.initParticleRenderType(k);
+						return ParticleHelper.newParticleQueue();
+					}).addAll(queue);
 				});
-				GpuParticles.gpuParticles.putAll(gpuParticles);
+				GpuParticleBehavior.gpuParticles.putAll(gpuParticles);
 			}
 		}
 	}
@@ -624,7 +636,7 @@ public class AsyncTicker {
 		if (!shouldTickParticles && ConfigHelper.isTickAsync()) {
 			return;
 		}
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			END_TICK_OPERATIONS.add(task);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> END_TICK_OPERATIONS.add(task));

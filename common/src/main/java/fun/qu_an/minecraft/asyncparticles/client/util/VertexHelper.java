@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import org.slf4j.Logger;
 
 public class VertexHelper {
@@ -15,7 +15,7 @@ public class VertexHelper {
 				LOGGER.warn("Negative alpha value {} detected. This may cause unexpected behavior. You can ignore it if nothing is broken.", alpha, new IllegalStateException(""));
 				warnedNegativeAlpha = true;
 			}
-			if ((AsyncRenderer.isParticlePhase() && ThreadUtil.isOnMainThread()) ||
+			if ((AsyncRenderBehavior.isParticlePhase() && ThreadUtil.isOnRenderThread()) ||
 				ThreadUtil.isOnParticleRendererThread()) {
 				alpha = 0f;
 			}

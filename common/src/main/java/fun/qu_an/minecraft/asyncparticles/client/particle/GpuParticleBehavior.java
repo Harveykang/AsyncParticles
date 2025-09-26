@@ -2,11 +2,12 @@ package fun.qu_an.minecraft.asyncparticles.client.particle;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
@@ -15,7 +16,7 @@ import org.spongepowered.asm.mixin.Unique;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class GpuParticles {
+public class GpuParticleBehavior {
 	public static final Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = new Reference2ObjectOpenHashMap<>();
 	public static final ParticleThreadLocal<Integer> DESTROY_LIGHT_CACHE = new ParticleThreadLocal<>();
 	// reuse buffer helper
@@ -34,7 +35,7 @@ public class GpuParticles {
 				SingleQuadParticle.class,
 				TextureSheetParticle.class,
 				FireworkParticles.OverlayParticle.class,
-				(Class<? extends Particle>) Class.forName("net.minecraft.client.particle.FireworkParticles$SparkParticle"),
+				(Class<? extends Particle>) Class.forName(Mappings.getFireworkSparkClass()),
 				DustColorTransitionParticle.class
 			));
 		} catch (ClassNotFoundException e) {
@@ -49,7 +50,7 @@ public class GpuParticles {
 	public static final String RENDER_METHOD;
 
 	static {
-		RENDER_METHOD = getRenderMethod();
+		RENDER_METHOD = Mappings.getRenderMethod();
 	}
 
 	//	public static final String TICK_METHOD = FabricLoader.getInstance().getMappingResolver().mapMethodName(
@@ -61,11 +62,6 @@ public class GpuParticles {
 	private static int particleLimit = -1;
 
 	public static void init() {
-	}
-
-	@ExpectPlatform
-	private static String getRenderMethod() {
-		throw new AssertionError();
 	}
 
 	public static ParticleRenderer createRenderer(ParticleRenderType type) {
@@ -119,8 +115,8 @@ public class GpuParticles {
 
 	@ApiStatus.Internal
 	public static void setInternalParticleLimit(int particleLimit) {
-		if (particleLimit != GpuParticles.particleLimit) {
-			GpuParticles.particleLimit = particleLimit;
+		if (particleLimit != GpuParticleBehavior.particleLimit) {
+			GpuParticleBehavior.particleLimit = particleLimit;
 			renderers.values().forEach(renderer -> renderer.resize(particleLimit));
 		}
 	}
@@ -140,5 +136,10 @@ public class GpuParticles {
 				renderer.runTf(camera, f);
 			}
 		});
+	}
+
+	public static void initParticleRenderType(ParticleRenderType k) {
+		Minecraft.getInstance().particleEngine.particles.computeIfAbsent(k, t -> ParticleHelper.newParticleQueue());
+		createRenderer(k);
 	}
 }

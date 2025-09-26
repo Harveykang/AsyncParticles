@@ -3,7 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.iris;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.vertex.PoseStack;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.GameRenderer;
@@ -34,7 +34,7 @@ public abstract class MixinLevelRenderer_Late {
 									  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 									  LocalIntRef irm) {
 		if (irm.get() != DELAYED_ASYNC){
-			AsyncRenderer.irisCustom(poseStack, partialTick, camera, lightTexture);
+			AsyncRenderBehavior.irisCustom(poseStack, partialTick, camera, lightTexture);
 		}
 	}
 
@@ -52,11 +52,11 @@ public abstract class MixinLevelRenderer_Late {
 										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 										  LocalIntRef irm) {
 		switch (irm.get()) {
-			case BEFORE_SYNC -> AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, false);
-			case MIXED_SYNC, SYNC -> AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture, false);
+			case BEFORE_SYNC -> AsyncRenderBehavior.endAll(poseStack, partialTick, camera, lightTexture, false);
+			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.irisOpaque(poseStack, partialTick, camera, lightTexture, false);
 			case MIXED_ASYNC, COMPATIBILITY_ASYNC ->
-				AsyncRenderer.irisOpaque(poseStack, partialTick, camera, lightTexture, true);
-			case BEFORE_ASYNC -> AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, true);
+				AsyncRenderBehavior.irisOpaque(poseStack, partialTick, camera, lightTexture, true);
+			case BEFORE_ASYNC -> AsyncRenderBehavior.endAll(poseStack, partialTick, camera, lightTexture, true);
 		}
 	}
 
@@ -71,9 +71,9 @@ public abstract class MixinLevelRenderer_Late {
 										 @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 										 LocalIntRef irm) {
 		switch (irm.get()) {
-			case MIXED_SYNC, SYNC -> AsyncRenderer.irisTranslucent(poseStack, partialTick, camera, lightTexture, false);
+			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.irisTranslucent(poseStack, partialTick, camera, lightTexture, false);
 			case MIXED_ASYNC, COMPATIBILITY_ASYNC ->
-				AsyncRenderer.irisTranslucent(poseStack, partialTick, camera, lightTexture, true);
+				AsyncRenderBehavior.irisTranslucent(poseStack, partialTick, camera, lightTexture, true);
 		}
 	}
 }

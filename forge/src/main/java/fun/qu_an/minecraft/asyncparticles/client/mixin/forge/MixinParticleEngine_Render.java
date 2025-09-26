@@ -10,8 +10,9 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticles;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.particle.ParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import net.minecraft.client.Camera;
@@ -53,13 +54,13 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 		// Remove duplicated render types, (e.g. Hex Casting mod's bug)
 		Map<ParticleRenderType, Queue<Particle>> particles = new LinkedHashMap<>((int) (RENDER_ORDER.size() * 1.34) + 1);
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderer.getVertexFormatPair(type, textureManager) != AsyncRenderer.EMPTY_FORMAT) {
-				particles.put(type, GameUtil.newParticleQueue());
+			if (AsyncRenderBehavior.getVertexFormatPair(type, textureManager) != AsyncRenderBehavior.EMPTY_FORMAT) {
+				particles.put(type, ParticleHelper.newParticleQueue());
 			}
 		}
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderer.getVertexFormatPair(type, textureManager) == AsyncRenderer.EMPTY_FORMAT) {
-				particles.put(type, GameUtil.newParticleQueue());
+			if (AsyncRenderBehavior.getVertexFormatPair(type, textureManager) == AsyncRenderBehavior.EMPTY_FORMAT) {
+				particles.put(type, ParticleHelper.newParticleQueue());
 			}
 		}
 
@@ -75,10 +76,10 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 	@Overwrite(remap = false) // Forge override
 	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f, Frustum ignored) {
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-		boolean renderAsync = AsyncRenderer.isRenderAsync();
+		boolean renderAsync = AsyncRenderBehavior.isRenderAsync();
 		if (renderAsync) {
 			profiler.push("wait_for_async_tasks");
-			AsyncRenderer.tryWaitingForAsyncTasks();
+			AsyncRenderBehavior.tryWaitingForAsyncTasks();
 			profiler.pop();
 		}
 
@@ -93,11 +94,11 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 		RenderSystem.applyModelViewMatrix();
 		profiler.pop();
 
-		GpuParticles.runTfs(camera, f);
+		GpuParticleBehavior.runTfs(camera, f);
 
-		Frustum frustum = AsyncRenderer.frustum;
+		Frustum frustum = AsyncRenderBehavior.frustum;
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
-		boolean irisEarlyOpaquePhase = AsyncRenderer.isIrisEarlyOpaquePhase();
+		boolean irisEarlyOpaquePhase = AsyncRenderBehavior.isIrisEarlyOpaquePhase();
 		// We don't use entrySet() to be compatible with iris.
 		for (ParticleRenderType particleRenderType : particles.keySet()) {
 			// FORGE doesn't skip NO_RENDER
@@ -105,7 +106,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 				continue;
 			}
 			Queue<Particle> queue = this.particles.get(particleRenderType);
-			Queue<TextureSheetParticle> gpuQueue = GpuParticles.gpuParticles.get(particleRenderType);
+			Queue<TextureSheetParticle> gpuQueue = GpuParticleBehavior.gpuParticles.get(particleRenderType);
 			boolean hasGpu = gpuQueue != null && !gpuQueue.isEmpty();
 			boolean hasCpu = queue != null && !queue.isEmpty();
 			profiler.push("render_particles");
@@ -113,7 +114,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 			if (!hasGpu) {
 				gpuParticleRenderer = null;
 			} else {
-				gpuParticleRenderer = GpuParticles.getRenderer(particleRenderType);
+				gpuParticleRenderer = GpuParticleBehavior.getRenderer(particleRenderType);
 				if (gpuParticleRenderer == null || gpuParticleRenderer.isShouldSkip()) {
 					hasGpu = false;
 				}
@@ -132,8 +133,8 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 				tesselator = FakeTesselator.INSTANCE;
 				realCullMode = null;
 				bufferBuilder = FakeBufferBuilder.INSTANCE;
-			} else if ((bufferBuilder = AsyncRenderer.beginBufferBuilder(particleRenderType, textureManager)) ==
-					   FakeBufferBuilder.INSTANCE) {
+			} else if ((bufferBuilder = AsyncRenderBehavior.beginBufferBuilder(particleRenderType, textureManager)) ==
+				FakeBufferBuilder.INSTANCE) {
 				realCullMode = particleCullingMode;
 				// if irisEarlyOpaquePhase, we render custom particles in AsyncRenderer.irisCustom()
 				syncParticles = irisEarlyOpaquePhase ? Collections.emptyList() : queue;
@@ -146,7 +147,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 				toBegin = bufferBuilder = tesselator.getBuilder();
 			} else {
 				realCullMode = ParticleCullingMode.DISABLED;
-				syncParticles = AsyncRenderer.getSync(particleRenderType);
+				syncParticles = AsyncRenderBehavior.getSync(particleRenderType);
 				tesselator = CustomTesselator.of(bufferBuilder, b -> BufferUploader.drawWithShader(b.end()));
 				toBegin = FakeBufferBuilder.INSTANCE;
 			}
@@ -186,7 +187,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 					try {
 						particle.render(bufferBuilder, camera, f3);
 					} catch (Throwable t) {
-						throw AsyncRenderer.constructCrashReport(particle, particleRenderType, t);
+						throw AsyncRenderBehavior.constructCrashReport(particle, particleRenderType, t);
 					}
 				}
 			}

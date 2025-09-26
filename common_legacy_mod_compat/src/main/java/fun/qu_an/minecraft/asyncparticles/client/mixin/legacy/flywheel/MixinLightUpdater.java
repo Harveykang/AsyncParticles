@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 public class MixinLightUpdater {
 	@WrapMethod(method = {"addListener", "removeListener"})
 	public void addListener(LightListener listener, Operation<Void> original) {
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			original.call(listener);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> original.call(listener));
@@ -27,7 +27,7 @@ public class MixinLightUpdater {
 
 	@WrapMethod(method = "onLightUpdate")
 	public void onLightUpdate(LightLayer type, long sectionPos, Operation<Void> original) {
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			original.call(type, sectionPos);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> original.call(type, sectionPos));
@@ -36,7 +36,7 @@ public class MixinLightUpdater {
 
 	@WrapMethod(method = "onLightPacket")
 	public void onLightPacket(int chunkX, int chunkZ, Operation<Void> original) {
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			original.call(chunkX, chunkZ);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> original.call(chunkX, chunkZ));

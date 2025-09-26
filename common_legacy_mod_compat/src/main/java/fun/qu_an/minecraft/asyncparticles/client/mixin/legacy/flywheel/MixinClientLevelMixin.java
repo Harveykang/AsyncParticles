@@ -20,7 +20,7 @@ public class MixinClientLevelMixin {
 	)
 	@Inject(method = "@MixinSquared:Handler", at = @At("HEAD"), cancellable = true)
 	private void filterEntities(CallbackInfoReturnable<Iterable<Entity>> ignored, CallbackInfo ci) {
-		if (!ThreadUtil.isOnMainThread()) {
+		if (!ThreadUtil.isOnRenderThread()) {
 			ci.cancel();
 		}
 	}

@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
 
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
@@ -37,10 +37,10 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	@Inject(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V", at = @At("RETURN"))
 	protected void onInit(CallbackInfo ci) {
 		Class<?> aClass = asyncparticles$getRealClass();
-		if (AsyncTicker.shouldSync(aClass)) {
+		if (AsyncTickBehavior.shouldSync(aClass)) {
 			asyncparticles$setTickSync();
 		}
-		if (AsyncRenderer.shouldSync(aClass)) {
+		if (AsyncRenderBehavior.shouldSync(aClass)) {
 			asyncparticles$setRenderSync();
 		}
 	}
@@ -120,7 +120,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 
 	public void asyncparticles$tickAABBCulling() {
 		AABB aabb = getBoundingBox().expandTowards(xd, yd, zd);
-		if (FrustumUtil.isVisible(AsyncRenderer.frustum, aabb)) {
+		if (FrustumUtil.isVisible(AsyncRenderBehavior.frustum, aabb)) {
 			asyncparticles$renderFlag |= 4;
 		} else {
 			asyncparticles$renderFlag &= ~4;
@@ -128,7 +128,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	}
 
 	public void asyncparticles$tickSphereCulling() {
-		if (FrustumUtil.isVisible(AsyncRenderer.frustum, (Particle) (Object) this)) {
+		if (FrustumUtil.isVisible(AsyncRenderBehavior.frustum, (Particle) (Object) this)) {
 			asyncparticles$renderFlag |= 4;
 		} else {
 			asyncparticles$renderFlag &= ~4;

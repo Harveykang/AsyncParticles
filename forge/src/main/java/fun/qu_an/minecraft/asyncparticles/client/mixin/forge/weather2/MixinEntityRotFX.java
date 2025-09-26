@@ -22,7 +22,7 @@ public class MixinEntityRotFX {
 
 	@Redirect(method = "remove", at = @At(value = "INVOKE", target = "Ljava/util/List;remove(Ljava/lang/Object;)Z"))
 	private boolean onRemove(List<Particle> instance, Object p_107347_) {
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			return instance.remove(p_107347_);
 		}
 		ThreadUtil.enqueueClientTask(() -> instance.remove((Particle) p_107347_));

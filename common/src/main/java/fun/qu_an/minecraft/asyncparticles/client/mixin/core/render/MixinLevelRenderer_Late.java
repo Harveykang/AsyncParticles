@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -36,7 +36,7 @@ public abstract class MixinLevelRenderer_Late {
 			PoseStack stack = RenderSystem.getModelViewStack();
 			// so that we don't need to change the behavior of ParticleEngine.render()
 			PoseStack.Pose pose = stack.poseStack.removeLast();
-			AsyncRenderer.endAll(poseStack, partialTick, camera, lightTexture, true);
+			AsyncRenderBehavior.endAll(poseStack, partialTick, camera, lightTexture, true);
 			stack.poseStack.addLast(pose);
 			RenderSystem.applyModelViewMatrix();
 		}

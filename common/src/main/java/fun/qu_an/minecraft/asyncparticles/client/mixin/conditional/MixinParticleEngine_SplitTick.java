@@ -3,9 +3,9 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 import com.bawnorton.mixinsquared.TargetHandler;
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticles;
+import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.particle.ParticleRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.particle.TickParticleRecursiveAction;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.particle.Particle;
@@ -47,15 +47,15 @@ public abstract class MixinParticleEngine_SplitTick {
 										 Queue<?> queue,
 										 CallbackInfo ci,
 										 @Local ParticleRenderer renderer) {
-		AsyncTicker.PARTICLE_OPERATIONS.add(() -> {
+		AsyncTickBehavior.PARTICLE_OPERATIONS.add(() -> {
 			if (ConfigHelper.isTickAsync() &&
 				PARALLELLED_RENDER_TYPES.contains(particleRenderType)) {
 				asyncparticles$splitTickParticleList((Queue) queue);
 			} else {
 				tickParticleList((Queue) queue);
 			}
-			AsyncTicker.doRemoveIf((Queue) queue);
-			renderer.tick(GpuParticles.getCameraPos(), (Queue) queue);
+			AsyncTickBehavior.doRemoveIf((Queue) queue);
+			renderer.tick(GpuParticleBehavior.getCameraPos(), (Queue) queue);
 		});
 	}
 
@@ -76,7 +76,7 @@ public abstract class MixinParticleEngine_SplitTick {
 	private void redirectScheduleTick(ParticleRenderType particleRenderType,
 									  Queue<?> queue,
 									  CallbackInfo ci) {
-		AsyncTicker.PARTICLE_OPERATIONS.add(() -> {
+		AsyncTickBehavior.PARTICLE_OPERATIONS.add(() -> {
 			if (ConfigHelper.isTickAsync() &&
 				PARALLELLED_RENDER_TYPES.contains(particleRenderType)) {
 				asyncparticles$splitTickParticleList((Queue) queue);

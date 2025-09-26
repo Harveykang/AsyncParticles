@@ -51,6 +51,9 @@ public class ParticleVertexBuffer {
 		if (size > this.size) {
 			resize(size);
 		}
+		if (mapped) {
+			throw new IllegalStateException("Buffer is already mapped");
+		}
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		ByteBuffer oldBuffer = glMapBufferRange(GL_ARRAY_BUFFER,
 			0,
@@ -69,7 +72,10 @@ public class ParticleVertexBuffer {
 
 	public void unmap(int size) {
 		if (size > this.size) {
-			throw new IllegalArgumentException("Unmapping more bytes than the buffer size");
+			throw new IllegalArgumentException("Unmapping more bytes than buffer size: " + size + " > " + this.size);
+		}
+		if (!mapped) {
+			throw new IllegalStateException("Buffer is not mapped");
 		}
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glFlushMappedBufferRange(GL_ARRAY_BUFFER, 0, size);

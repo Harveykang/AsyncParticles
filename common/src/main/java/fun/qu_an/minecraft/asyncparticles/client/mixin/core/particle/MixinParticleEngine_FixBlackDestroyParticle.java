@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
 
-import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticles;
+import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
@@ -28,12 +28,12 @@ public class MixinParticleEngine_FixBlackDestroyParticle {
 	@Inject(method = "method_34020", at = @At("HEAD"))
 	private void fixBlackDestroyParticle1(BlockPos blockPos, BlockState blockState, double d, double e, double f, double g, double h, double i, CallbackInfo ci) {
 		int lightColor = asyncparticles$getLightColor(level, blockPos);
-		GpuParticles.DESTROY_LIGHT_CACHE.set(lightColor);
+		GpuParticleBehavior.DESTROY_LIGHT_CACHE.set(lightColor);
 	}
 
 	@Inject(method = "method_34020", at = @At("RETURN"))
 	private void fixBlackDestroyParticle2(BlockPos blockPos, BlockState blockState, double d, double e, double f, double g, double h, double i, CallbackInfo ci) {
-		GpuParticles.DESTROY_LIGHT_CACHE.remove();
+		GpuParticleBehavior.DESTROY_LIGHT_CACHE.remove();
 	}
 
 	@Unique

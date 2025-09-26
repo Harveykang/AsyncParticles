@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.task;
 
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 
@@ -12,7 +12,7 @@ public interface EndTickOperation extends Runnable {
 	 * @apiNote Execution is not guaranteed.
 	 */
 	static void schedule(EndTickOperation task) {
-		AsyncTicker.scheduleOperation(task);
+		AsyncTickBehavior.scheduleOperation(task);
 	}
 
 	/**

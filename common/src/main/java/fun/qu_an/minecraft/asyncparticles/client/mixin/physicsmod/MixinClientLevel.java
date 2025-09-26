@@ -19,7 +19,7 @@ public class MixinClientLevel {
 	@Redirect(method = "@MixinSquared:Handler", at = @At(value = "INVOKE",
 		target = "Lnet/diebuddies/minecraft/ParticleSpawner;spawnServerBlockPhysicsParticle(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;DDDDDD)V"))
 	public void addParticle(BlockState state, Level level, double x, double y, double z, double vx, double vy, double vz) {
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			ParticleSpawner.spawnServerBlockPhysicsParticle(state, level, x, y, z, vx, vy, vz);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> ParticleSpawner.spawnServerBlockPhysicsParticle(state, level, x, y, z, vx, vy, vz));

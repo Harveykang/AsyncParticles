@@ -7,7 +7,7 @@ import com.mojang.blaze3d.vertex.VertexFormatElement;
 
 public class ParticleVertexFormats {
 	public static final int RAW_PARTICLE_BYTES = 68; // GPU_PARTICLE.getVertexSize();
-	public static final int PROCESSED_PARTICLE_BYTES = 44; // PARTICLE.getVertexSize();
+	public static final int PROCESSED_PARTICLE_VERTEX_BYTES = 44; // PARTICLE.getVertexSize();
 	public static final VertexFormatElement UV0_4F = new VertexFormatElement(0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.UV, 4);
 	public static final VertexFormatElement UV2_2I = new VertexFormatElement(2, VertexFormatElement.Type.INT, VertexFormatElement.Usage.UV, 2);
 	public static final VertexFormatElement VEC2F = new VertexFormatElement(0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.GENERIC, 2);

@@ -12,13 +12,13 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 
-public class TFUniformBuffer {
-	public static TFUniformBuffer TF_UNIFORM_BUFFER = new TFUniformBuffer();
+public class ParticleTransformFeedbackUniformBuffer {
+	public static ParticleTransformFeedbackUniformBuffer TF_UNIFORM_BUFFER = new ParticleTransformFeedbackUniformBuffer();
 	private static final int SIZE = 64;
 	public final int ubo;
 	private ByteBuffer buffer;
 
-	protected TFUniformBuffer() {
+	protected ParticleTransformFeedbackUniformBuffer() {
 		ubo = GL15C.glGenBuffers();
 		GL15C.glBindBuffer(GL31C.GL_UNIFORM_BUFFER, ubo);
 		GL15C.glBufferData(GL31C.GL_UNIFORM_BUFFER, SIZE, GL15C.GL_DYNAMIC_DRAW);

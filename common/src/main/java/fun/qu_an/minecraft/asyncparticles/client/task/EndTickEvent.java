@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.task;
 
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import net.minecraft.client.Minecraft;
 
 public interface EndTickEvent extends Runnable {
@@ -8,21 +8,21 @@ public interface EndTickEvent extends Runnable {
 	 * Equivalent to {@link EndTickEvent#register(boolean false, Runnable)}
 	 */
 	static void register(EndTickEvent task) {
-		AsyncTicker.registerEvent(task);
+		AsyncTickBehavior.registerEvent(task);
 	}
 
 	/**
 	 * Equivalent to {@link EndTickEvent#register(boolean false, MinecraftConsumer)}
 	 */
 	static void register(MinecraftConsumer task) {
-		AsyncTicker.registerEvent(() -> task.accept(Minecraft.getInstance()));
+		AsyncTickBehavior.registerEvent(() -> task.accept(Minecraft.getInstance()));
 	}
 
 	/**
 	 * Equivalent to {@link EndTickEvent#register(boolean false, ClientLevelConsumer)}
 	 */
 	static void register(ClientLevelConsumer task) {
-		AsyncTicker.registerEvent(() -> task.accept(Minecraft.getInstance().level));
+		AsyncTickBehavior.registerEvent(() -> task.accept(Minecraft.getInstance().level));
 	}
 
 	static void register(boolean parallel, Runnable task) {

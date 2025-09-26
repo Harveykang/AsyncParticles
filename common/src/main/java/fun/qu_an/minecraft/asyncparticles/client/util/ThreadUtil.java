@@ -1,8 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import net.minecraft.client.Minecraft;
 
 public class ThreadUtil {
@@ -38,19 +38,19 @@ public class ThreadUtil {
 
 	public static boolean isOnParticleThread() {
 		Class<? extends Thread> tClass = Thread.currentThread().getClass();
-		return tClass == AsyncRenderer.AsyncRendererThread.class || tClass == AsyncTicker.AsyncTickerThread.class;
+		return tClass == AsyncRenderBehavior.AsyncRendererThread.class || tClass == AsyncTickBehavior.AsyncTickerThread.class;
 	}
 
 	public static boolean isOnParticleRendererThread() {
-		return Thread.currentThread().getClass() == AsyncRenderer.AsyncRendererThread.class;
+		return Thread.currentThread().getClass() == AsyncRenderBehavior.AsyncRendererThread.class;
 	}
 
 	public static boolean isOnParticleTickerThread() {
-		return Thread.currentThread().getClass() == AsyncTicker.AsyncTickerThread.class;
+		return Thread.currentThread().getClass() == AsyncTickBehavior.AsyncTickerThread.class;
 	}
 
 	public static boolean isOnClientTickThread() {
-		return isOnMainThread() || isOnParticleTickerThread();
+		return isOnRenderThread() || isOnParticleTickerThread();
 	}
 
 	public static void runOnClient(Runnable runnable) {
@@ -61,7 +61,12 @@ public class ThreadUtil {
 		Minecraft.getInstance().pendingRunnables.add(runnable);
 	}
 
+	@Deprecated
 	public static boolean isOnMainThread() {
+		return isOnRenderThread();
+	}
+
+	public static boolean isOnRenderThread() {
 		return RenderSystem.isOnRenderThread();
 	}
 
@@ -70,7 +75,7 @@ public class ThreadUtil {
 	}
 
 	public static void assertNotMainThread() {
-		if (isOnMainThread()) {
+		if (isOnRenderThread()) {
 			throw new IllegalStateException("Cannot call this method from main thread");
 		}
 	}

@@ -5,8 +5,8 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
@@ -78,10 +78,10 @@ public final class AsyncParticlesClientForge {
 			.then(literal("debug")
 				.executes(context -> {
 					CommandSourceStack source = context.getSource();
-					AsyncTicker.debugLater(s -> source.sendSystemMessage(Component.literal(s)
+					AsyncTickBehavior.debugLater(s -> source.sendSystemMessage(Component.literal(s)
 						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
 							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
-					AsyncRenderer.debugLater(s -> source.sendSystemMessage(Component.literal(s)
+					AsyncRenderBehavior.debugLater(s -> source.sendSystemMessage(Component.literal(s)
 						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
 							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
 					return 1;
@@ -89,7 +89,7 @@ public final class AsyncParticlesClientForge {
 			.then(literal("dump")
 				.executes(context -> {
 					CommandSourceStack source = context.getSource();
-					AsyncTicker.dumpParticles();
+					AsyncTickBehavior.dumpParticles();
 					source.sendSystemMessage(Component.literal("Particles have been dumped to log."));
 					return 1;
 				}))
@@ -158,7 +158,7 @@ public final class AsyncParticlesClientForge {
 							.append(e.getMessage()));
 						return 1;
 					}
-					AsyncTicker.reloadLater();
+					AsyncTickBehavior.reloadLater();
 					source.sendSystemMessage(Component.literal("AsyncParticles config reloaded"));
 					return 1;
 				})));

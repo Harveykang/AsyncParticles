@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.epicfight;
 
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import net.minecraft.client.particle.Particle;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,8 +15,8 @@ public abstract class MixinCustomModelParticle implements ParticleAddon {
 	private void onInit(CallbackInfo ci) {
 		asyncparticles$setRenderSync();
 		Class<? extends Particle> clazz = asyncparticles$getRealClass();
-		if (!AsyncRenderer.shouldSync(clazz)) {
-			AsyncRenderer.markAsSync(clazz);
+		if (!AsyncRenderBehavior.shouldSync(clazz)) {
+			AsyncRenderBehavior.markAsSync(clazz);
 		}
 	}
 }

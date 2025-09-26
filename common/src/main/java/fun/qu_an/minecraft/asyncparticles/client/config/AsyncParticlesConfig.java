@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTicker;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -103,7 +103,7 @@ public class AsyncParticlesConfig {
 						Minecraft.getInstance().setScreen(current);
 						return;
 					} finally {
-						AsyncTicker.reloadLater();
+						AsyncTickBehavior.reloadLater();
 					}
 					current.message = msg.append("\n").append(
 						Component.translatable("gui.asyncparticles.reload-successfully")
@@ -139,7 +139,7 @@ public class AsyncParticlesConfig {
 						Minecraft.getInstance().setScreen(current);
 						return;
 					} finally {
-						AsyncTicker.reloadLater();
+						AsyncTickBehavior.reloadLater();
 					}
 					current.message = msg.append("\n").append(
 						Component.translatable("gui.asyncparticles.reset-successfully")

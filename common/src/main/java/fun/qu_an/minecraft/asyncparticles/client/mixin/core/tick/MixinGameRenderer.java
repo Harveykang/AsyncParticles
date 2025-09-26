@@ -3,7 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.tick;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticles;
+import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.task.EndTickOperation;
 import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.minecraft.client.Camera;
@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(GameRenderer.class)
 public class MixinGameRenderer {
 	static {
-		GpuParticles.init();
+		GpuParticleBehavior.init();
 	}
 	@Unique
 	private static final ResourceLocation asyncparticles$TICK_RAIN = GameUtil.id("tick_rain");

@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.iris.IrisCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -51,7 +52,7 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRendering
 
 // TODO: Organize this shit
 @Environment(EnvType.CLIENT)
-public class AsyncRenderer {
+public class AsyncRenderBehavior {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 	private static boolean renderAsync = false;
@@ -92,6 +93,7 @@ public class AsyncRenderer {
 	public static final ForkJoinPool EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
 	public static final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
+
 	static {
 		AtomicInteger workerCount = new AtomicInteger(1);
 		EXECUTOR = new ForkJoinPool(THREADS, (forkJoinPool) -> {
@@ -152,7 +154,7 @@ public class AsyncRenderer {
 				continue;
 			}
 			asyncTasks.add(CompletableFuture.runAsync(() -> renderParticles(f, camera, queue, particleRenderType, bufferBuilder), EXECUTOR)
-				.exceptionally(AsyncRenderer::renderAsyncExceptionally));
+				.exceptionally(AsyncRenderBehavior::renderAsyncExceptionally));
 		}
 		int size = asyncTasksSize = asyncTasks.size();
 		asyncTask = CompletableFuture.allOf(asyncTasks.toArray(new CompletableFuture[size]));
@@ -164,7 +166,7 @@ public class AsyncRenderer {
 										Queue<Particle> particles,
 										ParticleRenderType particleRenderType,
 										BufferBuilder bufferBuilder) {
-		Frustum frustum = AsyncRenderer.frustum;
+		Frustum frustum = AsyncRenderBehavior.frustum;
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		float f2 = f + 1f;
 		for (Particle particle : particles) {
@@ -205,7 +207,7 @@ public class AsyncRenderer {
 	}
 
 	private static void onRenderingParticleException(ParticleRenderType particleRenderType, Particle particle, Throwable t) {
-		boolean tolerable = AsyncTicker.isTolerable(t);
+		boolean tolerable = AsyncTickBehavior.isTolerable(t);
 		Class<? extends Particle> particleClass = ((ParticleAddon) particle).asyncparticles$getRealClass();
 		if (tolerable && !EXCEPTION_TRACKER.addException(particleClass, t)) {
 			return;
@@ -319,7 +321,7 @@ public class AsyncRenderer {
 		PoseStack poseStack2 = null;
 		Minecraft mc = Minecraft.getInstance();
 		ParticleEngine particleEngine = mc.particleEngine;
-		Frustum frustum = AsyncRenderer.frustum;
+		Frustum frustum = AsyncRenderBehavior.frustum;
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		float f2 = f + 1f;
 		for (Map.Entry<ParticleRenderType, Queue<Particle>> entry : particleEngine.particles.entrySet()) {
@@ -423,8 +425,8 @@ public class AsyncRenderer {
 	}
 
 	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable t) {
-		AsyncTicker.debugLater(LOGGER::info);
-		AsyncTicker.tryDebug();
+		AsyncTickBehavior.debugLater(LOGGER::info);
+		AsyncTickBehavior.tryDebug();
 		debugLater(LOGGER::info);
 		tryDebug();
 		CrashReport crashReport = CrashReport.forThrowable(t, "Rendering Particle");
@@ -535,7 +537,11 @@ public class AsyncRenderer {
 				sync particle types: %s,
 				sync particle render types: %s,
 				particle mode: %s,
-				iris particle mode: %s"""
+				iris particle mode: %s
+				glCapabilities: TransformFeedback: %s,
+				                ExplicitAttribLocation: %s,
+				                ComputeShader: %s,
+				                ShaderStorageBuffer: %s,""" // TODO
 				.formatted(asyncTasksSize,
 					BUFFER_BUILDERS.entrySet()
 						.stream()
@@ -563,7 +569,8 @@ public class AsyncRenderer {
 					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse()
 						? Optional.ofNullable(IrisCompat.getParticleRenderingSettings())
 						.map(ParticleRenderingSettings::name)
-						.orElse("disabled") : "disabled"));
+						.orElse("disabled") : "disabled",
+					GLCaps.tfSupport.getClass().getSimpleName(), Boolean.toString(GLCaps.supportsExplicitAttribLocation)));
 			debugConsumer = null;
 		}
 	}
