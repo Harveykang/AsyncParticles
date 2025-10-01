@@ -27,6 +27,7 @@
     "create.InvokerContraptionCollider",
     "create.MixinAbstractContraptionEntity",
     "create.MixinAbstractContraptionEntity_NoParticleCollision",
+    "create.MixinAirCurrent",
     "create.MixinContraption",
     "create.MixinParticle",
     "create.MixinParticle_LightCache",
