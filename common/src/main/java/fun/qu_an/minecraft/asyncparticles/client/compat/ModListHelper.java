@@ -27,6 +27,7 @@ public class ModListHelper {
 	public static final boolean FORGE_IRIS_LIKE_LOADED = isForgeModLoaded("iris") || isForgeModLoaded("oculus");
 	public static final boolean FORGE_IRIS_LOADED = isForgeModLoaded("iris");
 	public static final boolean FORGE_OCULUS_LOADED = isForgeModLoaded("oculus");
+	public static final boolean IS_LEGACY_IRIS = versionCheck("iris", null, "1.7.999999");
 	/* Dummmmmmy */
 	public static final boolean DUMMMMMMY_LOADED = isModLoaded("dummmmmmy");
 	/* Effectual */

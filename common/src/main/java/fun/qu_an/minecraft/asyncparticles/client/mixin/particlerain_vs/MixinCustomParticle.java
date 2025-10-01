@@ -15,13 +15,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import pigcart.particlerain.config.ModConfig;
+import pigcart.particlerain.config.ConfigData;
 import pigcart.particlerain.particle.CustomParticle;
 
 @Mixin(CustomParticle.class)
 public abstract class MixinCustomParticle extends MixinWeatherParticle implements ParticleRainAddon {
 	@Shadow(remap = false)
-	ModConfig.ParticleOptions opts;
+	public ConfigData.ParticleData opts;
 
 	protected MixinCustomParticle(ClientLevel clientLevel, double d, double e, double f) {
 		super(clientLevel, d, e, f);
@@ -32,7 +32,7 @@ public abstract class MixinCustomParticle extends MixinWeatherParticle implement
 										  ClipContext clipContext,
 										  @Local(ordinal = 0) Vec3 quadCenterPos,
 										  @Local(ordinal = 1) Vec3 quadEdgePos) {
-		if (!asyncparticles$isRainParticle()) {
+		if (!asyncparticles$isNeedSkyAccess()) {
 			return level.clip(clipContext);
 		}
 		BlockHitResult clip = VSClientUtils.clipVanillaAndShip(level, clipContext, true);

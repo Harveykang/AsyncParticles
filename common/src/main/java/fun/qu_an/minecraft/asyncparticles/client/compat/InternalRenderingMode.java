@@ -25,8 +25,8 @@ public class InternalRenderingMode {
 				case COMPATIBILITY -> COMPATIBILITY_ASYNC;
 			};
 		}
-		ParticleRenderingSettings settings = IrisCompat.getParticleRenderingSettings();
-		int i = (settings.ordinal() << 2) | renderingMode.ordinal(); // UNSET.ordinal() == 0
+		int settings = IrisCompat.getParticleRenderingSettings();
+		int i = (settings << 2) | renderingMode.ordinal(); // UNSET.ordinal() == 0
 		return mode = switch (i) {
 			case 0, 0b1100 -> SYNC; // IRIS_SYNC_AFTER
 			case 1, 0b1101 -> DELAYED_ASYNC; // IRIS_ASYNC_AFTER

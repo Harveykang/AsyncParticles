@@ -16,8 +16,11 @@ import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
+import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
+import net.irisshaders.iris.shaderpack.properties.ParticleRenderingSettings;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -419,7 +422,10 @@ public class AsyncRenderer {
 						case MIXED_ASYNC -> "MIXED_ASYNC";
 						default -> "UNKNOWN";
 					},
-					ModListHelper.IRIS_LIKE_LOADED ? IrisCompat.getParticleRenderingSettings().name() : "DISABLED"));
+					ModListHelper.IRIS_LIKE_LOADED ? Iris.getPipelineManager().getPipeline()
+						.map(WorldRenderingPipeline::getParticleRenderingSettings)
+						.map(ParticleRenderingSettings::name)
+						.orElse("UNSET") : "DISABLED"));
 			debugConsumer = null;
 		}
 	}

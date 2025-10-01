@@ -24,7 +24,7 @@ public abstract class MixinCustomParticle implements ParticleRainAddon {
 									  Operation<BlockHitResult> original,
 									  @Local(ordinal = 0) Vec3 quadCenterPos,
 									  @Local(ordinal = 1) Vec3 quadEdgePos) {
-		if (!asyncparticles$isRainParticle()) {
+		if (!asyncparticles$isNeedSkyAccess()) {
 			return original.call(level, clipContext);
 		}
 		ContraptionHitResult clip = CreateUtil.clipWithContactPointMotion(level, quadCenterPos, quadEdgePos);

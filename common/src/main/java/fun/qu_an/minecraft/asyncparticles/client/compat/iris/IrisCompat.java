@@ -1,23 +1,25 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.iris;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
 import net.irisshaders.iris.shaderpack.properties.ParticleRenderingSettings;
 
 public class IrisCompat {
-	public static ParticleRenderingSettings getParticleRenderingSettings() {
+	public static int getParticleRenderingSettings() {
 		if (!IrisApi.getInstance().isShaderPackInUse()) {
-			return ParticleRenderingSettings.UNSET;
+			return 0; // UNSET
 		}
 		WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
 		if (pipeline == null) {
-			return ParticleRenderingSettings.UNSET;
+			return 0;
 		}
 		ParticleRenderingSettings settings = pipeline.getParticleRenderingSettings();
 		if (settings == null) {
-			return ParticleRenderingSettings.UNSET;
+			return 0;
 		}
-		return settings;
+		int ordinal = settings.ordinal();
+		return ModListHelper.IS_LEGACY_IRIS ? ordinal + 1 : ordinal;
 	}
 }
