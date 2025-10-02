@@ -581,7 +581,11 @@ public class AsyncRenderer {
 		irisEarlyOpaquePhase = false;
 		renderAsync = false;
 		particlePhase = false;
-		waitForAsyncTasks();
+		try {
+			waitForAsyncTasks();
+		} catch (Exception e) {
+			LOGGER.error("Error waiting for particle task while resetting async renderer", e);
+		}
 		FORMATS.clear();
 		clearSync();
 	}
