@@ -104,8 +104,7 @@ public class AsyncRenderBehavior {
 		}, Util::onThreadException, true);
 	}
 
-	@NotNull
-	public static Frustum frustum = new Frustum(new Matrix4f(), new Matrix4f());
+	private static Frustum frustum = new Frustum(new Matrix4f(), new Matrix4f());
 	private static Consumer<String> debugConsumer;
 	private static CompletableFuture<Void> asyncTask;
 	private static boolean irisEarlyOpaquePhase = false;
@@ -166,7 +165,7 @@ public class AsyncRenderBehavior {
 										Queue<Particle> particles,
 										ParticleRenderType particleRenderType,
 										BufferBuilder bufferBuilder) {
-		Frustum frustum = AsyncRenderBehavior.frustum;
+		Frustum frustum = AsyncRenderBehavior.getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		float f2 = f + 1f;
 		for (Particle particle : particles) {
@@ -321,7 +320,7 @@ public class AsyncRenderBehavior {
 		PoseStack poseStack2 = null;
 		Minecraft mc = Minecraft.getInstance();
 		ParticleEngine particleEngine = mc.particleEngine;
-		Frustum frustum = AsyncRenderBehavior.frustum;
+		Frustum frustum = AsyncRenderBehavior.getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		float f2 = f + 1f;
 		for (Map.Entry<ParticleRenderType, Queue<Particle>> entry : particleEngine.particles.entrySet()) {
@@ -540,8 +539,7 @@ public class AsyncRenderBehavior {
 				iris particle mode: %s
 				glCapabilities: TransformFeedback: %s,
 				                ExplicitAttribLocation: %s,
-				                ComputeShader: %s,
-				                ShaderStorageBuffer: %s,""" // TODO
+				                ComputeShader: %s""" // TODO
 				.formatted(asyncTasksSize,
 					BUFFER_BUILDERS.entrySet()
 						.stream()
@@ -570,7 +568,9 @@ public class AsyncRenderBehavior {
 						? Optional.ofNullable(IrisCompat.getParticleRenderingSettings())
 						.map(ParticleRenderingSettings::name)
 						.orElse("disabled") : "disabled",
-					GLCaps.tfSupport.getClass().getSimpleName(), Boolean.toString(GLCaps.supportsExplicitAttribLocation)));
+					GLCaps.tfSupport.getClass().getSimpleName(),
+					GLCaps.supportsExplicitAttribLocation,
+					GLCaps.csSupport.getClass().getSimpleName()));
 			debugConsumer = null;
 		}
 	}
@@ -600,6 +600,14 @@ public class AsyncRenderBehavior {
 		if (mc.levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();
 		}
+	}
+
+	public static @NotNull Frustum getFrustum() {
+		return frustum;
+	}
+
+	public static void setFrustum(@NotNull Frustum frustum) {
+		AsyncRenderBehavior.frustum = frustum;
 	}
 
 	public static class AsyncRendererThread extends AsyncParticleWorkerThread {

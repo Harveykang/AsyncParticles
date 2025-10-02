@@ -24,7 +24,9 @@ public class GLCaps {
 		}
 		if (glCaps.OpenGL43) {
 			csSupport = new CsSupport.GL_43();
-		} else if (glCaps.GL_ARB_compute_shader && glCaps.GL_ARB_shader_storage_buffer_object) {
+		} else if (glCaps.GL_ARB_compute_shader &&
+			glCaps.GL_ARB_shader_storage_buffer_object &&
+			glCaps.GL_ARB_shader_atomic_counters) {
 			csSupport = new CsSupport.ARB();
 		} else {
 			csSupport = new CsSupport.Unsupported();
@@ -76,21 +78,7 @@ public class GLCaps {
 			}
 		}
 
-		class GL_43 implements CsSupport {
-			@Override
-			public boolean isSupported() {
-				return true;
-			}
-
-			@Override
-			public void glBindShaderStorageBuffer(int ssbo) {
-				GL43C.glBindBuffer(GL43C.GL_SHADER_STORAGE_BUFFER, ssbo);
-			}
-
-			@Override
-			public void glBindShaderStorageBufferBase(int bindingPoint, int ssbo) {
-				GL43C.glBindBufferBase(GL43C.GL_SHADER_STORAGE_BUFFER, bindingPoint, ssbo);
-			}
+		class GL_43 extends ARB {
 		}
 	}
 

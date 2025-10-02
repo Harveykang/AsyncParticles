@@ -3,14 +3,12 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.tick;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
-import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.particle.ParticleHelper;
-import fun.qu_an.minecraft.asyncparticles.client.particle.ParticleRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.particle.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
+import fun.qu_an.minecraft.asyncparticles.client.particle.render.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -146,7 +144,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		if (queue.isEmpty()) {
 			return;
 		}
-		ParticleRenderer renderer = GpuParticleBehavior.getRenderer(particleRenderType);
+		IParticleRenderer renderer = GpuParticleBehavior.getRenderer(particleRenderType);
 		renderer.mapBuffer();
 		AsyncTickBehavior.PARTICLE_OPERATIONS.add(() -> {
 			GPU_PARTICLE_PHASE.set(true);

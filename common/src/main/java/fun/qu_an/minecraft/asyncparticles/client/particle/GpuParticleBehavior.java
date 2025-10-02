@@ -2,7 +2,11 @@ package fun.qu_an.minecraft.asyncparticles.client.particle;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
+import fun.qu_an.minecraft.asyncparticles.client.particle.render.AdvancedParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.render.IParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.render.ParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
@@ -20,7 +24,7 @@ public class GpuParticleBehavior {
 	public static final Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = new Reference2ObjectOpenHashMap<>();
 	public static final ParticleThreadLocal<Integer> DESTROY_LIGHT_CACHE = new ParticleThreadLocal<>();
 	// reuse buffer helper
-	private static final Map<ParticleRenderType, ParticleRenderer> renderers = new Reference2ObjectOpenHashMap<>();
+	private static final Map<ParticleRenderType, IParticleRenderer> renderers = new Reference2ObjectOpenHashMap<>();
 	/**
 	 * Code adapted from <a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/src/main/java/me/jellysquid/mods/sodium/mixin/features/render/particle/ParticleManagerMixin.java#L51">wahfl2/sodium-fabric</a>
 	 * <p>
@@ -64,18 +68,24 @@ public class GpuParticleBehavior {
 	public static void init() {
 	}
 
-	public static ParticleRenderer createRenderer(ParticleRenderType type) {
+	public static IParticleRenderer createRenderer(ParticleRenderType type) {
 		RenderSystem.assertOnRenderThread();
-		return renderers.computeIfAbsent(type, k -> new ParticleRenderer());
+		return renderers.computeIfAbsent(type, k -> newParticleRenderer());
 	}
 
-	public static ParticleRenderer getRenderer(ParticleRenderType type) {
+	private static IParticleRenderer newParticleRenderer() {
+//		if (GLCaps.csSupport.isSupported()) return new AdvancedParticleRenderer();
+		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer();
+		throw new IllegalStateException("No compatible particle renderer found");
+	}
+
+	public static IParticleRenderer getRenderer(ParticleRenderType type) {
 		return renderers.get(type);
 	}
 
 	public static void swapAllBuffers() {
 		RenderSystem.assertOnRenderThread();
-		renderers.values().forEach(ParticleRenderer::unmapBufferAndSwap);
+		renderers.values().forEach(IParticleRenderer::unmapBufferAndSwap);
 	}
 
 	public static void setCameraPos(Vec3 pos) {
@@ -133,7 +143,7 @@ public class GpuParticleBehavior {
 //		}
 		renderers.values().forEach(renderer -> {
 			if (!renderer.isShouldSkip()) {
-				renderer.runTf(camera, f);
+				renderer.compute(camera, f);
 			}
 		});
 	}

@@ -49,9 +49,9 @@ public abstract class MixinLevelRenderer {
 		if (this.capturedFrustum != null) {
 			Frustum frustum = this.capturedFrustum;
 			frustum.prepare(this.frustumPos.x, this.frustumPos.y, this.frustumPos.z);
-			AsyncRenderBehavior.frustum = frustum;
+			AsyncRenderBehavior.setFrustum(frustum);
 		} else {
-			AsyncRenderBehavior.frustum = this.cullingFrustum;
+			AsyncRenderBehavior.setFrustum(this.cullingFrustum);
 		}
 		int irmValue = InternalRenderingMode.updateInternalMode(ConfigHelper.getParticleRenderingMode());
 		irm.set(irmValue);

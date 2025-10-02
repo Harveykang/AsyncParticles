@@ -10,10 +10,8 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.particle.ParticleHelper;
-import fun.qu_an.minecraft.asyncparticles.client.particle.ParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.*;
+import fun.qu_an.minecraft.asyncparticles.client.particle.render.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -96,7 +94,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 
 		GpuParticleBehavior.runTfs(camera, f);
 
-		Frustum frustum = AsyncRenderBehavior.frustum;
+		Frustum frustum = AsyncRenderBehavior.getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		boolean irisEarlyOpaquePhase = AsyncRenderBehavior.isIrisEarlyOpaquePhase();
 		// We don't use entrySet() to be compatible with iris.
@@ -110,7 +108,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 			boolean hasGpu = gpuQueue != null && !gpuQueue.isEmpty();
 			boolean hasCpu = queue != null && !queue.isEmpty();
 			profiler.push("render_particles");
-			ParticleRenderer gpuParticleRenderer;
+			IParticleRenderer gpuParticleRenderer;
 			if (!hasGpu) {
 				gpuParticleRenderer = null;
 			} else {

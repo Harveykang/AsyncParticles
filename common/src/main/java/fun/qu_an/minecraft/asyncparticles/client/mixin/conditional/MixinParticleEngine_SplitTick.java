@@ -3,10 +3,10 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 import com.bawnorton.mixinsquared.TargetHandler;
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.particle.ParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.particle.TickParticleRecursiveAction;
+import fun.qu_an.minecraft.asyncparticles.client.particle.render.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
@@ -46,7 +46,7 @@ public abstract class MixinParticleEngine_SplitTick {
 	private void redirectScheduleGpuTick(ParticleRenderType particleRenderType,
 										 Queue<?> queue,
 										 CallbackInfo ci,
-										 @Local ParticleRenderer renderer) {
+										 @Local IParticleRenderer renderer) {
 		AsyncTickBehavior.PARTICLE_OPERATIONS.add(() -> {
 			if (ConfigHelper.isTickAsync() &&
 				PARALLELLED_RENDER_TYPES.contains(particleRenderType)) {

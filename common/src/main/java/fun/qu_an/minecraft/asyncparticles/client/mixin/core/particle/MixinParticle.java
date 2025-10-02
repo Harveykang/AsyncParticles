@@ -120,7 +120,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 
 	public void asyncparticles$tickAABBCulling() {
 		AABB aabb = getBoundingBox().expandTowards(xd, yd, zd);
-		if (FrustumUtil.isVisible(AsyncRenderBehavior.frustum, aabb)) {
+		if (FrustumUtil.isVisible(AsyncRenderBehavior.getFrustum(), aabb)) {
 			asyncparticles$renderFlag |= 4;
 		} else {
 			asyncparticles$renderFlag &= ~4;
@@ -128,7 +128,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	}
 
 	public void asyncparticles$tickSphereCulling() {
-		if (FrustumUtil.isVisible(AsyncRenderBehavior.frustum, (Particle) (Object) this)) {
+		if (FrustumUtil.isVisible(AsyncRenderBehavior.getFrustum(), (Particle) (Object) this)) {
 			asyncparticles$renderFlag |= 4;
 		} else {
 			asyncparticles$renderFlag &= ~4;

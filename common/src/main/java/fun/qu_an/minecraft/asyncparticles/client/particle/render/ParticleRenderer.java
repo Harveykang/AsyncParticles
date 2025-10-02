@@ -1,21 +1,21 @@
-package fun.qu_an.minecraft.asyncparticles.client.particle;
+package fun.qu_an.minecraft.asyncparticles.client.particle.render;
 
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.particle.buffer.ParticleVertexBuffer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.shader.ParticleTransformFeedbackShader;
 import fun.qu_an.minecraft.asyncparticles.client.util.BufferHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import it.unimi.dsi.fastutil.HashCommon;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL14C;
 import org.lwjgl.opengl.GL15C;
@@ -27,7 +27,7 @@ import java.nio.ByteBuffer;
 import java.util.Objects;
 import java.util.Queue;
 
-public class ParticleRenderer {
+public class ParticleRenderer implements IParticleRenderer {
 	private static final int[] multiDrawIndex = {0, 0};
 	private static final int[] multiDrawCount = {0, 0};
 	private static final boolean DIRECT_BUFFER = true;
@@ -44,11 +44,11 @@ public class ParticleRenderer {
 
 	public ParticleRenderer() {
 		sources[0].bind();
-		ParticleVertexFormats.GPU_PARTICLE.setupBufferState(); // attributes
+		ParticleVertexFormats.RAW_PARTICLE.setupBufferState(); // attributes
 		sources[1].bind();
-		ParticleVertexFormats.GPU_PARTICLE.setupBufferState(); // attributes
+		ParticleVertexFormats.RAW_PARTICLE.setupBufferState(); // attributes
 		target.bind();
-		ParticleVertexFormats.PARTICLE.setupBufferState(); // attributes
+		ParticleVertexFormats.PROCESSED_PARTICLE.setupBufferState(); // attributes
 		RenderSystem.AutoStorageIndexBuffer autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
 		autoStorageIndexBuffer.bind(256);
 		ParticleVertexBuffer.unbind();
@@ -59,6 +59,7 @@ public class ParticleRenderer {
 		resize(GpuParticleBehavior.getParticleLimit());
 	}
 
+	@Override
 	public void unmapBufferAndSwap() {
 		if (DIRECT_BUFFER ? mappedBuffer != null : bufferHelper.isBuilding()) {
 			unmapBuffer();
@@ -70,6 +71,7 @@ public class ParticleRenderer {
 		this.particleCount[current] = 0;
 	}
 
+	@Override
 	public void mapBuffer() {
 		if (DIRECT_BUFFER) {
 			if (mappedBuffer != null) {
@@ -82,7 +84,9 @@ public class ParticleRenderer {
 		}
 	}
 
+	@Override
 	public void unmapBuffer() {
+		RenderSystem.assertOnRenderThread();
 		// correct the particle count
 		particleCount[2 | current] = particleCount[current] - GpuParticleBehavior.getParticleLimit();
 		particleCount[current] = Math.min(GpuParticleBehavior.getParticleLimit(), this.particleCount[current]);
@@ -99,7 +103,6 @@ public class ParticleRenderer {
 				data.clear();
 				return;
 			}
-			RenderSystem.assertOnRenderThread();
 			GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, sources[current].vbo);
 			GL15C.glBufferData(GL15C.GL_ARRAY_BUFFER, data.remaining(), GL15C.GL_DYNAMIC_DRAW); // 释放旧缓冲
 			GL15C.glBufferSubData(GL15C.GL_ARRAY_BUFFER, 0, data);
@@ -108,10 +111,12 @@ public class ParticleRenderer {
 		}
 	}
 
+	@Override
 	public boolean isShouldSkip() {
 		return shouldSkip;
 	}
 
+	@Override
 	public void tick(Vec3 cameraPos, Queue<TextureSheetParticle> particles) {
 		if (DIRECT_BUFFER && mappedBuffer == null) {
 			throw new IllegalStateException("Mapped buffer is null!");
@@ -230,7 +235,8 @@ public class ParticleRenderer {
 		this.particleCount[current] = position / ParticleVertexFormats.RAW_PARTICLE_BYTES;
 	}
 
-	public void runTf(Camera camera, float partialTicks) {
+	@Override
+	public void compute(Camera camera, float partialTicks) {
 		if (shouldSkip) {
 			throw new IllegalStateException("Should skip rendering during this tick!");
 		}
@@ -243,11 +249,11 @@ public class ParticleRenderer {
 		Vector3f cameraUpVector = camera.getUpVector();
 		Vec3 camPos = camera.getPosition();
 		Vec3 lastCamPos = cameraPositions[current ^ 1];
-		ParticleTransformFeedbackShader.TF_SHADER.use();
+		ParticleTransformFeedbackShader.INSTANCE.use();
 //		if (GLCaps.supportsUniformBufferObject) {
 //			TFUniformBuffer.TF_UNIFORM_BUFFER.bindUBO(0);
 //		} else {
-		ParticleTransformFeedbackShader.TF_SHADER.setup(partialTicks,
+		ParticleTransformFeedbackShader.INSTANCE.setup(partialTicks,
 			cameraLeftVector.x,
 			cameraLeftVector.y,
 			cameraLeftVector.z,
@@ -296,6 +302,7 @@ public class ParticleRenderer {
 		}
 	}
 
+	@Override
 	public void render() {
 		RenderSystem.assertOnRenderThread();
 		BufferUploader.invalidate();
@@ -311,11 +318,11 @@ public class ParticleRenderer {
 		ShaderInstance shader = RenderSystem.getShader();
 		Objects.requireNonNull(shader);
 
-		prepareShader(shader);
+		IParticleRenderer.prepareShader(shader);
 
 		shader.apply();
 
-		GL11.glDrawElements(VertexFormat.Mode.QUADS.asGLMode,
+		GL11C.glDrawElements(VertexFormat.Mode.QUADS.asGLMode,
 			indexCount,
 			autoStorageIndexBuffer.type().asGLType,
 			0L
@@ -326,6 +333,7 @@ public class ParticleRenderer {
 		ParticleVertexBuffer.unbind();
 	}
 
+	@Override
 	public void append(Vec3 cameraPos, TextureSheetParticle tsp) {
 		if (!((GpuParticleAddon) tsp).asyncparticles$shouldRender()) {
 			return;
@@ -454,74 +462,16 @@ public class ParticleRenderer {
 		}
 	}
 
+	@Override
 	public void resize(int particleLimit) {
-		if (particleLimit != sources[0].size) {
+		if (particleLimit != sources[0].getSize()) {
 			sources[0].resize0(particleLimit);
 		}
-		if (particleLimit != sources[1].size) {
+		if (particleLimit != sources[1].getSize()) {
 			sources[1].resize0(particleLimit);
 		}
-	}
-
-	private static void prepareShader(ShaderInstance shader) {
-		for (int i = 0; i < 12; ++i) {
-			int j = RenderSystem.getShaderTexture(i);
-			shader.setSampler("Sampler" + i, j);
+		if (particleLimit < target.getSize()) {
+			target.resize0(particleLimit * 4 * ParticleVertexFormats.PROCESSED_PARTICLE_VERTEX_BYTES);
 		}
-
-		if (shader.MODEL_VIEW_MATRIX != null) {
-			shader.MODEL_VIEW_MATRIX.set(RenderSystem.getModelViewMatrix());
-		}
-
-		if (shader.PROJECTION_MATRIX != null) {
-			shader.PROJECTION_MATRIX.set(RenderSystem.getProjectionMatrix());
-		}
-
-		if (shader.INVERSE_VIEW_ROTATION_MATRIX != null) {
-			shader.INVERSE_VIEW_ROTATION_MATRIX.set(RenderSystem.getInverseViewRotationMatrix());
-		}
-
-		if (shader.COLOR_MODULATOR != null) {
-			shader.COLOR_MODULATOR.set(RenderSystem.getShaderColor());
-		}
-
-		if (shader.GLINT_ALPHA != null) {
-			shader.GLINT_ALPHA.set(RenderSystem.getShaderGlintAlpha());
-		}
-
-		if (shader.FOG_START != null) {
-			shader.FOG_START.set(RenderSystem.getShaderFogStart());
-		}
-
-		if (shader.FOG_END != null) {
-			shader.FOG_END.set(RenderSystem.getShaderFogEnd());
-		}
-
-		if (shader.FOG_COLOR != null) {
-			shader.FOG_COLOR.set(RenderSystem.getShaderFogColor());
-		}
-
-		if (shader.FOG_SHAPE != null) {
-			shader.FOG_SHAPE.set(RenderSystem.getShaderFogShape().getIndex());
-		}
-
-		if (shader.TEXTURE_MATRIX != null) {
-			shader.TEXTURE_MATRIX.set(RenderSystem.getTextureMatrix());
-		}
-
-		if (shader.GAME_TIME != null) {
-			shader.GAME_TIME.set(RenderSystem.getShaderGameTime());
-		}
-
-		if (shader.SCREEN_SIZE != null) {
-			Window window = Minecraft.getInstance().getWindow();
-			shader.SCREEN_SIZE.set((float) window.getWidth(), (float) window.getHeight());
-		}
-
-//		if (shader.LINE_WIDTH != null && (this.mode == VertexFormat.Mode.LINES || this.mode == VertexFormat.Mode.LINE_STRIP)) {
-//			shader.LINE_WIDTH.set(RenderSystem.getShaderLineWidth());
-//		}
-
-		RenderSystem.setupShaderLights(shader);
 	}
 }

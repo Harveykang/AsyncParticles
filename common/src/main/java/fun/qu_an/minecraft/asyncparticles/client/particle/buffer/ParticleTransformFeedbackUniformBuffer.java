@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.particle;
+package fun.qu_an.minecraft.asyncparticles.client.particle.buffer;
 
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import net.minecraft.client.Camera;
