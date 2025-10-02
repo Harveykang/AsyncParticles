@@ -310,7 +310,7 @@ public class AsyncTicker {
 		}
 		Minecraft mc = Minecraft.getInstance();
 		if (!isTolerable(e) ||
-			(mc.level != null && mc.player != null)) {
+			(mc.level != null && mc.player != null && mc.getCameraEntity() != null)) {
 			throw toThrowDirectly(e);
 		}
 		LOGGER.warn("Exception while executing tick tasks.", e);
@@ -323,10 +323,10 @@ public class AsyncTicker {
 		}
 		Throwable rootCause = ExceptionUtil.getRootCause(e);
 		return rootCause instanceof MissingPaletteEntryException
-			   || rootCause instanceof NullPointerException
-			   || rootCause instanceof IndexOutOfBoundsException
-			   || rootCause instanceof ArrayIndexOutOfBoundsException
-			   || (rootCause instanceof ConcurrentModificationException && ConfigHelper.suppressCME());
+			|| rootCause instanceof NullPointerException
+			|| rootCause instanceof IndexOutOfBoundsException
+			|| rootCause instanceof ArrayIndexOutOfBoundsException
+			|| (rootCause instanceof ConcurrentModificationException && ConfigHelper.suppressCME());
 	}
 
 	public static void onTickingParticleException(Particle particle, Throwable t) {
@@ -548,10 +548,18 @@ public class AsyncTicker {
 	}
 
 	public static void reset() {
-		waitForCleanUp();
+		try {
+			waitForCleanUp();
+		} catch (Exception e) {
+			LOGGER.error("Error wating for cleanup task while resetting async ticker", e);
+		}
 		if (particleFuture != null) {
 			cancelled.setOpaque(true);
-			particleFuture.join();
+			try {
+				particleFuture.join();
+			} catch (Exception e) {
+				LOGGER.error("Error wating for particle future while resetting async ticker", e);
+			}
 			particleFuture = null;
 		}
 		cancelled.setOpaque(false);

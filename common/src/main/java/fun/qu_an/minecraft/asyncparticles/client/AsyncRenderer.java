@@ -435,7 +435,11 @@ public class AsyncRenderer {
 	public static void reset() {
 		renderAsync = false;
 		particlePhase = false;
-		waitForAsyncTasks();
+		try {
+			waitForAsyncTasks();
+		} catch (Exception e) {
+			LOGGER.warn("Error waiting for particle task while resetting async renderer", e);
+		}
 		closeBTesselators();
 		clearSync();
 	}

@@ -12,7 +12,7 @@ import yesman.epicfight.client.renderer.shader.AnimationShaderInstance;
 @Mixin(EpicFightRenderTypes.class)
 public class MixinEpicFightRenderTypes {
 	@Inject(method = "getAnimationShader(Lnet/minecraft/client/renderer/ShaderInstance;)Lyesman/epicfight/client/renderer/shader/AnimationShaderInstance;",
-			remap = false, at = @At("HEAD"))
+			require = 0, remap = false, at = @At("HEAD"))
 	private static void getAnimationShader(ShaderInstance shaderInstance, CallbackInfoReturnable<AnimationShaderInstance> cir) {
 		ThreadUtil.assertNotParticleRendererThread();
 	}
