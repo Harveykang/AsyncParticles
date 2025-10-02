@@ -467,8 +467,16 @@ public class AsyncRenderer {
 
 	public static void reset() {
 		particlePhase = false;
-		waitForParticleTask();
-		WeatherRenderer.waitForWeatherTask();
+		try {
+			waitForParticleTask();
+		} catch (Exception e) {
+			LOGGER.error("Error waiting for particle task while resetting async renderer", e);
+		}
+		try {
+			WeatherRenderer.waitForWeatherTask();
+		} catch (Exception e) {
+			LOGGER.error("Error waiting for weather task while resetting async renderer", e);
+		}
 		closeBTesselators();
 		clearSync();
 		WeatherRenderer.reset();

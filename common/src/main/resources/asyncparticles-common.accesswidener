@@ -16,7 +16,6 @@ accessible field net/minecraft/world/phys/HitResult location Lnet/minecraft/worl
 transitive-mutable field net/minecraft/world/phys/HitResult location Lnet/minecraft/world/phys/Vec3;
 accessible field net/minecraft/client/particle/Particle stoppedByCollision Z
 accessible field net/minecraft/client/particle/Particle MAXIMUM_COLLISION_VELOCITY_SQUARED D
-accessible field com/mojang/blaze3d/vertex/PoseStack poses Ljava/util/List;
 accessible method net/minecraft/client/renderer/RenderStateShard setupRenderState ()V
 accessible method net/minecraft/client/renderer/RenderStateShard clearRenderState ()V
 accessible class net/minecraft/client/renderer/RenderStateShard$OutputStateShard
@@ -63,6 +62,3 @@ accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables L
 accessible method net/minecraft/client/renderer/WeatherEffectRenderer collectColumnInstances (Lnet/minecraft/world/level/Level;IFLnet/minecraft/world/phys/Vec3;ILjava/util/List;Ljava/util/List;)V
 accessible class net/minecraft/client/renderer/WeatherEffectRenderer$ColumnInstance
 accessible method net/minecraft/client/renderer/WeatherEffectRenderer renderInstances (Lcom/mojang/blaze3d/vertex/VertexConsumer;Ljava/util/List;Lnet/minecraft/world/phys/Vec3;FIF)V
-
-# for NeoForge
-accessible method net/minecraft/client/renderer/RenderPipelines register (Lcom/mojang/blaze3d/pipeline/RenderPipeline;)Lcom/mojang/blaze3d/pipeline/RenderPipeline;
