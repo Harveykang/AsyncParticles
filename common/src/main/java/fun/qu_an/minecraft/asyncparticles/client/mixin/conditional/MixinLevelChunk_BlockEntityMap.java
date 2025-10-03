@@ -8,10 +8,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.level.chunk.UpgradeData;
+import net.minecraft.world.level.chunk.*;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -30,13 +27,13 @@ public abstract class MixinLevelChunk_BlockEntityMap extends ChunkAccess {
 	@Final
 	Level level;
 
-	public MixinLevelChunk_BlockEntityMap(ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, Registry<Biome> biomeRegistry, long inhabitedTime, @Nullable LevelChunkSection[] sections, @Nullable BlendingData blendingData) {
-		super(chunkPos, upgradeData, levelHeightAccessor, biomeRegistry, inhabitedTime, sections, blendingData);
+	public MixinLevelChunk_BlockEntityMap(ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, PalettedContainerFactory palettedContainerFactory, long l, @Nullable LevelChunkSection[] levelChunkSections, @Nullable BlendingData blendingData) {
+		super(chunkPos, upgradeData, levelHeightAccessor, palettedContainerFactory, l, levelChunkSections, blendingData);
 	}
 
 	@Inject(method = "<init>*", at = @At("RETURN"))
 	private void onInit1(CallbackInfo ci) {
-		if (level.isClientSide) {
+		if (level.isClientSide()) {
 			if (!(blockEntities instanceof ConcurrentHashMap)) {
 				blockEntities = new ConcurrentHashMap<>(blockEntities);
 			}
@@ -51,7 +48,7 @@ public abstract class MixinLevelChunk_BlockEntityMap extends ChunkAccess {
 	private void onGetBlockEntity(BlockPos pos,
 								  LevelChunk.EntityCreationType creationType,
 								  CallbackInfoReturnable<BlockEntity> cir) {
-		if (level.isClientSide && ThreadUtil.isOnParticleThread()) {
+		if (level.isClientSide() && ThreadUtil.isOnParticleThread()) {
 			cir.setReturnValue(blockEntities.get(pos));
 		}
 	}

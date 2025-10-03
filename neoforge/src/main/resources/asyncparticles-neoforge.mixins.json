@@ -5,19 +5,6 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.neoforge.APMixinPluginNeoForge",
   "client": [
-    "MixinLevelRenderer",
-    "MixinParticleEngine_Render",
-    "particular.MixinClientStuff",
-    "prettyrain.MixinGroundFogParticle",
-    "prettyrain.MixinModClientForgeEvents",
-    "prettyrain.MixinParticleRainClient",
-    "prettyrain.MixinRainParticle",
-    "prettyrain.MixinRippleParticle",
-    "prettyrain.MixinSnowParticle",
-    "prettyrain.MixinWeatherParticle",
-    "prettyrain.MixinWeatherParticleSpawner",
-    "simple_weather.MixinWeatherFX",
-    "subtle_effects.MixinParticleEngine"
   ],
   "injectors": {
     "defaultRequire": 1

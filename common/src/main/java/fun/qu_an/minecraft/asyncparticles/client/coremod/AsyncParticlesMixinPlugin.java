@@ -33,7 +33,8 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesNoCulling());
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesNoLightCache());
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockProvider());
-		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired());
+		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired_Tick());
+		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired_Extract());
 		MixinClassAdjusterRegistrar.register(new AdjusterReplaceRandom());
 		MixinMemberCancellerRegistrar.register(new AsyncParticlesMixinMemberCanceller());
 		MixinCancellerRegistrar.register(new AsyncParticlesMixinCanceller());
@@ -84,10 +85,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
-			case "fake_renders",
-				 "off_thread_access",
-				 "tick",
-				 "render" -> true;
+			case "core" -> true;
 			case "modernui" -> MODERN_UI_LOADED;
 			case "sodium" -> SODIUM_LOADED;
 			case "sodium_0_6" -> SODIUM_LOADED && versionCheck("sodium", "0.6", "0.7");

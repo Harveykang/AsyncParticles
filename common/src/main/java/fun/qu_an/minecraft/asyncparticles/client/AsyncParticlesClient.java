@@ -1,7 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.moreculling.MoreCullingCompat;
-
 import java.net.URI;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
@@ -16,7 +14,7 @@ public class AsyncParticlesClient {
 			return;
 		}
 		if (MORE_CULLING_LOADED) {
-			MoreCullingCompat.init();
+//			MoreCullingCompat.init();
 		}
 	}
 }

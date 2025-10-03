@@ -45,41 +45,41 @@ dependencies {
 
     /* APIs */
 //    modLocalRuntime 'maven.modrinth:architectury-api:17.0.6+fabric'
-    modLocalRuntime("me.shedaniel.cloth:cloth-config-fabric:19.0.147") {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
-    modLocalRuntime("io.wispforest:owo-lib:0.12.21+1.21.6") {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
+//    modLocalRuntime("me.shedaniel.cloth:cloth-config-fabric:19.0.147") {
+//        exclude(group: "net.fabricmc.fabric-api")
+//    }
+//    modLocalRuntime("io.wispforest:owo-lib:0.12.21+1.21.6") {
+//        exclude(group: "net.fabricmc.fabric-api")
+//    }
     modCompileOnly 'maven.modrinth:modmenu:15.0.0-beta.3'
-    modLocalRuntime 'maven.modrinth:modmenu:15.0.0-beta.3'
-    modLocalRuntime 'maven.modrinth:fabric-permissions-api:0.4.0'
-    modLocalRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
+//    modLocalRuntime 'maven.modrinth:modmenu:15.0.0-beta.3'
+//    modLocalRuntime 'maven.modrinth:fabric-permissions-api:0.4.0'
+//    modLocalRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
 
     /* Performance */
     modCompileOnly "maven.modrinth:sodium:mc1.21.6-0.6.13-fabric"
     modCompileOnly 'maven.modrinth:iris:l77DAK6U' // 1.9.1
-    modLocalRuntime "maven.modrinth:sodium:mc1.21.6-0.6.13-fabric"
-    modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.6-0.6.6+fabric'
-    modLocalRuntime 'maven.modrinth:iris:l77DAK6U' // 1.9.1
-    localRuntime "org.antlr:antlr4-runtime:4.13.1"
-    localRuntime "io.github.douira:glsl-transformer:2.0.1"
-    localRuntime "org.anarres:jcpp:1.4.14"
+//    modLocalRuntime "maven.modrinth:sodium:mc1.21.6-0.6.13-fabric"
+//    modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.6-0.6.6+fabric'
+//    modLocalRuntime 'maven.modrinth:iris:l77DAK6U' // 1.9.1
+//    localRuntime "org.antlr:antlr4-runtime:4.13.1"
+//    localRuntime "io.github.douira:glsl-transformer:2.0.1"
+//    localRuntime "org.anarres:jcpp:1.4.14"
 //    modLocalRuntime 'maven.modrinth:scalablelux:0.1.3+beta.1+fabric.4039a8d'
-    modLocalRuntime 'maven.modrinth:spark:1.10.139-fabric'
+//    modLocalRuntime 'maven.modrinth:spark:1.10.139-fabric'
     modCompileOnly 'maven.modrinth:moreculling:ESxkwc6w' // 1.4.0-beta.1
-    modLocalRuntime 'maven.modrinth:moreculling:ESxkwc6w' // 1.4.0-beta.1
+//    modLocalRuntime 'maven.modrinth:moreculling:ESxkwc6w' // 1.4.0-beta.1
 
     /* Particle Rain/Pretty Rain */
     modCompileOnly "maven.modrinth:particle-rain:3.3.6"
-    modLocalRuntime "maven.modrinth:particle-rain:3.3.6"
-    modLocalRuntime("dev.isxander:yet-another-config-lib:3.7.1+1.21.6-fabric"){
-        exclude(group: "net.fabricmc.fabric-api")
-    }
+//    modLocalRuntime "maven.modrinth:particle-rain:3.3.6"
+//    modLocalRuntime("dev.isxander:yet-another-config-lib:3.7.1+1.21.6-fabric"){
+//        exclude(group: "net.fabricmc.fabric-api")
+//    }
 
     /* Effectual */
-    modLocalRuntime 'maven.modrinth:effectual:1.1.0-1.21.8'
-    modLocalRuntime 'maven.modrinth:tlib:1.3.0-1.21.8'
+//    modLocalRuntime 'maven.modrinth:effectual:1.1.0-1.21.8'
+//    modLocalRuntime 'maven.modrinth:tlib:1.3.0-1.21.8'
 
     /* Lodestone */
 //    modLocalRuntime "maven.modrinth:lodestonelib:1.21.1-1.7.0.5-fabric" // TODO no 1.21.4 version

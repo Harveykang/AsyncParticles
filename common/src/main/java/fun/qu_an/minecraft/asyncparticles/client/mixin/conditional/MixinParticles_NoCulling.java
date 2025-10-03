@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
+import fun.qu_an.minecraft.asyncparticles.client.core.GameUtil;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
