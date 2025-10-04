@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client;
+package fun.qu_an.minecraft.asyncparticles.client.core.render;
 
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.util.AsyncParticleWorkerThread;

@@ -86,18 +86,26 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				};
 			}
 			case "core" -> true;
-			case "modernui" -> MODERN_UI_LOADED;
-			case "sodium" -> SODIUM_LOADED;
-			case "sodium_0_6" -> SODIUM_LOADED && versionCheck("sodium", "0.6", "0.7");
-			case "sodium_0_7" -> SODIUM_LOADED && versionCheck("sodium", "0.6.999999", "0.8");
-			case "sodium_extra" -> SODIUM_EXTRA_LOADED;
-			case "iris_like" -> IRIS_LIKE_LOADED;
-			case "a_good_place" -> A_GOOD_PLACE_LOADED;
-			case "watut" -> WATUT_LOADED;
-			case "physicsmod" -> PHYSICSMOD_LOADED;
-			case "cloth_config" -> CLOTH_CONFIG_LOADED;
-			case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
-			case "figura" -> FIGURA_LOADED;
+			case "compat" -> {
+				if (split.length == 2) {
+					throw new IllegalArgumentException("Unknown compat mixin: " + mixinClassName);
+				}
+				yield switch (split[1]) {
+					case "modernui" -> MODERN_UI_LOADED;
+					case "sodium" -> SODIUM_LOADED;
+					case "sodium_0_6" -> SODIUM_LOADED && versionCheck("sodium", "0.6", "0.7");
+					case "sodium_0_7" -> SODIUM_LOADED && versionCheck("sodium", "0.6.999999", "0.8");
+					case "sodium_extra" -> SODIUM_EXTRA_LOADED;
+					case "iris_like" -> IRIS_LIKE_LOADED;
+					case "a_good_place" -> A_GOOD_PLACE_LOADED;
+					case "watut" -> WATUT_LOADED;
+					case "physicsmod" -> PHYSICSMOD_LOADED;
+					case "cloth_config" -> CLOTH_CONFIG_LOADED;
+					case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
+					case "figura" -> FIGURA_LOADED;
+					default -> throw new IllegalStateException("Unknown compat mixin: " + mixinClassName);
+				};
+			}
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

@@ -77,7 +77,6 @@ subprojects {
 //        maven { url = "https://mvn.devos.one/snapshots" } // Create and several dependencies, Registrate
 //        maven { url = "https://maven.createmod.net" } // Create, Ponder, Flywheel
 //        maven { url = "https://maven.jamieswhiteshirt.com/libs-release" } // Reach Entity Attributes
-        maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven" } // Forge Config API Port
         maven {
             name = "Sinytra"
             url = "https://maven.su5ed.dev/releases"
@@ -106,6 +105,10 @@ subprojects {
             url = "https://maven.isxander.dev/releases"
             name = "Xander Maven"
         }
+//        maven {
+//            name = "Fuzs Mod Resources"
+//            url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+//        }// Forge Config API Port
     }
 
     dependencies {

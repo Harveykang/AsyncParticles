@@ -1,10 +1,15 @@
 {
   "required": true,
   "minVersion": "0.8",
+  "mixinextras": {
+    "minVersion": "0.5.0"
+  },
   "package": "fun.qu_an.minecraft.asyncparticles.client.mixin",
   "compatibilityLevel": "JAVA_17",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin",
   "client": [
+    "compat.sodium_extra.MixinMixinFireworkParticle",
+    "compat.sodium_extra.MixinMixinParticleEngine",
     "conditional.Mixin_ReplaceRandom",
     "conditional.MixinClassInstanceMultiMap",
     "conditional.MixinLegacyRandomSource",
@@ -14,12 +19,16 @@
     "conditional.MixinParticles_LockRequired_Extract",
     "conditional.MixinParticles_LockRequired_Tick",
     "conditional.MixinParticles_NoCulling",
+    "core.particle.MixinLevelRenderer",
+    "core.particle.MixinParticleEngine",
     "core.particle.MixinQuadParticleGroup",
-    "core.particle.MixinSingleQuadParticle$Layer"
+    "core.particle.MixinSingleQuadParticle$Layer",
+    "core.particle.MixinVertexVertexStorage"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
+    "core.MixinMemoryPool"
   ]
 }
