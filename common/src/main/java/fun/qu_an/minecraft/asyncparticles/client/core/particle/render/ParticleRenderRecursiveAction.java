@@ -1,13 +1,12 @@
-package fun.qu_an.minecraft.asyncparticles.client.core.render;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.render;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.core.AsyncQuadParticleGroup;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.AsyncQuadParticleGroup;
 import it.unimi.dsi.fastutil.HashCommon;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.culling.Frustum;
 
@@ -65,7 +64,7 @@ public class ParticleRenderRecursiveAction extends RecursiveAction {
 				ParticleAddon particleAddon = (ParticleAddon) particle;
 				SingleQuadParticle.Layer layer = particle.getLayer();
 				if (particleAddon.asyncparticles$isRenderSync()) {
-					AsyncRenderBehavior.recordSync(layer, particle);
+//					AsyncRenderBehavior.recordSync(layer, particle);
 					return;
 				}
 				float f3 = particleAddon.asyncparticles$isTicked() ? partialTick : f2;

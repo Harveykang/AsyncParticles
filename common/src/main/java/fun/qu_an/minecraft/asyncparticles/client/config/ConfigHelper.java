@@ -44,7 +44,7 @@ public class ConfigHelper {
 	}
 
 	public static int getParticleLimit() {
-		return 16384;
+		return 163840;
 	}
 
 	public static boolean alwaysSpawnRainParticlesOnVsShips() {
@@ -107,4 +107,13 @@ public class ConfigHelper {
 	public static ParticleCullingMode getParticleCullingMode() {
 		return ParticleCullingMode.SPHERE;
 	}
+
+	public static boolean isParallelQueueRemoval() {
+		return true;
+	}
+
+	public static boolean isParallelQueueEviction() {
+		return true;
+	}
+
 }

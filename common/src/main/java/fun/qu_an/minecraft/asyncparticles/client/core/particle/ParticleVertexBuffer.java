@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.core;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle;
 
 import org.lwjgl.opengl.GL15C;
 import org.lwjgl.opengl.GL30C;

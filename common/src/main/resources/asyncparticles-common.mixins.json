@@ -19,11 +19,20 @@
     "conditional.MixinParticles_LockRequired_Extract",
     "conditional.MixinParticles_LockRequired_Tick",
     "conditional.MixinParticles_NoCulling",
-    "core.particle.MixinLevelRenderer",
+    "core.MixinTextureManager",
+    "core.MixinVertexConsumer",
+    "core.particle.MixinParticle",
     "core.particle.MixinParticleEngine",
-    "core.particle.MixinQuadParticleGroup",
-    "core.particle.MixinSingleQuadParticle$Layer",
-    "core.particle.MixinVertexVertexStorage"
+    "core.particle.render.MixinLevelRenderer",
+    "core.particle.render.MixinParticle_LightCache",
+    "core.particle.render.MixinParticleEngine",
+    "core.particle.render.MixinParticlesRenderState",
+    "core.particle.render.MixinQuadParticleGroup",
+    "core.particle.render.MixinSingleQuadParticle$Layer",
+    "core.particle.render.MixinVertexVertexStorage",
+    "core.particle.tick.MixinMinecraft",
+    "core.particle.tick.MixinParticleEngine",
+    "core.particle.tick.MixinParticleGroup"
   ],
   "injectors": {
     "defaultRequire": 1

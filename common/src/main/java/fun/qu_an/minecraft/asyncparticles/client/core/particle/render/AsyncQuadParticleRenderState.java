@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.core.render;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.render;
 
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -6,15 +6,15 @@ import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleVertexStorageAddition;
 import fun.qu_an.minecraft.asyncparticles.client.addon.SingleQuadParticleLayerAddition;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
+import net.minecraft.client.particle.ParticleGroup;
 import net.minecraft.client.particle.SingleQuadParticle;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.feature.ParticleFeatureRenderer;
-import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.state.QuadParticleRenderState;
 import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.NotNull;
@@ -29,39 +29,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 
-// add() -> afterAdd() -> submit() { waitFuture() } -> prepare() -> render()
+// add() -> afterAdd() -> waitFuture() -> submit() -> prepare() -> render()
 public class AsyncQuadParticleRenderState extends QuadParticleRenderState {
+	private final ParticleGroup<SingleQuadParticle> group;
 	private MeshData meshData;
 	private ByteBufferBuilder byteBufferBuilder;
 	private final Map<SingleQuadParticle.Layer, PreparedLayer> preparedLayers = new Reference2ObjectArrayMap<>();
-	private CompletableFuture<Void> future;
+
+	public AsyncQuadParticleRenderState(ParticleGroup<SingleQuadParticle> group) {
+		this.group = group;
+	}
 
 	@Override
 	public void clear() {
-		if (this.future != null) {
+		if (((ParticleGroupAddition) group).asyncparticles$getFuture() != null) {
 			throw new IllegalStateException("submit() has not been called!");
 		}
 		freeBuffers();
 		super.clear();
-	}
-
-	@Override
-	public void submit(SubmitNodeCollector submitNodeCollector, CameraRenderState cameraRenderState) {
-		waitFuture();
-		if (particleCount > 0) {
-			submitNodeCollector.submitParticleGroup(this);
-		}
-	}
-
-	private void waitFuture() {
-		if (this.future != null) {
-			this.future.join();
-			this.future = null;
-		}
 	}
 
 	@Override
@@ -213,11 +200,11 @@ public class AsyncQuadParticleRenderState extends QuadParticleRenderState {
 		long ptr, Vector3f vector3f, float l, float m, int n, int o
 	) {
 		// Position
-		MemoryUtil.memPutFloat(ptr, vector3f.x());
+		MemoryUtil.memPutFloat(ptr, vector3f.x);
 		ptr += 4L;
-		MemoryUtil.memPutFloat(ptr, vector3f.y());
+		MemoryUtil.memPutFloat(ptr, vector3f.y);
 		ptr += 4L;
-		MemoryUtil.memPutFloat(ptr, vector3f.z());
+		MemoryUtil.memPutFloat(ptr, vector3f.z);
 		ptr += 4L;
 		// UV
 		MemoryUtil.memPutFloat(ptr, l);
@@ -242,7 +229,7 @@ public class AsyncQuadParticleRenderState extends QuadParticleRenderState {
 	@Nullable
 	@Override
 	public QuadParticleRenderState.PreparedBuffers prepare(ParticleFeatureRenderer.ParticleBufferCache particleBufferCache) {
-		if (future != null) {
+		if (((ParticleGroupAddition) group).asyncparticles$getFuture() != null) {
 			throw new IllegalStateException("submit() has not been called!");
 		}
 		if (meshData == null) {
@@ -275,10 +262,4 @@ public class AsyncQuadParticleRenderState extends QuadParticleRenderState {
 		}
 	}
 
-	public void dispatch(Runnable runnable, ForkJoinPool executor) {
-		if (future != null) {
-			throw new IllegalStateException("Already dispatched");
-		}
-		future = CompletableFuture.runAsync(runnable, executor);
-	}
 }

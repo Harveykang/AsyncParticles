@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import fun.qu_an.minecraft.asyncparticles.client.core.render.AsyncRendererThread;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.render.AsyncRendererThread;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncTickerThread;
 import net.minecraft.client.Minecraft;
 

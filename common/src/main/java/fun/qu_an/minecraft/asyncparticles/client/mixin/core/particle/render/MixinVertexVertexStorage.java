@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.render;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleVertexStorageAddition;
 import net.minecraft.client.renderer.state.QuadParticleRenderState;

@@ -25,3 +25,5 @@ accessible field net/minecraft/client/particle/Particle y D
 accessible field net/minecraft/client/particle/Particle z D
 accessible method net/minecraft/Util onThreadException (Ljava/lang/Thread;Ljava/lang/Throwable;)V
 accessible method net/minecraft/client/renderer/state/QuadParticleRenderState$Storage <init> ()V
+accessible method net/minecraft/client/particle/ParticleEngine updateCount (Lnet/minecraft/core/particles/ParticleLimit;I)V
+accessible field net/minecraft/client/particle/ParticleEngine particles Ljava/util/Map;

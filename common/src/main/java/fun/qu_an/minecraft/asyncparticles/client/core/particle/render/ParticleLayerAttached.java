@@ -1,33 +1,31 @@
-package fun.qu_an.minecraft.asyncparticles.client.core.render;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.render;
 
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.state.QuadParticleRenderState;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class ParticleLayerAttached {
 //	private static final AtomicInteger indexCounter = new AtomicInteger(0);
-	private static final List<ParticleLayerAttached> layers = new CopyOnWriteArrayList<>();
+	private static final List<ParticleLayerAttached> attaches = new CopyOnWriteArrayList<>();
 //	public final int index = indexCounter.getAndIncrement();
 	public final SingleQuadParticle.Layer layer;
 	public final QuadParticleRenderState.Storage storage = new QuadParticleRenderState.Storage();
 
 	public ParticleLayerAttached(SingleQuadParticle.Layer layer) {
 		this.layer = layer;
-		layers.add(this);
+		attaches.add(this);
 	}
 
 	public static int getParticleCount() {
-		return layers.stream().mapToInt(l -> l.storage.count()).sum();
+		return attaches.stream().mapToInt(l -> l.storage.count()).sum();
 	}
 
 	public static Map<SingleQuadParticle.Layer, ? extends QuadParticleRenderState.Storage> getParticles() {
-		return layers.stream().filter(l -> l.storage.count() > 0)
+		return attaches.stream().filter(l -> l.storage.count() > 0)
 			.collect(Collectors.toMap(l -> l.layer, l -> l.storage));
 	}
 
