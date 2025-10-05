@@ -562,13 +562,15 @@ public class AsyncTicker {
 	public static void reset() {
 		try {
 			waitForCleanUp();
-		} catch (Exception ignored) {
+		} catch (Exception e) {
+			LOGGER.error("Error waiting for cleanup task while resetting async ticker", e);
 		}
 		if (particleFuture != null) {
 			cancelled.setOpaque(true);
 			try {
 				particleFuture.join();
-			} catch (Exception ignored) {
+			} catch (Exception e) {
+				LOGGER.error("Error waiting for particle future while resetting async ticker", e);
 			}
 			particleFuture = null;
 		}

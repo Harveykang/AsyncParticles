@@ -58,6 +58,7 @@
     "render.MixinWeatherEffectRenderer",
     "sodium_0_6.MixinSingleQuadParticle",
     "sodium_0_7.MixinSingleQuadParticle",
+    "sodium_extra.MixinFireworkParticles$Starter",
     "sodium_extra.MixinParticleEngine",
     "tick.MixinClientLevel",
     "tick.MixinGameRenderer",

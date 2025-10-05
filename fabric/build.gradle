@@ -57,18 +57,18 @@ dependencies {
     modLocalRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
 
     /* Performance */
-    modCompileOnly "maven.modrinth:sodium:mc1.21.6-0.6.13-fabric"
-    modCompileOnly 'maven.modrinth:iris:l77DAK6U' // 1.9.1
-    modLocalRuntime "maven.modrinth:sodium:mc1.21.6-0.6.13-fabric"
-    modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.6-0.6.6+fabric'
-    modLocalRuntime 'maven.modrinth:iris:l77DAK6U' // 1.9.1
+    modCompileOnly "maven.modrinth:sodium:mc1.21.8-0.7.0-fabric"
+    modCompileOnly 'maven.modrinth:iris:1.9.2+1.21.8-fabric' // 1.9.1
+    modLocalRuntime "maven.modrinth:sodium:mc1.21.8-0.7.0-fabric"
+    modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.8-0.7.0+fabric'
+    modLocalRuntime 'maven.modrinth:iris:1.9.2+1.21.8-fabric' // 1.9.1
     localRuntime "org.antlr:antlr4-runtime:4.13.1"
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
     localRuntime "org.anarres:jcpp:1.4.14"
 //    modLocalRuntime 'maven.modrinth:scalablelux:0.1.3+beta.1+fabric.4039a8d'
     modLocalRuntime 'maven.modrinth:spark:1.10.139-fabric'
-    modCompileOnly 'maven.modrinth:moreculling:ESxkwc6w' // 1.4.0-beta.1
-    modLocalRuntime 'maven.modrinth:moreculling:ESxkwc6w' // 1.4.0-beta.1
+    modCompileOnly 'maven.modrinth:moreculling:ivOsScf8' // 1.4.0-beta.2
+    modLocalRuntime 'maven.modrinth:moreculling:ivOsScf8' // 1.4.0-beta.2
 
     /* Particle Rain/Pretty Rain */
     modCompileOnly "maven.modrinth:particle-rain:3.3.6"
