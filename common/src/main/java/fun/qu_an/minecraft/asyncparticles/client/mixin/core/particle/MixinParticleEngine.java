@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
 
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.AsyncQuadParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.TrackedParticleCountsMap;
 import fun.qu_an.minecraft.asyncparticles.client.util.BusyWaitEvictingQueue;
@@ -14,18 +13,12 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Queue;
 
 @Mixin(ParticleEngine.class)
 public class MixinParticleEngine {
-	@Redirect(method = "createParticleGroup", at = @At(value = "NEW", target = "(Lnet/minecraft/client/particle/ParticleEngine;Lnet/minecraft/client/particle/ParticleRenderType;)Lnet/minecraft/client/particle/QuadParticleGroup;"))
-	private QuadParticleGroup createParticleGroup(ParticleEngine particleEngine, ParticleRenderType particleRenderType) {
-		return new AsyncQuadParticleGroup(particleEngine, particleRenderType);
-	}
-
 	@Mutable
 	@Shadow
 	@Final

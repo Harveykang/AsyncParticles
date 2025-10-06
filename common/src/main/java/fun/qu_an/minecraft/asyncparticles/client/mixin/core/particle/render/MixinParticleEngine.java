@@ -3,16 +3,18 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.render;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.render.AsyncParticleRenderState;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.render.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.render.DeferredParticleRenderState;
 import net.minecraft.client.Camera;
-import net.minecraft.client.particle.*;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.particle.ParticleGroup;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.state.ParticleGroupRenderState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinTask;
 
 @Mixin(ParticleEngine.class)
@@ -29,6 +31,9 @@ public abstract class MixinParticleEngine {
 		DeferredParticleRenderState state = new DeferredParticleRenderState();
 		ForkJoinTask<?> task = AsyncRenderBehavior.EXECUTOR.submit(() -> {
 			ParticleGroupRenderState renderState = original.call(instance, frustum, camera, v);
+			if (renderState instanceof AsyncParticleRenderState asyncState) {
+				asyncState.afterAdd();
+			}
 			state.setDelegate(renderState);
 		});
 		AsyncRenderBehavior.addRenderingFuture(task);

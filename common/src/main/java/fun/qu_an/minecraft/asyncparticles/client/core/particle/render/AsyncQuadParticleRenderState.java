@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.concurrent.ForkJoinTask;
 
 // add() -> afterAdd() -> waitFuture() -> submit() -> prepare() -> render()
-public class AsyncQuadParticleRenderState extends QuadParticleRenderState {
+public class AsyncQuadParticleRenderState extends QuadParticleRenderState implements AsyncParticleRenderState {
 	private final ParticleGroup<SingleQuadParticle> group;
 	private MeshData meshData;
 	private ByteBufferBuilder byteBufferBuilder;
@@ -59,6 +59,7 @@ public class AsyncQuadParticleRenderState extends QuadParticleRenderState {
 		attached.add(f, g, h, i, j, k, l, m, n, o, p, q, r, s);
 	}
 
+	@Override
 	public void afterAdd() {
 		particleCount = ParticleLayerAttached.getParticleCount();
 		if (particleCount == 0) {
