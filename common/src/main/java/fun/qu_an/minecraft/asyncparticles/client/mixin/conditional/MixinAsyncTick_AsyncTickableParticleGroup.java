@@ -23,7 +23,7 @@ public abstract class MixinAsyncTick_AsyncTickableParticleGroup implements Async
 		if (!instance.isAlive()) {
 			return;
 		}
-		if (!((ParticleAddon) instance).asyncparticles$isTicked()) {
+		if (!((ParticleAddon) instance).asyncparticles$isTicked() && f <= 1.0f) {
 			f += 1.0F;
 		}
 		original.call(instance, quadParticleRenderState, camera, f);
