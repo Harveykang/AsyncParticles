@@ -1,61 +1,35 @@
 # AsyncParticles
 
 - [中文](./README_zh.md)|English
-- [Downloads](https://github.com/Harveykang/AsyncParticles/releases)
+- [Modrinth](https://modrinth.com/mod/asyncparticles)|[CurseForge](https://www.curseforge.com/minecraft/mc-mods/asyncparticles)
 
 ## Features
 
 - Minecraft
-  - Particle culling.
-  - Async particle ticking/rendering(buffer filling).
-  - Async particle light cache.
-  - Async client block entity ticking.
-- Create/Valkyrien Skies + Pretty Rain/Particle Rain
-  - Weather particles now collide with contraptions/ships.
-- Pretty Rain/Particle Rain/Effectual/Particular
-  - Async particle gen.
+    - Async particle ticking/rendering(buffer filling).
+    - Async particle light cache.
 
 ## Mods Recommended
 
 - ModernFix
-- Sodium/Embeddium
+- Sodium
 - Flerovium
-- Startlight/ScalableLux
+- ScalableLux
 
 ## Mod Compatability
 
-🔄️: Work in progress  
-✅: Compatible  
-❔: Works fine, but not fully tested  
-⚠️: More testing needed  
-❌: Not Compatible
+### ❌ Incompatible
+- OptiFine
+- MadParticle
 
-### Mods Tested
-
-✅ Forge + Sinytra Connector  
-✅ Fabric  
-✅ ModernFix  
-✅ Sodium/Embeddium  
-✅ Flerovium  
-✅ Brute force Rendering Culling  
-✅ Iris/Oculus  
-✅ Startlight  
-✅ Valkyrien Skies  
-✅ Particle Rain/Pretty Rain  
-✅ MmmMmmMmmMmm (Target Dummy)  
-✅ Hex Casting  
-⚠️ Create  
-❔ Effectual  
-❔ Effective/Effecticularity  
-❔ Particular  
-❔ Epic Fight  
-❔ Draconic Evolution  
-❔ Gateways to Eternity  
-❌ MadParticle  
-⬜ ...
+## License
+-   0.x   LGPL-3.0
+-   1.x   MIT
+- < ?.4.0 MIT
+- \>=?.4.0 LGPL-3.0
 
 ## Credits
 
-- [MixinSquared](https://github.com/Bawnorton/MixinSquared)
-- [MixinExtras](https://github.com/LlamaLad7/MixinExtras)
-- [MixinConstraints](https://github.com/Moulberry/MixinConstraints)
+- [wahfl2/sodium-fabric](https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16) for the approach to detect GPU-acceleratable particles.
+- [MixinSquared](https://github.com/Bawnorton/MixinSquared) for the amazing mixin-based framework.
+- [MixinConstraints](https://github.com/Moulberry/MixinConstraints) for the version checking code.
