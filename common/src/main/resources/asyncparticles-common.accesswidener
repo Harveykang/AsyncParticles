@@ -27,3 +27,4 @@ accessible method net/minecraft/Util onThreadException (Ljava/lang/Thread;Ljava/
 accessible method net/minecraft/client/renderer/state/QuadParticleRenderState$Storage <init> ()V
 accessible method net/minecraft/client/particle/ParticleEngine updateCount (Lnet/minecraft/core/particles/ParticleLimit;I)V
 accessible field net/minecraft/client/particle/ParticleEngine particles Ljava/util/Map;
+transitive-mutable field net/minecraft/world/level/Level random Lnet/minecraft/util/RandomSource;

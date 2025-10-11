@@ -36,6 +36,9 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired_Tick());
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired_Extract());
 		MixinClassAdjusterRegistrar.register(new AdjusterReplaceRandom());
+		MixinClassAdjusterRegistrar.register(new AdjusterParticlesAsyncTickableGroup());
+		MixinClassAdjusterRegistrar.register(new AdjusterParticlesModifyTheFromParticleMethod());
+		MixinClassAdjusterRegistrar.register(new AdjusterParticlesTestAliveBeforeRender());
 		MixinMemberCancellerRegistrar.register(new AsyncParticlesMixinMemberCanceller());
 		MixinCancellerRegistrar.register(new AsyncParticlesMixinCanceller());
 	}
@@ -85,7 +88,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
-			case "core" -> true;
+			case "core", "off_thread_access" -> true;
 			case "compat" -> {
 				if (split.length == 2) {
 					throw new IllegalArgumentException("Unknown compat mixin: " + mixinClassName);

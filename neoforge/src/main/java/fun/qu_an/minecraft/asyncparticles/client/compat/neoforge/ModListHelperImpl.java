@@ -15,18 +15,18 @@ public class ModListHelperImpl {
 	}
 
 	public static boolean isClient() {
-		return FMLLoader.getDist().isClient();
+		return FMLLoader.getCurrent().getDist().isClient();
 	}
 
 	public static boolean isModLoaded(String modId) {
-		return FMLLoader.getLoadingModList().getModFileById(modId) != null;
+		return FMLLoader.getCurrent().getLoadingModList().getModFileById(modId) != null;
 	}
 
 	/**
 	 * Basically from <a href="https://github.com/Moulberry/MixinConstraints">MixinConstraints</a>
 	 */
 	public static boolean versionCheck(String modId, String minInclusive, String maxExclusive) {
-		IModFileInfo info = LoadingModList.get().getModFileById(modId);
+		IModFileInfo info = FMLLoader.getCurrent().getLoadingModList().getModFileById(modId);
 		String version = info == null || info.getMods().isEmpty() ? null : info.versionString();
 		if (version == null) {
 			return false;
@@ -50,11 +50,11 @@ public class ModListHelperImpl {
 	}
 
 	public static String versionToString(String modId) {
-		IModFileInfo info = LoadingModList.get().getModFileById(modId);
+		IModFileInfo info = FMLLoader.getCurrent().getLoadingModList().getModFileById(modId);
 		return info == null || info.getMods().isEmpty() ? null : info.versionString();
 	}
 
 	public static boolean isDevelopmentEnvironment() {
-		return !FMLLoader.isProduction();
+		return !FMLLoader.getCurrent().isProduction();
 	}
 }

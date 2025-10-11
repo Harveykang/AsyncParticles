@@ -5,7 +5,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.neoforged.api.distmarker.Dist;
@@ -13,7 +12,6 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.moddiscovery.ModInfo;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -26,7 +24,7 @@ public final class AsyncParticlesClientNeoForge {
 		// Run our common setup.
 		AsyncParticlesClient.init();
 //		NeoForge.EVENT_BUS.addListener(this::registerClientCommands);
-		container.registerExtensionPoint(IConfigScreenFactory.class, (container1, parent)->AsyncParticlesConfig.newConfigScreen(parent));
+//		container.registerExtensionPoint(IConfigScreenFactory.class, (container1, parent)->AsyncParticlesConfig.newConfigScreen(parent));
 	}
 
 	private static CompletableFuture<Suggestions> suggestModId(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {

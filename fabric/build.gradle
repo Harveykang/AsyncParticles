@@ -57,13 +57,14 @@ dependencies {
     modLocalRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
 
     /* Performance */
-    modCompileOnly "maven.modrinth:sodium:mc1.21.9-0.7.0-fabric"
-    modCompileOnly 'maven.modrinth:iris:1.9.3+1.21.9-fabric' // 1.9.1
-    modLocalRuntime "maven.modrinth:sodium:mc1.21.9-0.7.0-fabric"
-//    modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.6-0.6.6+fabric'
-    modLocalRuntime 'maven.modrinth:iris:1.9.3+1.21.9-fabric' // 1.9.1
+    modCompileOnly "maven.modrinth:sodium:mc1.21.10-0.7.2-fabric"
+    modCompileOnly 'maven.modrinth:iris:1.9.6+1.21.10-fabric'
+    modCompileOnly 'maven.modrinth:sodium-extra:mc1.21.9-0.7.0+fabric'
+    modLocalRuntime "maven.modrinth:sodium:mc1.21.10-0.7.2-fabric"
+    modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.9-0.7.0+fabric'
+    modLocalRuntime 'maven.modrinth:iris:1.9.6+1.21.10-fabric'
     localRuntime "org.antlr:antlr4-runtime:4.13.1"
-    localRuntime "io.github.douira:glsl-transformer:2.0.1"
+    localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
     localRuntime "org.anarres:jcpp:1.4.14"
     modLocalRuntime 'maven.modrinth:scalablelux:0.1.6+fabric.c25518a'
     modLocalRuntime 'maven.modrinth:spark:1.10.145-fabric'

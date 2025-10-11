@@ -8,9 +8,12 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin",
   "client": [
-    "compat.sodium_extra.MixinMixinFireworkParticle",
-    "compat.sodium_extra.MixinMixinParticleEngine",
+    "compat.sodium_extra.MixinFireworkParticles$Starter",
+    "compat.sodium_extra.MixinParticleEngine",
     "conditional.Mixin_ReplaceRandom",
+    "conditional.MixinAsyncTick_AsyncTickableParticleGroup",
+    "conditional.MixinAsyncTick_ModifyTheFromParticleMethod",
+    "conditional.MixinAsyncTick_TestAliveBeforeRender",
     "conditional.MixinClassInstanceMultiMap",
     "conditional.MixinLegacyRandomSource",
     "conditional.MixinLevelChunk_BlockEntityMap",
@@ -21,23 +24,29 @@
     "conditional.MixinParticles_NoCulling",
     "core.MixinTextureManager",
     "core.MixinVertexConsumer",
+    "core.MixinWaterFluid",
     "core.particle.MixinParticle",
     "core.particle.MixinParticleEngine",
-    "core.particle.render.MixinLevelRenderer",
-    "core.particle.render.MixinParticle_LightCache",
-    "core.particle.render.MixinParticleEngine",
-    "core.particle.render.MixinParticlesRenderState",
-    "core.particle.render.MixinQuadParticleGroup",
-    "core.particle.render.MixinSingleQuadParticle$Layer",
-    "core.particle.render.MixinVertexVertexStorage",
-    "core.particle.tick.MixinMinecraft",
-    "core.particle.tick.MixinParticleEngine",
-    "core.particle.tick.MixinParticleGroup"
+    "core.particle.fix_black_destroy_particle.MixinParticleEngine_FixBlackDestroyParticle",
+    "core.particle.fix_black_destroy_particle.MixinTerrainParticle_FixBlackDestroyParticle",
+    "core.particle.async_render.MixinLevelRenderer",
+    "core.particle.async_render.MixinParticle_LightCache",
+    "core.particle.async_render.MixinParticleEngine",
+    "core.particle.async_render.MixinParticlesRenderState",
+    "core.particle.async_render.MixinQuadParticleGroup",
+    "core.particle.async_render.MixinSingleQuadParticle$Layer",
+    "core.particle.async_render.MixinVertexVertexStorage",
+    "core.particle.async_tick.MixinMinecraft",
+    "core.particle.async_tick.MixinParticleEngine",
+    "core.particle.async_tick.MixinParticleGroup",
+    "off_thread_access.MixinClientChunkCache",
+    "off_thread_access.MixinClientLevel",
+    "off_thread_access.MixinLevelRenderer",
+    "off_thread_access.MixinSoundEngine"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
-    "core.MixinMemoryPool"
   ]
 }

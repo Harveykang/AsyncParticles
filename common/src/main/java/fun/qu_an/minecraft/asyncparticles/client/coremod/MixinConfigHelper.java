@@ -36,4 +36,12 @@ public class MixinConfigHelper {
 	public static boolean isSafeBlockEntityMap() {
 		return CONFIG.isSafeBlockEntityMap();
 	}
+
+	public static Collection<String> getAsyncTickableParticleGroups() {
+		return CONFIG.getAsyncTickableParticleGroups();
+	}
+
+	public static Collection<String> getModifyTheFromParticleMethod() {
+		return CONFIG.getModifyTheFromParticleMethod();
+	}
 }

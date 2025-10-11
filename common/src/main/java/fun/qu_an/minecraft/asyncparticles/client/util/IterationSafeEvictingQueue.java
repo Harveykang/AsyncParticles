@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * This queue is designed to be iteration-safe.
@@ -145,6 +146,25 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		return new aSpliterator();
 	}
 
+	public Iterator<E> conditionalIterator(Predicate<E> predicate) {
+		return new anIterator() {
+			@Override
+			public boolean hasNext() {
+				if (next != null) {
+					return true;
+				}
+				final Object e = curr;
+				while (cursor < tail) {
+					next = a[cursor++ & mask];
+					if (next != null && next != e && predicate.test((E) next)) {
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+	}
+
 	private final class aSpliterator implements Spliterator<E> {
 		int pos;
 		int max;
@@ -240,13 +260,13 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 	}
 
 	private class anIterator implements Iterator<E> {
-		private final Object[] a = queue;
-		private final int mask = a.length - 1;
-		private final int head = Math.min(mask, IterationSafeEvictingQueue.this.head);
-		private int tail = Math.min(a.length, IterationSafeEvictingQueue.this.size) + head;
-		private int cursor = head;
-		private Object curr;
-		private Object next;
+		protected final Object[] a = queue;
+		protected final int mask = a.length - 1;
+		protected final int head = Math.min(mask, IterationSafeEvictingQueue.this.head);
+		protected int tail = Math.min(a.length, IterationSafeEvictingQueue.this.size) + head;
+		protected int cursor = head;
+		protected Object curr;
+		protected Object next;
 
 		@Override
 		public boolean hasNext() {

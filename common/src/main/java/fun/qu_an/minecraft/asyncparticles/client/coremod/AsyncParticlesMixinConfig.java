@@ -10,10 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.*;
 
@@ -151,6 +148,18 @@ public class AsyncParticlesMixinConfig {
 //			replaceRandom.add("appeng.client.render.effects.LightningFX");
 		}
 
+		private Set<String> asyncTickableParticleGroups = new LinkedHashSet<>();
+
+		{
+
+		}
+
+		private Set<String> modifyTheFromParticleMethod = new LinkedHashSet<>();
+
+		{
+
+		}
+
 		private void fold() {
 			assertNotGlobal();
 			safeClassInstanceMultiMap = toSaveConfig.safeClassInstanceMultiMap;
@@ -161,6 +170,8 @@ public class AsyncParticlesMixinConfig {
 			lockProvider = toSaveConfig.lockProvider;
 			lockRequired = toSaveConfig.lockRequired;
 			replaceRandom = toSaveConfig.replaceRandom;
+			asyncTickableParticleGroups = toSaveConfig.asyncTickableParticleGroups;
+			modifyTheFromParticleMethod = toSaveConfig.modifyTheFromParticleMethod;
 		}
 
 		private void read(Properties properties) {
@@ -179,6 +190,8 @@ public class AsyncParticlesMixinConfig {
 			lockProvider = getSet(properties, "particle$lockProvider", defaultConfig.lockProvider);
 			lockRequired = getSet(properties, "particle$lockRequired", defaultConfig.lockRequired);
 			replaceRandom = getSet(properties, "replaceRandom", defaultConfig.replaceRandom);
+			asyncTickableParticleGroups = getSet(properties, "asyncTick$asyncTickableParticleGroups", defaultConfig.asyncTickableParticleGroups);
+			modifyTheFromParticleMethod = getSet(properties, "asyncTick$modifyTheFromParticleMethod", defaultConfig.modifyTheFromParticleMethod);
 		}
 
 		void flat() {
@@ -286,27 +299,45 @@ public class AsyncParticlesMixinConfig {
 			this.safeLegacyRandomSource = safeLegacyRandomSource;
 		}
 
-		public boolean isSafeLegacyRandomSource() {
+		boolean isSafeLegacyRandomSource() {
 			return safeLegacyRandomSource;
 		}
 
-		public boolean isSafeClassInstanceMultiMap() {
+		boolean isSafeClassInstanceMultiMap() {
 			return safeClassInstanceMultiMap;
 		}
 
-		public void setSafeClassInstanceMultiMap(boolean safeClassInstanceMultiMap) {
+		void setSafeClassInstanceMultiMap(boolean safeClassInstanceMultiMap) {
 			assertNotGlobal();
 			this.safeClassInstanceMultiMap = ModListHelper.MAKE_BUBBLES_POP_LOADED ||
-											 safeClassInstanceMultiMap;
+				safeClassInstanceMultiMap;
 		}
 
-		public boolean isSafeBlockEntityMap() {
+		boolean isSafeBlockEntityMap() {
 			return safeBlockEntityMap;
 		}
 
-		public void setSafeBlockEntityMap(boolean safeBlockEntityMap) {
+		void setSafeBlockEntityMap(boolean safeBlockEntityMap) {
 			assertNotGlobal();
 			this.safeBlockEntityMap = safeBlockEntityMap;
+		}
+
+		Collection<String> getAsyncTickableParticleGroups() {
+			return asyncTickableParticleGroups;
+		}
+
+		void setAsyncTickableParticleGroups(Set<String> asyncTickableParticleGroups) {
+			assertNotGlobal();
+			this.asyncTickableParticleGroups = asyncTickableParticleGroups;
+		}
+
+		Collection<String> getModifyTheFromParticleMethod() {
+			return modifyTheFromParticleMethod;
+		}
+
+		void setModifyTheFromParticleMethod(Set<String> modifyTheFromParticleMethod) {
+			assertNotGlobal();
+			this.modifyTheFromParticleMethod = modifyTheFromParticleMethod;
 		}
 	}
 }
