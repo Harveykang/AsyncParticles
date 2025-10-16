@@ -11,7 +11,15 @@
     "sources": "https://github.com/Harveykang/AsyncParticles",
     "issues": "https://github.com/Harveykang/AsyncParticles/issues"
   },
-  "license": "MIT",
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.kofi": "https://ko-fi.com/harvey_husky",
+        "爱发电": "https://afdian.com/a/harvey-husky"
+      }
+    }
+  },
+  "license": "LGPL-3.0",
   "icon": "assets/asyncparticles/icon.png",
   "accessWidener": "asyncparticles-common.accesswidener",
   "environment": "client",

@@ -23,9 +23,9 @@
 - MadParticle
 
 ## License
--   0.x   LGPL-3.0
--   1.x   MIT
-- < ?.4.0 MIT
+-    0.x   LGPL-3.0
+-    1.x   MIT
+-  < ?.4.0 MIT
 - \>=?.4.0 LGPL-3.0
 
 ## Credits
