@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -96,14 +97,26 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 		if (level == null) {
 			return;
 		}
-		BlockPos blockPos = BlockPos.containing(x, y, z);
-		int light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
+		BlockPos.MutableBlockPos blockPos = SHARED_POS.get().set(x, y, z);
+		int light;
+		try {
+			light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
+		} catch (MissingPaletteEntryException ignore) {
+			// chunk not loaded yet maybe, ignore
+			light = 0;
+		}
 		if (asyncparticles$vsShip == null || !ConfigHelper.fixParticleLightOnVsShips()) {
 			asyncparticles$setLight(light);
 		} else {
 			Vector3d transformed = asyncparticles$vsShip.getWorldToShip().transformPosition(x, y, z, new Vector3d());
-			BlockPos pos = BlockPos.containing(transformed.x, transformed.y, transformed.z);
-			int shipLight = level.hasChunkAt(pos) ? LevelRenderer.getLightColor(level, pos) : 0;
+			blockPos.set(transformed.x, transformed.y, transformed.z);
+			int shipLight;
+			try {
+				shipLight = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
+			} catch (MissingPaletteEntryException ignore) {
+				// chunk not loaded yet maybe, ignore
+				shipLight = 0;
+			}
 			int finalLight = Math.max(light & 0xFFFF, shipLight & 0xFFFF) | // max for block, min for sky
 							 Math.min(light & 0xFFFF0000, shipLight & 0xFFFF0000);
 			asyncparticles$setLight(finalLight);

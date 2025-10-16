@@ -8,6 +8,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,8 +45,14 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 		if (level == null) {
 			return;
 		}
-		BlockPos blockPos = BlockPos.containing(x, y, z);
-		int light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
+		BlockPos blockPos = SHARED_POS.get().set(x, y, z);
+		int light;
+		try {
+			light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
+		} catch (MissingPaletteEntryException ignore) {
+			// chunk not loaded yet maybe, ignore
+			light = 0;
+		}
 		asyncparticles$setLight(light);
 	}
 
@@ -61,6 +68,11 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 
 	@Override
 	public int asyncparticles$invoke_getLightColor(float partialTick) {
-		return getLightColor(partialTick);
+		try {
+			return getLightColor(partialTick);
+		} catch (MissingPaletteEntryException ignore) {
+			// chunk not loaded yet maybe, ignore
+			return 0;
+		}
 	}
 }

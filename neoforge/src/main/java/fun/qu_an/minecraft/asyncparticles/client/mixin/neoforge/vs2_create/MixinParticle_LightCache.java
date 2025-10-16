@@ -8,6 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.mixin.vs2.MixinParticle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import org.joml.Vector3d;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -20,16 +21,28 @@ public abstract class MixinParticle_LightCache extends MixinParticle {
 		if (level == null) {
 			return;
 		}
-		BlockPos blockPos = BlockPos.containing(x, y, z);
-		int light = level.isLoaded(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
+		BlockPos.MutableBlockPos blockPos = SHARED_POS.get().set(x, y, z);
+		int light;
+		try {
+			light = level.isLoaded(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
+		} catch (MissingPaletteEntryException ignore) {
+			// chunk not loaded yet maybe, ignore
+			light = 0;
+		}
 		if (asyncparticles$vsShip == null || !ConfigHelper.fixParticleLightOnVsShips()) {
 			asyncparticles$setLight(light);
 		} else {
 			Vector3d transformed = asyncparticles$vsShip.getWorldToShip().transformPosition(x, y, z, new Vector3d());
-			BlockPos pos = BlockPos.containing(transformed.x, transformed.y, transformed.z);
-			int shipLight = level.isLoaded(pos) ? LevelRenderer.getLightColor(level, pos) : 0;
+			blockPos.set(transformed.x, transformed.y, transformed.z);
+			int shipLight;
+			try {
+				shipLight = level.isLoaded(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
+			} catch (MissingPaletteEntryException ignore) {
+				// chunk not loaded yet maybe, ignore
+				shipLight = 0;
+			}
 			int finalLight = Math.max(light & 0xFFFF, shipLight & 0xFFFF) | // max for block, min for sky
-							 Math.min(light & 0xFFFF0000, shipLight & 0xFFFF0000);
+				Math.min(light & 0xFFFF0000, shipLight & 0xFFFF0000);
 			asyncparticles$setLight(finalLight);
 		}
 	}
