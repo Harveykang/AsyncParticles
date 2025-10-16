@@ -60,10 +60,16 @@ public sealed class ParticleThreadLocal<T> permits ParticleThreadLocal.SuppliedP
 		Thread thread = Thread.currentThread();
 		if (thread instanceof AsyncParticleWorkerThread wt) {
 			setUnsafe(value);
-		} else if (fallback == null) {
-			fallback = newFallbackThreadLocal();
-			fallback.set(value);
 		} else {
+			ThreadLocal<T> fallback = this.fallback;
+			if (fallback == null) {
+				synchronized (this) {
+					fallback = this.fallback;
+					if (fallback == null) {
+						fallback = this.fallback = newFallbackThreadLocal();
+					}
+				}
+			}
 			fallback.set(value);
 		}
 	}
