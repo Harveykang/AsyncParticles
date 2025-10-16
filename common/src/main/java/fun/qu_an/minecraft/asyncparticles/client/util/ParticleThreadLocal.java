@@ -45,11 +45,22 @@ public sealed class ParticleThreadLocal<T> permits ParticleThreadLocal.SuppliedP
 		Thread thread = Thread.currentThread();
 		if (thread instanceof AsyncParticleWorkerThread) {
 			return getUnsafe();
-		} else if (fallback == null) {
-			return (fallback = newFallbackThreadLocal()).get();
 		} else {
-			return fallback.get();
+			return getFallback().get();
 		}
+	}
+
+	private ThreadLocal<T> getFallback() {
+		ThreadLocal<T> fallback = this.fallback;
+		if (fallback == null) {
+			synchronized (this) {
+				fallback = this.fallback;
+				if (fallback == null) {
+					fallback = this.fallback = newFallbackThreadLocal();
+				}
+			}
+		}
+		return fallback;
 	}
 
 	protected ThreadLocal<T> newFallbackThreadLocal() {
@@ -61,16 +72,7 @@ public sealed class ParticleThreadLocal<T> permits ParticleThreadLocal.SuppliedP
 		if (thread instanceof AsyncParticleWorkerThread wt) {
 			setUnsafe(value);
 		} else {
-			ThreadLocal<T> fallback = this.fallback;
-			if (fallback == null) {
-				synchronized (this) {
-					fallback = this.fallback;
-					if (fallback == null) {
-						fallback = this.fallback = newFallbackThreadLocal();
-					}
-				}
-			}
-			fallback.set(value);
+			getFallback().set(value);
 		}
 	}
 
@@ -78,8 +80,8 @@ public sealed class ParticleThreadLocal<T> permits ParticleThreadLocal.SuppliedP
 		Thread thread = Thread.currentThread();
 		if (thread instanceof AsyncParticleWorkerThread wt) {
 			setUnsafe(null);
-		} else if (fallback != null) {
-			fallback.remove();
+		} else {
+			getFallback().remove();
 		}
 	}
 
