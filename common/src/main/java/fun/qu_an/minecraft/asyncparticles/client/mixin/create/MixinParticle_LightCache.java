@@ -8,6 +8,7 @@ import com.simibubi.create.foundation.particle.AirParticle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin({AirFlowParticle.class, AirParticle.class, SteamJetParticle.class})
@@ -26,8 +27,14 @@ public abstract class MixinParticle_LightCache
 		if (level == null) {
 			return;
 		}
-		BlockPos blockpos = BlockPos.containing(x, y, z);
-		int light = level.isLoaded(blockpos) ? LevelRenderer.getLightColor(level, blockpos) : 0;
+		BlockPos blockPos = SHARED_POS.get().set(x, y, z);
+		int light;
+		try {
+			light = level.isLoaded(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
+		} catch (MissingPaletteEntryException ignore) {
+			// chunk not loaded yet maybe, ignore
+			light = 0;
+		}
 		asyncparticles$setLight(light);
 	}
 }
