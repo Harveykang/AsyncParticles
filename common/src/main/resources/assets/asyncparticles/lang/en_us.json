@@ -14,6 +14,8 @@
   "config.asyncparticles.tick.particleTickMode.tooltip": "Choose how particles are ticked.\n'Synchronously' means no optimization.",
   "config.asyncparticles.tick.tickWeatherAsync": "Async Weather Tick",
   "config.asyncparticles.tick.tickWeatherAsync.tooltip": "Enable asynchronous weather ticking.",
+  "config.asyncparticles.tick.deferredTextureTick": "Deferred Texture Tick",
+  "config.asyncparticles.tick.deferredTextureTick.tooltip": "Defer texture ticking by one frame to avoid lag.",
   "config.asyncparticles.tick.failPerSecLimit": "Failures Per Second Threshold",
   "config.asyncparticles.tick.failPerSecLimit.tooltip": "Max number of tick failures allowed per second\nfor each particle class or end-tick op.\nExceeding this will follow the 'Failure Behavior'\nrule.",
   "config.asyncparticles.tick.failBehavior": "Failure Behavior",

@@ -11,8 +11,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 import java.util.List;
+import java.util.Optional;
 
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
 
@@ -87,6 +89,27 @@ class ClothConfigMenus {
 				.setDefaultValue(defaultConfig.tick.tickWeatherAsync)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.tickWeatherAsync.tooltip"))
 				.setSaveConsumer(newValue -> tick$tickWeatherAsync = newValue)
+				.build())
+			.addEntry(entryBuilder
+				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.deferredTextureTick"),
+					tick$deferredTextureTick)
+				.setDefaultValue(defaultConfig.tick.deferredTextureTick)
+				.setTooltipSupplier(() -> {
+					if (ModListHelper.AXIOM_LOADED) {
+						return Optional.of(new MutableComponent[]{
+							Component.translatable("config.asyncparticles.tick.deferredTextureTick.tooltip")
+								.withStyle(ChatFormatting.STRIKETHROUGH),
+							Component.translatable("config.asyncparticles.incompatibility", "Axiom")
+								.withStyle(ChatFormatting.YELLOW)
+						});
+					} else {
+						return Optional.of(new MutableComponent[]{
+							Component.translatable("config.asyncparticles.tick.deferredTextureTick.tooltip")
+						});
+					}
+				})
+				.setSaveConsumer(newValue -> tick$deferredTextureTick = newValue)
+				.setRequirement(() -> !ModListHelper.AXIOM_LOADED)
 				.build())
 			.addEntry(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.tick.failPerSecLimit"),
