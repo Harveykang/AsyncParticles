@@ -114,6 +114,10 @@ public class ConfigHelper {
 		return tick$tickWeatherAsync;
 	}
 
+	public static boolean isDeferredTextureTick() {
+		return tick$deferredTextureTick;
+	}
+
 	public static ParticleCullingMode getParticleCullingMode() {
 		return rendering$particleCulling;
 	}

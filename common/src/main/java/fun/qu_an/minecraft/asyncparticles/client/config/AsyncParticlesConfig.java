@@ -44,6 +44,7 @@ public class AsyncParticlesConfig {
 	public static TickMode tick$animationTickMode;
 	public static TickMode tick$particleTickMode;
 	public static boolean tick$tickWeatherAsync;
+	public static boolean tick$deferredTextureTick;
 	public static int tick$failPerSecLimit;
 	public static FailBehavior tick$failBehavior;
 	public static boolean tick$suppressCME;
@@ -267,6 +268,7 @@ public class AsyncParticlesConfig {
 			TickMode animationTickMode = TickMode.INTERRUPTIBLE;
 			TickMode particleTickMode = TickMode.INTERRUPTIBLE;
 			boolean tickWeatherAsync = true;
+			boolean deferredTextureTick = !ModListHelper.AXIOM_LOADED;
 			int failPerSecLimit = 5;
 			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
 			boolean suppressCME = false;
@@ -275,6 +277,7 @@ public class AsyncParticlesConfig {
 				tick$animationTickMode = requireNonNullElse(animationTickMode, TickMode.INTERRUPTIBLE);
 				tick$particleTickMode = requireNonNullElse(particleTickMode, TickMode.INTERRUPTIBLE);
 				tick$tickWeatherAsync = tickWeatherAsync;
+				tick$deferredTextureTick = deferredTextureTick && !ModListHelper.AXIOM_LOADED;
 				tick$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				tick$failBehavior = requireNonNullElse(failBehavior, FailBehavior.RAISE_CRASH);
 				tick$suppressCME = suppressCME;
@@ -284,6 +287,7 @@ public class AsyncParticlesConfig {
 				animationTickMode = tick$animationTickMode;
 				particleTickMode = tick$particleTickMode;
 				tickWeatherAsync = tick$tickWeatherAsync;
+				deferredTextureTick = tick$deferredTextureTick;
 				failPerSecLimit = tick$failPerSecLimit;
 				failBehavior = tick$failBehavior;
 				suppressCME = tick$suppressCME;

@@ -14,6 +14,8 @@
   "config.asyncparticles.tick.particleTickMode.tooltip": "设置粒子刻的行为。“同步执行”意味着禁用优化。",
   "config.asyncparticles.tick.tickWeatherAsync": "异步天气刻",
   "config.asyncparticles.tick.tickWeatherAsync.tooltip": "设置是否启用异步天气刻。",
+  "config.asyncparticles.tick.deferredTextureTick": "推迟纹理刻",
+  "config.asyncparticles.tick.deferredTextureTick.tooltip": "将纹理刻推迟一帧执行以降低卡顿。",
   "config.asyncparticles.tick.failPerSecLimit": "每秒 Tick 异常上限",
   "config.asyncparticles.tick.failPerSecLimit.tooltip": "设置每个粒子类或事件中每秒允许的最大 Tick 异常数。\n超过此限制将触发“Tick 异常时”中设置的行为。",
   "config.asyncparticles.tick.failBehavior": "Tick 异常时",
