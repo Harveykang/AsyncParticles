@@ -50,15 +50,14 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 		if (level == null) {
 			return;
 		}
-		BlockPos blockPos = BlockPos.containing(x, y, z);
-		int levelLight;
+		BlockPos blockPos = SHARED_POS.get().set(x, y, z);
+		int light;
 		try {
-			levelLight = LevelRenderer.getLightColor(level, blockPos);
+			light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
 		} catch (MissingPaletteEntryException ignore) {
 			// chunk not loaded yet maybe, ignore
-			levelLight = 0;
+			light = 0;
 		}
-		int light = level.hasChunkAt(blockPos) ? levelLight : 0;
 		asyncparticles$setLight(light);
 	}
 

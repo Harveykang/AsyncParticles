@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Set;
@@ -116,4 +117,7 @@ public class ConfigHelper {
 		return true;
 	}
 
+	public static boolean isDeferredTextureTick() {
+		return !ModListHelper.AXIOM_LOADED;
+	}
 }
