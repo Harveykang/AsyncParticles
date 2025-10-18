@@ -119,6 +119,8 @@ public class ModListHelper {
 	public static final boolean MORE_CULLING_LOADED = isModLoaded("moreculling");
 	/* Figura */
 	public static final boolean FIGURA_LOADED = isModLoaded("figura");
+	/* Axiom */
+	public static final boolean AXIOM_LOADED = isModLoaded("axiom");
 
 	@ExpectPlatform
 	private static boolean isForge() {
