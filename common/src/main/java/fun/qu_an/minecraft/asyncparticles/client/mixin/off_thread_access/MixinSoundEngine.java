@@ -55,7 +55,7 @@ public class MixinSoundEngine {
 		} else {
 			ThreadUtil.enqueueClientTask(() -> original.call(soundInstance));
 			// FIXME
-			return this.loaded ? SoundEngine.PlayResult.STARTED_SILENTLY : SoundEngine.PlayResult.NOT_STARTED;
+			return this.loaded ? SoundEngine.PlayResult.STARTED : SoundEngine.PlayResult.NOT_STARTED;
 		}
 	}
 
