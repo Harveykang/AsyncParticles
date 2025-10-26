@@ -116,7 +116,7 @@ public class AsyncRenderer {
 
 	/* Renderer */
 
-	public static void start(float f, Camera camera, int irm) {
+	public static void start(float partialTick, Camera camera, int irm) {
 		tryDebug();
 		switch (irm) {
 			case MIXED_SYNC, BEFORE_SYNC -> {
@@ -152,22 +152,23 @@ public class AsyncRenderer {
 			if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
 				continue;
 			}
-			asyncTasks.add(CompletableFuture.runAsync(() -> renderParticles(f, camera, queue, particleRenderType, bufferBuilder), EXECUTOR)
-				.exceptionally(AsyncRenderer::renderAsyncExceptionally));
+			// asyncTasks.add(CompletableFuture.runAsync(() -> renderParticles(partialTick, camera, queue, particleRenderType, bufferBuilder), EXECUTOR)
+			//	 .exceptionally(AsyncRenderer::renderAsyncExceptionally));
+			renderParticles(partialTick, camera, queue, particleRenderType, bufferBuilder);
 		}
 		int size = asyncTasksSize = asyncTasks.size();
 		asyncTask = CompletableFuture.allOf(asyncTasks.toArray(new CompletableFuture[size]));
 		profiler.pop();
 	}
 
-	private static void renderParticles(float f,
+	private static void renderParticles(float partialTick,
 										Camera camera,
 										Queue<Particle> particles,
 										ParticleRenderType particleRenderType,
 										BufferBuilder bufferBuilder) {
 		Frustum frustum = AsyncRenderer.frustum;
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
-		float f2 = f + 1f;
+		float f2 = partialTick + 1f;
 		for (Particle particle : particles) {
 			if (!particle.isAlive()) {
 				continue;
@@ -196,7 +197,7 @@ public class AsyncRenderer {
 				recordSync(particleRenderType, particle);
 				continue;
 			}
-			float f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+			float f3 = particleAddon.asyncparticles$isTicked() ? partialTick : f2;
 			try {
 				particle.render(bufferBuilder, camera, f3);
 			} catch (Throwable t) {

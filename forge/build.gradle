@@ -81,7 +81,7 @@ dependencies {
     modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'
     modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.9"
     modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.9"
-    modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.5.1-beta.3'
+    //modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.5.1-beta.3'
 
     /* Particle Rain/Pretty Rain */
     modCompileOnly "maven.modrinth:pretty-rain:yIvOKPKZ" // 1.1.3
@@ -124,19 +124,19 @@ dependencies {
 //    modLocalRuntime("com.github.Fallen-Breath.conditional-mixin:conditional-mixin-forge:0.6.2")
     /* Epic Fight */
     modCompileOnly "maven.modrinth:epic-fight:20.12.5"
-    modLocalRuntime "maven.modrinth:epic-fight:20.12.5"
+    //modLocalRuntime "maven.modrinth:epic-fight:20.12.5"
 
     /* Gateways to Eternity */
     modCompileOnly "curse.maven:gateway-to-eternity-417802:5703251"
-    modLocalRuntime "curse.maven:gateway-to-eternity-417802:5703251"
+    //modLocalRuntime "curse.maven:gateway-to-eternity-417802:5703251"
 
     /* Epic ACG */
     modCompileOnly "curse.maven:epic-acg-665625:6106647"
-    modLocalRuntime "curse.maven:epic-acg-665625:6106647"
+   // modLocalRuntime "curse.maven:epic-acg-665625:6106647"
 
     /* Draconic Evolution */
     modCompileOnly "maven.modrinth:draconic-evolution:3.1.2.604"
-    modLocalRuntime "maven.modrinth:draconic-evolution:3.1.2.604"
+    //modLocalRuntime "maven.modrinth:draconic-evolution:3.1.2.604"
 
     /* Iron's Spells and Spellbooks */
     modCompileOnly "maven.modrinth:irons-spells-n-spellbooks:1.20.1-3.4.0.7"
@@ -144,7 +144,7 @@ dependencies {
 
     /* Weather2 */
     modCompileOnly "curse.maven:weather2-237746:5244118" // 2.8.3
-    modLocalRuntime "curse.maven:weather2-237746:5244118" // 2.8.3
+    //modLocalRuntime "curse.maven:weather2-237746:5244118" // 2.8.3
 
     /* Aquaculture */
     modCompileOnly "maven.modrinth:aquamirae:7lX4KLFc"
