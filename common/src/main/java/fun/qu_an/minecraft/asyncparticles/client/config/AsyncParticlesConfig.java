@@ -301,7 +301,7 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Rendering {
-			RenderingMode particleRenderingMode = RenderingMode.DELAYED;
+			RenderingMode particleRenderingMode = RenderingMode.SYNCHRONOUSLY;
 			ParticleCullingMode particleCulling = ParticleCullingMode.AABB;
 			boolean cullWeathers = true;
 			int failPerSecLimit = 20;
