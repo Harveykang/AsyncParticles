@@ -1,56 +1,35 @@
 # 异步粒子
 
 - 中文|[English](./README.md)
-- [下载](https://github.com/Harveykang/AsyncParticles/releases)
+- [Modrinth](https://modrinth.com/mod/asyncparticles)|[CurseForge](https://www.curseforge.com/minecraft/mc-mods/asyncparticles)
 
-## 特性
+## 功能
 
 - Minecraft
-  - 异步粒子刻/渲染
-  - 异步客户端方块实体刻
-- 瓦尔基里天空/机械动力 + Pretty Rain/粒子雨
-  - 天气粒子不会穿过船只/动态结构
-- Pretty Rain/粒子雨/Effectual/Particular
-  - 异步粒子生成
+  - 异步粒子更新/渲染（缓冲填充）。
+  - 异步粒子光照缓存。
 
-## 推荐模组
+## 推荐的模组
 
 - ModernFix
-- Sodium/Embeddium
+- Sodium
 - Flerovium
-- 星光/ScalableLux
+- ScalableLux
 
 ## 模组兼容性
 
-✅: 兼容  
-❔: 看起来没问题，但没有完全测试  
-⚠️: 需要更多测试  
-🔄️: 正在尝试兼容  
-❌: 不兼容
+### ❌ 不兼容
+- OptiFine
+- MadParticle
 
-### 已测试模组
+## 许可证
+-    0.x   LGPL-3.0
+-    1.x   MIT
+- <= ?.4.x MIT
+- \> ?.4.x LGPL-3.0
 
-✅ Forge + Sinytra Connector  
-✅ Fabric  
-✅ ModernFix  
-✅ Sodium/Embeddium  
-✅ Flerovium  
-✅ 野蛮渲染剔除  
-✅ Iris/Oculus  
-✅ 星光/ScalableLux  
-⚠️ 机械动力  
-✅ 瓦尔基里天空  
-✅ 粒子雨/Pretty Rain  
-❔ Effectual  
-❔ Effective/Effecticularity  
-❔ Particular  
-✅ MmmMmmMmmMmm (Target Dummy)  
-✅ Hex Casting  
-❌ MadParticle  
-⬜ ...
+## 鸣谢
 
-## 致谢
-
-- [MixinSquared](https://github.com/Bawnorton/MixinSquared)
-- [MixinExtras](https://github.com/LlamaLad7/MixinExtras)
-- [MixinConstraints](https://github.com/Moulberry/MixinConstraints)
+- [wahfl2/sodium-fabric](https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16) 对检测可GPU加速粒子的方法。
+- [MixinSquared](https://github.com/Bawnorton/MixinSquared) 对令人惊叹的基于mixin的框架。
+- [MixinConstraints](https://github.com/Moulberry/MixinConstraints) 对版本检查的代码。
