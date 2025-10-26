@@ -70,7 +70,7 @@ public class ParticleRainCompatImpl extends ParticleRainCompat {
 			if (particle != null) {
 				Vec3i normal = hit.getDirection().getNormal();
 				Vector3f normal1 = hit.shipToWorld.transformDirection(new Vector3f(normal.getX(), normal.getY(), normal.getZ())).normalize();
-				((RippleParticleAddon) particle).asyncedParticles$setNormal(normal1);
+				((RippleParticleAddon) particle).asyncparticles$setNormal(normal1);
 			}
 			if (level.isThundering() && config.doSplashParticles) {
 				mc.particleEngine.createParticle(ParticleTypes.RAIN, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, 0);

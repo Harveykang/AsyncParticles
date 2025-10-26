@@ -39,10 +39,7 @@ import org.joml.Matrix4f;
 import org.slf4j.Logger;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinWorkerThread;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -53,41 +50,9 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRendering
 @Environment(EnvType.CLIENT)
 public class AsyncRenderer {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
+	private static final Set<Class<?>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 	private static boolean renderAsync = false;
 	private static boolean particlePhase = false;
-
-	static {
-		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
-		SYNC_PARTICLE_TYPES.add(MobAppearanceParticle.class);
-		if (ModListHelper.DUMMMMMMY_LOADED) {
-			addSyncByClassName("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
-		}
-		if (ModListHelper.FABRIC_EFFECTIVE_LOADED) {
-			addSyncByClassName("org.ladysnake.effective.core.particle.SplashParticle");
-		}
-		if (ModListHelper.FORGE_EFFECTICULARITY_LOADED) {
-			addSyncByClassName("concerrox.effective.particle.SplashParticle");
-		}
-		if (ModListHelper.TOMBSTONE_LOADED) {
-			// tomestone may have duplicate ids with other mods, so we need to check if these classes are present
-			addSyncByClassName("ovh.corail.tombstone.particle.ParticleCasting");
-			addSyncByClassName("ovh.corail.tombstone.particle.ParticleGhost");
-			addSyncByClassName("ovh.corail.tombstone.particle.ParticleGraveSoul");
-			addSyncByClassName("ovh.corail.tombstone.particle.ParticleMagicCircle");
-			addSyncByClassName("ovh.corail.tombstone.particle.ParticleMarker");
-			addSyncByClassName("ovh.corail.tombstone.particle.ParticleRounding");
-		}
-		// TODO: configure this set
-	}
-
-	private static void addSyncByClassName(String className) {
-		try {
-			SYNC_PARTICLE_TYPES.add((Class<? extends Particle>) Class.forName(className));
-		} catch (Exception e) {
-			LOGGER.error("", e);
-		}
-	}
 
 	public static final ForkJoinPool EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
@@ -229,9 +194,10 @@ public class AsyncRenderer {
 
 	private static Void renderAsyncExceptionally(Throwable e) {
 		LOGGER.error("Error rendering particle", e);
-		Minecraft mc1 = Minecraft.getInstance();
-		if (mc1.level != null && mc1.player != null) {
-			throw ExceptionUtil.toThrowDirectly(e);
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.level != null && mc.player != null && mc.getCameraEntity() != null) {
+			ReportedException reportedException = GameUtil.getReportedException(e);
+			throw ExceptionUtil.toThrowDirectly(reportedException == null ? e : reportedException);
 		}
 		return null;
 	}
@@ -588,6 +554,10 @@ public class AsyncRenderer {
 		}
 		FORMATS.clear();
 		clearSync();
+		SYNC_PARTICLE_TYPES.clear();
+		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
+		SYNC_PARTICLE_TYPES.add(MobAppearanceParticle.class);
+		SYNC_PARTICLE_TYPES.addAll(ConfigHelper.getRenderSyncParticleClasses());
 	}
 
 	public static void onTranslucent(Minecraft mc) {

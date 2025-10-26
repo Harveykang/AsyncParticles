@@ -11,6 +11,7 @@
     "a_good_place.InvokerBlocksParticlesManager",
     "a_good_place.MixinBlocksParticlesManager",
     "a_good_place.MixinPlacingBlockParticle",
+    "acceleratedrendering.MixinAsyncRenderer",
     "cloth_config.AbstractConfigEntryAccessor",
     "cloth_config.AbstractConfigListEntryAccessor",
     "cloth_config.AccessorSubCategoryListEntry",

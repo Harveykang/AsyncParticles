@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -143,6 +144,13 @@ class ClothConfigMenus {
 				.setDefaultValue(defaultConfig.tick.suppressCME)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.suppressCME.tooltip"))
 				.setSaveConsumer(newValue -> tick$suppressCME = newValue)
+				.build())
+			.addEntry(entryBuilder
+				.startStrList(Component.translatable("config.asyncparticles.tick.syncParticleClasses"),
+					new ArrayList<>(tick$syncParticleClasses))
+				.setDefaultValue(new ArrayList<>(defaultConfig.tick.syncParticleClasses))
+				.setTooltip(Component.translatable("config.asyncparticles.tick.syncParticleClasses.tooltip"))
+				.setSaveConsumer(newValue -> tick$syncParticleClasses = new LinkedHashSet<>(newValue))
 				.build());
 		// endregion
 		// region Rendering Category
@@ -192,6 +200,13 @@ class ClothConfigMenus {
 						.withStyle(ChatFormatting.DARK_RED))
 				.setSaveConsumer(newValue -> rendering$failBehavior = newValue)
 				.setRequirement(() -> false)
+				.build())
+			.addEntry(entryBuilder
+				.startStrList(Component.translatable("config.asyncparticles.rendering.syncParticleClasses"),
+					new ArrayList<>(rendering$syncParticleClasses))
+				.setDefaultValue(new ArrayList<>(defaultConfig.rendering.syncParticleClasses))
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.syncParticleClasses.tooltip"))
+				.setSaveConsumer(newValue -> rendering$syncParticleClasses = new LinkedHashSet<>(newValue))
 				.build());
 		// endregion
 		// region Compat Category

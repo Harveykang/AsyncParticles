@@ -46,7 +46,7 @@ import static fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil.toThr
 @Environment(EnvType.CLIENT)
 public class AsyncTicker {
 	public static final Logger LOGGER = LogManager.getLogger();
-	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
+	private static final Set<Class<?>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 	private static final Set<Particle> SYNC_PARTICLES = Collections.newSetFromMap(new IdentityHashMap<>());
 	public static final List<Runnable> PARTICLE_OPERATIONS = new ArrayList<>();
 	private static final AtomicBoolean cancelled = new AtomicBoolean(false);
@@ -309,7 +309,8 @@ public class AsyncTicker {
 		Minecraft mc = Minecraft.getInstance();
 		if (!isTolerable(e) ||
 			(mc.level != null && mc.player != null && mc.getCameraEntity() != null)) {
-			throw toThrowDirectly(e);
+			ReportedException reportedException = GameUtil.getReportedException(e);
+			throw ExceptionUtil.toThrowDirectly(reportedException == null ? e : reportedException);
 		}
 		LOGGER.warn("Exception while executing tick tasks.", e);
 		return null;
@@ -566,6 +567,8 @@ public class AsyncTicker {
 		PARTICLE_OPERATIONS.clear();
 		END_TICK_OPERATIONS.clear();
 		SYNC_PARTICLES.clear();
+		SYNC_PARTICLE_TYPES.clear();
+		SYNC_PARTICLE_TYPES.addAll(ConfigHelper.getTickSyncParticleClasses());
 	}
 
 	/* Events */

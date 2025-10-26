@@ -97,9 +97,6 @@ dependencies {
     /* Shimmer */
     modCompileOnly "curse.maven:shimmer-627824:5685942" // 0.2.4
 
-    /* Loot Beams */
-//    modCompileOnly fileTree(dir: '../libs', include: 'lootbeams-3.6.1-mc1.20-.4-de.jar')
-
     /* Immediately Fast */
     modCompileOnly "maven.modrinth:immediatelyfast:1.5.0+1.20.4-fabric"
 
@@ -108,4 +105,7 @@ dependencies {
 
     /* Figura */
     modCompileOnly "maven.modrinth:figura:4HqSmvZ6" // 0.1.5
+
+    /* Accelerated Rendering */
+    modCompileOnly "maven.modrinth:acceleratedrendering:1.0.6-1.20.1-alpha"
 }

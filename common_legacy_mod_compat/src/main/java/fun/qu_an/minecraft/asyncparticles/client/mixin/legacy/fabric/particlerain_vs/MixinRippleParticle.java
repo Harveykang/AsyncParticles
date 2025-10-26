@@ -32,7 +32,7 @@ public abstract class MixinRippleParticle extends TextureSheetParticle implement
 	}
 
 	@Override
-	public void asyncedParticles$setNormal(Vector3f normal) {
+	public void asyncparticles$setNormal(Vector3f normal) {
 		this.asyncparticles$normal = normal;
 	}
 }
