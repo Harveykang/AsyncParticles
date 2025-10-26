@@ -10,7 +10,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -35,17 +34,6 @@ public class MixinContraption implements ContraptionAddon {
 	private List<AABB> asyncparticles$aabbs;
 	@Unique
 	private final Object asyncparticles$lock = new Object();
-
-	@Dynamic
-	@WrapOperation(method = {
-		"lambda$gatherBBsOffThread$17()Ljava/util/List;",
-		"lambda$gatherBBsOffThread$25()Ljava/util/List;",
-		"lambda$gatherBBsOffThread$26()Ljava/util/List;"
-	}, at = @At(value = "INVOKE",
-		target = "Lnet/minecraft/world/phys/shapes/VoxelShape;toAabbs()Ljava/util/List;"))
-	private List<AABB> optimizeVoxelShape(VoxelShape instance, Operation<List<AABB>> original) {
-		return original.call(instance);
-	}
 
 	@WrapOperation(method = "gatherBBsOffThread", remap = false, at = @At(value = "INVOKE", target = "Ljava/util/concurrent/CompletableFuture;thenAccept(Ljava/util/function/Consumer;)Ljava/util/concurrent/CompletableFuture;"))
 	private CompletableFuture<Void> gatherBBsOffThread(CompletableFuture<?> instance, Consumer<?> action, Operation<CompletableFuture<Void>> original) {

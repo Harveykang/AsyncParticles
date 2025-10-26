@@ -5,15 +5,20 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.simibubi.create.content.kinetics.fan.AirFlowParticle;
 import com.simibubi.create.content.kinetics.steamEngine.SteamJetParticle;
 import com.simibubi.create.foundation.particle.AirParticle;
+import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin({AirFlowParticle.class, AirParticle.class, SteamJetParticle.class})
-public abstract class MixinParticle_LightCache
-	extends fun.qu_an.minecraft.asyncparticles.client.mixin.MixinParticle_LightCache {
+public abstract class MixinParticle_LightCache extends Particle implements LightCachedParticleAddon {
+	protected MixinParticle_LightCache(ClientLevel level, double x, double y, double z) {
+		super(level, x, y, z);
+	}
+
 	@WrapMethod(method = "getLightColor")
 	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {
 		return asyncparticles$isEnabledLightCache()

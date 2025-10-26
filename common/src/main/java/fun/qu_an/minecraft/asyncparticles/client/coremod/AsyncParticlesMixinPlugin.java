@@ -90,6 +90,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				 "off_thread_access",
 				 "tick",
 				 "render" -> true;
+			case "acceleratedrendering" -> ACCCELERATED_RENDERING_LOADED;
 			case "particlerain" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN;
 			case "particlerain_vs" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && VS_LOADED;
 			case "particlerain_create" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && CREATE_LOADED;
