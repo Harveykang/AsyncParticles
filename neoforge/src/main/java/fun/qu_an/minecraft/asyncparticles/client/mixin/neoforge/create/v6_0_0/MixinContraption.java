@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.create;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.create.v6_0_0;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -28,6 +28,7 @@ public class MixinContraption implements ContraptionAddon {
 	@Shadow(remap = false)
 	protected Map<BlockPos, StructureTemplate.StructureBlockInfo> blocks;
 	@Shadow(remap = false)
+	@Dynamic
 	protected ContraptionWorld world;
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	@Shadow(remap = false) public Optional<List<AABB>> simplifiedEntityColliders;

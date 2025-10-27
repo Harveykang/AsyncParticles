@@ -42,7 +42,16 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 			case "prettyrain" -> FORGE_PRETTY_RAIN_LOADED;
 			case "prettyrain_create" -> FORGE_PRETTY_RAIN_LOADED && CREATE_LOADED;
 			case "prettyrain_vs" -> FORGE_PRETTY_RAIN_LOADED && VS_LOADED;
-			case "create" -> FORGE_CREATE_LOADED;
+			case "create" -> {
+				if (split.length == 2) {
+					yield FORGE_CREATE_LOADED;
+				}
+				yield switch (split[1]) {
+					case "v6_0_0" -> FORGE_CREATE_LOADED && versionCheck("create", null, "6.0.7");
+					case "v6_0_7" -> FORGE_CREATE_LOADED && versionCheck("create", "6.0.7", null);
+					default -> throw new IllegalArgumentException("Unknown create mixin: " + mixinClassName);
+				};
+			}
 			case "vs2_create" -> FORGE_VS_LOADED && CREATE_LOADED;
 			case "effecticularity" -> FORGE_EFFECTIVE_LOADED;
 			case "subtle_effects" -> FORGE_SUBTLE_EFFECTS_LOADED;
