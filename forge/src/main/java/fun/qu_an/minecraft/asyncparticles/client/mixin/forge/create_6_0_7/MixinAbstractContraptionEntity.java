@@ -1,13 +1,13 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.create;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.forge.create_6_0_7;
 
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.ContraptionEntityAddon;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(AbstractContraptionEntity.class)
-public class MixinAbstractContraptionEntity_NoParticleCollision implements ContraptionEntityAddon {
+public class MixinAbstractContraptionEntity implements ContraptionEntityAddon {
 	@Override
 	public boolean asyncparticles$doParticleCollision() {
-		return false;
+		return true;
 	}
 }

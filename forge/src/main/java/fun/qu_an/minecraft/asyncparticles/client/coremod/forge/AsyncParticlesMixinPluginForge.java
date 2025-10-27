@@ -50,7 +50,7 @@ public class AsyncParticlesMixinPluginForge implements IMixinConfigPlugin {
 					default -> true;
 				};
 			}
-			case "create" -> FORGE_CREATE_LOADED && !IS_LEGACY_CREATE;
+			case "create_6_0_7" -> FORGE_CREATE_LOADED && versionCheck("create", "6.0.7", null);
 			case "flerovium" -> FORGE_FLEROVIUM_LOADED;
 			case "embeddium" -> FORGE_EMBEDDIUM_LOADED;
 			case "epicfight" -> FORGE_EPICFIGHT_LOADED;
