@@ -23,6 +23,8 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -48,11 +50,13 @@ public class AsyncParticlesConfig {
 	public static int tick$failPerSecLimit;
 	public static FailBehavior tick$failBehavior;
 	public static boolean tick$suppressCME;
+	public static Set<String> tick$syncParticleClasses = new LinkedHashSet<>();
 	public static RenderingMode rendering$particleRenderingMode;
 	public static ParticleCullingMode rendering$particleCulling;
 	public static boolean rendering$cullWeathers;
 	public static int rendering$failPerSecLimit;
 	public static FailBehavior rendering$failBehavior;
+	public static Set<String> rendering$syncParticleClasses = new LinkedHashSet<>();
 	public static RainEffect valkyrienSkies$rainEffect;
 	public static boolean valkyrienSkies$fixParticleLights;
 	public static RainEffect create$rainEffect;
@@ -272,6 +276,9 @@ public class AsyncParticlesConfig {
 			int failPerSecLimit = 5;
 			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
 			boolean suppressCME = false;
+			Set<String> syncParticleClasses = new LinkedHashSet<>();
+			{
+			}
 
 			private void flat() {
 				tick$animationTickMode = requireNonNullElse(animationTickMode, TickMode.INTERRUPTIBLE);
@@ -281,6 +288,7 @@ public class AsyncParticlesConfig {
 				tick$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				tick$failBehavior = requireNonNullElse(failBehavior, FailBehavior.RAISE_CRASH);
 				tick$suppressCME = suppressCME;
+				tick$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
 			}
 
 			private void fold() {
@@ -291,15 +299,29 @@ public class AsyncParticlesConfig {
 				failPerSecLimit = tick$failPerSecLimit;
 				failBehavior = tick$failBehavior;
 				suppressCME = tick$suppressCME;
+				syncParticleClasses = new LinkedHashSet<>(tick$syncParticleClasses);
 			}
 		}
 
 		static class Rendering {
 			ParticleCullingMode particleCulling = ParticleCullingMode.SPHERE;
-			RenderingMode particleRenderingMode = RenderingMode.DELAYED;
+			RenderingMode particleRenderingMode = RenderingMode.SYNCHRONOUSLY;
 			boolean cullWeathers = true;
 			int failPerSecLimit = 20;
 			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
+			Set<String> syncParticleClasses = new LinkedHashSet<>();
+			{
+				syncParticleClasses.add("com.lootbeams.VFXParticle");
+				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleCasting");
+				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleGhost");
+				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleGraveSoul");
+				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleMagicCircle");
+				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleMarker");
+				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleRounding");
+				syncParticleClasses.add("concerrox.effective.particle.SplashParticle");
+				syncParticleClasses.add("org.ladysnake.effective.particle.SplashParticle");
+				syncParticleClasses.add("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
+			}
 
 			private void flat() {
 				rendering$particleCulling = requireNonNullElse(particleCulling, ParticleCullingMode.SPHERE);
@@ -307,6 +329,7 @@ public class AsyncParticlesConfig {
 				rendering$cullWeathers = cullWeathers;
 				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
+				rendering$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
 			}
 
 			private void fold() {
@@ -315,6 +338,7 @@ public class AsyncParticlesConfig {
 				cullWeathers = rendering$cullWeathers;
 				failPerSecLimit = rendering$failPerSecLimit;
 				failBehavior = rendering$failBehavior;
+				syncParticleClasses = new LinkedHashSet<>(rendering$syncParticleClasses);
 			}
 		}
 

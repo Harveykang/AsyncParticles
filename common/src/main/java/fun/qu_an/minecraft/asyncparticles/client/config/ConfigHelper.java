@@ -3,6 +3,8 @@ package fun.qu_an.minecraft.asyncparticles.client.config;
 import fun.qu_an.minecraft.asyncparticles.client.compat.cooparticlesapi.CooTickMode;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
@@ -120,5 +122,33 @@ public class ConfigHelper {
 
 	public static ParticleCullingMode getParticleCullingMode() {
 		return rendering$particleCulling;
+	}
+
+	public static List<? extends Class<?>> getRenderSyncParticleClasses() {
+		return rendering$syncParticleClasses
+			.stream()
+			.map(className -> {
+				try {
+					return Class.forName(className);
+				} catch (ClassNotFoundException e) {
+					return null;
+				}
+			})
+			.filter(Objects::nonNull)
+			.toList();
+	}
+
+	public static List<? extends Class<?>> getTickSyncParticleClasses() {
+		return tick$syncParticleClasses
+			.stream()
+			.map(className -> {
+				try {
+					return Class.forName(className);
+				} catch (ClassNotFoundException e) {
+					return null;
+				}
+			})
+			.filter(Objects::nonNull)
+			.toList();
 	}
 }
