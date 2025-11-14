@@ -1,6 +1,6 @@
 # This repository is archived and no longer maintained.
 
-Mojang will separate the render and main threads in newer versions of Minecraft, making this mod largely obsolete. Additionally, I currently don’t have the time or bandwidth to maintain the project.  
+Mojang will separate the render and main threads in newer versions of Minecraft, making this mod largely obsolete. Additionally, I currently don’t have the time to maintain the project.  
 
 Thank you to everyone who used, supported, or contributed to it!
 
