@@ -6,7 +6,7 @@ import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import org.jetbrains.annotations.NotNull;

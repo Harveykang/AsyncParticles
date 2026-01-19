@@ -51,28 +51,28 @@ dependencies {
 //    modLocalRuntime("io.wispforest:owo-lib:0.12.21+1.21.6") {
 //        exclude(group: "net.fabricmc.fabric-api")
 //    }
-    modCompileOnly 'maven.modrinth:modmenu:16.0.0-rc.1'
-    modLocalRuntime 'maven.modrinth:modmenu:16.0.0-rc.1'
-    modLocalRuntime 'maven.modrinth:fabric-permissions-api:0.4.0'
+    modCompileOnly 'maven.modrinth:modmenu:17.0.0-beta.2'
+    modLocalRuntime 'maven.modrinth:modmenu:17.0.0-beta.2'
+    modLocalRuntime 'maven.modrinth:fabric-permissions-api:0.6.1'
     modLocalRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
 
     /* Performance */
-    modCompileOnly "maven.modrinth:sodium:mc1.21.10-0.7.2-fabric"
-    modCompileOnly 'maven.modrinth:iris:1.9.6+1.21.10-fabric'
-    modCompileOnly 'maven.modrinth:sodium-extra:mc1.21.9-0.7.0+fabric'
-    modLocalRuntime "maven.modrinth:sodium:mc1.21.10-0.7.2-fabric"
-    modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.9-0.7.0+fabric'
-    modLocalRuntime 'maven.modrinth:iris:1.9.6+1.21.10-fabric'
+    modCompileOnly "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
+    modCompileOnly 'maven.modrinth:iris:1.10.4+1.21.11-fabric'
+    modCompileOnly 'maven.modrinth:sodium-extra:mc1.21.11-0.8.3+fabric'
+    modLocalRuntime "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
+    modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.11-0.8.3+fabric'
+    modLocalRuntime 'maven.modrinth:iris:1.10.4+1.21.11-fabric'
     localRuntime "org.antlr:antlr4-runtime:4.13.1"
     localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
     localRuntime "org.anarres:jcpp:1.4.14"
     modLocalRuntime 'maven.modrinth:scalablelux:0.1.6+fabric.c25518a'
-    modLocalRuntime 'maven.modrinth:spark:1.10.145-fabric'
-    modCompileOnly 'maven.modrinth:moreculling:ESxkwc6w' // 1.4.0-beta.1
+    modLocalRuntime 'maven.modrinth:spark:1.10.156-fabric'
+    modCompileOnly 'maven.modrinth:moreculling:kWU8mVq5' // 1.4.0-beta.1
 //    modLocalRuntime 'maven.modrinth:moreculling:ESxkwc6w' // 1.4.0-beta.1
 
     /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:particle-rain:3.3.6"
+    modCompileOnly "maven.modrinth:particle-rain:v4-beta.5+1.21.11-fabric"
 //    modLocalRuntime "maven.modrinth:particle-rain:3.3.6"
 //    modLocalRuntime("dev.isxander:yet-another-config-lib:3.7.1+1.21.6-fabric"){
 //        exclude(group: "net.fabricmc.fabric-api")
@@ -117,6 +117,10 @@ dependencies {
 
     /* Immediately Fast */
     modCompileOnly "maven.modrinth:immediatelyfast:1.11.0+1.21.7-fabric"
+
+    // /polytone/version/1.21.11-5.3.0-fabric
+    modCompileOnly "maven.modrinth:polytone:1.21.11-5.3.0-fabric"
+    modLocalRuntime "maven.modrinth:polytone:1.21.11-5.3.0-fabric"
 }
 
 processResources {

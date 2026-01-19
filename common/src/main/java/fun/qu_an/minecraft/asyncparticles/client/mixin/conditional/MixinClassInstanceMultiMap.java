@@ -43,7 +43,7 @@ public class MixinClassInstanceMultiMap {
 	// FIXME: can't remap lambda method_15217 properly, use * instead
 	@Dynamic
 	@Group(name = "redirect_collector", min = 1)
-	@Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;toMutableList()Ljava/util/stream/Collector;"))
+	@Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;toMutableList()Ljava/util/stream/Collector;"))
 	private <T> Collector<T, ?, List<T>> collect1() {
 		return Collectors.toCollection(IterationSafeArrayList::new);
 	}

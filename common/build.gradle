@@ -27,13 +27,13 @@ dependencies {
     modCompileOnly "maven.modrinth:fzzy-config:0.7.2+1.21.6"
 
     /* Performance */
-    modCompileOnly "maven.modrinth:sodium:mc1.21.10-0.7.2-fabric"
-    modCompileOnly "maven.modrinth:sodium-extra:mc1.21.9-0.7.0+fabric"
-    modCompileOnly 'maven.modrinth:iris:1.9.6+1.21.10-fabric'
-    modCompileOnly 'maven.modrinth:moreculling:nASRyMbu' // 1.5.0-beta.2
+    modCompileOnly "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
+    modCompileOnly 'maven.modrinth:iris:1.10.4+1.21.11-fabric'
+    modCompileOnly 'maven.modrinth:sodium-extra:mc1.21.11-0.8.3+fabric'
+    modCompileOnly 'maven.modrinth:moreculling:kWU8mVq5' // 1.5.0-beta.2
 
     /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:particle-rain:3.3.6"
+    modCompileOnly "maven.modrinth:particle-rain:v4-beta.5+1.21.11-fabric"
 
     /* Effectual */
     modCompileOnly 'maven.modrinth:effectual:1.1.0-1.21.8'
