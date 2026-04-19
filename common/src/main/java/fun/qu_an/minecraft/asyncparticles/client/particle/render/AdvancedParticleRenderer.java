@@ -6,11 +6,11 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.particle.buffer.BufferHelper;
 import fun.qu_an.minecraft.asyncparticles.client.particle.buffer.ParticleStorageBuffer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.buffer.ParticleVertexBuffer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.shader.ParticleComputeShader;
 import fun.qu_an.minecraft.asyncparticles.client.particle.shader.ParticleCounterToIndirectShader;
-import fun.qu_an.minecraft.asyncparticles.client.util.BufferHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import it.unimi.dsi.fastutil.HashCommon;
 import net.minecraft.client.Camera;
@@ -288,7 +288,7 @@ public class AdvancedParticleRenderer implements IParticleRenderer {
 			(float) (cameraPos.x - prevCameraPos.x), (float) (cameraPos.y - prevCameraPos.y), (float) (cameraPos.z - prevCameraPos.z),
 			particleCount[current ^ 1],
 			particleCount[2 | current ^ 1],
-			(Vector4f[]) frustumPlanesHandle.get(AsyncRenderBehavior.INSTANCE.getFrustum().intersection)
+			(Vector4f[]) frustumPlanesHandle.get(AsyncRenderBehavior.getInstance().getFrustum().intersection)
 		);
 
 		ParticleComputeShader.bindBuffers(sources[current ^ 1].ssbo, target.ssbo, counters.ssbo);

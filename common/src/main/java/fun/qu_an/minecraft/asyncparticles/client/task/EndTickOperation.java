@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.task;
 
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 

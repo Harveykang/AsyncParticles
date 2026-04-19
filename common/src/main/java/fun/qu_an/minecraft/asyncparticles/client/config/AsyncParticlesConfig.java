@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
+import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import net.minecraft.ChatFormatting;
@@ -40,6 +41,8 @@ public class AsyncParticlesConfig {
 	static final Logger LOGGER = LogUtils.getLogger();
 	public static int particle$particleLimit;
 	public static boolean particle$removeIfMissedTick;
+	public static boolean particle$parallelQueueRemoval;
+	public static boolean particle$parallelQueueEviction;
 	public static boolean particle$particleLightCache;
 	public static boolean particle$cullUnderwaterParticleType;
 	public static TickMode tick$animationTickMode;
@@ -52,6 +55,7 @@ public class AsyncParticlesConfig {
 	public static Set<String> tick$syncParticleClasses = new LinkedHashSet<>();
 	public static RenderingMode rendering$particleRenderingMode;
 	public static boolean rendering$gpuAcceleration;
+	public static boolean rendering$appendNewParticlesToRenderer;
 	public static ParticleCullingMode rendering$particleCulling;
 	public static boolean rendering$cullWeathers;
 	public static int rendering$failPerSecLimit;
@@ -246,12 +250,16 @@ public class AsyncParticlesConfig {
 		static class Particle {
 			int particleLimit = ModListHelper.FABRIC_COO_PARTICLES_API_LOADED ? 65536 : 16384;
 			boolean removeIfMissedTick = false;
+			boolean parallelQueueRemoval = true;
+			boolean parallelQueueEviction = true;
 			boolean particleLightCache = true;
 			boolean cullUnderwaterParticleType = true;
 
 			private void flat() {
 				particle$particleLimit = Mth.clamp(particleLimit, 1024, 262144);
 				particle$removeIfMissedTick = removeIfMissedTick;
+				particle$parallelQueueRemoval = parallelQueueRemoval;
+				particle$parallelQueueEviction = parallelQueueEviction;
 				particle$particleLightCache = particleLightCache;
 				particle$cullUnderwaterParticleType = cullUnderwaterParticleType;
 			}
@@ -259,6 +267,8 @@ public class AsyncParticlesConfig {
 			private void fold() {
 				particleLimit = particle$particleLimit;
 				removeIfMissedTick = particle$removeIfMissedTick;
+				parallelQueueRemoval = particle$parallelQueueRemoval;
+				parallelQueueEviction = particle$parallelQueueEviction;
 				particleLightCache = particle$particleLightCache;
 				cullUnderwaterParticleType = particle$cullUnderwaterParticleType;
 			}
@@ -302,6 +312,8 @@ public class AsyncParticlesConfig {
 		static class Rendering {
 			ParticleCullingMode particleCulling = ParticleCullingMode.SPHERE;
 			RenderingMode particleRenderingMode = RenderingMode.SYNCHRONOUSLY;
+			boolean gpuAcceleration = GLCaps.supportsGpuAcceleration();
+			boolean appendNewParticlesToRenderer = true;
 			boolean cullWeathers = true;
 			int failPerSecLimit = 20;
 			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
@@ -322,6 +334,8 @@ public class AsyncParticlesConfig {
 			private void flat() {
 				rendering$particleCulling = requireNonNullElse(particleCulling, ParticleCullingMode.SPHERE);
 				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
+				rendering$gpuAcceleration = gpuAcceleration && GLCaps.supportsGpuAcceleration();
+				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
 				rendering$cullWeathers = cullWeathers;
 				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
@@ -331,6 +345,8 @@ public class AsyncParticlesConfig {
 			private void fold() {
 				particleCulling = rendering$particleCulling;
 				particleRenderingMode = rendering$particleRenderingMode;
+				gpuAcceleration = rendering$gpuAcceleration;
+				appendNewParticlesToRenderer = rendering$appendNewParticlesToRenderer;
 				cullWeathers = rendering$cullWeathers;
 				failPerSecLimit = rendering$failPerSecLimit;
 				failBehavior = rendering$failBehavior;

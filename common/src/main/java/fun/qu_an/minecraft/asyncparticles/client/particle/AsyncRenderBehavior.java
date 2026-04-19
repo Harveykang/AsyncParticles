@@ -51,8 +51,12 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRendering
 
 // TODO: Organize this shit
 @Environment(EnvType.CLIENT)
-public class AsyncRenderBehavior {
-	public static final AsyncRenderBehavior INSTANCE = new AsyncRenderBehavior();
+public abstract class AsyncRenderBehavior {
+	@ExpectPlatform
+	public static AsyncRenderBehavior getInstance() {
+		throw new AssertionError();
+	}
+
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Set<Class<?>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 	public boolean renderAsync = false;
@@ -124,7 +128,7 @@ public class AsyncRenderBehavior {
 	                             Queue<Particle> particles,
 	                             ParticleRenderType particleRenderType,
 	                             BufferBuilder bufferBuilder) {
-		Frustum frustum = AsyncRenderBehavior.INSTANCE.getFrustum();
+		Frustum frustum = AsyncRenderBehavior.getInstance().getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		float f2 = f + 1f;
 		for (Particle particle : particles) {
@@ -227,14 +231,10 @@ public class AsyncRenderBehavior {
 	}
 
 	@ExpectPlatform
-	public void endOpaque(LightTexture lightTexture, Camera camera, float f, boolean isAsync) {
-		throw new AssertionError();
-	}
+	public abstract void endOpaque(LightTexture lightTexture, Camera camera, float f, boolean isAsync);
 
 	@ExpectPlatform
-	public void endTranslucent(LightTexture lightTexture, Camera camera, float f, boolean isAsync) {
-		throw new AssertionError();
-	}
+	public abstract void endTranslucent(LightTexture lightTexture, Camera camera, float f, boolean isAsync);
 
 	public boolean isRenderAsync() {
 		return renderAsync;

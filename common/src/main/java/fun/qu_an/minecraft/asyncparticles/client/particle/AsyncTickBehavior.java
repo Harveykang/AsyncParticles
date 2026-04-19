@@ -10,6 +10,7 @@ import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.task.EndTickEvent;
 import fun.qu_an.minecraft.asyncparticles.client.task.EndTickOperation;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -17,10 +18,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.particle.TrackingEmitter;
+import net.minecraft.client.particle.*;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
@@ -47,7 +45,8 @@ import static fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil.toThr
 public class AsyncTickBehavior {
 	public static final AsyncTickBehavior INSTANCE = new AsyncTickBehavior();
 	public static final Logger LOGGER = LogManager.getLogger();
-	private  final Set<Class<?>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
+//	public final Map<ParticleRenderType, ByteBuffer> UNUPLOADED_BUFFERS = new ConcurrentHashMap<>();
+	private final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 	private final Set<Particle> SYNC_PARTICLES = Collections.newSetFromMap(new IdentityHashMap<>());
 	public final List<Runnable> PARTICLE_OPERATIONS = new ArrayList<>();
 	private final AtomicBoolean cancelled = new AtomicBoolean(false);
@@ -61,6 +60,7 @@ public class AsyncTickBehavior {
 	private Consumer<String> debugConsumer;
 	private boolean shouldReload;
 	public final ForkJoinPool EXECUTOR;
+	public final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 	public final String THREAD_PREFIX = "AsyncParticleTicker";
 	private final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
@@ -70,21 +70,12 @@ public class AsyncTickBehavior {
 
 	{
 		AtomicInteger workerCount = new AtomicInteger(1);
-		int clamp = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
-		EXECUTOR = new ForkJoinPool(clamp, (forkJoinPool) -> {
+		EXECUTOR = new ForkJoinPool(THREADS, (forkJoinPool) -> {
 			ForkJoinWorkerThread forkJoinWorkerThread = new AsyncTickerThread(forkJoinPool);
 			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());
 			forkJoinWorkerThread.setDaemon(true);
 			return forkJoinWorkerThread;
 		}, Util::onThreadException, true);
-	}
-
-	private void addSyncByClassName(String className) {
-		try {
-			SYNC_PARTICLE_TYPES.add((Class<? extends Particle>) Class.forName(className));
-		} catch (Exception e) {
-			LOGGER.warn("", e);
-		}
 	}
 
 	/* Ticker */
@@ -125,51 +116,67 @@ public class AsyncTickBehavior {
 			shouldTickParticles = i == to - 1 && levelRunning;
 			if (levelRunning) {
 				ParticleEngine particleEngine = mc.particleEngine;
-				Collection<Queue<Particle>> values = particleEngine.particles.values();
-				CompletableFuture<?>[] futures = new CompletableFuture[values.size() + 1];
+				Collection<Queue<Particle>> queues1 = particleEngine.particles.values();
+				CompletableFuture<?>[] futures = new CompletableFuture[queues1.size() + 1];
 				Queue<TrackingEmitter> trackingEmitters = particleEngine.trackingEmitters;
 				if (trackingEmitters.isEmpty()) {
 					futures[0] = Utils.NULL_FUTURE;
 				} else {
-					futures[0] = CompletableFuture.runAsync(() ->
-						trackingEmitters.removeIf(trackingEmitter -> !trackingEmitter.isAlive()), EXECUTOR);
+					futures[0] = CompletableFuture.runAsync(() -> doEmittersRemoveIf(trackingEmitters),
+						EXECUTOR);
 				}
 				int k = 1;
-				boolean removeIfMissedTick = ConfigHelper.isRemoveIfMissedTick();
-				for (Queue<Particle> particles : values) {
+				for (Queue<Particle> particles : queues1) {
 					if (particles.isEmpty()) {
 						futures[k++] = Utils.NULL_FUTURE;
 						continue;
 					}
-					futures[k++] = CompletableFuture.runAsync(() -> particles.removeIf(particle1 -> {
-						if (!particle1.isAlive()) {
-							// make sure the tracked count is correct
-							particle1.getParticleGroup().ifPresent(
-								group -> particleEngine.updateCount(group, -1));
-							return true;
-						}
-						ParticleAddon particleAddon = (ParticleAddon) particle1;
-						if (particleAddon.asyncparticles$isTickSync()) {
-							return false;
-						}
-						if (particleAddon.asyncparticles$isTicked()) {
-							particleAddon.asyncparticles$resetTicked();
-							return false;
-						}
-						if (removeIfMissedTick) {
-							particle1.remove();
-							// make sure the tracked count is correct
-							particle1.getParticleGroup().ifPresent(
-								group -> particleEngine.updateCount(group, -1));
-							return true;
-						}
-						return false;
-					}), EXECUTOR);
+					futures[k++] = CompletableFuture.runAsync(() -> doRemoveIf(particles),
+						EXECUTOR);
 				}
 				particleCleanup = CompletableFuture.allOf(futures);
 			}
 		}
 		profiler.pop();
+	}
+
+	public void doRemoveIf(Queue<? extends Particle> queue) {
+		if (ConfigHelper.isParallelQueueRemoval()) {
+			((IterationSafeEvictingQueue<? extends Particle>) queue)
+				.parallelRemoveIf(particle -> AsyncTickBehavior.INSTANCE.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()),
+					ConfigHelper.isParallelQueueEviction(),
+					AsyncTickBehavior.INSTANCE.THREADS,
+					AsyncTickBehavior.INSTANCE.EXECUTOR);
+		} else {
+			queue.removeIf(particle -> AsyncTickBehavior.INSTANCE.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()));
+		}
+	}
+
+	public void doEmittersRemoveIf(Queue<? extends TrackingEmitter> queue) {
+		if (ConfigHelper.isParallelQueueRemoval()) {
+			((IterationSafeEvictingQueue<? extends TrackingEmitter>) queue)
+				.parallelRemoveIf(particle -> !particle.isAlive(),
+					ConfigHelper.isParallelQueueEviction(),
+					AsyncTickBehavior.INSTANCE.THREADS,
+					AsyncTickBehavior.INSTANCE.EXECUTOR);
+		} else {
+			queue.removeIf(particle -> AsyncTickBehavior.INSTANCE.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()));
+		}
+	}
+
+	public boolean shouldRemove(Particle particle1, boolean removeIfMissedTick) {
+		if (!particle1.isAlive()) {
+			return true;
+		}
+		ParticleAddon particleAddon = (ParticleAddon) particle1;
+		if (particleAddon.asyncparticles$isTickSync()) {
+			return false;
+		}
+		if (particleAddon.asyncparticles$isTicked()) {
+			particleAddon.asyncparticles$resetTicked();
+			return false;
+		}
+		return removeIfMissedTick;
 	}
 
 	/**
@@ -250,7 +257,6 @@ public class AsyncTickBehavior {
 			EndTickOperation[] endTickTasks = endTickOperations.toArray(new EndTickOperation[0]);
 			endTickOperations.clear();
 			sequencedTaskFuture = sequencedTaskFuture.thenRun(() -> {
-				// 每 tick 添加的不固定操作
 				for (EndTickOperation endTickTask : endTickTasks) {
 					if (!endTickTask.isParallel()) {
 						try {
@@ -264,7 +270,6 @@ public class AsyncTickBehavior {
 				}
 			}).exceptionally(this::tickExceptionally);
 			parallelOperationsFuture = particleFuture.thenCompose(v -> {
-				// 每 tick 结束时都要执行的固定事件，可在 tick 间的任意时刻执行
 				@SuppressWarnings("rawtypes")
 				CompletableFuture[] futures = new CompletableFuture[endTickTasks.length];
 				int j = 0;
@@ -299,7 +304,7 @@ public class AsyncTickBehavior {
 			}
 		}
 
-		this.particleFuture = sequencedTaskFuture
+		AsyncTickBehavior.INSTANCE.particleFuture = sequencedTaskFuture
 			.thenRunAsync(() -> timeUsageNano.setRelease(System.nanoTime() - timeUsageNano.getAcquire()), EXECUTOR);
 
 		profiler.pop();
@@ -311,9 +316,8 @@ public class AsyncTickBehavior {
 		}
 		Minecraft mc = Minecraft.getInstance();
 		if (!isTolerable(e) ||
-			(mc.level != null && mc.player != null && mc.getCameraEntity() != null)) {
-			ReportedException reportedException = GameUtil.getReportedException(e);
-			throw ExceptionUtil.toThrowDirectly(reportedException == null ? e : reportedException);
+			(mc.level != null && mc.player != null)) {
+			throw toThrowDirectly(e);
 		}
 		LOGGER.warn("Exception while executing tick tasks.", e);
 		return null;
@@ -385,8 +389,8 @@ public class AsyncTickBehavior {
 	public ReportedException constructCrashReport(Particle particle, Throwable t) {
 		debugLater(LOGGER::info);
 		tryDebug();
-		AsyncRenderBehavior.INSTANCE.debugLater(LOGGER::info);
-		AsyncRenderBehavior.INSTANCE.tryDebug();
+		AsyncRenderBehavior.getInstance().debugLater(LOGGER::info);
+		AsyncRenderBehavior.getInstance().tryDebug();
 		CrashReport crashReport = CrashReport.forThrowable(t, "Ticking Particle");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being ticked");
 		crashReportCategory.setDetail("Particle", particle::toString);
@@ -453,10 +457,11 @@ public class AsyncTickBehavior {
 
 	/* Debug/Reload */
 
-	void tryDebug() {
+	public void tryDebug() {
 		if (debugConsumer == null) {
 			return;
 		}
+		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 		debugConsumer.accept(String.format("""
 			[Debug AsyncTicker]
 			last tick duration: %.1f ms,
@@ -466,6 +471,7 @@ public class AsyncTickBehavior {
 			end tick operations: %d,
 			max particles queue size: %d,
 			particles queue size/allocated: %s,
+			gpu particles size/allocated: %s,
 			particles to add size: %d
 			sync particle count: %d,
 			sync particle types: %s,"""
@@ -479,6 +485,11 @@ public class AsyncTickBehavior {
 					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
 						Queue<Particle> queue = e.getValue();
 						return queue.size() + "/" + ((IterationSafeEvictingQueue<Particle>) queue).arraySize();
+					})),
+				GpuParticleBehavior.gpuParticles.entrySet()
+					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
+						Queue<TextureSheetParticle> queue = e.getValue();
+						return queue.size() + "/" + ((IterationSafeEvictingQueue<TextureSheetParticle>) queue).arraySize();
 					})),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
 				SYNC_PARTICLES.size(),
@@ -496,6 +507,7 @@ public class AsyncTickBehavior {
 			.stream()
 			.collect(Collectors.toMap(ParticleRenderType::getClass, Object::toString)));
 		LOGGER.info(particleEngine.particles);
+		LOGGER.info(GpuParticleBehavior.gpuParticles);
 	}
 
 	public void reloadLater() {
@@ -510,7 +522,7 @@ public class AsyncTickBehavior {
 	}
 
 	public void reload(boolean clearParticles) {
-		AsyncRenderBehavior.INSTANCE.reset();
+		AsyncRenderBehavior.getInstance().reset();
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 		if (clearParticles) {
 			reset();
@@ -524,11 +536,13 @@ public class AsyncTickBehavior {
 			particleEngine.trackingEmitters = newEmitters;
 			boolean enableLightCache = ConfigHelper.particleLightCache();
 			ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
-			particleEngine.particles.entrySet().forEach(entry -> {
-				Queue<Particle> queue = entry.getValue();
-				Queue<Particle> newQueue = IterationSafeEvictingQueue.newInstance(queue.size(), ConfigHelper.getParticleLimit(), this::onEvicted);
-				newQueue.addAll(queue);
-				newQueue.forEach(p -> {
+			Map<ParticleRenderType, Queue<Particle>> particles = new Reference2ObjectOpenHashMap<>();
+			Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = new Reference2ObjectOpenHashMap<>();
+			boolean tickAsync = ConfigHelper.isTickAsync();
+			boolean enableGpuAcceleration = ConfigHelper.isGpuParticles();
+			particleEngine.particles.forEach((key, queue) -> {
+				Queue<Particle> newQueue = ParticleHelper.newParticleQueue();
+				queue.forEach(p -> {
 					if (enableLightCache) {
 						((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
 						((LightCachedParticleAddon) p).asyncparticles$refresh();
@@ -539,9 +553,46 @@ public class AsyncTickBehavior {
 						case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();
 						case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();
 					}
+					if (tickAsync && enableGpuAcceleration &&
+						p instanceof TextureSheetParticle tsp && GpuParticleBehavior.canRenderFast(tsp)) {
+						gpuParticles.computeIfAbsent(key, k -> {
+							GpuParticleBehavior.initParticleRenderType(k);
+							return ParticleHelper.newParticleQueue();
+						}).add(tsp);
+					} else {
+						newQueue.add(p);
+					}
 				});
-				entry.setValue(newQueue);
+				particles.put(key, newQueue);
 			});
+			particleEngine.particles.putAll(particles);
+
+			if (!tickAsync || !enableGpuAcceleration) {
+				GpuParticleBehavior.gpuParticles.forEach((t, q) -> {
+					particles.get(t).addAll(q);
+				});
+				GpuParticleBehavior.gpuParticles.clear();
+			} else {
+				GpuParticleBehavior.gpuParticles.forEach((key, queue) -> {
+					queue.forEach(p -> {
+						if (enableLightCache) {
+							((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
+							((LightCachedParticleAddon) p).asyncparticles$refresh();
+						} else {
+							((LightCachedParticleAddon) p).asyncparticles$disableLightCache();
+						}
+						switch (particleCullingMode) {
+							case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();
+							case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();
+						}
+					});
+					gpuParticles.computeIfAbsent(key, k -> {
+						GpuParticleBehavior.initParticleRenderType(k);
+						return ParticleHelper.newParticleQueue();
+					}).addAll(queue);
+				});
+				GpuParticleBehavior.gpuParticles.putAll(gpuParticles);
+			}
 		}
 	}
 
@@ -553,11 +604,7 @@ public class AsyncTickBehavior {
 		}
 		if (particleFuture != null) {
 			cancelled.setOpaque(true);
-			try {
-				particleFuture.join();
-			} catch (Exception e) {
-				LOGGER.error("Error wating for particle future while resetting async ticker", e);
-			}
+			particleFuture.join();
 			particleFuture = null;
 		}
 		cancelled.setOpaque(false);
@@ -565,8 +612,6 @@ public class AsyncTickBehavior {
 		PARTICLE_OPERATIONS.clear();
 		END_TICK_OPERATIONS.clear();
 		SYNC_PARTICLES.clear();
-		SYNC_PARTICLE_TYPES.clear();
-		SYNC_PARTICLE_TYPES.addAll(ConfigHelper.getTickSyncParticleClasses());
 	}
 
 	/* Events */
@@ -595,7 +640,6 @@ public class AsyncTickBehavior {
 		if (ThreadUtil.isOnRenderThread()) {
 			END_TICK_OPERATIONS.add(task);
 		} else {
-			// FIXME: This should not happen.
 			ThreadUtil.enqueueClientTask(() -> END_TICK_OPERATIONS.add(task));
 		}
 	}
@@ -605,7 +649,6 @@ public class AsyncTickBehavior {
 			super(forkJoinPool);
 		}
 
-		@Override
 		protected void onTermination(Throwable throwable) {
 			if (throwable != null) {
 				LOGGER.warn("{} died", this.getName(), throwable);

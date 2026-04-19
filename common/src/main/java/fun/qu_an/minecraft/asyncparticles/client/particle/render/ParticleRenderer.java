@@ -8,7 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.particle.buffer.ParticleVertexBuffer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.shader.ParticleTransformFeedbackShader;
-import fun.qu_an.minecraft.asyncparticles.client.util.BufferHelper;
+import fun.qu_an.minecraft.asyncparticles.client.particle.buffer.BufferHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import it.unimi.dsi.fastutil.HashCommon;
 import net.minecraft.client.Camera;
@@ -39,7 +39,7 @@ public class ParticleRenderer implements IParticleRenderer {
 	private final int[] particleCount = {0, 0, 0, 0};
 	private int maxParticleCount;
 	private boolean shouldSkip = true;
-	private final BufferHelper bufferHelper = new BufferHelper();
+	private final BufferHelper bufferHelper = DIRECT_BUFFER ? null : new BufferHelper();
 	private final int tf;
 
 	public ParticleRenderer() {

@@ -58,9 +58,9 @@ public interface IParticleRenderer {
 			shader.PROJECTION_MATRIX.set(RenderSystem.getProjectionMatrix());
 		}
 
-		if (shader.INVERSE_VIEW_ROTATION_MATRIX != null) {
-			shader.INVERSE_VIEW_ROTATION_MATRIX.set(RenderSystem.getInverseViewRotationMatrix());
-		}
+//		if (shader.INVERSE_VIEW_ROTATION_MATRIX != null) {
+//			shader.INVERSE_VIEW_ROTATION_MATRIX.set(RenderSystem.getInverseViewRotationMatrix());
+//		}
 
 		if (shader.COLOR_MODULATOR != null) {
 			shader.COLOR_MODULATOR.set(RenderSystem.getShaderColor());

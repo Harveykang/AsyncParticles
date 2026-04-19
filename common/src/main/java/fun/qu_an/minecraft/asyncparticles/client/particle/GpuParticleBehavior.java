@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
-import fun.qu_an.minecraft.asyncparticles.client.particle.render.AdvancedParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.render.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.render.ParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;

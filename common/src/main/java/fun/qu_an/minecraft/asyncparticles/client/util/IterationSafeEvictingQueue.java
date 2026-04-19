@@ -4,9 +4,17 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+/**
+ * This queue is designed to be iteration-safe.
+ * It does not allow the same object to be adjacent elements, which can cause issues with iteration.
+ * The iteration-safe guarantees are only valid in our use cases.
+ */
 public class IterationSafeEvictingQueue<E> implements Queue<E> {
 	public static final int MAX_CAPACITY = Integer.MIN_VALUE >>> 1;
 	protected Object[] queue;
@@ -65,14 +73,14 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		if (size >= maxCapacity) {
 			// Remove the oldest element
 			int head = this.head;
-			this.head = (head + 1) & (capacity - 1);
+			int mask = capacity - 1;
+			this.head = (head + 1) & mask;
 			E evicted = (E) q[head];
 			if (evicted != null) {
 				onEvict.accept(evicted);
 			}
-			//			q[head] = item; // head is now tail
 			q[head] = null;
-			q[head + size & (capacity - 1)] = item;
+			q[head + size & mask] = item;
 		} else {
 			if (capacity == size) {
 				q = resize(capacity = capacity << 1); // update capacity and q
@@ -141,14 +149,16 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		int pos;
 		int max;
 
-		public aSpliterator() {
-			this(head, head + size);
-		}
-
 		private aSpliterator(int pos, int max) {
 			assert pos <= max : "pos " + pos + " must be <= max " + max;
 			this.pos = pos;
 			this.max = max;
+		}
+
+		private aSpliterator() {
+			Object[] a = IterationSafeEvictingQueue.this.queue;
+			this.pos = Math.min(a.length - 1, IterationSafeEvictingQueue.this.head);
+			this.max = Math.min(a.length, IterationSafeEvictingQueue.this.size) + this.pos;
 		}
 
 		@Override
@@ -173,9 +183,15 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		@Override
 		public void forEachRemaining(final Consumer<? super E> action) {
 			final Object[] a = queue;
-			for (final int max = this.max, mask = queue.length - 1;
+			int pos = this.pos;
+			final int max = this.max;
+			this.pos = max;
+			for (final int mask = queue.length - 1;
 				 pos < max; ++pos) {
-				action.accept((E) a[pos & mask]);
+				E e = (E) a[pos & mask];
+				if (e != null) {
+					action.accept(e);
+				}
 			}
 		}
 
@@ -220,14 +236,14 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 
 	@Override
 	public @NotNull Iterator<E> iterator() {
-		return new QueueIterator();
+		return new anIterator();
 	}
 
-	private class QueueIterator implements Iterator<E> {
+	private class anIterator implements Iterator<E> {
 		private final Object[] a = queue;
 		private final int mask = a.length - 1;
-		private final int head = IterationSafeEvictingQueue.this.head;
-		private int tail = IterationSafeEvictingQueue.this.size + head;
+		private final int head = Math.min(mask, IterationSafeEvictingQueue.this.head);
+		private int tail = Math.min(a.length, IterationSafeEvictingQueue.this.size) + head;
 		private int cursor = head;
 		private Object curr;
 		private Object next;
@@ -259,7 +275,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		}
 
 		/**
-		 * NOTE: This method is not thread-safe and should not be used concurrently.
+		 * NOTE: This method is not thread-safe and should not be used outside the main thread.
 		 */
 		@Override
 		public void remove() {
@@ -334,6 +350,134 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		return removeIf(e -> !c.contains(e));
 	}
 
+	public void parallelRemoveIf(@NotNull Predicate<? super E> filter, boolean parallelEvicting, int threads, ExecutorService executor) {
+		if (parallelEvicting) {
+			parallelRemoveIfParallelEvicting(filter, threads, executor);
+		} else {
+			parallelRemoveIfSequencedEvicting(filter, threads, executor);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void parallelRemoveIfSequencedEvicting(Predicate<? super E> filter, int threads, ExecutorService executor) {
+		final Object[] a = this.queue;
+		final int mask = a.length - 1;
+		final int size = this.size;
+		final int head = this.head;
+		// Determine the chunk size based on threads and size
+		int chunkSize = ((size + threads - 1) / threads);
+
+		Queue<E> queue = new ConcurrentLinkedQueue<>();
+		List<Future<?>> futures = new ArrayList<>(threads);
+		for (int i = 0; i < threads; i++) {
+			// Split the queue into chunks and process each chunk in parallel
+			int finalI = i;
+			futures.add(executor.submit(() -> {
+				int start = finalI * chunkSize;
+				int end = Math.min(start + chunkSize, size);
+				for (int j = start; j < end; j++) {
+					int index = (head + j) & mask;
+					E e = (E) a[index];
+//                    assert e != null;
+					if (filter.test(e)) {
+						a[index] = null; // Mark the element for removal
+						queue.add(e);
+					}
+				}
+			}));
+		}
+
+		// Wait for all tasks to complete
+		for (Future<?> future : futures) {
+			try {
+				future.get(); // Wait for the completion of each task
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		for (E e : queue) {
+			onEvict.accept(e);
+		}
+
+		// Modify the queue based on the null value
+		int newSize = 0;
+		for (int i = 0; i < size; i++) {
+			int pos = (head + i) & mask;
+			E e = (E) a[pos];
+			if (e != null) { // Check if element is not marked for removal
+				a[(head + newSize++) & mask] = e; // Copy unmarked elements to the new position
+			}
+		}
+
+		// Clear out the remaining elements
+		for (int i = newSize; i < size; i++) {
+			int pos = (head + i) & mask;
+			a[pos] = null; // Clear out the remaining elements
+		}
+
+		// Update the queue's size
+		this.size = newSize;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void parallelRemoveIfParallelEvicting(Predicate<? super E> filter, int threads, ExecutorService executor) {
+		final Object[] a = this.queue;
+		final int mask = a.length - 1;
+		final int size = this.size;
+		final int head = this.head;
+		// Determine the chunk size based on threads and size
+		int chunkSize = ((size + threads - 1) / threads);
+
+		List<Future<?>> futures = new ArrayList<>(threads);
+		for (int i = 0; i < threads; i++) {
+			// Split the queue into chunks and process each chunk in parallel
+			int finalI = i;
+			futures.add(executor.submit(() -> {
+				int start = finalI * chunkSize;
+				int end = Math.min(start + chunkSize, size);
+				for (int j = start; j < end; j++) {
+					int index = (head + j) & mask;
+					E e = (E) a[index];
+//                    assert e != null;
+					if (filter.test(e)) {
+						a[index] = null; // Mark the element for removal
+						onEvict.accept(e); // Evict the element
+					}
+				}
+			}));
+		}
+
+		// Wait for all tasks to complete
+		for (Future<?> future : futures) {
+			try {
+				future.get(); // Wait for the completion of each task
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		// Modify the queue based on the null value
+		int newSize = 0;
+		for (int i = 0; i < size; i++) {
+			int pos = (head + i) & mask;
+			E e = (E) a[pos];
+			if (e != null) { // Check if element is not marked for removal
+				a[(head + newSize++) & mask] = e; // Copy unmarked elements to the new position
+			}
+		}
+
+		// Clear out the remaining elements
+		for (int i = newSize; i < size; i++) {
+			int pos = (head + i) & mask;
+			a[pos] = null; // Clear out the remaining elements
+		}
+
+		// Update the queue's size
+		this.size = newSize;
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public boolean removeIf(@NotNull Predicate<? super E> filter) {
 		final Object[] a = this.queue;
@@ -341,28 +485,29 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		int i = head;
 		int to = size + i;
 		for (; i < to; i++) {
-			if (filter.test((E) a[i & mask])) {
+			E e = (E) a[i & mask];
+//			assert e != null;
+			if (filter.test(e)) {
+				onEvict.accept(e);
 				break;
 			}
 		}
 		if (i == to) {
 			return false;
 		}
-		final Object[] b = new Object[a.length];
-		if (i > a.length) { // Copy the elements before the first removed one.
-			System.arraycopy(a, head, b, head, a.length - head);
-			System.arraycopy(a, 0, b, 0, i - a.length);
-		} else {
-			System.arraycopy(a, head, b, head, i - head);
-		}
+		a[i & mask] = null;
 		int j = i++; // Index of the next element to copy.
 		for (; i < to; i++) {
-			E e = (E) a[i & mask];
+			int i1 = i & mask;
+			E e = (E) a[i1];
+//			assert e != null;
 			if (!filter.test(e)) {
-				b[j++ & mask] = e;
+				a[j++ & mask] = e;
+			} else {
+				onEvict.accept(e);
 			}
+			a[i1] = null;
 		}
-		this.queue = b;
 		this.size = j - head;
 		return true;
 	}
@@ -453,9 +598,9 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			return false;
 		}
 		Object[] q = queue;
-		int capacity = q.length;
+		int mask = q.length - 1;
 		for (int i = this.head, to = this.size + i; i < to; i++) {
-			int index = i & (capacity - 1);
+			int index = i & mask;
 			if (!o.equals(q[index])) {
 				continue;
 			}
@@ -487,10 +632,11 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 		StringBuilder sb = new StringBuilder();
 		sb.append('[');
 		Iterator<E> it = iterator();
-		while (it.hasNext()) {
+		if (it.hasNext()) {
 			sb.append(it.next());
-			if (it.hasNext()) {
+			while (it.hasNext()) {
 				sb.append(", ");
+				sb.append(it.next());
 			}
 		}
 		sb.append(']');

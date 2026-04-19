@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
-import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.rendering$gpuAcceleration;
 
 public class ConfigHelper {
 	public static void load() throws Exception {
@@ -150,5 +149,17 @@ public class ConfigHelper {
 
 	public static boolean isGpuParticles() {
 		return rendering$gpuAcceleration;
+	}
+
+	public static boolean isParallelQueueRemoval() {
+		return particle$parallelQueueRemoval;
+	}
+
+	public static boolean isParallelQueueEviction() {
+		return particle$parallelQueueEviction;
+	}
+
+	public static boolean isAppendNewParticlesToRenderer() {
+		return rendering$appendNewParticlesToRenderer;
 	}
 }

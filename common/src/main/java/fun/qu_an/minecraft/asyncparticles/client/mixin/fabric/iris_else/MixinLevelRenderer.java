@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.iris_else;
 
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -26,8 +27,8 @@ public abstract class MixinLevelRenderer {
 										 @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 										 LocalIntRef irm) {
 		switch (irm.get()) {
-			case SYNC -> AsyncRenderBehavior.INSTANCE.endAll(partialTick, camera, lightTexture, false);
-			case COMPATIBILITY_ASYNC -> AsyncRenderBehavior.INSTANCE.endAll(partialTick, camera, lightTexture, true);
+			case SYNC -> AsyncRenderBehavior.getInstance().endAll(partialTick, camera, lightTexture, false);
+			case COMPATIBILITY_ASYNC -> AsyncRenderBehavior.getInstance().endAll(partialTick, camera, lightTexture, true);
 		}
 	}
 }

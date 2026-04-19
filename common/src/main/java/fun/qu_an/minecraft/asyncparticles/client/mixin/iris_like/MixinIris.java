@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.iris_like;
 
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import net.irisshaders.iris.Iris;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

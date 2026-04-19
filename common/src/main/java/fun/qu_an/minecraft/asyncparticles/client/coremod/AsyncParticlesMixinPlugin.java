@@ -88,10 +88,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}
-			case "fake_renders",
-				 "off_thread_access",
-				 "tick",
-				 "render" -> true;
+			case "core" -> true;
 			case "particlerain" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN;
 			case "particlerain_vs" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && VS_LOADED;
 			case "particlerain_create" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && CREATE_LOADED;
