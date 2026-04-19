@@ -16,7 +16,7 @@ public class MixinParticleRenderType {
 	@Shadow(remap = false) private ResourceLocation texture;
 
 	@Dynamic
-	@Inject(method = "<init>", remap = false, at = @At("RETURN"))
+	@Inject(method = "<init>", require = 0, remap = false, at = @At("RETURN"))
 	private void onInit(CallbackInfo ci){
 		texture = TextureAtlas.LOCATION_PARTICLES;
 	}

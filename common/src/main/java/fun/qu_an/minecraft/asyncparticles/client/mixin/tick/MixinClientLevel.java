@@ -2,8 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.tick;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
-import fun.qu_an.minecraft.asyncparticles.client.api.EndTickOperation;
+import fun.qu_an.minecraft.asyncparticles.client.task.EndTickOperation;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -33,7 +32,7 @@ public abstract class MixinClientLevel extends Level {
 	private static final ResourceLocation ANIMATE_TICK = GameUtil.id("animate_tick");
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int i, int j, int k, Operation<Void> original) {
-		if (!AsyncTicker.shouldTickParticles &&
+		if (!AsyncTickBehavior.INSTANCE.shouldTickParticles &&
 			ConfigHelper.isTickAsync()) {
 			// don't tick animate if the game is lagging
 			return;
@@ -47,7 +46,7 @@ public abstract class MixinClientLevel extends Level {
 
 	@Inject(method = "animateTick", at = @At(value = "CONSTANT", args = "intValue=16"), cancellable = true)
 	public void onAnimateTick(int i, int j, int k, CallbackInfo ci) {
-		if (AsyncTicker.isCancelled() && !ConfigHelper.forceDoneBlockAnimateTick()) {
+		if (AsyncTickBehavior.INSTANCE.isCancelled() && !ConfigHelper.forceDoneBlockAnimateTick()) {
 			ci.cancel();
 		}
 	}

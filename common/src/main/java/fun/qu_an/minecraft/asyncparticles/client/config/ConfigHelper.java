@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.cooparticlesapi.CooTickMode;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
@@ -8,6 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
+import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.rendering$gpuAcceleration;
 
 public class ConfigHelper {
 	public static void load() throws Exception {
@@ -104,10 +104,6 @@ public class ConfigHelper {
 		return rendering$particleRenderingMode;
 	}
 
-	public static CooTickMode cooparticlesapi$getTickMode() {
-		return cooparticlesapi$tickMode;
-	}
-
 	public static boolean isCullWeathers() {
 		return rendering$cullWeathers;
 	}
@@ -150,5 +146,9 @@ public class ConfigHelper {
 			})
 			.filter(Objects::nonNull)
 			.toList();
+	}
+
+	public static boolean isGpuParticles() {
+		return rendering$gpuAcceleration;
 	}
 }

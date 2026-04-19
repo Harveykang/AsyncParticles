@@ -1,9 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin;
 
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -37,10 +36,10 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	@Inject(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V", at = @At("RETURN"))
 	protected void onInit(CallbackInfo ci) {
 		Class<?> aClass = asyncparticles$getRealClass();
-		if (AsyncTicker.shouldSync(aClass)) {
+		if (AsyncTickBehavior.INSTANCE.shouldSync(aClass)) {
 			asyncparticles$setTickSync();
 		}
-		if (AsyncRenderer.shouldSync(aClass)) {
+		if (AsyncRenderBehavior.INSTANCE.shouldSync(aClass)) {
 			asyncparticles$setRenderSync();
 		}
 	}
@@ -117,7 +116,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 
 	public void asyncparticles$tickAABBCulling() {
 		AABB aabb = getRenderBoundingBox(0f).expandTowards(xd, yd, zd);
-		if (FrustumUtil.isVisible(AsyncRenderer.frustum, aabb)) {
+		if (FrustumUtil.isVisible(AsyncRenderBehavior.INSTANCE.getFrustum(), aabb)) {
 			asyncparticles$renderFlag |= 4;
 		} else {
 			asyncparticles$renderFlag &= ~4;
@@ -125,7 +124,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	}
 
 	public void asyncparticles$tickSphereCulling() {
-		if (FrustumUtil.isVisible(AsyncRenderer.frustum, (Particle) (Object) this)) {
+		if (FrustumUtil.isVisible(AsyncRenderBehavior.INSTANCE.getFrustum(), (Particle) (Object) this)) {
 			asyncparticles$renderFlag |= 4;
 		} else {
 			asyncparticles$renderFlag &= ~4;

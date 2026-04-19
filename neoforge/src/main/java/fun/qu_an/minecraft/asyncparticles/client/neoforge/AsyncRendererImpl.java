@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.neoforge;
 
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -12,25 +12,25 @@ public class AsyncRendererImpl {
 		Minecraft mc = Minecraft.getInstance();
 		mc.getProfiler().popPush("particles");
 
-		AsyncRenderer.renderAsync = isAsync;
-		AsyncRenderer.particlePhase = true;
+		AsyncRenderBehavior.INSTANCE.renderAsync = isAsync;
+		AsyncRenderBehavior.INSTANCE.particlePhase = true;
 		mc.particleEngine.render(lightTexture, camera, f, null, t -> !t.isTranslucent());
-		AsyncRenderer.renderAsync = false;
-		AsyncRenderer.particlePhase = false;
+		AsyncRenderBehavior.INSTANCE.renderAsync = false;
+		AsyncRenderBehavior.INSTANCE.particlePhase = false;
 	}
 
 	public static void endTranslucent(LightTexture lightTexture, Camera camera, float f, boolean isAsync) {
 		Minecraft mc = Minecraft.getInstance();
 		mc.getProfiler().popPush("particles");
 
-		AsyncRenderer.onTranslucent(mc);
+		AsyncRenderBehavior.INSTANCE.onTranslucent(mc);
 
-		AsyncRenderer.renderAsync = isAsync;
-		AsyncRenderer.particlePhase = true;
+		AsyncRenderBehavior.INSTANCE.renderAsync = isAsync;
+		AsyncRenderBehavior.INSTANCE.particlePhase = true;
 		mc.particleEngine.render(lightTexture, camera, f, null, ParticleRenderType::isTranslucent);
-		AsyncRenderer.renderAsync = false;
-		AsyncRenderer.particlePhase = false;
+		AsyncRenderBehavior.INSTANCE.renderAsync = false;
+		AsyncRenderBehavior.INSTANCE.particlePhase = false;
 
-		AsyncRenderer.postTranslucent(mc);
+		AsyncRenderBehavior.INSTANCE.postTranslucent(mc);
 	}
 }

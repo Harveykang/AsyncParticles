@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.fabric;
 
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
 import net.minecraft.client.Camera;
@@ -21,18 +21,18 @@ public class AsyncRendererImpl {
 		} else {
 			throw new UnsupportedOperationException("endOpaque");
 		}
-		AsyncRenderer.renderAsync = isAsync;
-		AsyncRenderer.particlePhase = true;
+		AsyncRenderBehavior.INSTANCE.renderAsync = isAsync;
+		AsyncRenderBehavior.INSTANCE.particlePhase = true;
 		particleEngine.render(lightTexture, camera, f);
-		AsyncRenderer.renderAsync = false;
-		AsyncRenderer.particlePhase = false;
+		AsyncRenderBehavior.INSTANCE.renderAsync = false;
+		AsyncRenderBehavior.INSTANCE.particlePhase = false;
 	}
 
 	public static void endTranslucent(LightTexture lightTexture, Camera camera, float f, boolean isAsync) {
 		Minecraft mc = Minecraft.getInstance();
 		mc.getProfiler().popPush("particles");
 
-		AsyncRenderer.onTranslucent(mc);
+		AsyncRenderBehavior.INSTANCE.onTranslucent(mc);
 
 		ParticleEngine particleEngine = mc.particleEngine;
 		if (ModListHelper.FABRIC_IRIS_LOADED) {
@@ -40,12 +40,12 @@ public class AsyncRendererImpl {
 		} else {
 			throw new UnsupportedOperationException("endOpaque");
 		}
-		AsyncRenderer.renderAsync = isAsync;
-		AsyncRenderer.particlePhase = true;
+		AsyncRenderBehavior.INSTANCE.renderAsync = isAsync;
+		AsyncRenderBehavior.INSTANCE.particlePhase = true;
 		particleEngine.render(lightTexture, camera, f);
-		AsyncRenderer.renderAsync = false;
-		AsyncRenderer.particlePhase = false;
+		AsyncRenderBehavior.INSTANCE.renderAsync = false;
+		AsyncRenderBehavior.INSTANCE.particlePhase = false;
 
-		AsyncRenderer.postTranslucent(mc);
+		AsyncRenderBehavior.INSTANCE.postTranslucent(mc);
 	}
 }

@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[4,)"
 issueTrackerURL = "https://github.com/Harveykang/AsyncParticles/issues"
-license = "MIT"
+license = "LGPL-3.0"
 
 [[mods]]
 modId = "asyncparticles"
@@ -43,8 +43,8 @@ side = "CLIENT"
 [[mixins]]
 config = "asyncparticles-common.mixins.json"
 
-[[mixins]]
-config = "asyncparticles-common_legacy_mod_compat.mixins.json"
+#[[mixins]]
+#config = "asyncparticles-common_legacy_mod_compat.mixins.json"
 
 [[mixins]]
 config = "asyncparticles-neoforge.mixins.json"

@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.simple_weather;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import fun.qu_an.minecraft.asyncparticles.client.api.EndTickOperation;
+import fun.qu_an.minecraft.asyncparticles.client.task.EndTickOperation;
 import fun.qu_an.minecraft.asyncparticles.client.compat.simpleweather.neoforge.SimpleWeatherCompat;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;

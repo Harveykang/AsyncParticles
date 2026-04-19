@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge;
 
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -29,8 +29,8 @@ public abstract class MixinLevelRenderer {
 										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 										  LocalIntRef irm) {
 		switch (irm.get()) {
-			case SYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, false);
-			case COMPATIBILITY_ASYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
+			case SYNC -> AsyncRenderBehavior.INSTANCE.endAll(partialTick, camera, lightTexture, false);
+			case COMPATIBILITY_ASYNC -> AsyncRenderBehavior.INSTANCE.endAll(partialTick, camera, lightTexture, true);
 		}
 	}
 
@@ -45,11 +45,11 @@ public abstract class MixinLevelRenderer {
 										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 										  LocalIntRef irm) {
 		switch (irm.get()) {
-			case MIXED_SYNC, SYNC -> AsyncRenderer.endOpaque(lightTexture, camera, partialTick, false);
+			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.INSTANCE.endOpaque(lightTexture, camera, partialTick, false);
 			case MIXED_ASYNC, COMPATIBILITY_ASYNC ->
-				AsyncRenderer.endOpaque(lightTexture, camera, partialTick, true);
-			case BEFORE_SYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, false);
-			case BEFORE_ASYNC -> AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
+				AsyncRenderBehavior.INSTANCE.endOpaque(lightTexture, camera, partialTick, true);
+			case BEFORE_SYNC -> AsyncRenderBehavior.INSTANCE.endAll(partialTick, camera, lightTexture, false);
+			case BEFORE_ASYNC -> AsyncRenderBehavior.INSTANCE.endAll(partialTick, camera, lightTexture, true);
 		}
 	}
 
@@ -65,9 +65,9 @@ public abstract class MixinLevelRenderer {
 										  LocalIntRef irm) {
 
 		switch (irm.get()) {
-			case MIXED_SYNC, SYNC -> AsyncRenderer.endTranslucent(lightTexture, camera, partialTick, false);
+			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.INSTANCE.endTranslucent(lightTexture, camera, partialTick, false);
 			case MIXED_ASYNC, COMPATIBILITY_ASYNC ->
-				AsyncRenderer.endTranslucent(lightTexture, camera, partialTick, true);
+				AsyncRenderBehavior.INSTANCE.endTranslucent(lightTexture, camera, partialTick, true);
 		}
 	}
 }

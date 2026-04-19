@@ -2,7 +2,6 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.core.SectionPos;
@@ -13,7 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 public abstract class MixinClientChunkCache {
 	@WrapMethod(method = "onLightUpdate")
 	public void onLightUpdateWrap(LightLayer layer, SectionPos pos, Operation<Void> original) {
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			original.call(layer, pos);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> original.call(layer, pos));

@@ -5,11 +5,11 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.Tesselator;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.Camera;
@@ -56,12 +56,12 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 		// Remove duplicated render types, (e.g. Hex Casting mod's bug)
 		Set<ParticleRenderType> renderTypes = new LinkedHashSet<>((int) (RENDER_ORDER.size() * 1.34) + 1);
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (!AsyncRenderer.getBTesselator(type, textureManager).shouldSync) {
+			if (!AsyncRenderBehavior.INSTANCE.getBTesselator(type, textureManager).shouldSync) {
 				renderTypes.add(type);
 			}
 		}
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderer.getBTesselator(type, textureManager).shouldSync) {
+			if (AsyncRenderBehavior.INSTANCE.getBTesselator(type, textureManager).shouldSync) {
 				renderTypes.add(type);
 			}
 		}
@@ -75,10 +75,10 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Overwrite
 	public void render(LightTexture lightTexture, Camera camera, float f) {
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-		boolean renderAsync = AsyncRenderer.isRenderAsync();
+		boolean renderAsync = AsyncRenderBehavior.INSTANCE.isRenderAsync();
 		if (renderAsync) {
 			profiler.push("wait_for_async_tasks");
-			AsyncRenderer.tryWaitingForAsyncTasks();
+			AsyncRenderBehavior.INSTANCE.tryWaitingForAsyncTasks();
 			profiler.pop();
 		}
 
@@ -86,7 +86,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 		lightTexture.turnOnLightLayer();
 		profiler.pop();
 
-		Frustum frustum = AsyncRenderer.frustum;
+		Frustum frustum = AsyncRenderBehavior.INSTANCE.getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			// FABRIC skips NO_RENDER
@@ -97,7 +97,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			if (queue == null || queue.isEmpty()) {
 				continue;
 			}
-			BindingTesselator tesselator = AsyncRenderer.getBTesselator(particleRenderType, textureManager);
+			BindingTesselator tesselator = AsyncRenderBehavior.INSTANCE.getBTesselator(particleRenderType, textureManager);
 			profiler.push("render_sync");
 			Collection<? extends Particle> syncParticles;
 			ParticleCullingMode realCullMode;
@@ -109,7 +109,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 				toBegin = Tesselator.getInstance();
 			} else {
 				realCullMode = ParticleCullingMode.DISABLED;
-				syncParticles = AsyncRenderer.getSync(particleRenderType);
+				syncParticles = AsyncRenderBehavior.INSTANCE.getSync(particleRenderType);
 				toBegin = tesselator;
 			}
 			// why ParticleRenderType#end() removed?...
@@ -158,7 +158,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 					try {
 						particle.render(bufferBuilder, camera, f3);
 					} catch (Throwable t) {
-						throw AsyncRenderer.constructCrashReport(particle, particleRenderType, t);
+						throw AsyncRenderBehavior.INSTANCE.constructCrashReport(particle, particleRenderType, t);
 					}
 				}
 			}

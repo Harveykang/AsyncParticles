@@ -1,0 +1,128 @@
+#version 430 core
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+// 输入：每个粒子的数据
+struct ParticleInput {
+    vec3 oPosition;
+    vec3 Position;
+    vec2 Sizes;
+    vec4 UVMinMax;
+    int oColor;
+    int Color;
+    int Light;
+    vec2 Rolls;
+};
+
+// 输出：每个顶点的数据
+struct QuadVertex {
+    vec3 position;
+    vec2 uv;
+    vec4 color;
+    ivec2 light;
+};
+
+layout(binding = 0, std430) restrict readonly buffer InputBuffer {
+    ParticleInput particles[];
+};
+
+layout(binding = 1, std430) restrict writeonly buffer OutputBuffer {
+    QuadVertex vertices[];
+};
+
+layout(binding = 2, std430) buffer Counters {
+    uint outCount;
+    uint outOverflow;
+};
+
+uniform float uPartialTicks;
+uniform vec3 uCameraLeft;
+uniform vec3 uCameraUp;
+uniform vec3 uCameraDelta;// = currentCameraPos - prevCameraPos
+uniform int uParticleCount;
+uniform int uOverflowCount;
+uniform vec4 uFrustumPlanes[6];// left, right, bottom, top, near, far
+
+// 判断点是否在视锥内（保守：包围球或包围盒更佳，这里用中心点）
+bool inFrustum(vec3 p) {
+    for (int i = 0; i < 6; ++i) {
+        if (dot(uFrustumPlanes[i].xyz, p) + uFrustumPlanes[i].w < 0.0)
+        return false;
+    }
+    return true;
+}
+
+vec4 unpackColor(int c) {
+    return vec4(
+    float(c & 0xFF) / 255.0,
+    float((c >> 8) & 0xFF) / 255.0,
+    float((c >> 16) & 0xFF) / 255.0,
+    float((c >> 24) & 0xFF) / 255.0
+    );
+}
+
+ivec2 unpackLight(int l) {
+    return ivec2(
+    (l >> 4) & 0xFF,   // 直接 int
+    (l >> 20) & 0xFF
+    );
+}
+
+void main() {
+    int idx = int(gl_GlobalInvocationID.x);
+//    if (idx >= uParticleCount) return;
+
+    ParticleInput p = particles[idx];
+
+    vec3 pos = mix(p.oPosition, p.Position, uPartialTicks) + uCameraDelta;
+
+    // if (!inFrustum(pos)) return;
+
+    float nroll = mix(p.Rolls.x, p.Rolls.y, uPartialTicks);
+    float size = mix(p.Sizes.x, p.Sizes.y, uPartialTicks);
+    vec4 color = mix(unpackColor(p.oColor), unpackColor(p.Color), uPartialTicks);
+
+    // TODO 查表法
+    float sinRoll = sin(nroll);
+    float cosRoll = cos(nroll);
+    vec3 left = cosRoll * uCameraLeft + sinRoll * uCameraUp;
+    vec3 up = -sinRoll * uCameraLeft + cosRoll * uCameraUp;
+
+    vec2 uvLB = vec2(p.UVMinMax.z, p.UVMinMax.w);// left-bottom
+    vec2 uvLT = vec2(p.UVMinMax.z, p.UVMinMax.y);// left-top
+    vec2 uvRT = vec2(p.UVMinMax.x, p.UVMinMax.y);// right-top
+    vec2 uvRB = vec2(p.UVMinMax.x, p.UVMinMax.w);// right-bottom
+
+    ivec2 light = unpackLight(p.Light);
+    // 生成4个顶点
+    QuadVertex v0, v1, v2, v3;
+    v0.position = -(left + up) * size + pos;
+    v0.uv = uvLB;
+    v0.color = color;
+    v0.light = light;
+
+    v1.position = -(left - up) * size + pos;
+    v1.uv = uvLT;
+    v1.color = color;
+    v1.light = light;
+
+    v2.position =  (left + up) * size + pos;
+    v2.uv = uvRT;
+    v2.color = color;
+    v2.light = light;
+
+    v3.position =  (left - up) * size + pos;
+    v3.uv = uvRB;
+    v3.color = color;
+    v3.light = light;
+
+    // 如果启用剔除，则用原子计数器：
+    uint offset = atomicAdd(outCount, 1u) * 4u;
+    if (idx >= uOverflowCount) {
+        atomicAdd(outOverflow, 1u);
+    }
+    vertices[offset + 0u] = v0;
+    vertices[offset + 1u] = v1;
+    vertices[offset + 2u] = v2;
+    vertices[offset + 3u] = v3;
+}

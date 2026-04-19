@@ -4,9 +4,9 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.*;
@@ -53,13 +53,13 @@ public abstract class MixinLevelRenderer {
 		if (this.capturedFrustum != null) {
 			Frustum frustum = this.capturedFrustum;
 			frustum.prepare(this.frustumPos.x, this.frustumPos.y, this.frustumPos.z);
-			AsyncRenderer.frustum = frustum;
-		} else {
-			AsyncRenderer.frustum = this.cullingFrustum;
+			AsyncRenderBehavior.INSTANCE.setFrustum(frustum);
+		}else {
+			AsyncRenderBehavior.INSTANCE.setFrustum(this.cullingFrustum);
 		}
 		int irmValue = InternalRenderingMode.updateInternalMode(ConfigHelper.getParticleRenderingMode());
 		irm.set(irmValue);
-		AsyncRenderer.start(partialTick, camera, irmValue);
+		AsyncRenderBehavior.INSTANCE.start(partialTick, camera, irmValue);
 	}
 
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;prepare(DDD)V"))
@@ -110,7 +110,7 @@ public abstract class MixinLevelRenderer {
 								   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 								   LocalIntRef irm) {
 		if (irm.get() == DELAYED_ASYNC) {
-			AsyncRenderer.endAll(partialTick, camera, lightTexture, true);
+			AsyncRenderBehavior.INSTANCE.endAll(partialTick, camera, lightTexture, true);
 		}
 	}
 }

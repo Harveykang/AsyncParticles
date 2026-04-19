@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.physicsmod;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.diebuddies.minecraft.weather.WeatherParticle;
@@ -21,7 +20,7 @@ public abstract class MixinWeatherParticle implements ParticleAddon {
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", remap = false, target = "Lnet/diebuddies/physics/ocean/OceanWorld;spawnRainRipple(IFDDD)V"))
 	private void onSpawnRainRipple(OceanWorld instance, int lifetime, float scale, double x, double y, double z) {
-		if (ThreadUtil.isOnMainThread()){
+		if (ThreadUtil.isOnRenderThread()){
 			instance.spawnRainRipple(lifetime, scale, x, y, z);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> instance.spawnRainRipple(lifetime, scale, x, y, z));

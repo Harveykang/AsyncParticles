@@ -44,5 +44,6 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "create.MixinContraption"
   ]
 }

@@ -2,7 +2,6 @@ package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncTicker;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.ReportedException;
 import net.minecraft.client.particle.Particle;

@@ -2,7 +2,6 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -29,7 +28,7 @@ public class MixinSoundEngine {
 
 	@WrapMethod(method = {"reload", "stopAll", "destroy", "stopAll"})
 	public void wrapReload(Operation<Void> original) {
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			original.call();
 		} else {
 			ThreadUtil.enqueueClientTask(original::call);
@@ -38,7 +37,7 @@ public class MixinSoundEngine {
 
 	@WrapMethod(method = "updateCategoryVolume")
 	public void wrapUpdateCategoryVolume(SoundSource category, float volume, Operation<Void> original) {
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			original.call(category, volume);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> original.call(category, volume));
@@ -47,7 +46,7 @@ public class MixinSoundEngine {
 
 	@WrapMethod(method = "play")
 	public void wrapPlay(SoundInstance soundInstance, Operation<Void> original) {
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			original.call(soundInstance);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> original.call(soundInstance));
@@ -56,7 +55,7 @@ public class MixinSoundEngine {
 
 	@WrapMethod(method = {"addEventListener", "removeEventListener"})
 	public void wrapAddEventListener(SoundEventListener listener, Operation<Void> original) {
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			original.call(listener);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> original.call(listener));
@@ -70,7 +69,7 @@ public class MixinSoundEngine {
 
 	@WrapMethod(method = "queueTickingSound")
 	public void wrapQueueTickingSound(TickableSoundInstance tickableSound, Operation<Void> original) {
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			original.call(tickableSound);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> original.call(tickableSound));
@@ -79,7 +78,7 @@ public class MixinSoundEngine {
 
 	@WrapMethod(method = "requestPreload")
 	public void wrapRequestPreload(Sound sound, Operation<Void> original) {
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			original.call(sound);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> original.call(sound));
@@ -88,7 +87,7 @@ public class MixinSoundEngine {
 
 	@WrapMethod(method = "playDelayed")
 	public void wrapPlayDelayed(SoundInstance sound, int delay, Operation<Void> original) {
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			original.call(sound, delay);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> original.call(sound, delay));
@@ -97,7 +96,7 @@ public class MixinSoundEngine {
 
 	@WrapMethod(method = "stop(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/sounds/SoundSource;)V")
 	public void wrapStop(ResourceLocation soundName, SoundSource category, Operation<Void> original) {
-		if (ThreadUtil.isOnMainThread()) {
+		if (ThreadUtil.isOnRenderThread()) {
 			original.call(soundName, category);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> original.call(soundName, category));
