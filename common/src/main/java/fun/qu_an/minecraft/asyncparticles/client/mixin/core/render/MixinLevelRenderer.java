@@ -49,13 +49,13 @@ public abstract class MixinLevelRenderer {
 		if (this.capturedFrustum != null) {
 			Frustum frustum = this.capturedFrustum;
 			frustum.prepare(this.frustumPos.x, this.frustumPos.y, this.frustumPos.z);
-			AsyncRenderBehavior.setFrustum(frustum);
+			AsyncRenderBehavior.INSTANCE.setFrustum(frustum);
 		} else {
-			AsyncRenderBehavior.setFrustum(this.cullingFrustum);
+			AsyncRenderBehavior.INSTANCE.setFrustum(this.cullingFrustum);
 		}
 		int irmValue = InternalRenderingMode.updateInternalMode(ConfigHelper.getParticleRenderingMode());
 		irm.set(irmValue);
-		AsyncRenderBehavior.start(partialTick, camera, irmValue);
+		AsyncRenderBehavior.INSTANCE.start(partialTick, camera, irmValue);
 	}
 
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;prepare(DDD)V"))

@@ -53,14 +53,15 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRendering
 // TODO: Organize this shit
 @Environment(EnvType.CLIENT)
 public class AsyncRenderBehavior {
+	public static final AsyncRenderBehavior INSTANCE = new AsyncRenderBehavior();
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
-	private static boolean renderAsync = false;
-	private static boolean particlePhase = false;
+	private final Set<Class<? extends Particle>> syncParticleTypes = Collections.newSetFromMap(new IdentityHashMap<>());
+	private boolean renderAsync = false;
+	private boolean particlePhase = false;
 
-	static {
-		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
-		SYNC_PARTICLE_TYPES.add(MobAppearanceParticle.class);
+	{
+		syncParticleTypes.add(ItemPickupParticle.class);
+		syncParticleTypes.add(MobAppearanceParticle.class);
 		if (ModListHelper.DUMMMMMMY_LOADED) {
 			addSyncByClassName("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
 		}
@@ -82,19 +83,19 @@ public class AsyncRenderBehavior {
 		// TODO: configure this set
 	}
 
-	private static void addSyncByClassName(String className) {
+	private void addSyncByClassName(String className) {
 		try {
-			SYNC_PARTICLE_TYPES.add((Class<? extends Particle>) Class.forName(className));
+			syncParticleTypes.add((Class<? extends Particle>) Class.forName(className));
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
 	}
 
-	public static final ForkJoinPool EXECUTOR;
-	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
-	public static final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
+	public final ForkJoinPool EXECUTOR;
+	public final String THREAD_PREFIX = "AsyncParticleRenderer";
+	public final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 
-	static {
+	{
 		AtomicInteger workerCount = new AtomicInteger(1);
 		EXECUTOR = new ForkJoinPool(THREADS, (forkJoinPool) -> {
 			ForkJoinWorkerThread forkJoinWorkerThread = new AsyncRendererThread(forkJoinPool);
@@ -104,19 +105,19 @@ public class AsyncRenderBehavior {
 		}, Util::onThreadException, true);
 	}
 
-	private static Frustum frustum = new Frustum(new Matrix4f(), new Matrix4f());
-	private static Consumer<String> debugConsumer;
-	private static CompletableFuture<Void> asyncTask;
-	private static boolean irisEarlyOpaquePhase = false;
-	private static int asyncTasksSize;
-	private static final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
+	private Frustum frustum = new Frustum(new Matrix4f(), new Matrix4f());
+	private Consumer<String> debugConsumer;
+	private CompletableFuture<Void> asyncTask;
+	private boolean irisEarlyOpaquePhase = false;
+	private int asyncTasksSize;
+	private final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
 		ConfigHelper::getRenderFailurePerSecondThreshold
 	);
 
 	/* Renderer */
 
-	public static void start(float f, Camera camera, int irm) {
+	public void start(float f, Camera camera, int irm) {
 		tryDebug();
 		switch (irm) {
 			case MIXED_SYNC, BEFORE_SYNC -> {
@@ -153,19 +154,19 @@ public class AsyncRenderBehavior {
 				continue;
 			}
 			asyncTasks.add(CompletableFuture.runAsync(() -> renderParticles(f, camera, queue, particleRenderType, bufferBuilder), EXECUTOR)
-				.exceptionally(AsyncRenderBehavior::renderAsyncExceptionally));
+				.exceptionally(this::renderAsyncExceptionally));
 		}
 		int size = asyncTasksSize = asyncTasks.size();
 		asyncTask = CompletableFuture.allOf(asyncTasks.toArray(new CompletableFuture[size]));
 		profiler.pop();
 	}
 
-	private static void renderParticles(float f,
+	private void renderParticles(float f,
 										Camera camera,
 										Queue<Particle> particles,
 										ParticleRenderType particleRenderType,
 										BufferBuilder bufferBuilder) {
-		Frustum frustum = AsyncRenderBehavior.getFrustum();
+		Frustum frustum = this.getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		float f2 = f + 1f;
 		for (Particle particle : particles) {
@@ -205,8 +206,8 @@ public class AsyncRenderBehavior {
 		}
 	}
 
-	private static void onRenderingParticleException(ParticleRenderType particleRenderType, Particle particle, Throwable t) {
-		boolean tolerable = AsyncTickBehavior.isTolerable(t);
+	private void onRenderingParticleException(ParticleRenderType particleRenderType, Particle particle, Throwable t) {
+		boolean tolerable = AsyncTickBehavior.INSTANCE.isTolerable(t);
 		Class<? extends Particle> particleClass = ((ParticleAddon) particle).asyncparticles$getRealClass();
 		if (tolerable && !EXCEPTION_TRACKER.addException(particleClass, t)) {
 			return;
@@ -227,7 +228,7 @@ public class AsyncRenderBehavior {
 		recordSync(particleRenderType, particle);
 	}
 
-	private static Void renderAsyncExceptionally(Throwable e) {
+	private Void renderAsyncExceptionally(Throwable e) {
 		LOGGER.error("Error rendering particle", e);
 		Minecraft mc1 = Minecraft.getInstance();
 		if (mc1.level != null && mc1.player != null) {
@@ -236,7 +237,7 @@ public class AsyncRenderBehavior {
 		return null;
 	}
 
-	public static void endAll(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
+	public void endAll(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
@@ -262,11 +263,11 @@ public class AsyncRenderBehavior {
 		postTranslucent(mc);
 	}
 
-	public static boolean isIrisEarlyOpaquePhase() {
+	public boolean isIrisEarlyOpaquePhase() {
 		return irisEarlyOpaquePhase;
 	}
 
-	public static void irisOpaque(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
+	public void irisOpaque(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
@@ -288,7 +289,7 @@ public class AsyncRenderBehavior {
 		particlePhase = false;
 	}
 
-	public static void irisTranslucent(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
+	public void irisTranslucent(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
 //		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
 //			return;
 //		}
@@ -313,14 +314,14 @@ public class AsyncRenderBehavior {
 		postTranslucent(mc);
 	}
 
-	public static void irisCustom(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
+	public void irisCustom(PoseStack poseStack, float f, Camera camera, LightTexture lightTexture) {
 //		if (!isMixedParticleRendering()) { // Tested outside.
 //			return;
 //		}
 		PoseStack poseStack2 = null;
 		Minecraft mc = Minecraft.getInstance();
 		ParticleEngine particleEngine = mc.particleEngine;
-		Frustum frustum = AsyncRenderBehavior.getFrustum();
+		Frustum frustum = this.getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		float f2 = f + 1f;
 		for (Map.Entry<ParticleRenderType, Queue<Particle>> entry : particleEngine.particles.entrySet()) {
@@ -401,31 +402,31 @@ public class AsyncRenderBehavior {
 		}
 	}
 
-	public static boolean isRenderAsync() {
+	public boolean isRenderAsync() {
 		return renderAsync;
 	}
 
-	public static boolean isParticlePhase() {
+	public boolean isParticlePhase() {
 		return particlePhase;
 	}
 
-	private static void waitForAsyncTasks() {
+	private void waitForAsyncTasks() {
 		if (asyncTask != null) {
 			asyncTask.join();
 			asyncTask = null;
 		}
 	}
 
-	public static void tryWaitingForAsyncTasks() {
+	public void tryWaitingForAsyncTasks() {
 //		if (ConfigHelper.isRenderAsync() && stage != Stage.RENDERABLE) {
 //			throw new IllegalStateException("Can only wait for async tasks around translucent");
 //		}
 		waitForAsyncTasks();
 	}
 
-	public static ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable t) {
-		AsyncTickBehavior.debugLater(LOGGER::info);
-		AsyncTickBehavior.tryDebug();
+	public ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable t) {
+		AsyncTickBehavior.INSTANCE.debugLater(LOGGER::info);
+		AsyncTickBehavior.INSTANCE.tryDebug();
 		debugLater(LOGGER::info);
 		tryDebug();
 		CrashReport crashReport = CrashReport.forThrowable(t, "Rendering Particle");
@@ -437,11 +438,11 @@ public class AsyncRenderBehavior {
 
 	/* BufferBuilder */
 
-	private static final Map<ParticleRenderType, Pair<VertexFormat.Mode, VertexFormat>> FORMATS = new ConcurrentHashMap<>();
-	public static final Pair<VertexFormat.Mode, VertexFormat> EMPTY_FORMAT = Pair.of(null, null);
-	private static final Map<ParticleRenderType, BufferBuilder> BUFFER_BUILDERS = new IdentityHashMap<>();
+	private final Map<ParticleRenderType, Pair<VertexFormat.Mode, VertexFormat>> FORMATS = new ConcurrentHashMap<>();
+	public final Pair<VertexFormat.Mode, VertexFormat> EMPTY_FORMAT = Pair.of(null, null);
+	private final Map<ParticleRenderType, BufferBuilder> BUFFER_BUILDERS = new IdentityHashMap<>();
 
-	public static BufferBuilder beginBufferBuilder(ParticleRenderType particleRenderType, TextureManager textureManager) {
+	public BufferBuilder beginBufferBuilder(ParticleRenderType particleRenderType, TextureManager textureManager) {
 		Pair<VertexFormat.Mode, VertexFormat> pair = getVertexFormatPair(particleRenderType, textureManager);
 		if (pair == EMPTY_FORMAT) {
 			return FakeBufferBuilder.INSTANCE;
@@ -455,12 +456,12 @@ public class AsyncRenderBehavior {
 		return builder;
 	}
 
-	public static @NotNull Pair<VertexFormat.Mode, VertexFormat> getVertexFormatPair(ParticleRenderType particleRenderType, TextureManager textureManager) {
+	public @NotNull Pair<VertexFormat.Mode, VertexFormat> getVertexFormatPair(ParticleRenderType particleRenderType, TextureManager textureManager) {
 		return FORMATS.computeIfAbsent(particleRenderType, k -> computeVertexFormatPair(k, textureManager));
 	}
 
 	@SuppressWarnings("ConstantValue")
-	private static @NotNull Pair<VertexFormat.Mode, VertexFormat> computeVertexFormatPair(ParticleRenderType k, TextureManager textureManager) {
+	private @NotNull Pair<VertexFormat.Mode, VertexFormat> computeVertexFormatPair(ParticleRenderType k, TextureManager textureManager) {
 		// we try and store the vertex format/mode to avoid call begin() twice per frame...
 		TryAndStoreFakeBufferBuilder fakeBufferBuilder = new TryAndStoreFakeBufferBuilder();
 		// compatibility shit...
@@ -488,19 +489,19 @@ public class AsyncRenderBehavior {
 
 	/* Sync Rendering */
 
-	private static final Map<ParticleRenderType, Set<Particle>> SYNC_PARTICLES = Collections.synchronizedMap(new IdentityHashMap<>());
+	private final Map<ParticleRenderType, Set<Particle>> SYNC_PARTICLES = Collections.synchronizedMap(new IdentityHashMap<>());
 
-	public static void markAsSync(Class<? extends Particle> aClass) {
-		synchronized (SYNC_PARTICLE_TYPES) {
-			SYNC_PARTICLE_TYPES.add(aClass);
+	public void markAsSync(Class<? extends Particle> aClass) {
+		synchronized (syncParticleTypes) {
+			syncParticleTypes.add(aClass);
 		}
 	}
 
-	public static boolean shouldSync(Class<?> aClass) {
-		return SYNC_PARTICLE_TYPES.contains(aClass);
+	public boolean shouldSync(Class<?> aClass) {
+		return syncParticleTypes.contains(aClass);
 	}
 
-	public static void recordSync(ParticleRenderType particleRenderType, Particle particle) {
+	public void recordSync(ParticleRenderType particleRenderType, Particle particle) {
 		Set<Particle> particles = SYNC_PARTICLES.computeIfAbsent(particleRenderType,
 			k -> Collections.newSetFromMap(new IdentityHashMap<>()));
 		synchronized (particles) {
@@ -508,12 +509,12 @@ public class AsyncRenderBehavior {
 		}
 	}
 
-	public static Set<Particle> getSync(ParticleRenderType particleRenderType) {
+	public Set<Particle> getSync(ParticleRenderType particleRenderType) {
 		Set<Particle> set = SYNC_PARTICLES.get(particleRenderType);
 		return set == null ? Collections.emptySet() : set;
 	}
 
-	private static void clearSync() {
+	private void clearSync() {
 		if (!SYNC_PARTICLES.isEmpty()) {
 			SYNC_PARTICLES.clear();
 		}
@@ -521,11 +522,11 @@ public class AsyncRenderBehavior {
 
 	/* Debug */
 
-	public static void debugLater(Consumer<String> consumer) {
+	public void debugLater(Consumer<String> consumer) {
 		debugConsumer = consumer;
 	}
 
-	public static void tryDebug() {
+	public void tryDebug() {
 		if (debugConsumer != null) {
 			debugConsumer.accept("""
 				[Debug AsyncRenderer]
@@ -550,7 +551,7 @@ public class AsyncRenderBehavior {
 						? Minecraft.getInstance().particleEngine.particles.keySet()
 						: ParticleEngine.RENDER_ORDER,
 					SYNC_PARTICLES.values().stream().mapToInt(Set::size).sum(),
-					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList(),
+					syncParticleTypes.stream().map(Class::getName).toList(),
 					FORMATS.entrySet().stream()
 						.filter(e -> e.getValue() == EMPTY_FORMAT)
 						.map(Map.Entry::getKey).toList(),
@@ -577,7 +578,7 @@ public class AsyncRenderBehavior {
 
 	/* Destroy */
 
-	public static void reset() {
+	public void reset() {
 		irisEarlyOpaquePhase = false;
 		renderAsync = false;
 		particlePhase = false;
@@ -586,7 +587,7 @@ public class AsyncRenderBehavior {
 		clearSync();
 	}
 
-	public static void onTranslucent(Minecraft mc) {
+	public void onTranslucent(Minecraft mc) {
 		if (mc.levelRenderer.transparencyChain != null) {
 			RenderTarget particlesTarget = mc.levelRenderer.getParticlesTarget();
 			particlesTarget.clear(Minecraft.ON_OSX);
@@ -596,21 +597,21 @@ public class AsyncRenderBehavior {
 
 	}
 
-	public static void postTranslucent(Minecraft mc) {
+	public void postTranslucent(Minecraft mc) {
 		if (mc.levelRenderer.transparencyChain != null) {
 			RenderStateShard.PARTICLES_TARGET.clearRenderState();
 		}
 	}
 
-	public static @NotNull Frustum getFrustum() {
+	public @NotNull Frustum getFrustum() {
 		return frustum;
 	}
 
-	public static void setFrustum(@NotNull Frustum frustum) {
-		AsyncRenderBehavior.frustum = frustum;
+	public void setFrustum(@NotNull Frustum frustum) {
+		this.frustum = frustum;
 	}
 
-	public static class AsyncRendererThread extends AsyncParticleWorkerThread {
+	public class AsyncRendererThread extends AsyncParticleWorkerThread {
 		public AsyncRendererThread(ForkJoinPool forkJoinPool) {
 			super(forkJoinPool);
 		}

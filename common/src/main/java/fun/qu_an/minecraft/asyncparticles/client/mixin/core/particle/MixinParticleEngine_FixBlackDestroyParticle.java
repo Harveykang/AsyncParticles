@@ -69,7 +69,7 @@ public class MixinParticleEngine_FixBlackDestroyParticle {
 				skyDataLayerData.get(lx, ly, lz - 1));
 		}
 		if (j < 15) {
-			j = max(j, lz == 0 ? sky.getLightValue(asyncparticles$mutable.set(x, y, z - 1)) :
+			j = max(j, lz == 0 ? block.getLightValue(asyncparticles$mutable.set(x, y, z - 1)) :
 				blockDataLayerData.get(lx, ly, lz - 1));
 		}
 
@@ -78,7 +78,7 @@ public class MixinParticleEngine_FixBlackDestroyParticle {
 				skyDataLayerData.get(lx - 1, ly, lz));
 		}
 		if (j < 15) {
-			j = max(j, lx == 0 ? sky.getLightValue(asyncparticles$mutable.set(x - 1, y, z)) :
+			j = max(j, lx == 0 ? block.getLightValue(asyncparticles$mutable.set(x - 1, y, z)) :
 				blockDataLayerData.get(lx - 1, ly, lz));
 		}
 

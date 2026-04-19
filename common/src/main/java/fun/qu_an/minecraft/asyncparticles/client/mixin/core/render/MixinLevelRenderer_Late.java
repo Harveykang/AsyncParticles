@@ -36,7 +36,7 @@ public abstract class MixinLevelRenderer_Late {
 			PoseStack stack = RenderSystem.getModelViewStack();
 			// so that we don't need to change the behavior of ParticleEngine.render()
 			PoseStack.Pose pose = stack.poseStack.removeLast();
-			AsyncRenderBehavior.endAll(poseStack, partialTick, camera, lightTexture, true);
+			AsyncRenderBehavior.INSTANCE.endAll(poseStack, partialTick, camera, lightTexture, true);
 			stack.poseStack.addLast(pose);
 			RenderSystem.applyModelViewMatrix();
 		}

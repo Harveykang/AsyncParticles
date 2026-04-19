@@ -29,6 +29,8 @@ import java.util.function.Consumer;
 import static java.util.Objects.requireNonNullElse;
 
 public class AsyncParticlesConfig {
+	public static final int MIN_PARTICLE_LIMIT = 1024;
+	public static final int MAX_PARTICLE_LIMIT = 262144;
 	public static final int VERSION = 1;
 	public static final Path CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles.json");
 	static final Gson GSON = new GsonBuilder()
@@ -38,7 +40,6 @@ public class AsyncParticlesConfig {
 		.create();
 	static final Logger LOGGER = LogUtils.getLogger();
 	public static int particle$particleLimit;
-	public static boolean rendering$appendNewParticlesToRenderer;
 	public static boolean particle$removeIfMissedTick;
 	public static boolean particle$parallelQueueRemoval;
 	public static boolean particle$parallelQueueEviction;
@@ -50,6 +51,7 @@ public class AsyncParticlesConfig {
 	public static int tick$failPerSecLimit;
 	public static FailBehavior tick$failBehavior;
 	public static boolean tick$suppressCME;
+	public static boolean rendering$appendNewParticlesToRenderer;
 	public static RenderingMode rendering$particleRenderingMode;
 	public static boolean rendering$gpuAcceleration;
 	public static ParticleCullingMode rendering$particleCulling;
@@ -103,7 +105,7 @@ public class AsyncParticlesConfig {
 						Minecraft.getInstance().setScreen(current);
 						return;
 					} finally {
-						AsyncTickBehavior.reloadLater();
+						AsyncTickBehavior.INSTANCE.reloadLater();
 					}
 					current.message = msg.append("\n").append(
 						Component.translatable("gui.asyncparticles.reload-successfully")
@@ -139,7 +141,7 @@ public class AsyncParticlesConfig {
 						Minecraft.getInstance().setScreen(current);
 						return;
 					} finally {
-						AsyncTickBehavior.reloadLater();
+						AsyncTickBehavior.INSTANCE.reloadLater();
 					}
 					current.message = msg.append("\n").append(
 						Component.translatable("gui.asyncparticles.reset-successfully")
@@ -253,7 +255,7 @@ public class AsyncParticlesConfig {
 			boolean cullUnderwaterParticleType = true;
 
 			private void flat() {
-				particle$particleLimit = Mth.clamp(particleLimit, 1024, 262144);
+				particle$particleLimit = Mth.clamp(particleLimit, MIN_PARTICLE_LIMIT, MAX_PARTICLE_LIMIT);
 				particle$removeIfMissedTick = removeIfMissedTick;
 				particle$parallelQueueRemoval = parallelQueueRemoval;
 				particle$parallelQueueEviction = parallelQueueEviction;

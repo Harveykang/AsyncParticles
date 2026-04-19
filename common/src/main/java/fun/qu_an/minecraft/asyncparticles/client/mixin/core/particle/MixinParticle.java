@@ -37,10 +37,10 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	@Inject(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V", at = @At("RETURN"))
 	protected void onInit(CallbackInfo ci) {
 		Class<?> aClass = asyncparticles$getRealClass();
-		if (AsyncTickBehavior.shouldSync(aClass)) {
+		if (AsyncTickBehavior.INSTANCE.shouldSync(aClass)) {
 			asyncparticles$setTickSync();
 		}
-		if (AsyncRenderBehavior.shouldSync(aClass)) {
+		if (AsyncRenderBehavior.INSTANCE.shouldSync(aClass)) {
 			asyncparticles$setRenderSync();
 		}
 	}
@@ -120,7 +120,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 
 	public void asyncparticles$tickAABBCulling() {
 		AABB aabb = getBoundingBox().expandTowards(xd, yd, zd);
-		if (FrustumUtil.isVisible(AsyncRenderBehavior.getFrustum(), aabb)) {
+		if (FrustumUtil.isVisible(AsyncRenderBehavior.INSTANCE.getFrustum(), aabb)) {
 			asyncparticles$renderFlag |= 4;
 		} else {
 			asyncparticles$renderFlag &= ~4;
@@ -128,7 +128,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	}
 
 	public void asyncparticles$tickSphereCulling() {
-		if (FrustumUtil.isVisible(AsyncRenderBehavior.getFrustum(), (Particle) (Object) this)) {
+		if (FrustumUtil.isVisible(AsyncRenderBehavior.INSTANCE.getFrustum(), (Particle) (Object) this)) {
 			asyncparticles$renderFlag |= 4;
 		} else {
 			asyncparticles$renderFlag &= ~4;

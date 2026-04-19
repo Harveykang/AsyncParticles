@@ -36,17 +36,6 @@ public class MixinContraption implements ContraptionAddon {
 	@Unique
 	private final Object asyncparticles$lock = new Object();
 
-	@Dynamic
-	@WrapOperation(method = {
-		"lambda$gatherBBsOffThread$17()Ljava/util/List;",
-		"lambda$gatherBBsOffThread$25()Ljava/util/List;",
-		"lambda$gatherBBsOffThread$26()Ljava/util/List;"
-	}, at = @At(value = "INVOKE",
-		target = "Lnet/minecraft/world/phys/shapes/VoxelShape;toAabbs()Ljava/util/List;"))
-	private List<AABB> optimizeVoxelShape(VoxelShape instance, Operation<List<AABB>> original) {
-		return original.call(instance);
-	}
-
 	@WrapOperation(method = "gatherBBsOffThread", remap = false, at = @At(value = "INVOKE", target = "Ljava/util/concurrent/CompletableFuture;thenAccept(Ljava/util/function/Consumer;)Ljava/util/concurrent/CompletableFuture;"))
 	private CompletableFuture<Void> gatherBBsOffThread(CompletableFuture<?> instance, Consumer<?> action, Operation<CompletableFuture<Void>> original) {
 		return original.call(instance, action).thenRun(() -> {

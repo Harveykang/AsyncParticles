@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.tick;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
+import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.particle.*;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
@@ -63,7 +64,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	public void tick() {
 		//		assert AsyncTicker.shouldTickParticles;
 		if (!trackingEmitters.isEmpty()) {
-			AsyncTickBehavior.PARTICLE_OPERATIONS.add(this::asyncparticles$tickEmitters);
+			AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.add(this::asyncparticles$tickEmitters);
 		}
 
 		// Keep local variable tables as they were
@@ -71,12 +72,12 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 
 		boolean tickAsync = ConfigHelper.isTickAsync();
 		if (tickAsync) {
-			AsyncTickBehavior.waitForCleanUp();
+			AsyncTickBehavior.INSTANCE.waitForCleanUp();
 		} else {
 			particles.forEach(this::asyncparticles$scheduleParticleTick);
-			AsyncTickBehavior.PARTICLE_OPERATIONS.forEach(Runnable::run);
-			AsyncTickBehavior.PARTICLE_OPERATIONS.clear();
-			AsyncTickBehavior.tickSyncParticles();
+			AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.forEach(Runnable::run);
+			AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.clear();
+			AsyncTickBehavior.INSTANCE.tickSyncParticles();
 			particles.values().forEach(q -> q.removeIf(p -> {
 				if (p.isAlive()) {
 					return false;
@@ -98,7 +99,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				if (!gpuParticles || !tickAsync) {
 					canComputeFast = false;
 				} else if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
-					AsyncTickBehavior.recordSync(particle);
+					AsyncTickBehavior.INSTANCE.recordSync(particle);
 					canComputeFast = false;
 				} else {
 					canComputeFast = particle instanceof TextureSheetParticle tsp && GpuParticleBehavior.canRenderFast(tsp);
@@ -116,6 +117,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				} else {
 					queue = this.particles.computeIfAbsent(renderType, this::asyncparticles$newQueue);
 					// mark cpu particles as ticked
+					// this will skip the first tick after enqueued, while gpu particles don't skip it
 					((ParticleAddon) particle).asyncparticles$setTicked();
 				}
 				queue.add(particle);
@@ -125,7 +127,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		if (tickAsync) {
 			if (gpuParticles) {
 				GpuParticleBehavior.swapAllBuffers();
-				GpuParticleBehavior.setInternalParticleLimit(ConfigHelper.getParticleLimit());
+				GpuParticleBehavior.setGpuParticleLimit(ConfigHelper.getParticleLimit());
 				Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
 				GpuParticleBehavior.setCameraPos(camera.getPosition());
 				GpuParticleBehavior.gpuParticles.forEach(this::asyncparticles$scheduleGpuParticleTick);
@@ -146,18 +148,18 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		}
 		IParticleRenderer renderer = GpuParticleBehavior.getRenderer(particleRenderType);
 		renderer.mapBuffer();
-		AsyncTickBehavior.PARTICLE_OPERATIONS.add(() -> {
+		AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.add(() -> {
 			GPU_PARTICLE_PHASE.set(true);
 			tickParticleList((Queue) queue);
 			GPU_PARTICLE_PHASE.set(false);
-			AsyncTickBehavior.doRemoveIf(queue);
+			AsyncTickBehavior.INSTANCE.doRemoveIf(queue);
 			renderer.tick(GpuParticleBehavior.getCameraPos(), queue);
 		});
 	}
 
 	@Unique
 	private void asyncparticles$scheduleParticleTick(ParticleRenderType particleRenderType, Queue<Particle> queue) {
-		AsyncTickBehavior.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue));
+		AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue));
 	}
 
 	@Unique
@@ -169,7 +171,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	private void asyncparticles$tickEmitters() {
 		boolean forceDone = ConfigHelper.forceDoneParticleTick();
 		for (TrackingEmitter emitter : this.trackingEmitters) {
-			if (AsyncTickBehavior.isCancelled() && !forceDone) {
+			if (AsyncTickBehavior.INSTANCE.isCancelled() && !forceDone) {
 				return;
 			}
 			if (!emitter.isAlive()) {
@@ -177,13 +179,13 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			}
 			if (!ThreadUtil.isOnRenderThread() &&
 				((ParticleAddon) emitter).asyncparticles$isTickSync()) {
-				AsyncTickBehavior.recordSync(emitter);
+				AsyncTickBehavior.INSTANCE.recordSync(emitter);
 				continue;
 			}
 			try {
 				emitter.tick();
 			} catch (Throwable t) {
-				AsyncTickBehavior.onTickingParticleException(emitter, t);
+				AsyncTickBehavior.INSTANCE.onTickingParticleException(emitter, t);
 			}
 		}
 	}
@@ -204,7 +206,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			ConfigHelper.getParticleCullingMode();
 		boolean forceDone = ConfigHelper.forceDoneParticleTick();
 		for (Particle particle : collection) {
-			if (AsyncTickBehavior.isCancelled() && !forceDone) {
+			if (AsyncTickBehavior.INSTANCE.isCancelled() && !forceDone) {
 				return;
 			}
 			if (!particle.isAlive()) {
@@ -215,7 +217,8 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			}
 			if (isNotOnMainThread) {
 				if (((ParticleAddon) particle).asyncparticles$isTicked()) {
-					// Skip the first tick that the particle is added to the queue.
+					// Skip the first tick after enqueued that the particle is added to the queue.
+					// GPU particles don't skip the first tick.
 					if (enableLightCache) {
 						((LightCachedParticleAddon) particle).asyncparticles$refresh();
 					}
@@ -226,14 +229,14 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 					continue;
 				}
 				if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
-					AsyncTickBehavior.recordSync(particle);
+					AsyncTickBehavior.INSTANCE.recordSync(particle);
 					continue;
 				}
 			}
 			try {
 				tickParticle(particle);
 			} catch (Throwable t) {
-				AsyncTickBehavior.onTickingParticleException(particle, t);
+				AsyncTickBehavior.INSTANCE.onTickingParticleException(particle, t);
 			}
 			((ParticleAddon) particle).asyncparticles$setTicked();
 			if (enableLightCache) {
@@ -248,7 +251,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 
 	@Inject(method = "add", at = @At(value = "HEAD"))
 	public void add(Particle particle, CallbackInfo ci) {
-		if (!AsyncTickBehavior.shouldTickParticles && ConfigHelper.isTickAsync()) {
+		if (!AsyncTickBehavior.INSTANCE.shouldTickParticles && ConfigHelper.isTickAsync()) {
 			particle.remove(); // to compatible with some mods...
 			// don't cancel it,
 			// otherwise it may cause memory leak with some mods
@@ -269,14 +272,14 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void onClearParticles(CallbackInfo ci) {
-		particlesToAdd.forEach(AsyncTickBehavior::onEvicted);
-		particlesToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getParticleLimit(), AsyncTickBehavior::onEvicted);
-		trackingEmitters.forEach(AsyncTickBehavior::onEvicted);
-		trackingEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTickBehavior::onEvicted);
-		particles.values().forEach(queue -> queue.forEach(AsyncTickBehavior::onEvicted));
-		GpuParticleBehavior.gpuParticles.values().forEach(queue -> queue.forEach(AsyncTickBehavior::onEvicted));
+		particlesToAdd.forEach(AsyncTickBehavior.INSTANCE::onEvicted);
+		particlesToAdd = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT, ConfigHelper.getParticleLimit(), AsyncTickBehavior.INSTANCE::onEvicted);
+		trackingEmitters.forEach(AsyncTickBehavior.INSTANCE::onEvicted);
+		trackingEmitters = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT / 4, ConfigHelper.getParticleLimit(), AsyncTickBehavior.INSTANCE::onEvicted);
+		particles.values().forEach(queue -> queue.forEach(AsyncTickBehavior.INSTANCE::onEvicted));
+		GpuParticleBehavior.gpuParticles.values().forEach(queue -> queue.forEach(AsyncTickBehavior.INSTANCE::onEvicted));
 		GpuParticleBehavior.gpuParticles.clear();
-		AsyncTickBehavior.onParticleEngineClear();
+		AsyncTickBehavior.INSTANCE.onParticleEngineClear();
 	}
 
 	//	@Inject(method = "createParticle", at = @At("HEAD"), cancellable = true)

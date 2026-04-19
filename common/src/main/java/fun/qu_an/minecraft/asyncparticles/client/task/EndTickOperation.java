@@ -12,7 +12,7 @@ public interface EndTickOperation extends Runnable {
 	 * @apiNote Execution is not guaranteed.
 	 */
 	static void schedule(EndTickOperation task) {
-		AsyncTickBehavior.scheduleOperation(task);
+		AsyncTickBehavior.INSTANCE.scheduleOperation(task);
 	}
 
 	/**

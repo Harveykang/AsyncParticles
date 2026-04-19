@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
-import fun.qu_an.minecraft.asyncparticles.client.particle.render.AdvancedParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.render.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.render.ParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
@@ -124,7 +123,7 @@ public class GpuParticleBehavior {
 	}
 
 	@ApiStatus.Internal
-	public static void setInternalParticleLimit(int particleLimit) {
+	public static void setGpuParticleLimit(int particleLimit) {
 		if (particleLimit != GpuParticleBehavior.particleLimit) {
 			GpuParticleBehavior.particleLimit = particleLimit;
 			renderers.values().forEach(renderer -> renderer.resize(particleLimit));
@@ -132,7 +131,7 @@ public class GpuParticleBehavior {
 	}
 
 	@ApiStatus.Internal
-	public static int getParticleLimit() {
+	public static int getGpuParticleLimit() {
 		return particleLimit;
 	}
 

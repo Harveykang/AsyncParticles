@@ -48,6 +48,7 @@
     "core.render.MixinVertexConsumer",
     "core.tick.MixinClientLevel",
     "core.tick.MixinGameRenderer",
+    "core.tick.MixinLevelRenderer_RainTick",
     "core.tick.MixinMinecraft",
     "core.tick.MixinParticleEngine",
     "core.tick.MixinParticleEngine_Late",

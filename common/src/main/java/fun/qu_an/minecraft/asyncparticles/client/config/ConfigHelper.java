@@ -40,18 +40,6 @@ public class ConfigHelper {
 		return particle$removeIfMissedTick;
 	}
 
-	public static boolean isParallelQueueRemoval() {
-		return particle$parallelQueueRemoval;
-	}
-
-	public static boolean isParallelQueueEviction() {
-		return particle$parallelQueueEviction;
-	}
-
-	public static boolean isAppendNewParticlesToRenderer() {
-		return rendering$appendNewParticlesToRenderer;
-	}
-
 	public static boolean suppressCME() {
 		return tick$suppressCME;
 	}
@@ -96,10 +84,6 @@ public class ConfigHelper {
 		return rendering$particleCulling;
 	}
 
-	public static boolean isGpuParticles() {
-		return rendering$gpuAcceleration;
-	}
-
 	public static boolean fixParticleLightOnVsShips() {
 		return valkyrienSkies$fixParticleLights;
 	}
@@ -119,5 +103,21 @@ public class ConfigHelper {
 	// TODO: implement weather particle config, which will not be spawn into physics structures
 	public static Set<ResourceLocation> getWeatherParticles() {
 		return Set.of();
+	}
+
+	public static boolean isGpuParticles() {
+		return rendering$gpuAcceleration;
+	}
+
+	public static boolean isParallelQueueRemoval() {
+		return particle$parallelQueueRemoval;
+	}
+
+	public static boolean isParallelQueueEviction() {
+		return particle$parallelQueueEviction;
+	}
+
+	public static boolean isAppendNewParticlesToRenderer() {
+		return rendering$appendNewParticlesToRenderer;
 	}
 }

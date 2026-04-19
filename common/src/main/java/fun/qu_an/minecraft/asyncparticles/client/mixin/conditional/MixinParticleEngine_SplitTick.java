@@ -47,14 +47,14 @@ public abstract class MixinParticleEngine_SplitTick {
 										 Queue<?> queue,
 										 CallbackInfo ci,
 										 @Local IParticleRenderer renderer) {
-		AsyncTickBehavior.PARTICLE_OPERATIONS.add(() -> {
+		AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.add(() -> {
 			if (ConfigHelper.isTickAsync() &&
 				PARALLELLED_RENDER_TYPES.contains(particleRenderType)) {
 				asyncparticles$splitTickParticleList((Queue) queue);
 			} else {
 				tickParticleList((Queue) queue);
 			}
-			AsyncTickBehavior.doRemoveIf((Queue) queue);
+			AsyncTickBehavior.INSTANCE.doRemoveIf((Queue) queue);
 			renderer.tick(GpuParticleBehavior.getCameraPos(), (Queue) queue);
 		});
 	}
@@ -76,7 +76,7 @@ public abstract class MixinParticleEngine_SplitTick {
 	private void redirectScheduleTick(ParticleRenderType particleRenderType,
 									  Queue<?> queue,
 									  CallbackInfo ci) {
-		AsyncTickBehavior.PARTICLE_OPERATIONS.add(() -> {
+		AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.add(() -> {
 			if (ConfigHelper.isTickAsync() &&
 				PARALLELLED_RENDER_TYPES.contains(particleRenderType)) {
 				asyncparticles$splitTickParticleList((Queue) queue);

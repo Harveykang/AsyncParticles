@@ -15,8 +15,8 @@ public abstract class MixinCustomModelParticle implements ParticleAddon {
 	private void onInit(CallbackInfo ci) {
 		asyncparticles$setRenderSync();
 		Class<? extends Particle> clazz = asyncparticles$getRealClass();
-		if (!AsyncRenderBehavior.shouldSync(clazz)) {
-			AsyncRenderBehavior.markAsSync(clazz);
+		if (!AsyncRenderBehavior.INSTANCE.shouldSync(clazz)) {
+			AsyncRenderBehavior.INSTANCE.markAsSync(clazz);
 		}
 	}
 }

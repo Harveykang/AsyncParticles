@@ -91,7 +91,7 @@ public class AdvancedParticleRenderer implements IParticleRenderer {
 				throw new IllegalStateException("Mapped buffer is not null");
 			}
 			ParticleStorageBuffer source = sources[current];
-			mappedBuffer = source.map(GpuParticleBehavior.getParticleLimit() * ParticleVertexFormats.COMPUTE_SHADER_RAW_PARTICLE_BYTES);
+			mappedBuffer = source.map(GpuParticleBehavior.getGpuParticleLimit() * ParticleVertexFormats.COMPUTE_SHADER_RAW_PARTICLE_BYTES);
 		} else {
 			bufferHelper.begin();
 		}
@@ -101,8 +101,8 @@ public class AdvancedParticleRenderer implements IParticleRenderer {
 	public void unmapBuffer() {
 		RenderSystem.assertOnRenderThread();
 		// correct the particle count
-		particleCount[2 | current] = particleCount[current] - GpuParticleBehavior.getParticleLimit();
-		particleCount[current] = Math.min(GpuParticleBehavior.getParticleLimit(), this.particleCount[current]);
+		particleCount[2 | current] = particleCount[current] - GpuParticleBehavior.getGpuParticleLimit();
+		particleCount[current] = Math.min(GpuParticleBehavior.getGpuParticleLimit(), this.particleCount[current]);
 		if (DIRECT_BUFFER) {
 			if (mappedBuffer == null) {
 				throw new IllegalStateException("Mapped buffer is null!");
@@ -267,7 +267,7 @@ public class AdvancedParticleRenderer implements IParticleRenderer {
 		ParticleStorageBuffer.unbind();
 
 		if (maxParticleCount < particleCount[current ^ 1]) {
-			int nextCount = Math.min(HashCommon.nextPowerOfTwo(particleCount[current ^ 1]), GpuParticleBehavior.getParticleLimit());
+			int nextCount = Math.min(HashCommon.nextPowerOfTwo(particleCount[current ^ 1]), GpuParticleBehavior.getGpuParticleLimit());
 			target.resize(nextCount * 4 * ParticleVertexFormats.COMPUTE_SHADER_PROCESSED_PARTICLE_VERTEX_BYTES);
 			maxParticleCount = nextCount;
 		}
@@ -288,7 +288,7 @@ public class AdvancedParticleRenderer implements IParticleRenderer {
 			(float) (cameraPos.x - prevCameraPos.x), (float) (cameraPos.y - prevCameraPos.y), (float) (cameraPos.z - prevCameraPos.z),
 			particleCount[current ^ 1],
 			particleCount[2 | current ^ 1],
-			(Vector4f[]) frustumPlanesHandle.get(AsyncRenderBehavior.getFrustum().intersection)
+			(Vector4f[]) frustumPlanesHandle.get(AsyncRenderBehavior.INSTANCE.getFrustum().intersection)
 		);
 
 		ParticleComputeShader.bindBuffers(sources[current ^ 1].ssbo, target.ssbo, counters.ssbo);
@@ -390,7 +390,7 @@ public class AdvancedParticleRenderer implements IParticleRenderer {
 		double cy;
 		double cz;
 		int particleCount = this.particleCount[current];
-		int particleLimit = GpuParticleBehavior.getParticleLimit();
+		int particleLimit = GpuParticleBehavior.getGpuParticleLimit();
 		int offset;
 		if (particleCount >= particleLimit) {
 //			offset = particleCount % particleLimit * ParticleVertexFormats.SSBO_PARTICLE_BYTES;

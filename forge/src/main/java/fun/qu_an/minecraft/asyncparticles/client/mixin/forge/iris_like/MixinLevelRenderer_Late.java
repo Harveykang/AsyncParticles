@@ -32,7 +32,7 @@ public abstract class MixinLevelRenderer_Late {
 									  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 									  LocalIntRef irm) {
 		if (irm.get() != DELAYED_ASYNC){
-			AsyncRenderBehavior.irisCustom(poseStack, partialTick, camera, lightTexture);
+			AsyncRenderBehavior.INSTANCE.irisCustom(poseStack, partialTick, camera, lightTexture);
 		}
 	}
 
@@ -50,11 +50,11 @@ public abstract class MixinLevelRenderer_Late {
 										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 										  LocalIntRef irm) {
 		switch (irm.get()) {
-			case BEFORE_SYNC -> AsyncRenderBehavior.endAll(poseStack, partialTick, camera, lightTexture, false);
-			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.irisOpaque(poseStack, partialTick, camera, lightTexture, false);
+			case BEFORE_SYNC -> AsyncRenderBehavior.INSTANCE.endAll(poseStack, partialTick, camera, lightTexture, false);
+			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.INSTANCE.irisOpaque(poseStack, partialTick, camera, lightTexture, false);
 			case MIXED_ASYNC, COMPATIBILITY_ASYNC ->
-				AsyncRenderBehavior.irisOpaque(poseStack, partialTick, camera, lightTexture, true);
-			case BEFORE_ASYNC -> AsyncRenderBehavior.endAll(poseStack, partialTick, camera, lightTexture, true);
+				AsyncRenderBehavior.INSTANCE.irisOpaque(poseStack, partialTick, camera, lightTexture, true);
+			case BEFORE_ASYNC -> AsyncRenderBehavior.INSTANCE.endAll(poseStack, partialTick, camera, lightTexture, true);
 		}
 	}
 
@@ -71,9 +71,9 @@ public abstract class MixinLevelRenderer_Late {
 										 LocalIntRef irm) {
 
 		switch (irm.get()) {
-			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.irisTranslucent(poseStack, partialTick, camera, lightTexture, false);
+			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.INSTANCE.irisTranslucent(poseStack, partialTick, camera, lightTexture, false);
 			case MIXED_ASYNC, COMPATIBILITY_ASYNC ->
-				AsyncRenderBehavior.irisTranslucent(poseStack, partialTick, camera, lightTexture, true);
+				AsyncRenderBehavior.INSTANCE.irisTranslucent(poseStack, partialTick, camera, lightTexture, true);
 		}
 	}
 }

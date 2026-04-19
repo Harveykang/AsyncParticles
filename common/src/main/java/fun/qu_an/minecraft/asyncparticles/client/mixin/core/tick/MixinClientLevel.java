@@ -33,7 +33,7 @@ public abstract class MixinClientLevel extends Level {
 		new ResourceLocation("asyncparticles", "animate_tick");
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int i, int j, int k, Operation<Void> original) {
-		if (!AsyncTickBehavior.shouldTickParticles &&
+		if (!AsyncTickBehavior.INSTANCE.shouldTickParticles &&
 			ConfigHelper.isTickAsync()) {
 			// don't tick animate if the game is lagging
 			return;
@@ -47,7 +47,7 @@ public abstract class MixinClientLevel extends Level {
 
 	@Inject(method = "animateTick", at = @At(value = "CONSTANT", args = "intValue=16"), cancellable = true)
 	public void onAnimateTick(int i, int j, int k, CallbackInfo ci) {
-		if (AsyncTickBehavior.isCancelled() && !ConfigHelper.forceDoneBlockAnimateTick()) {
+		if (AsyncTickBehavior.INSTANCE.isCancelled() && !ConfigHelper.forceDoneBlockAnimateTick()) {
 			ci.cancel();
 		}
 	}

@@ -28,19 +28,19 @@ public class MixinMinecraft {
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
 	private void onTick(boolean bl, CallbackInfo ci, @Local(ordinal = 0) int i, @Local(ordinal = 1) int j) {
-		AsyncTickBehavior.onTickBefore(j, Math.min(10, i));
+		AsyncTickBehavior.INSTANCE.onTickBefore(j, Math.min(10, i));
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/Minecraft;tick()V"))
 	private void onTickAfter(boolean bl, CallbackInfo ci, @Local(ordinal = 0) int i, @Local(ordinal = 1) int j) {
-		AsyncTickBehavior.onTickAfter(j, Math.min(10, i));
+		AsyncTickBehavior.INSTANCE.onTickAfter(j, Math.min(10, i));
 	}
 
 	@Inject(method = "setLevel", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, ordinal = 0,
 		target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;"))
 	private void onSetLevel(CallbackInfo ci) {
-		AsyncTickBehavior.reset();
-		AsyncRenderBehavior.reset();
+		AsyncTickBehavior.INSTANCE.reset();
+		AsyncRenderBehavior.INSTANCE.reset();
 	}
 
 	@Inject(method = "setLevel", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
@@ -49,14 +49,14 @@ public class MixinMinecraft {
 		if (!asyncparticles$sorted) {
 			asyncparticles$sorted = true;
 			((ParticleEngineAddon) particleEngine).asyncparticle$sortRenderOrder();
-			GpuParticleBehavior.setInternalParticleLimit(ConfigHelper.getParticleLimit());
+			GpuParticleBehavior.setGpuParticleLimit(ConfigHelper.getParticleLimit());
 		}
 	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;tick()V"))
 	private void redirectParticleEngineTick(ParticleEngine instance) {
 		if (ConfigHelper.isTickAsync()) {
-			AsyncTickBehavior.tickSyncParticles();
+			AsyncTickBehavior.INSTANCE.tickSyncParticles();
 		} else {
 			instance.tick();
 		}

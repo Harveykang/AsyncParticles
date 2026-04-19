@@ -21,7 +21,7 @@ public class MixinVSAnimation {
 		at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"),
 		cancellable = true) // two injections with the same mixin
 	private void afterAnimatedTick1(CallbackInfo ci) {
-		if (AsyncTickBehavior.isCancelled() && !ConfigHelper.forceDoneBlockAnimateTick()) {
+		if (AsyncTickBehavior.INSTANCE.isCancelled() && !ConfigHelper.forceDoneBlockAnimateTick()) {
 			ci.cancel();
 		}
 	}

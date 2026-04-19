@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinAsyncRenderer {
 	@Inject(method = "start", remap = false, at = @At(value = "INVOKE",
 		target = "Lit/unimi/dsi/fastutil/objects/ObjectArrayList;add(Ljava/lang/Object;)Z"))
-	private static void Minecraft (CallbackInfo ci, @Local ParticleRenderType particleRenderType) {
+	private void activatePostEffectPipeline(CallbackInfo ci, @Local ParticleRenderType particleRenderType) {
 		if (particleRenderType instanceof PostParticleRenderType){
 			PostEffectPipelines.active();
 		}

@@ -52,12 +52,12 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 		// Remove duplicated render types, (e.g. Hex Casting mod's bug)
 		Map<ParticleRenderType, Queue<Particle>> particles = new LinkedHashMap<>((int) (RENDER_ORDER.size() * 1.34) + 1);
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderBehavior.getVertexFormatPair(type, textureManager) != AsyncRenderBehavior.EMPTY_FORMAT) {
+			if (AsyncRenderBehavior.INSTANCE.getVertexFormatPair(type, textureManager) != AsyncRenderBehavior.INSTANCE.EMPTY_FORMAT) {
 				particles.put(type, ParticleHelper.newParticleQueue());
 			}
 		}
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderBehavior.getVertexFormatPair(type, textureManager) == AsyncRenderBehavior.EMPTY_FORMAT) {
+			if (AsyncRenderBehavior.INSTANCE.getVertexFormatPair(type, textureManager) == AsyncRenderBehavior.INSTANCE.EMPTY_FORMAT) {
 				particles.put(type, ParticleHelper.newParticleQueue());
 			}
 		}
@@ -74,10 +74,10 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 	@Overwrite(remap = false) // Forge override
 	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f, Frustum ignored) {
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-		boolean renderAsync = AsyncRenderBehavior.isRenderAsync();
+		boolean renderAsync = AsyncRenderBehavior.INSTANCE.isRenderAsync();
 		if (renderAsync) {
 			profiler.push("wait_for_async_tasks");
-			AsyncRenderBehavior.tryWaitingForAsyncTasks();
+			AsyncRenderBehavior.INSTANCE.tryWaitingForAsyncTasks();
 			profiler.pop();
 		}
 
@@ -94,11 +94,11 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 
 		GpuParticleBehavior.runTfs(camera, f);
 
-		Frustum frustum = AsyncRenderBehavior.getFrustum();
+		Frustum frustum = AsyncRenderBehavior.INSTANCE.getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
-		boolean irisEarlyOpaquePhase = AsyncRenderBehavior.isIrisEarlyOpaquePhase();
+		boolean irisEarlyOpaquePhase = AsyncRenderBehavior.INSTANCE.isIrisEarlyOpaquePhase();
 		// We don't use entrySet() to be compatible with iris.
-		for (ParticleRenderType particleRenderType : particles.keySet()) {
+		for (ParticleRenderType particleRenderType : particles.keySet()) { // FIXME mods can clear the map if the queue is empty
 			// FORGE doesn't skip NO_RENDER
 			if (particleRenderType == ParticleRenderType.NO_RENDER) {
 				continue;
@@ -131,7 +131,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 				tesselator = FakeTesselator.INSTANCE;
 				realCullMode = null;
 				bufferBuilder = FakeBufferBuilder.INSTANCE;
-			} else if ((bufferBuilder = AsyncRenderBehavior.beginBufferBuilder(particleRenderType, textureManager)) ==
+			} else if ((bufferBuilder = AsyncRenderBehavior.INSTANCE.beginBufferBuilder(particleRenderType, textureManager)) ==
 				FakeBufferBuilder.INSTANCE) {
 				realCullMode = particleCullingMode;
 				// if irisEarlyOpaquePhase, we render custom particles in AsyncRenderer.irisCustom()
@@ -145,7 +145,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 				toBegin = bufferBuilder = tesselator.getBuilder();
 			} else {
 				realCullMode = ParticleCullingMode.DISABLED;
-				syncParticles = AsyncRenderBehavior.getSync(particleRenderType);
+				syncParticles = AsyncRenderBehavior.INSTANCE.getSync(particleRenderType);
 				tesselator = CustomTesselator.of(bufferBuilder, b -> BufferUploader.drawWithShader(b.end()));
 				toBegin = FakeBufferBuilder.INSTANCE;
 			}
@@ -185,7 +185,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 					try {
 						particle.render(bufferBuilder, camera, f3);
 					} catch (Throwable t) {
-						throw AsyncRenderBehavior.constructCrashReport(particle, particleRenderType, t);
+						throw AsyncRenderBehavior.INSTANCE.constructCrashReport(particle, particleRenderType, t);
 					}
 				}
 			}

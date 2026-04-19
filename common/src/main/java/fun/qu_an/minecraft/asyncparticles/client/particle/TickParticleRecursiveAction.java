@@ -14,7 +14,7 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveAction;
 
 public class TickParticleRecursiveAction extends RecursiveAction {
-	private static final int MAX_DEPTH = (int) Math.round(Math.log(HashCommon.nextPowerOfTwo(AsyncTickBehavior.THREADS)) / Math.log(2)) + 2;
+	private static final int MAX_DEPTH = (int) Math.round(Math.log(HashCommon.nextPowerOfTwo(AsyncTickBehavior.INSTANCE.THREADS)) / Math.log(2)) + 2;
 	private final Spliterator<Particle> spliterator;
 	private final int depth;
 
@@ -41,18 +41,18 @@ public class TickParticleRecursiveAction extends RecursiveAction {
 			boolean forceDone = ConfigHelper.forceDoneParticleTick();
 			ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 			spliterator.forEachRemaining(particle -> {
-				if (AsyncTickBehavior.isCancelled() && !forceDone) {
+				if (AsyncTickBehavior.INSTANCE.isCancelled() && !forceDone) {
 					return;
 				}
 				if (!((ParticleAddon) particle).asyncparticles$isTicked()) {
 					if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
-						AsyncTickBehavior.recordSync(particle);
+						AsyncTickBehavior.INSTANCE.recordSync(particle);
 						return;
 					}
 					try {
 						particleEngine.tickParticle(particle);
 					} catch (Throwable t) {
-						AsyncTickBehavior.onTickingParticleException(particle, t);
+						AsyncTickBehavior.INSTANCE.onTickingParticleException(particle, t);
 					}
 					((ParticleAddon) particle).asyncparticles$setTicked();
 				}

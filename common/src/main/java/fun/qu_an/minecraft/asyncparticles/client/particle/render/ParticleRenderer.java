@@ -56,7 +56,7 @@ public class ParticleRenderer implements IParticleRenderer {
 		GLCaps.tfSupport.glBindTransformFeedback(tf);
 		GLCaps.tfSupport.glBindTransformFeedbackBuffer(0, target.vbo);
 		GLCaps.tfSupport.glBindTransformFeedback(0);
-		resize(GpuParticleBehavior.getParticleLimit());
+		resize(GpuParticleBehavior.getGpuParticleLimit());
 	}
 
 	@Override
@@ -78,7 +78,7 @@ public class ParticleRenderer implements IParticleRenderer {
 				throw new IllegalStateException("Mapped buffer is not null");
 			}
 			ParticleVertexBuffer source = sources[current];
-			mappedBuffer = source.map(GpuParticleBehavior.getParticleLimit() * ParticleVertexFormats.RAW_PARTICLE_BYTES);
+			mappedBuffer = source.map(GpuParticleBehavior.getGpuParticleLimit() * ParticleVertexFormats.RAW_PARTICLE_BYTES);
 		} else {
 			bufferHelper.begin();
 		}
@@ -88,8 +88,8 @@ public class ParticleRenderer implements IParticleRenderer {
 	public void unmapBuffer() {
 		RenderSystem.assertOnRenderThread();
 		// correct the particle count
-		particleCount[2 | current] = particleCount[current] - GpuParticleBehavior.getParticleLimit();
-		particleCount[current] = Math.min(GpuParticleBehavior.getParticleLimit(), this.particleCount[current]);
+		particleCount[2 | current] = particleCount[current] - GpuParticleBehavior.getGpuParticleLimit();
+		particleCount[current] = Math.min(GpuParticleBehavior.getGpuParticleLimit(), this.particleCount[current]);
 		if (DIRECT_BUFFER) {
 			if (mappedBuffer == null) {
 				throw new IllegalStateException("Mapped buffer is null!");
@@ -266,7 +266,7 @@ public class ParticleRenderer implements IParticleRenderer {
 //		}
 
 		if (maxParticleCount < particleCount[current ^ 1]) {
-			int nextCount = Math.min(HashCommon.nextPowerOfTwo(particleCount[current ^ 1]), GpuParticleBehavior.getParticleLimit());
+			int nextCount = Math.min(HashCommon.nextPowerOfTwo(particleCount[current ^ 1]), GpuParticleBehavior.getGpuParticleLimit());
 			target.resize(nextCount * 4 * ParticleVertexFormats.PROCESSED_PARTICLE_VERTEX_BYTES);
 			maxParticleCount = nextCount;
 		}
@@ -284,7 +284,7 @@ public class ParticleRenderer implements IParticleRenderer {
 			GL11C.glDrawArrays(GL11C.GL_POINTS, 0, particleCount[current ^ 1]);
 		} else {
 			multiDrawIndex[0] = overflow;
-			multiDrawCount[0] = GpuParticleBehavior.getParticleLimit() - overflow;
+			multiDrawCount[0] = GpuParticleBehavior.getGpuParticleLimit() - overflow;
 			multiDrawCount[1] = overflow;
 			GL14C.glMultiDrawArrays(GL11C.GL_POINTS,
 				multiDrawIndex,
@@ -352,7 +352,7 @@ public class ParticleRenderer implements IParticleRenderer {
 		double cy;
 		double cz;
 		int particleCount = this.particleCount[current];
-		int particleLimit = GpuParticleBehavior.getParticleLimit();
+		int particleLimit = GpuParticleBehavior.getGpuParticleLimit();
 		int offset;
 		if (particleCount >= particleLimit) {
 //			offset = particleCount % particleLimit * ParticleVertexFormats.RAW_PARTICLE_BYTES;
