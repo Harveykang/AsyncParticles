@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
+import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.MIN_PARTICLE_LIMIT;
 
 class LegacyConfigMigrator {
 	static boolean migrate() {
@@ -29,7 +30,7 @@ class LegacyConfigMigrator {
 		AsyncParticlesConfig.ConfigObj defaultConfig = new AsyncParticlesConfig.ConfigObj();
 
 		particle$particleLimit = getInt(properties, "limit", 32768);
-		if (particle$particleLimit == 32768 || particle$particleLimit < 1024 || particle$particleLimit > 262144) {
+		if (particle$particleLimit == 32768 || particle$particleLimit < MIN_PARTICLE_LIMIT || particle$particleLimit > MAX_PARTICLE_LIMIT) {
 			particle$particleLimit = defaultConfig.particle.particleLimit;
 		}
 		particle$particleLightCache = getBoolean(properties, "particleLightCache", defaultConfig.particle.particleLightCache);

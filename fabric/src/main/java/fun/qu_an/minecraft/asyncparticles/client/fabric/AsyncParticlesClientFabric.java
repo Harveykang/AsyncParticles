@@ -64,7 +64,7 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 							AsyncTickBehavior.INSTANCE.debugLater(s -> source.sendFeedback(Component.literal(s)
 								.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
 									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
-							AsyncRenderBehavior.getInstance().debugLater(s -> source.sendFeedback(Component.literal(s)
+							AsyncRenderBehavior.INSTANCE.debugLater(s -> source.sendFeedback(Component.literal(s)
 								.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
 									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
 							return 1;

@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
@@ -17,7 +18,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.ParticleGroup;
-import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -49,8 +49,8 @@ public abstract class MixinParticleEngine {
 	@Inject(method = "<init>", order = 9000, at = @At(value = "RETURN"))
 	public void initTail(CallbackInfo ci) {
 		trackedParticleCounts = new TrackedParticleCountsMap();
-		particlesToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getParticleLimit(), AsyncTickBehavior.INSTANCE::onEvicted);
-		trackingEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTickBehavior.INSTANCE::onEvicted);
+		particlesToAdd = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT, ConfigHelper.getParticleLimit(), AsyncTickBehavior.INSTANCE::onEvicted);
+		trackingEmitters = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT / 4, ConfigHelper.getParticleLimit(), AsyncTickBehavior.INSTANCE::onEvicted);
 	}
 
 	@Shadow
@@ -61,7 +61,7 @@ public abstract class MixinParticleEngine {
 
 	@ModifyExpressionValue(method = "countParticles", at = @At(value = "INVOKE", target = "Ljava/util/stream/IntStream;sum()I"))
 	private int modifyCount(int i) {
-		return i + GpuParticleBehavior.gpuParticles.values().stream().mapToInt(Collection::size).sum();
+		return i + GpuParticleBehavior.INSTANCE.gpuParticles.values().stream().mapToInt(Collection::size).sum();
 	}
 
 	@Inject(method = "tickParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;forThrowable(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;"))
@@ -117,21 +117,22 @@ public abstract class MixinParticleEngine {
 					AsyncTickBehavior.INSTANCE.recordSync(particle);
 					canComputeFast = false;
 				} else {
-					canComputeFast = particle instanceof TextureSheetParticle tsp && GpuParticleBehavior.canRenderFast(tsp);
+					canComputeFast = particle instanceof TextureSheetParticle tsp && GpuParticleBehavior.INSTANCE.canRenderFast(tsp);
 				}
 				Queue<Particle> queue;
 				ParticleRenderType renderType = particle.getRenderType();
 				if (canComputeFast) {
-					queue = (Queue) GpuParticleBehavior.gpuParticles.computeIfAbsent(renderType, k -> {
-						GpuParticleBehavior.initParticleRenderType(k);
+					queue = (Queue) GpuParticleBehavior.INSTANCE.gpuParticles.computeIfAbsent(renderType, k -> {
+						GpuParticleBehavior.INSTANCE.initParticleRenderType(k);
 						return ParticleHelper.newParticleQueue();
 					});
 					if (appendNewParticlesToRenderer) {
-						GpuParticleBehavior.getRenderer(renderType).append(GpuParticleBehavior.getCameraPos(), ((TextureSheetParticle) particle));
+						GpuParticleBehavior.INSTANCE.getRenderer(renderType).append(GpuParticleBehavior.INSTANCE.getCameraPos(), ((TextureSheetParticle) particle));
 					}
 				} else {
 					queue = this.particles.computeIfAbsent(renderType, this::asyncparticles$newQueue);
 					// mark cpu particles as ticked
+					// this will skip the first tick after enqueued, while gpu particles don't skip it
 					((ParticleAddon) particle).asyncparticles$setTicked();
 				}
 				queue.add(particle);
@@ -140,11 +141,11 @@ public abstract class MixinParticleEngine {
 		}
 		if (tickAsync) {
 			if (gpuParticles) {
-				GpuParticleBehavior.swapAllBuffers();
-				GpuParticleBehavior.setInternalParticleLimit(ConfigHelper.getParticleLimit());
+				GpuParticleBehavior.INSTANCE.swapAllBuffers();
+				GpuParticleBehavior.INSTANCE.setGpuParticleLimit(ConfigHelper.getParticleLimit());
 				Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-				GpuParticleBehavior.setCameraPos(camera.getPosition());
-				GpuParticleBehavior.gpuParticles.forEach(this::asyncparticles$scheduleGpuParticleTick);
+				GpuParticleBehavior.INSTANCE.setCameraPos(camera.getPosition());
+				GpuParticleBehavior.INSTANCE.gpuParticles.forEach(this::asyncparticles$scheduleGpuParticleTick);
 			}
 			particles.forEach((particleRenderType, queue) -> {
 				if (queue.isEmpty()) {
@@ -160,14 +161,14 @@ public abstract class MixinParticleEngine {
 		if (queue.isEmpty()) {
 			return;
 		}
-		IParticleRenderer renderer = GpuParticleBehavior.getRenderer(particleRenderType);
+		IParticleRenderer renderer = GpuParticleBehavior.INSTANCE.getRenderer(particleRenderType);
 		renderer.mapBuffer();
 		AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.add(() -> {
 			GPU_PARTICLE_PHASE.set(true);
 			tickParticleList((Queue) queue);
 			GPU_PARTICLE_PHASE.set(false);
 			AsyncTickBehavior.INSTANCE.doRemoveIf(queue);
-			renderer.tick(GpuParticleBehavior.getCameraPos(), queue);
+			renderer.tick(GpuParticleBehavior.INSTANCE.getCameraPos(), queue);
 		});
 	}
 
@@ -232,7 +233,8 @@ public abstract class MixinParticleEngine {
 			ParticleAddon particleAddon = (ParticleAddon) particle;
 			if (isNotOnMainThread) {
 				if (particleAddon.asyncparticles$isTicked()) {
-					// Skip the first tick that the particle is added to the queue.
+					// Skip the first tick after enqueued that the particle is added to the queue.
+					// GPU particles don't skip the first tick.
 					if (enableLightCache) {
 						((LightCachedParticleAddon) particle).asyncparticles$refresh();
 					}
@@ -287,12 +289,12 @@ public abstract class MixinParticleEngine {
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void onClearParticles(CallbackInfo ci) {
 		particlesToAdd.forEach(AsyncTickBehavior.INSTANCE::onEvicted);
-		particlesToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getParticleLimit(), AsyncTickBehavior.INSTANCE::onEvicted);
+		particlesToAdd = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT, ConfigHelper.getParticleLimit(), AsyncTickBehavior.INSTANCE::onEvicted);
 		trackingEmitters.forEach(AsyncTickBehavior.INSTANCE::onEvicted);
-		trackingEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTickBehavior.INSTANCE::onEvicted);
+		trackingEmitters = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT / 4, ConfigHelper.getParticleLimit(), AsyncTickBehavior.INSTANCE::onEvicted);
 		particles.values().forEach(queue -> queue.forEach(AsyncTickBehavior.INSTANCE::onEvicted));
-		GpuParticleBehavior.gpuParticles.values().forEach(queue -> queue.forEach(AsyncTickBehavior.INSTANCE::onEvicted));
-		GpuParticleBehavior.gpuParticles.clear();
+		GpuParticleBehavior.INSTANCE.gpuParticles.values().forEach(queue -> queue.forEach(AsyncTickBehavior.INSTANCE::onEvicted));
+		GpuParticleBehavior.INSTANCE.gpuParticles.clear();
 		AsyncTickBehavior.INSTANCE.onParticleEngineClear();
 	}
 

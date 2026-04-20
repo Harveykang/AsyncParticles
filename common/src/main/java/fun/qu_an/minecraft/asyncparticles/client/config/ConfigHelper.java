@@ -47,7 +47,7 @@ public class ConfigHelper {
 	}
 
 	public static RainEffect getCreateRainEffect() {
-		return AsyncParticlesConfig.create$rainEffect;
+		return create$rainEffect;
 	}
 
 	public static RainEffect getVSRainEffect() {
@@ -59,7 +59,7 @@ public class ConfigHelper {
 	}
 
 	public static boolean doCreateRainEffectsIfMoving() {
-		return true;
+		return create$rainEffect == RainEffect.ALWAYS;
 	}
 
 	public static int getRenderFailurePerSecondThreshold() {

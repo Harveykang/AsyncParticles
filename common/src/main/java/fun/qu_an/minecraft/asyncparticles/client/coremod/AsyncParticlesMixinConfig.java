@@ -117,7 +117,6 @@ public class AsyncParticlesMixinConfig {
 			particle$noLightCache.add("com.chailotl.particular.particles.FireflyParticle");
 			particle$noLightCache.add("com.lowdragmc.photon.client.gameobject.FXObject");
 			particle$noLightCache.add("net.diebuddies.minecraft.weather.WeatherParticle");
-			particle$noLightCache.add("cn.coostack.cooparticlesapi.particles.ControlableParticle");
 		}
 
 		private Set<String> particle$lockProvider = new LinkedHashSet<>();

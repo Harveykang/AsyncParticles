@@ -5,8 +5,9 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import java.util.List;
 
 public class ParticleVertexFormat {
-	ParticleVertexFormatElement[] elements;
-	int[] offsets;
+	private final ParticleVertexFormatElement[] elements;
+	private final int[] offsets;
+	public final int size;
 
 	public ParticleVertexFormat(ParticleVertexFormatElement... elements) {
 		this.offsets = new int[elements.length];
@@ -18,19 +19,14 @@ public class ParticleVertexFormat {
 		}
 
 		this.elements = elements;
+		size = offset;
 	}
 
 	public void setupBufferState() {
-		int vertexSize = this.getVertexSize();
-
 		for (int i = 0, l = elements.length; i < l; ++i) {
 			ParticleVertexFormatElement element = elements[i];
 			GlStateManager._enableVertexAttribArray(i);
-			element.setupBufferState(i, offsets[i], vertexSize);
+			element.setupBufferState(size, offsets[i], i);
 		}
-	}
-
-	private int getVertexSize() {
-		return 0;
 	}
 }

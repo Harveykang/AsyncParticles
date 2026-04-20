@@ -11,22 +11,20 @@
     "create.MixinAbstractContraptionEntity",
     "create.MixinAbstractContraptionEntity_NoParticleCollision",
     "create.MixinAirCurrent",
+    "create.MixinLevelRenderer_Rain",
     "create.MixinParticle",
     "create.MixinParticle_LightCache",
     "epicfight.MixinCustomModelParticle",
-    "epicfight.MixinEpicFightRenderTypes",
     "simple_weather.MixinRainParticle",
     "simple_weather.MixinSimpleWeather$NeoBus",
     "simple_weather_create.MixinSimpleWeather$NeoBus",
-    "subtle_effects.MixinParticleEngine",
-    "weather2.MixinClientTickHandler",
     "weather2.MixinEntityRotFX",
-    "weather2_create.MixinEntityRotFX"
+    "weather2_create.MixinEntityRotFX",
+    "create.AccessorMatrix3d"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
-    "create.MixinContraption"
   ]
 }

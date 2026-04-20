@@ -49,13 +49,13 @@ dependencies {
     neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
-    common(project(path: ':common_legacy_mod_compat', configuration: 'namedElements')) { transitive false }
-    shadowBundle project(path: ':common_legacy_mod_compat', configuration: 'transformProductionNeoForge')
+//    common(project(path: ':common_legacy_mod_compat', configuration: 'namedElements')) { transitive false }
+//    shadowBundle project(path: ':common_legacy_mod_compat', configuration: 'transformProductionNeoForge')
 
     /* APIs */
     modLocalRuntime 'maven.modrinth:architectury-api:13.0.8+neoforge'
     modLocalRuntime "me.shedaniel.cloth:cloth-config-neoforge:15.0.140"
-    localRuntime("dev.isxander:yet-another-config-lib:3.7.1+1.21.1-neoforge") {
+    localRuntime("dev.isxander:yet-another-config-lib:3.7.1+$minecraft_version-neoforge") {
         exclude group: "net.neoforged.fancymodloader", module: "loader"
     }
 //    if (rootProject.use_connector_mod == "true") {
@@ -65,33 +65,33 @@ dependencies {
     /* ===Performance=== */
 
     /* Embeddium */
-//    modCompileOnly 'maven.modrinth:embeddium:1.0.15+mc1.21.1'
-//    modLocalRuntime 'maven.modrinth:embeddium:1.0.15+mc1.21.1'
+//    modCompileOnly "maven.modrinth:embeddium:1.0.15+mc$minecraft_version"
+//    modLocalRuntime "maven.modrinth:embeddium:1.0.15+mc$minecraft_version"
 //
 //    localRuntime("io.github.douira:glsl-transformer:2.0.2")
 //    localRuntime "org.anarres:jcpp:1.4.14" // Why NoClassDefFoundError?
 //    localRuntime("org.taumc:glsl-transformation-lib:0.2.0-20.ge3cb096") { transitive = false }
 //    modLocalRuntime 'maven.modrinth:neoculus:WDZ0i0mz'
 
-//    modLocalRuntime "maven.modrinth:iris:1.8.1+1.21.1-neoforge"
+//    modLocalRuntime "maven.modrinth:iris:1.8.1+$minecraft_version-neoforge"
 //    modLocalRuntime 'maven.modrinth:monocle-iris:0.1.8'
 //    localRuntime "org.antlr:antlr4-runtime:4.13.1"
 //    localRuntime "io.github.douira:glsl-transformer:2.0.1"
 //    localRuntime "org.anarres:jcpp:1.4.14"
 
     /* Sodium */
-    modCompileOnly 'maven.modrinth:sodium:mc1.21.1-0.6.13-neoforge'
-    modCompileOnly "maven.modrinth:iris:1.8.12+1.21.1-neoforge"
+    modCompileOnly "maven.modrinth:sodium:mc$minecraft_version-0.6.13-neoforge"
+    modCompileOnly "maven.modrinth:iris:1.8.12+$minecraft_version-neoforge"
     modCompileOnly "maven.modrinth:flerovium:1.0.17"
 
     // Iris
-    localRuntime "maven.modrinth:iris:1.8.12+1.21.1-neoforge"
+    localRuntime "maven.modrinth:iris:1.8.12+$minecraft_version-neoforge"
 //    // decompressed jarjars
 //    localRuntime fileTree(dir: '../libs', include: 'jcpp-1.4.14.jar')
 //    localRuntime fileTree(dir: '../libs', include: 'glsl-transformer-2.0.1.jar')
     // Sodium
-    localRuntime('maven.modrinth:sodium:mc1.21.1-0.6.13-neoforge')
-    modLocalRuntime('maven.modrinth:sodium-extra:mc1.21.1-0.6.0+neoforge')
+    localRuntime("maven.modrinth:sodium:mc$minecraft_version-0.6.13-neoforge")
+    modLocalRuntime("maven.modrinth:sodium-extra:mc$minecraft_version-0.6.0+neoforge")
 
 //    localRuntime "org.antlr:antlr4-runtime:4.13.1"
 //    localRuntime "io.github.douira:glsl-transformer:2.0.1"
@@ -100,11 +100,11 @@ dependencies {
 //    modLocalRuntime("org.sinytra.forgified-fabric-api:fabric-renderer-api-v1:3.4.0+9c40919e19")
 //    modLocalRuntime("org.sinytra.forgified-fabric-api:fabric-rendering-data-attachment-v1:0.3.48+73761d2e19")
 //    modLocalRuntime("org.sinytra.forgified-fabric-api:fabric-block-view-api-v2:1.0.10+9afaaf8c19")
-//    modLocalRuntime "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
+//    modLocalRuntime "maven.modrinth:iris:1.8.8+$minecraft_version-neoforge"
 //    modLocalRuntime "curse.maven:flerovium-1142875:6359527" // 1.0.4
 
-    modLocalRuntime "maven.modrinth:spark:1.10.124-neoforge-1.21.1"
-    modLocalRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
+    modLocalRuntime "maven.modrinth:spark:1.10.124-neoforge-$minecraft_version"
+//    modLocalRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
 //    modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
     /* ===End Performance=== */
 
@@ -116,8 +116,8 @@ dependencies {
 
     /* Particle Rain/Pretty Rain */
 //    modCompileOnly "maven.modrinth:pretty-rain:1.1.4"
-    modCompileOnly("maven.modrinth:particle-rain:v4-beta.9+1.21.1-neoforge")
-//    modLocalRuntime("maven.modrinth:particle-rain:v4-beta.9+1.21.1-neoforge")
+    modCompileOnly("maven.modrinth:particle-rain:v4-beta.9+$minecraft_version-neoforge")
+//    modLocalRuntime("maven.modrinth:particle-rain:v4-beta.9+$minecraft_version-neoforge")
 //    modLocalRuntime "maven.modrinth:pretty-rain:1.1.4"
 
     /* Effectual */
@@ -168,13 +168,32 @@ dependencies {
 
     /* Simple Weather */
     modCompileOnly "curse.maven:simple-weather-983390:7436830" // 1.0.13-hf
-//    modLocalRuntime "curse.maven:simple-weather-983390:5984086"
+//    modLocalRuntime "curse.maven:simple-weather-983390:7436830"
 
     /* Weather2 */
     modCompileOnly "maven.modrinth:weather-storms-tornadoes:1.21.0-2.8.6"
 
     /* Epic Fight */
-    modCompileOnly "maven.modrinth:epic-fight:21.16.3-mc1.21.1-neoforge"
+    modCompileOnly "maven.modrinth:epic-fight:21.16.3-mc$minecraft_version-neoforge"
+
+    /* Veil */
+//    modRuntimeOnly "maven.modrinth:veil:3.6.2"
+    api("foundry.veil:veil-neoforge-${project.minecraft_version}:3.6.2") {
+        exclude group: "maven.modrinth"
+        exclude group: "me.fallenbreath"
+    }
+    api "io.github.spair:imgui-java-binding:1.88.0"
+    api("io.github.spair:imgui-java-lwjgl3:1.88.0") {
+        exclude group: 'org.lwjgl'
+        exclude group: 'org.lwjgl.lwjgl'
+    }
+//    modRuntimeOnly "maven.modrinth:sable:g8CObHcP" // 1.1.3
+//    modRuntimeOnly "maven.modrinth:create-aeronautics:1sv6OtSz" // 1.1.3
+//    modRuntimeOnly "dev.ryanhcode.sable:sable-common-${project.minecraft_version}:1.1.3" // 1.1.3
+    modApi "dev.ryanhcode.sable:sable-neoforge-$minecraft_version:1.1.3" // 1.1.3
+    modRuntimeOnly("dev.simulated_team.simulated:simulated-neoforge-$minecraft_version:1.1.0") { transitive = false }
+    modRuntimeOnly("dev.ryanhcode.offroad:offroad-neoforge-$minecraft_version:1.1.0") { transitive = false }
+    modRuntimeOnly("dev.eriksonn.aeronautics:aeronautics-neoforge-$minecraft_version:1.1.0") { transitive = false }
 }
 
 processResources {

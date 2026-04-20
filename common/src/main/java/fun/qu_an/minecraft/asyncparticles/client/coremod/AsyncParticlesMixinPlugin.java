@@ -83,8 +83,6 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					case "iris_else" -> !IS_FORGE && !FABRIC_IRIS_LOADED;
 					case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;
 					case "loot_beams_up" -> FABRIC_LOOT_BEAMS_UP_LOADED;
-					case "cooparticlesapi" -> FABRIC_COO_PARTICLES_API_LOADED &&
-											  versionCheck("cooparticlesapi", null, "1.11.0");
 					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 				};
 			}

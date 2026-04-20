@@ -40,7 +40,7 @@ public class MixinMinecraft {
 		target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;"))
 	private void onSetLevel(CallbackInfo ci) {
 		AsyncTickBehavior.INSTANCE.reset();
-		AsyncRenderBehavior.getInstance().reset();
+		AsyncRenderBehavior.INSTANCE.reset();
 	}
 
 	@Inject(method = "setLevel", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
@@ -49,7 +49,7 @@ public class MixinMinecraft {
 		if (!asyncparticles$sorted) {
 			asyncparticles$sorted = true;
 			((ParticleEngineAddon) particleEngine).asyncparticle$sortRenderOrder();
-			GpuParticleBehavior.setInternalParticleLimit(ConfigHelper.getParticleLimit());
+			GpuParticleBehavior.INSTANCE.setGpuParticleLimit(ConfigHelper.getParticleLimit());
 		}
 	}
 

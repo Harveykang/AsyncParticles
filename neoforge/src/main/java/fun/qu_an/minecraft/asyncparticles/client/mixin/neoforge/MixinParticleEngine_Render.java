@@ -11,7 +11,10 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.particle.render.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
+import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.minecraft.client.Camera;
@@ -19,6 +22,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -56,12 +60,12 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 		// Remove duplicated render types, (e.g. Hex Casting mod's bug)
 		Map<ParticleRenderType, Queue<Particle>> particles = new LinkedHashMap<>((int) (RENDER_ORDER.size() * 1.34) + 1);
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (!AsyncRenderBehavior.getInstance().getBTesselator(type, textureManager).shouldSync) {
+			if (!AsyncRenderBehavior.INSTANCE.getBTesselator(type, textureManager).shouldSync) {
 				particles.put(type, GameUtil.newParticleQueue());
 			}
 		}
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderBehavior.getInstance().getBTesselator(type, textureManager).shouldSync) {
+			if (AsyncRenderBehavior.INSTANCE.getBTesselator(type, textureManager).shouldSync) {
 				particles.put(type, GameUtil.newParticleQueue());
 			}
 		}
@@ -78,10 +82,10 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Overwrite(remap = false)
 	public void render(LightTexture lightTexture, Camera camera, float f, @Nullable Frustum ignored, Predicate<ParticleRenderType> renderTypePredicate) {
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-		boolean renderAsync = AsyncRenderBehavior.getInstance().isRenderAsync();
+		boolean renderAsync = AsyncRenderBehavior.INSTANCE.isRenderAsync();
 		if (renderAsync) {
 			profiler.push("wait_for_async_tasks");
-			AsyncRenderBehavior.getInstance().tryWaitingForAsyncTasks();
+			AsyncRenderBehavior.INSTANCE.tryWaitingForAsyncTasks();
 			profiler.pop();
 		}
 
@@ -91,29 +95,50 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 		RenderSystem.activeTexture(33984);
 		profiler.pop();
 
-		Frustum frustum = AsyncRenderBehavior.getInstance().getFrustum();
+		GpuParticleBehavior.INSTANCE.compute(camera, f);
+
+		Frustum frustum = AsyncRenderBehavior.INSTANCE.getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		for (ParticleRenderType particleRenderType : particles.keySet()) {
-			if (particleRenderType == ParticleRenderType.NO_RENDER
-				|| !renderTypePredicate.test(particleRenderType)) {
+			if (particleRenderType == ParticleRenderType.NO_RENDER) {
 				continue;
 			}
 			Queue<Particle> queue = this.particles.get(particleRenderType);
-			if (queue == null || queue.isEmpty()) {
+			Queue<TextureSheetParticle> gpuQueue = GpuParticleBehavior.INSTANCE.gpuParticles.get(particleRenderType);
+			boolean hasGpu = gpuQueue != null && !gpuQueue.isEmpty();
+			boolean hasCpu = queue != null && !queue.isEmpty();
+			profiler.push("render_particles");
+			IParticleRenderer gpuParticleRenderer;
+			if (!hasGpu) {
+				gpuParticleRenderer = null;
+			} else {
+				gpuParticleRenderer = GpuParticleBehavior.INSTANCE.getRenderer(particleRenderType);
+				if (gpuParticleRenderer == null || gpuParticleRenderer.isShouldSkip()) {
+					hasGpu = false;
+				}
+			}
+			if (!hasCpu && !hasGpu) {
 				continue;
 			}
-			BindingTesselator tesselator = AsyncRenderBehavior.getInstance().getBTesselator(particleRenderType, textureManager);
-			profiler.push("render_sync");
+			BindingTesselator tesselator = AsyncRenderBehavior.INSTANCE.getBTesselator(particleRenderType, textureManager);
 			Collection<? extends Particle> syncParticles;
 			ParticleCullingMode realCullMode;
 			Tesselator toBegin;
-			if (!renderAsync || tesselator.shouldSync) {
+			if (!hasCpu) {
+				syncParticles = null;
+				toBegin = FakeTesselator.INSTANCE;
+				realCullMode = null;
+			} else if (AsyncRenderBehavior.INSTANCE.getBTesselator(particleRenderType, textureManager).shouldSync) {
+				realCullMode = particleCullingMode;
+				syncParticles = queue;
+				toBegin = Tesselator.getInstance();
+			} else if (!renderAsync) { // With this check we behave like vanilla if this method is called from other mod.
 				realCullMode = particleCullingMode;
 				syncParticles = queue;
 				toBegin = Tesselator.getInstance();
 			} else {
 				realCullMode = ParticleCullingMode.DISABLED;
-				syncParticles = AsyncRenderBehavior.getInstance().getSync(particleRenderType);
+				syncParticles = AsyncRenderBehavior.INSTANCE.getSync(particleRenderType);
 				toBegin = tesselator;
 			}
 			// why ParticleRenderType#end() removed?...
@@ -125,64 +150,67 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			// We must ensure only call begin once in this method,
 			// otherwise it will mess up some mod's mixins.
 			BufferBuilder bufferBuilder = particleRenderType.begin(toBegin, this.textureManager);
-			if (bufferBuilder == null) {
-				continue;
+			if (hasGpu) {
+				gpuParticleRenderer.render();
 			}
-			if (!syncParticles.isEmpty()) {
-				float f2 = f + 1f;
-				for (Particle particle : syncParticles) {
-					if (!particle.isAlive()) {
-						continue;
-					}
-					float f3;
-					ParticleAddon particleAddon = (ParticleAddon) particle;
-					switch (realCullMode) {
-						case AABB -> {
-							f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
-							if (particleAddon.asyncparticles$shouldCull() &&
-								!FrustumUtil.isVisible(frustum, particleAddon.getRenderBoundingBox(f3))) {
-								continue;
-							}
+			if (bufferBuilder != null) {
+				if (hasCpu && !syncParticles.isEmpty()) {
+					float f2 = f + 1f;
+					for (Particle particle : syncParticles) {
+						if (!particle.isAlive()) {
+							continue;
 						}
-						case SPHERE -> {
-							if (particleAddon.asyncparticles$shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
-								continue;
+						float f3;
+						ParticleAddon particleAddon = (ParticleAddon) particle;
+						switch (realCullMode) {
+							case AABB -> {
+								f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+								if (particleAddon.asyncparticles$shouldCull() &&
+									!FrustumUtil.isVisible(frustum, particleAddon.getRenderBoundingBox(f3))) {
+									continue;
+								}
 							}
-							f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
-						}
-						case ASYNC_AABB, ASYNC_SPHERE -> {
-							if (particleAddon.asyncparticles$shouldCull() &&
-								!particleAddon.asyncparticles$isVisibleOnScreen()) {
-								continue;
+							case SPHERE -> {
+								if (particleAddon.asyncparticles$shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
+									continue;
+								}
+								f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
 							}
-							f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+							case ASYNC_AABB, ASYNC_SPHERE -> {
+								if (particleAddon.asyncparticles$shouldCull() &&
+									!particleAddon.asyncparticles$isVisibleOnScreen()) {
+									continue;
+								}
+								f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+							}
+							default -> f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
 						}
-						default -> f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
-					}
-					try {
-						particle.render(bufferBuilder, camera, f3);
-					} catch (Throwable t) {
-						throw AsyncRenderBehavior.getInstance().constructCrashReport(particle, particleRenderType, t);
+						try {
+							particle.render(bufferBuilder, camera, f3);
+						} catch (Throwable t) {
+							throw AsyncRenderBehavior.INSTANCE.constructCrashReport(particle, particleRenderType, t);
+						}
 					}
 				}
-			}
-			profiler.popPush("build_buffer");
-			MeshData meshData = bufferBuilder.build();
-			if (meshData != null) {
-				profiler.popPush("upload_particles");
-				BufferUploader.drawWithShader(meshData);
+				profiler.popPush("build_buffer");
+				MeshData meshData = bufferBuilder.build();
+				if (meshData != null) {
+					profiler.popPush("upload_particles");
+					BufferUploader.drawWithShader(meshData);
+				}
 			}
 			profiler.pop();
 		}
 
 		profiler.push("cleanup");
+		RenderSystem.applyModelViewMatrix();
 		RenderSystem.depthMask(true);
 		RenderSystem.disableBlend();
 		// reset blend func and culling state
 		// other mods may change them...
 		RenderSystem.defaultBlendFunc();
-		RenderSystem.enableDepthTest();
 		RenderSystem.enableCull();
+		RenderSystem.enableDepthTest();
 		lightTexture.turnOffLightLayer();
 		profiler.pop();
 	}

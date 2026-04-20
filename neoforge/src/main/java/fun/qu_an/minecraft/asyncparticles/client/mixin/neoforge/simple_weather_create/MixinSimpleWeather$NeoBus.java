@@ -18,11 +18,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(targets = "tv.soaryn.simpleweather.SimpleWeather$NeoBus")
 public interface MixinSimpleWeather$NeoBus {
-	@WrapWithCondition(method = {"addRain", "addSnowflake"}, remap = false,
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;addParticle(Lnet/minecraft/core/particles/ParticleOptions;ZDDDDDD)V"))
-	private static boolean onAddParticle(ClientLevel level, ParticleOptions particleData, boolean forceAlwaysRender, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-		return CreateCompat.canSpawnWeatherParticle(level, x, y, z);
-	}
+//	@WrapWithCondition(method = {"addRain", "addSnowflake"}, remap = false,
+//		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;addParticle(Lnet/minecraft/core/particles/ParticleOptions;ZDDDDDD)V"))
+//	private static boolean onAddParticle(ClientLevel level, ParticleOptions particleData, boolean forceAlwaysRender, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+//		return CreateCompat.canSpawnWeatherParticle(level, x, y, z);
+//	}
 
 	@Group(name = "asyncparticles:redirectDeltaMovement", min = 1, max = 1)
 	@WrapOperation(method = "renderWeather", remap = false,

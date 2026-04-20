@@ -40,8 +40,8 @@ dependencies {
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
-    common(project(path: ':common_legacy_mod_compat', configuration: 'namedElements')) { transitive false }
-    shadowBundle project(path: ':common_legacy_mod_compat', configuration: 'transformProductionFabric')
+//    common(project(path: ':common_legacy_mod_compat', configuration: 'namedElements')) { transitive false }
+//    shadowBundle project(path: ':common_legacy_mod_compat', configuration: 'transformProductionFabric')
 
     /* APIs */
     modCompileOnly 'maven.modrinth:modmenu:11.0.3'
@@ -157,7 +157,7 @@ runClient {
         main {
             resources {
                 srcDirs += "../common/src/main/resources"
-                srcDirs += "../common_legacy_mod_compat/src/main/resources"
+//                srcDirs += "../common_legacy_mod_compat/src/main/resources"
             }
         }
     }

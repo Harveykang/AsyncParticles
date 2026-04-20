@@ -7,11 +7,11 @@ public record ParticleVertexFormatElement(int uv,
                                           VertexFormatElement.Type type,
                                           @Nullable VertexFormatElement.Usage usage,
                                           int count) {
-	public void setupBufferState(int i, int offset, int vertexSize) {
+	public void setupBufferState(int stride, int offset, int stateIndex) {
 		if (usage == null) {
 			return;
 		}
-		usage.setupState.setupBufferState(count, type.glType(), i, offset, vertexSize);
+		usage.setupState.setupBufferState(count, type.glType(), stride, offset, stateIndex);
 	}
 
 	public int size() {

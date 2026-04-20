@@ -5,38 +5,38 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.LightTexture;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 @SuppressWarnings("unused")
 public class AsyncRenderBehaviorImpl extends AsyncRenderBehavior {
-	private static final AsyncRenderBehavior INSTANCE = new AsyncRenderBehaviorImpl();
-
-	public static AsyncRenderBehavior getInstance() {
-		return INSTANCE;
+	public static AsyncRenderBehavior newInstance() {
+		return new AsyncRenderBehaviorImpl();
 	}
 
 	public void endOpaque(LightTexture lightTexture, Camera camera, float f, boolean isAsync) {
 		Minecraft mc = Minecraft.getInstance();
 		mc.getProfiler().popPush("particles");
 
-		AsyncRenderBehavior.getInstance().renderAsync = isAsync;
-		AsyncRenderBehavior.getInstance().particlePhase = true;
+		renderAsync = isAsync;
+		particlePhase = true;
 		mc.particleEngine.render(lightTexture, camera, f, null, t -> !t.isTranslucent());
-		AsyncRenderBehavior.getInstance().renderAsync = false;
-		AsyncRenderBehavior.getInstance().particlePhase = false;
+		renderAsync = false;
+		particlePhase = false;
 	}
 
 	public void endTranslucent(LightTexture lightTexture, Camera camera, float f, boolean isAsync) {
 		Minecraft mc = Minecraft.getInstance();
 		mc.getProfiler().popPush("particles");
 
-		AsyncRenderBehavior.getInstance().onTranslucent(mc);
+		onTranslucent(mc);
 
-		AsyncRenderBehavior.getInstance().renderAsync = isAsync;
-		AsyncRenderBehavior.getInstance().particlePhase = true;
+		renderAsync = isAsync;
+		particlePhase = true;
 		mc.particleEngine.render(lightTexture, camera, f, null, ParticleRenderType::isTranslucent);
-		AsyncRenderBehavior.getInstance().renderAsync = false;
-		AsyncRenderBehavior.getInstance().particlePhase = false;
+		renderAsync = false;
+		particlePhase = false;
 
-		AsyncRenderBehavior.getInstance().postTranslucent(mc);
+		postTranslucent(mc);
 	}
 }

@@ -5,6 +5,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
+import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.task.EndTickEvent;
@@ -389,8 +390,8 @@ public class AsyncTickBehavior {
 	public ReportedException constructCrashReport(Particle particle, Throwable t) {
 		debugLater(LOGGER::info);
 		tryDebug();
-		AsyncRenderBehavior.getInstance().debugLater(LOGGER::info);
-		AsyncRenderBehavior.getInstance().tryDebug();
+		AsyncRenderBehavior.INSTANCE.debugLater(LOGGER::info);
+		AsyncRenderBehavior.INSTANCE.tryDebug();
 		CrashReport crashReport = CrashReport.forThrowable(t, "Ticking Particle");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being ticked");
 		crashReportCategory.setDetail("Particle", particle::toString);
@@ -461,7 +462,6 @@ public class AsyncTickBehavior {
 		if (debugConsumer == null) {
 			return;
 		}
-		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 		debugConsumer.accept(String.format("""
 			[Debug AsyncTicker]
 			last tick duration: %.1f ms,
@@ -486,7 +486,7 @@ public class AsyncTickBehavior {
 						Queue<Particle> queue = e.getValue();
 						return queue.size() + "/" + ((IterationSafeEvictingQueue<Particle>) queue).arraySize();
 					})),
-				GpuParticleBehavior.gpuParticles.entrySet()
+				GpuParticleBehavior.INSTANCE.gpuParticles.entrySet()
 					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
 						Queue<TextureSheetParticle> queue = e.getValue();
 						return queue.size() + "/" + ((IterationSafeEvictingQueue<TextureSheetParticle>) queue).arraySize();
@@ -507,7 +507,7 @@ public class AsyncTickBehavior {
 			.stream()
 			.collect(Collectors.toMap(ParticleRenderType::getClass, Object::toString)));
 		LOGGER.info(particleEngine.particles);
-		LOGGER.info(GpuParticleBehavior.gpuParticles);
+		LOGGER.info(GpuParticleBehavior.INSTANCE.gpuParticles);
 	}
 
 	public void reloadLater() {
@@ -522,16 +522,16 @@ public class AsyncTickBehavior {
 	}
 
 	public void reload(boolean clearParticles) {
-		AsyncRenderBehavior.getInstance().reset();
+		AsyncRenderBehavior.INSTANCE.reset();
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 		if (clearParticles) {
 			reset();
 			particleEngine.clearParticles();
 		} else {
-			Queue<Particle> newToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getParticleLimit(), this::onEvicted);
+			Queue<Particle> newToAdd = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT, ConfigHelper.getParticleLimit(), this::onEvicted);
 			newToAdd.addAll(particleEngine.particlesToAdd);
 			particleEngine.particlesToAdd = newToAdd;
-			Queue<TrackingEmitter> newEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), this::onEvicted);
+			Queue<TrackingEmitter> newEmitters = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT / 4, ConfigHelper.getParticleLimit(), this::onEvicted);
 			newEmitters.addAll(particleEngine.trackingEmitters);
 			particleEngine.trackingEmitters = newEmitters;
 			boolean enableLightCache = ConfigHelper.particleLightCache();
@@ -554,9 +554,9 @@ public class AsyncTickBehavior {
 						case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();
 					}
 					if (tickAsync && enableGpuAcceleration &&
-						p instanceof TextureSheetParticle tsp && GpuParticleBehavior.canRenderFast(tsp)) {
+						p instanceof TextureSheetParticle tsp && GpuParticleBehavior.INSTANCE.canRenderFast(tsp)) {
 						gpuParticles.computeIfAbsent(key, k -> {
-							GpuParticleBehavior.initParticleRenderType(k);
+							GpuParticleBehavior.INSTANCE.initParticleRenderType(k);
 							return ParticleHelper.newParticleQueue();
 						}).add(tsp);
 					} else {
@@ -568,12 +568,12 @@ public class AsyncTickBehavior {
 			particleEngine.particles.putAll(particles);
 
 			if (!tickAsync || !enableGpuAcceleration) {
-				GpuParticleBehavior.gpuParticles.forEach((t, q) -> {
+				GpuParticleBehavior.INSTANCE.gpuParticles.forEach((t, q) -> {
 					particles.get(t).addAll(q);
 				});
-				GpuParticleBehavior.gpuParticles.clear();
+				GpuParticleBehavior.INSTANCE.gpuParticles.clear();
 			} else {
-				GpuParticleBehavior.gpuParticles.forEach((key, queue) -> {
+				GpuParticleBehavior.INSTANCE.gpuParticles.forEach((key, queue) -> {
 					queue.forEach(p -> {
 						if (enableLightCache) {
 							((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
@@ -587,11 +587,11 @@ public class AsyncTickBehavior {
 						}
 					});
 					gpuParticles.computeIfAbsent(key, k -> {
-						GpuParticleBehavior.initParticleRenderType(k);
+						GpuParticleBehavior.INSTANCE.initParticleRenderType(k);
 						return ParticleHelper.newParticleQueue();
 					}).addAll(queue);
 				});
-				GpuParticleBehavior.gpuParticles.putAll(gpuParticles);
+				GpuParticleBehavior.INSTANCE.gpuParticles.putAll(gpuParticles);
 			}
 		}
 	}
@@ -644,7 +644,7 @@ public class AsyncTickBehavior {
 		}
 	}
 
-	public class AsyncTickerThread extends AsyncParticleWorkerThread {
+	public static class AsyncTickerThread extends AsyncParticleWorkerThread {
 		public AsyncTickerThread(ForkJoinPool forkJoinPool) {
 			super(forkJoinPool);
 		}

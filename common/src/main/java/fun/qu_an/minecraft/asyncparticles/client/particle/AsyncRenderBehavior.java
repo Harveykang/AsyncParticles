@@ -52,8 +52,10 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRendering
 // TODO: Organize this shit
 @Environment(EnvType.CLIENT)
 public abstract class AsyncRenderBehavior {
+	public static final AsyncRenderBehavior INSTANCE = newInstance();
+
 	@ExpectPlatform
-	public static AsyncRenderBehavior getInstance() {
+	private static AsyncRenderBehavior newInstance() {
 		throw new AssertionError();
 	}
 
@@ -128,7 +130,7 @@ public abstract class AsyncRenderBehavior {
 	                             Queue<Particle> particles,
 	                             ParticleRenderType particleRenderType,
 	                             BufferBuilder bufferBuilder) {
-		Frustum frustum = AsyncRenderBehavior.getInstance().getFrustum();
+		Frustum frustum = AsyncRenderBehavior.INSTANCE.getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		float f2 = f + 1f;
 		for (Particle particle : particles) {
@@ -230,10 +232,8 @@ public abstract class AsyncRenderBehavior {
 		postTranslucent(mc);
 	}
 
-	@ExpectPlatform
 	public abstract void endOpaque(LightTexture lightTexture, Camera camera, float f, boolean isAsync);
 
-	@ExpectPlatform
 	public abstract void endTranslucent(LightTexture lightTexture, Camera camera, float f, boolean isAsync);
 
 	public boolean isRenderAsync() {
@@ -446,7 +446,7 @@ public abstract class AsyncRenderBehavior {
 		this.frustum = frustum;
 	}
 
-	public class AsyncRendererThread extends AsyncParticleWorkerThread {
+	public static class AsyncRendererThread extends AsyncParticleWorkerThread {
 		public AsyncRendererThread(ForkJoinPool forkJoinPool) {
 			super(forkJoinPool);
 		}

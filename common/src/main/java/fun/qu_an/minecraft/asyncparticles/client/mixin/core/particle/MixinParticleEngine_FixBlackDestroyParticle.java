@@ -25,15 +25,17 @@ public class MixinParticleEngine_FixBlackDestroyParticle {
 	@Unique
 	private final BlockPos.MutableBlockPos asyncparticles$mutable = new BlockPos.MutableBlockPos();
 
-	@Inject(method = "method_34020", at = @At("HEAD"))
+	@Inject(method = {"method_34020", "lambda$destroy$14"}, // Fabric/NeoForge
+		at = @At("HEAD"))
 	private void fixBlackDestroyParticle1(BlockPos blockPos, BlockState blockState, double d, double e, double f, double g, double h, double i, CallbackInfo ci) {
 		int lightColor = asyncparticles$getLightColor(level, blockPos);
-		GpuParticleBehavior.DESTROY_LIGHT_CACHE.set(lightColor);
+		GpuParticleBehavior.INSTANCE.DESTROY_LIGHT_CACHE.set(lightColor);
 	}
 
-	@Inject(method = "method_34020", at = @At("RETURN"))
+	@Inject(method = {"method_34020", "lambda$destroy$14"}, // Fabric/NeoForge
+		at = @At("RETURN"))
 	private void fixBlackDestroyParticle2(BlockPos blockPos, BlockState blockState, double d, double e, double f, double g, double h, double i, CallbackInfo ci) {
-		GpuParticleBehavior.DESTROY_LIGHT_CACHE.remove();
+		GpuParticleBehavior.INSTANCE.DESTROY_LIGHT_CACHE.remove();
 	}
 
 	@Unique
@@ -69,7 +71,7 @@ public class MixinParticleEngine_FixBlackDestroyParticle {
 				skyDataLayerData.get(lx, ly, lz - 1));
 		}
 		if (j < 15) {
-			j = max(j, lz == 0 ? sky.getLightValue(asyncparticles$mutable.set(x, y, z - 1)) :
+			j = max(j, lz == 0 ? block.getLightValue(asyncparticles$mutable.set(x, y, z - 1)) :
 				blockDataLayerData.get(lx, ly, lz - 1));
 		}
 
@@ -78,7 +80,7 @@ public class MixinParticleEngine_FixBlackDestroyParticle {
 				skyDataLayerData.get(lx - 1, ly, lz));
 		}
 		if (j < 15) {
-			j = max(j, lx == 0 ? sky.getLightValue(asyncparticles$mutable.set(x - 1, y, z)) :
+			j = max(j, lx == 0 ? block.getLightValue(asyncparticles$mutable.set(x - 1, y, z)) :
 				blockDataLayerData.get(lx - 1, ly, lz));
 		}
 

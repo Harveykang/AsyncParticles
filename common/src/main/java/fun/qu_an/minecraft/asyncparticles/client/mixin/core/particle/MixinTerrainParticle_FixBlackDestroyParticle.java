@@ -15,7 +15,7 @@ public abstract class MixinTerrainParticle_FixBlackDestroyParticle extends Mixin
 	public void asyncparticles$refresh() {
 		if (asyncparticles$isFirstRefresh) {
 			asyncparticles$isFirstRefresh = false;
-			Integer i = GpuParticleBehavior.DESTROY_LIGHT_CACHE.get();
+			Integer i = GpuParticleBehavior.INSTANCE.DESTROY_LIGHT_CACHE.get();
 			if (i != null) {
 				asyncparticles$setLight(i);
 			} else {

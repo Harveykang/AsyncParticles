@@ -61,8 +61,6 @@ public class ModListHelper {
 	/* Particular */
 	public static final boolean FABRIC_PARTICULAR_LOADED = isFabricModLoaded("particular");
 	public static final boolean FORGE_PARTICULAR_LOADED = isForgeModLoaded("particular");
-	/* Particle Core */
-	public static final boolean PARTICLE_CORE_LOADED = isModLoaded("particle_core");
 	/* Physics Mod */
 	public static final boolean PHYSICSMOD_LOADED = isModLoaded("physicsmod");
 	/* A Good Place */
@@ -98,8 +96,6 @@ public class ModListHelper {
 	public static final boolean FABRIC_PORTING_LIB_BASE_LOADED = isFabricModLoaded("porting_lib_base");
 	/* Loot Beams Up */
 	public static final boolean FABRIC_LOOT_BEAMS_UP_LOADED = isFabricModLoaded("lootbeams");
-	/* Coo Particles API */
-	public static final boolean FABRIC_COO_PARTICLES_API_LOADED = isModLoaded("cooparticlesapi");
 	/* Dynamic Surroundings */
 	public static final boolean DSURROUND_LOADED = isModLoaded("dsurround");
 	/* Immediately Fast */
@@ -117,6 +113,8 @@ public class ModListHelper {
 	public static final boolean FIGURA_LOADED = isModLoaded("figura");
 	/* Veil */
 	public static final boolean VEIL_LOADED = isModLoaded("veil");
+	/* Sable */
+	public static final boolean SABLE_LOADED = isModLoaded("sable");
 	/* Axiom */
 	public static final boolean AXIOM_LOADED = isModLoaded("axiom");
 

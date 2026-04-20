@@ -29,8 +29,8 @@ public abstract class MixinLevelRenderer {
 										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 										  LocalIntRef irm) {
 		switch (irm.get()) {
-			case SYNC -> AsyncRenderBehavior.getInstance().endAll(partialTick, camera, lightTexture, false);
-			case COMPATIBILITY_ASYNC -> AsyncRenderBehavior.getInstance().endAll(partialTick, camera, lightTexture, true);
+			case SYNC -> AsyncRenderBehavior.INSTANCE.endAll(partialTick, camera, lightTexture, false);
+			case COMPATIBILITY_ASYNC -> AsyncRenderBehavior.INSTANCE.endAll(partialTick, camera, lightTexture, true);
 		}
 	}
 
@@ -45,11 +45,11 @@ public abstract class MixinLevelRenderer {
 										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 										  LocalIntRef irm) {
 		switch (irm.get()) {
-			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.getInstance().endOpaque(lightTexture, camera, partialTick, false);
+			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.INSTANCE.endOpaque(lightTexture, camera, partialTick, false);
 			case MIXED_ASYNC, COMPATIBILITY_ASYNC ->
-				AsyncRenderBehavior.getInstance().endOpaque(lightTexture, camera, partialTick, true);
-			case BEFORE_SYNC -> AsyncRenderBehavior.getInstance().endAll(partialTick, camera, lightTexture, false);
-			case BEFORE_ASYNC -> AsyncRenderBehavior.getInstance().endAll(partialTick, camera, lightTexture, true);
+				AsyncRenderBehavior.INSTANCE.endOpaque(lightTexture, camera, partialTick, true);
+			case BEFORE_SYNC -> AsyncRenderBehavior.INSTANCE.endAll(partialTick, camera, lightTexture, false);
+			case BEFORE_ASYNC -> AsyncRenderBehavior.INSTANCE.endAll(partialTick, camera, lightTexture, true);
 		}
 	}
 
@@ -65,9 +65,9 @@ public abstract class MixinLevelRenderer {
 										  LocalIntRef irm) {
 
 		switch (irm.get()) {
-			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.getInstance().endTranslucent(lightTexture, camera, partialTick, false);
+			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.INSTANCE.endTranslucent(lightTexture, camera, partialTick, false);
 			case MIXED_ASYNC, COMPATIBILITY_ASYNC ->
-				AsyncRenderBehavior.getInstance().endTranslucent(lightTexture, camera, partialTick, true);
+				AsyncRenderBehavior.INSTANCE.endTranslucent(lightTexture, camera, partialTick, true);
 		}
 	}
 }

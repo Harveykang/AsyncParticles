@@ -7,6 +7,9 @@ transitive-mutable field net/minecraft/client/particle/ParticleEngine particles 
 accessible field net/minecraft/client/particle/Particle x D
 accessible field net/minecraft/client/particle/Particle y D
 accessible field net/minecraft/client/particle/Particle z D
+accessible field net/minecraft/client/particle/Particle xd D
+accessible field net/minecraft/client/particle/Particle yd D
+accessible field net/minecraft/client/particle/Particle zd D
 accessible field net/minecraft/client/particle/Particle xo D
 accessible field net/minecraft/client/particle/Particle yo D
 accessible field net/minecraft/client/particle/Particle zo D

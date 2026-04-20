@@ -10,7 +10,6 @@ import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.particle.render.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
-import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.Camera;
@@ -58,12 +57,12 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 		// Remove duplicated render types, (e.g. Hex Casting mod's bug)
 		Set<ParticleRenderType> renderTypes = new LinkedHashSet<>((int) (RENDER_ORDER.size() * 1.34) + 1);
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (!AsyncRenderBehavior.getInstance().getBTesselator(type, textureManager).shouldSync) {
+			if (!AsyncRenderBehavior.INSTANCE.getBTesselator(type, textureManager).shouldSync) {
 				renderTypes.add(type);
 			}
 		}
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderBehavior.getInstance().getBTesselator(type, textureManager).shouldSync) {
+			if (AsyncRenderBehavior.INSTANCE.getBTesselator(type, textureManager).shouldSync) {
 				renderTypes.add(type);
 			}
 		}
@@ -77,10 +76,10 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Overwrite
 	public void render(LightTexture lightTexture, Camera camera, float f) {
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-		boolean renderAsync = AsyncRenderBehavior.getInstance().isRenderAsync();
+		boolean renderAsync = AsyncRenderBehavior.INSTANCE.isRenderAsync();
 		if (renderAsync) {
 			profiler.push("wait_for_async_tasks");
-			AsyncRenderBehavior.getInstance().tryWaitingForAsyncTasks();
+			AsyncRenderBehavior.INSTANCE.tryWaitingForAsyncTasks();
 			profiler.pop();
 		}
 
@@ -88,9 +87,9 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 		lightTexture.turnOnLightLayer();
 		profiler.pop();
 
-		GpuParticleBehavior.runTfs(camera, f);
+		GpuParticleBehavior.INSTANCE.compute(camera, f);
 
-		Frustum frustum = AsyncRenderBehavior.getInstance().getFrustum();
+		Frustum frustum = AsyncRenderBehavior.INSTANCE.getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			// FABRIC skips NO_RENDER
@@ -98,7 +97,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 //					continue;
 //				}
 			Queue<Particle> queue = this.particles.get(particleRenderType);
-			Queue<TextureSheetParticle> gpuQueue = GpuParticleBehavior.gpuParticles.get(particleRenderType);
+			Queue<TextureSheetParticle> gpuQueue = GpuParticleBehavior.INSTANCE.gpuParticles.get(particleRenderType);
 			boolean hasGpu = gpuQueue != null && !gpuQueue.isEmpty();
 			boolean hasCpu = queue != null && !queue.isEmpty();
 			profiler.push("render_particles");
@@ -106,7 +105,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			if (!hasGpu) {
 				gpuParticleRenderer = null;
 			} else {
-				gpuParticleRenderer = GpuParticleBehavior.getRenderer(particleRenderType);
+				gpuParticleRenderer = GpuParticleBehavior.INSTANCE.getRenderer(particleRenderType);
 				if (gpuParticleRenderer == null || gpuParticleRenderer.isShouldSkip()) {
 					hasGpu = false;
 				}
@@ -114,7 +113,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			if (!hasCpu && !hasGpu) {
 				continue;
 			}
-			BindingTesselator tesselator = AsyncRenderBehavior.getInstance().getBTesselator(particleRenderType, textureManager);
+			BindingTesselator tesselator = AsyncRenderBehavior.INSTANCE.getBTesselator(particleRenderType, textureManager);
 			Collection<? extends Particle> syncParticles;
 			ParticleCullingMode realCullMode;
 			Tesselator toBegin;
@@ -122,7 +121,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 				syncParticles = null;
 				toBegin = FakeTesselator.INSTANCE;
 				realCullMode = null;
-			} else if (AsyncRenderBehavior.getInstance().getBTesselator(particleRenderType, textureManager).shouldSync) {
+			} else if (AsyncRenderBehavior.INSTANCE.getBTesselator(particleRenderType, textureManager).shouldSync) {
 				realCullMode = particleCullingMode;
 				syncParticles = queue;
 				toBegin = Tesselator.getInstance();
@@ -132,7 +131,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 				toBegin = Tesselator.getInstance();
 			} else {
 				realCullMode = ParticleCullingMode.DISABLED;
-				syncParticles = AsyncRenderBehavior.getInstance().getSync(particleRenderType);
+				syncParticles = AsyncRenderBehavior.INSTANCE.getSync(particleRenderType);
 				toBegin = tesselator;
 			}
 			// why ParticleRenderType#end() removed?...
@@ -182,7 +181,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 						try {
 							particle.render(bufferBuilder, camera, f3);
 						} catch (Throwable t) {
-							throw AsyncRenderBehavior.getInstance().constructCrashReport(particle, particleRenderType, t);
+							throw AsyncRenderBehavior.INSTANCE.constructCrashReport(particle, particleRenderType, t);
 						}
 					}
 				}

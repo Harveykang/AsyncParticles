@@ -8,13 +8,13 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.LightTexture;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 @SuppressWarnings("unused")
 public class AsyncRenderBehaviorImpl extends AsyncRenderBehavior {
-	private static final AsyncRenderBehavior INSTANCE = new AsyncRenderBehaviorImpl();
-
-	public static AsyncRenderBehavior getInstance() {
-		return INSTANCE;
+	public static AsyncRenderBehavior newInstance() {
+		return new AsyncRenderBehaviorImpl();
 	}
 
 	public void endOpaque(LightTexture lightTexture, Camera camera, float f, boolean isAsync) {

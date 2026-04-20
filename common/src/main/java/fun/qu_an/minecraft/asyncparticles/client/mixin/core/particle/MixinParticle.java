@@ -28,7 +28,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	@Final
 	public ClientLevel level;
 	@Unique
-	private boolean asyncparticles$ticked = true;
+	private boolean asyncparticles$ticked = false;
 	@Unique
 	private byte asyncparticles$renderFlag = 2;
 	@Unique
@@ -40,7 +40,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 		if (AsyncTickBehavior.INSTANCE.shouldSync(aClass)) {
 			asyncparticles$setTickSync();
 		}
-		if (AsyncRenderBehavior.getInstance().shouldSync(aClass)) {
+		if (AsyncRenderBehavior.INSTANCE.shouldSync(aClass)) {
 			asyncparticles$setRenderSync();
 		}
 	}
@@ -117,7 +117,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 
 	public void asyncparticles$tickAABBCulling() {
 		AABB aabb = getRenderBoundingBox(0f).expandTowards(xd, yd, zd);
-		if (FrustumUtil.isVisible(AsyncRenderBehavior.getInstance().getFrustum(), aabb)) {
+		if (FrustumUtil.isVisible(AsyncRenderBehavior.INSTANCE.getFrustum(), aabb)) {
 			asyncparticles$renderFlag |= 4;
 		} else {
 			asyncparticles$renderFlag &= ~4;
@@ -125,7 +125,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	}
 
 	public void asyncparticles$tickSphereCulling() {
-		if (FrustumUtil.isVisible(AsyncRenderBehavior.getInstance().getFrustum(), (Particle) (Object) this)) {
+		if (FrustumUtil.isVisible(AsyncRenderBehavior.INSTANCE.getFrustum(), (Particle) (Object) this)) {
 			asyncparticles$renderFlag |= 4;
 		} else {
 			asyncparticles$renderFlag &= ~4;

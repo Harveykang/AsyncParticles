@@ -28,78 +28,82 @@ public class MixinSoundEngine {
 
 	@WrapMethod(method = {"reload", "stopAll", "destroy", "stopAll"})
 	public void wrapReload(Operation<Void> original) {
-		if (ThreadUtil.isOnRenderThread()) {
-			original.call();
-		} else {
+		if (ThreadUtil.isOnParticleThread()) {
 			ThreadUtil.enqueueClientTask(original::call);
+		} else {
+			original.call();
 		}
 	}
 
 	@WrapMethod(method = "updateCategoryVolume")
 	public void wrapUpdateCategoryVolume(SoundSource category, float volume, Operation<Void> original) {
-		if (ThreadUtil.isOnRenderThread()) {
-			original.call(category, volume);
-		} else {
+		if (ThreadUtil.isOnParticleThread()) {
 			ThreadUtil.enqueueClientTask(() -> original.call(category, volume));
+		} else {
+			original.call(category, volume);
 		}
 	}
 
 	@WrapMethod(method = "play")
 	public void wrapPlay(SoundInstance soundInstance, Operation<Void> original) {
-		if (ThreadUtil.isOnRenderThread()) {
-			original.call(soundInstance);
-		} else {
+		if (ThreadUtil.isOnParticleThread()) {
 			ThreadUtil.enqueueClientTask(() -> original.call(soundInstance));
+		} else {
+			original.call(soundInstance);
 		}
 	}
 
 	@WrapMethod(method = {"addEventListener", "removeEventListener"})
 	public void wrapAddEventListener(SoundEventListener listener, Operation<Void> original) {
-		if (ThreadUtil.isOnRenderThread()) {
-			original.call(listener);
-		} else {
+		if (ThreadUtil.isOnParticleThread()) {
 			ThreadUtil.enqueueClientTask(() -> original.call(listener));
+		} else {
+			original.call(listener);
 		}
 	}
 
 	@Redirect(method = "isActive", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"))
 	public Object redirectIsActive(Map<?, Integer> instance, Object o) {
-		return instance.getOrDefault(o, Integer.MAX_VALUE);
+		if (ThreadUtil.isOnParticleThread()) {
+			return instance.getOrDefault(o, Integer.MAX_VALUE);
+		} else {
+			return instance.get(o);
+		}
 	}
 
 	@WrapMethod(method = "queueTickingSound")
 	public void wrapQueueTickingSound(TickableSoundInstance tickableSound, Operation<Void> original) {
-		if (ThreadUtil.isOnRenderThread()) {
-			original.call(tickableSound);
-		} else {
+		if (ThreadUtil.isOnParticleThread()) {
 			ThreadUtil.enqueueClientTask(() -> original.call(tickableSound));
+		} else {
+			original.call(tickableSound);
 		}
 	}
 
 	@WrapMethod(method = "requestPreload")
 	public void wrapRequestPreload(Sound sound, Operation<Void> original) {
-		if (ThreadUtil.isOnRenderThread()) {
-			original.call(sound);
-		} else {
+		if (ThreadUtil.isOnParticleThread()) {
 			ThreadUtil.enqueueClientTask(() -> original.call(sound));
+		} else {
+			original.call(sound);
 		}
 	}
 
 	@WrapMethod(method = "playDelayed")
 	public void wrapPlayDelayed(SoundInstance sound, int delay, Operation<Void> original) {
-		if (ThreadUtil.isOnRenderThread()) {
-			original.call(sound, delay);
-		} else {
+		if (ThreadUtil.isOnParticleThread()) {
 			ThreadUtil.enqueueClientTask(() -> original.call(sound, delay));
+		} else {
+			original.call(sound, delay);
 		}
 	}
 
 	@WrapMethod(method = "stop(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/sounds/SoundSource;)V")
 	public void wrapStop(ResourceLocation soundName, SoundSource category, Operation<Void> original) {
-		if (ThreadUtil.isOnRenderThread()) {
-			original.call(soundName, category);
-		} else {
+		if (ThreadUtil.isOnParticleThread()) {
 			ThreadUtil.enqueueClientTask(() -> original.call(soundName, category));
+		} else {
+			original.call(soundName, category);
 		}
 	}
 }

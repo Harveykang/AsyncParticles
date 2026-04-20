@@ -42,10 +42,10 @@ dependencies {
 
     /* Create */
     // 6.0.0
-//    compileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
-//    modCompileOnly("net.createmod.ponder:Ponder-Fabric-${minecraft_version}:${ponder_version}")
-//    modCompileOnly("dev.engine-room.flywheel:flywheel-fabric-api-${minecraft_version}:${flywheel_version}")
-//    modCompileOnly("com.tterrag.registrate:Registrate:${registrate_version}")
+    modCompileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
+    modCompileOnly("net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${minecraft_version}")
+    modCompileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}")
+    modCompileOnly("com.tterrag.registrate:Registrate:${registrate_version}")
     // 0.5.0
 //    modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
 
@@ -91,5 +91,6 @@ dependencies {
     modCompileOnly "maven.modrinth:figura:0.1.5+1.21.1"
 
     /* Veil */
-    modCompileOnly "maven.modrinth:veil:r8K6Ml64" // 3.6.0
+    modCompileOnly "maven.modrinth:veil:ux6J2bdY" // 3.6.2
+    modCompileOnly "maven.modrinth:sable:1.1.3+mc1.21.1"
 }

@@ -1,21 +1,19 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.create;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalDoubleRef;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CollideUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.VoxelShape;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-
-import java.util.List;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Particle.class)
 public class MixinParticle {
@@ -24,22 +22,30 @@ public class MixinParticle {
 	public ClientLevel level;
 
 	@Shadow
-	public double x;
+	private AABB bb;
 
 	@Shadow
-	public double y;
-
-	@Shadow
-	public double z;
+	protected boolean hasPhysics;
 
 	/**
 	 * See {@link fun.qu_an.minecraft.asyncparticles.client.mixin.vs2.MixinParticle#collideBoundingBox}
 	 * See {@link fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.weather2_vs.MixinEntityRotFX#collideBoundingBox}
 	 */
-	@WrapOperation(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;collideBoundingBox(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Lnet/minecraft/world/level/Level;Ljava/util/List;)Lnet/minecraft/world/phys/Vec3;"))
-	private Vec3 collideBoundingBox(Entity entity, Vec3 motion, AABB aABB, Level level, List<VoxelShape> list, Operation<Vec3> original) {
-		// we do it in another thread, so we don't need to worry about costly collision checks
-		Vec3 mov = CreateUtil.collideMotionWithContraptions((ClientLevel) level, motion, aABB);
-		return original.call(entity, mov == null ? motion : mov, aABB, level, list);
+	@Inject(method = "move", at = @At(value = "FIELD", opcode = Opcodes.GETFIELD,
+		target = "Lnet/minecraft/client/particle/Particle;stoppedByCollision:Z"))
+	private void collideBoundingBox(CallbackInfo ci,
+	                                @Local(ordinal = 0) LocalDoubleRef d,
+	                                @Local(ordinal = 1) LocalDoubleRef e,
+	                                @Local(ordinal = 2) LocalDoubleRef f) {
+		if (!hasPhysics) {
+			return;
+		}
+		Vec3 mov = CollideUtil.collideMotionWithContraptions(level, new Vec3(d.get(), e.get(), f.get()), bb);
+		if (mov == null) {
+			return;
+		}
+		d.set(mov.x);
+		e.set(mov.y);
+		f.set(mov.z);
 	}
 }

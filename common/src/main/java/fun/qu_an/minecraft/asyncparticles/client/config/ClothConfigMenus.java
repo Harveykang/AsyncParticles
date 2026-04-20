@@ -43,8 +43,8 @@ class ClothConfigMenus {
 				.setDefaultValue(defaultConfig.particle.particleLimit)
 				.setTooltip(Component.translatable("config.asyncparticles.particle.particleLimit.tooltip"))
 				.setSaveConsumer(newValue -> particle$particleLimit = newValue)
-				.setMin(1024)
-				.setMax(262144)
+				.setMin(MIN_PARTICLE_LIMIT)
+				.setMax(MAX_PARTICLE_LIMIT)
 				.build())
 			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.removeIfMissedTick"),
