@@ -2,14 +2,8 @@ package fun.qu_an.minecraft.asyncparticles.client.particle.shader;
 
 import com.mojang.blaze3d.platform.GlConst;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
-import org.apache.commons.io.IOUtils;
-import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL30C;
-
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 
 public class ParticleTransformFeedbackShader {
 	public static final ParticleTransformFeedbackShader INSTANCE = new ParticleTransformFeedbackShader();
