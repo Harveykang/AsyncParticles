@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.spongepowered.asm.mixin.Unique;
@@ -66,7 +67,7 @@ public class GpuParticleBehavior {
 
 	private IParticleRenderer newParticleRenderer() {
 //		if (GLCaps.csSupport.isSupported()) return new AdvancedParticleRenderer();
-		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer();
+		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer(this);
 		throw new IllegalStateException("No compatible particle renderer found");
 	}
 
@@ -147,5 +148,9 @@ public class GpuParticleBehavior {
 	private IParticleRenderer createRenderer(ParticleRenderType type) {
 		RenderSystem.assertOnRenderThread();
 		return renderers.computeIfAbsent(type, k -> newParticleRenderer());
+	}
+
+	public Frustum getFrustum() {
+		return AsyncRenderBehavior.INSTANCE.getFrustum();
 	}
 }

@@ -87,6 +87,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				};
 			}
 			case "core" -> true;
+			case "sable" -> SABLE_LOADED;
 			case "particlerain" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN;
 			case "particlerain_vs" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && VS_LOADED;
 			case "particlerain_create" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && CREATE_LOADED;

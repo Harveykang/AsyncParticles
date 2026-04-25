@@ -31,6 +31,8 @@
   "config.asyncparticles.rendering.cullWeathers.tooltip": "Cull weathers outside the camera view.",
   "config.asyncparticles.rendering.particleRenderingMode": "Async Particle Rendering",
   "config.asyncparticles.rendering.particleRenderingMode.tooltip": "Choose how particles are rendered.\n'Compatibility' improves mod compatibility\nbut reduce performance slightly.\nAutomatically enabled when using shader packs.\n'Synchronously' disables the optimization.\n'Compatibility' and 'Synchronously\nsupport rendering opaque particles underwater\n(Iris mod required on Fabric).",
+  "config.asyncparticles.rendering.gpuAcceleration": "GPU Particle Acceleration",
+  "config.asyncparticles.rendering.gpuAcceleration.tooltip": "Use GPU acceleration to render particles,\nimproving framerate and reducing CPU load.",
   "config.asyncparticles.rendering.renderWeatherAsync": "Async Weather Rendering",
   "config.asyncparticles.rendering.renderWeatherAsync.tooltip": "Enable asynchronous weather rendering.",
   "config.asyncparticles.rendering.syncParticleClasses": "Particle Classes for Synchronous Rendering",

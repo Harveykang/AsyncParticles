@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(LevelRenderer.class)
-public class MixinLevelRenderer_RainTick {
+public class MixinLevelRenderer_TickRain {
 	@Unique
 	private static final ResourceLocation asyncparticles$TICK_RAIN = GameUtil.id("tick_rain");
 

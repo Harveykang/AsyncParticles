@@ -162,4 +162,12 @@ public class ConfigHelper {
 	public static boolean isAppendNewParticlesToRenderer() {
 		return rendering$appendNewParticlesToRenderer;
 	}
+
+	public static boolean fixParticleLightOnSableSublevel() {
+		return true;
+	}
+
+	public static ParticleCullingMode getGpuParticleCullingMode() {
+		return ParticleCullingMode.DISABLED;
+	}
 }

@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.core.render;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.core.weather;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;

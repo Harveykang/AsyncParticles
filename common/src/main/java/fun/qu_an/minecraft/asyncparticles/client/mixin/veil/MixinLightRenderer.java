@@ -1,7 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.veil;
 
-import foundry.veil.api.client.registry.LightTypeRegistry;
-import foundry.veil.api.client.render.light.renderer.LightTypeRenderer;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

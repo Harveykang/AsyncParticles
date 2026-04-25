@@ -35,7 +35,6 @@
     "core.particle.MixinTerrainParticle_FixBlackDestroyParticle",
     "core.particle.MixinTextureSheetParticle",
     "core.render.MixinLevelRenderer",
-    "core.render.MixinLevelRenderer_WeatherCulling",
     "core.render.MixinMultiBufferSource$BufferSource",
     "core.render.MixinTesselator",
     "core.render.MixinVertexConsumer",
@@ -46,7 +45,8 @@
     "core.tick.MixinParticleEngine",
     "core.tick.MixinTextureManager",
     "core.tick.MixinWaterFluid",
-    "core.weather.MixinLevelRenderer_RainTick",
+    "core.weather.MixinLevelRenderer_TickRain",
+    "core.weather.MixinLevelRenderer_WeatherCulling",
     "dsurround.MixinParticleRenderCollection",
     "fabric.MixinParticle",
     "fabric.MixinParticleEngine_Render",
@@ -72,15 +72,16 @@
     "physicsmod.MixinWeatherParticle",
     "physicsmod_create.MixinLevelRenderer",
     "physicsmod_create.MixinWeatherParticle",
+    "sable.MixinParticle",
     "sodium_0_6.MixinSingleQuadParticle",
     "sodium_0_7.MixinSingleQuadParticle",
     "sodium_extra.MixinParticleEngine",
+    "veil.MixinLightRenderer",
     "watut.MixinCustomParticleEngine"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
-    "veil.MixinLightRenderer"
   ]
 }

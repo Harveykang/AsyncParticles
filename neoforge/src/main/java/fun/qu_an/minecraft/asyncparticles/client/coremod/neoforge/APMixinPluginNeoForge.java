@@ -52,7 +52,7 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 					default -> throw new IllegalArgumentException("Unknown create mixin: " + mixinClassName);
 				};
 			}
-			case "vs2_create" -> FORGE_VS_LOADED && CREATE_LOADED;
+			case "sable_create" -> SABLE_LOADED && CREATE_LOADED;
 			case "effecticularity" -> FORGE_EFFECTIVE_LOADED;
 			case "subtle_effects" -> FORGE_SUBTLE_EFFECTS_LOADED;
 			case "simple_weather" -> FORGE_SIMPLE_WEATHER_LOADED;

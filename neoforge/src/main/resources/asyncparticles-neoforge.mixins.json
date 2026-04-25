@@ -7,6 +7,7 @@
   "client": [
     "MixinLevelRenderer",
     "MixinParticleEngine_Render",
+    "create.AccessorMatrix3d",
     "create.InvokerContraptionCollider",
     "create.MixinAbstractContraptionEntity",
     "create.MixinAbstractContraptionEntity_NoParticleCollision",
@@ -14,13 +15,13 @@
     "create.MixinLevelRenderer_Rain",
     "create.MixinParticle",
     "create.MixinParticle_LightCache",
+    "sable_create.MixinParticle_LightCache",
     "epicfight.MixinCustomModelParticle",
     "simple_weather.MixinRainParticle",
     "simple_weather.MixinSimpleWeather$NeoBus",
     "simple_weather_create.MixinSimpleWeather$NeoBus",
     "weather2.MixinEntityRotFX",
-    "weather2_create.MixinEntityRotFX",
-    "create.AccessorMatrix3d"
+    "weather2_create.MixinEntityRotFX"
   ],
   "injectors": {
     "defaultRequire": 1

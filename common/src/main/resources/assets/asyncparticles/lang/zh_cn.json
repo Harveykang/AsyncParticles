@@ -29,6 +29,8 @@
   "config.asyncparticles.rendering.particleCulling.tooltip": "启用时会剔除不可见（位于视锥体外）的粒子。\n“球形（实时）”最推荐使用。\n“立方体（实时）”是旧实现，更慢但更精确。\n“球形（异步，每游戏刻）”和“立方体（异步，每游戏刻）”较快，\n但会导致快速转动视角时粒子屏幕边缘不能立刻渲染。\n两个“球形”可能与某些模组不兼容。“禁用”会禁用粒子剔除。",
   "config.asyncparticles.rendering.cullWeathers": "天气剔除",
   "config.asyncparticles.rendering.cullWeathers.tooltip": "启用时会剔除不可见（位于视锥体外）的天气。",
+  "config.asyncparticles.rendering.gpuAcceleration": "GPU 加速粒子渲染",
+  "config.asyncparticles.rendering.gpuAcceleration.tooltip": "使用 GPU 加速粒子渲染，提升帧率并降低 CPU 负载。",
   "config.asyncparticles.rendering.particleRenderingMode": "异步粒子渲染",
   "config.asyncparticles.rendering.particleRenderingMode.tooltip": "设置粒子渲染模式。\n“兼容模式”可能和其他模组有更好的兼容性，\n但会损失些许性能，使用着色器时自动启用。\n“同步执行”意味着禁用优化。\n“兼容模式”和“同步执行”可以看到水下的不透明粒子\n（在 Fabric 上需要 Iris 模组）。",
   "config.asyncparticles.rendering.renderWeatherAsync": "异步天气渲染",
