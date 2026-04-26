@@ -31,8 +31,17 @@ public abstract class MixinParticle implements LightCachedParticleAddon {
 	@Shadow
 	public double z;
 
+	@Shadow
+	public double xo;
+	@Shadow
+	public double yo;
+	@Shadow
+	public double zo;
 	@Unique
 	protected WeakReference<SubLevel> asyncparticle$tracingSubLevel = new WeakReference<>(null);
+
+	@Unique
+	protected BlockPos asyncparticle$lossSublevelPos;
 
 	@Override // inject after MixinParticle_LightCache to override
 	public void asyncparticles$refresh() {
@@ -46,17 +55,20 @@ public abstract class MixinParticle implements LightCachedParticleAddon {
 		SubLevel subLevel = particleExtension.sable$getTrackingSubLevel();
 		if (!ConfigHelper.fixParticleLightOnSableSublevel()) {
 			asyncparticles$setLight(light);
-		} else if (subLevel == null) {
-			subLevel = asyncparticle$tracingSubLevel.get();
-			if (subLevel == null) {
-				asyncparticles$setLight(light);
-			} else {
-				asyncparticles$clampLight(subLevel, level, light);
-			}
-		} else {
-			if (asyncparticle$tracingSubLevel.get() != subLevel){
+		} else if (subLevel != null) {
+			if (asyncparticle$tracingSubLevel.get() != subLevel) {
 				asyncparticle$tracingSubLevel = new WeakReference<>(subLevel);
 			}
+			asyncparticles$clampLight(subLevel, level, light);
+		} else if ((subLevel = asyncparticle$tracingSubLevel.get()) == null) {
+			asyncparticles$setLight(light);
+			asyncparticle$lossSublevelPos = null;
+		} else if (asyncparticle$lossSublevelPos == null) {
+			asyncparticles$clampLight(subLevel, level, light);
+			asyncparticle$lossSublevelPos = BlockPos.containing(xo, yo, zo);
+		} else if (asyncparticle$lossSublevelPos.distManhattan(blockPos) > 15) {
+			asyncparticles$setLight(light);
+		} else {
 			asyncparticles$clampLight(subLevel, level, light);
 		}
 	}

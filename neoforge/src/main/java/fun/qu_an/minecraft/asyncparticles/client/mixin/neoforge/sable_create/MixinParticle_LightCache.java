@@ -27,21 +27,24 @@ public abstract class MixinParticle_LightCache extends MixinParticle {
 		}
 		ParticleExtension particleExtension = (ParticleExtension) this;
 		BlockPos blockPos = BlockPos.containing(x, y, z);
-		int light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
+		int light = level.isLoaded(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
 		SubLevel subLevel = particleExtension.sable$getTrackingSubLevel();
 		if (!ConfigHelper.fixParticleLightOnSableSublevel()) {
 			asyncparticles$setLight(light);
-		} else if (subLevel == null) {
-			subLevel = asyncparticle$tracingSubLevel.get();
-			if (subLevel == null) {
-				asyncparticles$setLight(light);
-			} else {
-				asyncparticles$clampLight(subLevel, level, light);
-			}
-		} else {
-			if (asyncparticle$tracingSubLevel.get() != subLevel){
+		} else if (subLevel != null) {
+			if (asyncparticle$tracingSubLevel.get() != subLevel) {
 				asyncparticle$tracingSubLevel = new WeakReference<>(subLevel);
 			}
+			asyncparticles$clampLight(subLevel, level, light);
+		} else if ((subLevel = asyncparticle$tracingSubLevel.get()) == null) {
+			asyncparticles$setLight(light);
+			asyncparticle$lossSublevelPos = null;
+		} else if (asyncparticle$lossSublevelPos == null) {
+			asyncparticles$clampLight(subLevel, level, light);
+			asyncparticle$lossSublevelPos = BlockPos.containing(xo, yo, zo);
+		} else if (asyncparticle$lossSublevelPos.distManhattan(blockPos) > 15) {
+			asyncparticles$setLight(light);
+		} else {
 			asyncparticles$clampLight(subLevel, level, light);
 		}
 	}
