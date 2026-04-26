@@ -358,11 +358,11 @@ public class CollideUtil {
 		}
 	}
 
-	public static CollisionType isCollideWithContraption(ClientLevel level, Vec3 motion, AABB bb) {
-		return isCollideWithContraption(level, motion, bb, true);
+	public static CollisionType isCollideWithContraptions(ClientLevel level, Vec3 motion, AABB bb) {
+		return isCollideWithContraptions(level, motion, bb, true);
 	}
 
-	public static CollisionType isCollideWithContraption(ClientLevel level, Vec3 motion, AABB bb, boolean estimate) {
+	public static CollisionType isCollideWithContraptions(ClientLevel level, Vec3 motion, AABB bb, boolean estimate) {
 		for (Iterator<AbstractContraptionEntity> it = CreateUtilImpl.forEachContraption(level); it.hasNext(); ) {
 			AbstractContraptionEntity contraptionEntity = it.next();
 			CollisionType collisionType = CollideUtil.isCollideWithContraption(motion, bb, contraptionEntity, estimate);

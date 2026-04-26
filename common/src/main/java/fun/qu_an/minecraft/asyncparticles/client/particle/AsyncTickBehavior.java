@@ -93,7 +93,7 @@ public class AsyncTickBehavior {
 	 * @param i  Current index of tick loop
 	 * @param to Count of ticks to run
 	 */
-	public void onTickBefore(int i, int to) {
+	public void preTick(int i, int to) {
 		if (!ConfigHelper.isTickAsync()) {
 			return;
 		}
@@ -184,7 +184,7 @@ public class AsyncTickBehavior {
 	 * @param i  Current index of tick loop
 	 * @param to Count of ticks to run
 	 */
-	public void onTickAfter(int i, int to) {
+	public void postTick(int i, int to) {
 		Minecraft mc = Minecraft.getInstance();
 		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
 		if (!ConfigHelper.isTickAsync()) {

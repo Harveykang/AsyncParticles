@@ -15,13 +15,14 @@
     "create.MixinLevelRenderer_Rain",
     "create.MixinParticle",
     "create.MixinParticle_LightCache",
-    "sable_create.MixinParticle_LightCache",
     "epicfight.MixinCustomModelParticle",
+    "sable_create.MixinParticle_LightCache",
     "simple_weather.MixinRainParticle",
     "simple_weather.MixinSimpleWeather$NeoBus",
     "simple_weather_create.MixinSimpleWeather$NeoBus",
     "weather2.MixinEntityRotFX",
-    "weather2_create.MixinEntityRotFX"
+    "weather2_create.MixinEntityRotFX",
+    "sable_create.MixinCollideUtil"
   ],
   "injectors": {
     "defaultRequire": 1

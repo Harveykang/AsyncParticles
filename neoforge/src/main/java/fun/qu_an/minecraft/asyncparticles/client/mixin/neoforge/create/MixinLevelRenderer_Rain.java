@@ -7,11 +7,10 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.ContraptionRainBlockingOptimized;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.ContraptionRainBlocking;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import it.unimi.dsi.fastutil.longs.*;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
@@ -21,9 +20,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -69,7 +66,7 @@ public class MixinLevelRenderer_Rain {
 	                        @Local(ordinal = 0) BlockPos blockpos) {
 		Entity entity = camera.getEntity();
 		if (entity == null) return;
-		ContraptionRainBlockingOptimized.batchCheckRainBlocking(
+		ContraptionRainBlocking.batchCheckRainBlocking(
 			asyncparticles$contraptionHeightMap,
 			asyncparticles$contraptionMoving,
 			entity.level(),

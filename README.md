@@ -3,9 +3,6 @@
 - [中文](./README_zh.md)|English
 - [Modrinth](https://modrinth.com/mod/asyncparticles)|[CurseForge](https://www.curseforge.com/minecraft/mc-mods/asyncparticles)
 
-## In Progress
-- Use transform feedback for regular particle rendering.
-
 ## Configuration
 - Settings can be accessed via the ModList/ModMenu.
 
@@ -13,14 +10,14 @@
 
 - Minecraft
   - Fast particle culling.
-  - Async particle tick/rendering(buffer filling).
+  - GPU particle acceleration.
+  - Async particle tick.
   - Async particle light cache.
   - Delayed texture tick by one frame to reduce client tick duration.
-  - Async rain&snow tick/rendering. (currently only supported in MC1.21.5+)
-- Valkyrien Skies/Create + Simple Weather/Pretty Rain/Particle Rain
+  - Async rain tick.
+- Create:
+  - Contraptions now block vanilla rains.
   - Modded weather particles can now collide with ships/contraptions.
-- Pretty Rain/Particle Rain/Effectual/Particular/Simple Weather
-  - Async particle gen.
 
 ## Mods Recommended
 

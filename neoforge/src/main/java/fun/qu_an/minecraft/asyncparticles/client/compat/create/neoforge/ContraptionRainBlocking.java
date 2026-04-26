@@ -3,323 +3,715 @@ package fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge;
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import com.simibubi.create.content.contraptions.Contraption;
 import com.simibubi.create.foundation.collision.CollisionList;
-import com.simibubi.create.foundation.collision.Matrix3d;
+import dev.ryanhcode.sable.Sable;
+import dev.ryanhcode.sable.companion.math.Pose3d;
+import dev.ryanhcode.sable.sublevel.SubLevel;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.create.AccessorMatrix3d;
+import it.unimi.dsi.fastutil.longs.Long2BooleanMap;
 import it.unimi.dsi.fastutil.longs.Long2FloatMap;
+import it.unimi.dsi.fastutil.longs.Long2FloatOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4d;
+import org.joml.Vector3d;
 
 import java.util.Iterator;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CreateUtilImpl.forEachContraption;
-import static fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.TransformUtil.localToWorldPos;
 
+/**
+ * Thanks to ChatGPT
+ */
 public class ContraptionRainBlocking {
-	/// 盒子 6 个面的顶点索引表。
-	///
-	/// 局部 AABB 的 8 个角点按如下顺序编号：
-	/// ```
-    /// 0 = (minX, minY, minZ)
-    /// 1 = (minX, minY, maxZ)
-    /// 2 = (minX, maxY, minZ)
-    /// 3 = (minX, maxY, maxZ)
-    /// 4 = (maxX, minY, minZ)
-    /// 5 = (maxX, minY, maxZ)
-    /// 6 = (maxX, maxY, minZ)
-    /// 7 = (maxX, maxY, maxZ)
-    /// ```
-	/// 每个 face 里的 4 个索引，按面边界顺序排列，这样的绕序，使得：
-	/// `normal = (b - a) x (c - a)`指向盒子外侧。
-	/// 后续会用 normal.y > 0 来筛选“朝上的面”，
-	/// 从而只光栅化可能成为最高挡雨面的那些面。
-	///
-	/// 面顺序本身不是算法必须的，只是为了阅读方便：
-	/// ```
-    /// 0: -X
-    /// 1: +X
-    /// 2: -Y (bottom)
-    /// 3: +Y (top)
-    /// 4: -Z
-    /// 5: +Z
-    /// ```
-	///
-	/// Local AABB corner layout:
-	/// ```
-    /// y = maxY layer:
-    ///   3 ---- 7
-    ///   |      |
-    ///   2 ---- 6
-    /// ```
-	/// ```
-    /// y = minY layer:
-    ///   1 ---- 5
-    ///   |      |
-    ///   0 ---- 4
-    /// ```
-	/// with:
-	///
-	///   x: min -> max  (left -> right in the above sketch)
-	///
-	///   z: min -> max  (front/back depends on your mental view; use numeric definition as ground truth)
-	private static final int[][] BOX_FACE_INDICES = {
-		// x = minX, outward normal = (-1, 0, 0)
-		{0, 1, 3, 2},
-		// x = maxX, outward normal = (+1, 0, 0)
-		{4, 6, 7, 5},
-		// y = minY, outward normal = (0, -1, 0)
-		{0, 4, 5, 1},
-		// y = maxY, outward normal = (0, +1, 0)
-		{2, 3, 7, 6},
-		// z = minZ, outward normal = (0, 0, -1)
-		{0, 2, 6, 4},
-		// z = maxZ, outward normal = (0, 0, +1)
-		{1, 5, 7, 3}
+	/**
+	 * ------------------------------------------------------------------------
+	 * 原始可读版 BOX_FACE_INDICES（保留作维护对照，不参与运行）
+	 * ------------------------------------------------------------------------
+	 * <p>
+	 * 8 个角点固定编号：
+	 * <p>
+	 * 0 = (minX, minY, minZ)
+	 * 1 = (minX, minY, maxZ)
+	 * 2 = (minX, maxY, minZ)
+	 * 3 = (minX, maxY, maxZ)
+	 * 4 = (maxX, minY, minZ)
+	 * 5 = (maxX, minY, maxZ)
+	 * 6 = (maxX, maxY, minZ)
+	 * 7 = (maxX, maxY, maxZ)
+	 * <p>
+	 * private static final int[][] BOX_FACE_INDICES = {
+	 * {0, 1, 3, 2}, // -X
+	 * {4, 6, 7, 5}, // +X
+	 * {0, 4, 5, 1}, // -Y
+	 * {2, 3, 7, 6}, // +Y
+	 * {0, 2, 6, 4}, // -Z
+	 * {1, 5, 7, 3}  // +Z
+	 * };
+	 * <p>
+	 * 现在运行时改成扁平 int[]，少一层数组解引用。
+	 * <p>
+	 * 盒子 6 个面的扁平索引表。
+	 * 面顺序仍然与原先一致，便于维护：
+	 * 0: -X -> {0, 1, 3, 2}
+	 * 1: +X -> {4, 6, 7, 5}
+	 * 2: -Y -> {0, 4, 5, 1}
+	 * 3: +Y -> {2, 3, 7, 6}
+	 * 4: -Z -> {0, 2, 6, 4}
+	 * 5: +Z -> {1, 5, 7, 3}
+	 * <p>
+	 * 每 4 个数字表示一个四边形面。
+	 */
+	private static final int[] BOX_FACE_INDICES_FLAT = {
+		0, 1, 3, 2,
+		4, 6, 7, 5,
+		0, 4, 5, 1,
+		2, 3, 7, 6,
+		0, 2, 6, 4,
+		1, 5, 7, 3
 	};
 
 	private static final double FACE_EPS = 1.0e-7;
 
-	/// 批量检测矩形区域内空间立方体的挡雨情况。
-	/// 1. contraption 的 colliders（局部 AABB）
-	/// 3. 把每个局部 AABB 的 8 个角点变到世界空间
-	/// 4. 枚举盒子 6 个世界面
-	/// 5. 只处理法线 y 分量 > 0 的面（朝上的面）
-	/// 6. 将这个四边形在 XZ 平面上做光栅化
-	/// 7. 对于落在四边形投影内的每个方块列中心 (x+0.5, z+0.5)，用平面方程求该点对应的 worldY
-	/// 8. 最大值加入 result
-	public static void batchCheckRainBlocking(Long2FloatMap result, Level level, int x1, int z1, int x2, int z2) {
-		int minX = Math.min(x1, x2);
-		int maxX = Math.max(x1, x2);
-		int minZ = Math.min(z1, z2);
-		int maxZ = Math.max(z1, z2);
+	/**
+	 * 批量检测矩形区域内空间立方体的挡雨情况。
+	 */
+	public static void batchCheckRainBlocking(Long2FloatMap heightMap,
+	                                          Long2BooleanMap isMoving,
+	                                          Level level,
+	                                          int x1,
+	                                          int z1,
+	                                          int x2,
+	                                          int z2) {
+		heightMap.clear();
+		boolean doRainEffectsIfMoving = ConfigHelper.doCreateRainEffectsIfMoving();
+		if (!doRainEffectsIfMoving) {
+			isMoving.clear();
+		}
+		final int queryMinX = Math.min(x1, x2);
+		final int queryMaxX = Math.max(x1, x2);
+		final int queryMinZ = Math.min(z1, z2);
+		final int queryMaxZ = Math.max(z1, z2);
 
+		// 整个 batch 调用期间复用，不在 collider 循环里反复分配
+		final double[] cornerX = new double[8];
+		final double[] cornerY = new double[8];
+		final double[] cornerZ = new double[8];
+
+		Long2FloatMap tempHeightMap = doRainEffectsIfMoving ? heightMap : new Long2FloatOpenHashMap();
+		Matrix4d subLevelMatrix = ModListHelper.SABLE_LOADED ? new Matrix4d() : null;
+		Matrix4d S;
 		for (Iterator<AbstractContraptionEntity> it = forEachContraption(level); it.hasNext(); ) {
 			AbstractContraptionEntity entity = it.next();
 			Contraption contraption = entity.getContraption();
 			if (contraption == null) continue;
 
-			AbstractContraptionEntity.ContraptionRotationState rotationState = entity.getRotationState();
-
-			// rotationState.asMatrix() 是 world -> local
-			// 对于 localToWorldPos 应使用 transformTransposed
-			Matrix3d matrix = rotationState.asMatrix();
-			// TODO JOML
-
-			// Contraption 的世界坐标
-			Vec3 anchor = entity.getAnchorVec();
-
-			// 额外的 yaw 偏移
-			float yawOffset = rotationState.getYawOffset();
-
 			CollisionList colliders = contraption.getSimplifiedEntityColliders();
-			if (colliders == null) {
+			if (colliders == null || colliders.size <= 0) {
 				continue;
 			}
 
-			for (int i = 0; i < colliders.size; i++) {
-				// 局部AABB
-				double centerX = colliders.centerX[i];
-				double centerY = colliders.centerY[i];
-				double centerZ = colliders.centerZ[i];
-				double extentsX = colliders.extentsX[i];
-				double extentsY = colliders.extentsY[i];
-				double extentsZ = colliders.extentsZ[i];
-
-				double localMinX = centerX - extentsX;
-				double localMinY = centerY - extentsY;
-				double localMinZ = centerZ - extentsZ;
-				double localMaxX = centerX + extentsX;
-				double localMaxY = centerY + extentsY;
-				double localMaxZ = centerZ + extentsZ;
-
-				/*
-				 * 构造局部 AABB 的 8 个角点，并转换到世界坐标。
-				 *
-				 * 角点编号必须与 BOX_FACE_INDICES 的约定保持一致，
-				 * 否则面拓扑和法线方向都会错。
-				 */
-				Vec3[] corners = new Vec3[8];
-				// TODO JOML
-				corners[0] = localToWorldPos(new Vec3(localMinX, localMinY, localMinZ), anchor, matrix, yawOffset);
-				corners[1] = localToWorldPos(new Vec3(localMinX, localMinY, localMaxZ), anchor, matrix, yawOffset);
-				corners[2] = localToWorldPos(new Vec3(localMinX, localMaxY, localMinZ), anchor, matrix, yawOffset);
-				corners[3] = localToWorldPos(new Vec3(localMinX, localMaxY, localMaxZ), anchor, matrix, yawOffset);
-				corners[4] = localToWorldPos(new Vec3(localMaxX, localMinY, localMinZ), anchor, matrix, yawOffset);
-				corners[5] = localToWorldPos(new Vec3(localMaxX, localMinY, localMaxZ), anchor, matrix, yawOffset);
-				corners[6] = localToWorldPos(new Vec3(localMaxX, localMaxY, localMinZ), anchor, matrix, yawOffset);
-				corners[7] = localToWorldPos(new Vec3(localMaxX, localMaxY, localMaxZ), anchor, matrix, yawOffset);
-
-				/*
-				 * 枚举盒子 6 个面。
-				 *
-				 * 并不是只处理“局部 +Y 面”。
-				 * 因为 contraption 已经旋转到世界空间后，
-				 * 原本的侧面也可能变成朝上面。
-				 *
-				 * 所以我们在世界空间里重新算法线，再用 normal.y > 0 来筛选。
-				 */
-				for (int[] face : BOX_FACE_INDICES) {
-					rasterizeTopQuadFace(
-						result,
-						minX, maxX,
-						minZ, maxZ,
-						corners[face[0]],
-						corners[face[1]],
-						corners[face[2]],
-						corners[face[3]]
-					);
+			AABB aabb = entity.getBoundingBox();
+			Object subLevel = null;
+			if (!ModListHelper.SABLE_LOADED || (subLevel = Sable.HELPER.getContaining(entity)) == null) {
+				if (aabb.minX > queryMaxX
+					|| aabb.maxX < queryMinX
+					|| aabb.minZ > queryMaxZ
+					|| aabb.maxZ < queryMinZ) {
+					continue;
 				}
+				S = null;
+			} else {
+				Pose3d pose3d = ((SubLevel) subLevel).logicalPose();
+				Vec3 minPos = pose3d.transformPosition(aabb.getMinPosition());
+				Vec3 maxPos;
+				if (minPos.x > queryMaxX
+					|| minPos.z > queryMaxZ
+					|| (maxPos = pose3d.transformPosition(aabb.getMaxPosition())).x < queryMinX
+					|| maxPos.z < queryMinZ) {
+					continue;
+				}
+				S = ((SubLevel) subLevel).logicalPose().bakeIntoMatrix(subLevelMatrix);
 			}
+
+			checkRainBlocking(entity,
+				colliders,
+				cornerX,
+				cornerY,
+				cornerZ,
+				heightMap,
+				isMoving,
+				tempHeightMap,
+				subLevel,
+				S);
 		}
 	}
 
-	/// 将一个世界空间中的四边形面光栅化到 XZ 网格上，并把最高y写入 result。
-	///
-	/// 这里要求：
-	/// - a/b/c/d 是同一平面上的四边形顶点
-	/// - 顶点顺序沿面边界排列
-	/// - 顺序应与 BOX\_FACE\_INDICES 保持一致，使得 (b-a)x(c-a) 是外法线
-	private static void rasterizeTopQuadFace(
+	private static void checkRainBlocking(AbstractContraptionEntity entity,
+	                                      CollisionList colliders,
+	                                      double[] cornerX,
+	                                      double[] cornerY,
+	                                      double[] cornerZ,
+	                                      Long2FloatMap heightMap,
+	                                      Long2BooleanMap isMoving,
+	                                      Long2FloatMap tempHeightMap,
+	                                      Object subLevel,
+	                                      Matrix4d S) {
+		boolean doRainEffectsIfMoving = ConfigHelper.doCreateRainEffectsIfMoving();
+		AbstractContraptionEntity.ContraptionRotationState rotationState = entity.getRotationState();
+		AccessorMatrix3d mAcc = (AccessorMatrix3d) rotationState.asMatrix();
+		Vec3 anchor = entity.getAnchorVec();
+		float yawOffset = rotationState.getYawOffset();
+
+		/*
+		  Vec3 worldPos = localPos.subtract(VecHelper.CENTER_OF_ORIGIN);
+		  worldPos = rotationMatrix.transformTransposed(worldPos);
+		  worldPos = VecHelper.rotate(worldPos, (double) yawOffset, Axis.Y);
+		  worldPos = worldPos.add(VecHelper.CENTER_OF_ORIGIN);
+		  worldPos = worldPos.add(anchorVec);
+		  return worldPos;
+
+		  上式可整理成：
+		    world = Ry(+yaw) * M^T * local + [anchor + center - Ry(+yaw) * M^T * center]
+		  写成仿射形式：
+		    world = T * local + offset
+		  其中：
+		    T = Ry(+yaw) * M^T
+		 */
+
+		final double m00 = mAcc.m00();
+		final double m01 = mAcc.m01();
+		final double m02 = mAcc.m02();
+		final double m10 = mAcc.m10();
+		final double m11 = mAcc.m11();
+		final double m12 = mAcc.m12();
+		final double m20 = mAcc.m20();
+		final double m21 = mAcc.m21();
+		final double m22 = mAcc.m22();
+
+		final double rad = Math.toRadians(yawOffset);
+		final double cos = Math.cos(rad);
+		final double sin = Math.sin(rad);
+
+		/*
+		 * T = Ry(yaw) * M^T
+		 *
+		 * 这里采用与前面 localToWorldPos 一致的 Y 轴旋转约定：
+		 *   x' = x*cos + z*sin
+		 *   y' = y
+		 *   z' = -x*sin + z*cos
+		 */
+		final double t00 = cos * m00 + sin * m02;
+		final double t01 = cos * m10 + sin * m12;
+		final double t02 = cos * m20 + sin * m22;
+
+		@SuppressWarnings("UnnecessaryLocalVariable") final double t10 = m01;
+		@SuppressWarnings("UnnecessaryLocalVariable") final double t11 = m11;
+		@SuppressWarnings("UnnecessaryLocalVariable") final double t12 = m21;
+
+		final double t20 = -sin * m00 + cos * m02;
+		final double t21 = -sin * m10 + cos * m12;
+		final double t22 = -sin * m20 + cos * m22;
+
+		/*
+		 * offset = anchor + center - T * center
+		 * 0.5 is centered offset
+		 */
+		final double offsetX = anchor.x + .5 - (t00 * .5 + t01 * .5 + t02 * .5);
+		final double offsetY = anchor.y + .5 - (t10 * .5 + t11 * .5 + t12 * .5);
+		final double offsetZ = anchor.z + .5 - (t20 * .5 + t21 * .5 + t22 * .5);
+
+		for (int i = 0; i < colliders.size; i++) {
+			final double cx = colliders.centerX[i];
+			final double cy = colliders.centerY[i];
+			final double cz = colliders.centerZ[i];
+			final double ex = colliders.extentsX[i];
+			final double ey = colliders.extentsY[i];
+			final double ez = colliders.extentsZ[i];
+
+			/*
+			 * ----------------------------------------------------------------
+			 * 上一版优化（保留作对照，不参与运行）
+			 * ----------------------------------------------------------------
+			 *
+			 * final double minX = cx - ex;
+			 * final double minY = cy - ey;
+			 * final double minZ = cz - ez;
+			 * final double maxX = cx + ex;
+			 * final double maxY = cy + ey;
+			 * final double maxZ = cz + ez;
+			 *
+			 * setTransformedCorner(0, minX, minY, minZ, ...);
+			 * setTransformedCorner(1, minX, minY, maxZ, ...);
+			 * ...
+			 * setTransformedCorner(7, maxX, maxY, maxZ, ...);
+			 *
+			 * ----------------------------------------------------------------
+			 * 当前进一步优化：
+			 * ----------------------------------------------------------------
+			 *
+			 * 局部 AABB 的 8 个角点可以写成：
+			 *   centerLocal ± (ex,0,0) ± (0,ey,0) ± (0,0,ez)
+			 *
+			 * 在线性部分 T 下：
+			 *   T * (center ± axisX ± axisY ± axisZ)
+			 * = T*center ± T*axisX ± T*axisY ± T*axisZ
+			 *
+			 * 因此只需要：
+			 *   1) 变换局部中心
+			 *   2) 求三个世界半轴向量 vx/vy/vz
+			 *   3) 8 个角点用加减组合
+			 */
+
+			// centerWorld = T * centerLocal + offset
+			double worldCenterX = t00 * cx + t01 * cy + t02 * cz + offsetX;
+			double worldCenterY = t10 * cx + t11 * cy + t12 * cz + offsetY;
+			double worldCenterZ = t20 * cx + t21 * cy + t22 * cz + offsetZ;
+
+			if (S != null) {
+				Vector3d vector3d = S.transformPosition(worldCenterX, worldCenterY, worldCenterZ, new Vector3d());
+				worldCenterX = vector3d.x;
+				worldCenterY = vector3d.y;
+				worldCenterZ = vector3d.z;
+			}
+
+			// 局部 X 半轴 extent 变到世界后的向量 vx = T * (ex, 0, 0)
+			double vxX = t00 * ex;
+			double vxY = t10 * ex;
+			double vxZ = t20 * ex;
+			if (S != null) {
+				vxX = S.m00() * vxX;
+				vxY = S.m10() * vxY;
+				vxZ = S.m20() * vxZ;
+			}
+
+			// 局部 Y 半轴 extent 变到世界后的向量 vy = T * (0, ey, 0)
+			double vyX = t01 * ey;
+			double vyY = t11 * ey;
+			double vyZ = t21 * ey;
+			if (S != null) {
+				vyX = S.m01() * vyX;
+				vyY = S.m11() * vyY;
+				vyZ = S.m21() * vyZ;
+			}
+
+			// 局部 Z 半轴 extent 变到世界后的向量 vz = T * (0, 0, ez)
+			double vzX = t02 * ez;
+			double vzY = t12 * ez;
+			double vzZ = t22 * ez;
+			if (S != null) {
+				vzX = S.m02() * vzX;
+				vzY = S.m12() * vzY;
+				vzZ = S.m22() * vzZ;
+			}
+
+			/*
+			 * 按固定编号填充 8 个角点：
+			 *
+			 * 0 = center - vx - vy - vz
+			 * 1 = center - vx - vy + vz
+			 * 2 = center - vx + vy - vz
+			 * 3 = center - vx + vy + vz
+			 * 4 = center + vx - vy - vz
+			 * 5 = center + vx - vy + vz
+			 * 6 = center + vx + vy - vz
+			 * 7 = center + vx + vy + vz
+			 */
+
+			// 0 = (minX, minY, minZ)
+			cornerX[0] = worldCenterX - vxX - vyX - vzX;
+			cornerY[0] = worldCenterY - vxY - vyY - vzY;
+			cornerZ[0] = worldCenterZ - vxZ - vyZ - vzZ;
+
+			// 1 = (minX, minY, maxZ)
+			cornerX[1] = worldCenterX - vxX - vyX + vzX;
+			cornerY[1] = worldCenterY - vxY - vyY + vzY;
+			cornerZ[1] = worldCenterZ - vxZ - vyZ + vzZ;
+
+			// 2 = (minX, maxY, minZ)
+			cornerX[2] = worldCenterX - vxX + vyX - vzX;
+			cornerY[2] = worldCenterY - vxY + vyY - vzY;
+			cornerZ[2] = worldCenterZ - vxZ + vyZ - vzZ;
+
+			// 3 = (minX, maxY, maxZ)
+			cornerX[3] = worldCenterX - vxX + vyX + vzX;
+			cornerY[3] = worldCenterY - vxY + vyY + vzY;
+			cornerZ[3] = worldCenterZ - vxZ + vyZ + vzZ;
+
+			// 4 = (maxX, minY, minZ)
+			cornerX[4] = worldCenterX + vxX - vyX - vzX;
+			cornerY[4] = worldCenterY + vxY - vyY - vzY;
+			cornerZ[4] = worldCenterZ + vxZ - vyZ - vzZ;
+
+			// 5 = (maxX, minY, maxZ)
+			cornerX[5] = worldCenterX + vxX - vyX + vzX;
+			cornerY[5] = worldCenterY + vxY - vyY + vzY;
+			cornerZ[5] = worldCenterZ + vxZ - vyZ + vzZ;
+
+			// 6 = (maxX, maxY, minZ)
+			cornerX[6] = worldCenterX + vxX + vyX - vzX;
+			cornerY[6] = worldCenterY + vxY + vyY - vzY;
+			cornerZ[6] = worldCenterZ + vxZ + vyZ - vzZ;
+
+			// 7 = (maxX, maxY, maxZ)
+			cornerX[7] = worldCenterX + vxX + vyX + vzX;
+			cornerY[7] = worldCenterY + vxY + vyY + vzY;
+			cornerZ[7] = worldCenterZ + vxZ + vyZ + vzZ;
+
+			// 遍历 6 个面；扁平数组版少一层数组解引用
+			for (int f = 0; f < BOX_FACE_INDICES_FLAT.length; f += 4) {
+				rasterizeTopQuadFaceRaw(
+					tempHeightMap,
+					cornerX, cornerY, cornerZ,
+					BOX_FACE_INDICES_FLAT[f],
+					BOX_FACE_INDICES_FLAT[f + 1],
+					BOX_FACE_INDICES_FLAT[f + 2],
+					BOX_FACE_INDICES_FLAT[f + 3]
+				);
+			}
+		}
+
+		if (!doRainEffectsIfMoving && !tempHeightMap.isEmpty()) {
+			for (Long2FloatMap.Entry e : tempHeightMap.long2FloatEntrySet()) {
+				long l = e.getLongKey();
+				float f = e.getFloatValue();
+				float old = heightMap.get(l);
+				if (old > f) {
+					continue;
+				}
+				heightMap.put(l, f);
+				Vec3 globalContactPoint = new Vec3(BlockPos.getX(l), f, BlockPos.getZ(l));
+				Vec3 contactPointMotion;
+				if (subLevel != null) {
+					Pose3d pose = ((SubLevel) subLevel).logicalPose();
+					Vec3 localContactPoint = pose.transformPositionInverse(globalContactPoint);
+					contactPointMotion = pose.transformNormal(entity.getContactPointMotion(localContactPoint))
+						.add(globalContactPoint.subtract(((SubLevel) subLevel).lastPose().transformPosition(localContactPoint)));
+				} else {
+					contactPointMotion = entity.getContactPointMotion(globalContactPoint);
+				}
+				boolean b = contactPointMotion.lengthSqr() > 0.01;
+				isMoving.put(l, b);
+			}
+			tempHeightMap.clear();
+		}
+	}
+
+	/**
+	 * 将一个世界空间中的四边形面直接 rasterize 到 XZ 网格上。
+	 * <p>
+	 * 输入是：
+	 * - cornerX / cornerY / cornerZ 三个数组
+	 * - 四个顶点索引 ia/ib/ic/id
+	 * <p>
+	 * 这样避免了 Vec3 对象和额外解引用。
+	 * <p>
+	 * ------------------------------------------------------------------------
+	 * 上一版未继续优化的实现（保留作对照，不参与运行）
+	 * ------------------------------------------------------------------------
+	 * <p>
+	 * final double invNy = 1.0 / ny;
+	 * final double kx = -nx * invNy;
+	 * final double kz = -nz * invNy;
+	 * final double kb = ay + (nx * ax + nz * az) * invNy;
+	 * <p>
+	 * <code>for (int x = fromX; x <= toX; x++) {
+	 * final double sampleX = x + 0.5;
+	 * <p>
+	 * for (int z = fromZ; z <= toZ; z++) {
+	 * final double sampleZ = z + 0.5;
+	 * <p>
+	 * if (!isPointInConvexQuadXZRaw(sampleX, sampleZ, ax, az, bx, bz, cx, cz, dx, dz)) {
+	 * continue;
+	 * }
+	 * <p>
+	 * final double y = kx * sampleX + kz * sampleZ + kb;
+	 * long key = packXZ(x, z);
+	 * float old = result.getOrDefault(key, Float.NEGATIVE_INFINITY);
+	 * if (y > old) result.put(key, (float) y);
+	 * }
+	 * }</code>
+	 * <p>
+	 * ------------------------------------------------------------------------
+	 * 当前进一步优化：
+	 * ------------------------------------------------------------------------
+	 * <p>
+	 * 1. 不再每格调用 isPointInConvexQuadXZRaw()
+	 * 2. 把四条边都写成：
+	 * E(x,z) = A*x + B*z + C
+	 * 3. 在 x/z 双循环中对 E 做增量更新
+	 * 4. 平面高度 y = kx*x + kz*z + kb 也做增量更新
+	 * <p>
+	 * 将一个世界空间中的四边形面直接 rasterize 到 XZ 网格上。
+	 * <p>
+	 * 输入是：
+	 * - cornerX / cornerY / cornerZ 三个数组
+	 * - 四个顶点索引 ia/ib/ic/id
+	 * <p>
+	 * 这样避免了 Vec3 对象和额外解引用。
+	 * <p>
+	 * ------------------------------------------------------------------------
+	 * 旧版（保留思路对照，不参与运行）
+	 * ------------------------------------------------------------------------
+	 * <p>
+	 * <code>final double area2 =
+	 * ax * bz - az * bx +
+	 * bx * cz - bz * cx +
+	 * cx * dz - cz * dx +
+	 * dx * az - dz * ax;</code>
+	 * <p>
+	 * <code>if (Math.abs(area2) <= FACE_EPS) {
+	 * return;
+	 * }</code>
+	 * <p>
+	 * final boolean ccw = area2 > 0.0;
+	 * <p>
+	 * <code>if (ccw) {
+	 * for (...) {
+	 * if (e1 >= -FACE_EPS && e2 >= -FACE_EPS && e3 >= -FACE_EPS && e4 >= -FACE_EPS) {
+	 * ...
+	 * }
+	 * }
+	 * } else {
+	 * for (...) {
+	 * if (e1 <= FACE_EPS && e2 <= FACE_EPS && e3 <= FACE_EPS && e4 <= FACE_EPS) {
+	 * ...
+	 * }
+	 * }
+	 * }</code>
+	 * <p>
+	 * ------------------------------------------------------------------------
+	 * 当前“分支更少版”
+	 * ------------------------------------------------------------------------
+	 * <p>
+	 * 做法：
+	 * 1. 先求投影四边形有向面积 area2
+	 * 2. 用 orientSign = +1 或 -1 表示绕序
+	 * 3. 把四条边函数整体乘上 orientSign
+	 * 4. 之后统一判断：
+	 * e1 >= -FACE_EPS && e2 >= -FACE_EPS && e3 >= -FACE_EPS && e4 >= -FACE_EPS
+	 * <p>
+	 * 这样就去掉了整块 ccw/cw 双分支循环。
+	 */
+	private static void rasterizeTopQuadFaceRaw(
 		Long2FloatMap result,
-		int queryMinX, int queryMaxX,
-		int queryMinZ, int queryMaxZ,
-		Vec3 a, Vec3 b, Vec3 c, Vec3 d
+		double[] cornerX, double[] cornerY, double[] cornerZ,
+		int ia, int ib, int ic, int id
 	) {
-		/*
-		 * 用前三个点计算面法线：
-		 * normal = (b - a) x (c - a)
-		 *
-		 * 这里不需要单位化，因为后面只用到：
-		 * 1. normal.y 的符号判断
-		 * 2. 平面方程中的相对比例
-		 */
-		double abx = b.x - a.x;
-		double aby = b.y - a.y;
-		double abz = b.z - a.z;
+		final double ax = cornerX[ia];
+		final double ay = cornerY[ia];
+		final double az = cornerZ[ia];
 
-		double acx = c.x - a.x;
-		double acy = c.y - a.y;
-		double acz = c.z - a.z;
+		final double bx = cornerX[ib];
+		final double by = cornerY[ib];
+		final double bz = cornerZ[ib];
 
-		double nx = aby * acz - abz * acy;
-		double ny = abz * acx - abx * acz;
-		double nz = abx * acy - aby * acx;
+		final double cx = cornerX[ic];
+		final double cy = cornerY[ic];
+		final double cz = cornerZ[ic];
 
-		/*
-		 * 只 rasterize 朝上的面。
-		 *
-		 * ny <= 0:
-		 *   - 说明这个面不是朝上
-		 *   - 或者接近竖直，无法稳定地由平面方程反解 y
-		 *
-		 * 因为我们求的是“最高挡雨面”，
-		 * 所以只有 ny > 0 的面有意义。
-		 */
+		final double dx = cornerX[id];
+		final double dy = cornerY[id];
+		final double dz = cornerZ[id];
+
+		// normal = (b - a) x (c - a)
+		final double abx = bx - ax;
+		final double aby = by - ay;
+		final double abz = bz - az;
+
+		final double acx = cx - ax;
+		final double acy = cy - ay;
+		final double acz = cz - az;
+
+		final double nx = aby * acz - abz * acy;
+		final double ny = abz * acx - abx * acz;
+		final double nz = abx * acy - aby * acx;
+
+		// 只保留朝上的面；同时避免 ny 太小时反解 y 不稳定
 		if (ny <= FACE_EPS) {
 			return;
 		}
 
-		/*
-		 * 先求四边形在 XZ 平面上的投影包围盒，
-		 * 再与用户查询矩形做裁剪。
-		 *
-		 * 注意我们采样的是“方块列中心”：
-		 *   sampleX = x + 0.5
-		 *   sampleZ = z + 0.5
-		 *
-		 * 因此这里要把“投影包围盒”转换成可能命中的整数 x/z 范围：
-		 *   x + 0.5 ∈ [minFaceX, maxFaceX]
-		 * <=> x ∈ [ceil(minFaceX - 0.5), floor(maxFaceX - 0.5)]
-		 */
-		double minFaceX = Math.min(Math.min(a.x, b.x), Math.min(c.x, d.x));
-		double maxFaceX = Math.max(Math.max(a.x, b.x), Math.max(c.x, d.x));
-		double minFaceZ = Math.min(Math.min(a.z, b.z), Math.min(c.z, d.z));
-		double maxFaceZ = Math.max(Math.max(a.z, b.z), Math.max(c.z, d.z));
+		// XZ 投影包围盒裁剪
+		final double minFaceX = Math.min(Math.min(ax, bx), Math.min(cx, dx));
+		final double maxFaceX = Math.max(Math.max(ax, bx), Math.max(cx, dx));
+//		final double minFaceY = Math.min(Math.min(ay, by), Math.min(cy, dy));
+		final double maxFaceY = Math.max(Math.max(ay, by), Math.max(cy, dy));
+		final double minFaceZ = Math.min(Math.min(az, bz), Math.min(cz, dz));
+		final double maxFaceZ = Math.max(Math.max(az, bz), Math.max(cz, dz));
 
-		int fromX = Math.max(queryMinX, Mth.ceil(minFaceX - 0.5));
-		int toX = Math.min(queryMaxX, Mth.floor(maxFaceX - 0.5));
-		int fromZ = Math.max(queryMinZ, Mth.ceil(minFaceZ - 0.5));
-		int toZ = Math.min(queryMaxZ, Mth.floor(maxFaceZ - 0.5));
+		final int fromX = Mth.floor(minFaceX);
+		final int toX = Mth.ceil(maxFaceX) - 1;
+		final int fromZ = Mth.floor(minFaceZ);
+		final int toZ = Mth.ceil(maxFaceZ) - 1;
 
 		if (fromX > toX || fromZ > toZ) {
 			return;
 		}
 
 		/*
-		 * 遍历可能落入该面投影的所有世界列中心。
-		 *
-		 * 对每个 (x, z)：
-		 * 1. 取列中心 (x + 0.5, z + 0.5)
-		 * 2. 判断该点是否落在四边形的 XZ 投影内部
-		 * 3. 若在，则用平面方程直接求对应 y
-		 * 4. 更新 result 为更高的挡雨面
+		 * 平面高度：
+		 *   nx*(x-ax) + ny*(y-ay) + nz*(z-az) = 0
+		 * => y = ay - (nx*(x-ax) + nz*(z-az)) / ny
+		 * => y = kx*x + kz*z + kb
 		 */
-		double inverseNy = 1.0 / ny;
+		final double invNy = 1.0 / ny;
+		final double kx = -nx * invNy;
+		final double kz = -nz * invNy;
+		final double kb = ay + (nx * ax + nz * az) * invNy;
 
-// 根据梯度确定每个格子的最高角
-		double kx = -nx * inverseNy;
-		double kz = -nz * inverseNy;
+		/*
+		 * 四条边函数：
+		 *   E(x,z) = A*x + B*z + C
+		 *
+		 * 对有向边 p -> q：
+		 *   E(x,z) = cross(q-p, (x,z)-p)
+		 */
+		double e1A = -(bz - az);
+		double e1B = (bx - ax);
+		double e1C = (bz - az) * ax - (bx - ax) * az;
 
-		double sampleOffsetX = kx > 0 ? 1.0 : 0.0;
-		double sampleOffsetZ = kz > 0 ? 1.0 : 0.0;
+		double e2A = -(cz - bz);
+		double e2B = (cx - bx);
+		double e2C = (cz - bz) * bx - (cx - bx) * bz;
+
+		double e3A = -(dz - cz);
+		double e3B = (dx - cx);
+		double e3C = (dz - cz) * cx - (dx - cx) * cz;
+
+		double e4A = -(az - dz);
+		double e4B = (ax - dx);
+		double e4C = (az - dz) * dx - (ax - dx) * dz;
+
+		/*
+		 * 投影多边形有向面积：
+		 * - area2 > 0 表示一种绕序
+		 * - area2 < 0 表示相反绕序
+		 *
+		 * 旧版会在这里分成 ccw/cw 两套循环。
+		 * 现在直接把边函数整体乘以 orientSign，
+		 * 把“内部判定”统一成同一个方向。
+		 */
+		final double area2 =
+			ax * bz - az * bx +
+				bx * cz - bz * cx +
+				cx * dz - cz * dx +
+				dx * az - dz * ax;
+
+		// 投影退化太严重时跳过
+		if (Math.abs(area2) <= FACE_EPS) {
+			return;
+		}
+
+		final double orientSign = area2 > 0.0 ? 1.0 : -1.0;
+
+		e1A *= orientSign;
+		e1B *= orientSign;
+		e1C *= orientSign;
+
+		e2A *= orientSign;
+		e2B *= orientSign;
+		e2C *= orientSign;
+
+		e3A *= orientSign;
+		e3B *= orientSign;
+		e3C *= orientSign;
+
+		e4A *= orientSign;
+		e4B *= orientSign;
+		e4C *= orientSign;
+
+		/*
+		  利用平面梯度直接确定格子内最高点
+
+		  平面方程：y = kx*x + kz*z + kb
+		  梯度：(kx, kz)
+
+		  对于格子 [x, x+1] x [z, z+1]：
+		  - 如果 kx > 0，x 越大 y 越大 → 选右边 (x+1)
+		  - 如果 kx < 0，x 越小 y 越大 → 选左边 (x)
+		  - 如果 kz > 0，z 越大 y 越大 → 选上边 (z+1)
+		  - 如果 kz < 0，z 越小 y 越大 → 选下边 (z)
+
+		  因此每个格子只需采样1个角点（最高角）
+		 */
+		// xz取判断取中心点
+		final double startSampleX = fromX + 0.5;
+		final double startSampleZ = fromZ + 0.5;
+
+		/*
+		  把“中心点 inside”改成“格子与四边形投影有任意相交”
+		  对边函数 E(x,z)=A*x+B*z+C，在格子中心的值为 Ecenter 时，
+		  它在整个 1x1 格子中的最大可能增量是 0.5*(|A|+|B|)。
+
+		  判断与水平面夹角是否小于 45 度：
+		  cos(theta) > cos(45) => ny^2 > nx^2 + nz^2
+		 */
+		final boolean isFlat = (ny * ny) > (nx * nx + nz * nz);
+
+		/*
+		  如果平缓 (<45度)，给半格的膨胀容差，解决漏格子问题；
+		  如果陡峭 (>=45度)，容差给 0，退化回严格的“中心点在内部”判定，防止高度暴走。
+		 */
+		final double e1Reach;
+		final double e2Reach;
+		final double e3Reach;
+		final double e4Reach;
+		if (false) { // TODO is it necessary?
+			e1Reach = e2Reach = e3Reach = e4Reach = 0.0;
+		} else {
+			e1Reach = 0.5 * (Math.abs(e1A) + Math.abs(e1B));
+			e2Reach = 0.5 * (Math.abs(e2A) + Math.abs(e2B));
+			e3Reach = 0.5 * (Math.abs(e3A) + Math.abs(e3B));
+			e4Reach = 0.5 * (Math.abs(e4A) + Math.abs(e4B));
+		}
+
+		double rowE1 = e1A * startSampleX + e1B * startSampleZ + e1C + e1Reach;
+		double rowE2 = e2A * startSampleX + e2B * startSampleZ + e2C + e2Reach;
+		double rowE3 = e3A * startSampleX + e3B * startSampleZ + e3C + e3Reach;
+		double rowE4 = e4A * startSampleX + e4B * startSampleZ + e4C + e4Reach;
+		// 高度取格子内最高角
+		double rowY = kx * (fromX + (kx > 0 ? 1.0 : 0.0)) + kz * (fromZ + (kz > 0 ? 1.0 : 0.0)) + kb;
 
 		for (int x = fromX; x <= toX; x++) {
+			double e1 = rowE1;
+			double e2 = rowE2;
+			double e3 = rowE3;
+			double e4 = rowE4;
+			double y = rowY;
+
 			for (int z = fromZ; z <= toZ; z++) {
-				// 采样最高角
-				double sampleX = x + sampleOffsetX;
-				double sampleZ = z + sampleOffsetZ;
+				if (e1 >= -FACE_EPS &&
+					e2 >= -FACE_EPS &&
+					e3 >= -FACE_EPS &&
+					e4 >= -FACE_EPS) {
+					final long key = BlockPos.asLong(x, 0, z);
+					final float old = result.getOrDefault(key, Float.NEGATIVE_INFINITY);
 
-				// 检查采样点是否在四边形内
-				if (isPointInConvexQuadXZ(sampleX, sampleZ, a, b, c, d)) {
-					double y = a.y - (nx * (sampleX - a.x) + nz * (sampleZ - a.z)) * inverseNy;
+					// 限制 y 不能超过四边形本身的最高和最低点，加入偏移量
+					float clampedY = (float) Math.min(y, maxFaceY) + 0.9f; // idk but it works
 
-					long key = BlockPos.asLong(x, 0, z);
-					float old = result.getOrDefault(key, Float.NEGATIVE_INFINITY);
-					y += 1.0;
-					if (y > old) {
-						result.put(key, (float) y);
+					if (clampedY > old) {
+						result.put(key, clampedY);
 					}
 				}
+
+				e1 += e1B;
+				e2 += e2B;
+				e3 += e3B;
+				e4 += e4B;
+				y += kz;
 			}
+
+			rowE1 += e1A;
+			rowE2 += e2A;
+			rowE3 += e3A;
+			rowE4 += e4A;
+			rowY += kx;
 		}
-	}
-
-	/**
-	 * 判断一个 XZ 平面中的点 (px, pz) 是否落在凸四边形 a-b-c-d 的投影内部。
-	 * <p>
-	 * 这里假设：
-	 * - a/b/c/d 沿四边形边界顺序排列
-	 * - 四边形是凸的
-	 * <p>
-	 * 算法：
-	 * - 对四条边分别计算 2D 叉积符号
-	 * - 若符号同时出现正负，说明点在外部
-	 * - 若全同号或允许少量接近 0，则说明点在内部或边界上
-	 * <p>
-	 * 这是一个“对绕序不敏感”的写法：
-	 * - 若顶点顺序是顺时针，内部点的叉积会整体同号
-	 * - 若顶点顺序是逆时针，内部点的叉积也会整体同号
-	 * 只要四边形顶点顺序沿边界一致即可
-	 */
-	private static boolean isPointInConvexQuadXZ(double px, double pz, Vec3 a, Vec3 b, Vec3 c, Vec3 d) {
-		double c1 = cross2D(b.x - a.x, b.z - a.z, px - a.x, pz - a.z);
-		double c2 = cross2D(c.x - b.x, c.z - b.z, px - b.x, pz - b.z);
-		double c3 = cross2D(d.x - c.x, d.z - c.z, px - c.x, pz - c.z);
-		double c4 = cross2D(a.x - d.x, a.z - d.z, px - d.x, pz - d.z);
-
-		boolean hasPos = c1 > FACE_EPS || c2 > FACE_EPS || c3 > FACE_EPS || c4 > FACE_EPS;
-		boolean hasNeg = c1 < -FACE_EPS || c2 < -FACE_EPS || c3 < -FACE_EPS || c4 < -FACE_EPS;
-
-		return !(hasPos && hasNeg);
-	}
-
-	/**
-	 * 2D 叉积：
-	 * (ax, az) x (bx, bz) = ax * bz - az * bx
-	 * <p>
-	 * 在 XZ 平面里，它的符号可以用来判断点位于有向边的哪一侧。
-	 */
-	private static double cross2D(double ax, double az, double bx, double bz) {
-		return ax * bz - az * bx;
 	}
 }
