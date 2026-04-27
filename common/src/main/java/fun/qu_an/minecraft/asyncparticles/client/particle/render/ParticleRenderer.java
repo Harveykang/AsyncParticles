@@ -46,6 +46,7 @@ public class ParticleRenderer implements IParticleRenderer {
 	private boolean shouldSkip = true;
 	private final BufferHelper bufferHelper = DIRECT_BUFFER ? null : new BufferHelper();
 	private final int tf;
+	private boolean computed = false;
 
 	public ParticleRenderer(GpuParticleBehavior gpuBehavior) {
 		this.gpuBehavior = gpuBehavior;
@@ -63,6 +64,10 @@ public class ParticleRenderer implements IParticleRenderer {
 		GLCaps.tfSupport.glBindTransformFeedbackBuffer(0, target.vbo);
 		GLCaps.tfSupport.glBindTransformFeedback(0);
 		resize(gpuBehavior.getGpuParticleLimit());
+	}
+
+	public void beginFrame() {
+		computed = false;
 	}
 
 	@Override
@@ -247,6 +252,9 @@ public class ParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void compute(Camera camera, float partialTicks) {
+		if (computed) {
+			return; // compute once per frame
+		}
 		if (shouldSkip) {
 			throw new IllegalStateException("Should skip rendering during this tick!");
 		}
@@ -310,6 +318,8 @@ public class ParticleRenderer implements IParticleRenderer {
 		if (tf != -1) {
 			GLCaps.tfSupport.glBindTransformFeedback(0);
 		}
+
+		computed = true;
 	}
 
 	@Override
@@ -444,7 +454,7 @@ public class ParticleRenderer implements IParticleRenderer {
 			MemoryUtil.memPutByte(ptr, (byte) (tsp.alpha * 255f));
 			ptr += 1L;
 
-			// Light (56-59): 两个 short
+			// Light (56-59): 2 shorts
 			MemoryUtil.memPutInt(ptr, light);
 			ptr += 4L;
 

@@ -471,7 +471,7 @@ public class AsyncTickBehavior {
 			end tick operations: %d,
 			max particles queue size: %d,
 			particles queue size/allocated: %s,
-			gpu particles size/allocated: %s,
+			GPU particles size/allocated: %s,
 			particles to add size: %d
 			sync particle count: %d,
 			sync particle types: %s,"""
@@ -569,7 +569,7 @@ public class AsyncTickBehavior {
 
 			if (!tickAsync || !enableGpuAcceleration) {
 				GpuParticleBehavior.INSTANCE.gpuParticles.forEach((t, q) -> {
-					particles.get(t).addAll(q);
+					particles.computeIfAbsent(t, k -> ParticleHelper.newParticleQueue()).addAll(q);
 				});
 				GpuParticleBehavior.INSTANCE.gpuParticles.clear();
 			} else {

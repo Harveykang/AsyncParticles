@@ -13,10 +13,7 @@ import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.particle.render.IParticleRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
-import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
-import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
-import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
+import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -99,12 +96,14 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 
 		Frustum frustum = AsyncRenderBehavior.INSTANCE.getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
-		for (ParticleRenderType particleRenderType : particles.keySet()) {
-			if (particleRenderType == ParticleRenderType.NO_RENDER) {
+		Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = GpuParticleBehavior.INSTANCE.gpuParticles;
+		for (ParticleRenderType particleRenderType : new CombineIterable<>(particles.keySet(), gpuParticles.keySet())) {
+			if (particleRenderType == ParticleRenderType.NO_RENDER
+				|| !renderTypePredicate.test(particleRenderType)) {
 				continue;
 			}
-			Queue<Particle> queue = this.particles.get(particleRenderType);
-			Queue<TextureSheetParticle> gpuQueue = GpuParticleBehavior.INSTANCE.gpuParticles.get(particleRenderType);
+			Queue<Particle> queue = particles.get(particleRenderType);
+			Queue<TextureSheetParticle> gpuQueue = gpuParticles.get(particleRenderType);
 			boolean hasGpu = gpuQueue != null && !gpuQueue.isEmpty();
 			boolean hasCpu = queue != null && !queue.isEmpty();
 			profiler.push("render_particles");
@@ -214,4 +213,5 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 		lightTexture.turnOffLightLayer();
 		profiler.pop();
 	}
+
 }

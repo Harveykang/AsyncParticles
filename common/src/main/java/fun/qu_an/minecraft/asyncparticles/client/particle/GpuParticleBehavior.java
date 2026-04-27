@@ -152,4 +152,10 @@ public class GpuParticleBehavior {
 	public Frustum getFrustum() {
 		return AsyncRenderBehavior.INSTANCE.getFrustum();
 	}
+
+	public void beginFrame() {
+		for (IParticleRenderer renderer : renderers.values()) {
+			renderer.beginFrame();
+		}
+	}
 }

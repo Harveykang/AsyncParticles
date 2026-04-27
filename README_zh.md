@@ -6,13 +6,13 @@
 ## 特性
 
 - Minecraft
-  - 粒子剔除
-  - 异步粒子刻/渲染（缓冲区填充）
-  - 异步粒子光照缓存
+    - 粒子剔除
+    - 异步粒子刻/渲染（缓冲区填充）
+    - 异步粒子光照缓存
 - Simple Weather/Pretty Rain/粒子雨 + 瓦尔基里天空/机械动力
-  - 天气粒子不会穿过船只/动态结构
+    - 天气粒子不会穿过船只/动态结构
 - Pretty Rain/粒子雨/Effectual/Particular/Simple Weather
-  - 异步粒子生成
+    - 异步粒子生成
 
 ## 推荐模组
 
@@ -27,26 +27,18 @@
 
 - 钠/Embeddium
 - 鈇
-- Iris/Oculus
+- Iris
 - 机械动力
 - 瓦尔基里天空
 - 粒子雨/Pretty Rain
 - Simple Weather
-- Effectual
-- Effective
-- Particular
-- Particle Core
-  - 会取消 Particle Core 的大部分优化  
-    (不支持异步执行)
 - ...
 
-### ❔ 看起来没问题
-- Epic Fight
-- Draconic Evolution
-
 ### ❌ 不兼容
+
 - 高清修复
 - 疯狂粒子
+- Particle Core
 
 ## 致谢
 

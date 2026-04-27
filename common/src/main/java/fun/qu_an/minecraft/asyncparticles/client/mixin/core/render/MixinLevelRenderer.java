@@ -7,6 +7,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.*;
@@ -49,6 +50,7 @@ public abstract class MixinLevelRenderer {
 								   CallbackInfo ci,
 								   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 								   LocalIntRef irm) {
+		GpuParticleBehavior.INSTANCE.beginFrame();
 		float partialTick = deltaTracker.getGameTimeDeltaPartialTick(false);
 		if (this.capturedFrustum != null) {
 			Frustum frustum = this.capturedFrustum;
