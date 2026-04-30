@@ -65,6 +65,8 @@
     "lodestone.MixinLodestoneRenderLayer",
     "lodestone.MixinRenderHandler",
     "modernui.MixinRenderSystem",
+    "particle_interactions.MixinParticle_FixBlackDestroyParticle",
+    "particle_interactions.MixinSpawnParticles",
     "physicsmod.MixinClientLevel",
     "physicsmod.MixinLevelRenderer",
     "physicsmod.MixinRainParticle",
