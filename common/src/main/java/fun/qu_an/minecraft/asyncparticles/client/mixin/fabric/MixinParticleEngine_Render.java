@@ -100,7 +100,6 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			Queue<TextureSheetParticle> gpuQueue = GpuParticleBehavior.INSTANCE.gpuParticles.get(particleRenderType);
 			boolean hasGpu = gpuQueue != null && !gpuQueue.isEmpty();
 			boolean hasCpu = queue != null && !queue.isEmpty();
-			profiler.push("render_particles");
 			IParticleRenderer gpuParticleRenderer;
 			if (!hasGpu) {
 				gpuParticleRenderer = null;
@@ -113,6 +112,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			if (!hasCpu && !hasGpu) {
 				continue;
 			}
+			profiler.push("render_particles");
 			BindingTesselator tesselator = AsyncRenderBehavior.INSTANCE.getBTesselator(particleRenderType, textureManager);
 			Collection<? extends Particle> syncParticles;
 			ParticleCullingMode realCullMode;
@@ -146,51 +146,53 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			if (hasGpu) {
 				gpuParticleRenderer.render();
 			}
-			if (bufferBuilder != null) {
-				if (hasCpu && !syncParticles.isEmpty()) {
-					float f2 = f + 1f;
-					for (Particle particle : syncParticles) {
-						if (!particle.isAlive()) {
-							continue;
-						}
-						float f3;
-						ParticleAddon particleAddon = (ParticleAddon) particle;
-						switch (realCullMode) {
-							case AABB -> {
-								f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
-								if (particleAddon.asyncparticles$shouldCull() &&
-									!FrustumUtil.isVisible(frustum, particleAddon.getRenderBoundingBox(f3))) {
-									continue;
-								}
+			if (bufferBuilder == null) {
+				profiler.pop();
+				continue;
+			}
+			if (hasCpu && !syncParticles.isEmpty()) {
+				float f2 = f + 1f;
+				for (Particle particle : syncParticles) {
+					if (!particle.isAlive()) {
+						continue;
+					}
+					float f3;
+					ParticleAddon particleAddon = (ParticleAddon) particle;
+					switch (realCullMode) {
+						case AABB -> {
+							f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+							if (particleAddon.asyncparticles$shouldCull() &&
+								!FrustumUtil.isVisible(frustum, particleAddon.getRenderBoundingBox(f3))) {
+								continue;
 							}
-							case SPHERE -> {
-								if (particleAddon.asyncparticles$shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
-									continue;
-								}
-								f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
-							}
-							case ASYNC_AABB, ASYNC_SPHERE -> {
-								if (particleAddon.asyncparticles$shouldCull() &&
-									!particleAddon.asyncparticles$isVisibleOnScreen()) {
-									continue;
-								}
-								f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
-							}
-							default -> f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
 						}
-						try {
-							particle.render(bufferBuilder, camera, f3);
-						} catch (Throwable t) {
-							throw AsyncRenderBehavior.INSTANCE.constructCrashReport(particle, particleRenderType, t);
+						case SPHERE -> {
+							if (particleAddon.asyncparticles$shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
+								continue;
+							}
+							f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
 						}
+						case ASYNC_AABB, ASYNC_SPHERE -> {
+							if (particleAddon.asyncparticles$shouldCull() &&
+								!particleAddon.asyncparticles$isVisibleOnScreen()) {
+								continue;
+							}
+							f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+						}
+						default -> f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+					}
+					try {
+						particle.render(bufferBuilder, camera, f3);
+					} catch (Throwable t) {
+						throw AsyncRenderBehavior.INSTANCE.constructCrashReport(particle, particleRenderType, t);
 					}
 				}
-				profiler.popPush("build_buffer");
-				MeshData meshData = bufferBuilder.build();
-				if (meshData != null) {
-					profiler.popPush("upload_particles");
-					BufferUploader.drawWithShader(meshData);
-				}
+			}
+			profiler.popPush("build_buffer");
+			MeshData meshData = bufferBuilder.build();
+			if (meshData != null) {
+				profiler.popPush("upload_particles");
+				BufferUploader.drawWithShader(meshData);
 			}
 			profiler.pop();
 		}

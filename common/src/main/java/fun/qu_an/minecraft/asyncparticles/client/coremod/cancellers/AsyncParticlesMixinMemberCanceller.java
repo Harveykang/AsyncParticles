@@ -21,7 +21,7 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 	public boolean shouldCancelMethod(List<String> targetClassNames, String mixinClassName, List<String> targetMethodDescs, String mixinMethodName, String mixinMethodDesc) {
 		return switch (mixinClassName) {
 			case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin" ->
-				"shouldRenderParticle".equals(mixinMethodName);
+				"shouldRenderParticle".equals(mixinMethodName); // FIXME how can i get it work...
 			// See mixin.fabric.porting_lib_base.MixinMixinParticleEngine
 			case "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin" ->
 				"addCustomRenderTypes".equals(mixinMethodName);

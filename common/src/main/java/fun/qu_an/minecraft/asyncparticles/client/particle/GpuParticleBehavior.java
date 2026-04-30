@@ -6,7 +6,6 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.particle.render.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.render.ParticleRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
@@ -23,7 +22,6 @@ import java.util.function.Predicate;
 public class GpuParticleBehavior {
 	public static final GpuParticleBehavior INSTANCE = new GpuParticleBehavior();
 	public final Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = new Reference2ObjectOpenHashMap<>();
-	public final ParticleThreadLocal<Integer> DESTROY_LIGHT_CACHE = new ParticleThreadLocal<>();
 	// reuse buffers
 	private final Map<ParticleRenderType, IParticleRenderer> renderers = new Reference2ObjectOpenHashMap<>();
 	/**

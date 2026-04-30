@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.particle_interactions;
 
-import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import games.enchanted.blockplaceparticles.particle.dust.FloatingDust;
 import games.enchanted.blockplaceparticles.particle.petal.FallingPetal;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(value = { FloatingDust.class, FallingPetal.class })
-public abstract class MixinParticle_FixBlackDestroyParticle extends MixinParticle_LightCache implements LightCachedParticleAddon {
+public abstract class MixinParticle_FixBlackDestructionParticles extends MixinParticle_LightCache implements LightCachedParticleAddon {
 
     @Unique
     private boolean asyncparticles$isFirstRefresh = true;
@@ -18,7 +18,7 @@ public abstract class MixinParticle_FixBlackDestroyParticle extends MixinParticl
     public void asyncparticles$refresh() {
         if (asyncparticles$isFirstRefresh) {
             asyncparticles$isFirstRefresh = false;
-            Integer i = GpuParticleBehavior.INSTANCE.DESTROY_LIGHT_CACHE.get();
+            Integer i = GameUtil.DESTRUCTION_LIGHT_CACHE.get();
             if (i != null) {
                 asyncparticles$setLight(i);
             } else {

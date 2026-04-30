@@ -13,7 +13,7 @@ public class ConfigHelper {
 		AsyncParticlesConfig.load();
 	}
 
-	public static boolean asyncBlockEntityAnimate() {
+	public static boolean asyncAnimateTick() {
 		return tick$animationTickMode != TickMode.SYNCHRONOUSLY;
 	}
 

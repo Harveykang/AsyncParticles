@@ -12,10 +12,10 @@ import org.spongepowered.asm.mixin.Mixin;
 public abstract class MixinClientChunkCache {
 	@WrapMethod(method = "onLightUpdate")
 	public void onLightUpdateWrap(LightLayer layer, SectionPos pos, Operation<Void> original) {
-		if (ThreadUtil.isOnRenderThread()) {
-			original.call(layer, pos);
-		} else {
+		if (ThreadUtil.isOnParticleThread()) {
 			ThreadUtil.enqueueClientTask(() -> original.call(layer, pos));
+		} else {
+			original.call(layer, pos);
 		}
 	}
 }

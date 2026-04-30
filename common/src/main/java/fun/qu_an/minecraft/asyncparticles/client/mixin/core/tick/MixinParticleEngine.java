@@ -18,7 +18,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.ParticleGroup;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -129,11 +128,11 @@ public abstract class MixinParticleEngine {
 					if (appendNewParticlesToRenderer) {
 						GpuParticleBehavior.INSTANCE.getRenderer(renderType).append(GpuParticleBehavior.INSTANCE.getCameraPos(), ((TextureSheetParticle) particle));
 					}
+					// mark particles as gpu
+					// this will not skip the first tick after enqueued, while cpu particles skip it
+					((ParticleAddon) particle).asyncparticles$setGpu(true);
 				} else {
-					queue = this.particles.computeIfAbsent(renderType, this::asyncparticles$newQueue);
-					// mark cpu particles as ticked
-					// this will skip the first tick after enqueued, while gpu particles don't skip it
-					((ParticleAddon) particle).asyncparticles$setTicked();
+					queue = this.particles.computeIfAbsent(renderType, k -> ParticleHelper.newParticleQueue());
 				}
 				queue.add(particle);
 			}
@@ -147,12 +146,7 @@ public abstract class MixinParticleEngine {
 				GpuParticleBehavior.INSTANCE.setCameraPos(camera.getPosition());
 				GpuParticleBehavior.INSTANCE.gpuParticles.forEach(this::asyncparticles$scheduleGpuParticleTick);
 			}
-			particles.forEach((particleRenderType, queue) -> {
-				if (queue.isEmpty()) {
-					return;
-				}
-				asyncparticles$scheduleParticleTick(particleRenderType, queue);
-			});
+			particles.forEach(this::asyncparticles$scheduleParticleTick);
 		}
 	}
 
@@ -174,12 +168,10 @@ public abstract class MixinParticleEngine {
 
 	@Unique
 	private void asyncparticles$scheduleParticleTick(ParticleRenderType particleRenderType, Queue<Particle> queue) {
+		if (queue.isEmpty()) {
+			return;
+		}
 		AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue));
-	}
-
-	@Unique
-	private <T extends Particle> @NotNull Queue<T> asyncparticles$newQueue(ParticleRenderType k) {
-		return ParticleHelper.newParticleQueue();
 	}
 
 	@Unique
@@ -215,7 +207,7 @@ public abstract class MixinParticleEngine {
 			return;
 		}
 		boolean enableLightCache = ConfigHelper.particleLightCache();
-		boolean isNotOnMainThread = !ThreadUtil.isOnRenderThread();
+		boolean isOnMainThread = ThreadUtil.isOnRenderThread();
 		ParticleCullingMode particleCullingMode = GPU_PARTICLE_PHASE.get() ?
 			ParticleCullingMode.DISABLED :
 			ConfigHelper.getParticleCullingMode();
@@ -231,31 +223,35 @@ public abstract class MixinParticleEngine {
 				continue;
 			}
 			ParticleAddon particleAddon = (ParticleAddon) particle;
-			if (isNotOnMainThread) {
-				if (particleAddon.asyncparticles$isTicked()) {
-					// Skip the first tick after enqueued that the particle is added to the queue.
-					// GPU particles don't skip the first tick.
-					if (enableLightCache) {
-						((LightCachedParticleAddon) particle).asyncparticles$refresh();
-					}
-					switch (particleCullingMode) {
-						case ASYNC_AABB -> particleAddon.asyncparticles$tickAABBCulling();
-						case ASYNC_SPHERE -> particleAddon.asyncparticles$tickSphereCulling();
-					}
-					continue;
-				}
-				if (particleAddon.asyncparticles$isTickSync()) {
-					AsyncTickBehavior.INSTANCE.recordSync(particle);
-					continue;
-				}
+			boolean shouldTick;
+			boolean shouldRefresh;
+			if (isOnMainThread) {
+				shouldTick = true;
+				shouldRefresh = enableLightCache;
+			} else if (particleAddon.asyncparticles$isTicked()) {
+				// Skip the first tick after enqueued that the particle is added to the queue.
+				// only GPU particles don't skip the first tick, but skip the first refresh.
+				// skip the first refresh will fix black destruction gpu particles.
+				shouldTick = particleAddon.asyncparticles$isGpu();
+				shouldRefresh = !shouldTick && enableLightCache;
+			} else if (particleAddon.asyncparticles$isTickSync()) {
+				AsyncTickBehavior.INSTANCE.recordSync(particle);
+				continue;
+			} else {
+				shouldTick = true;
+				shouldRefresh = enableLightCache;
 			}
-			try {
-				tickParticle(particle);
-			} catch (Throwable t) {
-				AsyncTickBehavior.INSTANCE.onTickingParticleException(particle, t);
+			if (shouldTick) {
+				try {
+					// We must ensure `tickParticle` method appear once in this method,
+					// otherwise the other mod's mixins will not work properly.
+					tickParticle(particle);
+				} catch (Throwable t) {
+					AsyncTickBehavior.INSTANCE.onTickingParticleException(particle, t);
+				}
+				particleAddon.asyncparticles$setTicked();
 			}
-			particleAddon.asyncparticles$setTicked();
-			if (enableLightCache) {
+			if (shouldRefresh) {
 				((LightCachedParticleAddon) particle).asyncparticles$refresh();
 			}
 			switch (particleCullingMode) {
@@ -297,21 +293,4 @@ public abstract class MixinParticleEngine {
 		GpuParticleBehavior.INSTANCE.gpuParticles.clear();
 		AsyncTickBehavior.INSTANCE.onParticleEngineClear();
 	}
-
-	//	@Inject(method = "createParticle", at = @At("HEAD"), cancellable = true)
-	//	public void onCreateParticle(ParticleOptions particleType, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, CallbackInfoReturnable<Particle> cir) {
-	//		if (!ModListHelper.CREATE_LOADED && !ModListHelper.VS_LOADED) {
-	//			return;
-	//		}
-	//		ResourceLocation key = BuiltInRegistries.PARTICLE_TYPE.getKey(particleType.getType());
-	//		if (!SimplePropertiesConfig.getWeatherParticles().contains(key)) {
-	//			return;
-	//		}
-	//		if (ModListHelper.CREATE_LOADED && !CreateCompat.canSpawnWeatherParticle(level, x, y, z)) {
-	//			cir.setReturnValue(null);
-	//		}
-	//		if (ModListHelper.VS_LOADED && !VSCompat.canCreateWeatherParticle(level, x, y, z)) {
-	//			cir.setReturnValue(null);
-	//		}
-	//	}
 }

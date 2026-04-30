@@ -52,6 +52,9 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRendering
 // TODO: Organize this shit
 @Environment(EnvType.CLIENT)
 public abstract class AsyncRenderBehavior {
+	private static final Logger LOGGER = LogUtils.getLogger();
+	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
+	public static final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 	public static final AsyncRenderBehavior INSTANCE = newInstance();
 
 	@ExpectPlatform
@@ -59,14 +62,11 @@ public abstract class AsyncRenderBehavior {
 		throw new AssertionError();
 	}
 
-	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Set<Class<?>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 	public boolean renderAsync = false;
 	public boolean particlePhase = false;
 
 	public final ForkJoinPool EXECUTOR;
-	public final String THREAD_PREFIX = "AsyncParticleRenderer";
-	public final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 
 	{
 		AtomicInteger workerCount = new AtomicInteger(1);

@@ -24,7 +24,7 @@ import java.util.List;
 @Mixin(value = AirCurrent.class, remap = false)
 public class MixinAirCurrent {
 	@Shadow
-	public List<Object> segments;
+	public List<?> segments;
 	@Unique
 	private boolean asyncparticles$isClient = false;
 
@@ -58,14 +58,14 @@ public class MixinAirCurrent {
 	}
 
 	@Inject(method = "rebuild", at = @At("RETURN"))
-	public void onRebuildHead(CallbackInfo ci, @Share("localSegs") LocalRef<List<Object>> localSegs) {
+	public void onRebuildHead(CallbackInfo ci, @Share("localSegs") LocalRef<List<?>> localSegs) {
 		if (!asyncparticles$isClient) {
 			return;
 		}
-		List<Object> segs;
+		List<?> segs;
 		if ((segs = localSegs.get()) != null) {
 			segments = segs;
-		} else if (!(segments instanceof IterationSafeArrayList<Object>)) {
+		} else if (!(segments instanceof IterationSafeArrayList)) {
 			segments = new IterationSafeArrayList<>(segments);
 		}
 	}

@@ -25,10 +25,6 @@ public class MixinConfigHelper {
 		return CONFIG.getReplaceRandom();
 	}
 
-	public static boolean isSafeLegacyRandomSource() {
-		return CONFIG.isSafeLegacyRandomSource();
-	}
-
 	public static boolean isSafeClassInstanceMultiMap() {
 		return CONFIG.isSafeClassInstanceMultiMap();
 	}

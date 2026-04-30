@@ -44,7 +44,6 @@ dependencies {
     // MixinSquared's annotationProcessor MUST be registered BEFORE Mixin's one.
     compileOnly(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:0.3.7-beta.1"))
     implementation(include("com.github.bawnorton.mixinsquared:mixinsquared-neoforge:0.3.7-beta.1"))
-    implementation(include("io.github.llamalad7:mixinextras-neoforge:0.4.1"))
 
     neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
@@ -197,6 +196,8 @@ dependencies {
 
     modCompileOnly "curse.maven:create-propulsion-simulated-1522736:7982952" // 1.0.3
     modRuntimeOnly "curse.maven:create-propulsion-simulated-1522736:7982952" // 1.0.3
+
+//    modRuntimeOnly "maven.modrinth:particle-interactions:0.4.1"
 }
 
 processResources {

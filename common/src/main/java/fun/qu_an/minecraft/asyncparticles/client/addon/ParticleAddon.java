@@ -33,4 +33,8 @@ public interface ParticleAddon {
 	void asyncparticles$tickSphereCulling();
 
 	Class<? extends Particle> asyncparticles$getRealClass();
+
+	void asyncparticles$setGpu(boolean isGpu);
+
+	boolean asyncparticles$isGpu();
 }

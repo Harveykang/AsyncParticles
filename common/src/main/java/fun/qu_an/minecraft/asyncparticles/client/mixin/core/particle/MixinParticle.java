@@ -28,7 +28,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	@Final
 	public ClientLevel level;
 	@Unique
-	private boolean asyncparticles$ticked = false;
+	private boolean asyncparticles$ticked = true; // always true at first tick
 	@Unique
 	private byte asyncparticles$renderFlag = 2;
 	@Unique
@@ -53,8 +53,6 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 
 	@Shadow
 	protected double zd;
-
-	@Shadow public abstract AABB getBoundingBox();
 
 	@Override
 	public void asyncparticles$setTicked() {
@@ -91,10 +89,12 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 		return (asyncparticles$tickFlag & 1) != 0;
 	}
 
+	@Override
 	public void asyncparticles$enableLightCache() {
 		asyncparticles$tickFlag |= 2;
 	}
 
+	@Override
 	public void asyncparticles$disableLightCache() {
 		asyncparticles$tickFlag &= ~2;
 	}
@@ -136,5 +136,15 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	@Override
 	public Class<? extends Particle> asyncparticles$getRealClass() {
 		return (Class) this.getClass();
+	}
+
+	@Override
+	public void asyncparticles$setGpu(boolean isGpu) {
+		asyncparticles$tickFlag = (byte) ((asyncparticles$tickFlag & ~4) | (isGpu ? 4 : 0));
+	}
+
+	@Override
+	public boolean asyncparticles$isGpu() {
+		return (asyncparticles$tickFlag & 4) != 0;
 	}
 }

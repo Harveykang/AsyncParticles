@@ -20,7 +20,6 @@ public class AsyncParticlesMixinConfig {
 	static String COMMENTS = """
 		safeBlockEntityMap: Boolean. Make 'LevelChunk#blockEntities' thread-safe.
 		safeClassInstanceMultiMap: Boolean. Make 'ClassInstanceMultiMap' thread-safe.
-		safeLegacyRandomSource: Boolean. Make LegacyRandomSource thread-safe.
 		particle$noCulling: A comma-separated list of classes extending 'Particle' that should not be culled.
 		particle$noLightCache: A comma-separated list of classes extending 'Particle' that should not use the light cache.
 		particle$lockRequired: A comma-separated list of classes extending 'Particle' that require a spin lock.
@@ -103,7 +102,6 @@ public class AsyncParticlesMixinConfig {
 		private boolean safeClassInstanceMultiMap = (IRONS_SPELLBOOKS_LOADED && IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
 													MAKE_BUBBLES_POP_LOADED;
 		private boolean safeBlockEntityMap = false;
-		private boolean safeLegacyRandomSource = false;
 		private Set<String> particle$noCulling = new LinkedHashSet<>();
 
 		{
@@ -154,7 +152,6 @@ public class AsyncParticlesMixinConfig {
 			assertNotGlobal();
 			safeClassInstanceMultiMap = toSaveConfig.safeClassInstanceMultiMap;
 			safeBlockEntityMap = toSaveConfig.safeBlockEntityMap;
-			safeLegacyRandomSource = toSaveConfig.safeLegacyRandomSource;
 			particle$noCulling = toSaveConfig.particle$noCulling;
 			particle$noLightCache = toSaveConfig.particle$noLightCache;
 			particle$lockProvider = toSaveConfig.particle$lockProvider;
@@ -174,7 +171,6 @@ public class AsyncParticlesMixinConfig {
 										MAKE_BUBBLES_POP_LOADED ||
 										getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
 			safeBlockEntityMap = getBoolean(properties, "safeBlockEntityMap", defaultConfig.safeBlockEntityMap);
-			safeLegacyRandomSource = getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);
 			particle$noCulling = getSet(properties, "particle$noCulling", defaultConfig.particle$noCulling);
 			particle$noLightCache = getSet(properties, "particle$noLightCache", defaultConfig.particle$noLightCache);
 			particle$lockProvider = getSet(properties, "particle$lockProvider", defaultConfig.particle$lockProvider);
@@ -191,7 +187,6 @@ public class AsyncParticlesMixinConfig {
 			properties.setProperty("version", Integer.toString(version));
 			properties.setProperty("safeClassInstanceMultiMap", Boolean.toString(safeClassInstanceMultiMap));
 			properties.setProperty("safeBlockEntityMap", Boolean.toString(safeBlockEntityMap));
-			properties.setProperty("safeLegacyRandomSource", Boolean.toString(safeLegacyRandomSource));
 			properties.setProperty("particle$noCulling", String.join(",", particle$noCulling));
 			properties.setProperty("particle$noLightCache", String.join(",", particle$noLightCache));
 			properties.setProperty("particle$lockProvider", String.join(",", particle$lockProvider));
@@ -282,15 +277,6 @@ public class AsyncParticlesMixinConfig {
 		void setReplaceRandom(Set<String> replaceRandom) {
 			assertNotGlobal();
 			this.replaceRandom = replaceRandom;
-		}
-
-		void setSafeLegacyRandomSource(boolean safeLegacyRandomSource) {
-			assertNotGlobal();
-			this.safeLegacyRandomSource = safeLegacyRandomSource;
-		}
-
-		public boolean isSafeLegacyRandomSource() {
-			return safeLegacyRandomSource;
 		}
 
 		public boolean isSafeClassInstanceMultiMap() {
