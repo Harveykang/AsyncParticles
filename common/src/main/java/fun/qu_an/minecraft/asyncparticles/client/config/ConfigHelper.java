@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Set;
 
@@ -81,7 +81,7 @@ public class ConfigHelper {
 	}
 
 	// TODO: implement weather particle config, which will not be spawn into physics structures
-	public static Set<ResourceLocation> getWeatherParticles() {
+	public static Set<Identifier> getWeatherParticles() {
 		return Set.of();
 	}
 

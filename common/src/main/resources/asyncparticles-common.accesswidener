@@ -9,8 +9,8 @@ accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables L
 transitive-mutable field net/minecraft/world/level/chunk/ChunkAccess blockEntities Ljava/util/Map;
 transitive-mutable field net/minecraft/world/level/chunk/ChunkAccess pendingBlockEntities Ljava/util/Map;
 accessible field com/mojang/blaze3d/opengl/GlBuffer handle I
-accessible method com/mojang/blaze3d/opengl/DirectStateAccess mapBufferRange (IIIII)Ljava/nio/ByteBuffer;
-accessible method com/mojang/blaze3d/opengl/DirectStateAccess flushMappedBufferRange (IIII)V
+accessible method com/mojang/blaze3d/opengl/DirectStateAccess mapBufferRange (IJJII)Ljava/nio/ByteBuffer;
+accessible method com/mojang/blaze3d/opengl/DirectStateAccess  flushMappedBufferRange (IJJI)V
 accessible method com/mojang/blaze3d/opengl/DirectStateAccess unmapBuffer (II)V
 accessible class com/mojang/blaze3d/opengl/GlBuffer$GlMappedView
 accessible method com/mojang/blaze3d/opengl/GlBuffer$GlMappedView <init> (Ljava/lang/Runnable;Lcom/mojang/blaze3d/opengl/GlBuffer;Ljava/nio/ByteBuffer;)V
@@ -23,7 +23,7 @@ accessible field net/minecraft/client/particle/QuadParticleGroup particleType Ln
 accessible field net/minecraft/client/particle/Particle x D
 accessible field net/minecraft/client/particle/Particle y D
 accessible field net/minecraft/client/particle/Particle z D
-accessible method net/minecraft/Util onThreadException (Ljava/lang/Thread;Ljava/lang/Throwable;)V
+accessible method net/minecraft/util/Util onThreadException (Ljava/lang/Thread;Ljava/lang/Throwable;)V
 accessible method net/minecraft/client/renderer/state/QuadParticleRenderState$Storage <init> ()V
 accessible method net/minecraft/client/particle/ParticleEngine updateCount (Lnet/minecraft/core/particles/ParticleLimit;I)V
 accessible field net/minecraft/client/particle/ParticleEngine particles Ljava/util/Map;

@@ -51,7 +51,7 @@ public abstract class MixinLevelRenderer {
 								 boolean bl2,
 								 CallbackInfo ci,
 								 @Share("earlyFrustum") LocalRef<Frustum> frustumRef) {
-		Frustum frustum = prepareCullFrustum(matrix4f, matrix4f3, camera.getPosition());
+		Frustum frustum = prepareCullFrustum(matrix4f, matrix4f3, camera.position());
 		frustumRef.set(frustum);
 		if (asyncparticles$extractParticles != null) {
 			asyncparticles$extractParticles.call(Minecraft.getInstance().particleEngine,

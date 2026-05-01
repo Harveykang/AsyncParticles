@@ -16,10 +16,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin({
 	ItemPickupParticleGroup.class,
-	ElderGuardianParticleGroup.class
+	ElderGuardianParticleGroup.class/*ItemPickupParticleGroup.ParticleInstance.class,
+	ElderGuardianParticleGroup.ElderGuardianParticleRenderState.class*/
 })
 public class MixinAsyncTick_ModifyTheFromParticleMethod {
-	@Dynamic
+	/*@Dynamic
 	@Inject(method = "*", at = @At("HEAD"))
 	private static void modifyParticleRecord(@Coerce Particle particle,
 											 Camera camera,
@@ -28,5 +29,5 @@ public class MixinAsyncTick_ModifyTheFromParticleMethod {
 											 @Local(ordinal = 0, argsOnly = true) LocalFloatRef tickDelta) {
 		float v = !((ParticleAddon) particle).asyncparticles$isTicked() && f <= 1.0f ? f + 1.0f : f;
 		tickDelta.set(v);
-	}
+	}*/
 }

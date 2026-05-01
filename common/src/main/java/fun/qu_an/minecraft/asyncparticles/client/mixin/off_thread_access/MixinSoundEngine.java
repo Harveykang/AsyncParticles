@@ -9,7 +9,7 @@ import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.resources.sounds.TickableSoundInstance;
 import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.client.sounds.SoundEventListener;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,7 +41,7 @@ public abstract class MixinSoundEngine {
 	public abstract void destroy();
 
 	@Shadow
-	public abstract void updateCategoryVolume(SoundSource soundSource);
+	public abstract void refreshCategoryVolume(SoundSource soundSource);
 
 	@Shadow
 	public abstract SoundEngine.PlayResult play(SoundInstance soundInstance);
@@ -62,13 +62,13 @@ public abstract class MixinSoundEngine {
 	public abstract void playDelayed(SoundInstance soundInstance, int i);
 
 	@Shadow
-	public abstract void stop(@Nullable ResourceLocation resourceLocation, @Nullable SoundSource soundSource);
+	public abstract void stop(@Nullable Identifier resourceLocation, @Nullable SoundSource soundSource);
 
 	@Shadow
 	public abstract void stop(SoundInstance soundInstance);
 
 	@Shadow
-	public abstract void setVolume(SoundInstance soundInstance, float f);
+	public abstract float calculateVolume(float f, SoundSource soundSource);
 
 	@Shadow
 	public abstract void pauseAllExcept(SoundSource... soundSources);
@@ -113,11 +113,11 @@ public abstract class MixinSoundEngine {
 		}
 	}
 
-	@Inject(method = "updateCategoryVolume", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "refreshCategoryVolume", at = @At("HEAD"), cancellable = true)
 	public void injectUpdateCategoryVolume(SoundSource soundSource, CallbackInfo ci) {
 		if (ThreadUtil.isOnParticleThread()) {
 			ci.cancel();
-			ThreadUtil.enqueueClientTask(() -> this.updateCategoryVolume(soundSource));
+			ThreadUtil.enqueueClientTask(() -> this.refreshCategoryVolume(soundSource));
 		}
 	}
 
@@ -175,8 +175,8 @@ public abstract class MixinSoundEngine {
 		}
 	}
 
-	@Inject(method = "stop(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/sounds/SoundSource;)V", at = @At("HEAD"), cancellable = true)
-	public void injectStop(ResourceLocation soundName, SoundSource category, CallbackInfo ci) {
+	@Inject(method = "stop(Lnet/minecraft/resources/Identifier;Lnet/minecraft/sounds/SoundSource;)V", at = @At("HEAD"), cancellable = true)
+	public void injectStop(Identifier soundName, SoundSource category, CallbackInfo ci) {
 		if (ThreadUtil.isOnParticleThread()) {
 			ci.cancel();
 			ThreadUtil.enqueueClientTask(() -> this.stop(soundName, category));
@@ -191,11 +191,11 @@ public abstract class MixinSoundEngine {
 		}
 	}
 
-	@Inject(method = "setVolume", at = @At("HEAD"), cancellable = true)
-	public void injectSetVolume(SoundInstance soundInstance, float f, CallbackInfo ci) {
+	@Inject(method = "calculateVolume(FLnet/minecraft/sounds/SoundSource;)F", at = @At("HEAD"), cancellable = true)
+	public void injectSetVolume(float f, SoundSource soundSource, CallbackInfoReturnable<Float> cir) {
 		if (ThreadUtil.isOnParticleThread()) {
-			ci.cancel();
-			ThreadUtil.enqueueClientTask(() -> this.setVolume(soundInstance, f));
+			cir.cancel();
+			ThreadUtil.enqueueClientTask(() -> this.calculateVolume(f, soundSource));
 		}
 	}
 

@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.state.QuadParticleRenderState;
 import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -245,8 +246,7 @@ public class AsyncQuadParticleRenderState extends QuadParticleRenderState implem
 					RenderSystem.getModelViewMatrix(),
 					new Vector4f(1.0F, 1.0F, 1.0F, 1.0F),
 					new Vector3f(),
-					RenderSystem.getTextureMatrix(),
-					RenderSystem.getShaderLineWidth()
+						new Matrix4f()
 				);
 			return new PreparedBuffers(meshData.drawState().indexCount(), gpuBufferSlice, preparedLayers);
 
