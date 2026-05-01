@@ -467,8 +467,8 @@ public class AsyncTickBehavior {
 			last tick duration: %.1f ms,
 			interrupted: %s,
 			particle operations: %d,
-			end tick events: %d,
-			end tick operations: %d,
+			end tick events: %s,
+			end tick operations: %s,
 			max particles queue size: %d,
 			particles queue size/allocated: %s,
 			GPU particles size/allocated: %s,
@@ -478,8 +478,8 @@ public class AsyncTickBehavior {
 			.formatted(ConfigHelper.isTickAsync() ? timeUsageNano.getAcquire() / 1000000d : Double.NaN,
 				debug_cancelled,
 				PARTICLE_OPERATIONS.size(),
-				SEQUENCED_END_TICK_EVENTS.size() + PARALLEL_END_TICK_EVENTS.size(),
-				END_TICK_OPERATIONS.size(),
+				SEQUENCED_END_TICK_EVENTS + PARALLEL_END_TICK_EVENTS.toString(),
+				END_TICK_OPERATIONS,
 				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
 					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {

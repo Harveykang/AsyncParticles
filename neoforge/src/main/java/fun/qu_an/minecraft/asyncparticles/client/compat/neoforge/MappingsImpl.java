@@ -6,6 +6,14 @@ public class MappingsImpl {
 		return "render";
 	}
 
+	public static String getRenderRotatedQuadMethod1() {
+		return "renderRotatedQuad";
+	}
+
+	public static String getRenderRotatedQuadMethod2() {
+		return "renderRotatedQuad";
+	}
+
 	public static String getFireworkSparkClass() {
 		return "net.minecraft.client.particle.FireworkParticles$SparkParticle";
 	}

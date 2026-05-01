@@ -27,4 +27,12 @@ public final class DefaultEndTickOperation implements EndTickOperation {
 	public void run() {
 		task.run();
 	}
+
+	@Override
+	public String toString() {
+		return "EndTickOperation{" +
+				"id=" + id +
+				", parallel=" + parallel +
+				'}';
+	}
 }

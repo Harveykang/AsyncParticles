@@ -160,7 +160,7 @@ public class ConfigHelper {
 	}
 
 	public static boolean isAppendNewParticlesToRenderer() {
-		return rendering$appendNewParticlesToRenderer;
+		return rendering$appendNewParticlesToRenderer && particle$particleLightCache;
 	}
 
 	public static boolean fixParticleLightOnSableSublevel() {

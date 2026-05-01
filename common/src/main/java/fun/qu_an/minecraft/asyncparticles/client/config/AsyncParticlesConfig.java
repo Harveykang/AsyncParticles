@@ -172,12 +172,7 @@ public class AsyncParticlesConfig {
 		if (!Files.exists(CONFIG_FILE)) {
 			Files.createDirectories(CONFIG_FILE.getParent());
 			Files.createFile(CONFIG_FILE);
-			new ConfigObj().flat();
-			if (LegacyConfigMigrator.migrate()) {
-				save();
-			} else {
-				reset();
-			}
+			reset();
 			return;
 		}
 

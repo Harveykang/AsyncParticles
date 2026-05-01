@@ -9,6 +9,15 @@ public class Mappings {
 	}
 
 	@ExpectPlatform
+	public static String getRenderRotatedQuadMethod1() {
+		throw new AssertionError();
+	}
+	@ExpectPlatform
+	public static String getRenderRotatedQuadMethod2() {
+		throw new AssertionError();
+	}
+
+	@ExpectPlatform
 	public static String getFireworkSparkClass() {
 		throw new AssertionError();
 	}

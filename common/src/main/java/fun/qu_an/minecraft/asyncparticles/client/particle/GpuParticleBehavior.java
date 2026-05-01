@@ -8,18 +8,23 @@ import fun.qu_an.minecraft.asyncparticles.client.particle.render.IParticleRender
 import fun.qu_an.minecraft.asyncparticles.client.particle.render.ParticleRenderer;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
+import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Unique;
 
 import java.util.*;
 import java.util.function.Predicate;
 
 public class GpuParticleBehavior {
+	public static final String RENDER_METHOD = Mappings.getRenderMethod();
+	public static final String RENDER_ROTATED_QUAD_METHOD_1 = Mappings.getRenderRotatedQuadMethod1();
+	public static final String RENDER_ROTATED_QUAD_METHOD_2 = Mappings.getRenderRotatedQuadMethod2();
 	public static final GpuParticleBehavior INSTANCE = new GpuParticleBehavior();
 	public final Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = new Reference2ObjectOpenHashMap<>();
 	// reuse buffers
@@ -29,12 +34,12 @@ public class GpuParticleBehavior {
 	 * <p>
 	 * License: <a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/README.md#-license">README.md#-license</a> and <a/><a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/COPYING.LESSER">LGPL-3.0</a>
 	 */
-	private final List<Class<? extends Particle>> GPU_PARTICLES;
+	private final List<Class<? extends Particle>> GPU_PARTICLE_CLASSES;
 
 	{
 		try {
 			//noinspection unchecked
-			GPU_PARTICLES = new ArrayList<>(List.of(
+			GPU_PARTICLE_CLASSES = new ReferenceArrayList<>(List.of(
 				SingleQuadParticle.class,
 				TextureSheetParticle.class,
 				FireworkParticles.OverlayParticle.class,
@@ -50,7 +55,6 @@ public class GpuParticleBehavior {
 		new Reference2BooleanOpenHashMap<>();
 	private Vec3 cameraPos = Vec3.ZERO;
 	//	private Vec3 prevCameraPos = Vec3.ZERO;
-	public final String RENDER_METHOD = Mappings.getRenderMethod();
 
 	//	public final String TICK_METHOD = FabricLoader.getInstance().getMappingResolver().mapMethodName(
 //		"intermediary",
@@ -100,15 +104,42 @@ public class GpuParticleBehavior {
 		return CAN_RENDER_FAST_CACHE.computeIfAbsent(tsp.getClass(), (Predicate<Class<? extends TextureSheetParticle>>)
 			k -> {
 				try {
-					Class<?> declaringClass = k.getMethod(RENDER_METHOD,
+					Class<?> renderMethodDeclaringClass = k.getMethod(RENDER_METHOD,
 						VertexConsumer.class,
 						Camera.class,
 						float.class).getDeclaringClass();
-					return GPU_PARTICLES.contains(declaringClass);
+					Class<?> renderRotatedQuadMethod1DeclaringClass = findDeclaringClass(k, RENDER_ROTATED_QUAD_METHOD_1,
+						VertexConsumer.class,
+						Camera.class,
+						Quaternionf.class,
+						float.class);
+					Class<?> renderRotatedQuadMethod2DeclaringClass = findDeclaringClass(k, RENDER_ROTATED_QUAD_METHOD_2,
+						VertexConsumer.class,
+						Quaternionf.class,
+						float.class,
+						float.class,
+						float.class,
+						float.class);
+					return GPU_PARTICLE_CLASSES.contains(renderMethodDeclaringClass)
+						&& GPU_PARTICLE_CLASSES.contains(renderRotatedQuadMethod1DeclaringClass)
+						&& GPU_PARTICLE_CLASSES.contains(renderRotatedQuadMethod2DeclaringClass);
 				} catch (NoSuchMethodException e) {
 					return false;
 				}
 			});
+	}
+
+	private static Class<?> findDeclaringClass(Class<?> clazz,
+	                                           String methodName,
+	                                           Class<?>... parameterTypes) throws NoSuchMethodException {
+		while (clazz != null && clazz != Object.class) {
+			try {
+				return clazz.getDeclaredMethod(methodName, parameterTypes).getDeclaringClass();
+			} catch (NoSuchMethodException e) {
+				clazz = clazz.getSuperclass();
+			}
+		}
+		throw new NoSuchMethodException();
 	}
 
 	@ApiStatus.Internal

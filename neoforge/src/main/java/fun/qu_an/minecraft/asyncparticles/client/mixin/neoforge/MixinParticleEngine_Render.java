@@ -97,7 +97,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 		Frustum frustum = AsyncRenderBehavior.INSTANCE.getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = GpuParticleBehavior.INSTANCE.gpuParticles;
-		for (ParticleRenderType particleRenderType : CombinedIteration.ofSet(particles.keySet(), gpuParticles.keySet())) {
+		for (ParticleRenderType particleRenderType : CombinedIterable.ofIdentitySet(particles.keySet(), gpuParticles.keySet())) {
 			if (particleRenderType == ParticleRenderType.NO_RENDER
 				|| !renderTypePredicate.test(particleRenderType)) {
 				continue;
