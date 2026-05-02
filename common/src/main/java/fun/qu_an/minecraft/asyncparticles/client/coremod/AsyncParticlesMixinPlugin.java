@@ -45,8 +45,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public String getRefMapperConfig() {
-		// this fixes the useless refmap (crash) on neoforge
-		return IS_FORGE ? null : "fabric-asyncparticles-common-refmap.json";
+		return null; // see neoforge/build.gradle:processResources:filesMatching('asyncparticles-common.mixins.json')
 	}
 
 	//	private static final int L = "fun.qu_an.minecraft.asyncparticles.client.mixin.".length();

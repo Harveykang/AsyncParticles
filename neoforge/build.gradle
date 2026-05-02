@@ -125,6 +125,15 @@ processResources {
     filesMatching('META-INF/neoforge.mods.toml') {
         expand version: project.version
     }
+
+    from(project(':common').sourceSets.main.resources.srcDirs) {
+        include 'asyncparticles-common.mixins.json'
+    }
+    filesMatching('asyncparticles-common.mixins.json') {
+        filter { line ->
+            line.replaceAll(/.*"refmap".*/, '')
+        }
+    }
 }
 
 shadowJar {
