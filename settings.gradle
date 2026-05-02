@@ -11,6 +11,6 @@ pluginManagement {
 rootProject.name = 'asyncparticles'
 
 include 'common'
-include 'common_legacy_mod_compat'
+//include 'common_legacy_mod_compat'
 include 'fabric'
 include 'neoforge'

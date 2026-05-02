@@ -33,7 +33,7 @@ dependencies {
     modCompileOnly 'maven.modrinth:moreculling:kWU8mVq5' // 1.5.0-beta.2
 
     /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:particle-rain:v4-beta.5+1.21.11-fabric"
+    modCompileOnly "maven.modrinth:particle-rain:v4-beta.9+1.21.11-fabric"
 
     /* Effectual */
     modCompileOnly 'maven.modrinth:effectual:1.1.0-1.21.8'

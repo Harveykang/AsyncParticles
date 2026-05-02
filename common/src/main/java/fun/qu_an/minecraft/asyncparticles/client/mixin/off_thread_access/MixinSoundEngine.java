@@ -16,7 +16,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -76,6 +75,12 @@ public abstract class MixinSoundEngine {
 	@Shadow
 	public abstract void updateSource(Camera camera);
 
+	@Shadow
+	public abstract void updateCategoryVolume(SoundSource soundSource, float f);
+
+	@Shadow
+	public abstract void emergencyShutdown();
+
 	@Inject(method = "tick", at = @At("HEAD"))
 	public void injectTick(CallbackInfo ci) {
 		ThreadUtil.assertNotParticleThread();
@@ -113,8 +118,16 @@ public abstract class MixinSoundEngine {
 		}
 	}
 
+	@Inject(method = "updateCategoryVolume", at = @At("HEAD"), cancellable = true)
+	public void injectUpdateCategoryVolume(SoundSource soundSource, float f, CallbackInfo ci) {
+		if (ThreadUtil.isOnParticleThread()) {
+			ci.cancel();
+			ThreadUtil.enqueueClientTask(() -> this.updateCategoryVolume(soundSource, f));
+		}
+	}
+
 	@Inject(method = "refreshCategoryVolume", at = @At("HEAD"), cancellable = true)
-	public void injectUpdateCategoryVolume(SoundSource soundSource, CallbackInfo ci) {
+	public void injectRefreshCategoryVolume(SoundSource soundSource, CallbackInfo ci) {
 		if (ThreadUtil.isOnParticleThread()) {
 			ci.cancel();
 			ThreadUtil.enqueueClientTask(() -> this.refreshCategoryVolume(soundSource));
@@ -188,14 +201,6 @@ public abstract class MixinSoundEngine {
 		if (ThreadUtil.isOnParticleThread()) {
 			ci.cancel();
 			ThreadUtil.enqueueClientTask(() -> this.stop(soundInstance));
-		}
-	}
-
-	@Inject(method = "calculateVolume(FLnet/minecraft/sounds/SoundSource;)F", at = @At("HEAD"), cancellable = true)
-	public void injectSetVolume(float f, SoundSource soundSource, CallbackInfoReturnable<Float> cir) {
-		if (ThreadUtil.isOnParticleThread()) {
-			cir.cancel();
-			ThreadUtil.enqueueClientTask(() -> this.calculateVolume(f, soundSource));
 		}
 	}
 
