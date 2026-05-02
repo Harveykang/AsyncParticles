@@ -15,5 +15,6 @@ public class AsyncParticlesClient {
 		if (MORE_CULLING_LOADED) {
 			MoreCullingCompat.init();
 		}
+
 	}
 }

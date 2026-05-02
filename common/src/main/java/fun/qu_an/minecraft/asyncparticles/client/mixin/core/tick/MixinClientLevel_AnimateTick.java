@@ -35,6 +35,7 @@ public abstract class MixinClientLevel_AnimateTick extends Level {
 
 	@Unique
 	private static final ResourceLocation ANIMATE_TICK = GameUtil.id("animate_tick");
+
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int i, int j, int k, Operation<Void> original) {
 		if (!AsyncTickBehavior.INSTANCE.shouldTickParticles &&
@@ -56,7 +57,7 @@ public abstract class MixinClientLevel_AnimateTick extends Level {
 		}
 	}
 
-	@Redirect(method = "animateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;create()Lnet/minecraft/util/RandomSource;"))
+	@Redirect(method = "animateTick", require = 0, at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;create()Lnet/minecraft/util/RandomSource;"))
 	private RandomSource redirectRandomSource() {
 		return new SingleThreadedRandomSource(RandomSupport.generateUniqueSeed());
 	}

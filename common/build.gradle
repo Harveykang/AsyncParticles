@@ -97,4 +97,7 @@ dependencies {
 
     /* Particle Interactions */
     modCompileOnly "maven.modrinth:particle-interactions:0.4.1-patch.1"
+
+    /* RUOK */
+    modCompileOnly "maven.modrinth:ruok:l0jVfXsH" // 1.7.4
 }
