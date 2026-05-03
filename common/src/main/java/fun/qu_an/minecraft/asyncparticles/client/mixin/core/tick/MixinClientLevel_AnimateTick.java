@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.tick;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.task.EndTickOperation;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -38,7 +39,7 @@ public abstract class MixinClientLevel_AnimateTick extends Level {
 
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int i, int j, int k, Operation<Void> original) {
-		if (!AsyncTickBehavior.INSTANCE.shouldTickParticles &&
+		if (!AsyncTickBehavior.INSTANCE.isShouldTickParticles() &&
 			ConfigHelper.isTickAsync()) {
 			// don't tick animate if the game is lagging
 			return;
@@ -57,8 +58,8 @@ public abstract class MixinClientLevel_AnimateTick extends Level {
 		}
 	}
 
-	@Redirect(method = "animateTick", require = 0, at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;create()Lnet/minecraft/util/RandomSource;"))
-	private RandomSource redirectRandomSource() {
+	@WrapOperation(method = "animateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;create()Lnet/minecraft/util/RandomSource;"))
+	private RandomSource redirectRandomSource(Operation<RandomSource> original) {
 		return new SingleThreadedRandomSource(RandomSupport.generateUniqueSeed());
 	}
 }

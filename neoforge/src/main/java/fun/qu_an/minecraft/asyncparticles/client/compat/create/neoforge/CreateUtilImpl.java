@@ -3,6 +3,9 @@ package fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge;
 import com.simibubi.create.content.contraptions.*;
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.ContraptionHitResult;
+import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
+import it.unimi.dsi.fastutil.longs.Long2BooleanMap;
+import it.unimi.dsi.fastutil.longs.Long2FloatMap;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -161,5 +164,21 @@ public class CreateUtilImpl {
 			hitResult.getDirection(),
 			BlockPos.containing(hit),
 			hitResult.isInside());
+	}
+
+	public static boolean isUnderContraption(ClientLevel level, Vec3 pos, double size) {
+		return isUnderContraption(level, pos.x, pos.y, pos.z, size);
+	}
+
+	public static boolean isUnderContraption(ClientLevel level, double x, double y, double z, double size) {
+		Long2FloatMap heightMap = ContraptionRainBlocking.getAttachedContractionHeightMap(level);
+		Long2BooleanMap movingMap = ContraptionRainBlocking.getAttachedContractionMovingMap(level);
+		boolean[] result = new boolean[1];
+		GameUtil.forEachBlockPos(x, 0, z, size, (l) -> {
+			boolean b = ContraptionRainBlocking.getHeight(level, l) >= y;
+			result[0] = b;
+			return !b;
+		});
+		return result[0];
 	}
 }

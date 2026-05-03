@@ -26,6 +26,13 @@ versionRange = "[1.21,)"
 ordering = "NONE"
 side = "CLIENT"
 
+[[dependencies.asyncparticles]]
+modId = "particle_core"
+type = "incompatible"
+versionRange = "[]"
+ordering = "NONE"
+side = "CLIENT"
+
 #[[dependencies.asyncparticles]]
 #modId = "mixinextras"
 #mandatory = true

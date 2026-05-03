@@ -46,7 +46,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 	}
 
 	private static final int PACKAGE_LENGTH = AsyncParticlesClient.class.getPackage().getName().length() +
-											  ".mixin.".length();
+		".mixin.".length();
 
 	/// - mixins located in `mixin/fabric` or `mixin/<mod_id>/fabric` package only take effect on fabric.
 	/// - mixins located in `mixin/fabric/<mod_id>` take effect on fabric or Sinytra Connector.
@@ -62,55 +62,51 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			return true;
 		}
 		return switch (split[0]) {
+			case "core" -> !"fabric".equals(split[1]) || !IS_FORGE;
 			case "conditional" -> switch (split[1]) {
 				case "MixinClassInstanceMultiMap" -> MixinConfigHelper.isSafeClassInstanceMultiMap();
 				case "MixinLevelChunk_BlockEntityMap" -> MixinConfigHelper.isSafeBlockEntityMap();
 				case "MixinLegacyRandomSource" -> MixinConfigHelper.isSafeLegacyRandomSource();
 				default -> true;
 			};
-			case "fabric" -> {
-				if (split.length == 2) {
-					yield !IS_FORGE;
-				}
-				yield switch (split[1]) {
+			case "compat" -> switch (split[1]) {
+				case "fabric" -> switch (split[2]) {
 					case "off_thread_access" -> !IS_FORGE;
 					case "create" -> FABRIC_CREATE_LOADED;
 					case "effective" -> FABRIC_EFFECTIVE_LOADED;
-					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
-					case "particular" -> FABRIC_PARTICULAR_LOADED;
 					case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
 					case "iris" -> FABRIC_IRIS_LOADED;
 					case "iris_else" -> !IS_FORGE && !FABRIC_IRIS_LOADED;
 					case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;
 					case "loot_beams_up" -> FABRIC_LOOT_BEAMS_UP_LOADED;
-					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
+					default -> throw new IllegalArgumentException("Unknown fabric compat mixin: " + mixinClassName);
 				};
-			}
-			case "core" -> true;
-			case "sable" -> SABLE_LOADED;
-			case "particlerain" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN;
-			case "particlerain_vs" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && VS_LOADED;
-			case "particlerain_create" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && CREATE_LOADED;
-			case "modernui" -> MODERN_UI_LOADED;
-			case "create" -> CREATE_LOADED;
-			case "sodium_0_6" -> SODIUM_LOADED && versionCheck("sodium", "0.6", "0.7");
-			case "sodium_0_7" -> SODIUM_LOADED && versionCheck("sodium", "0.6.999999", "0.8");
-			case "sodium_extra" -> SODIUM_EXTRA_LOADED;
-			case "iris_like" -> IRIS_LIKE_LOADED;
-			case "a_good_place" -> A_GOOD_PLACE_LOADED;
-			case "watut" -> WATUT_LOADED && versionCheck("watut", "1.21.0-1.2.0", null);
-			case "physicsmod" -> PHYSICSMOD_LOADED;
-			case "physicsmod_create" -> PHYSICSMOD_LOADED && CREATE_LOADED;
-			case "physicsmod_vs" -> PHYSICSMOD_LOADED && VS_LOADED;
-			case "lodestone" -> LODESTONE_LOADED;
-			case "cloth_config" -> CLOTH_CONFIG_LOADED;
-			case "vs2" -> VS_LOADED;
-			case "vs2_create" -> VS_LOADED && CREATE_LOADED;
-			case "dsurround" -> DSURROUND_LOADED;
-			case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
-			case "figura" -> FIGURA_LOADED;
-			case "veil" -> VEIL_LOADED && versionCheck("veil", "1.999999", null);
-			case "particle_interactions" -> PARTICLE_INTERACTIONS_LOADED;
+				case "sable" -> SABLE_LOADED;
+				case "particlerain" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN;
+				case "particlerain_vs" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && VS_LOADED;
+				case "particlerain_create" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && CREATE_LOADED;
+				case "modernui" -> MODERN_UI_LOADED;
+				case "create" -> CREATE_LOADED;
+				case "sodium_0_6" -> SODIUM_LOADED && versionCheck("sodium", "0.6", "0.7");
+				case "sodium_0_7" -> SODIUM_LOADED && versionCheck("sodium", "0.6.999999", "0.8");
+				case "sodium_extra" -> SODIUM_EXTRA_LOADED;
+				case "iris_like" -> IRIS_LIKE_LOADED;
+				case "a_good_place" -> A_GOOD_PLACE_LOADED;
+				case "watut" -> WATUT_LOADED && versionCheck("watut", "1.21.0-1.2.0", null);
+				case "physicsmod" -> PHYSICSMOD_LOADED;
+				case "physicsmod_create" -> PHYSICSMOD_LOADED && CREATE_LOADED;
+				case "physicsmod_vs" -> PHYSICSMOD_LOADED && VS_LOADED;
+				case "lodestone" -> LODESTONE_LOADED;
+				case "cloth_config" -> CLOTH_CONFIG_LOADED;
+				case "vs2" -> VS_LOADED;
+				case "vs2_create" -> VS_LOADED && CREATE_LOADED;
+				case "dsurround" -> DSURROUND_LOADED;
+				case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
+				case "figura" -> FIGURA_LOADED;
+				case "veil" -> VEIL_LOADED && versionCheck("veil", "1.999999", null);
+				case "particle_interactions" -> PARTICLE_INTERACTIONS_LOADED;
+				default -> throw new IllegalArgumentException("Unknown compat mixin: " + mixinClassName);
+			};
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

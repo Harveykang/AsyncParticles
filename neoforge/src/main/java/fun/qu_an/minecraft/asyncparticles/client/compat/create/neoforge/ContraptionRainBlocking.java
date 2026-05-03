@@ -8,13 +8,14 @@ import dev.ryanhcode.sable.companion.math.Pose3d;
 import dev.ryanhcode.sable.sublevel.SubLevel;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge.create.AccessorMatrix3d;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.neoforge.create.AccessorMatrix3d;
+import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import it.unimi.dsi.fastutil.longs.Long2BooleanMap;
 import it.unimi.dsi.fastutil.longs.Long2FloatMap;
 import it.unimi.dsi.fastutil.longs.Long2FloatOpenHashMap;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4d;
@@ -28,6 +29,14 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.C
  * Thanks to ChatGPT
  */
 public class ContraptionRainBlocking {
+	public static Long2FloatMap getAttachedContractionHeightMap(ClientLevel level) {
+		return ((ContraptionHeightMapProvider) level).asyncparticles$getHeightMap();
+	}
+
+	public static Long2BooleanMap getAttachedContractionMovingMap(ClientLevel level) {
+		return ((ContraptionHeightMapProvider) level).asyncparticles$getMovingMap();
+	}
+
 	/**
 	 * ------------------------------------------------------------------------
 	 * 原始可读版 BOX_FACE_INDICES（保留作维护对照，不参与运行）
@@ -80,13 +89,13 @@ public class ContraptionRainBlocking {
 	/**
 	 * 批量检测矩形区域内空间立方体的挡雨情况。
 	 */
-	public static void batchCheckRainBlocking(Long2FloatMap heightMap,
-	                                          Long2BooleanMap isMoving,
-	                                          Level level,
-	                                          int x1,
-	                                          int z1,
-	                                          int x2,
-	                                          int z2) {
+	public static void tickRainBlocking(ClientLevel level,
+	                                    int x1,
+	                                    int z1,
+	                                    int x2,
+	                                    int z2) {
+		Long2FloatMap heightMap = getAttachedContractionHeightMap(level);
+		Long2BooleanMap isMoving = getAttachedContractionMovingMap(level);
 		heightMap.clear();
 		boolean doRainEffectsIfMoving = ConfigHelper.doCreateRainEffectsIfMoving();
 		if (!doRainEffectsIfMoving) {
@@ -104,7 +113,6 @@ public class ContraptionRainBlocking {
 
 		Long2FloatMap tempHeightMap = doRainEffectsIfMoving ? heightMap : new Long2FloatOpenHashMap();
 		Matrix4d subLevelMatrix = ModListHelper.SABLE_LOADED ? new Matrix4d() : null;
-		Matrix4d S;
 		for (Iterator<AbstractContraptionEntity> it = forEachContraption(level); it.hasNext(); ) {
 			AbstractContraptionEntity entity = it.next();
 			Contraption contraption = entity.getContraption();
@@ -117,6 +125,7 @@ public class ContraptionRainBlocking {
 
 			AABB aabb = entity.getBoundingBox();
 			Object subLevel = null;
+			Matrix4d S;
 			if (!ModListHelper.SABLE_LOADED || (subLevel = Sable.HELPER.getContaining(entity)) == null) {
 				if (aabb.minX > queryMaxX
 					|| aabb.maxX < queryMinX
@@ -713,5 +722,30 @@ public class ContraptionRainBlocking {
 			rowE4 += e4A;
 			rowY += kx;
 		}
+	}
+
+	public static float getHeight(ClientLevel level, long l) {
+		Long2FloatMap heightMap = getAttachedContractionHeightMap(level);
+		Long2BooleanMap movingMap = getAttachedContractionMovingMap(level);
+		BlockPos.MutableBlockPos mutableBlockPos = GameUtil.SHARED_POS.get();
+
+		if (heightMap.containsKey(l)) {
+			return heightMap.get(l);
+		}
+		fun.qu_an.minecraft.asyncparticles.client.compat.create.ContraptionHitResult contraptionHitResult = CollideUtilImpl.rayCastWithContactPointMotion(
+			level,
+			Vec3.atCenterOf(mutableBlockPos.set(l | BlockPos.asLong(0, level.getMaxBuildHeight() + 16, 0))),
+			Vec3.atCenterOf(mutableBlockPos.set(l | BlockPos.asLong(0, level.getMinBuildHeight() - 16, 0))));
+		if (contraptionHitResult == null) {
+			float f = heightMap.defaultReturnValue();
+			heightMap.put(l, f);
+			return f;
+		}
+		float y = (float) contraptionHitResult.contactPointMotion.y;
+		heightMap.put(l, y);
+		if (contraptionHitResult.contactPointMotion.lengthSqr() > 0.01f) {
+			movingMap.put(l, true);
+		}
+		return y;
 	}
 }

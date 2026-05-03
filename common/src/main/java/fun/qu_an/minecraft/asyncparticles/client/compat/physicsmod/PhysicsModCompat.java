@@ -1,9 +1,10 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.physicsmod;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollideUtil;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollisionType;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.RainEffect;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollisionType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.ParticleTypes;
@@ -14,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class PhysicsModCompat {
 	public static CollisionType isCollideWithContraption(ClientLevel level, Vec3 movement, AABB aabb) {
-		return CreateUtil.isCollideWithContraption(level, movement, aabb, true);
+		return CollideUtil.isCollideWithContraptions(level, movement, aabb, true);
 	}
 
 	public static void onContraptionCollide(ClientLevel level, Vec3 location, Vec3 movement, CollisionType collisionType) {

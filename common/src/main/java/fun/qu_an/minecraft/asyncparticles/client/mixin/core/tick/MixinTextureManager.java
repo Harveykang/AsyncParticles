@@ -13,7 +13,7 @@ public class MixinTextureManager {
 	@WrapMethod(method = "tick")
 	public void wrapTick(Operation<Void> original) {
 		if (ConfigHelper.isDeferredTextureTick() &&
-			AsyncTickBehavior.INSTANCE.shouldTickParticles) {
+			AsyncTickBehavior.INSTANCE.isShouldTickParticles()) {
 			// execute at the first frame after tick
 			ThreadUtil.enqueueClientTask(original::call);
 		} else {

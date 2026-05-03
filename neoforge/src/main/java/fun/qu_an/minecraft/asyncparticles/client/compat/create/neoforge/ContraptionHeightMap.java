@@ -5,16 +5,12 @@ import com.simibubi.create.content.contraptions.Contraption;
 import com.simibubi.create.foundation.collision.CollisionList;
 import com.simibubi.create.foundation.collision.Matrix3d;
 import it.unimi.dsi.fastutil.longs.Long2FloatMap;
-import it.unimi.dsi.fastutil.longs.Long2IntMap;
-import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.createmod.catnip.math.VecHelper;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 

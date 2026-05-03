@@ -118,12 +118,14 @@ public abstract class MixinParticleEngine {
 				} else {
 					canComputeFast = particle instanceof TextureSheetParticle tsp && GpuParticleBehavior.INSTANCE.canRenderFast(tsp);
 				}
-				Queue<Particle> queue;
+				Queue queue;
 				ParticleRenderType renderType = particle.getRenderType();
-				if (canComputeFast) {
-					queue = (Queue) GpuParticleBehavior.INSTANCE.gpuParticles.computeIfAbsent(renderType, k -> {
-						GpuParticleBehavior.INSTANCE.initParticleRenderType(k);
-						return ParticleHelper.newParticleQueue();
+				if (!canComputeFast) {
+					queue = this.particles.computeIfAbsent(renderType, this::asyncparticles$newParticleQueue);
+				} else {
+					queue = GpuParticleBehavior.INSTANCE.gpuParticles.computeIfAbsent(renderType, k -> {
+						GpuParticleBehavior.INSTANCE.createRenderer(k);
+						return asyncparticles$newParticleQueue(k);
 					});
 					if (appendNewParticlesToRenderer) {
 						GpuParticleBehavior.INSTANCE.getRenderer(renderType).append(GpuParticleBehavior.INSTANCE.getCameraPos(), ((TextureSheetParticle) particle));
@@ -131,8 +133,6 @@ public abstract class MixinParticleEngine {
 					// mark particles as gpu
 					// this will not skip the first tick after enqueued, while cpu particles skip it
 					((ParticleAddon) particle).asyncparticles$setGpu(true);
-				} else {
-					queue = this.particles.computeIfAbsent(renderType, k -> ParticleHelper.newParticleQueue());
 				}
 				queue.add(particle);
 			}
@@ -148,6 +148,14 @@ public abstract class MixinParticleEngine {
 			}
 			particles.forEach(this::asyncparticles$scheduleParticleTick);
 		}
+	}
+
+	/**
+	 * @see fun.qu_an.minecraft.asyncparticles.client.mixin.compat.fabric.porting_lib_base.MixinMixinParticleEngine
+	 */
+	@Unique
+	private <T extends Particle> Queue<T> asyncparticles$newParticleQueue(ParticleRenderType k) {
+		return ParticleHelper.newParticleQueue();
 	}
 
 	@Unique
@@ -263,7 +271,7 @@ public abstract class MixinParticleEngine {
 
 	@Inject(method = "add", at = @At(value = "HEAD"))
 	public void add(Particle particle, CallbackInfo ci) {
-		if (!AsyncTickBehavior.INSTANCE.shouldTickParticles && ConfigHelper.isTickAsync()) {
+		if (!AsyncTickBehavior.INSTANCE.isShouldTickParticles() && ConfigHelper.isTickAsync()) {
 			particle.remove(); // to compatible with some mods...
 			// don't cancel it,
 			// otherwise it may cause memory leak with some mods

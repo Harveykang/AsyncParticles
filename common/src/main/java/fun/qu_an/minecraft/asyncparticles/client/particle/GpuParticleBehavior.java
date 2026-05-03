@@ -168,14 +168,9 @@ public class GpuParticleBehavior {
 	}
 
 	@ApiStatus.Internal
-	public void initParticleRenderType(ParticleRenderType k) {
-		Minecraft.getInstance().particleEngine.particles.computeIfAbsent(k, t -> ParticleHelper.newParticleQueue());
-		createRenderer(k);
-	}
-
-	private IParticleRenderer createRenderer(ParticleRenderType type) {
+	public void createRenderer(ParticleRenderType type) {
 		RenderSystem.assertOnRenderThread();
-		return renderers.computeIfAbsent(type, k -> newParticleRenderer());
+		renderers.computeIfAbsent(type, k -> newParticleRenderer());
 	}
 
 	public Frustum getFrustum() {

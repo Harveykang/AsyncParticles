@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -44,7 +45,7 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 		if (level == null) {
 			return;
 		}
-		BlockPos blockPos = SHARED_POS.get().set(x, y, z);
+		BlockPos blockPos = GameUtil.SHARED_POS.get().set(x, y, z);
 		int light;
 		try {
 			light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;

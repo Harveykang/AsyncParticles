@@ -10,6 +10,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.lighting.LayerLightEventListener;
@@ -18,12 +19,14 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Unique;
 
 import java.util.Queue;
+import java.util.function.LongPredicate;
 
 import static java.lang.Math.abs;
 import static org.joml.Math.max;
 
 public class GameUtil {
 	public static final ParticleThreadLocal<Integer> DESTRUCTION_LIGHT_CACHE = new ParticleThreadLocal<>();
+	public static final ParticleThreadLocal<BlockPos.MutableBlockPos> SHARED_POS = ParticleThreadLocal.withInitial(BlockPos.MutableBlockPos::new);
 
 	@ExpectPlatform
 	public static AABB infinityAABB() {
@@ -131,5 +134,27 @@ public class GameUtil {
 			--j;
 		}
 		return (i & 0xF) << 20 | (j & 0xF) << 4;
+	}
+
+	public static void forEachBlockPos(double x, double y, double z, double size, LongPredicate longConsumer) {
+		int l = Mth.floor(x - size);
+		int m = Mth.floor(x + size);
+		int n = Mth.floor(y - size);
+		int o = Mth.floor(y + size);
+		int p = Mth.floor(z - size);
+		int q = Mth.floor(z + size);
+		if (l == m && n == o && p == q) {
+			longConsumer.test(BlockPos.asLong(l, n, p));
+		} else {
+			for (int r = l; r <= m; r++) {
+				for (int s = n; s <= o; s++) {
+					for (int t = p; t <= q; t++) {
+						if (!longConsumer.test(BlockPos.asLong(r, s, t))) {
+							return;
+						}
+					}
+				}
+			}
+		}
 	}
 }

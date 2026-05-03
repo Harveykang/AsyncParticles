@@ -53,7 +53,7 @@ public class AsyncTickBehavior {
 	private final Set<Particle> SYNC_PARTICLES = Collections.newSetFromMap(new IdentityHashMap<>());
 	public final List<Runnable> PARTICLE_OPERATIONS = new ArrayList<>();
 	private final AtomicBoolean cancelled = new AtomicBoolean(false);
-	public boolean shouldTickParticles = false;
+	private boolean shouldTickParticles = false;
 	public CompletableFuture<Void> particleCleanup;
 	private final List<EndTickEvent> SEQUENCED_END_TICK_EVENTS = new ArrayList<>();
 	private final List<EndTickEvent> PARALLEL_END_TICK_EVENTS = new ArrayList<>();
@@ -402,7 +402,7 @@ public class AsyncTickBehavior {
 	/* Sync Ticking */
 
 	public void tickSyncParticles() {
-		if ((!shouldTickParticles && ConfigHelper.isTickAsync()) || SYNC_PARTICLES.isEmpty()) {
+		if ((!isShouldTickParticles() && ConfigHelper.isTickAsync()) || SYNC_PARTICLES.isEmpty()) {
 			return;
 		}
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
@@ -556,7 +556,7 @@ public class AsyncTickBehavior {
 					if (tickAsync && enableGpuAcceleration &&
 						p instanceof TextureSheetParticle tsp && GpuParticleBehavior.INSTANCE.canRenderFast(tsp)) {
 						newGpuParticleMap.computeIfAbsent(key, k -> {
-							GpuParticleBehavior.INSTANCE.initParticleRenderType(k);
+							GpuParticleBehavior.INSTANCE.createRenderer(k);
 							return ParticleHelper.newParticleQueue();
 						}).add(tsp);
 						((ParticleAddon) tsp).asyncparticles$setGpu(true);
@@ -593,7 +593,7 @@ public class AsyncTickBehavior {
 						}
 					});
 					newGpuParticleMap.computeIfAbsent(key, k -> {
-						GpuParticleBehavior.INSTANCE.initParticleRenderType(k);
+						GpuParticleBehavior.INSTANCE.createRenderer(k);
 						return ParticleHelper.newParticleQueue();
 					}).addAll(oldGpuQueue);
 				});
@@ -640,7 +640,7 @@ public class AsyncTickBehavior {
 
 	@ApiStatus.Internal
 	public void scheduleOperation(EndTickOperation task) {
-		if (!shouldTickParticles && ConfigHelper.isTickAsync()) {
+		if (!isShouldTickParticles() && ConfigHelper.isTickAsync()) {
 			return;
 		}
 		if (ThreadUtil.isOnRenderThread()) {
@@ -648,6 +648,10 @@ public class AsyncTickBehavior {
 		} else {
 			ThreadUtil.enqueueClientTask(() -> END_TICK_OPERATIONS.add(task));
 		}
+	}
+
+	public boolean isShouldTickParticles() {
+		return shouldTickParticles;
 	}
 
 	public static class AsyncTickerThread extends AsyncParticleWorkerThread {
