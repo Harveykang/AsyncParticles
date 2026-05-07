@@ -33,6 +33,13 @@ versionRange = "[]"
 ordering = "NONE"
 side = "CLIENT"
 
+[[dependencies.asyncparticles]]
+modId = "create"
+type = "incompatible"
+versionRange = "(,6.0.9]"
+ordering = "NONE"
+side = "CLIENT"
+
 #[[dependencies.asyncparticles]]
 #modId = "mixinextras"
 #mandatory = true
