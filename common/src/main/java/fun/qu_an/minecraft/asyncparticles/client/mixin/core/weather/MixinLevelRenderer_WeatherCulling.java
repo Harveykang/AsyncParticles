@@ -21,7 +21,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = LevelRenderer.class, priority = 1500)
@@ -88,17 +87,5 @@ public abstract class MixinLevelRenderer_WeatherCulling {
 	public boolean shouldRenderWeatherColumn(Biome instance, Operation<Boolean> original,
 											 @Share(value = "isVisible") LocalBooleanRef isVisible) {
 		return isVisible.get() && original.call(instance);
-	}
-
-	// It's ok if this redirect is not applied, just reduce a little of performance.
-	@Redirect(method = "renderSnowAndRain", order = 500, require = 0, at = @At(value = "INVOKE",
-		target = "Lnet/minecraft/world/level/Level;getHeight(Lnet/minecraft/world/level/levelgen/Heightmap$Types;II)I"))
-	public int onGetHeight(Level instance,
-						   Heightmap.Types types,
-						   int i,
-						   int j,
-						   @Share(value = "enableCull") LocalBooleanRef enableCull,
-						   @Share(value = "height_map") LocalIntRef qRef) {
-		return enableCull.get() ? qRef.get() : instance.getHeight(types, i, j);
 	}
 }

@@ -68,7 +68,7 @@ public class GpuParticleBehavior {
 	}
 
 	private IParticleRenderer newParticleRenderer() {
-		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer(this);
+		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer(particleLimit);
 		throw new IllegalStateException("No compatible particle renderer found");
 	}
 
