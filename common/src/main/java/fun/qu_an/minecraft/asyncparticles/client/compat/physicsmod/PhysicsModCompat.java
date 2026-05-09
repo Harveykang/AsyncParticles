@@ -2,7 +2,6 @@ package fun.qu_an.minecraft.asyncparticles.client.compat.physicsmod;
 
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollideUtil;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollisionType;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.RainEffect;
 import net.minecraft.client.Minecraft;
@@ -24,7 +23,7 @@ public class PhysicsModCompat {
 			level.random.nextFloat() > 0.1) {
 			return;
 		}
-		BlockHitResult hit = CreateUtil.clip(level, location, location.add(movement.scale(2)));
+		BlockHitResult hit = CollideUtil.rayCast(level, location, location.add(movement.scale(2)));
 		if (hit == null || hit.getType() != HitResult.Type.BLOCK || hit.isInside() ||
 			!collisionType.canSpawnRainEffect(createRainEffect)) {
 			return;

@@ -30,8 +30,6 @@ import java.util.Queue;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class MixinParticleEngine {
-	@Unique
-	private static final ParticleThreadLocal<Boolean> GPU_PARTICLE_PHASE = ParticleThreadLocal.withInitial(() -> false);
 	@Shadow
 	public Queue<Particle> particlesToAdd;
 	@Shadow
@@ -166,9 +164,9 @@ public abstract class MixinParticleEngine {
 		IParticleRenderer renderer = GpuParticleBehavior.INSTANCE.getRenderer(particleRenderType);
 		renderer.mapBuffer();
 		AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.add(() -> {
-			GPU_PARTICLE_PHASE.set(true);
+			GpuParticleBehavior.GPU_PARTICLE_PHASE.set(true);
 			tickParticleList((Queue) queue);
-			GPU_PARTICLE_PHASE.set(false);
+			GpuParticleBehavior.GPU_PARTICLE_PHASE.set(false);
 			AsyncTickBehavior.INSTANCE.doRemoveIf(queue);
 			renderer.tick(GpuParticleBehavior.INSTANCE.getCameraPos(), queue);
 		});
@@ -216,7 +214,7 @@ public abstract class MixinParticleEngine {
 		}
 		boolean enableLightCache = ConfigHelper.particleLightCache();
 		boolean isOnMainThread = ThreadUtil.isOnRenderThread();
-		ParticleCullingMode particleCullingMode = GPU_PARTICLE_PHASE.get() ?
+		ParticleCullingMode particleCullingMode = GpuParticleBehavior.GPU_PARTICLE_PHASE.get() ?
 			ParticleCullingMode.DISABLED :
 			ConfigHelper.getParticleCullingMode();
 		boolean forceDone = ConfigHelper.forceDoneParticleTick();

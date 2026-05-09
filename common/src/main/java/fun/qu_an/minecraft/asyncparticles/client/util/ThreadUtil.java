@@ -68,4 +68,10 @@ public class ThreadUtil {
 	public static void assertOnMainThread() {
 		RenderSystem.assertOnRenderThread();
 	}
+
+	public static void assertNotMainThread() {
+		if (isOnRenderThread()) {
+			throw new IllegalStateException("Cannot call this method from main thread");
+		}
+	}
 }

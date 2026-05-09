@@ -32,7 +32,7 @@ dependencies {
     modCompileOnly 'maven.modrinth:iris:1.8.8+1.21.1-fabric'
 
     /* Particle Rain */
-    modCompileOnly "maven.modrinth:particle-rain:v4-beta.9+1.21.1-fabric"
+    modCompileOnly "maven.modrinth:particle-rain:v4-beta.10+$minecraft_version-fabric"
 
     /* Effectual */
 //    modCompileOnly 'maven.modrinth:effectual:1.1.0-1.21.1'

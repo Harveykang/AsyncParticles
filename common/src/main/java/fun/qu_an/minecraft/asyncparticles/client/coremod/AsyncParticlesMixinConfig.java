@@ -12,7 +12,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
-import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.*;
+import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.LOGGER;
 
 public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
@@ -21,6 +21,7 @@ public class AsyncParticlesMixinConfig {
 		safeBlockEntityMap: Boolean. Make 'LevelChunk#blockEntities' thread-safe.
 		safeClassInstanceMultiMap: Boolean. Make 'ClassInstanceMultiMap' thread-safe.
 		safeLegacyRandomSource: Boolean. Make LegacyRandomSource thread-safe.
+		particle$splitTick: Boolean. Enable recursive particle tick.
 		particle$noCulling: A comma-separated list of classes extending 'Particle' that should not be culled.
 		particle$noLightCache: A comma-separated list of classes extending 'Particle' that should not use the light cache.
 		particle$lockRequired: A comma-separated list of classes extending 'Particle' that require a spin lock.
@@ -100,6 +101,7 @@ public class AsyncParticlesMixinConfig {
 
 	static class MixinConfigObj {
 		private int version = 0;
+		private boolean particle$splitTick = false;
 		private boolean safeClassInstanceMultiMap = (IRONS_SPELLBOOKS_LOADED && IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
 													MAKE_BUBBLES_POP_LOADED;
 		private boolean safeBlockEntityMap = false;
@@ -152,6 +154,7 @@ public class AsyncParticlesMixinConfig {
 
 		private void fold() {
 			assertNotGlobal();
+			particle$splitTick = toSaveConfig.particle$splitTick;
 			safeClassInstanceMultiMap = toSaveConfig.safeClassInstanceMultiMap;
 			safeBlockEntityMap = toSaveConfig.safeBlockEntityMap;
 			safeLegacyRandomSource = toSaveConfig.safeLegacyRandomSource;
@@ -170,6 +173,7 @@ public class AsyncParticlesMixinConfig {
 			} catch (NumberFormatException ignored) {
 			}
 			MixinConfigObj defaultConfig = new MixinConfigObj();
+			particle$splitTick = getBoolean(properties, "particle$splitTick", defaultConfig.particle$splitTick);
 			safeClassInstanceMultiMap = (IRONS_SPELLBOOKS_LOADED && IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
 										MAKE_BUBBLES_POP_LOADED ||
 										getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
@@ -189,6 +193,7 @@ public class AsyncParticlesMixinConfig {
 
 		private void write(Properties properties) {
 			properties.setProperty("version", Integer.toString(version));
+			properties.setProperty("particle$splitTick", Boolean.toString(particle$splitTick));
 			properties.setProperty("safeClassInstanceMultiMap", Boolean.toString(safeClassInstanceMultiMap));
 			properties.setProperty("safeBlockEntityMap", Boolean.toString(safeBlockEntityMap));
 			properties.setProperty("safeLegacyRandomSource", Boolean.toString(safeLegacyRandomSource));
@@ -320,6 +325,15 @@ public class AsyncParticlesMixinConfig {
 		void setContraptionNoParticleCollision(Collection<String> contraptionNoParticleCollision) {
 			assertNotGlobal();
 			this.create$contraptionNoParticleCollision = new LinkedHashSet<>(contraptionNoParticleCollision);
+		}
+
+		public boolean isParticleSplitTick() {
+			return particle$splitTick;
+		}
+
+		void setParticleSplitTick(boolean splitTick) {
+			assertNotGlobal();
+			this.particle$splitTick = splitTick;
 		}
 	}
 }

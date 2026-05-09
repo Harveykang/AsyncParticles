@@ -60,6 +60,8 @@
   "config.asyncparticles.mod-compat.create.rainEffect.tooltip": "设置机械动力结构上雨水效果的生成条件。",
   "config.asyncparticles.category.mixin": "Mixin",
   "config.asyncparticles.mixin.tooltip": "默认值无法删除。（可通过删除所有条目重置为默认值。）",
+  "config.asyncparticles.mixin.particle.splitTick": "分割原版粒子刻",
+  "config.asyncparticles.mixin.particle.splitTick.tooltip": "使原版粒子刻任务均匀分配到各个线程，\n而不是按“ParticleRenderType”分割。",
   "config.asyncparticles.mixin.safeClassInstanceMultiMap": "使“ClassInstanceMultiMap”线程安全",
   "config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip": "如果你安装的模组中包含会访问世界中实体的\n非标准的粒子实现，则必须启用这个选项。\n否则可能会导致游戏崩溃。",
   "config.asyncparticles.mixin.safeBlockEntityMap": "使“LevelChunk#blockEntities”线程安全",

@@ -14,7 +14,7 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveAction;
 
 public class TickParticleRecursiveAction extends RecursiveAction {
-	private static final int MAX_DEPTH = (int) Math.round(Math.log(HashCommon.nextPowerOfTwo(AsyncTickBehavior.INSTANCE.THREADS)) / Math.log(2)) + 2;
+	private static final int MAX_DEPTH = (int) Math.round(Math.log(HashCommon.nextPowerOfTwo(AsyncTickBehavior.THREADS)) / Math.log(2)) + 2;
 	private final Spliterator<Particle> spliterator;
 	private final int depth;
 

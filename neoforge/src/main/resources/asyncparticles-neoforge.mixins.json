@@ -4,6 +4,9 @@
   "package": "fun.qu_an.minecraft.asyncparticles.client.mixin",
   "compatibilityLevel": "JAVA_17",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.neoforge.APMixinPluginNeoForge",
+  "mixinextras": {
+    "minVersion": "0.5.0"
+  },
   "client": [
     "neoforge.MixinLevelRenderer",
     "neoforge.MixinParticleEngine_Render",

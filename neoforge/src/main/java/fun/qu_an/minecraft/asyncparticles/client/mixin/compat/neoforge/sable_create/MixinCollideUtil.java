@@ -12,6 +12,7 @@ import dev.ryanhcode.sable.sublevel.SubLevel;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollisionType;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CollideUtilImpl;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.neoforge.create.AccessorMatrix3d;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
@@ -64,7 +65,7 @@ public class MixinCollideUtil {
 					 "collideMotionWithContraption"
 	}, at = @At("HEAD"))
 	private static void asyncparticles$head(CallbackInfoReturnable<CollisionType> cir,
-	                                        @Local(argsOnly = true) AbstractContraptionEntity instance,
+	                                        @Local(argsOnly = true) Entity instance,
 	                                        @Share("subLevel") LocalRef<SubLevel> contraptionSubLevel) {
 		SubLevel subLevel = Sable.HELPER.getContaining(instance);
 		contraptionSubLevel.set(subLevel);
@@ -90,7 +91,7 @@ public class MixinCollideUtil {
 		"isCollideWithContraption",
 		"collideMotionWithContraption"
 	}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/AABB;expandTowards(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/AABB;"))
-	private static AABB asyncparticles$entityQueryBounds(AABB instance, Vec3 vec3, @Local(argsOnly = true) AbstractContraptionEntity contraption, @Share("subLevel") LocalRef<SubLevel> contraptionSubLevel) {
+	private static AABB asyncparticles$entityQueryBounds(AABB instance, Vec3 vec3, @Local(argsOnly = true) Entity contraption, @Share("subLevel") LocalRef<SubLevel> contraptionSubLevel) {
 		SubLevel subLevel = contraptionSubLevel.get();
 
 		if (subLevel != null) {
@@ -120,7 +121,7 @@ public class MixinCollideUtil {
 		"isCollideWithContraption",
 		"collideMotionWithContraption"
 	}, at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/contraptions/AbstractContraptionEntity$ContraptionRotationState;asMatrix()Lcom/simibubi/create/foundation/collision/Matrix3d;"))
-	private static Matrix3d asyncparticles$rotationMatrix(AbstractContraptionEntity.ContraptionRotationState rotationState, @Local(argsOnly = true) AbstractContraptionEntity contraption, @Share("subLevel") LocalRef<SubLevel> contraptionSubLevel) {
+	private static Matrix3d asyncparticles$rotationMatrix(AbstractContraptionEntity.ContraptionRotationState rotationState, @Local(argsOnly = true) Entity contraption, @Share("subLevel") LocalRef<SubLevel> contraptionSubLevel) {
 		SubLevel subLevel = contraptionSubLevel.get();
 		if (subLevel != null) {
 			Pose3d pose = subLevel.logicalPose();

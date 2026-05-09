@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.compat.neoforge.create;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalDoubleRef;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CollideUtilImpl;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollideUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.world.phys.AABB;
@@ -40,7 +40,7 @@ public class MixinParticle {
 		if (!hasPhysics) {
 			return;
 		}
-		Vec3 mov = CollideUtilImpl.collideMotionWithContraptions(level, new Vec3(d.get(), e.get(), f.get()), bb);
+		Vec3 mov = CollideUtil.collideMotionWithContraptions(level, new Vec3(d.get(), e.get(), f.get()), bb);
 		if (mov == null) {
 			return;
 		}

@@ -7,6 +7,6 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(GameRenderer.class)
 public class MixinGameRenderer {
 	static {
-		GpuParticleBehavior.INSTANCE.init();
+		GpuParticleBehavior.init();
 	}
 }

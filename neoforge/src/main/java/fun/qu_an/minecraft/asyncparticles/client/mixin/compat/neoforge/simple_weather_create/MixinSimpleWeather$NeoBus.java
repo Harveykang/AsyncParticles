@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.compat.neoforge.simple_w
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CreateUtilImpl;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -24,7 +24,7 @@ public interface MixinSimpleWeather$NeoBus {
 	@WrapOperation(method = "renderWeather", remap = false,
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getDeltaMovement()Lnet/minecraft/world/phys/Vec3;"))
 	private static Vec3 redirectDeltaMovement(LocalPlayer player, Operation<Vec3> original) {
-		Vec3 contraptionMotion = CreateUtilImpl.getContraptionDeltaMovement(player);
+		Vec3 contraptionMotion = CreateUtil.getContraptionDeltaMovement(player);
 		Vec3 deltaMovement = original.call(player);
 		return contraptionMotion != null ? contraptionMotion.add(deltaMovement) : deltaMovement;
 	}
@@ -34,7 +34,7 @@ public interface MixinSimpleWeather$NeoBus {
 	@Redirect(method = "renderWeather", remap = false,
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getDeltaMovement()Lnet/minecraft/world/phys/Vec3;"))
 	private static Vec3 redirectDeltaMovement2(Entity entity) {
-		Vec3 contraptionMotion = CreateUtilImpl.getContraptionDeltaMovement(entity);
+		Vec3 contraptionMotion = CreateUtil.getContraptionDeltaMovement(entity);
 		Vec3 deltaMovement = entity.getDeltaMovement();
 		return contraptionMotion != null ? contraptionMotion.add(deltaMovement) : deltaMovement;
 	}

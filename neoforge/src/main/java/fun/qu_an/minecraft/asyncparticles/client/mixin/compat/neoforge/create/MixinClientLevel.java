@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.compat.neoforge.create;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.ContraptionHeightMapProvider;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.ContraptionHeightMapProvider;
 import it.unimi.dsi.fastutil.longs.*;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;

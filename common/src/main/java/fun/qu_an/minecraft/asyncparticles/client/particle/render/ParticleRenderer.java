@@ -237,16 +237,16 @@ public class ParticleRenderer implements IParticleRenderer {
 		this.particleCount[current] = position / ParticleVertexFormats.RAW_PARTICLE_BYTES;
 	}
 
-	private static boolean shouldCull(ParticleCullingMode particleCullingMode, Frustum frustum, TextureSheetParticle tsp) {
-		ParticleAddon particleAddon = (ParticleAddon) tsp;
-		return particleAddon.asyncparticles$shouldCull() &&
-			switch (particleCullingMode) {
-				case AABB -> !FrustumUtil.isVisible(frustum, tsp.getBoundingBox());
-				case DISABLED -> false;
-				case SPHERE -> !FrustumUtil.isVisible(frustum, tsp);
-				case ASYNC_AABB, ASYNC_SPHERE -> !particleAddon.asyncparticles$isVisibleOnScreen();
-			};
-	}
+//	private static boolean shouldCull(ParticleCullingMode particleCullingMode, Frustum frustum, TextureSheetParticle tsp) {
+//		ParticleAddon particleAddon = (ParticleAddon) tsp;
+//		return particleAddon.asyncparticles$shouldCull() &&
+//			switch (particleCullingMode) {
+//				case AABB -> !FrustumUtil.isVisible(frustum, tsp.getBoundingBox());
+//				case DISABLED -> false;
+//				case SPHERE -> !FrustumUtil.isVisible(frustum, tsp);
+//				case ASYNC_AABB, ASYNC_SPHERE -> !particleAddon.asyncparticles$isVisibleOnScreen();
+//			};
+//	}
 
 	@Override
 	public void compute(Camera camera, float partialTicks) {

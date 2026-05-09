@@ -4,6 +4,9 @@
   "package": "fun.qu_an.minecraft.asyncparticles.client.mixin",
   "compatibilityLevel": "JAVA_17",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin",
+  "mixinextras": {
+    "minVersion": "0.5.0"
+  },
   "client": [
     "compat.a_good_place.InvokerBlocksParticlesManager",
     "compat.a_good_place.MixinBlocksParticlesManager",
@@ -29,6 +32,12 @@
     "compat.modernui.MixinRenderSystem",
     "compat.particle_interactions.MixinParticle_FixBlackDestructionParticles",
     "compat.particle_interactions.MixinSpawnParticles",
+    "compat.particlerain.MixinParticleRain",
+    "compat.particlerain.MixinParticleSpawner",
+    "compat.particlerain.MixinWeatherParticle",
+    "compat.particlerain_create.MixinCustomParticle",
+    "compat.particlerain_create.MixinParticleSpawner",
+    "compat.particlerain_create.MixinWeatherParticle",
     "compat.physicsmod.MixinClientLevel",
     "compat.physicsmod.MixinLevelRenderer",
     "compat.physicsmod.MixinRainParticle",
@@ -46,6 +55,7 @@
     "conditional.MixinClassInstanceMultiMap",
     "conditional.MixinLegacyRandomSource",
     "conditional.MixinLevelChunk_BlockEntityMap",
+    "conditional.MixinParticleEngine_SplitTick",
     "conditional.MixinParticles_LightCacheNoRefresh",
     "conditional.MixinParticles_LockProvider",
     "conditional.MixinParticles_LockRequired",
@@ -56,6 +66,7 @@
     "core.off_thread_access.MixinActiveProfiler",
     "core.off_thread_access.MixinClientChunkCache",
     "core.off_thread_access.MixinClientLevel",
+    "core.off_thread_access.MixinEntityGetter",
     "core.off_thread_access.MixinLevel",
     "core.off_thread_access.MixinLevelRenderer",
     "core.off_thread_access.MixinSoundEngine",
@@ -71,7 +82,6 @@
     "core.render.MixinMultiBufferSource$BufferSource",
     "core.render.MixinTesselator",
     "core.render.MixinVertexConsumer",
-    "core.render.MixinVertexFormatElement",
     "core.tick.MixinClientLevel_AnimateTick",
     "core.tick.MixinGameRenderer",
     "core.tick.MixinMinecraft",
@@ -85,6 +95,5 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "core.off_thread_access.MixinEntityGetter"
   ]
 }

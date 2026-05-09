@@ -6,16 +6,21 @@ import com.simibubi.create.content.contraptions.ContraptionHandlerClient;
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import com.simibubi.create.foundation.collision.CollisionList;
 import com.simibubi.create.foundation.collision.Matrix3d;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollideUtil;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollisionType;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.ContraptionHitResult;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.neoforge.create.InvokerContraptionCollider;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
@@ -25,33 +30,12 @@ import java.util.Iterator;
 import static java.lang.Math.abs;
 import static java.lang.Math.max;
 
+@ApiStatus.Internal
 public class CollideUtilImpl {
 	private static final float LENGTH_SQR_EPSILON = 0.01f;
 
-	@Nullable
-	public static Vec3 collideMotionWithContraptions(ClientLevel level, Vec3 motion, AABB bounds) {
-		Vector3d result = new Vector3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-		AABB finalBounds = bounds.inflate(0.1);
-		for (Iterator<AbstractContraptionEntity> it = CreateUtilImpl.forEachContraption(level); it.hasNext(); ) {
-			AbstractContraptionEntity entity = it.next();
-			if (!((ContraptionEntityAddon) entity).asyncparticles$isParticleCollision()) {
-				continue;
-			}
-			Vec3 vec3 = collideMotionWithContraption(motion, finalBounds, entity, false);
-			if (vec3 != null) {
-				result.set(abs(result.x) < abs(vec3.x) ? result.x : vec3.x,
-					abs(result.y) < abs(vec3.y) ? result.y : vec3.y,
-					abs(result.z) < abs(vec3.z) ? result.z : vec3.z);
-			}
-		}
-		if (result.x == Double.MAX_VALUE
-			|| (motion.x == result.x && motion.y == result.y && motion.z == result.z)) {
-			return null;
-		}
-		return new Vec3(result.x, result.y, result.z);
-	}
-
-	public static CollisionType isCollideWithContraption(Vec3 originalMotion, AABB particleBound, AbstractContraptionEntity contraptionEntity, boolean estimate) {
+	public static CollisionType isCollideWithContraption(Vec3 originalMotion, AABB particleBound, Entity entity, boolean estimate) {
+		AbstractContraptionEntity contraptionEntity = (AbstractContraptionEntity) entity;
 		// 第一阶段：出界及基础判断
 		AABB bb0;
 		AABB entityBoundingBox = contraptionEntity instanceof CarriageContraptionEntity
@@ -148,8 +132,9 @@ public class CollideUtilImpl {
 	@Nullable
 	public static Vec3 collideMotionWithContraption(Vec3 originalMotion,
 	                                                AABB particleBounds,
-	                                                AbstractContraptionEntity contraptionEntity,
+	                                                Entity entity,
 	                                                boolean estimate) {
+		AbstractContraptionEntity contraptionEntity = (AbstractContraptionEntity) entity;
 		AABB bb0;
 		AABB entityBoundingBox = contraptionEntity instanceof CarriageContraptionEntity
 			? (bb0 = contraptionEntity.getBoundingBox()).inflate(0, Math.max(Math.max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
@@ -362,28 +347,12 @@ public class CollideUtilImpl {
 		}
 	}
 
-	public static CollisionType isCollideWithContraptions(ClientLevel level, Vec3 motion, AABB bb) {
-		return isCollideWithContraptions(level, motion, bb, true);
-	}
-
-	public static CollisionType isCollideWithContraptions(ClientLevel level, Vec3 motion, AABB bb, boolean estimate) {
-		for (Iterator<AbstractContraptionEntity> it = CreateUtilImpl.forEachContraption(level); it.hasNext(); ) {
-			AbstractContraptionEntity contraptionEntity = it.next();
-			CollisionType collisionType = CollideUtilImpl.isCollideWithContraption(motion, bb, contraptionEntity, estimate);
-			if (collisionType != CollisionType.NONE) {
-				return collisionType;
-			}
-		}
-		return CollisionType.NONE;
-	}
-
-
 	public static BlockHitResult rayCast(ClientLevel level, Vec3 start, Vec3 end) {
 		double shortestDistance = Double.MAX_VALUE;
 		BlockHitResult hitResult = null;
 		Vec3 hit = null;
-		for (Iterator<AbstractContraptionEntity> it = CreateUtilImpl.forEachContraption(level); it.hasNext(); ) {
-			AbstractContraptionEntity entity = it.next();
+		for (Iterator<Entity> it = CreateUtil.forEachContraption(level); it.hasNext(); ) {
+			AbstractContraptionEntity entity = (AbstractContraptionEntity) it.next();
 			BlockHitResult hitResult1 = ContraptionHandlerClient.rayTraceContraption(start, end, entity);
 			if (hitResult1 != null && hitResult1.getType() != HitResult.Type.MISS) {
 				Vec3 hit1 = entity.toGlobalVector(hitResult1.getLocation(), 1.0F);
@@ -401,13 +370,13 @@ public class CollideUtilImpl {
 	}
 
 	@Nullable
-	public static fun.qu_an.minecraft.asyncparticles.client.compat.create.ContraptionHitResult rayCastWithContactPointMotion(ClientLevel level, Vec3 start, Vec3 end) {
+	public static ContraptionHitResult rayCastWithContactPointMotion(ClientLevel level, Vec3 start, Vec3 end) {
 		double shortestDistance = Double.MAX_VALUE;
 		BlockHitResult hitResult = null;
 		Vec3 hit = null;
 		AbstractContraptionEntity entity = null;
-		for (Iterator<AbstractContraptionEntity> it = CreateUtilImpl.forEachContraption(level); it.hasNext(); ) {
-			AbstractContraptionEntity entity1 = it.next();
+		for (Iterator<Entity> it = CreateUtil.forEachContraption(level); it.hasNext(); ) {
+			AbstractContraptionEntity entity1 = (AbstractContraptionEntity) it.next();
 			AABB bb0;
 			AABB entity1Bb = entity1 instanceof CarriageContraptionEntity
 				? (bb0 = entity1.getBoundingBox()).inflate(0, max(max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
@@ -429,7 +398,7 @@ public class CollideUtilImpl {
 		if (hitResult == null || hitResult.getType() == HitResult.Type.MISS) {
 			return null;
 		}
-		return new fun.qu_an.minecraft.asyncparticles.client.compat.create.ContraptionHitResult(entity.getContactPointMotion(hit),
+		return new ContraptionHitResult(entity.getContactPointMotion(hit),
 			hit,
 			hitResult.getDirection(),
 			BlockPos.containing(hit),

@@ -18,7 +18,7 @@ public abstract class MixinBatchableBufferSource {
 		"endLastBatch",
 		"endBatch*"
 	}, at = @At("HEAD"))
-	private void getBuffer(CallbackInfoReturnable<VertexConsumer> cir) {
+	private void assertion(CallbackInfoReturnable<VertexConsumer> cir) {
 		ThreadUtil.assertNotParticleRendererThread();
 	}
 
@@ -27,7 +27,7 @@ public abstract class MixinBatchableBufferSource {
 		"close",
 		"drawDirect"
 	}, remap = false, at = @At("HEAD"))
-	private void endBatches(CallbackInfo ci) {
+	private void assertion(CallbackInfo ci) {
 		ThreadUtil.assertNotParticleRendererThread();
 	}
 }

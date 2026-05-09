@@ -113,11 +113,8 @@ dependencies {
 //    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.5"
 //    modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.5.1-beta.3'
 
-    /* Particle Rain/Pretty Rain */
-//    modCompileOnly "maven.modrinth:pretty-rain:1.1.4"
-    modCompileOnly("maven.modrinth:particle-rain:v4-beta.9+$minecraft_version-neoforge")
-//    modLocalRuntime("maven.modrinth:particle-rain:v4-beta.9+$minecraft_version-neoforge")
-//    modLocalRuntime "maven.modrinth:pretty-rain:1.1.4"
+    /* Particle Rain */
+//    modLocalRuntime("maven.modrinth:particle-rain:v4-beta.10+$minecraft_version-neoforge")
 
     /* Effectual */
 //    if (rootProject.use_connector_mod == "true") {

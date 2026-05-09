@@ -6,6 +6,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.particle.render.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.render.ParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
@@ -25,6 +26,7 @@ public class GpuParticleBehavior {
 	public static final String RENDER_METHOD = Mappings.getRenderMethod();
 	public static final String RENDER_ROTATED_QUAD_METHOD_1 = Mappings.getRenderRotatedQuadMethod1();
 	public static final String RENDER_ROTATED_QUAD_METHOD_2 = Mappings.getRenderRotatedQuadMethod2();
+	public static final ParticleThreadLocal<Boolean> GPU_PARTICLE_PHASE = ParticleThreadLocal.withInitial(() -> false);
 	public static final GpuParticleBehavior INSTANCE = new GpuParticleBehavior();
 	public final Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = new Reference2ObjectOpenHashMap<>();
 	// reuse buffers
@@ -64,7 +66,7 @@ public class GpuParticleBehavior {
 //	);
 	private int particleLimit = -1;
 
-	public void init() {
+	public static void init() {
 	}
 
 	private IParticleRenderer newParticleRenderer() {

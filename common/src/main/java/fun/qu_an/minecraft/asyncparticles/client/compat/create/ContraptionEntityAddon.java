@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge;
+package fun.qu_an.minecraft.asyncparticles.client.compat.create;
 
 public interface ContraptionEntityAddon {
 	boolean asyncparticles$isParticleCollision();

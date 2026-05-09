@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge;
+package fun.qu_an.minecraft.asyncparticles.client.compat.create;
 
 import it.unimi.dsi.fastutil.longs.Long2BooleanMap;
 import it.unimi.dsi.fastutil.longs.Long2FloatMap;

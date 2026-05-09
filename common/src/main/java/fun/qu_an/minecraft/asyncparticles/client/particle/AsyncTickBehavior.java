@@ -5,6 +5,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
@@ -50,6 +51,13 @@ public class AsyncTickBehavior {
 	public static final AsyncTickBehavior INSTANCE = new AsyncTickBehavior();
 	//	public final Map<ParticleRenderType, ByteBuffer> UNUPLOADED_BUFFERS = new ConcurrentHashMap<>();
 	private final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
+	private final List<ParticleRenderType> PARALLELLED_RENDER_TYPES = new ArrayList<>(List.of(
+		ParticleRenderType.TERRAIN_SHEET,
+		ParticleRenderType.PARTICLE_SHEET_OPAQUE,
+		ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT,
+		ParticleRenderType.PARTICLE_SHEET_LIT,
+		ParticleRenderType.NO_RENDER
+	));
 	private final Set<Particle> SYNC_PARTICLES = Collections.newSetFromMap(new IdentityHashMap<>());
 	public final List<Runnable> PARTICLE_OPERATIONS = new ArrayList<>();
 	private final AtomicBoolean cancelled = new AtomicBoolean(false);
@@ -77,6 +85,16 @@ public class AsyncTickBehavior {
 			forkJoinWorkerThread.setDaemon(true);
 			return forkJoinWorkerThread;
 		}, Util::onThreadException, true);
+	}
+
+	public void addTickInParallel(ParticleRenderType particleRenderType) {
+		synchronized (PARALLELLED_RENDER_TYPES) {
+			PARALLELLED_RENDER_TYPES.add(particleRenderType);
+		}
+	}
+
+	public boolean canTickInParallel(ParticleRenderType particleRenderType) {
+		return PARALLELLED_RENDER_TYPES.contains(particleRenderType);
 	}
 
 	/* Ticker */
@@ -146,7 +164,7 @@ public class AsyncTickBehavior {
 			((IterationSafeEvictingQueue<? extends Particle>) queue)
 				.parallelRemoveIf(particle -> this.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()),
 					ConfigHelper.isParallelQueueEviction(),
-					this.THREADS,
+					THREADS,
 					this.EXECUTOR);
 		} else {
 			queue.removeIf(particle -> this.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()));
@@ -158,7 +176,7 @@ public class AsyncTickBehavior {
 			((IterationSafeEvictingQueue<? extends TrackingEmitter>) queue)
 				.parallelRemoveIf(particle -> !particle.isAlive(),
 					ConfigHelper.isParallelQueueEviction(),
-					this.THREADS,
+					THREADS,
 					this.EXECUTOR);
 		} else {
 			queue.removeIf(particle -> this.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()));
@@ -374,9 +392,13 @@ public class AsyncTickBehavior {
 	}
 
 	public void onParticleEngineClear() {
-		// this fix a good placement mod block invisible
+		// fix a good placement mod block invisible
 		if (ModListHelper.A_GOOD_PLACE_LOADED) {
 			AGoodPlaceCompat.onParticleEngineClear();
+		}
+		// fix particlerain's particle count management
+		if (ModListHelper.PARTICLERAIN_LOADED) {
+			ParticleRainCompat.particleCount.set(0);
 		}
 	}
 

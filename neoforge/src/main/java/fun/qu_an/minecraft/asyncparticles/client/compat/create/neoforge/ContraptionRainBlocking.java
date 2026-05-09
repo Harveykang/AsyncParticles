@@ -7,6 +7,10 @@ import dev.ryanhcode.sable.Sable;
 import dev.ryanhcode.sable.companion.math.Pose3d;
 import dev.ryanhcode.sable.sublevel.SubLevel;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollideUtil;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.ContraptionHeightMapProvider;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.ContraptionHitResult;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.neoforge.create.AccessorMatrix3d;
 import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
@@ -16,14 +20,13 @@ import it.unimi.dsi.fastutil.longs.Long2FloatOpenHashMap;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4d;
 import org.joml.Vector3d;
 
 import java.util.Iterator;
-
-import static fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CreateUtilImpl.forEachContraption;
 
 /**
  * Thanks to ChatGPT
@@ -113,8 +116,8 @@ public class ContraptionRainBlocking {
 
 		Long2FloatMap tempHeightMap = doRainEffectsIfMoving ? heightMap : new Long2FloatOpenHashMap();
 		Matrix4d subLevelMatrix = ModListHelper.SABLE_LOADED ? new Matrix4d() : null;
-		for (Iterator<AbstractContraptionEntity> it = forEachContraption(level); it.hasNext(); ) {
-			AbstractContraptionEntity entity = it.next();
+		for (Iterator<Entity> it = CreateUtil.forEachContraption(level); it.hasNext(); ) {
+			AbstractContraptionEntity entity = (AbstractContraptionEntity) it.next();
 			Contraption contraption = entity.getContraption();
 			if (contraption == null) continue;
 
@@ -732,7 +735,7 @@ public class ContraptionRainBlocking {
 		if (heightMap.containsKey(l)) {
 			return heightMap.get(l);
 		}
-		fun.qu_an.minecraft.asyncparticles.client.compat.create.ContraptionHitResult contraptionHitResult = CollideUtilImpl.rayCastWithContactPointMotion(
+		ContraptionHitResult contraptionHitResult = CollideUtil.rayCastWithContactPointMotion(
 			level,
 			Vec3.atCenterOf(mutableBlockPos.set(l | BlockPos.asLong(0, level.getMaxBuildHeight() + 16, 0))),
 			Vec3.atCenterOf(mutableBlockPos.set(l | BlockPos.asLong(0, level.getMinBuildHeight() - 16, 0))));

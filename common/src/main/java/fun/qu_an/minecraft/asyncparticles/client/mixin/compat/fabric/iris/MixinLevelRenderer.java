@@ -9,6 +9,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.*;
 import org.joml.Matrix4f;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -39,7 +40,7 @@ public abstract class MixinLevelRenderer {
 	}
 
 	@Inject(method = "renderLevel", at = @At(value = "FIELD", ordinal = 0,
-		target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;"))
+		target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;", opcode = Opcodes.GETFIELD))
 	private void onRenderLevelTransparencyChain(DeltaTracker deltaTracker,
 												boolean renderBlockOutline,
 												Camera camera,

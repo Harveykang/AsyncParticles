@@ -24,6 +24,17 @@ public class ClothConfigMixinMenus {
 		MixinConfigObj newConfig = new MixinConfigObj();
 		MixinConfigObj lastConfig = getToSaveConfig();
 		mixinCategory.addEntry(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.particle.splitTick"),
+				lastConfig.isParticleSplitTick())
+			.setDefaultValue(defaultConfig.isParticleSplitTick())
+			.setSaveConsumer(newConfig::setParticleSplitTick)
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.particle.splitTick.tooltip"))
+			.requireRestart()
+			.build());
+		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap"),
 				lastConfig.isSafeClassInstanceMultiMap())
 			.setDefaultValue(defaultConfig.isSafeClassInstanceMultiMap())
