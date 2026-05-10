@@ -2,31 +2,33 @@ package fun.qu_an.minecraft.asyncparticles.client.compat;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
-import org.jetbrains.annotations.Nullable;
 import org.sinytra.connector.loader.ConnectorEarlyLoader;
 
 public class ModListHelper {
 	public static final boolean IS_FORGE = isForge();
 	public static final boolean IS_CLIENT = isClient();
-	public static final boolean FABRIC_API_LOADED = isModLoaded("fabric");
+	public static final boolean FABRIC_API_LOADED = isModLoaded("fabric") || isModLoaded("fabric-api")
+		|| isModLoaded("fabric_api");
 	public static final boolean CONNECTORMOD_LOADED = isModLoaded("connectormod");
 	/* Valkyrien Skies */
 	public static final boolean VS_LOADED = isModLoaded("valkyrienskies");
 	public static final boolean FABRIC_VS_LOADED = isFabricModLoaded("valkyrienskies");
 	public static final boolean FORGE_VS_LOADED = isForgeModLoaded("valkyrienskies");
-	public static final boolean IS_LEGACY_VS = VS_LOADED && versionCheck("valkyrienskies", "2.2.999999", "2.4");
 	/* Sodium */
-	public static final boolean SODIUM_LIKE_LOADED = isModLoaded("sodium") || isModLoaded("embeddium");
 	public static final boolean SODIUM_LOADED = isModLoaded("sodium");
 	public static final boolean FABRIC_SODIUM_LOADED = isFabricModLoaded("sodium");
-	public static final boolean FORGE_EMBEDDIUM_LOADED = isForgeModLoaded("embeddium");
 	public static final boolean FORGE_SODIUM_LOADED = isForgeModLoaded("sodium");
+	public static final boolean FORGE_EMBEDDIUM_LOADED = isForgeModLoaded("embeddium");
 	/* Sodium Extra */
 	public static final boolean FABRIC_SODIUM_EXTRA_LOADED = isFabricModLoaded("sodium-extra");
 	/* IRIS */
+	// What the hell of compatibility is this!
 	public static final boolean IRIS_LIKE_LOADED = isModLoaded("iris") || isModLoaded("oculus");
 	public static final boolean FABRIC_IRIS_LOADED = isFabricModLoaded("iris");
 	public static final boolean FORGE_IRIS_LIKE_LOADED = isForgeModLoaded("iris") || isForgeModLoaded("oculus");
+	public static final boolean FORGE_IRIS_LOADED = isForgeModLoaded("iris");
+	public static final boolean FORGE_OCULUS_LOADED = isForgeModLoaded("oculus");
+	public static final boolean IS_LEGACY_IRIS = versionCheck("iris", null, "1.7.999999");
 	/* Dummmmmmy */
 	public static final boolean DUMMMMMMY_LOADED = isModLoaded("dummmmmmy");
 	/* Effectual */
@@ -34,35 +36,22 @@ public class ModListHelper {
 	/* Flerovium */
 	public static final boolean FORGE_FLEROVIUM_LOADED = isForgeModLoaded("flerovium");
 	/* Effective */
-	public static final boolean FORGE_EFFECTICULARITY_LOADED = isForgeModLoaded("effective") &&
-															   classExists("concerrox.effective.Effective");
-	public static final boolean FABRIC_EFFECTICULARITY_LOADED = isFabricModLoaded("effective") &&
-																classExists("concerrox.effective.Effective");
-	public static final boolean FABRIC_EFFECTIVE_LOADED = isFabricModLoaded("effective") &&
-														  classExists("org.ladysnake.effective.core.Effective");
+	public static final boolean FORGE_EFFECTIVE_LOADED = isForgeModLoaded("effective");
+	public static final boolean FABRIC_EFFECTIVE_LOADED = isFabricModLoaded("effective");
 	/* Particle Rain */
 	public static final boolean PARTICLERAIN_LOADED = isModLoaded("particlerain");
-	public static final boolean FABRIC_PARTICLERAIN_LOADED = isFabricModLoaded("particlerain");
-	public static final boolean FORGE_PARTICLERAIN_LOADED = isForgeModLoaded("particlerain");
-	public static final boolean FORGE_PRETTY_RAIN_LOADED = isForgeModLoaded("particlerain") &&
-														   versionCheck("particlerain", null, "1.999999");
-	public static final boolean IS_LEGACY_PARTICLERAIN = versionCheck("particlerain", null, "3.999999");
 	/* Flywheel */
 	public static final boolean FLYWHEEL_LOADED = isModLoaded("flywheel");
-	/* Ponder */
-	public static final boolean PONDER_LOADED = isModLoaded("ponder");
 	/* Create */
 	public static final boolean CREATE_LOADED = isModLoaded("create");
-	public static final boolean IS_LEGACY_CREATE = CREATE_LOADED && versionCheck("create", "0.5", "6.0");
 	public static final boolean FABRIC_CREATE_LOADED = isFabricModLoaded("create");
 	public static final boolean FORGE_CREATE_LOADED = isForgeModLoaded("create");
+	public static final boolean IS_LEGACY_CREATE = CREATE_LOADED && versionCheck("create", null, "0.5.999999");
 	/* Epic Fight */
 	public static final boolean EPICFIGHT_LOADED = isModLoaded("epicfight");
 	public static final boolean FORGE_EPICFIGHT_LOADED = isForgeModLoaded("epicfight");
 	/* Epic ACG */
 	public static final boolean FORGE_EPICACG_LOADED = isForgeModLoaded("epicacg");
-	/* A Good Place */
-	public static final boolean A_GOOD_PLACE_LOADED = isModLoaded("a_good_place");
 	/* Gateways to Eternity */
 	public static final boolean FORGE_GATEWAYS_LOADED = isForgeModLoaded("gateways");
 	/* Tombstone */
@@ -70,14 +59,10 @@ public class ModListHelper {
 	/* Particular */
 	public static final boolean FABRIC_PARTICULAR_LOADED = isFabricModLoaded("particular");
 	public static final boolean FORGE_PARTICULAR_LOADED = isForgeModLoaded("particular");
-	/* Particle Core */
-	public static final boolean PARTICLE_CORE_LOADED = isModLoaded("particle_core");
 	/* Physics Mod */
 	public static final boolean PHYSICSMOD_LOADED = isModLoaded("physicsmod");
-	public static final boolean FABRIC_PHYSICSMOD_LOADED = isFabricModLoaded("physicsmod");
-	public static final boolean FORGE_PHYSICSMOD_LOADED = isForgeModLoaded("physicsmod");
-	/* Draconic Evolution */
-	public static final boolean FORGE_DRACONIC_EVOLUTION_LOADED = isForgeModLoaded("draconicevolution");
+	/* A Good Place */
+	public static final boolean A_GOOD_PLACE_LOADED = isModLoaded("a_good_place");
 	/* Modern UI */
 	public static final boolean MODERN_UI_LOADED = isModLoaded("modernui");
 	/* Subtle Effects */
@@ -119,6 +104,14 @@ public class ModListHelper {
 	public static final boolean MORE_CULLING_LOADED = isModLoaded("moreculling");
 	/* Figura */
 	public static final boolean FIGURA_LOADED = isModLoaded("figura");
+	/* Veil */
+	public static final boolean VEIL_LOADED = isModLoaded("veil");
+	/* Sable */
+	public static final boolean SABLE_LOADED = isModLoaded("sable");
+	/* Axiom */
+	public static final boolean AXIOM_LOADED = isModLoaded("axiom");
+	/* Particle Interactions */
+	public static final boolean PARTICLE_INTERACTIONS_LOADED = isModLoaded("eg_particle_interactions");
 
 	@ExpectPlatform
 	private static boolean isForge() {
@@ -132,14 +125,14 @@ public class ModListHelper {
 
 	@ExpectPlatform
 	public static boolean isModLoaded(String modId) {
-		ExceptionUtil.throwAssertionError();
-		return false;
+		throw new AssertionError();
 	}
 
 	@ExpectPlatform
-	public static boolean versionCheck(String modId, @Nullable String minInclusive, @Nullable String maxExclusive) {
+	public static boolean versionCheck(String modId, String minInclusive, String maxExclusive) {
+		// Suppressing the ConstantValue check because this is a generated method.
 		ExceptionUtil.throwAssertionError();
-		return false;
+		return true;
 	}
 
 	@ExpectPlatform
@@ -158,8 +151,7 @@ public class ModListHelper {
 
 	@ExpectPlatform
 	public static boolean isDevelopmentEnvironment() {
-		ExceptionUtil.throwAssertionError();
-		return false;
+		throw new AssertionError();
 	}
 
 	public static boolean classExists(String className) {

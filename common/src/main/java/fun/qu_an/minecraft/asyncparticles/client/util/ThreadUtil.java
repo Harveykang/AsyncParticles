@@ -61,11 +61,6 @@ public class ThreadUtil {
 		Minecraft.getInstance().pendingRunnables.add(runnable);
 	}
 
-	@Deprecated
-	public static boolean isOnMainThread() {
-		return isOnRenderThread();
-	}
-
 	public static boolean isOnRenderThread() {
 		return RenderSystem.isOnRenderThread();
 	}

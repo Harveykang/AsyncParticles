@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
-import fun.qu_an.minecraft.asyncparticles.client.mixin.cloth_config.AccessorSubCategoryListEntry;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.cloth_config.AccessorSubCategoryListEntry;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.gui.entries.SubCategoryListEntry;
 

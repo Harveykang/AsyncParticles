@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AdjusterContraptionNoParticleCollision implements MixinClassAdjuster {
-	private static final String CLASS_NAME = "fun.qu_an.minecraft.asyncparticles.client.mixin.create.MixinAbstractContraptionEntity_NoParticleCollision";
+	private static final String CLASS_NAME = "fun.qu_an.minecraft.asyncparticles.client.mixin.compat.create.MixinAbstractContraptionEntity_NoParticleCollision";
 	@Override
 	public String getMixinClassName() {
 		return CLASS_NAME;

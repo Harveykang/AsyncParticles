@@ -1,50 +1,63 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
+import it.unimi.dsi.fastutil.objects.ObjectArraySet;
+import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
+import java.util.Set;
 
-public class CombinedIterable<T> implements Iterable<T>, Iterator<T> {
-	public static <T> CombinedIterable<T> combine(Iterable<T> firstIterable, Iterable<T> secondIterable) {
-		return new CombinedIterable<>(firstIterable, secondIterable);
+public class CombinedIterable {
+	public static <T> Iterable<T> of(Iterable<T> left, Iterable<T> right) {
+		return new Iterable<>() {
+			@Override
+			public @NotNull Iterator<T> iterator() {
+				return new Iterator<>() {
+					private final Iterator<T> l = left.iterator();
+					private final Iterator<T> r = right.iterator();
+					private boolean isLeft;
+
+					@Override
+					public boolean hasNext() {
+						return (isLeft && (isLeft = l.hasNext())) || r.hasNext();
+					}
+
+					@Override
+					public T next() {
+						return isLeft ? l.next() : r.next();
+					}
+				};
+			}
+		};
 	}
 
-	private final Iterator<T> firstItr;
-	private final Iterator<T> secondItr;
-	private boolean first = true;
-
-	public CombinedIterable(Iterable<T> renderOrder, Iterable<T> particleRenderTypes) {
-		firstItr = renderOrder.iterator();
-		secondItr = particleRenderTypes.iterator();
-	}
-
-	@Override
-	public boolean hasNext() {
-		if (!first) {
-			return secondItr.hasNext();
-		} else if (firstItr.hasNext()) {
-			return true;
-		} else {
-			first = false;
-			return secondItr.hasNext();
+	public static <T> Set<T> ofSet(Set<T> left, Set<T> right) {
+		int sizeL = left.size();
+		if (sizeL == 0) {
+			return right;
 		}
-	}
-
-	@Override
-	public T next() {
-		if (first) {
-			return firstItr.next();
-		} else {
-			return secondItr.next();
+		int sizeR = right.size();
+		if (sizeR == 0) {
+			return left;
 		}
+		Set<T> merged = new ObjectArraySet<>(sizeL + sizeR);
+		merged.addAll(left);
+		merged.addAll(right);
+		return merged;
 	}
 
-	@Override
-	public @NotNull Iterator<T> iterator() {
-		return this;
-	}
-
-	public boolean isFirst() {
-		return first;
+	public static <T> Set<T> ofIdentitySet(Set<T> left, Set<T> right) {
+		int sizeL = left.size();
+		if (sizeL == 0) {
+			return right;
+		}
+		int sizeR = right.size();
+		if (sizeR == 0) {
+			return left;
+		}
+		Set<T> merged = new ReferenceArraySet<>(sizeL + sizeR);
+		merged.addAll(left);
+		merged.addAll(right);
+		return merged;
 	}
 }

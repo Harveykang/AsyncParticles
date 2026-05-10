@@ -49,7 +49,7 @@ public class MixinMinecraft {
 		if (!asyncparticles$sorted) {
 			asyncparticles$sorted = true;
 			((ParticleEngineAddon) particleEngine).asyncparticle$sortRenderOrder();
-			GpuParticleBehavior.setGpuParticleLimit(ConfigHelper.getParticleLimit());
+			GpuParticleBehavior.INSTANCE.setGpuParticleLimit(ConfigHelper.getParticleLimit());
 		}
 	}
 

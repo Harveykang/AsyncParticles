@@ -92,19 +92,20 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 		RenderSystem.applyModelViewMatrix();
 		profiler.pop();
 
-		GpuParticleBehavior.runTfs(camera, f);
+		GpuParticleBehavior.INSTANCE.compute(camera, f);
 
 		Frustum frustum = AsyncRenderBehavior.INSTANCE.getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		boolean irisEarlyOpaquePhase = AsyncRenderBehavior.INSTANCE.isIrisEarlyOpaquePhase();
 		// We don't use entrySet() to be compatible with iris.
-		for (ParticleRenderType particleRenderType : particles.keySet()) { // FIXME mods can clear the map if the queue is empty
+		Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = GpuParticleBehavior.INSTANCE.gpuParticles;
+		for (ParticleRenderType particleRenderType : CombinedIterable.ofIdentitySet(particles.keySet(), gpuParticles.keySet())) {
 			// FORGE doesn't skip NO_RENDER
 			if (particleRenderType == ParticleRenderType.NO_RENDER) {
 				continue;
 			}
 			Queue<Particle> queue = this.particles.get(particleRenderType);
-			Queue<TextureSheetParticle> gpuQueue = GpuParticleBehavior.gpuParticles.get(particleRenderType);
+			Queue<TextureSheetParticle> gpuQueue = GpuParticleBehavior.INSTANCE.gpuParticles.get(particleRenderType);
 			boolean hasGpu = gpuQueue != null && !gpuQueue.isEmpty();
 			boolean hasCpu = queue != null && !queue.isEmpty();
 			profiler.push("render_particles");
@@ -112,7 +113,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 			if (!hasGpu) {
 				gpuParticleRenderer = null;
 			} else {
-				gpuParticleRenderer = GpuParticleBehavior.getRenderer(particleRenderType);
+				gpuParticleRenderer = GpuParticleBehavior.INSTANCE.getRenderer(particleRenderType);
 				if (gpuParticleRenderer == null || gpuParticleRenderer.isShouldSkip()) {
 					hasGpu = false;
 				}

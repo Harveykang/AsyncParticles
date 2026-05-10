@@ -11,6 +11,8 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Queue;
 
 public interface IParticleRenderer {
+	void beginFrame();
+
 	void unmapBufferAndSwap();
 
 	void mapBuffer();

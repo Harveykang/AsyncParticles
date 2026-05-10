@@ -3,12 +3,12 @@ package fun.qu_an.minecraft.asyncparticles.client.particle;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.task.EndTickEvent;
 import fun.qu_an.minecraft.asyncparticles.client.task.EndTickOperation;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v3.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
@@ -29,7 +29,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -44,14 +43,23 @@ import static fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil.toThr
 // TODO: Organize this shit
 @Environment(EnvType.CLIENT)
 public class AsyncTickBehavior {
-	public static final AsyncTickBehavior INSTANCE = new AsyncTickBehavior();
 	public static final Logger LOGGER = LogManager.getLogger();
+	public static final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
+	public static final String THREAD_PREFIX = "AsyncParticleTicker";
+	public static final AsyncTickBehavior INSTANCE = new AsyncTickBehavior();
 //	public final Map<ParticleRenderType, ByteBuffer> UNUPLOADED_BUFFERS = new ConcurrentHashMap<>();
 	private final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
+	private final List<ParticleRenderType> PARALLELLED_RENDER_TYPES = new ArrayList<>(List.of(
+		ParticleRenderType.TERRAIN_SHEET,
+		ParticleRenderType.PARTICLE_SHEET_OPAQUE,
+		ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT,
+		ParticleRenderType.PARTICLE_SHEET_LIT,
+		ParticleRenderType.NO_RENDER
+	));
 	private final Set<Particle> SYNC_PARTICLES = Collections.newSetFromMap(new IdentityHashMap<>());
 	public final List<Runnable> PARTICLE_OPERATIONS = new ArrayList<>();
 	private final AtomicBoolean cancelled = new AtomicBoolean(false);
-	public boolean shouldTickParticles = false;
+	private boolean shouldTickParticles = false;
 	public CompletableFuture<Void> particleCleanup;
 	private final List<EndTickEvent> SEQUENCED_END_TICK_EVENTS = new ArrayList<>();
 	private final List<EndTickEvent> PARALLEL_END_TICK_EVENTS = new ArrayList<>();
@@ -61,8 +69,6 @@ public class AsyncTickBehavior {
 	private Consumer<String> debugConsumer;
 	private boolean shouldReload;
 	public final ForkJoinPool EXECUTOR;
-	public final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
-	public final String THREAD_PREFIX = "AsyncParticleTicker";
 	private final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
 		ConfigHelper::getTickFailurePerSecondThreshold
@@ -374,13 +380,13 @@ public class AsyncTickBehavior {
 	}
 
 	public void onParticleEngineClear() {
-		// this fix a good placement mod block invisible
+		// fix a good placement mod block invisible
 		if (ModListHelper.A_GOOD_PLACE_LOADED) {
 			AGoodPlaceCompat.onParticleEngineClear();
 		}
-		// this fix particlerain's particle count management bug
-		if (ModListHelper.PARTICLERAIN_LOADED && ModListHelper.IS_LEGACY_PARTICLERAIN) {
-			ParticleRainCompat.INSTANCE.clearCounters();
+		// fix particlerain's particle count management
+		if (ModListHelper.PARTICLERAIN_LOADED) {
+			ParticleRainCompat.particleCount.set(0);
 		}
 	}
 
@@ -406,7 +412,7 @@ public class AsyncTickBehavior {
 	/* Sync Ticking */
 
 	public void tickSyncParticles() {
-		if ((!shouldTickParticles && ConfigHelper.isTickAsync()) || SYNC_PARTICLES.isEmpty()) {
+		if ((!isShouldTickParticles() && ConfigHelper.isTickAsync()) || SYNC_PARTICLES.isEmpty()) {
 			return;
 		}
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
@@ -466,32 +472,31 @@ public class AsyncTickBehavior {
 		if (debugConsumer == null) {
 			return;
 		}
-		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 		debugConsumer.accept(String.format("""
 			[Debug AsyncTicker]
 			last tick duration: %.1f ms,
 			interrupted: %s,
 			particle operations: %d,
-			end tick events: %d,
-			end tick operations: %d,
+			end tick events: %s,
+			end tick operations: %s,
 			max particles queue size: %d,
 			particles queue size/allocated: %s,
-			gpu particles size/allocated: %s,
+			GPU particles size/allocated: %s,
 			particles to add size: %d
 			sync particle count: %d,
 			sync particle types: %s,"""
 			.formatted(ConfigHelper.isTickAsync() ? timeUsageNano.getAcquire() / 1000000d : Double.NaN,
 				debug_cancelled,
 				PARTICLE_OPERATIONS.size(),
-				SEQUENCED_END_TICK_EVENTS.size() + PARALLEL_END_TICK_EVENTS.size(),
-				END_TICK_OPERATIONS.size(),
+				SEQUENCED_END_TICK_EVENTS + PARALLEL_END_TICK_EVENTS.toString(),
+				END_TICK_OPERATIONS,
 				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
 					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
 						Queue<Particle> queue = e.getValue();
 						return queue.size() + "/" + ((IterationSafeEvictingQueue<Particle>) queue).arraySize();
 					})),
-				GpuParticleBehavior.gpuParticles.entrySet()
+				GpuParticleBehavior.INSTANCE.gpuParticles.entrySet()
 					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
 						Queue<TextureSheetParticle> queue = e.getValue();
 						return queue.size() + "/" + ((IterationSafeEvictingQueue<TextureSheetParticle>) queue).arraySize();
@@ -512,7 +517,7 @@ public class AsyncTickBehavior {
 			.stream()
 			.collect(Collectors.toMap(ParticleRenderType::getClass, Object::toString)));
 		LOGGER.info(particleEngine.particles);
-		LOGGER.info(GpuParticleBehavior.gpuParticles);
+		LOGGER.info(GpuParticleBehavior.INSTANCE.gpuParticles);
 	}
 
 	public void reloadLater() {
@@ -541,13 +546,13 @@ public class AsyncTickBehavior {
 			particleEngine.trackingEmitters = newEmitters;
 			boolean enableLightCache = ConfigHelper.particleLightCache();
 			ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
-			Map<ParticleRenderType, Queue<Particle>> particles = new Reference2ObjectOpenHashMap<>();
-			Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = new Reference2ObjectOpenHashMap<>();
+			Map<ParticleRenderType, Queue<Particle>> newCpuParticleMap = new Reference2ObjectOpenHashMap<>();
+			Map<ParticleRenderType, Queue<TextureSheetParticle>> newGpuParticleMap = new Reference2ObjectOpenHashMap<>();
 			boolean tickAsync = ConfigHelper.isTickAsync();
 			boolean enableGpuAcceleration = ConfigHelper.isGpuParticles();
-			particleEngine.particles.forEach((key, queue) -> {
-				Queue<Particle> newQueue = ParticleHelper.newParticleQueue();
-				queue.forEach(p -> {
+			particleEngine.particles.forEach((key, oldCpuQueue) -> {
+				Queue<Particle> newCpuQueue = ParticleHelper.newParticleQueue();
+				oldCpuQueue.forEach(p -> {
 					if (enableLightCache) {
 						((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
 						((LightCachedParticleAddon) p).asyncparticles$refresh();
@@ -559,27 +564,33 @@ public class AsyncTickBehavior {
 						case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();
 					}
 					if (tickAsync && enableGpuAcceleration &&
-						p instanceof TextureSheetParticle tsp && GpuParticleBehavior.canRenderFast(tsp)) {
-						gpuParticles.computeIfAbsent(key, k -> {
-							GpuParticleBehavior.initParticleRenderType(k);
+						p instanceof TextureSheetParticle tsp && GpuParticleBehavior.INSTANCE.canRenderFast(tsp)) {
+						newGpuParticleMap.computeIfAbsent(key, k -> {
+							GpuParticleBehavior.INSTANCE.createRenderer(k);
 							return ParticleHelper.newParticleQueue();
 						}).add(tsp);
+						((ParticleAddon) tsp).asyncparticles$setGpu(true);
 					} else {
-						newQueue.add(p);
+						newCpuQueue.add(p);
+						((ParticleAddon) p).asyncparticles$setGpu(false);
 					}
 				});
-				particles.put(key, newQueue);
+				newCpuParticleMap.put(key, newCpuQueue);
 			});
-			particleEngine.particles.putAll(particles);
+			particleEngine.particles.putAll(newCpuParticleMap);
 
 			if (!tickAsync || !enableGpuAcceleration) {
-				GpuParticleBehavior.gpuParticles.forEach((t, q) -> {
-					particles.get(t).addAll(q);
+				GpuParticleBehavior.INSTANCE.gpuParticles.forEach((t, oldGpuQueue) -> {
+					Queue<Particle> cpuQueue = newCpuParticleMap.computeIfAbsent(t, k -> ParticleHelper.newParticleQueue());
+					oldGpuQueue.forEach(p -> {
+						((ParticleAddon) p).asyncparticles$setGpu(false);
+						cpuQueue.add(p);
+					});
 				});
-				GpuParticleBehavior.gpuParticles.clear();
+				GpuParticleBehavior.INSTANCE.gpuParticles.clear();
 			} else {
-				GpuParticleBehavior.gpuParticles.forEach((key, queue) -> {
-					queue.forEach(p -> {
+				GpuParticleBehavior.INSTANCE.gpuParticles.forEach((key, oldGpuQueue) -> {
+					oldGpuQueue.forEach(p -> {
 						if (enableLightCache) {
 							((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
 							((LightCachedParticleAddon) p).asyncparticles$refresh();
@@ -591,12 +602,12 @@ public class AsyncTickBehavior {
 							case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();
 						}
 					});
-					gpuParticles.computeIfAbsent(key, k -> {
-						GpuParticleBehavior.initParticleRenderType(k);
+					newGpuParticleMap.computeIfAbsent(key, k -> {
+						GpuParticleBehavior.INSTANCE.createRenderer(k);
 						return ParticleHelper.newParticleQueue();
-					}).addAll(queue);
+					}).addAll(oldGpuQueue);
 				});
-				GpuParticleBehavior.gpuParticles.putAll(gpuParticles);
+				GpuParticleBehavior.INSTANCE.gpuParticles.putAll(newGpuParticleMap);
 			}
 		}
 	}
@@ -635,7 +646,7 @@ public class AsyncTickBehavior {
 
 	@ApiStatus.Internal
 	public void scheduleOperation(EndTickOperation task) {
-		if (!shouldTickParticles && ConfigHelper.isTickAsync()) {
+		if (!isShouldTickParticles() && ConfigHelper.isTickAsync()) {
 			return;
 		}
 		if (ThreadUtil.isOnRenderThread()) {
@@ -643,6 +654,20 @@ public class AsyncTickBehavior {
 		} else {
 			ThreadUtil.enqueueClientTask(() -> END_TICK_OPERATIONS.add(task));
 		}
+	}
+
+	public boolean isShouldTickParticles() {
+		return shouldTickParticles;
+	}
+
+	public void addTickInParallel(ParticleRenderType particleRenderType) {
+		synchronized (PARALLELLED_RENDER_TYPES) {
+			PARALLELLED_RENDER_TYPES.add(particleRenderType);
+		}
+	}
+
+	public boolean canTickInParallel(ParticleRenderType particleRenderType) {
+		return PARALLELLED_RENDER_TYPES.contains(particleRenderType);
 	}
 
 	public class AsyncTickerThread extends AsyncParticleWorkerThread {

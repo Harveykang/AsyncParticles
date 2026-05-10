@@ -187,7 +187,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			final int max = this.max;
 			this.pos = max;
 			for (final int mask = queue.length - 1;
-				 pos < max; ++pos) {
+			     pos < max; ++pos) {
 				E e = (E) a[pos & mask];
 				if (e != null) {
 					action.accept(e);

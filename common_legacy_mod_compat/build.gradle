@@ -6,6 +6,7 @@ loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
 
     mixin {
+        useLegacyMixinAp = true
         defaultRefmapName = "asyncparticles-common_legacy_mod_compat-refmap.json"
     }
 }
@@ -24,7 +25,7 @@ dependencies {
     /* Particle Rain */
     modCompileOnly "maven.modrinth:particle-rain:3.0.6-1.20"
 
-    // 0.5.0
+    // Create
     modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
 
     /* What Are They Up To */

@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -46,6 +47,7 @@ public abstract class MixinLevelRenderer {
 								   CallbackInfo ci,
 								   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
 								   LocalIntRef irm) {
+		GpuParticleBehavior.INSTANCE.beginFrame();
 		if (this.capturedFrustum != null) {
 			Frustum frustum = this.capturedFrustum;
 			frustum.prepare(this.frustumPos.x, this.frustumPos.y, this.frustumPos.z);

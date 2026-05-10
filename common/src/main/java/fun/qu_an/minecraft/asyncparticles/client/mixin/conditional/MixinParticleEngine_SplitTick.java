@@ -19,22 +19,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Queue;
-import java.util.Spliterator;
+import java.util.*;
 
 @Mixin(value = ParticleEngine.class, priority = 600)
 public abstract class MixinParticleEngine_SplitTick {
-	@Unique
-	private static final List<ParticleRenderType> PARALLELLED_RENDER_TYPES = List.of(
-		ParticleRenderType.TERRAIN_SHEET,
-		ParticleRenderType.PARTICLE_SHEET_OPAQUE,
-		ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT,
-		ParticleRenderType.PARTICLE_SHEET_LIT,
-		ParticleRenderType.NO_RENDER
-	);
-
 	@Shadow
 	protected abstract void tickParticleList(Collection<Particle> particles);
 
@@ -44,18 +32,20 @@ public abstract class MixinParticleEngine_SplitTick {
 	)
 	@Inject(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
 	private void redirectScheduleGpuTick(ParticleRenderType particleRenderType,
-										 Queue<?> queue,
-										 CallbackInfo ci,
-										 @Local IParticleRenderer renderer) {
+	                                     Queue<?> queue,
+	                                     CallbackInfo ci,
+	                                     @Local IParticleRenderer renderer) {
 		AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.add(() -> {
+			GpuParticleBehavior.GPU_PARTICLE_PHASE.set(true);
 			if (ConfigHelper.isTickAsync() &&
-				PARALLELLED_RENDER_TYPES.contains(particleRenderType)) {
+				AsyncTickBehavior.INSTANCE.canTickInParallel(particleRenderType)) {
 				asyncparticles$splitTickParticleList((Queue) queue);
 			} else {
 				tickParticleList((Queue) queue);
 			}
+			GpuParticleBehavior.GPU_PARTICLE_PHASE.set(false);
 			AsyncTickBehavior.INSTANCE.doRemoveIf((Queue) queue);
-			renderer.tick(GpuParticleBehavior.getCameraPos(), (Queue) queue);
+			renderer.tick(GpuParticleBehavior.INSTANCE.getCameraPos(), (Queue) queue);
 		});
 	}
 
@@ -74,11 +64,11 @@ public abstract class MixinParticleEngine_SplitTick {
 	)
 	@Inject(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
 	private void redirectScheduleTick(ParticleRenderType particleRenderType,
-									  Queue<?> queue,
-									  CallbackInfo ci) {
+	                                  Queue<?> queue,
+	                                  CallbackInfo ci) {
 		AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.add(() -> {
 			if (ConfigHelper.isTickAsync() &&
-				PARALLELLED_RENDER_TYPES.contains(particleRenderType)) {
+				AsyncTickBehavior.INSTANCE.canTickInParallel(particleRenderType)) {
 				asyncparticles$splitTickParticleList((Queue) queue);
 			} else {
 				tickParticleList((Queue) queue);

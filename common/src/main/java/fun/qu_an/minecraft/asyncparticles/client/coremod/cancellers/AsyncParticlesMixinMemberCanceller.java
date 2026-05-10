@@ -26,7 +26,7 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 				 "einstein.subtle_effects.mixin.client.particle.ForgeParticleEngineMixin" ->
 				"shouldRenderParticle".equals(mixinMethodName);
 			case "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin" ->
-				"tick".equals(mixinMethodName);
+				"tick".equals(mixinMethodName); // TODO update RuOK to a new version
 			case "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin" ->
 				"flerovium$getLightColorCached".equals(mixinMethodName);
 			case "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin" ->

@@ -42,13 +42,13 @@ public abstract class MixinClientLevel extends Level {
 		}
 	}
 
-	@Override
-	public Player getPlayerByUUID(@NotNull UUID uuid) {
-		for (Player player : players) {
-			if (Objects.equals(player.getUUID(), uuid)) {
-				return player;
-			}
-		}
-		return null;
-	}
+//	@Override
+//	public Player getPlayerByUUID(@NotNull UUID uuid) {
+//		for (Player player : players) {
+//			if (Objects.equals(player.getUUID(), uuid)) {
+//				return player;
+//			}
+//		}
+//		return null;
+//	}
 }

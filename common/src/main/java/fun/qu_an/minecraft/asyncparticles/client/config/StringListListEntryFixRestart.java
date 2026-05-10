@@ -1,8 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
-import fun.qu_an.minecraft.asyncparticles.client.mixin.cloth_config.AbstractConfigEntryAccessor;
-import fun.qu_an.minecraft.asyncparticles.client.mixin.cloth_config.AbstractConfigListEntryAccessor;
-import fun.qu_an.minecraft.asyncparticles.client.mixin.cloth_config.BaseListEntryAccessor;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.cloth_config.AbstractConfigEntryAccessor;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.cloth_config.AbstractConfigListEntryAccessor;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.cloth_config.BaseListEntryAccessor;
 import me.shedaniel.clothconfig2.gui.entries.StringListListEntry;
 
 public class StringListListEntryFixRestart extends StringListListEntry {

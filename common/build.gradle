@@ -6,6 +6,7 @@ loom {
     accessWidenerPath = file('src/main/resources/asyncparticles-common.accesswidener')
 
     mixin {
+        useLegacyMixinAp = true
         defaultRefmapName = "asyncparticles-common-refmap.json"
     }
 }
@@ -41,11 +42,10 @@ dependencies {
 
     /* Valkyrien Skies */
     modCompileOnly "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
-    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.9"
-    modCompileOnly 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
+    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.4.11"
 
     /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:particle-rain:v4-beta.1+1.20.1-fabric"
+    modCompileOnly "maven.modrinth:particle-rain:v4-beta.10+1.20.1-fabric"
 
     /* Effectual */
     modCompileOnly 'maven.modrinth:effectual:0.6.0-1.20.1'
@@ -54,14 +54,8 @@ dependencies {
 //    modCompileOnly 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
 
     /* Create */
-    // 6.0.0
-//    modCompileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}") { transitive = false }
-//    modCompileOnly("net.createmod.ponder:Ponder-Fabric-${minecraft_version}:${ponder_version}")
-//    modCompileOnly("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}")
-//    modCompileOnly("com.tterrag.registrate:Registrate:${registrate_version}")
     // 0.5.0
     modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
-//    modCompileOnly 'maven.modrinth:iris-flw-compat:1.1.2'
 
     /* Lodestone */
     modCompileOnly "maven.modrinth:lodestonelib:1.20.1-1.6.2.3f"

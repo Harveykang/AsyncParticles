@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.vs2;
 
-import fun.qu_an.minecraft.asyncparticles.client.mixin.vs2.InvokerEntityShipCollisionUtils;
-import fun.qu_an.minecraft.asyncparticles.client.mixin.vs2.InvokerRaycastUtils;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.vs2.InvokerEntityShipCollisionUtils;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.vs2.InvokerRaycastUtils;
 import kotlin.Pair;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -22,11 +22,12 @@ import org.joml.primitives.AABBd;
 import org.joml.primitives.AABBdc;
 import org.valkyrienskies.core.api.ships.ClientShip;
 import org.valkyrienskies.core.api.ships.properties.ShipTransform;
-import org.valkyrienskies.core.apigame.collision.ConvexPolygonc;
-import org.valkyrienskies.core.apigame.collision.EntityPolygonCollider;
+import org.valkyrienskies.core.internal.collision.VsiConvexPolygonc;
+import org.valkyrienskies.core.internal.collision.VsiEntityPolygonCollider;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.ValkyrienSkiesMod;
 import org.valkyrienskies.mod.common.util.EntityShipCollisionUtils;
+import org.valkyrienskies.mod.util.BugFixUtil;
 
 import java.util.List;
 
@@ -54,7 +55,7 @@ public class VSClientUtils {
 		return VSGameUtilsKt.getShipObjectWorld(world).getLoadedShips().getIntersecting(aabb.correctBounds());
 	}
 
-	private static final EntityPolygonCollider collider = ValkyrienSkiesMod.vsCore.getEntityPolygonCollider();
+	private static final VsiEntityPolygonCollider collider = ValkyrienSkiesMod.getVsCore().getEntityPolygonCollider();
 
 	/**
 	 * include matrices in hit result.
@@ -105,7 +106,7 @@ public class VSClientUtils {
 		Vec3 movement,
 		AABB entityBoundingBox,
 		ClientLevel world) {
-		List<ConvexPolygonc> collidingShipPolygons =
+		List<VsiConvexPolygonc> collidingShipPolygons =
 			((InvokerEntityShipCollisionUtils) (Object) EntityShipCollisionUtils.INSTANCE).invoker_getShipPolygonsCollidingWithEntity(
 				null, new Vec3(movement.x(), movement.y(), movement.z()),
 				entityBoundingBox.inflate(0.1), world);
@@ -148,13 +149,13 @@ public class VSClientUtils {
 
 		for (ClientShip shipObject : VSGameUtilsKt.getShipObjectWorld(world).getLoadedShips().getIntersecting(entityBoundingBoxExtended)) {
 			ShipTransform shipTransform = shipObject.getTransform();
-			ConvexPolygonc entityPolyInShipCoordinates = collider.createPolygonFromAABB(
+			VsiConvexPolygonc entityPolyInShipCoordinates = collider.createPolygonFromAABB(
 				toJOML(entityBoxWithMovement),
 				shipTransform.getWorldToShip(),
 				null
 			);
 			AABBdc entityBoundingBoxInShipCoordinates = entityPolyInShipCoordinates.getEnclosingAABB(new AABBd());
-			if (VSCompat.isCollisionBoxTooBig(toMinecraft(entityBoundingBoxInShipCoordinates))) {
+			if (BugFixUtil.INSTANCE.isCollisionBoxTooBig(toMinecraft(entityBoundingBoxInShipCoordinates))) {
 				// Box too large, skip it
 				continue;
 			}
@@ -191,7 +192,7 @@ public class VSClientUtils {
 		// Note that this increases the cost of doing collision, so we only do it for the players
 		// Add [max(stepHeight - inflation, 0.0)] to search for polygons we might collide with while stepping
 		double yMovement = movement.y() + Math.max(stepHeight - inflation, 0.0);
-		List<ConvexPolygonc> collidingShipPolygons =
+		List<VsiConvexPolygonc> collidingShipPolygons =
 			((InvokerEntityShipCollisionUtils) (Object) EntityShipCollisionUtils.INSTANCE).invoker_getShipPolygonsCollidingWithEntity(
 				null, new Vec3(movement.x(), yMovement, movement.z()),
 				entityBoundingBox.inflate(inflation), world);

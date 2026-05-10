@@ -9,6 +9,10 @@ architectury {
 
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
+
+    mixin {
+        useLegacyMixinAp = true
+    }
 }
 
 configurations {
@@ -69,7 +73,7 @@ dependencies {
     modLocalRuntime "maven.modrinth:reeses-sodium-options:mc1.20.1-1.7.2"
     modLocalRuntime 'maven.modrinth:iris:1.7.6+1.20.1'
     if (rootProject.physics_enabled != 'true') {
-        modLocalRuntime 'maven.modrinth:starlight:1.1.2+1.20'
+//        modLocalRuntime 'maven.modrinth:starlight:1.1.2+1.20'
     }
     localRuntime "org.antlr:antlr4-runtime:4.13.1"
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
@@ -87,19 +91,19 @@ dependencies {
 
     /* Valkyrien Skies */
     modLocalRuntime "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
-    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.9"
-    modLocalRuntime 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
+    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.4.11"
+    modLocalRuntime 'maven.modrinth:eureka:1.20.1-fabric-1.6.3'
 
     modCompileOnly "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
-    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.3.0-beta.9"
-    modCompileOnly 'maven.modrinth:eureka:1.20.1-fabric-1.5.1-beta.3'
+    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.4.11"
+    modCompileOnly 'maven.modrinth:eureka:1.20.1-fabric-1.6.3'
 
     /* Create */
-    modLocalRuntime("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
+    modLocalRuntime("com.simibubi.create:create-fabric-1.20.1:$fabric_create_version")
 //    modLocalRuntime 'maven.modrinth:iris-flw-compat:1.1.4'
     // keep this line to compile properly
     // 否则被模组重写的原版方法不会正确重映射...
-    modCompileOnly("com.simibubi.create:create-fabric-1.20.1:0.5.1-j-build.1631+mc1.20.1")
+    modCompileOnly("com.simibubi.create:create-fabric-1.20.1:$fabric_create_version")
 
     /* Physics Mod */
     modCompileOnly "maven.modrinth:physicsmod:3.0.14"
@@ -108,10 +112,8 @@ dependencies {
         return
     }
 
-    /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:particle-rain:3.0.6-1.20"
-    modCompileOnly "maven.modrinth:particle-rain:v4-beta.1+1.20.1-fabric"
-    modLocalRuntime "maven.modrinth:particle-rain:v4-beta.1+1.20.1-fabric"
+    /* Particle Rain */
+    modLocalRuntime "maven.modrinth:particle-rain:v4-beta.10+$minecraft_version-fabric"
 
     /* Mmmmmmmmmmmm */
 //    modLocalRuntime 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'

@@ -53,51 +53,19 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRendering
 // TODO: Organize this shit
 @Environment(EnvType.CLIENT)
 public class AsyncRenderBehavior {
-	public static final AsyncRenderBehavior INSTANCE = new AsyncRenderBehavior();
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private final Set<Class<? extends Particle>> syncParticleTypes = Collections.newSetFromMap(new IdentityHashMap<>());
+	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
+	public static final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
+	public static final AsyncRenderBehavior INSTANCE = new AsyncRenderBehavior();
+	private final Set<Class<?>> syncParticleTypes = Collections.newSetFromMap(new IdentityHashMap<>());
 	private boolean renderAsync = false;
 	private boolean particlePhase = false;
 
-	{
-		syncParticleTypes.add(ItemPickupParticle.class);
-		syncParticleTypes.add(MobAppearanceParticle.class);
-		if (ModListHelper.DUMMMMMMY_LOADED) {
-			addSyncByClassName("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
-		}
-		if (ModListHelper.FABRIC_EFFECTIVE_LOADED) {
-			addSyncByClassName("org.ladysnake.effective.core.particle.SplashParticle");
-		}
-		if (ModListHelper.FORGE_EFFECTICULARITY_LOADED) {
-			addSyncByClassName("concerrox.effective.particle.SplashParticle");
-		}
-		if (ModListHelper.TOMBSTONE_LOADED) {
-			// tomestone may have duplicate ids with other mods, so we need to check if these classes are present
-			addSyncByClassName("ovh.corail.tombstone.particle.ParticleCasting");
-			addSyncByClassName("ovh.corail.tombstone.particle.ParticleGhost");
-			addSyncByClassName("ovh.corail.tombstone.particle.ParticleGraveSoul");
-			addSyncByClassName("ovh.corail.tombstone.particle.ParticleMagicCircle");
-			addSyncByClassName("ovh.corail.tombstone.particle.ParticleMarker");
-			addSyncByClassName("ovh.corail.tombstone.particle.ParticleRounding");
-		}
-		// TODO: configure this set
-	}
-
-	private void addSyncByClassName(String className) {
-		try {
-			syncParticleTypes.add((Class<? extends Particle>) Class.forName(className));
-		} catch (Exception e) {
-			LOGGER.error("", e);
-		}
-	}
-
-	public final ForkJoinPool EXECUTOR;
-	public final String THREAD_PREFIX = "AsyncParticleRenderer";
-	public final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
+	public final ForkJoinPool executor;
 
 	{
 		AtomicInteger workerCount = new AtomicInteger(1);
-		EXECUTOR = new ForkJoinPool(THREADS, (forkJoinPool) -> {
+		executor = new ForkJoinPool(THREADS, (forkJoinPool) -> {
 			ForkJoinWorkerThread forkJoinWorkerThread = new AsyncRendererThread(forkJoinPool);
 			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());
 			forkJoinWorkerThread.setDaemon(true);
@@ -110,7 +78,7 @@ public class AsyncRenderBehavior {
 	private CompletableFuture<Void> asyncTask;
 	private boolean irisEarlyOpaquePhase = false;
 	private int asyncTasksSize;
-	private final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
+	private final ExceptionTracker<Class<? extends Particle>> exceptionTracker = new ExceptionTracker<>(
 		() -> 5000,
 		ConfigHelper::getRenderFailurePerSecondThreshold
 	);
@@ -153,7 +121,7 @@ public class AsyncRenderBehavior {
 			if (bufferBuilder == FakeBufferBuilder.INSTANCE) {
 				continue;
 			}
-			asyncTasks.add(CompletableFuture.runAsync(() -> renderParticles(f, camera, queue, particleRenderType, bufferBuilder), EXECUTOR)
+			asyncTasks.add(CompletableFuture.runAsync(() -> renderParticles(f, camera, queue, particleRenderType, bufferBuilder), executor)
 				.exceptionally(this::renderAsyncExceptionally));
 		}
 		int size = asyncTasksSize = asyncTasks.size();
@@ -162,10 +130,10 @@ public class AsyncRenderBehavior {
 	}
 
 	private void renderParticles(float f,
-										Camera camera,
-										Queue<Particle> particles,
-										ParticleRenderType particleRenderType,
-										BufferBuilder bufferBuilder) {
+	                             Camera camera,
+	                             Queue<Particle> particles,
+	                             ParticleRenderType particleRenderType,
+	                             BufferBuilder bufferBuilder) {
 		Frustum frustum = this.getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		float f2 = f + 1f;
@@ -209,7 +177,7 @@ public class AsyncRenderBehavior {
 	private void onRenderingParticleException(ParticleRenderType particleRenderType, Particle particle, Throwable t) {
 		boolean tolerable = AsyncTickBehavior.INSTANCE.isTolerable(t);
 		Class<? extends Particle> particleClass = ((ParticleAddon) particle).asyncparticles$getRealClass();
-		if (tolerable && !EXCEPTION_TRACKER.addException(particleClass, t)) {
+		if (tolerable && !exceptionTracker.addException(particleClass, t)) {
 			return;
 		}
 		((ParticleAddon) particle).asyncparticles$setRenderSync();
@@ -567,8 +535,8 @@ public class AsyncRenderBehavior {
 					},
 					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse()
 						? Optional.ofNullable(IrisCompat.getParticleRenderingSettings())
-						.map(ParticleRenderingSettings::name)
-						.orElse("disabled") : "disabled",
+						  .map(ParticleRenderingSettings::name)
+						  .orElse("disabled") : "disabled",
 					GLCaps.tfSupport.getClass().getSimpleName(),
 					GLCaps.supportsExplicitAttribLocation,
 					GLCaps.csSupport.getClass().getSimpleName()));
@@ -585,6 +553,10 @@ public class AsyncRenderBehavior {
 		waitForAsyncTasks();
 		FORMATS.clear();
 		clearSync();
+		syncParticleTypes.clear();
+		syncParticleTypes.add(ItemPickupParticle.class);
+		syncParticleTypes.add(MobAppearanceParticle.class);
+		syncParticleTypes.addAll(ConfigHelper.getRenderSyncParticleClasses());
 	}
 
 	public void onTranslucent(Minecraft mc) {

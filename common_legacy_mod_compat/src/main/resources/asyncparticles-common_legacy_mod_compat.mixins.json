@@ -1,27 +1,13 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "fun.qu_an.minecraft.asyncparticles.client.mixin.legacy",
+  "package": "fun.qu_an.minecraft.asyncparticles.client.mixin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "asyncparticles-common_legacy_mod_compat-refmap.json",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.legacy.APMixinLegacyModCompatPlugin",
   "client": [
-    "fabric.particlerain.MixinGroundFogParticle",
-    "fabric.particlerain.MixinParticleRainClient",
-    "fabric.particlerain.MixinRainParticle",
-    "fabric.particlerain.MixinRippleParticle",
-    "fabric.particlerain.MixinSnowParticle",
-    "fabric.particlerain.MixinWeatherParticle",
-    "fabric.particlerain.MixinWeatherParticles",
-    "fabric.particlerain.MixinWeatherParticleSpawner",
-    "fabric.particlerain_create.MixinWeatherParticleSpawner",
-    "fabric.particlerain_vs.MixinGroundFogParticle",
-    "fabric.particlerain_vs.MixinRippleParticle",
-    "fabric.particlerain_vs.MixinWeatherParticleSpawner",
-    "flywheel.MixinClientLevelMixin",
-    "flywheel.MixinLightUpdater",
-    "subtle_effects.MixinAsyncRenderer",
-    "subtle_effects.fabric.MixinParticleEngine"
+    "compat.legacy.flywheel.MixinClientLevelMixin",
+    "compat.legacy.flywheel.MixinLightUpdater"
   ],
   "injectors": {
     "defaultRequire": 1

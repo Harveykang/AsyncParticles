@@ -22,6 +22,7 @@ public class AsyncParticlesMixinConfig {
 		safeBlockEntityMap: Boolean. Make 'LevelChunk#blockEntities' thread-safe.
 		safeClassInstanceMultiMap: Boolean. Make 'ClassInstanceMultiMap' thread-safe.
 		safeLegacyRandomSource: Boolean. Make LegacyRandomSource thread-safe.
+		particle$splitTick: Boolean. Enable recursive particle tick.
 		particle$noCulling: A comma-separated list of classes extending 'Particle' that should not be culled.
 		particle$noLightCache: A comma-separated list of classes extending 'Particle' that should not use the light cache.
 		particle$lockRequired: A comma-separated list of classes extending 'Particle' that require a spin lock.
@@ -33,7 +34,6 @@ public class AsyncParticlesMixinConfig {
 	private static MixinConfigObj toSaveConfig;
 
 	static {
-		LOGGER.debug("AsyncParticlesMixinConfig initialized.");
 		try {
 			load();
 		} catch (Throwable e) {
@@ -101,7 +101,7 @@ public class AsyncParticlesMixinConfig {
 
 	static class MixinConfigObj {
 		private int version = 0;
-		private boolean particle$splitTick = true;
+		private boolean particle$splitTick = false;
 		private boolean safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED;
 		private boolean safeBlockEntityMap = false;
 		private boolean safeLegacyRandomSource = false;

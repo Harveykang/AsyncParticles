@@ -1,9 +1,9 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.ClothConfigMixinMenus;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.TranslatableEnum;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
@@ -14,14 +14,18 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
 
 // No more NoClassDefFoundError
 class ClothConfigMenus {
+	@SuppressWarnings("UnstableApiUsage")
 	static ConfigBuilder screenBuilder(Screen screen) {
 		ConfigObj defaultConfig = new ConfigObj();
 		ConfigBuilder builder = ConfigBuilder.create()
@@ -107,6 +111,27 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> tick$tickWeatherAsync = newValue)
 				.build())
 			.addEntry(entryBuilder
+				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.deferredTextureTick"),
+					tick$deferredTextureTick)
+				.setDefaultValue(defaultConfig.tick.deferredTextureTick)
+				.setTooltipSupplier(() -> {
+					if (ModListHelper.AXIOM_LOADED) {
+						return Optional.of(new MutableComponent[]{
+							Component.translatable("config.asyncparticles.tick.deferredTextureTick.tooltip")
+								.withStyle(ChatFormatting.STRIKETHROUGH),
+							Component.translatable("config.asyncparticles.incompatibility", "Axiom")
+								.withStyle(ChatFormatting.YELLOW)
+						});
+					} else {
+						return Optional.of(new MutableComponent[]{
+							Component.translatable("config.asyncparticles.tick.deferredTextureTick.tooltip")
+						});
+					}
+				})
+				.setSaveConsumer(newValue -> tick$deferredTextureTick = newValue)
+				.setRequirement(() -> !ModListHelper.AXIOM_LOADED)
+				.build())
+			.addEntry(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.tick.failPerSecLimit"),
 					tick$failPerSecLimit)
 				.setDefaultValue(defaultConfig.tick.failPerSecLimit)
@@ -134,6 +159,13 @@ class ClothConfigMenus {
 				.setDefaultValue(defaultConfig.tick.suppressCME)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.suppressCME.tooltip"))
 				.setSaveConsumer(newValue -> tick$suppressCME = newValue)
+				.build())
+			.addEntry(entryBuilder
+				.startStrList(Component.translatable("config.asyncparticles.tick.syncParticleClasses"),
+					new ArrayList<>(tick$syncParticleClasses))
+				.setDefaultValue(new ArrayList<>(defaultConfig.tick.syncParticleClasses))
+				.setTooltip(Component.translatable("config.asyncparticles.tick.syncParticleClasses.tooltip"))
+				.setSaveConsumer(newValue -> tick$syncParticleClasses = new LinkedHashSet<>(newValue))
 				.build());
 		// endregion
 		// region Rendering Category
@@ -199,10 +231,16 @@ class ClothConfigMenus {
 						.withStyle(ChatFormatting.DARK_RED))
 				.setSaveConsumer(newValue -> rendering$failBehavior = newValue)
 				.setRequirement(() -> false)
+				.build())
+			.addEntry(entryBuilder
+				.startStrList(Component.translatable("config.asyncparticles.rendering.syncParticleClasses"),
+					new ArrayList<>(rendering$syncParticleClasses))
+				.setDefaultValue(new ArrayList<>(defaultConfig.rendering.syncParticleClasses))
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.syncParticleClasses.tooltip"))
+				.setSaveConsumer(newValue -> rendering$syncParticleClasses = new LinkedHashSet<>(newValue))
 				.build());
 		// endregion
 		// region Compat Category
-
 		// Mixin
 		ConfigEntryBuilder mixinEntryBuilder = builder.entryBuilder();
 		mixinEntryBuilder.setResetButtonKey(Component.translatable("gui.asyncparticles.revert"));

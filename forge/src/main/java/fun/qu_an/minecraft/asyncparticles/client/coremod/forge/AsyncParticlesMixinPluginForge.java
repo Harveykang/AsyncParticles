@@ -22,7 +22,7 @@ public class AsyncParticlesMixinPluginForge implements IMixinConfigPlugin {
 
 	//	private static final int L = "fun.qu_an.minecraft.asyncparticles.client.mixin.".length();
 	private static final int PACKAGE_LENGTH = AsyncParticlesClient.class.getPackage().getName().length() +
-											  ".mixin.forge.".length();
+		".mixin.".length();
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
@@ -31,39 +31,28 @@ public class AsyncParticlesMixinPluginForge implements IMixinConfigPlugin {
 		}
 		String mixinPackageName = mixinClassName.substring(PACKAGE_LENGTH);
 		String[] split = mixinPackageName.split("\\.");
-		if (split.length == 1) {
+		if (split.length == 3) {
 			return true;
 		}
 		return switch (split[0]) {
-			case "prettyrain_vs" -> FORGE_PRETTY_RAIN_LOADED && VS_LOADED;
-			case "prettyrain_create" -> FORGE_PRETTY_RAIN_LOADED && CREATE_LOADED;
-			case "prettyrain" -> {
-				if (!FORGE_PRETTY_RAIN_LOADED) {
-					yield false;
-				}
-				if (split.length == 2) {
-					yield true;
-				}
-				yield switch (split[1]) {
-					case "v1_1_2" -> versionCheck("particlerain", null, "1.1.3");
-					case "v1_1_3" -> versionCheck("particlerain", "1.1.3", null);
-					default -> true;
-				};
-			}
-			case "create" -> FORGE_CREATE_LOADED && !IS_LEGACY_CREATE;
-			case "flerovium" -> FORGE_FLEROVIUM_LOADED;
-			case "embeddium" -> FORGE_EMBEDDIUM_LOADED;
-			case "epicfight" -> FORGE_EPICFIGHT_LOADED;
-			case "epicacg" -> FORGE_EPICACG_LOADED;
-			case "gateways" -> FORGE_GATEWAYS_LOADED;
-			case "subtle_effects" -> FORGE_SUBTLE_EFFECTS_LOADED;
-			case "weather2" -> FORGE_WEATHER2_LOADED;
-			case "weather2_vs" -> FORGE_WEATHER2_LOADED && VS_LOADED;
-			case "weather2_create" -> FORGE_WEATHER2_LOADED && CREATE_LOADED;
-			case "particular" -> FORGE_PARTICULAR_LOADED;
-			case "iris_like" -> FORGE_IRIS_LIKE_LOADED;
-			case "iris_like_else" -> !FORGE_IRIS_LIKE_LOADED;
-			case "fluffy_fur" -> FORGE_FLUFFY_FUR_LOADED;
+			case "forge" -> IS_FORGE;
+			case "compat" -> "forge".equals(split[1]) && switch (split[2]) {
+				case "create" -> FORGE_CREATE_LOADED;
+				case "flerovium" -> FORGE_FLEROVIUM_LOADED;
+				case "embeddium" -> FORGE_EMBEDDIUM_LOADED;
+				case "epicfight" -> FORGE_EPICFIGHT_LOADED;
+				case "epicacg" -> FORGE_EPICACG_LOADED;
+				case "gateways" -> FORGE_GATEWAYS_LOADED;
+				case "subtle_effects" -> FORGE_SUBTLE_EFFECTS_LOADED;
+				case "weather2" -> FORGE_WEATHER2_LOADED;
+				case "weather2_vs" -> FORGE_WEATHER2_LOADED && VS_LOADED;
+				case "weather2_create" -> FORGE_WEATHER2_LOADED && CREATE_LOADED;
+				case "particular" -> FORGE_PARTICULAR_LOADED;
+				case "iris_like" -> FORGE_IRIS_LIKE_LOADED;
+				case "iris_like_else" -> !FORGE_IRIS_LIKE_LOADED;
+				case "fluffy_fur" -> FORGE_FLUFFY_FUR_LOADED;
+				default -> throw new IllegalArgumentException("Unknown forge compat mixin: " + mixinClassName);
+			};
 			default -> throw new IllegalArgumentException("Unknown forge mixin: " + mixinClassName);
 		};
 	}

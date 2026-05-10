@@ -1,9 +1,9 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
 
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -28,9 +28,9 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	@Final
 	public ClientLevel level;
 	@Unique
-	private boolean asyncparticles$ticked = false;
+	private boolean asyncparticles$ticked = true; // always true at first tick
 	@Unique
-	private byte asyncparticles$renderFlag = 2; // 2 is unused
+	private byte asyncparticles$renderFlag = 2;
 	@Unique
 	private byte asyncparticles$tickFlag;
 
@@ -45,13 +45,6 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 		}
 	}
 
-	@SuppressWarnings("unused")
-	@Shadow
-	public abstract int getLightColor(float partialTick);
-
-	@Shadow
-	public abstract AABB getBoundingBox();
-
 	@Shadow
 	protected double xd;
 
@@ -62,10 +55,16 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	protected double zd;
 
 	@Shadow
+	public abstract AABB getBoundingBox();
+
+	@Shadow
 	public float bbWidth;
 
 	@Shadow
 	public float bbHeight;
+
+	@Shadow
+	public abstract int getLightColor(float partialTick);
 
 	@Override
 	public void asyncparticles$setTicked() {
@@ -102,10 +101,12 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 		return (asyncparticles$tickFlag & 1) != 0;
 	}
 
+	@Override
 	public void asyncparticles$enableLightCache() {
 		asyncparticles$tickFlag |= 2;
 	}
 
+	@Override
 	public void asyncparticles$disableLightCache() {
 		asyncparticles$tickFlag &= ~2;
 	}
@@ -139,5 +140,15 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	@Override
 	public Class<? extends Particle> asyncparticles$getRealClass() {
 		return (Class) this.getClass();
+	}
+
+	@Override
+	public void asyncparticles$setGpu(boolean isGpu) {
+		asyncparticles$tickFlag = (byte) ((asyncparticles$tickFlag & ~4) | (isGpu ? 4 : 0));
+	}
+
+	@Override
+	public boolean asyncparticles$isGpu() {
+		return (asyncparticles$tickFlag & 4) != 0;
 	}
 }

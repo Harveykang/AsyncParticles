@@ -66,15 +66,13 @@ dependencies {
     /* Performance */
     modCompileOnly 'maven.modrinth:embeddium:0.3.31+mc1.20.1'
     modCompileOnly "maven.modrinth:oculus:1.20.1-1.8.0"
-    modCompileOnly "maven.modrinth:flerovium:1.2.15"
+    modCompileOnly "maven.modrinth:flerovium:1.2.18"
 
     /* Valkyrien Skies */
     modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.9"
 
-    /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:pretty-rain:yIvOKPKZ" // 1.1.3
-    modCompileOnly "maven.modrinth:particle-rain:v4-beta.1+1.20.1-forge"
-//    modLocalRuntime "maven.modrinth:particle-rain:v4-beta.1+1.20.1-forge"
+    /* Particle Rain */
+    modLocalRuntime("maven.modrinth:particle-rain:v4-beta.10+$minecraft_version-neoforge")
 
     /* Effectual */
 //    if (rootProject.use_connector_mod == "true") {
@@ -83,16 +81,17 @@ dependencies {
 
     /* Create */
 //    modLocalRuntime("com.simibubi.create:create-1.20.1:0.5.1.j-55:slim") { transitive = false }
-//    modCompileOnly("com.simibubi.create:create-1.20.1:0.5.1.j-55:slim") { transitive = false }
-//    modCompileOnly("maven.modrinth:create:1.20.1-0.5.1.j")
 //    modLocalRuntime "com.jozufozu.flywheel:flywheel-forge-1.20.1:0.6.11-13"
 //    modLocalRuntime "com.tterrag.registrate:Registrate:MC1.20-1.3.3"
-    //**** MUST use create6 here ****//
-    modCompileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
-//    modLocalRuntime("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
-    modCompileOnly("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}")
-    modCompileOnly("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}")
-    modCompileOnly("com.tterrag.registrate:Registrate:${registrate_version}")
+    //**** MUST be create6 here ****//
+    modCompileOnly("com.simibubi.create:create-${minecraft_version}:${forge_create_version}:slim") { transitive = false }
+    modCompileOnly("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${forge_ponder_version}")
+    modCompileOnly("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${forge_flywheel_version}")
+    modCompileOnly("com.tterrag.registrate:Registrate:${forge_registrate_version}")
+    modLocalRuntime("com.simibubi.create:create-${minecraft_version}:${forge_create_version}:slim") { transitive = false }
+    modLocalRuntime("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${forge_ponder_version}")
+    modLocalRuntime("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${forge_flywheel_version}")
+    modLocalRuntime("com.tterrag.registrate:Registrate:${forge_registrate_version}")
 
     /* Effective */
 //    modLocalRuntime fileTree(dir: '../libs', include: 'effective-1.0.6-1.20.1-forge.jar')
@@ -155,17 +154,17 @@ dependencies {
     localRuntime "org.antlr:antlr4-runtime:4.13.1"
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
     localRuntime "org.anarres:jcpp:1.4.14"
-    modLocalRuntime "maven.modrinth:flerovium:1.2.15"
+    modLocalRuntime "maven.modrinth:flerovium:1.2.18"
 
     modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'
     modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.9"
-    modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.5.1-beta.3'
+    modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.6.3'
 //    modLocalRuntime "maven.modrinth:pretty-rain:yIvOKPKZ" // 1.1.3
-    modLocalRuntime "maven.modrinth:particle-rain:v4-beta.1+1.20.1-forge"
-    modLocalRuntime("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}")
-    modLocalRuntime("dev.engine-room.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}")
+    modLocalRuntime "maven.modrinth:particle-rain:v4-beta.10+1.20.1-forge"
+    modLocalRuntime("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${forge_ponder_version}")
+    modLocalRuntime("dev.engine-room.flywheel:flywheel-forge-${minecraft_version}:${forge_flywheel_version}")
     modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
-    modLocalRuntime("com.tterrag.registrate:Registrate:${registrate_version}")
+    modLocalRuntime("com.tterrag.registrate:Registrate:${forge_registrate_version}")
     modLocalRuntime "maven.modrinth:epic-fight:20.12.5"
     modLocalRuntime "curse.maven:gateway-to-eternity-417802:5703251"
     modLocalRuntime "curse.maven:epic-acg-665625:6106647"

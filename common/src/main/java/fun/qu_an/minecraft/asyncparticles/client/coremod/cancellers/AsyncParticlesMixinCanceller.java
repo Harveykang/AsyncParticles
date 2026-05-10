@@ -14,12 +14,12 @@ public class AsyncParticlesMixinCanceller implements MixinCanceller {
 		return switch (mixinClassName) {
 			case "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer",
 				 // These mixins do not support async rendering
-				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerFrustumMixin",
-				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerRotationMixin",
-				 "me.fzzyhmstrs.particle_core.mixins.WorldRendererFrustumMixin",
-				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerCachedLightMixin",
-				 "me.fzzyhmstrs.particle_core.mixins.BillboardParticleMixin",
-				 "me.fzzyhmstrs.particle_core.mixins.ParticleMixin",
+//				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerFrustumMixin",
+//				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerRotationMixin",
+//				 "me.fzzyhmstrs.particle_core.mixins.WorldRendererFrustumMixin",
+//				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerCachedLightMixin",
+//				 "me.fzzyhmstrs.particle_core.mixins.BillboardParticleMixin",
+//				 "me.fzzyhmstrs.particle_core.mixins.ParticleMixin",
 				 "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
 				 "com.moepus.flerovium.mixins.Particle.ParticleMixin",
 				// TODO: 这里处理一下

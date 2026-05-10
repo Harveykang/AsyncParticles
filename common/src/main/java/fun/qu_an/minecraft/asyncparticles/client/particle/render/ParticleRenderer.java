@@ -4,16 +4,19 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
-import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
+import fun.qu_an.minecraft.asyncparticles.client.particle.buffer.BufferHelper;
 import fun.qu_an.minecraft.asyncparticles.client.particle.buffer.ParticleVertexBuffer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.shader.ParticleTransformFeedbackShader;
-import fun.qu_an.minecraft.asyncparticles.client.util.BufferHelper;
+import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import it.unimi.dsi.fastutil.HashCommon;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11C;
@@ -33,16 +36,18 @@ public class ParticleRenderer implements IParticleRenderer {
 	private static final boolean DIRECT_BUFFER = true;
 	private final ParticleVertexBuffer[] sources = {new ParticleVertexBuffer(), new ParticleVertexBuffer()};
 	private final ParticleVertexBuffer target = new ParticleVertexBuffer();
+	private int particleLimit;
 	private int current = 0;
 	private ByteBuffer mappedBuffer;
 	private final Vec3[] cameraPositions = {Vec3.ZERO, Vec3.ZERO};
 	private final int[] particleCount = {0, 0, 0, 0};
 	private int maxParticleCount;
 	private boolean shouldSkip = true;
-	private final BufferHelper bufferHelper = new BufferHelper();
+	private final BufferHelper bufferHelper = DIRECT_BUFFER ? null : new BufferHelper();
 	private final int tf;
+	private boolean computed = false;
 
-	public ParticleRenderer() {
+	public ParticleRenderer(int particleLimit) {
 		sources[0].bind();
 		ParticleVertexFormats.RAW_PARTICLE.setupBufferState(); // attributes
 		sources[1].bind();
@@ -56,7 +61,11 @@ public class ParticleRenderer implements IParticleRenderer {
 		GLCaps.tfSupport.glBindTransformFeedback(tf);
 		GLCaps.tfSupport.glBindTransformFeedbackBuffer(0, target.vbo);
 		GLCaps.tfSupport.glBindTransformFeedback(0);
-		resize(GpuParticleBehavior.getGpuParticleLimit());
+		resize(particleLimit); // this.particleLimit = particleLimit;
+	}
+
+	public void beginFrame() {
+		computed = false;
 	}
 
 	@Override
@@ -78,7 +87,7 @@ public class ParticleRenderer implements IParticleRenderer {
 				throw new IllegalStateException("Mapped buffer is not null");
 			}
 			ParticleVertexBuffer source = sources[current];
-			mappedBuffer = source.map(GpuParticleBehavior.getGpuParticleLimit() * ParticleVertexFormats.RAW_PARTICLE_BYTES);
+			mappedBuffer = source.map(this.particleLimit * ParticleVertexFormats.RAW_PARTICLE_BYTES);
 		} else {
 			bufferHelper.begin();
 		}
@@ -88,8 +97,8 @@ public class ParticleRenderer implements IParticleRenderer {
 	public void unmapBuffer() {
 		RenderSystem.assertOnRenderThread();
 		// correct the particle count
-		particleCount[2 | current] = particleCount[current] - GpuParticleBehavior.getGpuParticleLimit();
-		particleCount[current] = Math.min(GpuParticleBehavior.getGpuParticleLimit(), this.particleCount[current]);
+		particleCount[2 | current] = particleCount[current] - particleLimit;
+		particleCount[current] = Math.min(particleLimit, this.particleCount[current]);
 		if (DIRECT_BUFFER) {
 			if (mappedBuffer == null) {
 				throw new IllegalStateException("Mapped buffer is null!");
@@ -133,22 +142,15 @@ public class ParticleRenderer implements IParticleRenderer {
 			bufferHelper.ensureCapacity(particles.size() * ParticleVertexFormats.RAW_PARTICLE_BYTES);
 		}
 		int position = 0;
-//		Frustum frustum = AsyncRenderer.frustum;
-//		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
+//		Frustum frustum = gpuBehavior.getFrustum();
+//		ParticleCullingMode particleCullingMode = ConfigHelper.getGpuParticleCullingMode();
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			final long address = stack.nmalloc(ParticleVertexFormats.RAW_PARTICLE_BYTES);
 			for (TextureSheetParticle tsp : particles) {
 				if (!((GpuParticleAddon) tsp).asyncparticles$shouldRender()) {
 					continue;
 				}
-//				ParticleAddon particleAddon = (ParticleAddon) tsp;
-//				if (particleAddon.shouldCull() &&
-//					switch (particleCullingMode) {
-//						case AABB -> !FrustumUtil.isVisible(frustum, tsp.getBoundingBox());
-//						case DISABLED -> false;
-//						case SPHERE -> !FrustumUtil.isVisible(frustum, tsp);
-//						case ASYNC_AABB, ASYNC_SPHERE -> !particleAddon.asyncparticles$isVisibleOnScreen();
-//					}) {
+//				if (shouldCull(particleCullingMode, frustum, tsp)) {
 //					continue;
 //				}
 				float oSize = tsp.getQuadSize(0f);
@@ -235,8 +237,22 @@ public class ParticleRenderer implements IParticleRenderer {
 		this.particleCount[current] = position / ParticleVertexFormats.RAW_PARTICLE_BYTES;
 	}
 
+//	private static boolean shouldCull(ParticleCullingMode particleCullingMode, Frustum frustum, TextureSheetParticle tsp) {
+//		ParticleAddon particleAddon = (ParticleAddon) tsp;
+//		return particleAddon.asyncparticles$shouldCull() &&
+//			switch (particleCullingMode) {
+//				case AABB -> !FrustumUtil.isVisible(frustum, tsp.getBoundingBox());
+//				case DISABLED -> false;
+//				case SPHERE -> !FrustumUtil.isVisible(frustum, tsp);
+//				case ASYNC_AABB, ASYNC_SPHERE -> !particleAddon.asyncparticles$isVisibleOnScreen();
+//			};
+//	}
+
 	@Override
 	public void compute(Camera camera, float partialTicks) {
+		if (computed) {
+			return; // compute once per frame
+		}
 		if (shouldSkip) {
 			throw new IllegalStateException("Should skip rendering during this tick!");
 		}
@@ -266,7 +282,7 @@ public class ParticleRenderer implements IParticleRenderer {
 //		}
 
 		if (maxParticleCount < particleCount[current ^ 1]) {
-			int nextCount = Math.min(HashCommon.nextPowerOfTwo(particleCount[current ^ 1]), GpuParticleBehavior.getGpuParticleLimit());
+			int nextCount = Math.min(HashCommon.nextPowerOfTwo(particleCount[current ^ 1]), this.particleLimit);
 			target.resize(nextCount * 4 * ParticleVertexFormats.PROCESSED_PARTICLE_VERTEX_BYTES);
 			maxParticleCount = nextCount;
 		}
@@ -284,7 +300,7 @@ public class ParticleRenderer implements IParticleRenderer {
 			GL11C.glDrawArrays(GL11C.GL_POINTS, 0, particleCount[current ^ 1]);
 		} else {
 			multiDrawIndex[0] = overflow;
-			multiDrawCount[0] = GpuParticleBehavior.getGpuParticleLimit() - overflow;
+			multiDrawCount[0] = this.particleLimit - overflow;
 			multiDrawCount[1] = overflow;
 			GL14C.glMultiDrawArrays(GL11C.GL_POINTS,
 				multiDrawIndex,
@@ -300,6 +316,8 @@ public class ParticleRenderer implements IParticleRenderer {
 		if (tf != -1) {
 			GLCaps.tfSupport.glBindTransformFeedback(0);
 		}
+
+		computed = true;
 	}
 
 	@Override
@@ -338,21 +356,15 @@ public class ParticleRenderer implements IParticleRenderer {
 		if (!((GpuParticleAddon) tsp).asyncparticles$shouldRender()) {
 			return;
 		}
-//				ParticleAddon particleAddon = (ParticleAddon) tsp;
-//				if (particleAddon.shouldCull() &&
-//					switch (particleCullingMode) {
-//						case AABB -> !FrustumUtil.isVisible(frustum, tsp.getBoundingBox());
-//						case DISABLED -> false;
-//						case SPHERE -> !FrustumUtil.isVisible(frustum, tsp);
-//						case ASYNC_AABB, ASYNC_SPHERE -> !particleAddon.asyncparticles$isVisibleOnScreen();
-//					}) {
-//					continue;
-//				}
+//		ParticleCullingMode particleCullingMode = ConfigHelper.getGpuParticleCullingMode();
+//		if (shouldCull(particleCullingMode, gpuBehavior.getFrustum(), tsp)) {
+//			return;
+//		}
 		double cx;
 		double cy;
 		double cz;
 		int particleCount = this.particleCount[current];
-		int particleLimit = GpuParticleBehavior.getGpuParticleLimit();
+		int particleLimit = this.particleLimit;
 		int offset;
 		if (particleCount >= particleLimit) {
 //			offset = particleCount % particleLimit * ParticleVertexFormats.RAW_PARTICLE_BYTES;
@@ -440,7 +452,7 @@ public class ParticleRenderer implements IParticleRenderer {
 			MemoryUtil.memPutByte(ptr, (byte) (tsp.alpha * 255f));
 			ptr += 1L;
 
-			// Light (56-59): 两个 short
+			// Light (56-59): 2 shorts
 			MemoryUtil.memPutInt(ptr, light);
 			ptr += 4L;
 
@@ -473,5 +485,6 @@ public class ParticleRenderer implements IParticleRenderer {
 		if (particleLimit < target.getSize()) {
 			target.resize0(particleLimit * 4 * ParticleVertexFormats.PROCESSED_PARTICLE_VERTEX_BYTES);
 		}
+		this.particleLimit = particleLimit;
 	}
 }

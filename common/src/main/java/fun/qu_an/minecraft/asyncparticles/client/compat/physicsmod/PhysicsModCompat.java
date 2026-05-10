@@ -1,11 +1,11 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.physicsmod;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollideUtil;
+import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollisionType;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.ShipHitResult;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.RainEffect;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollisionType;
 import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.diebuddies.physics.snow.math.AABB3D;
 import net.minecraft.client.Minecraft;
@@ -61,7 +61,7 @@ public class PhysicsModCompat {
 	}
 
 	public static CollisionType isCollideWithContraption(ClientLevel level, Vec3 movement, AABB aabb) {
-		return CreateUtil.isCollideWithContraption(level, movement, aabb, true);
+		return CollideUtil.isCollideWithContraptions(level, movement, aabb, true);
 	}
 
 	public static void onContraptionCollide(ClientLevel level, Vec3 location, Vec3 movement, CollisionType collisionType) {
@@ -70,7 +70,7 @@ public class PhysicsModCompat {
 			level.random.nextFloat() > 0.1) {
 			return;
 		}
-		BlockHitResult hit = CreateUtil.clip(level, location, location.add(movement.scale(2)));
+		BlockHitResult hit = CollideUtil.rayCast(level, location, location.add(movement.scale(2)));
 		if (hit == null || hit.getType() != HitResult.Type.BLOCK || hit.isInside() ||
 			!collisionType.canSpawnRainEffect(createRainEffect)) {
 			return;

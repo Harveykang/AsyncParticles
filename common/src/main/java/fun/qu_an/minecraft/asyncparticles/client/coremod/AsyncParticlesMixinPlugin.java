@@ -62,6 +62,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		}
 		return switch (split[0]) {
+			case "core" -> !"fabric".equals(split[1]) || !IS_FORGE;
 			case "conditional" -> switch (split[1]) {
 				case "MixinClassInstanceMultiMap" -> MixinConfigHelper.isSafeClassInstanceMultiMap();
 				case "MixinLevelChunk_BlockEntityMap", "MixinLevelChunk_BlockEntityMap_Late" ->
@@ -70,11 +71,30 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "MixinParticleEngine_SplitTick" -> MixinConfigHelper.isParticleSplitTick();
 				default -> true;
 			};
-			case "fabric" -> {
-				if (split.length == 2) {
-					yield !IS_FORGE;
-				}
-				yield switch (split[1]) {
+			case "compat" -> switch (split[1]) {
+				case "particlerain" -> PARTICLERAIN_LOADED;
+				case "particlerain_vs" -> PARTICLERAIN_LOADED && VS_LOADED;
+				case "particlerain_create" -> PARTICLERAIN_LOADED && CREATE_LOADED;
+				case "modernui" -> MODERN_UI_LOADED;
+				case "vs2" -> VS_LOADED;
+				case "vs2_create" -> VS_LOADED && CREATE_LOADED;
+				case "create" -> CREATE_LOADED; // 0.5.1~6.0.8
+				case "iris_like" -> IRIS_LIKE_LOADED;
+				case "flywheel" -> FLYWHEEL_LOADED &&
+					versionCheck("flywheel", "1.0", "2.0");
+				case "physicsmod" -> PHYSICSMOD_LOADED;
+				case "physicsmod_create" -> PHYSICSMOD_LOADED && CREATE_LOADED;
+				case "physicsmod_vs" -> PHYSICSMOD_LOADED && VS_LOADED;
+				case "a_good_place" -> A_GOOD_PLACE_LOADED;
+				case "watut" -> WATUT_LOADED && versionCheck("watut", "1.20.1-1.2.0", null);
+				case "lodestone" -> LODESTONE_LOADED;
+				case "fabric_api" -> FABRIC_API_LOADED; // Includes Forge version
+				case "cloth_config" -> CLOTH_CONFIG_LOADED;
+				case "photon_editor" -> PHOTON_EDITOR_LOADED;
+				case "shimmer" -> SHIMMER_LOADED;
+				case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
+				case "figura" -> FIGURA_LOADED;
+				case "fabric" -> switch (split[2]) {
 					case "effective" -> FABRIC_EFFECTIVE_LOADED;
 					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
 					case "particular" -> FABRIC_PARTICULAR_LOADED;
@@ -84,33 +104,10 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;
 					case "loot_beams_up" -> FABRIC_LOOT_BEAMS_UP_LOADED;
 					case "sodium_extra" -> FABRIC_SODIUM_EXTRA_LOADED;
-					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
+					default -> throw new IllegalArgumentException("Unknown fabric compat mixin: " + mixinClassName);
 				};
-			}
-			case "core" -> true;
-			case "particlerain" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN;
-			case "particlerain_vs" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && VS_LOADED;
-			case "particlerain_create" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && CREATE_LOADED;
-			case "modernui" -> MODERN_UI_LOADED;
-			case "vs2" -> VS_LOADED;
-			case "vs2_create" -> VS_LOADED && CREATE_LOADED;
-			case "create" -> CREATE_LOADED;
-			case "iris_like" -> IRIS_LIKE_LOADED;
-			case "flywheel" -> FLYWHEEL_LOADED &&
-							   versionCheck("flywheel", "1.0", "2.0");
-			case "particle_core" -> PARTICLE_CORE_LOADED;
-			case "physicsmod" -> PHYSICSMOD_LOADED;
-			case "physicsmod_create" -> PHYSICSMOD_LOADED && CREATE_LOADED;
-			case "physicsmod_vs" -> PHYSICSMOD_LOADED && VS_LOADED;
-			case "a_good_place" -> A_GOOD_PLACE_LOADED;
-			case "watut" -> WATUT_LOADED && versionCheck("watut", "1.20.1-1.2.0", null);
-			case "lodestone" -> LODESTONE_LOADED;
-			case "fabric_api" -> FABRIC_API_LOADED; // Includes Forge version
-			case "cloth_config" -> CLOTH_CONFIG_LOADED;
-			case "photon_editor" -> PHOTON_EDITOR_LOADED;
-			case "shimmer" -> SHIMMER_LOADED;
-			case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
-			case "figura" -> FIGURA_LOADED;
+				default -> throw new IllegalArgumentException("Unknown compat mixin: " + mixinClassName);
+			};
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

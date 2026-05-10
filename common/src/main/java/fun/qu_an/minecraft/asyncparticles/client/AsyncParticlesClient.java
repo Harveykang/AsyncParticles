@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import fun.qu_an.minecraft.asyncparticles.client.compat.moreculling.MoreCullingCompat;
-import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.v3.ParticleRainCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -19,7 +19,7 @@ public class AsyncParticlesClient {
 		if (MORE_CULLING_LOADED) {
 			MoreCullingCompat.init();
 		}
-		if (PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN) {
+		if (PARTICLERAIN_LOADED) {
 			ParticleRainCompat.init();
 		}
 	}

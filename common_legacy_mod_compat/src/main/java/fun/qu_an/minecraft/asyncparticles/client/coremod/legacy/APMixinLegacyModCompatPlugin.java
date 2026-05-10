@@ -22,38 +22,18 @@ public class APMixinLegacyModCompatPlugin implements IMixinConfigPlugin {
 	}
 
 	private static final int PACKAGE_LENGTH = AsyncParticlesClient.class.getPackage().getName().length() +
-											  ".mixin.legacy.".length();
+											  ".mixin.".length();
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		String mixinPackageName = mixinClassName.substring(PACKAGE_LENGTH);
 		String[] split = mixinPackageName.split("\\.");
-		if (split.length == 1) {
+		if (split.length <= 3) {
 			throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		}
-		return switch (split[0]) {
-			case "fabric" -> {
-				if (split.length == 2) {
-					yield !IS_FORGE;
-				}
-				yield switch (split[1]) {
-					case "particlerain" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN;
-					case "particlerain_vs" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN && VS_LOADED;
-					case "particlerain_create" -> FABRIC_PARTICLERAIN_LOADED && IS_LEGACY_PARTICLERAIN && CREATE_LOADED;
-					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
-				};
-			}
+		return switch (split[2]) {
 			case "flywheel" -> FLYWHEEL_LOADED &&
 							   versionCheck("flywheel", "0.6", "1.0");
-			case "subtle_effects" -> {
-				if (split.length == 2) {
-					yield SUBTLE_EFFECTS_LOADED;
-				}
-				yield switch (split[1]) {
-					case "fabric" -> !IS_FORGE && FABRIC_SUBTLE_EFFECTS_LOADED;
-					default -> SUBTLE_EFFECTS_LOADED;
-				};
-			}
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

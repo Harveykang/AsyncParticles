@@ -2,6 +2,8 @@ package fun.qu_an.minecraft.asyncparticles.client.config;
 
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
@@ -28,18 +30,6 @@ public class ConfigHelper {
 		return particle$particleLightCache;
 	}
 
-	public static int getParticleLimit() {
-		return particle$particleLimit;
-	}
-
-	public static boolean isCullUnderwaterParticleType() {
-		return particle$cullUnderwaterParticleType;
-	}
-
-	public static boolean isRemoveIfMissedTick() {
-		return particle$removeIfMissedTick;
-	}
-
 	public static boolean suppressCME() {
 		return tick$suppressCME;
 	}
@@ -52,16 +42,32 @@ public class ConfigHelper {
 		return tick$particleTickMode == TickMode.FORCE_COMPLETE;
 	}
 
-	public static boolean isTickWeatherAsync() {
-		return tick$tickWeatherAsync;
+	public static boolean fixParticleLightOnVsShips() {
+		return valkyrienSkies$fixParticleLights;
 	}
 
-	public static int getTickFailurePerSecondThreshold() {
-		return tick$failPerSecLimit;
+	public static RainEffect getCreateRainEffect() {
+		return create$rainEffect;
+	}
+
+	public static RainEffect getVSRainEffect() {
+		return AsyncParticlesConfig.valkyrienSkies$rainEffect;
+	}
+
+	public static int getParticleLimit() {
+		return particle$particleLimit;
+	}
+
+	public static boolean doCreateRainEffectsIfMoving() {
+		return create$rainEffect == RainEffect.ALWAYS;
 	}
 
 	public static int getRenderFailurePerSecondThreshold() {
 		return rendering$failPerSecLimit;
+	}
+
+	public static int getTickFailurePerSecondThreshold() {
+		return tick$failPerSecLimit;
 	}
 
 	public static RenderingMode particleRenderingMode() {
@@ -72,37 +78,73 @@ public class ConfigHelper {
 		return rendering$particleRenderingMode != RenderingMode.SYNCHRONOUSLY;
 	}
 
-	public static boolean isCullWeathers() {
-		return rendering$cullWeathers;
+	public static boolean isCompatibilityRendering() {
+		return rendering$particleRenderingMode == RenderingMode.COMPATIBILITY;
+	}
+
+	public static boolean isDelayedRendering() {
+		return rendering$particleRenderingMode == RenderingMode.DELAYED;
+	}
+
+	// TODO: implement weather particle config, which will not be spawn into physics structures
+	public static Set<ResourceLocation> getWeatherParticles() {
+		return Set.of();
+	}
+
+	public static boolean isCullUnderwaterParticleType() {
+		return particle$cullUnderwaterParticleType;
+	}
+
+	public static boolean isRemoveIfMissedTick() {
+		return particle$removeIfMissedTick;
 	}
 
 	public static RenderingMode getParticleRenderingMode() {
 		return rendering$particleRenderingMode;
 	}
 
+	public static boolean isCullWeathers() {
+		return rendering$cullWeathers;
+	}
+
+	public static boolean isTickWeatherAsync() {
+		return tick$tickWeatherAsync;
+	}
+
+	public static boolean isDeferredTextureTick() {
+		return tick$deferredTextureTick;
+	}
+
 	public static ParticleCullingMode getParticleCullingMode() {
 		return rendering$particleCulling;
 	}
 
-	public static boolean fixParticleLightOnVsShips() {
-		return valkyrienSkies$fixParticleLights;
+	public static List<? extends Class<?>> getRenderSyncParticleClasses() {
+		return rendering$syncParticleClasses
+			.stream()
+			.map(className -> {
+				try {
+					return Class.forName(className);
+				} catch (ClassNotFoundException e) {
+					return null;
+				}
+			})
+			.filter(Objects::nonNull)
+			.toList();
 	}
 
-	public static RainEffect getCreateRainEffect() {
-		return AsyncParticlesConfig.create$rainEffect;
-	}
-
-	public static RainEffect getVSRainEffect() {
-		return AsyncParticlesConfig.valkyrienSkies$rainEffect;
-	}
-
-	public static boolean alwaysSpawnRainParticlesOnVsShips() {
-		return valkyrienSkies$rainEffect == RainEffect.ALWAYS;
-	}
-
-	// TODO: implement weather particle config, which will not be spawn into physics structures
-	public static Set<ResourceLocation> getWeatherParticles() {
-		return Set.of();
+	public static List<? extends Class<?>> getTickSyncParticleClasses() {
+		return tick$syncParticleClasses
+			.stream()
+			.map(className -> {
+				try {
+					return Class.forName(className);
+				} catch (ClassNotFoundException e) {
+					return null;
+				}
+			})
+			.filter(Objects::nonNull)
+			.toList();
 	}
 
 	public static boolean isGpuParticles() {
@@ -118,6 +160,14 @@ public class ConfigHelper {
 	}
 
 	public static boolean isAppendNewParticlesToRenderer() {
-		return rendering$appendNewParticlesToRenderer;
+		return rendering$appendNewParticlesToRenderer && particle$particleLightCache;
+	}
+
+	public static boolean fixParticleLightOnSableSublevel() {
+		return true;
+	}
+
+	public static ParticleCullingMode getGpuParticleCullingMode() {
+		return ParticleCullingMode.DISABLED;
 	}
 }
