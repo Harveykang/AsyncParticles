@@ -16,7 +16,6 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +33,7 @@ public class MixinLevelRenderer_Rain {
 	@Shadow
 	private @Nullable ClientLevel level;
 	@Unique
-	private static final long asyncparticles$MASK = BlockPos.asLong(Integer.MAX_VALUE, 0, Integer.MAX_VALUE);
+	private static final long asyncparticles$MASK = BlockPos.asLong(-1, 0, -1);
 
 	@Inject(method = "tickRain",
 		slice = @Slice(

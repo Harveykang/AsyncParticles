@@ -62,15 +62,15 @@ public abstract class AsyncRenderBehavior {
 		throw new AssertionError();
 	}
 
-	private final Set<Class<?>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
+	private final Set<Class<?>> syncParticleTypes = Collections.newSetFromMap(new IdentityHashMap<>());
 	public boolean renderAsync = false;
 	public boolean particlePhase = false;
 
-	public final ForkJoinPool EXECUTOR;
+	public final ForkJoinPool executor;
 
 	{
 		AtomicInteger workerCount = new AtomicInteger(1);
-		EXECUTOR = new ForkJoinPool(THREADS, (forkJoinPool) -> {
+		executor = new ForkJoinPool(THREADS, (forkJoinPool) -> {
 			ForkJoinWorkerThread forkJoinWorkerThread = new AsyncRendererThread(forkJoinPool);
 			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());
 			forkJoinWorkerThread.setDaemon(true);
@@ -83,7 +83,7 @@ public abstract class AsyncRenderBehavior {
 	private Consumer<String> debugConsumer;
 	private CompletableFuture<Void> asyncTask;
 	private int asyncTasksSize;
-	private final ExceptionTracker<Class<? extends Particle>> EXCEPTION_TRACKER = new ExceptionTracker<>(
+	private final ExceptionTracker<Class<? extends Particle>> exceptionTracker = new ExceptionTracker<>(
 		() -> 5000,
 		ConfigHelper::getRenderFailurePerSecondThreshold
 	);
@@ -117,7 +117,7 @@ public abstract class AsyncRenderBehavior {
 				continue;
 			}
 			asyncTasks.add(CompletableFuture.runAsync(() -> renderParticles(f, camera, queue, particleRenderType, bTesselator.begin()),
-					EXECUTOR)
+					executor)
 				.exceptionally(this::renderAsyncExceptionally));
 		}
 		int size = asyncTasksSize = asyncTasks.size();
@@ -177,7 +177,7 @@ public abstract class AsyncRenderBehavior {
 	private void onRenderingParticleException(ParticleRenderType particleRenderType, Particle particle, Throwable t) {
 		boolean tolerable = AsyncTickBehavior.INSTANCE.isTolerable(t);
 		Class<? extends Particle> particleClass = ((ParticleAddon) particle).asyncparticles$getRealClass();
-		if (tolerable && !EXCEPTION_TRACKER.addException(particleClass, t)) {
+		if (tolerable && !exceptionTracker.addException(particleClass, t)) {
 			return;
 		}
 		((ParticleAddon) particle).asyncparticles$setRenderSync();
@@ -322,13 +322,13 @@ public abstract class AsyncRenderBehavior {
 	private final Map<ParticleRenderType, Set<Particle>> SYNC_PARTICLES = Collections.synchronizedMap(new IdentityHashMap<>());
 
 	public void markAsSync(Class<? extends Particle> aClass) {
-		synchronized (SYNC_PARTICLE_TYPES) {
-			SYNC_PARTICLE_TYPES.add(aClass);
+		synchronized (syncParticleTypes) {
+			syncParticleTypes.add(aClass);
 		}
 	}
 
 	public boolean shouldSync(Class<?> aClass) {
-		return SYNC_PARTICLE_TYPES.contains(aClass);
+		return syncParticleTypes.contains(aClass);
 	}
 
 	public void recordSync(ParticleRenderType particleRenderType, Particle particle) {
@@ -380,7 +380,7 @@ public abstract class AsyncRenderBehavior {
 						? Minecraft.getInstance().particleEngine.particles.keySet()
 						: ParticleEngine.RENDER_ORDER,
 					SYNC_PARTICLES.values().stream().mapToInt(Set::size).sum(),
-					SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList(),
+					syncParticleTypes.stream().map(Class::getName).toList(),
 					BTESSELATORS.entrySet().stream()
 						.filter(e -> e.getValue().shouldSync)
 						.map(Map.Entry::getKey).toList(),
@@ -417,10 +417,10 @@ public abstract class AsyncRenderBehavior {
 		}
 		closeBTesselators();
 		clearSync();
-		SYNC_PARTICLE_TYPES.clear();
-		SYNC_PARTICLE_TYPES.add(ItemPickupParticle.class);
-		SYNC_PARTICLE_TYPES.add(MobAppearanceParticle.class);
-		SYNC_PARTICLE_TYPES.addAll(ConfigHelper.getRenderSyncParticleClasses());
+		syncParticleTypes.clear();
+		syncParticleTypes.add(ItemPickupParticle.class);
+		syncParticleTypes.add(MobAppearanceParticle.class);
+		syncParticleTypes.addAll(ConfigHelper.getRenderSyncParticleClasses());
 	}
 
 	public void onTranslucent(Minecraft mc) {

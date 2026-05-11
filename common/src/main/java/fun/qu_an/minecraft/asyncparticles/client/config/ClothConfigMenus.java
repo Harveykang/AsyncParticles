@@ -25,6 +25,7 @@ import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesCon
 
 // No more NoClassDefFoundError
 class ClothConfigMenus {
+	@SuppressWarnings("UnstableApiUsage")
 	static ConfigBuilder screenBuilder(Screen screen) {
 		ConfigObj defaultConfig = new ConfigObj();
 		ConfigBuilder builder = ConfigBuilder.create()
@@ -235,7 +236,7 @@ class ClothConfigMenus {
 				.startStrList(Component.translatable("config.asyncparticles.rendering.syncParticleClasses"),
 					new ArrayList<>(rendering$syncParticleClasses))
 				.setDefaultValue(new ArrayList<>(defaultConfig.rendering.syncParticleClasses))
-				.setTooltip(Component.translatable("config.asyncparticles.rendering	.syncParticleClasses.tooltip"))
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.syncParticleClasses.tooltip"))
 				.setSaveConsumer(newValue -> rendering$syncParticleClasses = new LinkedHashSet<>(newValue))
 				.build());
 		// endregion

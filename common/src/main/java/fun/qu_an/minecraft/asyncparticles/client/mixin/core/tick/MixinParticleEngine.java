@@ -128,9 +128,6 @@ public abstract class MixinParticleEngine {
 					if (appendNewParticlesToRenderer) {
 						GpuParticleBehavior.INSTANCE.getRenderer(renderType).append(GpuParticleBehavior.INSTANCE.getCameraPos(), ((TextureSheetParticle) particle));
 					}
-					// mark particles as gpu
-					// this will not skip the first tick after enqueued, while cpu particles skip it
-					((ParticleAddon) particle).asyncparticles$setGpu(true);
 				}
 				queue.add(particle);
 			}
@@ -214,7 +211,8 @@ public abstract class MixinParticleEngine {
 		}
 		boolean enableLightCache = ConfigHelper.particleLightCache();
 		boolean isOnMainThread = ThreadUtil.isOnRenderThread();
-		ParticleCullingMode particleCullingMode = GpuParticleBehavior.GPU_PARTICLE_PHASE.get() ?
+		boolean isGpu = GpuParticleBehavior.GPU_PARTICLE_PHASE.get();
+		ParticleCullingMode particleCullingMode = isGpu ?
 			ParticleCullingMode.DISABLED :
 			ConfigHelper.getParticleCullingMode();
 		boolean forceDone = ConfigHelper.forceDoneParticleTick();
@@ -238,8 +236,8 @@ public abstract class MixinParticleEngine {
 				// Skip the first tick after enqueued that the particle is added to the queue.
 				// only GPU particles don't skip the first tick, but skip the first refresh.
 				// skip the first refresh will fix black destruction gpu particles.
-				shouldTick = particleAddon.asyncparticles$isGpu();
-				shouldRefresh = !shouldTick && enableLightCache;
+				shouldTick = isGpu;
+				shouldRefresh = !isGpu && enableLightCache;
 			} else if (particleAddon.asyncparticles$isTickSync()) {
 				AsyncTickBehavior.INSTANCE.recordSync(particle);
 				continue;

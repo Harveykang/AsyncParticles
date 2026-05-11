@@ -89,6 +89,6 @@ public abstract class MixinParticleEngine_SplitTick {
 	private void asyncparticles$splitTickParticleList(Collection<Particle> collection) {
 		ThreadUtil.assertNotMainThread();
 		Spliterator<Particle> spliterator = collection.spliterator();
-		new TickParticleRecursiveAction(spliterator).compute();
+		new TickParticleRecursiveAction(spliterator, GpuParticleBehavior.GPU_PARTICLE_PHASE.get()).compute();
 	}
 }

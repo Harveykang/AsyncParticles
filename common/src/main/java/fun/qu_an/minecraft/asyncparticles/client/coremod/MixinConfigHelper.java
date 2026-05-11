@@ -40,4 +40,8 @@ public class MixinConfigHelper {
 	public static Collection<String> getContraptionNoParticleCollision() {
 		return CONFIG.getContraptionNoParticleCollision();
 	}
+
+	public static boolean isParticleSplitTick() {
+		return CONFIG.isParticleSplitTick();
+	}
 }

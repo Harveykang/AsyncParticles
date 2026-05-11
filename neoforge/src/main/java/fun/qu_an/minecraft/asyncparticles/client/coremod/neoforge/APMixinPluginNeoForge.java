@@ -42,11 +42,8 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 				case "particlerain_create" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN;
 				case "create" -> FORGE_CREATE_LOADED;
 				case "sable_create" -> SABLE_LOADED && CREATE_LOADED;
-				case "effecticularity" -> FORGE_EFFECTIVE_LOADED;
-				case "subtle_effects" -> FORGE_SUBTLE_EFFECTS_LOADED;
 				case "simple_weather" -> FORGE_SIMPLE_WEATHER_LOADED;
 				case "simple_weather_create" -> FORGE_SIMPLE_WEATHER_LOADED && CREATE_LOADED;
-				case "particular" -> FORGE_PARTICULAR_LOADED;
 				case "weather2" -> FORGE_WEATHER2_LOADED;
 				case "weather2_create" -> FORGE_WEATHER2_LOADED && CREATE_LOADED;
 				case "weather2_vs" -> FORGE_WEATHER2_LOADED && VS_LOADED;

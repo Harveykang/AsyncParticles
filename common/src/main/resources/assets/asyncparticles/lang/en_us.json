@@ -61,7 +61,7 @@
   "config.asyncparticles.category.mixin": "Mixin",
   "config.asyncparticles.mixin.tooltip": "Default entries can't be deleted.\n(Reset to default by removing all entries.)",
   "config.asyncparticles.mixin.particle.splitTick": "Split Vanilla Particle Ticking",
-  "config.asyncparticles.mixin.particle.splitTick.tooltip": "Split the vanilla particle's tick task more evenly\ninstead of grouping by ParticleRenderType.",
+  "config.asyncparticles.mixin.particle.splitTick.tooltip": "Split the supported particle tick tasks more evenly\ninstead of grouping by ParticleRenderType.",
   "config.asyncparticles.mixin.safeClassInstanceMultiMap": "Make 'ClassInstanceMultiMap' Thread-Safe",
   "config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip": "Enable this if you're encountering crashes related\nto non-standard particle implementations in your\ninstalled mods that access entities in the world.",
   "config.asyncparticles.mixin.safeBlockEntityMap": "Make 'LevelChunk#blockEntities' Thread-Safe",

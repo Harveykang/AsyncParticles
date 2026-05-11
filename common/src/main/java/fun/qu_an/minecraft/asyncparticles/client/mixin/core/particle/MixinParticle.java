@@ -137,14 +137,4 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	public Class<? extends Particle> asyncparticles$getRealClass() {
 		return (Class) this.getClass();
 	}
-
-	@Override
-	public void asyncparticles$setGpu(boolean isGpu) {
-		asyncparticles$tickFlag = (byte) ((asyncparticles$tickFlag & ~4) | (isGpu ? 4 : 0));
-	}
-
-	@Override
-	public boolean asyncparticles$isGpu() {
-		return (asyncparticles$tickFlag & 4) != 0;
-	}
 }

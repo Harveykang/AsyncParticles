@@ -581,10 +581,8 @@ public class AsyncTickBehavior {
 							GpuParticleBehavior.INSTANCE.createRenderer(k);
 							return ParticleHelper.newParticleQueue();
 						}).add(tsp);
-						((ParticleAddon) tsp).asyncparticles$setGpu(true);
 					} else {
 						newCpuQueue.add(p);
-						((ParticleAddon) p).asyncparticles$setGpu(false);
 					}
 				});
 				newCpuParticleMap.put(key, newCpuQueue);
@@ -594,10 +592,7 @@ public class AsyncTickBehavior {
 			if (!tickAsync || !enableGpuAcceleration) {
 				GpuParticleBehavior.INSTANCE.gpuParticles.forEach((t, oldGpuQueue) -> {
 					Queue<Particle> cpuQueue = newCpuParticleMap.computeIfAbsent(t, k -> ParticleHelper.newParticleQueue());
-					oldGpuQueue.forEach(p -> {
-						((ParticleAddon) p).asyncparticles$setGpu(false);
-						cpuQueue.add(p);
-					});
+					cpuQueue.addAll(oldGpuQueue);
 				});
 				GpuParticleBehavior.INSTANCE.gpuParticles.clear();
 			} else {

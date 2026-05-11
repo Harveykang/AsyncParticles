@@ -67,6 +67,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "MixinClassInstanceMultiMap" -> MixinConfigHelper.isSafeClassInstanceMultiMap();
 				case "MixinLevelChunk_BlockEntityMap" -> MixinConfigHelper.isSafeBlockEntityMap();
 				case "MixinLegacyRandomSource" -> MixinConfigHelper.isSafeLegacyRandomSource();
+				case "MixinParticleEngine_SplitTick" -> MixinConfigHelper.isParticleSplitTick();
 				default -> true;
 			};
 			case "compat" -> switch (split[1]) {

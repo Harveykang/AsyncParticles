@@ -158,7 +158,8 @@ public class ModListHelper {
 
 	@ExpectPlatform
 	public static boolean isDevelopmentEnvironment() {
-		throw new AssertionError();
+		ExceptionUtil.throwAssertionError();
+		return false;
 	}
 
 	public static boolean classExists(String className) {
