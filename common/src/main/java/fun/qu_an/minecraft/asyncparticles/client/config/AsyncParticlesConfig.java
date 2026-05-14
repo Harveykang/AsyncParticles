@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
@@ -34,7 +35,7 @@ public class AsyncParticlesConfig {
 	public static final int MIN_PARTICLE_LIMIT = 1024;
 	public static final int MAX_PARTICLE_LIMIT = 262144;
 	public static final int VERSION = 1;
-	public static final Path CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles.json");
+	public static final Path CONFIG_FILE = Path.of("config", AsyncParticlesClient.MOD_ID, AsyncParticlesClient.MOD_ID + ".json");
 	static final Gson GSON = new GsonBuilder()
 		.setLenient()
 		.setPrettyPrinting()
@@ -66,6 +67,7 @@ public class AsyncParticlesConfig {
 	public static RainEffect valkyrienSkies$rainEffect;
 	public static boolean valkyrienSkies$fixParticleLights;
 	public static RainEffect create$rainEffect;
+	public static int create$tickRainBlockingRange;
 
 	static {
 		LOGGER.debug("AsyncParticlesConfig initialized.");
@@ -367,16 +369,18 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Create {
-			RainEffect rainEffect = RainEffect.STATIONARY;
+			RainEffect rainEffect = RainEffect.ALWAYS;
+			int tickRainBlockingRange = ModListHelper.PARTICLERAIN_LOADED ? 32 : 16;
 
 			private void flat() {
 				create$rainEffect = requireNonNullElse(rainEffect, RainEffect.ALWAYS);
+				create$tickRainBlockingRange = Mth.clamp(tickRainBlockingRange, 10, 512);
 			}
 
 			private void fold() {
 				rainEffect = create$rainEffect;
+				tickRainBlockingRange = create$tickRainBlockingRange;
 			}
 		}
 	}
-
 }

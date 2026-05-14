@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.Unique;
 
 import java.util.Queue;
 import java.util.function.LongPredicate;
+import java.util.function.Predicate;
 
 import static java.lang.Math.abs;
 import static org.joml.Math.max;
@@ -136,20 +137,21 @@ public class GameUtil {
 		return (i & 0xF) << 20 | (j & 0xF) << 4;
 	}
 
-	public static void forEachBlockPos(double x, double y, double z, double size, LongPredicate longConsumer) {
+	public static void forEachBlockPos(double x, double y, double z, double size, Predicate<BlockPos> longConsumer) {
 		int l = Mth.floor(x - size);
 		int m = Mth.floor(x + size);
 		int n = Mth.floor(y - size);
 		int o = Mth.floor(y + size);
 		int p = Mth.floor(z - size);
 		int q = Mth.floor(z + size);
+		BlockPos.MutableBlockPos pos = GameUtil.SHARED_POS.get();
 		if (l == m && n == o && p == q) {
-			longConsumer.test(BlockPos.asLong(l, n, p));
+			longConsumer.test(pos.set(l, n, p));
 		} else {
 			for (int r = l; r <= m; r++) {
 				for (int s = n; s <= o; s++) {
 					for (int t = p; t <= q; t++) {
-						if (!longConsumer.test(BlockPos.asLong(r, s, t))) {
+						if (!longConsumer.test(pos.set(r, s, t))) {
 							return;
 						}
 					}

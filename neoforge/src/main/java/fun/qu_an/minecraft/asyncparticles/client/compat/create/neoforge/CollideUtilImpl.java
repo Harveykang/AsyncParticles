@@ -6,7 +6,6 @@ import com.simibubi.create.content.contraptions.ContraptionHandlerClient;
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import com.simibubi.create.foundation.collision.CollisionList;
 import com.simibubi.create.foundation.collision.Matrix3d;
-import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollideUtil;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CollisionType;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.ContraptionHitResult;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
@@ -23,7 +22,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3d;
 
 import java.util.Iterator;
 
@@ -32,17 +30,15 @@ import static java.lang.Math.max;
 
 @ApiStatus.Internal
 public class CollideUtilImpl {
-	private static final float LENGTH_SQR_EPSILON = 0.01f;
-
-	public static CollisionType isCollideWithContraption(Vec3 originalMotion, AABB particleBound, Entity entity, boolean estimate) {
+	public static CollisionType isCollideWithContraption(Vec3 originalMotion, AABB particleBounds, Entity entity, boolean estimate) {
 		AbstractContraptionEntity contraptionEntity = (AbstractContraptionEntity) entity;
 		// 第一阶段：出界及基础判断
 		AABB bb0;
 		AABB entityBoundingBox = contraptionEntity instanceof CarriageContraptionEntity
-			? (bb0 = contraptionEntity.getBoundingBox()).inflate(0, Math.max(Math.max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
-			: contraptionEntity.getBoundingBox();
+			? (bb0 = CreateUtilImpl.getBoundingBox(contraptionEntity)).inflate(0, Math.max(Math.max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
+			: CreateUtilImpl.getBoundingBox(contraptionEntity);
 
-		if (!particleBound.expandTowards(originalMotion).intersects(entityBoundingBox)) {
+		if (!particleBounds.expandTowards(originalMotion).intersects(entityBoundingBox)) {
 			return CollisionType.NONE;
 		}
 
@@ -52,17 +48,17 @@ public class CollideUtilImpl {
 		if (contraption == null) return CollisionType.NONE;
 
 		AbstractContraptionEntity.ContraptionRotationState rotation = contraptionEntity.getRotationState();
-		Matrix3d rotationMatrix = rotation.asMatrix();
+		Matrix3d rotationMatrix = CreateUtilImpl.asMatrix(contraptionEntity, rotation);
 
-		Vec3 particleBoundsCenter = particleBound.getCenter();
+		Vec3 particleBoundsCenter = particleBounds.getCenter();
 		float yawOffset = rotation.getYawOffset();
-		Vec3 anchorVec = contraptionEntity.getAnchorVec();
+		Vec3 anchorVec = CreateUtilImpl.getAnchorVec(contraptionEntity);
 		Vec3 toLocalTranslation = TransformUtil.worldToLocalDisplacement(particleBoundsCenter, anchorVec, rotationMatrix, yawOffset);
 
-		Vec3 contactPointMotion = contraptionEntity.getContactPointMotion(particleBoundsCenter);
+		Vec3 contactPointMotion = CreateUtilImpl.getContactPointMotion(contraptionEntity, particleBoundsCenter);
 		Vec3 localMotion = rotationMatrix.transform(originalMotion.subtract(contactPointMotion));
 
-		AABB localBB = particleBound.move(toLocalTranslation).inflate(1.0E-7D);
+		AABB localBB = particleBounds.move(toLocalTranslation).inflate(1.0E-7D);
 
 		// 第三阶段：获取碰撞体数据
 		CollisionList collidableBBs = contraption.getSimplifiedEntityColliders();
@@ -70,10 +66,11 @@ public class CollideUtilImpl {
 		if (collidableBBs == null) {
 			if (estimate) {
 				// 估算模式下，如果有接触点运动则认为是移动碰撞，否则是静止碰撞
-				return contactPointMotion.lengthSqr() > LENGTH_SQR_EPSILON ? CollisionType.MOVING : CollisionType.STATIONARY;
+				return abs(contactPointMotion.x) + abs(contactPointMotion.y) + abs(contactPointMotion.z) > CreateUtil.LENGTH_SQR_EPSILON ?
+					CollisionType.MOVING : CollisionType.STATIONARY;
 			}
 			collidableBBs = new CollisionList();
-			InvokerContraptionCollider.invoker_getPotentiallyCollidedShapes(world, contraption, localBB.expandTowards(localMotion), new CollisionList.Populate(collidableBBs));
+			InvokerContraptionCollider.invoker_getPotentiallyCollidedShapes(world, contraption, CreateUtilImpl.expandTowards(contraptionEntity, localBB, localMotion), new CollisionList.Populate(collidableBBs));
 		}
 
 		// 第四阶段：快速碰撞检测
@@ -126,7 +123,8 @@ public class CollideUtilImpl {
 		}
 
 		// 有碰撞时，根据接触点运动判断是移动还是静止碰撞
-		return contactPointMotion.lengthSqr() > LENGTH_SQR_EPSILON ? CollisionType.MOVING : CollisionType.STATIONARY;
+		return abs(contactPointMotion.x) + abs(contactPointMotion.y) + abs(contactPointMotion.z) > CreateUtil.LENGTH_SQR_EPSILON ?
+			CollisionType.MOVING : CollisionType.STATIONARY;
 	}
 
 	@Nullable
@@ -137,8 +135,8 @@ public class CollideUtilImpl {
 		AbstractContraptionEntity contraptionEntity = (AbstractContraptionEntity) entity;
 		AABB bb0;
 		AABB entityBoundingBox = contraptionEntity instanceof CarriageContraptionEntity
-			? (bb0 = contraptionEntity.getBoundingBox()).inflate(0, Math.max(Math.max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
-			: contraptionEntity.getBoundingBox();
+			? (bb0 = CreateUtilImpl.getBoundingBox(contraptionEntity)).inflate(0, Math.max(Math.max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
+			: CreateUtilImpl.getBoundingBox(contraptionEntity);
 
 		if (!particleBounds.expandTowards(originalMotion).intersects(entityBoundingBox)) {
 			return null;
@@ -149,14 +147,14 @@ public class CollideUtilImpl {
 		if (contraption == null) return null;
 
 		AbstractContraptionEntity.ContraptionRotationState rotation = contraptionEntity.getRotationState();
-		Matrix3d rotationMatrix = rotation.asMatrix();
+		Matrix3d rotationMatrix = CreateUtilImpl.asMatrix(contraptionEntity, rotation);
 
 		Vec3 particleBoundsCenter = particleBounds.getCenter();
 		float yawOffset = rotation.getYawOffset();
-		Vec3 anchorVec = contraptionEntity.getAnchorVec();
+		Vec3 anchorVec = CreateUtilImpl.getAnchorVec(contraptionEntity);
 		Vec3 toLocalTranslation = TransformUtil.worldToLocalDisplacement(particleBoundsCenter, anchorVec, rotationMatrix, yawOffset);
 
-		Vec3 contactPointMotion = contraptionEntity.getContactPointMotion(particleBoundsCenter);
+		Vec3 contactPointMotion = CreateUtilImpl.getContactPointMotion(contraptionEntity, particleBoundsCenter);
 		Vec3 localMotion = rotationMatrix.transform(originalMotion.subtract(contactPointMotion));
 
 		AABB localBB = particleBounds.move(toLocalTranslation).inflate(1.0E-7D);
@@ -168,7 +166,7 @@ public class CollideUtilImpl {
 				return Vec3.ZERO;
 			}
 			collidableBBs = new CollisionList();
-			InvokerContraptionCollider.invoker_getPotentiallyCollidedShapes(world, contraption, localBB.expandTowards(localMotion), new CollisionList.Populate(collidableBBs));
+			InvokerContraptionCollider.invoker_getPotentiallyCollidedShapes(world, contraption, CreateUtilImpl.expandTowards(contraptionEntity, localBB, localMotion), new CollisionList.Populate(collidableBBs));
 		}
 
 		double localMinX = localBB.minX;
@@ -379,8 +377,8 @@ public class CollideUtilImpl {
 			AbstractContraptionEntity entity1 = (AbstractContraptionEntity) it.next();
 			AABB bb0;
 			AABB entity1Bb = entity1 instanceof CarriageContraptionEntity
-				? (bb0 = entity1.getBoundingBox()).inflate(0, max(max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
-				: entity1.getBoundingBox();
+				? (bb0 = CreateUtilImpl.getBoundingBox(entity1)).inflate(0, max(max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
+				: CreateUtilImpl.getBoundingBox(entity1);
 			if (!entity1Bb.intersects(start, end)) {
 				continue;
 			}
@@ -398,7 +396,7 @@ public class CollideUtilImpl {
 		if (hitResult == null || hitResult.getType() == HitResult.Type.MISS) {
 			return null;
 		}
-		return new ContraptionHitResult(entity.getContactPointMotion(hit),
+		return new ContraptionHitResult(CreateUtilImpl.getContactPointMotion(entity, hit),
 			hit,
 			hitResult.getDirection(),
 			BlockPos.containing(hit),

@@ -76,7 +76,7 @@ public abstract class MixinParticleEngine {
 	public void tick() {
 		//		assert AsyncTicker.shouldTickParticles;
 		if (!trackingEmitters.isEmpty()) {
-			AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.add(this::asyncparticles$tickEmitters);
+			AsyncTickBehavior.INSTANCE.particleOperations.add(this::asyncparticles$tickEmitters);
 		}
 
 		// Keep local variable tables as they were
@@ -87,8 +87,8 @@ public abstract class MixinParticleEngine {
 			AsyncTickBehavior.INSTANCE.waitForCleanUp();
 		} else {
 			particles.forEach(this::asyncparticles$scheduleParticleTick);
-			AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.forEach(Runnable::run);
-			AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.clear();
+			AsyncTickBehavior.INSTANCE.particleOperations.forEach(Runnable::run);
+			AsyncTickBehavior.INSTANCE.particleOperations.clear();
 			AsyncTickBehavior.INSTANCE.tickSyncParticles();
 			particles.values().forEach(q -> q.removeIf(p -> {
 				if (p.isAlive()) {
@@ -160,7 +160,7 @@ public abstract class MixinParticleEngine {
 		}
 		IParticleRenderer renderer = GpuParticleBehavior.INSTANCE.getRenderer(particleRenderType);
 		renderer.mapBuffer();
-		AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.add(() -> {
+		AsyncTickBehavior.INSTANCE.particleOperations.add(() -> {
 			GpuParticleBehavior.GPU_PARTICLE_PHASE.set(true);
 			tickParticleList((Queue) queue);
 			GpuParticleBehavior.GPU_PARTICLE_PHASE.set(false);
@@ -174,7 +174,7 @@ public abstract class MixinParticleEngine {
 		if (queue.isEmpty()) {
 			return;
 		}
-		AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.add(() -> tickParticleList(queue));
+		AsyncTickBehavior.INSTANCE.particleOperations.add(() -> tickParticleList(queue));
 	}
 
 	@Unique

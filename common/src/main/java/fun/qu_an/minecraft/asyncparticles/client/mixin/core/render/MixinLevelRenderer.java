@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
@@ -48,7 +49,7 @@ public abstract class MixinLevelRenderer {
 								   Matrix4f frustumMatrix,
 								   Matrix4f projectionMatrix,
 								   CallbackInfo ci,
-								   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+								   @Share(namespace = AsyncParticlesClient.MOD_ID, value = "internalRenderingMode")
 								   LocalIntRef irm) {
 		GpuParticleBehavior.INSTANCE.beginFrame();
 		float partialTick = deltaTracker.getGameTimeDeltaPartialTick(false);
@@ -109,7 +110,7 @@ public abstract class MixinLevelRenderer {
 								   Matrix4f projectionMatrix,
 								   CallbackInfo ci,
 								   @Local(ordinal = 0) float partialTick,
-								   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+								   @Share(namespace = AsyncParticlesClient.MOD_ID, value = "internalRenderingMode")
 								   LocalIntRef irm) {
 		if (irm.get() == DELAYED_ASYNC) {
 			AsyncRenderBehavior.INSTANCE.endAll(partialTick, camera, lightTexture, true);

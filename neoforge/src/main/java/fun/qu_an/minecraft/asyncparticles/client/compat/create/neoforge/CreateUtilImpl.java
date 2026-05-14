@@ -2,15 +2,16 @@ package fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge;
 
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import com.simibubi.create.content.contraptions.ContraptionHandler;
+import com.simibubi.create.foundation.collision.Matrix3d;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateUtil;
-import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
+import fun.qu_an.minecraft.asyncparticles.client.compat.sable.neoforge.SableCompat;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.neoforge.create.AccessorMatrix3d;
 import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
-import it.unimi.dsi.fastutil.longs.Long2BooleanMap;
-import it.unimi.dsi.fastutil.longs.Long2FloatMap;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -22,15 +23,15 @@ import java.util.function.Consumer;
 @SuppressWarnings("unused")
 @ApiStatus.Internal
 public class CreateUtilImpl {
-	public static Map<Integer, WeakReference<Entity>> loadedContraptions(LevelAccessor level) {
+	public static Map<Integer, WeakReference<Entity>> loadedContraptions(Level level) {
 		return (Map) ContraptionHandler.loadedContraptions.get(level);
 	}
 
-	public static Collection<WeakReference<Entity>> contraptions(LevelAccessor level) {
+	public static Collection<WeakReference<Entity>> contraptions(Level level) {
 		return CreateUtil.loadedContraptions(level).values();
 	}
 
-	public static Iterator<Entity> forEachContraption(LevelAccessor level) {
+	public static Iterator<Entity> forEachContraption(Level level) {
 		Iterator<WeakReference<AbstractContraptionEntity>> iterator = (Iterator) CreateUtil.contraptions(level).iterator();
 		return new Iterator<>() {
 			private AbstractContraptionEntity next;
@@ -100,8 +101,8 @@ public class CreateUtilImpl {
 
 	public static boolean isUnderContraption(ClientLevel level, double x, double y, double z, double size) {
 		boolean[] result = new boolean[1];
-		GameUtil.forEachBlockPos(x, 0, z, size, (l) -> {
-			boolean b = ContraptionRainBlocking.getHeight(level, l) >= y;
+		GameUtil.forEachBlockPos(x, 0, z, size, (blockPos) -> {
+			boolean b = ContraptionRainBlocking.getHeight(level, blockPos) >= y;
 			result[0] = b;
 			return !b;
 		});
@@ -109,6 +110,83 @@ public class CreateUtilImpl {
 	}
 
 	public static boolean isUnderContraption(ClientLevel level, int x, int y, int z) {
-		return ContraptionRainBlocking.getHeight(level, BlockPos.asLong(x, 0, z)) >= y;
+		return ContraptionRainBlocking.getHeight(level, x, z) >= y;
 	}
+
+	public static org.joml.Matrix3d toJOML(Matrix3d createMatrix) {
+		return toJOML(createMatrix, new org.joml.Matrix3d());
+	}
+
+	public static org.joml.Matrix3d toJOML(Matrix3d createMatrix, org.joml.Matrix3d jomlMatrix) {
+		AccessorMatrix3d accessor = ((AccessorMatrix3d) createMatrix);
+		jomlMatrix.set(accessor.m00(),
+			accessor.m01(),
+			accessor.m02(),
+			accessor.m10(),
+			accessor.m11(),
+			accessor.m12(),
+			accessor.m20(),
+			accessor.m21(),
+			accessor.m22());
+		return jomlMatrix;
+	}
+
+	public static Matrix3d toCreate(org.joml.Matrix3d jomlMatrix) {
+		return toCreate(jomlMatrix, new Matrix3d());
+	}
+
+	public static Matrix3d toCreate(org.joml.Matrix3d jomlMatrix, Matrix3d createMatrix) {
+		AccessorMatrix3d accessor = ((AccessorMatrix3d) createMatrix);
+		accessor.m00(jomlMatrix.m00);
+		accessor.m01(jomlMatrix.m01);
+		accessor.m02(jomlMatrix.m02);
+		accessor.m10(jomlMatrix.m10);
+		accessor.m11(jomlMatrix.m11);
+		accessor.m12(jomlMatrix.m12);
+		accessor.m20(jomlMatrix.m20);
+		accessor.m21(jomlMatrix.m21);
+		accessor.m22(jomlMatrix.m22);
+		return createMatrix;
+	}
+
+	public static AABB getBoundingBox(AbstractContraptionEntity contraptionEntity) {
+		AABB original = contraptionEntity.getBoundingBox();
+		if (ModListHelper.SABLE_LOADED) {
+			original = SableCompat.getBoundingBox(original, contraptionEntity);
+		}
+		return original;
+	}
+
+	public static AABB expandTowards(AbstractContraptionEntity contraptionEntity, AABB aabb, Vec3 expansion) {
+		AABB original = aabb.expandTowards(expansion);
+		if (ModListHelper.SABLE_LOADED) {
+			original = SableCompat.expandTowards(original, contraptionEntity);
+		}
+		return original;
+	}
+
+	public static Vec3 getAnchorVec(AbstractContraptionEntity contraptionEntity) {
+		Vec3 original = contraptionEntity.getAnchorVec();
+		if (ModListHelper.SABLE_LOADED) {
+			original = SableCompat.getAnchorVec(original, contraptionEntity);
+		}
+		return original;
+	}
+
+	public static Matrix3d asMatrix(AbstractContraptionEntity contraptionEntity, AbstractContraptionEntity.ContraptionRotationState rotation) {
+		Matrix3d original = rotation.asMatrix();
+		if (ModListHelper.SABLE_LOADED) {
+			original = SableCompat.asMatrix(original, contraptionEntity);
+		}
+		return original;
+	}
+
+	public static Vec3 getContactPointMotion(AbstractContraptionEntity contraptionEntity, Vec3 contactPoint) {
+		Vec3 original = contraptionEntity.getContactPointMotion(contactPoint);
+		if (ModListHelper.SABLE_LOADED) {
+			original = SableCompat.getContactPointMotion(original, contraptionEntity, contactPoint);
+		}
+		return original;
+	}
+
 }

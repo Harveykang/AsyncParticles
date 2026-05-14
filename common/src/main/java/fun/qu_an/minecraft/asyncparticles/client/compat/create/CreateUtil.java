@@ -4,7 +4,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,18 +15,20 @@ import java.util.Map;
 
 @SuppressWarnings("unused")
 public class CreateUtil {
+	public static final float LENGTH_SQR_EPSILON = 0.01f;
+
 	@ExpectPlatform
-	public static Map<Integer, WeakReference<Entity>> loadedContraptions(LevelAccessor level) {
+	public static Map<Integer, WeakReference<Entity>> loadedContraptions(Level level) {
 		throw new AssertionError();
 	}
 
 	@ExpectPlatform
-	public static Collection<WeakReference<Entity>> contraptions(LevelAccessor level) {
+	public static Collection<WeakReference<Entity>> contraptions(Level level) {
 		throw new AssertionError();
 	}
 
 	@ExpectPlatform
-	public static Iterator<Entity> forEachContraption(LevelAccessor level) {
+	public static Iterator<Entity> forEachContraption(Level level) {
 		throw new AssertionError();
 	}
 

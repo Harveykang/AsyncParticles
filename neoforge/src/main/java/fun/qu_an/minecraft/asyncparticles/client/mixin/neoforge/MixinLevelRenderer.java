@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.neoforge;
 
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
@@ -26,7 +27,7 @@ public abstract class MixinLevelRenderer {
 										  float partialTick,
 										  Frustum frustum,
 										  Predicate<ParticleRenderType> predicate,
-										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+										  @Share(namespace = AsyncParticlesClient.MOD_ID, value = "internalRenderingMode")
 										  LocalIntRef irm) {
 		switch (irm.get()) {
 			case SYNC -> AsyncRenderBehavior.INSTANCE.endAll(partialTick, camera, lightTexture, false);
@@ -42,7 +43,7 @@ public abstract class MixinLevelRenderer {
 										  float partialTick,
 										  Frustum frustum,
 										  Predicate<ParticleRenderType> predicate,
-										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+										  @Share(namespace = AsyncParticlesClient.MOD_ID, value = "internalRenderingMode")
 										  LocalIntRef irm) {
 		switch (irm.get()) {
 			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.INSTANCE.endOpaque(lightTexture, camera, partialTick, false);
@@ -61,7 +62,7 @@ public abstract class MixinLevelRenderer {
 										  float partialTick,
 										  Frustum frustum,
 										  Predicate<ParticleRenderType> predicate,
-										  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+										  @Share(namespace = AsyncParticlesClient.MOD_ID, value = "internalRenderingMode")
 										  LocalIntRef irm) {
 
 		switch (irm.get()) {

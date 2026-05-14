@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.compat.fabric.iris;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -31,7 +32,7 @@ public abstract class MixinLevelRenderer {
 									  Matrix4f projectionMatrix,
 									  CallbackInfo ci,
 									  @Local(ordinal = 0) float partialTick,
-									  @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+									  @Share(namespace = AsyncParticlesClient.MOD_ID, value = "internalRenderingMode")
 									  LocalIntRef irm) {
 		switch (irm.get()) {
 			case MIXED_SYNC -> AsyncRenderBehavior.INSTANCE.endOpaque(lightTexture, camera, partialTick, false);
@@ -50,7 +51,7 @@ public abstract class MixinLevelRenderer {
 												Matrix4f projectionMatrix,
 												CallbackInfo ci,
 												@Local(ordinal = 0) float partialTick,
-												@Share(namespace = "asyncparticles", value = "internalRenderingMode")
+												@Share(namespace = AsyncParticlesClient.MOD_ID, value = "internalRenderingMode")
 												LocalIntRef irm) {
 		switch (irm.get()) {
 			case SYNC -> AsyncRenderBehavior.INSTANCE.endOpaque(lightTexture, camera, partialTick, false);
@@ -65,7 +66,7 @@ public abstract class MixinLevelRenderer {
 										 LightTexture lightTexture,
 										 Camera camera,
 										 float partialTick,
-										 @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+										 @Share(namespace = AsyncParticlesClient.MOD_ID, value = "internalRenderingMode")
 										 LocalIntRef irm) {
 		switch (irm.get()) {
 			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.INSTANCE.endTranslucent(lightTexture, camera, partialTick, false);

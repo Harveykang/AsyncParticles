@@ -276,6 +276,14 @@ class ClothConfigMenus {
 			.setSaveConsumer(newValue -> create$rainEffect = newValue)
 			.setRequirement(() -> ModListHelper.CREATE_LOADED)
 			.build());
+		createEntries.add(entryBuilder
+			.startIntField(Component.translatable("config.asyncparticles.mod-compat.create.tickRainBlockingRange"),
+				create$tickRainBlockingRange)
+			.setDefaultValue(defaultConfig.create.tickRainBlockingRange)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.create.tickRainBlockingRange.tooltip"))
+			.setSaveConsumer(newValue -> create$tickRainBlockingRange = newValue)
+			.setRequirement(() -> ModListHelper.CREATE_LOADED)
+			.build());
 
 		// Mixin
 		ClothConfigMixinMenus.addModCompatCategory(entryBuilder, mixinEntryBuilder, vsEntries, createEntries);

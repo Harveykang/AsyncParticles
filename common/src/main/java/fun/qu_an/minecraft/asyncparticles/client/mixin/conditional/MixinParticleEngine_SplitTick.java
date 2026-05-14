@@ -35,7 +35,7 @@ public abstract class MixinParticleEngine_SplitTick {
 										 Queue<?> queue,
 										 CallbackInfo ci,
 										 @Local IParticleRenderer renderer) {
-		AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.add(() -> {
+		AsyncTickBehavior.INSTANCE.particleOperations.add(() -> {
 			GpuParticleBehavior.GPU_PARTICLE_PHASE.set(true);
 			if (ConfigHelper.isTickAsync() &&
 				AsyncTickBehavior.INSTANCE.canTickInParallel(particleRenderType)) {
@@ -66,7 +66,7 @@ public abstract class MixinParticleEngine_SplitTick {
 	private void redirectScheduleTick(ParticleRenderType particleRenderType,
 									  Queue<?> queue,
 									  CallbackInfo ci) {
-		AsyncTickBehavior.INSTANCE.PARTICLE_OPERATIONS.add(() -> {
+		AsyncTickBehavior.INSTANCE.particleOperations.add(() -> {
 			if (ConfigHelper.isTickAsync() &&
 				AsyncTickBehavior.INSTANCE.canTickInParallel(particleRenderType)) {
 				asyncparticles$splitTickParticleList((Queue) queue);

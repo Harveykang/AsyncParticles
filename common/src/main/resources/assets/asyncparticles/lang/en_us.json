@@ -58,6 +58,8 @@
   "config.asyncparticles.category.mod-compat.create": "Create",
   "config.asyncparticles.mod-compat.create.rainEffect": "Rain Effect",
   "config.asyncparticles.mod-compat.create.rainEffect.tooltip": "Control when rain effects spawn\non Create contraptions.",
+  "config.asyncparticles.mod-compat.create.tickRainBlockingRange": "Range of Rain Blocking Calculation",
+  "config.asyncparticles.mod-compat.create.tickRainBlockingRange.tooltip": "Rain blocking access outside of this range(X/Z direction)\nare calculated using the slower fallback method.",
   "config.asyncparticles.category.mixin": "Mixin",
   "config.asyncparticles.mixin.tooltip": "Default entries can't be deleted.\n(Reset to default by removing all entries.)",
   "config.asyncparticles.mixin.particle.splitTick": "Split Vanilla Particle Ticking",

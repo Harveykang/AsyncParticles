@@ -8,8 +8,6 @@
     "minVersion": "0.5.0"
   },
   "client": [
-    "neoforge.MixinLevelRenderer",
-    "neoforge.MixinParticleEngine_Render",
     "compat.neoforge.create.AccessorMatrix3d",
     "compat.neoforge.create.InvokerContraptionCollider",
     "compat.neoforge.create.MixinAbstractContraptionEntity",
@@ -17,16 +15,18 @@
     "compat.neoforge.create.MixinAirCurrent",
     "compat.neoforge.create.MixinClientLevel",
     "compat.neoforge.create.MixinLevelRenderer_Rain",
+    "compat.neoforge.create.MixinLevelRenderer_Rain_Early",
     "compat.neoforge.create.MixinParticle",
     "compat.neoforge.create.MixinParticle_LightCache",
     "compat.neoforge.epicfight.MixinCustomModelParticle",
-    "compat.neoforge.sable_create.MixinCollideUtil",
     "compat.neoforge.sable_create.MixinParticle_LightCache",
     "compat.neoforge.simple_weather.MixinRainParticle",
     "compat.neoforge.simple_weather.MixinSimpleWeather$NeoBus",
     "compat.neoforge.simple_weather_create.MixinSimpleWeather$NeoBus",
     "compat.neoforge.weather2.MixinEntityRotFX",
-    "compat.neoforge.weather2_create.MixinEntityRotFX"
+    "compat.neoforge.weather2_create.MixinEntityRotFX",
+    "neoforge.MixinLevelRenderer",
+    "neoforge.MixinParticleEngine_Render"
   ],
   "injectors": {
     "defaultRequire": 1
