@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.PoseStack;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -45,7 +46,7 @@ public abstract class MixinLevelRenderer {
 								   LightTexture lightTexture,
 								   Matrix4f matrix4f,
 								   CallbackInfo ci,
-								   @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+								   @Share(namespace = AsyncParticlesClient.MOD_ID, value = "internalRenderingMode")
 								   LocalIntRef irm) {
 		GpuParticleBehavior.INSTANCE.beginFrame();
 		if (this.capturedFrustum != null) {

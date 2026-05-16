@@ -7,7 +7,9 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.ContraptionRainBlocking;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.Camera;
@@ -22,18 +24,15 @@ import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = LevelRenderer.class, priority = 1500)
+@Mixin(value = LevelRenderer.class, priority = 5010)
 public class MixinLevelRenderer_Rain {
 	@Shadow
 	private @Nullable ClientLevel level;
-	@Unique
-	private static final long asyncparticles$MASK = BlockPos.asLong(-1, 0, -1);
 
 	@Inject(method = "tickRain",
 		slice = @Slice(
@@ -42,45 +41,44 @@ public class MixinLevelRenderer_Rain {
 		, at = @At(value = "CONSTANT", ordinal = 0, args = "intValue=0"))
 	private void onTickRain(Camera camera,
 	                        CallbackInfo ci,
-	                        @Local(ordinal = 0) int range,
 	                        @Local(ordinal = 0) BlockPos blockpos) {
 		ContraptionRainBlocking.tickRainBlocking(
 			level,
-			blockpos.getX() - range,
-			blockpos.getZ() - range,
-			blockpos.getX() + range,
-			blockpos.getZ() + range);
+			blockpos.getX(),
+			blockpos.getZ(),
+			ConfigHelper.getTickRainBlockingRange());
 	}
 
 	@Inject(method = "tickRain", at = @At(value = "HEAD"))
 	private void onTickRain(Camera camera,
 	                        CallbackInfo ci,
-	                        @Share("rainPos") LocalRef<BlockPos.MutableBlockPos> rainPos) {
-		rainPos.set(new BlockPos.MutableBlockPos());
+	                        @Share("rainPos") LocalRef<BlockPos.MutableBlockPos> rainPosRef) {
+		rainPosRef.set(new BlockPos.MutableBlockPos());
 	}
 
 	@ModifyExpressionValue(method = "tickRain", at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/world/level/LevelReader;getHeightmapPos(Lnet/minecraft/world/level/levelgen/Heightmap$Types;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/core/BlockPos;"))
-	private BlockPos wrapHeightmapPos(BlockPos original,
-	                                  @Share("hasNoContraption") LocalBooleanRef hasNoContraption,
-	                                  @Share("rainPos") LocalRef<BlockPos.MutableBlockPos> rainPos) {
-		int i = Mth.ceil(ContraptionRainBlocking.getAttachedContractionHeightMap(level)
-			.get(original.asLong() & asyncparticles$MASK));
-		boolean b = original.getY() > i;
-		hasNoContraption.set(b);
+	private BlockPos wrapHeightmapPos(BlockPos blockPos,
+	                                  @Share("rainPos") LocalRef<BlockPos.MutableBlockPos> rainPosRef,
+	                                  @Share(value = "contraptionSurfaceY", namespace = AsyncParticlesClient.MOD_ID) LocalIntRef contraptionSurfaceY) {
+		int i = Mth.ceil(ContraptionRainBlocking.getHeight(level, blockPos));
+		boolean b = blockPos.getY() > i;
 		if (b) {
-			return original;
+			return blockPos;
 		}
-		BlockPos.MutableBlockPos pos = rainPos.get();
-		pos.set(original.getX(), i, original.getZ());
-		return pos;
+		contraptionSurfaceY.set(i); // must set after all other mods' injections.
+		// record the contraption rain height,
+		// we must compare it with the finally calculated rain height by other mods
+		BlockPos.MutableBlockPos rainPos = rainPosRef.get();
+		rainPos.set(blockPos.getX(), i, blockPos.getZ());
+		return rainPos;
 	}
 
 	@WrapOperation(method = "renderSnowAndRain", at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/world/level/Level;getHeight(Lnet/minecraft/world/level/levelgen/Heightmap$Types;II)I"))
 	private int wrapGetHeight(Level instance, Heightmap.Types types, int i, int j, Operation<Integer> original) {
-		return Math.max(original.call(instance, types, i, j), Mth.ceil(ContraptionRainBlocking.getAttachedContractionHeightMap(level)
-			.get(BlockPos.asLong(i, 0, j))));
+		return Math.max(original.call(instance, types, i, j), Mth.floor(ContraptionRainBlocking.getHeight(level, i, j)));
+		// compare this with the finally calculated rain height by other mods
 	}
 
 	@WrapWithCondition(method = "tickRain", at = @At(value = "INVOKE",
@@ -94,13 +92,12 @@ public class MixinLevelRenderer_Rain {
 	                                double h,
 	                                double i,
 	                                @Local(ordinal = 1) BlockPos blockpos1,
-	                                @Share("hasNoContraption") LocalBooleanRef hasNoContraption) {
+	                                @Share(value = "hasNoContraption", namespace = AsyncParticlesClient.MOD_ID) LocalBooleanRef hasNoContraption) {
 		// If the block is not a contraption block, or the contraption block is not moving,
 		// or the contraption y less than rain y, then add the particle
 		return hasNoContraption.get()
 			|| switch (ConfigHelper.getCreateRainEffect()) {
-			case STATIONARY -> !ContraptionRainBlocking.getAttachedContractionMovingMap(level)
-				.get(blockpos1.asLong() & asyncparticles$MASK);
+			case STATIONARY -> !ContraptionRainBlocking.isMoving(level, blockpos1);
 			case NONE -> false;
 			default -> true;
 		};

@@ -13,6 +13,9 @@ description = '''
 '''
 logoFile = "assets/asyncparticles/icon.png"
 
+[modproperties.asyncparticles]
+incompatibleMods = ["particle_core"]
+
 [[dependencies.asyncparticles]]
 modId = "forge"
 mandatory = true
@@ -24,12 +27,5 @@ side = "CLIENT"
 modId = "minecraft"
 mandatory = true
 versionRange = "[1.20.1]"
-ordering = "NONE"
-side = "CLIENT"
-
-[[dependencies.asyncparticles]]
-modId = "effective"
-mandatory = false
-versionRange = "[1.0.6,)"
 ordering = "NONE"
 side = "CLIENT"

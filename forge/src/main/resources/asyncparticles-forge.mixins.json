@@ -5,11 +5,13 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "asyncparticles-forge-refmap.json",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.forge.AsyncParticlesMixinPluginForge",
+  "mixinextras": {
+    "minVersion": "0.5.0"
+  },
   "client": [
-    "forge.MixinParticleEngine_Render",
     "compat.forge.epicacg.MixinAsyncRenderer",
-    "compat.forge.epicfight.MixinEpicFightRenderTypes",
     "compat.forge.epicfight.MixinCustomModelParticle",
+    "compat.forge.epicfight.MixinEpicFightRenderTypes",
     "compat.forge.flerovium.MixinSingleQuadParticleMixin",
     "compat.forge.fluffy_fur.MixinShadersIntegration",
     "compat.forge.gateways.MixinGatewayParticle",
@@ -18,7 +20,8 @@
     "compat.forge.weather2.MixinClientTickHandler",
     "compat.forge.weather2.MixinEntityRotFX",
     "compat.forge.weather2_create.MixinEntityRotFX",
-    "compat.forge.weather2_vs.MixinEntityRotFX"
+    "compat.forge.weather2_vs.MixinEntityRotFX",
+    "forge.MixinParticleEngine_Render"
   ],
   "injectors": {
     "defaultRequire": 1

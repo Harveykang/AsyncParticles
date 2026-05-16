@@ -131,7 +131,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 				realCullMode = null;
 				bufferBuilder = FakeBufferBuilder.INSTANCE;
 			} else if ((bufferBuilder = AsyncRenderBehavior.INSTANCE.beginBufferBuilder(particleRenderType, textureManager)) ==
-					   FakeBufferBuilder.INSTANCE) {
+				FakeBufferBuilder.INSTANCE) {
 				realCullMode = particleCullingMode;
 				// if irisEarlyOpaquePhase, we render custom particles in AsyncRenderer.irisCustom()
 				syncParticles = irisEarlyOpaquePhase ? Collections.emptyList() : queue;

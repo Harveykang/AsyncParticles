@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
@@ -30,7 +31,7 @@ public abstract class MixinLevelRenderer_Late {
 									LightTexture lightTexture,
 									Matrix4f matrix4f,
 									CallbackInfo ci,
-									@Share(namespace = "asyncparticles", value = "internalRenderingMode")
+									@Share(namespace = AsyncParticlesClient.MOD_ID, value = "internalRenderingMode")
 									LocalIntRef irm) {
 		if (irm.get() == DELAYED_ASYNC) {
 			PoseStack stack = RenderSystem.getModelViewStack();

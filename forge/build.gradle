@@ -45,8 +45,8 @@ configurations {
 dependencies {
     compileOnly(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:0.3.7-beta.1"))
     include(implementation("com.github.bawnorton.mixinsquared:mixinsquared-forge:0.3.7-beta.1"))
-    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
-    include(implementation("io.github.llamalad7:mixinextras-forge:0.4.1"))
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.3"))
+    include(implementation("io.github.llamalad7:mixinextras-forge:0.5.3"))
 
     forge "net.minecraftforge:forge:$rootProject.forge_version"
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
@@ -69,7 +69,7 @@ dependencies {
     modCompileOnly "maven.modrinth:flerovium:1.2.18"
 
     /* Valkyrien Skies */
-    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.9"
+    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.4.11"
 
     /* Particle Rain */
     modLocalRuntime("maven.modrinth:particle-rain:v4-beta.10+$minecraft_version-neoforge")
@@ -157,7 +157,7 @@ dependencies {
     modLocalRuntime "maven.modrinth:flerovium:1.2.18"
 
     modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'
-    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.9"
+    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.4.11"
     modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.6.3'
 //    modLocalRuntime "maven.modrinth:pretty-rain:yIvOKPKZ" // 1.1.3
     modLocalRuntime "maven.modrinth:particle-rain:v4-beta.10+1.20.1-forge"
@@ -165,12 +165,12 @@ dependencies {
     modLocalRuntime("dev.engine-room.flywheel:flywheel-forge-${minecraft_version}:${forge_flywheel_version}")
     modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
     modLocalRuntime("com.tterrag.registrate:Registrate:${forge_registrate_version}")
-    modLocalRuntime "maven.modrinth:epic-fight:20.12.5"
-    modLocalRuntime "curse.maven:gateway-to-eternity-417802:5703251"
-    modLocalRuntime "curse.maven:epic-acg-665625:6106647"
-    modLocalRuntime "maven.modrinth:draconic-evolution:3.1.2.604"
-    modLocalRuntime "maven.modrinth:curios:5.12.1+1.20.1"
-    modLocalRuntime "curse.maven:weather2-237746:5244118" // 2.8.3
+//    modLocalRuntime "maven.modrinth:epic-fight:20.12.5"
+//    modLocalRuntime "curse.maven:gateway-to-eternity-417802:5703251"
+//    modLocalRuntime "curse.maven:epic-acg-665625:6106647"
+//    modLocalRuntime "maven.modrinth:draconic-evolution:3.1.2.604"
+//    modLocalRuntime "maven.modrinth:curios:5.12.1+1.20.1"
+//    modLocalRuntime "curse.maven:weather2-237746:5244118" // 2.8.3
 }
 
 processResources {

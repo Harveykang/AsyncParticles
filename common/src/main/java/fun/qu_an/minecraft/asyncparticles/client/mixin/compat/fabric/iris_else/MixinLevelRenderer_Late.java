@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.compat.fabric.iris_else;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.vertex.PoseStack;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
@@ -27,7 +28,7 @@ public abstract class MixinLevelRenderer_Late {
 										 LightTexture lightTexture,
 										 Camera camera,
 										 float partialTick,
-										 @Share(namespace = "asyncparticles", value = "internalRenderingMode")
+										 @Share(namespace = AsyncParticlesClient.MOD_ID, value = "internalRenderingMode")
 										 LocalIntRef irm) {
 		switch (irm.get()) {
 			case SYNC -> AsyncRenderBehavior.INSTANCE.endAll(poseStack, partialTick, camera, lightTexture, false);

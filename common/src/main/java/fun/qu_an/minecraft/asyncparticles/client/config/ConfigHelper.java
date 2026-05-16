@@ -50,16 +50,16 @@ public class ConfigHelper {
 		return create$rainEffect;
 	}
 
+	public static int getTickRainBlockingRange() {
+		return create$tickRainBlockingRange;
+	}
+
 	public static RainEffect getVSRainEffect() {
 		return AsyncParticlesConfig.valkyrienSkies$rainEffect;
 	}
 
 	public static int getParticleLimit() {
 		return particle$particleLimit;
-	}
-
-	public static boolean doCreateRainEffectsIfMoving() {
-		return create$rainEffect == RainEffect.ALWAYS;
 	}
 
 	public static int getRenderFailurePerSecondThreshold() {

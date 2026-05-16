@@ -106,8 +106,6 @@ public class ModListHelper {
 	public static final boolean FIGURA_LOADED = isModLoaded("figura");
 	/* Veil */
 	public static final boolean VEIL_LOADED = isModLoaded("veil");
-	/* Sable */
-	public static final boolean SABLE_LOADED = isModLoaded("sable");
 	/* Axiom */
 	public static final boolean AXIOM_LOADED = isModLoaded("axiom");
 	/* Particle Interactions */
@@ -151,7 +149,8 @@ public class ModListHelper {
 
 	@ExpectPlatform
 	public static boolean isDevelopmentEnvironment() {
-		throw new AssertionError();
+		ExceptionUtil.throwAssertionError();
+		return false;
 	}
 
 	public static boolean classExists(String className) {

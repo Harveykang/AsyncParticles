@@ -48,28 +48,28 @@ public class AsyncTickBehavior {
 	public static final String THREAD_PREFIX = "AsyncParticleTicker";
 	public static final AsyncTickBehavior INSTANCE = new AsyncTickBehavior();
 //	public final Map<ParticleRenderType, ByteBuffer> UNUPLOADED_BUFFERS = new ConcurrentHashMap<>();
-	private final Set<Class<? extends Particle>> SYNC_PARTICLE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
-	private final List<ParticleRenderType> PARALLELLED_RENDER_TYPES = new ArrayList<>(List.of(
+	private final Set<Class<? extends Particle>> syncParticleTypes = Collections.newSetFromMap(new IdentityHashMap<>());
+	private final List<ParticleRenderType> parallelledRenderTypes = new ArrayList<>(List.of(
 		ParticleRenderType.TERRAIN_SHEET,
 		ParticleRenderType.PARTICLE_SHEET_OPAQUE,
 		ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT,
 		ParticleRenderType.PARTICLE_SHEET_LIT,
 		ParticleRenderType.NO_RENDER
 	));
-	private final Set<Particle> SYNC_PARTICLES = Collections.newSetFromMap(new IdentityHashMap<>());
-	public final List<Runnable> PARTICLE_OPERATIONS = new ArrayList<>();
+	private final Set<Particle> syncParticles = Collections.newSetFromMap(new IdentityHashMap<>());
+	public final List<Runnable> particleOperations = new ArrayList<>();
 	private final AtomicBoolean cancelled = new AtomicBoolean(false);
 	private boolean shouldTickParticles = false;
 	public CompletableFuture<Void> particleCleanup;
-	private final List<EndTickEvent> SEQUENCED_END_TICK_EVENTS = new ArrayList<>();
-	private final List<EndTickEvent> PARALLEL_END_TICK_EVENTS = new ArrayList<>();
-	private final List<EndTickOperation> END_TICK_OPERATIONS = new ArrayList<>();
+	private final List<EndTickEvent> sequencedEndTickEvents = new ArrayList<>();
+	private final List<EndTickEvent> parallelEndTickEvents = new ArrayList<>();
+	private final List<EndTickOperation> endTickOperationList = new ArrayList<>();
 	private CompletableFuture<Void> particleFuture;
 	private boolean debug_cancelled = false;
 	private Consumer<String> debugConsumer;
 	private boolean shouldReload;
-	public final ForkJoinPool EXECUTOR;
-	private final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
+	public final ForkJoinPool executor;
+	private final ExceptionTracker<Object> exceptionTracker = new ExceptionTracker<>(
 		() -> 5000,
 		ConfigHelper::getTickFailurePerSecondThreshold
 	);
@@ -77,7 +77,7 @@ public class AsyncTickBehavior {
 
 	{
 		AtomicInteger workerCount = new AtomicInteger(1);
-		EXECUTOR = new ForkJoinPool(THREADS, (forkJoinPool) -> {
+		executor = new ForkJoinPool(THREADS, (forkJoinPool) -> {
 			ForkJoinWorkerThread forkJoinWorkerThread = new AsyncTickerThread(forkJoinPool);
 			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());
 			forkJoinWorkerThread.setDaemon(true);
@@ -130,7 +130,7 @@ public class AsyncTickBehavior {
 					futures[0] = Utils.NULL_FUTURE;
 				} else {
 					futures[0] = CompletableFuture.runAsync(() -> doEmittersRemoveIf(trackingEmitters),
-						EXECUTOR);
+						executor);
 				}
 				int k = 1;
 				for (Queue<Particle> particles : queues1) {
@@ -139,7 +139,7 @@ public class AsyncTickBehavior {
 						continue;
 					}
 					futures[k++] = CompletableFuture.runAsync(() -> doRemoveIf(particles),
-						EXECUTOR);
+						executor);
 				}
 				particleCleanup = CompletableFuture.allOf(futures);
 			}
@@ -152,8 +152,8 @@ public class AsyncTickBehavior {
 			((IterationSafeEvictingQueue<? extends Particle>) queue)
 				.parallelRemoveIf(particle -> this.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()),
 					ConfigHelper.isParallelQueueEviction(),
-					this.THREADS,
-					this.EXECUTOR);
+					THREADS,
+					this.executor);
 		} else {
 			queue.removeIf(particle -> this.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()));
 		}
@@ -164,8 +164,8 @@ public class AsyncTickBehavior {
 			((IterationSafeEvictingQueue<? extends TrackingEmitter>) queue)
 				.parallelRemoveIf(particle -> !particle.isAlive(),
 					ConfigHelper.isParallelQueueEviction(),
-					this.THREADS,
-					this.EXECUTOR);
+					THREADS,
+					this.executor);
 		} else {
 			queue.removeIf(particle -> this.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()));
 		}
@@ -196,11 +196,11 @@ public class AsyncTickBehavior {
 		if (!ConfigHelper.isTickAsync()) {
 			tryReload();
 			tryDebug();
-			END_TICK_OPERATIONS.forEach(Runnable::run);
-			END_TICK_OPERATIONS.clear();
+			endTickOperationList.forEach(Runnable::run);
+			endTickOperationList.clear();
 			if (levelRunning) {
-				SEQUENCED_END_TICK_EVENTS.forEach(Runnable::run);
-				PARALLEL_END_TICK_EVENTS.forEach(Runnable::run);
+				sequencedEndTickEvents.forEach(Runnable::run);
+				parallelEndTickEvents.forEach(Runnable::run);
 			}
 			return;
 		}
@@ -222,7 +222,7 @@ public class AsyncTickBehavior {
 		// tick last, schedule async tasks
 		tryReload();
 		tryDebug();
-		CompletableFuture<Void> particleFuture = CompletableFuture.runAsync(() -> timeUsageNano.setRelease(System.nanoTime()), EXECUTOR);
+		CompletableFuture<Void> particleFuture = CompletableFuture.runAsync(() -> timeUsageNano.setRelease(System.nanoTime()), executor);
 		CompletableFuture<Void> sequencedTaskFuture = particleFuture;
 		CompletableFuture<?> parallelEventsFuture = particleFuture;
 		CompletableFuture<?> parallelOperationsFuture = particleFuture;
@@ -230,11 +230,11 @@ public class AsyncTickBehavior {
 		if (levelRunning) {
 			sequencedTaskFuture = sequencedTaskFuture.thenRun(() -> {
 				// 每 tick 结束时都要执行的固定事件
-				for (Runnable endTickEvent : SEQUENCED_END_TICK_EVENTS) {
+				for (Runnable endTickEvent : sequencedEndTickEvents) {
 					try {
 						endTickEvent.run();
 					} catch (Exception e) {
-						if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickEvent, e)) {
+						if (!isTolerable(e) || exceptionTracker.addException(endTickEvent, e)) {
 							throw e;
 						}
 					}
@@ -243,12 +243,12 @@ public class AsyncTickBehavior {
 			parallelEventsFuture = particleFuture.thenCompose(v -> {
 				// 每 tick 结束时都要执行的固定事件，可在 tick 间的任意时刻执行
 				@SuppressWarnings("rawtypes")
-				CompletableFuture[] completableFutures = new CompletableFuture[PARALLEL_END_TICK_EVENTS.size()];
+				CompletableFuture[] completableFutures = new CompletableFuture[parallelEndTickEvents.size()];
 				int j = 0;
-				for (Runnable endTickEvent : PARALLEL_END_TICK_EVENTS) {
-					completableFutures[j++] = CompletableFuture.runAsync(endTickEvent, EXECUTOR)
+				for (Runnable endTickEvent : parallelEndTickEvents) {
+					completableFutures[j++] = CompletableFuture.runAsync(endTickEvent, executor)
 						.exceptionally(e -> {
-							if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickEvent, e)) {
+							if (!isTolerable(e) || exceptionTracker.addException(endTickEvent, e)) {
 								throw toThrowDirectly(e);
 							}
 							return null;
@@ -259,7 +259,7 @@ public class AsyncTickBehavior {
 		}
 
 		// end tick operations
-		List<EndTickOperation> endTickOperations = END_TICK_OPERATIONS;
+		List<EndTickOperation> endTickOperations = endTickOperationList;
 		if (!endTickOperations.isEmpty()) {
 			EndTickOperation[] endTickTasks = endTickOperations.toArray(new EndTickOperation[0]);
 			endTickOperations.clear();
@@ -269,7 +269,7 @@ public class AsyncTickBehavior {
 						try {
 							endTickTask.run();
 						} catch (Exception e) {
-							if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickTask.getId(), e)) {
+							if (!isTolerable(e) || exceptionTracker.addException(endTickTask.getId(), e)) {
 								throw e;
 							}
 						}
@@ -282,9 +282,9 @@ public class AsyncTickBehavior {
 				int j = 0;
 				for (EndTickOperation endTickTask : endTickTasks) {
 					if (endTickTask.isParallel()) {
-						futures[j++] = CompletableFuture.runAsync(endTickTask, EXECUTOR)
+						futures[j++] = CompletableFuture.runAsync(endTickTask, executor)
 							.exceptionally(e -> {
-								if (!isTolerable(e) || EXCEPTION_TRACKER.addException(endTickTask.getId(), e)) {
+								if (!isTolerable(e) || exceptionTracker.addException(endTickTask.getId(), e)) {
 									throw toThrowDirectly(e);
 								}
 								return null;
@@ -297,7 +297,7 @@ public class AsyncTickBehavior {
 		sequencedTaskFuture = CompletableFuture.allOf(sequencedTaskFuture, parallelEventsFuture, parallelOperationsFuture);
 
 		// tick particles
-		List<Runnable> particleOperations = PARTICLE_OPERATIONS;
+		List<Runnable> particleOperations = this.particleOperations;
 		if (!particleOperations.isEmpty()) {
 			if (!levelRunning) {
 				particleOperations.clear();
@@ -305,14 +305,14 @@ public class AsyncTickBehavior {
 				Runnable[] particleTasks = particleOperations.toArray(new Runnable[0]);
 				particleOperations.clear();
 				Function<Void, CompletableFuture<Void>> function = v -> CompletableFuture.allOf(Arrays.stream(particleTasks)
-					.map(runnable -> CompletableFuture.runAsync(runnable, EXECUTOR))
+					.map(runnable -> CompletableFuture.runAsync(runnable, executor))
 					.toArray(CompletableFuture[]::new)).exceptionally(this::tickExceptionally);
 				sequencedTaskFuture = sequencedTaskFuture.thenCompose(function);
 			}
 		}
 
 		this.particleFuture = sequencedTaskFuture
-			.thenRunAsync(() -> timeUsageNano.setRelease(System.nanoTime() - timeUsageNano.getAcquire()), EXECUTOR);
+			.thenRunAsync(() -> timeUsageNano.setRelease(System.nanoTime() - timeUsageNano.getAcquire()), executor);
 
 		profiler.pop();
 	}
@@ -348,7 +348,7 @@ public class AsyncTickBehavior {
 		}
 		boolean tolerable = isTolerable(t);
 		Class<? extends Particle> particleClass = ((ParticleAddon) particle).asyncparticles$getRealClass();
-		if (tolerable && !EXCEPTION_TRACKER.addException(particleClass, t)) {
+		if (tolerable && !exceptionTracker.addException(particleClass, t)) {
 			return;
 		}
 		if (ConfigHelper.markSyncIfTickFailed()) {
@@ -412,13 +412,13 @@ public class AsyncTickBehavior {
 	/* Sync Ticking */
 
 	public void tickSyncParticles() {
-		if ((!isShouldTickParticles() && ConfigHelper.isTickAsync()) || SYNC_PARTICLES.isEmpty()) {
+		if ((!isShouldTickParticles() && ConfigHelper.isTickAsync()) || syncParticles.isEmpty()) {
 			return;
 		}
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 		boolean enableLightCache = ConfigHelper.particleLightCache();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
-		for (Iterator<Particle> iterator = SYNC_PARTICLES.iterator(); iterator.hasNext(); ) {
+		for (Iterator<Particle> iterator = syncParticles.iterator(); iterator.hasNext(); ) {
 			Particle particle = iterator.next();
 			try {
 				particleEngine.tickParticle(particle);
@@ -444,18 +444,18 @@ public class AsyncTickBehavior {
 	}
 
 	public void markAsSync(Class<? extends Particle> aClass) {
-		synchronized (SYNC_PARTICLE_TYPES) {
-			SYNC_PARTICLE_TYPES.add(aClass);
+		synchronized (syncParticleTypes) {
+			syncParticleTypes.add(aClass);
 		}
 	}
 
 	public boolean shouldSync(Class<?> aClass) {
-		return SYNC_PARTICLE_TYPES.contains(aClass);
+		return syncParticleTypes.contains(aClass);
 	}
 
 	public void recordSync(Particle particle) {
-		synchronized (SYNC_PARTICLES) {
-			SYNC_PARTICLES.add(particle);
+		synchronized (syncParticles) {
+			syncParticles.add(particle);
 		}
 	}
 
@@ -487,9 +487,9 @@ public class AsyncTickBehavior {
 			sync particle types: %s,"""
 			.formatted(ConfigHelper.isTickAsync() ? timeUsageNano.getAcquire() / 1000000d : Double.NaN,
 				debug_cancelled,
-				PARTICLE_OPERATIONS.size(),
-				SEQUENCED_END_TICK_EVENTS + PARALLEL_END_TICK_EVENTS.toString(),
-				END_TICK_OPERATIONS,
+				particleOperations.size(),
+				sequencedEndTickEvents + parallelEndTickEvents.toString(),
+				endTickOperationList,
 				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
 					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
@@ -502,8 +502,8 @@ public class AsyncTickBehavior {
 						return queue.size() + "/" + ((IterationSafeEvictingQueue<TextureSheetParticle>) queue).arraySize();
 					})),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
-				SYNC_PARTICLES.size(),
-				SYNC_PARTICLE_TYPES.stream().map(Class::getName).toList())));
+				syncParticles.size(),
+				syncParticleTypes.stream().map(Class::getName).toList())));
 		debugConsumer = null;
 	}
 
@@ -569,10 +569,8 @@ public class AsyncTickBehavior {
 							GpuParticleBehavior.INSTANCE.createRenderer(k);
 							return ParticleHelper.newParticleQueue();
 						}).add(tsp);
-						((ParticleAddon) tsp).asyncparticles$setGpu(true);
 					} else {
 						newCpuQueue.add(p);
-						((ParticleAddon) p).asyncparticles$setGpu(false);
 					}
 				});
 				newCpuParticleMap.put(key, newCpuQueue);
@@ -582,10 +580,7 @@ public class AsyncTickBehavior {
 			if (!tickAsync || !enableGpuAcceleration) {
 				GpuParticleBehavior.INSTANCE.gpuParticles.forEach((t, oldGpuQueue) -> {
 					Queue<Particle> cpuQueue = newCpuParticleMap.computeIfAbsent(t, k -> ParticleHelper.newParticleQueue());
-					oldGpuQueue.forEach(p -> {
-						((ParticleAddon) p).asyncparticles$setGpu(false);
-						cpuQueue.add(p);
-					});
+					cpuQueue.addAll(oldGpuQueue);
 				});
 				GpuParticleBehavior.INSTANCE.gpuParticles.clear();
 			} else {
@@ -621,9 +616,9 @@ public class AsyncTickBehavior {
 		}
 		cancelled.setOpaque(false);
 		timeUsageNano.set(0L);
-		PARTICLE_OPERATIONS.clear();
-		END_TICK_OPERATIONS.clear();
-		SYNC_PARTICLES.clear();
+		particleOperations.clear();
+		endTickOperationList.clear();
+		syncParticles.clear();
 	}
 
 	/* Events */
@@ -631,15 +626,15 @@ public class AsyncTickBehavior {
 	@ApiStatus.Internal
 	public void registerEvent(EndTickEvent task) {
 		if (task.isParallel()) {
-			synchronized (PARALLEL_END_TICK_EVENTS) {
-				PARALLEL_END_TICK_EVENTS.add(task);
+			synchronized (parallelEndTickEvents) {
+				parallelEndTickEvents.add(task);
 				// also sort the unordered events. To determine the order of submission of asynchronous tasks
-				PARALLEL_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
+				parallelEndTickEvents.sort(Comparator.comparingInt(EndTickEvent::getPriority));
 			}
 		} else {
-			synchronized (SEQUENCED_END_TICK_EVENTS) {
-				SEQUENCED_END_TICK_EVENTS.add(task);
-				SEQUENCED_END_TICK_EVENTS.sort(Comparator.comparingInt(EndTickEvent::getPriority));
+			synchronized (sequencedEndTickEvents) {
+				sequencedEndTickEvents.add(task);
+				sequencedEndTickEvents.sort(Comparator.comparingInt(EndTickEvent::getPriority));
 			}
 		}
 	}
@@ -650,9 +645,9 @@ public class AsyncTickBehavior {
 			return;
 		}
 		if (ThreadUtil.isOnRenderThread()) {
-			END_TICK_OPERATIONS.add(task);
+			endTickOperationList.add(task);
 		} else {
-			ThreadUtil.enqueueClientTask(() -> END_TICK_OPERATIONS.add(task));
+			ThreadUtil.enqueueClientTask(() -> endTickOperationList.add(task));
 		}
 	}
 
@@ -661,13 +656,13 @@ public class AsyncTickBehavior {
 	}
 
 	public void addTickInParallel(ParticleRenderType particleRenderType) {
-		synchronized (PARALLELLED_RENDER_TYPES) {
-			PARALLELLED_RENDER_TYPES.add(particleRenderType);
+		synchronized (parallelledRenderTypes) {
+			parallelledRenderTypes.add(particleRenderType);
 		}
 	}
 
 	public boolean canTickInParallel(ParticleRenderType particleRenderType) {
-		return PARALLELLED_RENDER_TYPES.contains(particleRenderType);
+		return parallelledRenderTypes.contains(particleRenderType);
 	}
 
 	public class AsyncTickerThread extends AsyncParticleWorkerThread {

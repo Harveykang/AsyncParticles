@@ -10,8 +10,6 @@ public interface MixinVertexConsumer {
 	/**
 	 * @author Harvey_Husky
 	 * @reason Fix negative particle alpha.
-	 * I have no idea why 'default' and 'private' injections are causing crash in different mixin environments (on Forge).
-	 * And it has NEVER crashed my game, either on Forge or Fabric. So I have to use '@Overwrite' instead.
 	 */
 	@Overwrite
 	default VertexConsumer color(float red, float green, float blue, float alpha) {

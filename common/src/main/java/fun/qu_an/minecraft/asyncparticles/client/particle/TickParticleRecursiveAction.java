@@ -17,51 +17,70 @@ public class TickParticleRecursiveAction extends RecursiveAction {
 	private static final int MAX_DEPTH = (int) Math.round(Math.log(HashCommon.nextPowerOfTwo(AsyncTickBehavior.THREADS)) / Math.log(2)) + 2;
 	private final Spliterator<Particle> spliterator;
 	private final int depth;
+	private final boolean isGpu;
 
-	public TickParticleRecursiveAction(Spliterator<Particle> spliterator) {
-		this(spliterator, 0);
+	public TickParticleRecursiveAction(Spliterator<Particle> spliterator, boolean isGpu) {
+		this(spliterator, 0, isGpu);
 	}
 
-	private TickParticleRecursiveAction(Spliterator<Particle> spliterator, int depth) {
+	private TickParticleRecursiveAction(Spliterator<Particle> spliterator, int depth, boolean isGpu) {
 		this.spliterator = spliterator;
 		this.depth = depth;
+		this.isGpu = isGpu;
 	}
 
 	@Override
 	public void compute() {
 		Spliterator<Particle> sub;
 		if (spliterator.estimateSize() > 192 && depth < MAX_DEPTH && (sub = spliterator.trySplit()) != null) {
-			ForkJoinTask<Void> left = new TickParticleRecursiveAction(sub, depth + 1).fork();
-			ForkJoinTask<Void> right = new TickParticleRecursiveAction(spliterator, depth + 1).fork();
+			ForkJoinTask<Void> left = new TickParticleRecursiveAction(sub, depth + 1, isGpu).fork();
+			ForkJoinTask<Void> right = new TickParticleRecursiveAction(spliterator, depth + 1, isGpu).fork();
 			left.join();
 			right.join();
 		} else {
 			boolean enableLightCache = ConfigHelper.particleLightCache();
-			ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
+			ParticleCullingMode particleCullingMode = isGpu ?
+				ParticleCullingMode.DISABLED :
+				ConfigHelper.getParticleCullingMode();
 			boolean forceDone = ConfigHelper.forceDoneParticleTick();
 			ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 			spliterator.forEachRemaining(particle -> {
 				if (AsyncTickBehavior.INSTANCE.isCancelled() && !forceDone) {
 					return;
 				}
-				if (!((ParticleAddon) particle).asyncparticles$isTicked()) {
-					if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
-						AsyncTickBehavior.INSTANCE.recordSync(particle);
-						return;
-					}
+				if (!particle.isAlive()) {
+					return;
+				}
+				ParticleAddon particleAddon = (ParticleAddon) particle;
+				boolean shouldTick;
+				boolean shouldRefresh;
+				if (particleAddon.asyncparticles$isTicked()) {
+					// Skip the first tick after enqueued that the particle is added to the queue.
+					// only GPU particles don't skip the first tick, but skip the first refresh.
+					// skip the first refresh will fix black destruction gpu particles.
+					shouldTick = isGpu;
+					shouldRefresh = !isGpu && enableLightCache;
+				} else if (particleAddon.asyncparticles$isTickSync()) {
+					AsyncTickBehavior.INSTANCE.recordSync(particle);
+					return;
+				} else {
+					shouldTick = true;
+					shouldRefresh = enableLightCache;
+				}
+				if (shouldTick) {
 					try {
 						particleEngine.tickParticle(particle);
 					} catch (Throwable t) {
 						AsyncTickBehavior.INSTANCE.onTickingParticleException(particle, t);
 					}
-					((ParticleAddon) particle).asyncparticles$setTicked();
+					particleAddon.asyncparticles$setTicked();
 				}
-				if (enableLightCache) {
+				if (shouldRefresh) {
 					((LightCachedParticleAddon) particle).asyncparticles$refresh();
 				}
 				switch (particleCullingMode) {
-					case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
-					case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
+					case ASYNC_AABB -> particleAddon.asyncparticles$tickAABBCulling();
+					case ASYNC_SPHERE -> particleAddon.asyncparticles$tickSphereCulling();
 				}
 			});
 		}

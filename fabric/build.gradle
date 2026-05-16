@@ -80,13 +80,13 @@ dependencies {
     localRuntime "org.anarres:jcpp:1.4.14"
     modLocalRuntime "maven.modrinth:indium:1.0.36+mc1.20.1"
     modCompileOnly 'maven.modrinth:lithium:mc1.20.1-0.11.3-fabric'
-    modLocalRuntime 'maven.modrinth:lithium:mc1.20.1-0.11.3-fabric'
+//    modLocalRuntime 'maven.modrinth:lithium:mc1.20.1-0.11.3-fabric'
 
     modCompileOnly "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
     modCompileOnly 'maven.modrinth:iris:1.7.6+1.20.1'
 
     /* APIs */
-    modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
+//    modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
     modLocalRuntime "dev.isxander:yet-another-config-lib:3.6.6+1.20.1-fabric"
 
     /* Valkyrien Skies */
@@ -113,7 +113,7 @@ dependencies {
     }
 
     /* Particle Rain */
-    modLocalRuntime "maven.modrinth:particle-rain:v4-beta.10+$minecraft_version-fabric"
+//    modLocalRuntime "maven.modrinth:particle-rain:v4-beta.10+$minecraft_version-fabric"
 
     /* Mmmmmmmmmmmm */
 //    modLocalRuntime 'maven.modrinth:mmmmmmmmmmmm:1.20-2.0.5'
@@ -130,36 +130,36 @@ dependencies {
 
     /* Particular */
 //    modLocalRuntime "maven.modrinth:particular:1.1.1"
-    modLocalRuntime "maven.modrinth:sushi-bar:0.2.2+1.20"
+//    modLocalRuntime "maven.modrinth:sushi-bar:0.2.2+1.20"
 
     modCompileOnly "maven.modrinth:particular:1.1.1"
 
     /* Particle Core */
-    modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.20.1"
-    modLocalRuntime "maven.modrinth:fzzy-config:0.7.2+1.20.1"
-    modLocalRuntime "me.fallenbreath:conditional-mixin:0.5.1"
+//    modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.20.1"
+//    modLocalRuntime "maven.modrinth:fzzy-config:0.7.2+1.20.1"
+//    modLocalRuntime "me.fallenbreath:conditional-mixin:0.5.1"
 
     /* Subtle Effects */
-    localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"
-    modLocalRuntime "maven.modrinth:subtle-effects:mRWsAYqN" // fabric 1.12.1
+//    localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"
+//    modLocalRuntime "maven.modrinth:subtle-effects:mRWsAYqN" // fabric 1.12.1
 
     /* A Good Place */
-    modLocalRuntime "maven.modrinth:a-good-place:1.20-1.2.7"
+//    modLocalRuntime "maven.modrinth:a-good-place:1.20-1.2.7"
     modCompileOnly "maven.modrinth:a-good-place:1.20-1.2.7"
 
     /* Carpet */
 //    modLocalRuntime "curse.maven:carpet-349239:4573334" // 1.4.112
 
     /* Observable */
-    modLocalRuntime "maven.modrinth:observable:4.4.2+fabric"
+//    modLocalRuntime "maven.modrinth:observable:4.4.2+fabric"
 
     /* What Are They Up To */
-    modLocalRuntime "maven.modrinth:coroutil:7tRnsYkP" // 1.3.7
+//    modLocalRuntime "maven.modrinth:coroutil:7tRnsYkP" // 1.3.7
     modCompileOnly "maven.modrinth:what-are-they-up-to:1.20.1-1.2.3"
-    modLocalRuntime "maven.modrinth:what-are-they-up-to:1.20.1-1.2.3"
+//    modLocalRuntime "maven.modrinth:what-are-they-up-to:1.20.1-1.2.3"
 
     /* More Culling */
-    modLocalRuntime "maven.modrinth:moreculling:0.24.0"
+//    modLocalRuntime "maven.modrinth:moreculling:0.24.0"
 
     /* Real Camera */
 //    modLocalRuntime "maven.modrinth:real-camera:XZ9lHrLr"

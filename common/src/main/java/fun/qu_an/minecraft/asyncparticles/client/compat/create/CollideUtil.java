@@ -24,8 +24,6 @@ import java.util.Optional;
 import static java.lang.Math.*;
 
 public class CollideUtil {
-	private static final float LENGTH_SQR_EPSILON = 0.01f;
-
 	@Nullable
 	public static Vec3 collideMotionWithContraptions(ClientLevel level, Vec3 motion, AABB bounds) {
 		Vector3d result = new Vector3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
@@ -56,23 +54,23 @@ public class CollideUtil {
 		// bro why the train's contraption out of bounds?
 		AABB bb0;
 		AABB entityBoundingBox = contraptionEntity instanceof CarriageContraptionEntity
-			? (bb0 = contraptionEntity.getBoundingBox()).inflate(0, max(max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
-			: contraptionEntity.getBoundingBox();
+			? (bb0 = CreateUtil.getBoundingBox(contraptionEntity)).inflate(0, max(max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
+			: CreateUtil.getBoundingBox(contraptionEntity);
 		if (!particleBound.expandTowards(originalMotion).intersects(entityBoundingBox)) {
 			return CollisionType.NONE;
 		}
 
 		// Init matrix
 		AbstractContraptionEntity.ContraptionRotationState rotation = contraptionEntity.getRotationState();
-		Matrix3d rotationMatrix = rotation.asMatrix();
+		Matrix3d rotationMatrix = CreateUtil.asMatrix(contraptionEntity, rotation);
 
 		// Transform entity position and motion to local space
 		Vec3 center = particleBound.getCenter();
 		float yawOffset = rotation.getYawOffset();
-		Vec3 anchorVec = contraptionEntity.getAnchorVec();
+		Vec3 anchorVec = CreateUtil.getAnchorVec(contraptionEntity);
 		Vec3 toLocalTranslation = getWorldToLocalTranslation(center, anchorVec, rotationMatrix, yawOffset);
 
-		Vec3 contactPointMotion = contraptionEntity.getContactPointMotion(center);
+		Vec3 contactPointMotion = CreateUtil.getContactPointMotion(contraptionEntity, center);
 		Vec3 localMotion = rotationMatrix.transform(originalMotion.subtract(contactPointMotion));
 
 		// Prepare entity bounds
@@ -88,8 +86,8 @@ public class CollideUtil {
 		if (collisionShapes.isPresent()) {
 			collidableBBs = collisionShapes.get();
 		} else if (estimate) {
-			return abs(contactPointMotion.x) + abs(contactPointMotion.y) + abs(contactPointMotion.z) > 0.005d ?
-				CollisionType.MOVING : CollisionType.STATIONARY; // No simplified bbs, use full entity bounds, this is a fallback for better performance
+			return abs(contactPointMotion.x) + abs(contactPointMotion.y) + abs(contactPointMotion.z) > CreateUtil.LENGTH_SQR_EPSILON ?
+				CollisionType.MOVING : CollisionType.STATIONARY;
 		} else {
 			collidableBBs = ((ContraptionAddon) contraption).asyncparticles$getAabbs();
 		}
@@ -114,23 +112,23 @@ public class CollideUtil {
 		// bro why the train's contraption out of bounds?
 		AABB bb0;
 		AABB entityBoundingBox = contraptionEntity instanceof CarriageContraptionEntity
-			? (bb0 = contraptionEntity.getBoundingBox()).inflate(0, max(max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
-			: contraptionEntity.getBoundingBox();
+			? (bb0 = CreateUtil.getBoundingBox(contraptionEntity)).inflate(0, max(max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
+			: CreateUtil.getBoundingBox(contraptionEntity);
 		if (!particleBounds.expandTowards(originalMotion).intersects(entityBoundingBox)) {
 			return null;
 		}
 
 		// Init matrix
 		AbstractContraptionEntity.ContraptionRotationState rotation = contraptionEntity.getRotationState();
-		Matrix3d rotationMatrix = rotation.asMatrix();
+		Matrix3d rotationMatrix = CreateUtil.asMatrix(contraptionEntity, rotation);
 
 		// Transform entity position and motion to local space
 		Vec3 center = particleBounds.getCenter();
 		float yawOffset = rotation.getYawOffset();
-		Vec3 anchorVec = contraptionEntity.getAnchorVec();
+		Vec3 anchorVec = CreateUtil.getAnchorVec(contraptionEntity);
 		Vec3 toLocalTranslation = getWorldToLocalTranslation(center, anchorVec, rotationMatrix, yawOffset);
 
-		Vec3 contactPointMotion = contraptionEntity.getContactPointMotion(center);
+		Vec3 contactPointMotion = CreateUtil.getContactPointMotion(contraptionEntity, center);
 		Vec3 localMotion = rotationMatrix.transform(originalMotion.subtract(contactPointMotion));
 
 		// Prepare entity bounds
@@ -210,7 +208,9 @@ public class CollideUtil {
 				return null;
 			}
 		}
-		Vec3 clipped = rotationMatrix.transpose().transform(clippedLocal);
+		rotationMatrix.transpose();
+		Vec3 clipped = rotationMatrix.transform(clippedLocal);
+		rotationMatrix.transpose();
 		double x = signum(contactPointMotion.x) != signum(originalMotion.x) ||
 			abs(clipped.x) < abs(contactPointMotion.x) ?
 			contactPointMotion.x * 3 : contactPointMotion.x;
@@ -334,8 +334,8 @@ public class CollideUtil {
 			AbstractContraptionEntity entity1 = it.next();
 			AABB bb0;
 			AABB entity1Bb = entity1 instanceof CarriageContraptionEntity
-				? (bb0 = entity1.getBoundingBox()).inflate(0, max(max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
-				: entity1.getBoundingBox();
+				? (bb0 = CreateUtil.getBoundingBox(entity1)).inflate(0, max(max(bb0.getXsize(), bb0.getZsize()) - bb0.getYsize() * 0.3, 0), 0)
+				: CreateUtil.getBoundingBox(entity1);
 			if (!entity1Bb.intersects(start, end)) {
 				continue;
 			}
@@ -353,7 +353,7 @@ public class CollideUtil {
 		if (hitResult == null || hitResult.getType() == HitResult.Type.MISS) {
 			return null;
 		}
-		return new ContraptionHitResult(entity.getContactPointMotion(hit),
+		return new ContraptionHitResult(CreateUtil.getContactPointMotion(entity, hit),
 			hit,
 			hitResult.getDirection(),
 			BlockPos.containing(hit),

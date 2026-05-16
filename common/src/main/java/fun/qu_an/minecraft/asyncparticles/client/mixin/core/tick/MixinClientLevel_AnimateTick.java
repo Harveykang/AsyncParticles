@@ -6,6 +6,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.task.EndTickOperation;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -34,7 +35,7 @@ public abstract class MixinClientLevel_AnimateTick extends Level {
 
 	@Unique
 	private static final ResourceLocation asyncparticles$ANIMATE_TICK =
-		new ResourceLocation("asyncparticles", "animate_tick");
+		GameUtil.id("animate_tick");
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int i, int j, int k, Operation<Void> original) {
 		if (!AsyncTickBehavior.INSTANCE.isShouldTickParticles() &&

@@ -3,31 +3,28 @@ package fun.qu_an.minecraft.asyncparticles.client.compat.create;
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import com.simibubi.create.content.contraptions.Contraption;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.RainEffect;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.create.AccessorMatrix3d;
-import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
-import it.unimi.dsi.fastutil.longs.Long2BooleanMap;
+import fun.qu_an.minecraft.asyncparticles.client.util.HeightMap;
 import it.unimi.dsi.fastutil.longs.Long2FloatMap;
 import it.unimi.dsi.fastutil.longs.Long2FloatOpenHashMap;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Thanks to ChatGPT
+ * FIXME: thread safe and reletive pos storage
  */
 public class ContraptionRainBlocking {
-	public static Long2FloatMap getAttachedContractionHeightMap(ClientLevel level) {
+	public static ContraptionHeightMap getAttachedContractionHeightMap(ClientLevel level) {
 		return ((ContraptionHeightMapProvider) level).asyncparticles$getHeightMap();
-	}
-
-	public static Long2BooleanMap getAttachedContractionMovingMap(ClientLevel level) {
-		return ((ContraptionHeightMapProvider) level).asyncparticles$getMovingMap();
 	}
 
 	/**
@@ -83,44 +80,39 @@ public class ContraptionRainBlocking {
 	 * 批量检测矩形区域内空间立方体的挡雨情况。
 	 */
 	public static void tickRainBlocking(ClientLevel level,
-	                                    int x1,
-	                                    int z1,
-	                                    int x2,
-	                                    int z2) {
-		Long2FloatMap heightMap = getAttachedContractionHeightMap(level);
-		Long2BooleanMap isMoving = getAttachedContractionMovingMap(level);
-		heightMap.clear();
-		boolean doRainEffectsIfMoving = ConfigHelper.doCreateRainEffectsIfMoving();
-		if (!doRainEffectsIfMoving) {
-			isMoving.clear();
-		}
-		final int queryMinX = Math.min(x1, x2);
-		final int queryMaxX = Math.max(x1, x2);
-		final int queryMinZ = Math.min(z1, z2);
-		final int queryMaxZ = Math.max(z1, z2);
+	                                    int centerX,
+	                                    int centerZ,
+	                                    int range) {
+		ContraptionHeightMapProvider mapProvider = (ContraptionHeightMapProvider) level;
+		ContraptionHeightMap heightMap = mapProvider.asyncparticles$getHeightMap();
+		heightMap.beginUpdate(centerX, centerZ, range);
+
+		final double queryMinX = centerX - range + 0.5;
+		final double queryMaxX = centerX + range + 0.5;
+		final double queryMinZ = centerZ - range + 0.5;
+		final double queryMaxZ = centerZ + range + 0.5;
 
 		// 整个 batch 调用期间复用，不在 collider 循环里反复分配
 		final double[] cornerX = new double[8];
 		final double[] cornerY = new double[8];
 		final double[] cornerZ = new double[8];
 
-		Long2FloatMap tempHeightMap = doRainEffectsIfMoving ? heightMap : new Long2FloatOpenHashMap();
+		Long2FloatMap tempHeightMap = ConfigHelper.getCreateRainEffect() == RainEffect.ALWAYS ? null : new Long2FloatOpenHashMap();
 		for (Iterator<AbstractContraptionEntity> it = CreateUtil.forEachContraption(level); it.hasNext(); ) {
 			AbstractContraptionEntity entity = it.next();
 			Contraption contraption = entity.getContraption();
 			if (contraption == null) continue;
 
-			Optional<List<AABB>> collidersOptional = contraption.getSimplifiedEntityColliders();
-			if (collidersOptional.isEmpty()) {
+			List<AABB> colliders = ((ContraptionAddon) contraption).asyncparticles$getAabbs();
+			if (colliders.isEmpty()) {
 				continue;
 			}
-			List<AABB> colliders = collidersOptional.get();
 
-			AABB aabb = entity.getBoundingBox();
-			if (aabb.minX > queryMaxX
+			AABB aabb = CreateUtil.getBoundingBox(entity);
+			if ((aabb.minX > queryMaxX
 				|| aabb.maxX < queryMinX
 				|| aabb.minZ > queryMaxZ
-				|| aabb.maxZ < queryMinZ) {
+				|| aabb.maxZ < queryMinZ)) {
 				continue;
 			}
 
@@ -130,10 +122,10 @@ public class ContraptionRainBlocking {
 				cornerY,
 				cornerZ,
 				heightMap,
-				isMoving,
-				tempHeightMap
-			);
+				tempHeightMap);
 		}
+
+		heightMap.commitUpdate();
 	}
 
 	private static void checkRainBlocking(AbstractContraptionEntity entity,
@@ -141,13 +133,11 @@ public class ContraptionRainBlocking {
 	                                      double[] cornerX,
 	                                      double[] cornerY,
 	                                      double[] cornerZ,
-	                                      Long2FloatMap heightMap,
-	                                      Long2BooleanMap isMoving,
+	                                      ContraptionHeightMap heightMap,
 	                                      Long2FloatMap tempHeightMap) {
-		boolean doRainEffectsIfMoving = ConfigHelper.doCreateRainEffectsIfMoving();
 		AbstractContraptionEntity.ContraptionRotationState rotationState = entity.getRotationState();
-		AccessorMatrix3d mAcc = (AccessorMatrix3d) rotationState.asMatrix();
-		Vec3 anchor = entity.getAnchorVec();
+		AccessorMatrix3d mAcc = (AccessorMatrix3d) CreateUtil.asMatrix(entity, rotationState);
+		Vec3 anchor = CreateUtil.getAnchorVec(entity);
 		float yawOffset = rotationState.getYawOffset();
 
 		/*
@@ -257,20 +247,42 @@ public class ContraptionRainBlocking {
 			double worldCenterY = t10 * cx + t11 * cy + t12 * cz + offsetY;
 			double worldCenterZ = t20 * cx + t21 * cy + t22 * cz + offsetZ;
 
+//			if (extraMatrix != null) {
+//				Vector3d vector3d = extraMatrix.transformPosition(worldCenterX, worldCenterY, worldCenterZ, new Vector3d());
+//				worldCenterX = vector3d.x;
+//				worldCenterY = vector3d.y;
+//				worldCenterZ = vector3d.z;
+//			}
+
 			// 局部 X 半轴 extent 变到世界后的向量 vx = T * (ex, 0, 0)
 			double vxX = t00 * ex;
 			double vxY = t10 * ex;
 			double vxZ = t20 * ex;
+//			if (extraMatrix != null) {
+//				vxX = extraMatrix.m00() * vxX;
+//				vxY = extraMatrix.m10() * vxY;
+//				vxZ = extraMatrix.m20() * vxZ;
+//			}
 
 			// 局部 Y 半轴 extent 变到世界后的向量 vy = T * (0, ey, 0)
 			double vyX = t01 * ey;
 			double vyY = t11 * ey;
 			double vyZ = t21 * ey;
+//			if (extraMatrix != null) {
+//				vyX = extraMatrix.m01() * vyX;
+//				vyY = extraMatrix.m11() * vyY;
+//				vyZ = extraMatrix.m21() * vyZ;
+//			}
 
 			// 局部 Z 半轴 extent 变到世界后的向量 vz = T * (0, 0, ez)
 			double vzX = t02 * ez;
 			double vzY = t12 * ez;
 			double vzZ = t22 * ez;
+//			if (extraMatrix != null) {
+//				vzX = extraMatrix.m02() * vzX;
+//				vzY = extraMatrix.m12() * vzY;
+//				vzZ = extraMatrix.m22() * vzZ;
+//			}
 
 			/*
 			 * 按固定编号填充 8 个角点：
@@ -329,6 +341,7 @@ public class ContraptionRainBlocking {
 			for (int f = 0; f < BOX_FACE_INDICES_FLAT.length; f += 4) {
 				rasterizeTopQuadFaceRaw(
 					tempHeightMap,
+					heightMap,
 					cornerX, cornerY, cornerZ,
 					BOX_FACE_INDICES_FLAT[f],
 					BOX_FACE_INDICES_FLAT[f + 1],
@@ -338,19 +351,18 @@ public class ContraptionRainBlocking {
 			}
 		}
 
-		if (!doRainEffectsIfMoving && !tempHeightMap.isEmpty()) {
+		if (tempHeightMap != null && !tempHeightMap.isEmpty()) {
 			for (Long2FloatMap.Entry e : tempHeightMap.long2FloatEntrySet()) {
 				long l = e.getLongKey();
 				float f = e.getFloatValue();
-				float old = heightMap.get(l);
-				if (old > f) {
+				if (!heightMap.setHeight(l, f)) {
 					continue;
 				}
-				heightMap.put(l, f);
-				Vec3 globalContactPoint = new Vec3(BlockPos.getX(l), f, BlockPos.getZ(l));
-				Vec3 contactPointMotion = entity.getContactPointMotion(globalContactPoint);
-				boolean b = contactPointMotion.lengthSqr() > 0.01;
-				isMoving.put(l, b);
+
+				Vec3 globalContactPoint = new Vec3(HeightMap.getX(l), f, HeightMap.getZ(l));
+				Vec3 contactPointMotion = CreateUtil.getContactPointMotion(entity, globalContactPoint);
+				boolean b = contactPointMotion.x + contactPointMotion.y + contactPointMotion.z > CreateUtil.LENGTH_SQR_EPSILON;
+				heightMap.setMoving(l, b);
 			}
 			tempHeightMap.clear();
 		}
@@ -386,8 +398,8 @@ public class ContraptionRainBlocking {
 	 * <p>
 	 * final double y = kx * sampleX + kz * sampleZ + kb;
 	 * long key = packXZ(x, z);
-	 * float old = result.getOrDefault(key, Float.NEGATIVE_INFINITY);
-	 * if (y > old) result.put(key, (float) y);
+	 * float old = heightMap.getOrDefault(key, Float.NEGATIVE_INFINITY);
+	 * if (y > old) heightMap.put(key, (float) y);
 	 * }
 	 * }</code>
 	 * <p>
@@ -453,7 +465,8 @@ public class ContraptionRainBlocking {
 	 * 这样就去掉了整块 ccw/cw 双分支循环。
 	 */
 	private static void rasterizeTopQuadFaceRaw(
-		Long2FloatMap result,
+		Long2FloatMap tempHeightMap,
+		ContraptionHeightMap heightMap,
 		double[] cornerX, double[] cornerY, double[] cornerZ,
 		int ia, int ib, int ic, int id
 	) {
@@ -616,7 +629,7 @@ public class ContraptionRainBlocking {
 		final double e2Reach;
 		final double e3Reach;
 		final double e4Reach;
-		if (false) { // TODO is it necessary?
+		if (!isFlat) {
 			e1Reach = e2Reach = e3Reach = e4Reach = 0.0;
 		} else {
 			e1Reach = 0.5 * (Math.abs(e1A) + Math.abs(e1B));
@@ -630,28 +643,55 @@ public class ContraptionRainBlocking {
 		double rowE3 = e3A * startSampleX + e3B * startSampleZ + e3C + e3Reach;
 		double rowE4 = e4A * startSampleX + e4B * startSampleZ + e4C + e4Reach;
 		// 高度取格子内最高角
-		double rowY = kx * (fromX + (kx > 0 ? 1.0 : 0.0)) + kz * (fromZ + (kz > 0 ? 1.0 : 0.0)) + kb;
+		double rowYCorner = kx * (fromX + (kx > 0 ? 1.0 : 0.0)) + kz * (fromZ + (kz > 0 ? 1.0 : 0.0)) + kb;
 
+		// ---------- 梯度确定的角点偏移 ----------
+		final double cornerDx = kx > 0 ? 1.0 : 0.0;
+		final double cornerDz = kz > 0 ? 1.0 : 0.0;
+		// 角点相对于格子中心 (x+0.5, z+0.5) 的偏移量
+		final double offsetX = cornerDx - 0.5;
+		final double offsetZ = cornerDz - 0.5;
+		// 角点高度与中心点高度的差值（常量）
+		final double cornerToCenterDY = kx * offsetX + kz * offsetZ;
+
+		// 角点边函数的偏移常量：ΔE = A*offsetX + B*offsetZ
+		final double e1CornerOffset = e1A * offsetX + e1B * offsetZ;
+		final double e2CornerOffset = e2A * offsetX + e2B * offsetZ;
+		final double e3CornerOffset = e3A * offsetX + e3B * offsetZ;
+		final double e4CornerOffset = e4A * offsetX + e4B * offsetZ;
 		for (int x = fromX; x <= toX; x++) {
 			double e1 = rowE1;
 			double e2 = rowE2;
 			double e3 = rowE3;
 			double e4 = rowE4;
-			double y = rowY;
+			double yCorner = rowYCorner;  // 当前格子的角点高度
 
 			for (int z = fromZ; z <= toZ; z++) {
 				if (e1 >= -FACE_EPS &&
 					e2 >= -FACE_EPS &&
 					e3 >= -FACE_EPS &&
 					e4 >= -FACE_EPS) {
-					final long key = BlockPos.asLong(x, 0, z);
-					final float old = result.getOrDefault(key, Float.NEGATIVE_INFINITY);
+					double finalY;
+					// 去掉膨胀，得到中心点的严格边函数，再加角点偏移得到角点的严格边函数
+					double e1Corner = (e1 - e1Reach) + e1CornerOffset;
+					double e2Corner = (e2 - e2Reach) + e2CornerOffset;
+					double e3Corner = (e3 - e3Reach) + e3CornerOffset;
+					double e4Corner = (e4 - e4Reach) + e4CornerOffset;
 
-					// 限制 y 不能超过四边形本身的最高和最低点，加入偏移量
-					float clampedY = (float) Math.min(y, maxFaceY) + 0.9f; // idk but it works
+					if (e1Corner >= -FACE_EPS && e2Corner >= -FACE_EPS &&
+						e3Corner >= -FACE_EPS && e4Corner >= -FACE_EPS) {
+						// 角点在四边形内，安全使用角点高度
+						finalY = yCorner;
+					} else {
+						// 角点不在内，退回到中心点高度（预防外推）
+						finalY = yCorner - cornerToCenterDY;
+					}
 
-					if (clampedY > old) {
-						result.put(key, clampedY);
+					float clampedY = (float) Math.min(finalY, maxFaceY) + 0.9f;
+					if (tempHeightMap == null){
+						heightMap.setHeight(x, z, clampedY);
+					} else {
+						tempHeightMap.put(HeightMap.asLong(x, z), clampedY);
 					}
 				}
 
@@ -659,39 +699,59 @@ public class ContraptionRainBlocking {
 				e2 += e2B;
 				e3 += e3B;
 				e4 += e4B;
-				y += kz;
+				yCorner += kz;
 			}
 
 			rowE1 += e1A;
 			rowE2 += e2A;
 			rowE3 += e3A;
 			rowE4 += e4A;
-			rowY += kx;
+			rowYCorner += kx;
 		}
 	}
 
-	public static float getHeight(ClientLevel level, long l) {
-		Long2FloatMap heightMap = getAttachedContractionHeightMap(level);
-		Long2BooleanMap movingMap = getAttachedContractionMovingMap(level);
-		BlockPos.MutableBlockPos mutableBlockPos = GameUtil.SHARED_POS.get();
+	// TODO optimize the fallback
+	public static float getHeight(ClientLevel level, int x, int z) {
+		ContraptionHeightMap heightMap = getAttachedContractionHeightMap(level);
+		float height = heightMap.getHeight(x, z);
+		int dx = Math.abs(x - heightMap.getCenterX());
+		int dz = Math.abs(z - heightMap.getCenterZ());
+		int distance = Math.max(dx, dz);
+		if (distance < heightMap.getRange() || distance > 8192) {
+			return height;
+		}
+		Vec3 start = new Vec3(x + 0.5, level.getMaxBuildHeight() + 16, z + 0.5);
+		BlockHitResult result = CollideUtil.rayCast(level, start, new Vec3(x + 0.5, level.getMinBuildHeight() - 16, z + 0.5));
+		if (result == null) {
+			return height;
+		}
+		if (result.getType() == BlockHitResult.Type.MISS) {
+			return height;
+		}
+		return (float) result.getLocation().y;
+	}
 
-		if (heightMap.containsKey(l)) {
-			return heightMap.get(l);
+	public static float getHeight(ClientLevel level, BlockPos blockPos) {
+		return getHeight(level, blockPos.getX(), blockPos.getZ());
+	}
+
+	// TODO optimize the fallback
+	public static boolean isMoving(ClientLevel level, int x, int z) {
+		ContraptionHeightMap heightMap = getAttachedContractionHeightMap(level);
+		byte moving = heightMap.isMoving(x, z);
+		int dx = Math.abs(x - heightMap.getCenterX());
+		int dz = Math.abs(z - heightMap.getCenterZ());
+		int distance = Math.max(dx, dz);
+		if (distance < heightMap.getRange() || distance > 8192) {
+			return moving > 0;
 		}
-		ContraptionHitResult contraptionHitResult = CollideUtil.rayCastWithContactPointMotion(
-			level,
-			Vec3.atCenterOf(mutableBlockPos.set(l | BlockPos.asLong(0, level.getMaxBuildHeight() + 16, 0))),
-			Vec3.atCenterOf(mutableBlockPos.set(l | BlockPos.asLong(0, level.getMinBuildHeight() - 16, 0))));
-		if (contraptionHitResult == null) {
-			float f = heightMap.defaultReturnValue();
-			heightMap.put(l, f);
-			return f;
-		}
-		float y = (float) contraptionHitResult.contactPointMotion.y;
-		heightMap.put(l, y);
-		if (contraptionHitResult.contactPointMotion.lengthSqr() > 0.01f) {
-			movingMap.put(l, true);
-		}
-		return y;
+		Vec3 motion = new Vec3(x + 0.5, level.getMinBuildHeight() - level.getMaxBuildHeight() - 32, z + 0.5);
+		AABB bb = AABB.ofSize(new Vec3(x + 0.5, level.getMaxBuildHeight() + 16, z + 0.5), 1, 1, 1);
+		CollisionType collideWithContraptions = CollideUtil.isCollideWithContraptions(level, motion, bb);
+		return collideWithContraptions == CollisionType.MOVING;
+	}
+
+	public static boolean isMoving(ClientLevel level, BlockPos blockPos) {
+		return isMoving(level, blockPos.getX(), blockPos.getZ());
 	}
 }

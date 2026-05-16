@@ -6,6 +6,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -32,7 +33,7 @@ public abstract class MixinLevelRenderer_WeatherCulling {
 
 	@Inject(method = "renderSnowAndRain", at = @At(value = "HEAD"))
 	public void beforeRenderSnowAndRain(CallbackInfo ci,
-										@Share(namespace = "asyncparticles", value = "enableCull")
+										@Share(namespace = AsyncParticlesClient.MOD_ID, value = "enableCull")
 										LocalBooleanRef enableCull) {
 		enableCull.set(ConfigHelper.isCullWeathers());
 	}
@@ -51,9 +52,9 @@ public abstract class MixinLevelRenderer_WeatherCulling {
 							   @Local(ordinal = 3) int l,
 							   @Local(ordinal = 5) int n,
 							   @Local(ordinal = 6) int o,
-							   @Share(namespace = "asyncparticles", value = "enableCull")
+							   @Share(namespace = AsyncParticlesClient.MOD_ID, value = "enableCull")
 							   LocalBooleanRef enableCull,
-							   @Share(namespace = "asyncparticles", value = "height_map")
+							   @Share(namespace = AsyncParticlesClient.MOD_ID, value = "height_map")
 							   LocalIntRef qRef,
 							   @Share(value = "isVisible") LocalBooleanRef isVisible) {
 		if (!enableCull.get()) {

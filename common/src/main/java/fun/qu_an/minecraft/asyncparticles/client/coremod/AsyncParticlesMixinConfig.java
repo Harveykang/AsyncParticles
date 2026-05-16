@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
+import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import org.spongepowered.asm.mixin.throwables.MixinError;
@@ -16,7 +17,7 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.MAK
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.LOGGER;
 
 public class AsyncParticlesMixinConfig {
-	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
+	public static final Path MIXIN_CONFIG_FILE = Path.of("config", AsyncParticlesClient.MOD_ID, AsyncParticlesClient.MOD_ID + "-mixin.properties");
 	public static final int VERSION = 1;
 	static String COMMENTS = """
 		safeBlockEntityMap: Boolean. Make 'LevelChunk#blockEntities' thread-safe.

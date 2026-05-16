@@ -5,6 +5,9 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "asyncparticles-common-refmap.json",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin",
+  "mixinextras": {
+    "minVersion": "0.5.0"
+  },
   "client": [
     "compat.a_good_place.InvokerBlocksParticlesManager",
     "compat.a_good_place.MixinBlocksParticlesManager",
@@ -21,6 +24,7 @@
     "compat.create.MixinClientLevel",
     "compat.create.MixinContraption",
     "compat.create.MixinLevelRenderer_Rain",
+    "compat.create.MixinLevelRenderer_Rain_Early",
     "compat.create.MixinParticle",
     "compat.create.MixinParticle_LightCache",
     "compat.fabric.effective.MixinRippleParticle",
@@ -59,10 +63,11 @@
     "compat.shimmer.MixinPostParticle",
     "compat.vs2.InvokerEntityShipCollisionUtils",
     "compat.vs2.InvokerRaycastUtils",
-    "compat.vs2.MixinLevelRenderer",
     "compat.vs2.MixinParticle",
     "compat.vs2.MixinVSAnimation",
     "compat.vs2.MixinVSSoundEngine",
+    "compat.vs2_create.MixinLevelRenderer_Rain",
+    "compat.vs2_create.MixinLevelRenderer_Rain_Late",
     "compat.vs2_create.MixinParticle_LightCache",
     "compat.watut.MixinCustomParticleEngine",
     "compat.watut.MixinParticleItem",
@@ -84,7 +89,6 @@
     "core.off_thread_access.MixinActiveProfiler",
     "core.off_thread_access.MixinClientChunkCache",
     "core.off_thread_access.MixinClientLevel",
-    "core.off_thread_access.MixinEntityGetter",
     "core.off_thread_access.MixinLevel",
     "core.off_thread_access.MixinLevelRenderer",
     "core.off_thread_access.MixinSoundEngine",

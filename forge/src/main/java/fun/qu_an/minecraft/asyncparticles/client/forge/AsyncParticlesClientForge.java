@@ -37,6 +37,7 @@ import static net.minecraft.commands.Commands.literal;
 
 @Mod(AsyncParticlesClient.MOD_ID)
 public final class AsyncParticlesClientForge {
+	@SuppressWarnings("removal")
 	public AsyncParticlesClientForge() {
 		// Run our common setup.
 		if (!ModListHelper.IS_CLIENT) {
