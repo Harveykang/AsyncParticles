@@ -15,7 +15,7 @@ import java.util.Map;
 
 @SuppressWarnings("unused")
 public class CreateUtil {
-	public static final float LENGTH_SQR_EPSILON = 0.01f;
+	public static final float LENGTH_SQR_EPSILON = 0.001f;
 
 	@ExpectPlatform
 	public static Map<Integer, WeakReference<Entity>> loadedContraptions(Level level) {

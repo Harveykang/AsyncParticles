@@ -27,7 +27,7 @@ dependencies {
     modCompileOnly "maven.modrinth:fzzy-config:0.6.8+1.21"
 
     /* Performance */
-    modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.6.13-fabric"
+    modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.8.12-alpha.3-fabric"
     modCompileOnly "maven.modrinth:sodium-extra:mc1.21.1-0.6.0+fabric"
     modCompileOnly 'maven.modrinth:iris:1.8.8+1.21.1-fabric'
 
@@ -90,8 +90,6 @@ dependencies {
     /* Figura */
     modCompileOnly "maven.modrinth:figura:0.1.5+1.21.1"
 
-    /* Veil */
-//    modCompileOnly "maven.modrinth:veil:ux6J2bdY" // 3.6.2
     /* Sable */
     modApi "dev.ryanhcode.sable:sable-common-$minecraft_version:1.1.3" // 1.1.3
 
@@ -100,4 +98,9 @@ dependencies {
 
     /* RUOK */
     modCompileOnly "maven.modrinth:ruok:l0jVfXsH" // 1.7.4
+
+    api("foundry.veil:veil-neoforge-${project.minecraft_version}:4.1.1") {
+        exclude group: "maven.modrinth"
+        exclude group: "me.fallenbreath"
+    }
 }

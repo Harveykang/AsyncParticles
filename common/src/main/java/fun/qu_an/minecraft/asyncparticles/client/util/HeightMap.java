@@ -10,7 +10,7 @@ public class HeightMap {
 	private static final LongHash.Strategy STRATEGY = new LongHash.Strategy() {
 		@Override
 		public int hashCode(long e) {
-			return (int) ((e & 0xFFFFFFFFL) * 31 + (e >>> 32));
+			return getZ(e) * 31 + getX(e);
 		}
 
 		@Override
