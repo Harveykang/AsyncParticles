@@ -691,7 +691,7 @@ public class ContraptionRainBlocking {
 					if (tempHeightMap == null){
 						heightMap.setHeight(x, z, clampedY);
 					} else {
-						tempHeightMap.put(HeightMap.asLong(x, z), clampedY);
+						tempHeightMap.mergeFloat(HeightMap.asLong(x, z), clampedY, Float::max);
 					}
 				}
 

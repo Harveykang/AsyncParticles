@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("unused")
 public class CreateUtil {
-	public static final float LENGTH_SQR_EPSILON = 0.01f;
+	public static final float LENGTH_SQR_EPSILON = 0.001f;
 
 	public static Map<Integer, WeakReference<?>> loadedContraptions(LevelAccessor level) {
 		if (ModListHelper.IS_LEGACY_CREATE) {
