@@ -361,7 +361,8 @@ public class ContraptionRainBlocking {
 
 				Vec3 globalContactPoint = new Vec3(HeightMap.getX(l), f, HeightMap.getZ(l));
 				Vec3 contactPointMotion = CreateUtil.getContactPointMotion(entity, globalContactPoint);
-				boolean b = contactPointMotion.x + contactPointMotion.y + contactPointMotion.z > CreateUtil.LENGTH_SQR_EPSILON;
+				boolean b = Math.abs(contactPointMotion.x) + Math.abs(contactPointMotion.y) + Math.abs(contactPointMotion.z)
+					> CreateUtil.LENGTH_SQR_EPSILON;
 				heightMap.setMoving(l, b);
 			}
 			tempHeightMap.clear();
@@ -713,11 +714,12 @@ public class ContraptionRainBlocking {
 	// TODO optimize the fallback
 	public static float getHeight(ClientLevel level, int x, int z) {
 		ContraptionHeightMap heightMap = getAttachedContractionHeightMap(level);
-		float height = heightMap.getHeight(x, z);
-		int dx = Math.abs(x - heightMap.getCenterX());
-		int dz = Math.abs(z - heightMap.getCenterZ());
+		ContraptionHeightMap.State state = heightMap.getState();
+		float height = state.getHeight(x, z);
+		int dx = Math.abs(x - state.centerX());
+		int dz = Math.abs(z - state.centerZ());
 		int distance = Math.max(dx, dz);
-		if (distance < heightMap.getRange() || distance > 8192) {
+		if (distance < state.range() || distance > 8192) {
 			return height;
 		}
 		Vec3 start = new Vec3(x + 0.5, level.getMaxBuildHeight() + 16, z + 0.5);
@@ -738,11 +740,12 @@ public class ContraptionRainBlocking {
 	// TODO optimize the fallback
 	public static boolean isMoving(ClientLevel level, int x, int z) {
 		ContraptionHeightMap heightMap = getAttachedContractionHeightMap(level);
-		byte moving = heightMap.isMoving(x, z);
-		int dx = Math.abs(x - heightMap.getCenterX());
-		int dz = Math.abs(z - heightMap.getCenterZ());
+		ContraptionHeightMap.State state = heightMap.getState();
+		byte moving = state.isMoving(x, z);
+		int dx = Math.abs(x - state.centerX());
+		int dz = Math.abs(z - state.centerZ());
 		int distance = Math.max(dx, dz);
-		if (distance < heightMap.getRange() || distance > 8192) {
+		if (distance < state.range() || distance > 8192) {
 			return moving > 0;
 		}
 		Vec3 motion = new Vec3(x + 0.5, level.getMinBuildHeight() - level.getMaxBuildHeight() - 32, z + 0.5);
