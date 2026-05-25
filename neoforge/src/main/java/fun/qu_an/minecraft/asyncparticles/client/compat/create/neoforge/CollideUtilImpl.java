@@ -243,7 +243,7 @@ public class CollideUtilImpl {
 
 				switch (squeezedAxis) {
 					case X -> sx = getSqueezed(lcX, bbCx, intersectXsize, sx);
-					case Y -> sy = getSqueezed(lcY, bbCy, intersectYsize, lMotionY > 0 ? lMotionY : sy);
+					case Y -> sy = getSqueezed(lcY, bbCy, intersectYsize, originalMotion.y > 0 ? lMotionY : sy);
 					case Z -> sz = getSqueezed(lcZ, bbCz, intersectZsize, sz);
 				}
 			} else if (!squeezed) {
