@@ -97,6 +97,10 @@ subprojects {
 //            name = "Xander Maven"
 //            url = "https://maven.isxander.dev/releases"
 //        }
+        maven { // LambDynamicLights
+            name = "Gegy"
+            url = uri("https://maven.gegy.dev")
+        }
     }
 
     loom {

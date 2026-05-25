@@ -179,7 +179,7 @@ public class CollideUtil {
 
 				switch (squeezedAxis) {
 					case X -> sx = getSqueezed(localCenter.x, bbCenter.x, intersectXsize, sx);
-					case Y -> sy = getSqueezed(localCenter.y, bbCenter.y, intersectYsize, cy > 0 ? cy : sy);
+					case Y -> sy = getSqueezed(localCenter.y, bbCenter.y, intersectYsize, originalMotion.y > 0 ? cy : sy);
 					case Z -> sz = getSqueezed(localCenter.z, bbCenter.z, intersectZsize, sz);
 				}
 			} else if (!squeezed) {

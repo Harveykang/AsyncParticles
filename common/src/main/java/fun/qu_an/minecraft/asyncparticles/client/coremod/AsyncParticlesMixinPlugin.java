@@ -76,6 +76,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "particlerain_vs" -> PARTICLERAIN_LOADED && VS_LOADED;
 				case "particlerain_create" -> PARTICLERAIN_LOADED && CREATE_LOADED;
 				case "modernui" -> MODERN_UI_LOADED;
+				case "lambdynlights" -> LAMBDYNLIGHTS_LOADED;
 				case "vs2" -> VS_LOADED;
 				case "vs2_create" -> VS_LOADED && CREATE_LOADED;
 				case "create" -> CREATE_LOADED; // 0.5.1~6.0.8

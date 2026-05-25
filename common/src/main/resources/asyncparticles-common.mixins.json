@@ -39,6 +39,7 @@
     "compat.iris_like.MixinFullyBufferedMultiBufferSource",
     "compat.iris_like.MixinIris",
     "compat.iris_like.MixinOldFullyBufferedMultiBufferSource",
+    "compat.lambdynlights.MixinParticleEngineMixin",
     "compat.lodestone.MixinLodestoneRenderLayer",
     "compat.lodestone.MixinRenderHandler",
     "compat.modernui.MixinRenderSystem",

@@ -110,7 +110,8 @@ public class ModListHelper {
 	public static final boolean AXIOM_LOADED = isModLoaded("axiom");
 	/* Particle Interactions */
 	public static final boolean PARTICLE_INTERACTIONS_LOADED = isModLoaded("eg_particle_interactions");
-
+	/* Lambdynights */
+	public static final boolean LAMBDYNLIGHTS_LOADED = isModLoaded("lambdynlights");
 	@ExpectPlatform
 	private static boolean isForge() {
 		throw new AssertionError();

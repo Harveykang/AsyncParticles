@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.longs.Long2FloatOpenCustomHashMap;
 import it.unimi.dsi.fastutil.longs.LongHash;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class HeightMap {
+public class HeightMap {
 	public static final float DEFAULT_HEIGHT = Integer.MIN_VALUE;
 	private static final LongHash.Strategy STRATEGY = new LongHash.Strategy() {
 		@Override

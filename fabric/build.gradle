@@ -163,6 +163,9 @@ dependencies {
 
     /* Real Camera */
 //    modLocalRuntime "maven.modrinth:real-camera:XZ9lHrLr"
+
+    /* LambDynamicLights */
+    modLocalRuntime("dev.lambdaurora.lambdynamiclights:lambdynamiclights-runtime:4.4.0+1.20.1")
 }
 
 processResources {
