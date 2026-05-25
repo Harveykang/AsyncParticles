@@ -1,11 +1,12 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import it.unimi.dsi.fastutil.longs.Long2FloatMap;
+import it.unimi.dsi.fastutil.longs.Long2FloatMaps;
 import it.unimi.dsi.fastutil.longs.Long2FloatOpenCustomHashMap;
 import it.unimi.dsi.fastutil.longs.LongHash;
 import org.jetbrains.annotations.NotNull;
 
-public class HeightMap {
+public abstract class HeightMap {
 	public static final float DEFAULT_HEIGHT = Integer.MIN_VALUE;
 	private static final LongHash.Strategy STRATEGY = new LongHash.Strategy() {
 		@Override
@@ -18,22 +19,24 @@ public class HeightMap {
 			return a == b;
 		}
 	};
-	protected int centerX, centerZ, range;
+	private final float defaultHeight;
 	protected int pendingCenterX, pendingCenterZ, pendingRange;
-	protected volatile Long2FloatMap heightMap;
-	protected Long2FloatMap pendingHeightMap;
-	private boolean updating;
+	protected Long2FloatMap heightMap, pendingHeightMap;
+	protected boolean updating;
+	protected volatile State state;
 
 	public HeightMap() {
 		this(DEFAULT_HEIGHT);
 	}
 
 	public HeightMap(float defaultHeight) {
+		this.defaultHeight = defaultHeight;
 		this.heightMap = newMap(defaultHeight);
 		this.pendingHeightMap = newMap(defaultHeight);
+		this.state = new State(0, 0, 0, Long2FloatMaps.EMPTY_MAP);
 	}
 
-	protected @NotNull Long2FloatMap newMap(float defaultHeight) {
+	protected static @NotNull Long2FloatMap newMap(float defaultHeight) {
 		Long2FloatMap map = new Long2FloatOpenCustomHashMap(STRATEGY);
 		map.defaultReturnValue(defaultHeight);
 		return map;
@@ -42,7 +45,6 @@ public class HeightMap {
 	/**
 	 * 开始批量更新（必须在写入线程调用）
 	 *
-	 * @return 基于上一帧统计数据推荐的计算半径
 	 * @throws IllegalStateException 如果已经在更新中
 	 */
 	public void beginUpdate(int centerX, int centerZ, int range) {
@@ -56,22 +58,27 @@ public class HeightMap {
 	}
 
 	/**
-	 * 提交更新，原子性地切换到新地图
+	 * 提交更新，原子性地切换到新状态
 	 * 必须在写入线程调用，与 beginUpdate 配对使用
 	 */
-	public void commitUpdate() {
+	public final void commitUpdate() {
 		if (!isUpdating()) {
 			throw new IllegalStateException("Must call beginUpdate before commitUpdate");
 		}
 		updating = false;
+		this.state = createSnapshot();
+		swapMaps();
+	}
 
-		centerX = pendingCenterX;
-		centerZ = pendingCenterZ;
-		range = pendingRange;
+	protected void swapMaps() {
 		Long2FloatMap oldMap = heightMap;
 		heightMap = pendingHeightMap;
 		oldMap.clear();
-		pendingHeightMap = oldMap;
+		this.pendingHeightMap = oldMap;
+	}
+
+	protected State createSnapshot() {
+		return new State(pendingCenterX, pendingCenterZ, pendingRange, pendingHeightMap);
 	}
 
 	/**
@@ -81,8 +88,8 @@ public class HeightMap {
 		if (!isUpdating()) {
 			throw new IllegalStateException("Must call beginUpdate before setCenter");
 		}
-		centerX = x;
-		centerZ = z;
+		pendingCenterX = x;
+		pendingCenterZ = z;
 	}
 
 	/**
@@ -114,17 +121,6 @@ public class HeightMap {
 		return v == height;
 	}
 
-	/**
-	 * 获取高度值
-	 */
-	public float getHeight(int x, int z) {
-		return getHeight(asLong(x, z));
-	}
-
-	public float getHeight(long xz) {
-		return heightMap.get(xz);
-	}
-
 	public float getPendingHeight(int x, int z) {
 		if (!isUpdating()) {
 			throw new IllegalStateException("Must call beginUpdate before getPendingHeight");
@@ -143,6 +139,14 @@ public class HeightMap {
 		return pendingHeightMap.get(xz);
 	}
 
+	public State getState() {
+		return state;
+	}
+
+	public float defaultHeight() {
+		return defaultHeight;
+	}
+
 	public static long asLong(int x, int z) {
 		return ((long) z << 32) | (x & 0xFFFFFFFFL);
 	}
@@ -159,23 +163,43 @@ public class HeightMap {
 		return updating;
 	}
 
-	public float defaultHeight() {
-		return heightMap.defaultReturnValue();
+	public static boolean isOutOfRange(int x, int z, State state) {
+		int range = state.range();
+		return Math.abs(x - state.centerX()) > range
+			|| Math.abs(z - state.centerZ()) > range;
 	}
 
-	public boolean isOutOfRange(int x, int z) {
-		return Math.abs(x - centerX) > range || Math.abs(z - centerZ) > range;
-	}
+	public static class State {
+		private final int centerX;
+		private final int centerZ;
+		private final int range;
+		private final Long2FloatMap heightMap;
 
-	public int getRange() {
-		return range;
-	}
+		private State(int centerX, int centerZ, int range, Long2FloatMap heightMap) {
+			this.centerX = centerX;
+			this.centerZ = centerZ;
+			this.range = range;
+			this.heightMap = heightMap;
+		}
 
-	public int getCenterX() {
-		return centerX;
-	}
+		public State(State state) {
+			this(state.centerX, state.centerZ, state.range, state.heightMap);
+		}
 
-	public int getCenterZ() {
-		return centerZ;
+		public float getHeight(int x, int z) {
+			return heightMap.get(asLong(x, z));
+		}
+
+		public int centerX() {
+			return centerX;
+		}
+
+		public int centerZ() {
+			return centerZ;
+		}
+
+		public int range() {
+			return range;
+		}
 	}
 }
