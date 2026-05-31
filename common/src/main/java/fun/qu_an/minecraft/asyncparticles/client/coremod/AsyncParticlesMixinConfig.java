@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import org.spongepowered.asm.mixin.throwables.MixinError;
@@ -12,20 +12,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.*;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.MAKE_BUBBLES_POP_LOADED;
+import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.LOGGER;
 
 public class AsyncParticlesMixinConfig {
-	public static final Path MIXIN_CONFIG_FILE = Path.of("config", "asyncparticles", "asyncparticles-mixin.properties");
+	public static final Path MIXIN_CONFIG_FILE = Path.of("config", AsyncParticlesClient.MOD_ID, AsyncParticlesClient.MOD_ID + "-mixin.properties");
 	public static final int VERSION = 2;
 	static String COMMENTS = """
 		safeBlockEntityMap: Boolean. Make 'LevelChunk#blockEntities' thread-safe.
 		safeClassInstanceMultiMap: Boolean. Make 'ClassInstanceMultiMap' thread-safe.
 		safeLegacyRandomSource: Boolean. Make LegacyRandomSource thread-safe.
+		particle$splitTick: Boolean. Enable recursive particle tick.
 		particle$noCulling: A comma-separated list of classes extending 'Particle' that should not be culled.
 		particle$noLightCache: A comma-separated list of classes extending 'Particle' that should not use the light cache.
 		particle$lockRequired: A comma-separated list of classes extending 'Particle' that require a spin lock.
 		particle$lockProvider: A comma-separated list of classes extending 'Particle' that provide a spin lock.
 		replaceRandom: A comma-separated list of classes that require multithreaded random sources.
+		create$contraptionNoParticleCollision: A comma-separated list of classes extending 'AbstractContraptionEntity' that should not collide with particles.
 		""";
 	static final MixinConfigObj CONFIG;
 	private static MixinConfigObj toSaveConfig;
@@ -99,53 +102,42 @@ public class AsyncParticlesMixinConfig {
 
 	static class MixinConfigObj {
 		private int version = 0;
-		private boolean safeClassInstanceMultiMap = ModListHelper.MAKE_BUBBLES_POP_LOADED;
+		private boolean particle$splitTick = false;
+		private boolean safeClassInstanceMultiMap = MAKE_BUBBLES_POP_LOADED;
 		private boolean safeBlockEntityMap = false;
 		private boolean safeLegacyRandomSource = false;
-		private Set<String> noCulling = new LinkedHashSet<>();
+
+		private Set<String> particle$noLightCache = new LinkedHashSet<>();
 
 		{
-//			noCulling.add("com.lowdragmc.photon.client.gameobject.FXObject");
+			particle$noLightCache.add("dev.shadowsoffire.gateways.client.GatewayParticle");
+			particle$noLightCache.add("com.chailotl.particular.particles.FireflyParticle");
+			particle$noLightCache.add("com.lowdragmc.photon.client.gameobject.FXObject");
+			particle$noLightCache.add("net.diebuddies.minecraft.weather.WeatherParticle");
 		}
 
-		private Set<String> noLightCache = new LinkedHashSet<>();
+		private Set<String> particle$lockProvider = new LinkedHashSet<>();
 
 		{
-//			noLightCache.add("dev.shadowsoffire.gateways.client.GatewayParticle");
-			noLightCache.add("com.chailotl.particular.particles.FireflyParticle");
-//			noLightCache.add("com.lowdragmc.photon.client.gameobject.FXObject");
-			noLightCache.add("net.diebuddies.minecraft.weather.WeatherParticle");
-//			noLightCache.add("cn.coostack.cooparticlesapi.particles.ControlableParticle");
+			particle$lockProvider.add("yesman.epicfight.client.particle.TrailParticle");
+			particle$lockProvider.add("yesman.epicfight.client.particle.AbstractTrailParticle");
+			particle$lockProvider.add("com.lowdragmc.photon.client.gameobject.FXObject");
 		}
 
-		private Set<String> lockProvider = new LinkedHashSet<>();
+		private Set<String> particle$lockRequired = new LinkedHashSet<>();
 
 		{
-//			lockProvider.add("yesman.epicfight.client.particle.TrailParticle");
-//			lockProvider.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
-//			lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
-//			lockProvider.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
-//			lockProvider.add("com.lowdragmc.photon.client.gameobject.FXObject");
-		}
-
-		private Set<String> lockRequired = new LinkedHashSet<>();
-
-		{
-//			lockRequired.add("yesman.epicfight.client.particle.TrailParticle");
-//			lockRequired.add("com.dfdyz.epicacg.client.particle.BloomTrailParticle");
-//			lockRequired.add("com.brandon3055.draconicevolution.client.render.effect.ExplosionFX");
-//			lockRequired.add("com.brandon3055.draconicevolution.client.render.effect.CrystalFXWireless");
-//			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.Emitter");
-//			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.particle.ParticleEmitter");
-//			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.beam.BeamEmitter");
-//			lockRequired.add("com.lowdragmc.photon.client.gameobject.emitter.trail.TrailEmitter");
+			particle$lockRequired.add("yesman.epicfight.client.particle.TrailParticle");
+			particle$lockRequired.add("yesman.epicfight.client.particle.AbstractTrailParticle");
+			particle$lockRequired.add("com.lowdragmc.photon.client.gameobject.FXObject");
 		}
 
 		private Set<String> replaceRandom = new LinkedHashSet<>();
 
 		{
-//			replaceRandom.add("appeng.client.render.effects.LightningArcFX");
-//			replaceRandom.add("appeng.client.render.effects.LightningFX");
+			replaceRandom.add("appeng.client.render.effects.LightningArcFX");
+			replaceRandom.add("appeng.client.render.effects.LightningFX");
+			replaceRandom.add("de.cheaterpaul.fallingleaves.util.LeafUtil");
 		}
 
 		private Set<String> asyncTickableParticleGroups = new LinkedHashSet<>();
@@ -160,15 +152,22 @@ public class AsyncParticlesMixinConfig {
 
 		}
 
+//		private Set<String> create$contraptionNoParticleCollision = new LinkedHashSet<>();
+//
+//		{
+//			create$contraptionNoParticleCollision.add("rbasamoyai.createbigcannons.cannon_control.contraption.PitchOrientedContraptionEntity");
+//			create$contraptionNoParticleCollision.add("rbasamoyai.createbigcannons.cannon_control.contraption.AbstractMountedCannonContraption");
+//		}
+
 		private void fold() {
 			assertNotGlobal();
+			particle$splitTick = toSaveConfig.particle$splitTick;
 			safeClassInstanceMultiMap = toSaveConfig.safeClassInstanceMultiMap;
 			safeBlockEntityMap = toSaveConfig.safeBlockEntityMap;
 			safeLegacyRandomSource = toSaveConfig.safeLegacyRandomSource;
-			noCulling = toSaveConfig.noCulling;
-			noLightCache = toSaveConfig.noLightCache;
-			lockProvider = toSaveConfig.lockProvider;
-			lockRequired = toSaveConfig.lockRequired;
+			particle$noLightCache = toSaveConfig.particle$noLightCache;
+			particle$lockProvider = toSaveConfig.particle$lockProvider;
+			particle$lockRequired = toSaveConfig.particle$lockRequired;
 			replaceRandom = toSaveConfig.replaceRandom;
 			asyncTickableParticleGroups = toSaveConfig.asyncTickableParticleGroups;
 			modifyTheFromParticleMethod = toSaveConfig.modifyTheFromParticleMethod;
@@ -181,17 +180,15 @@ public class AsyncParticlesMixinConfig {
 			} catch (NumberFormatException ignored) {
 			}
 			MixinConfigObj defaultConfig = new MixinConfigObj();
-			safeClassInstanceMultiMap = ModListHelper.MAKE_BUBBLES_POP_LOADED ||
+			particle$splitTick = getBoolean(properties, "particle$splitTick", defaultConfig.particle$splitTick);
+			safeClassInstanceMultiMap = MAKE_BUBBLES_POP_LOADED ||
 				getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
 			safeBlockEntityMap = getBoolean(properties, "safeBlockEntityMap", defaultConfig.safeBlockEntityMap);
 			safeLegacyRandomSource = getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);
-			noCulling = getSet(properties, "particle$noCulling", defaultConfig.noCulling);
-			noLightCache = getSet(properties, "particle$noLightCache", defaultConfig.noLightCache);
-			lockProvider = getSet(properties, "particle$lockProvider", defaultConfig.lockProvider);
-			lockRequired = getSet(properties, "particle$lockRequired", defaultConfig.lockRequired);
+			particle$noLightCache = getSet(properties, "particle$noLightCache", defaultConfig.particle$noLightCache);
+			particle$lockProvider = getSet(properties, "particle$lockProvider", defaultConfig.particle$lockProvider);
+			particle$lockRequired = getSet(properties, "particle$lockRequired", defaultConfig.particle$lockRequired);
 			replaceRandom = getSet(properties, "replaceRandom", defaultConfig.replaceRandom);
-			asyncTickableParticleGroups = getSet(properties, "asyncTick$asyncTickableParticleGroups", defaultConfig.asyncTickableParticleGroups);
-			modifyTheFromParticleMethod = getSet(properties, "asyncTick$modifyTheFromParticleMethod", defaultConfig.modifyTheFromParticleMethod);
 		}
 
 		void flat() {
@@ -200,13 +197,13 @@ public class AsyncParticlesMixinConfig {
 
 		private void write(Properties properties) {
 			properties.setProperty("version", Integer.toString(version));
+			properties.setProperty("particle$splitTick", Boolean.toString(particle$splitTick));
 			properties.setProperty("safeClassInstanceMultiMap", Boolean.toString(safeClassInstanceMultiMap));
 			properties.setProperty("safeBlockEntityMap", Boolean.toString(safeBlockEntityMap));
 			properties.setProperty("safeLegacyRandomSource", Boolean.toString(safeLegacyRandomSource));
-			properties.setProperty("particle$noCulling", String.join(",", noCulling));
-			properties.setProperty("particle$noLightCache", String.join(",", noLightCache));
-			properties.setProperty("particle$lockProvider", String.join(",", lockProvider));
-			properties.setProperty("particle$lockRequired", String.join(",", lockRequired));
+			properties.setProperty("particle$noLightCache", String.join(",", particle$noLightCache));
+			properties.setProperty("particle$lockProvider", String.join(",", particle$lockProvider));
+			properties.setProperty("particle$lockRequired", String.join(",", particle$lockRequired));
 			properties.setProperty("replaceRandom", String.join(",", replaceRandom));
 		}
 
@@ -245,43 +242,33 @@ public class AsyncParticlesMixinConfig {
 		}
 
 		@Unmodifiable
-		Set<String> getNoCulling() {
-			return Collections.unmodifiableSet(noCulling);
-		}
-
-		void setNoCulling(Set<String> noCulling) {
-			assertNotGlobal();
-			this.noCulling = noCulling;
-		}
-
-		@Unmodifiable
 		Set<String> getNoLightCache() {
-			return Collections.unmodifiableSet(noLightCache);
+			return Collections.unmodifiableSet(particle$noLightCache);
 		}
 
 		void setNoLightCache(Set<String> noLightCache) {
 			assertNotGlobal();
-			this.noLightCache = noLightCache;
+			this.particle$noLightCache = noLightCache;
 		}
 
 		@Unmodifiable
 		Set<String> getLockProvider() {
-			return Collections.unmodifiableSet(lockProvider);
+			return Collections.unmodifiableSet(particle$lockProvider);
 		}
 
 		void setLockProvider(Set<String> lockProvider) {
 			assertNotGlobal();
-			this.lockProvider = lockProvider;
+			this.particle$lockProvider = lockProvider;
 		}
 
 		@Unmodifiable
 		Set<String> getLockRequired() {
-			return Collections.unmodifiableSet(lockRequired);
+			return Collections.unmodifiableSet(particle$lockRequired);
 		}
 
 		void setLockRequired(Set<String> lockRequired) {
 			assertNotGlobal();
-			this.lockRequired = lockRequired;
+			this.particle$lockRequired = lockRequired;
 		}
 
 		@Unmodifiable
@@ -299,45 +286,53 @@ public class AsyncParticlesMixinConfig {
 			this.safeLegacyRandomSource = safeLegacyRandomSource;
 		}
 
-		boolean isSafeLegacyRandomSource() {
+		public boolean isSafeLegacyRandomSource() {
 			return safeLegacyRandomSource;
 		}
 
-		boolean isSafeClassInstanceMultiMap() {
+		public boolean isSafeClassInstanceMultiMap() {
 			return safeClassInstanceMultiMap;
 		}
 
-		void setSafeClassInstanceMultiMap(boolean safeClassInstanceMultiMap) {
+		public void setSafeClassInstanceMultiMap(boolean safeClassInstanceMultiMap) {
 			assertNotGlobal();
-			this.safeClassInstanceMultiMap = ModListHelper.MAKE_BUBBLES_POP_LOADED ||
-				safeClassInstanceMultiMap;
+			this.safeClassInstanceMultiMap = MAKE_BUBBLES_POP_LOADED || safeClassInstanceMultiMap;
 		}
 
-		boolean isSafeBlockEntityMap() {
+		public boolean isSafeBlockEntityMap() {
 			return safeBlockEntityMap;
 		}
 
-		void setSafeBlockEntityMap(boolean safeBlockEntityMap) {
+		public void setSafeBlockEntityMap(boolean safeBlockEntityMap) {
 			assertNotGlobal();
 			this.safeBlockEntityMap = safeBlockEntityMap;
 		}
 
-		Collection<String> getAsyncTickableParticleGroups() {
+		public Collection<String> getAsyncTickableParticleGroups() {
 			return asyncTickableParticleGroups;
 		}
 
-		void setAsyncTickableParticleGroups(Set<String> asyncTickableParticleGroups) {
+		public void setAsyncTickableParticleGroups(Set<String> asyncTickableParticleGroups) {
 			assertNotGlobal();
 			this.asyncTickableParticleGroups = asyncTickableParticleGroups;
 		}
 
-		Collection<String> getModifyTheFromParticleMethod() {
+		public Collection<String> getModifyFromParticleMethod() {
 			return modifyTheFromParticleMethod;
 		}
 
-		void setModifyTheFromParticleMethod(Set<String> modifyTheFromParticleMethod) {
+		public void setModifyTheFromParticleMethod(Set<String> modifyTheFromParticleMethod) {
 			assertNotGlobal();
 			this.modifyTheFromParticleMethod = modifyTheFromParticleMethod;
+		}
+
+		public boolean isParticleSplitTick() {
+			return particle$splitTick;
+		}
+
+		public void setParticleSplitTick(boolean splitTick) {
+			assertNotGlobal();
+			this.particle$splitTick = splitTick;
 		}
 	}
 }

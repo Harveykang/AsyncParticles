@@ -1,6 +1,6 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.fix_black_destroy_particle;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.fix_black_destruction_particle;
 
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.fix_black_destroy_particle.TerrainParticleBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.fix_black_destruction_particle.TerrainParticleBehavior;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -25,13 +25,13 @@ public class MixinParticleEngine_FixBlackDestroyParticle {
 		target = "Lnet/minecraft/world/phys/shapes/VoxelShape;forAllBoxes(Lnet/minecraft/world/phys/shapes/Shapes$DoubleLineConsumer;)V"))
 	private void fixBlackDestroyParticle1(BlockPos blockPos, BlockState blockState, CallbackInfo ci) {
 		int lightColor = asyncparticles$getLightColor((ClientLevel) (Object) this, blockPos);
-		TerrainParticleBehavior.DESTROY_LIGHT_CACHE.set(lightColor);
+		TerrainParticleBehavior.DESTRUCTION_LIGHT_CACHE.set(lightColor);
 	}
 
 	@Inject(method = "addDestroyBlockEffect", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
 		target = "Lnet/minecraft/world/phys/shapes/VoxelShape;forAllBoxes(Lnet/minecraft/world/phys/shapes/Shapes$DoubleLineConsumer;)V"))
 	private void fixBlackDestroyParticle2(BlockPos blockPos, BlockState blockState, CallbackInfo ci) {
-		TerrainParticleBehavior.DESTROY_LIGHT_CACHE.remove();
+		TerrainParticleBehavior.DESTRUCTION_LIGHT_CACHE.remove();
 	}
 
 	@Unique
@@ -67,7 +67,7 @@ public class MixinParticleEngine_FixBlackDestroyParticle {
 				skyDataLayerData.get(lx, ly, lz - 1));
 		}
 		if (j < 15) {
-			j = max(j, lz == 0 ? sky.getLightValue(asyncparticles$mutable.set(x, y, z - 1)) :
+			j = max(j, lz == 0 ? block.getLightValue(asyncparticles$mutable.set(x, y, z - 1)) :
 				blockDataLayerData.get(lx, ly, lz - 1));
 		}
 
@@ -76,7 +76,7 @@ public class MixinParticleEngine_FixBlackDestroyParticle {
 				skyDataLayerData.get(lx - 1, ly, lz));
 		}
 		if (j < 15) {
-			j = max(j, lx == 0 ? sky.getLightValue(asyncparticles$mutable.set(x - 1, y, z)) :
+			j = max(j, lx == 0 ? block.getLightValue(asyncparticles$mutable.set(x - 1, y, z)) :
 				blockDataLayerData.get(lx - 1, ly, lz));
 		}
 

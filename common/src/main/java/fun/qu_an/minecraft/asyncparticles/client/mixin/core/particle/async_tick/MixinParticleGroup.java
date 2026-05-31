@@ -1,15 +1,15 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.async_tick;
 
 import com.google.common.collect.EvictingQueue;
-import com.llamalad7.mixinextras.sugar.Share;
-import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickableParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
+import fun.qu_an.minecraft.asyncparticles.client.core.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
 import net.minecraft.ReportedException;
 import net.minecraft.client.particle.Particle;
@@ -39,15 +39,14 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 
 	@Redirect(method = "<init>", at = @At(value = "INVOKE", remap = false,
 		target = "Lcom/google/common/collect/EvictingQueue;create(I)Lcom/google/common/collect/EvictingQueue;"))
-	private EvictingQueue<?> redirectNewQueue(int maxSize, @Share("maxSize") LocalIntRef maxSizeRef) {
-		maxSizeRef.set(maxSize);
+	private EvictingQueue<?> redirectNewQueue(int maxSize) {
 		return null;
 	}
 
 	@Inject(method = "<init>", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER,
 		target = "Lnet/minecraft/client/particle/ParticleGroup;particles:Ljava/util/Queue;"))
-	private void injectNewQueue(ParticleEngine particleEngine, CallbackInfo ci, @Share("maxSize") LocalIntRef maxSizeRef) {
-		particles = new IterationSafeEvictingQueue<>(16, maxSizeRef.get(), AsyncTickBehavior::onEvict);
+	private void injectNewQueue(ParticleEngine engine, CallbackInfo ci) {
+		particles = ParticleHelper.newParticleQueue();
 	}
 
 	/**
@@ -56,9 +55,7 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 	 */
 	@Overwrite
 	public void tickParticles() {
-//		assert ThreadUtil.isOnParticleTickerThread();
-		boolean enableLightCache = ConfigHelper.isParticleLightCache();
-		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
+		boolean enableLightCache = ConfigHelper.particleLightCache();
 		boolean forceDone = ConfigHelper.forceDoneParticleTick();
 		for (Particle particle : particles) {
 			if (AsyncTickBehavior.isCancelled() && !forceDone) {
@@ -73,10 +70,6 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 				// Skip the first tick that the particle is added to the queue.
 				if (enableLightCache) {
 					((LightCachedParticleAddon) particle).asyncparticles$refresh();
-				}
-				switch (particleCullingMode) {
-					case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
-					case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
 				}
 				continue;
 			}
@@ -95,10 +88,6 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 			((ParticleAddon) particle).asyncparticles$setTicked();
 			if (enableLightCache) {
 				((LightCachedParticleAddon) particle).asyncparticles$refresh();
-			}
-			switch (particleCullingMode) {
-				case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
-				case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
 			}
 		}
 	}

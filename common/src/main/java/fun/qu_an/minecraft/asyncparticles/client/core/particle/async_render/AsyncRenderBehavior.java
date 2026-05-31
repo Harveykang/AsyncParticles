@@ -6,6 +6,7 @@ import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.util.Util;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
@@ -27,6 +28,7 @@ public class AsyncRenderBehavior {
 	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
 	private static boolean particlePhase;
 	private static final List<ForkJoinTask<?>> futures = new ArrayList<>();
+	private static Frustum frustum;
 
 	static {
 		AtomicInteger workerCount = new AtomicInteger(1);
@@ -85,5 +87,17 @@ public class AsyncRenderBehavior {
 
 	public static void addRenderingFuture(ForkJoinTask<?> future) {
 		futures.add(future);
+	}
+
+	public static void setFrustum(Frustum frustum) {
+		AsyncRenderBehavior.frustum = frustum;
+	}
+
+	public static Frustum getFrustum() {
+		return frustum;
+	}
+
+	public static boolean shouldSync(Class<?> aClass) {
+		return false;
 	}
 }

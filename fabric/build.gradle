@@ -11,7 +11,6 @@ loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
 
     mixin {
-        useLegacyMixinAp = true
     }
 }
 
@@ -26,7 +25,7 @@ configurations {
 
     // Files in this configuration will be bundled into your mod using the Shadow plugin.
     // Don't use the `shadow` configuration from the plugin itself as it's meant for excluding files.
-    shadowBundle {
+    shadowCommon {
         canBeResolved = true
         canBeConsumed = false
     }
@@ -35,88 +34,88 @@ configurations {
 dependencies {
     include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.3.3")))
 
-    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
+    implementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+    implementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 
-    common(project(path: ':common', configuration: 'namedElements')) { transitive false }
-    shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
-//    common(project(path: ':common_legacy_mod_compat', configuration: 'namedElements')) { transitive false }
-//    shadowBundle project(path: ':common_legacy_mod_compat', configuration: 'transformProductionFabric')
+    common(project(path: ':common')) { transitive false }
+    shadowCommon(project(path: ':common', configuration: 'transformProductionFabric'))
+//    common(project(path: ':common_legacy_mod_compat')) { transitive false }
+//    shadowCommon project(path: ':common_legacy_mod_compat', configuration: 'transformProductionFabric')
 
     /* APIs */
-//    modLocalRuntime 'maven.modrinth:architectury-api:17.0.6+fabric'
-//    modLocalRuntime("me.shedaniel.cloth:cloth-config-fabric:19.0.147") {
+//    localRuntime 'maven.modrinth:architectury-api:17.0.6+fabric'
+    localRuntime("me.shedaniel.cloth:cloth-config-fabric:26.1.154") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+//    localRuntime("io.wispforest:owo-lib:0.12.21+1.21.6") {
 //        exclude(group: "net.fabricmc.fabric-api")
 //    }
-//    modLocalRuntime("io.wispforest:owo-lib:0.12.21+1.21.6") {
-//        exclude(group: "net.fabricmc.fabric-api")
-//    }
-    modCompileOnly 'maven.modrinth:modmenu:17.0.0-beta.2'
-    modLocalRuntime 'maven.modrinth:modmenu:17.0.0-beta.2'
-    modLocalRuntime 'maven.modrinth:fabric-permissions-api:0.6.1'
-    modLocalRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
-
-    /* Performance */
-    modCompileOnly "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
-    modCompileOnly 'maven.modrinth:iris:1.10.4+1.21.11-fabric'
-    modCompileOnly 'maven.modrinth:sodium-extra:mc1.21.11-0.8.3+fabric'
-    modLocalRuntime "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
-    modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.11-0.8.3+fabric'
-    modLocalRuntime 'maven.modrinth:iris:1.10.4+1.21.11-fabric'
-    localRuntime "org.antlr:antlr4-runtime:4.13.1"
-    localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
-    localRuntime "org.anarres:jcpp:1.4.14"
-    modLocalRuntime 'maven.modrinth:scalablelux:0.1.6+fabric.c25518a'
-    modLocalRuntime 'maven.modrinth:spark:1.10.156-fabric'
-    modCompileOnly 'maven.modrinth:moreculling:kWU8mVq5' // 1.4.0-beta.1
-//    modLocalRuntime 'maven.modrinth:moreculling:ESxkwc6w' // 1.4.0-beta.1
-
-    /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:particle-rain:v4-beta.5+1.21.11-fabric"
-//    modLocalRuntime "maven.modrinth:particle-rain:3.3.6"
-//    modLocalRuntime("dev.isxander:yet-another-config-lib:3.7.1+1.21.6-fabric"){
-//        exclude(group: "net.fabricmc.fabric-api")
-//    }
-
-    /* Effectual */
-//    modLocalRuntime 'maven.modrinth:effectual:1.1.0-1.21.8'
-//    modLocalRuntime 'maven.modrinth:tlib:1.3.0-1.21.8'
-
-    /* Lodestone */
-//    modLocalRuntime "maven.modrinth:lodestonelib:1.21.1-1.7.0.5-fabric" // TODO no 1.21.4 version
-
-    /* Effective */
-//    modLocalRuntime "maven.modrinth:effective:2.4.8-1.21.1" // TODO no 1.21.4 version
-//    modLocalRuntime fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
-
-    /* Particular */
-//    modLocalRuntime "maven.modrinth:particular:1.1.1+1.21.4" // TODO: this is a 1.21.4 version
-
-    /* Particle Core */
-//    modLocalRuntime "maven.modrinth:particle-core:0.2.6+1.21.5"
-//    modLocalRuntime "maven.modrinth:fzzy-config:0.6.9+1.21.5"
-//    modLocalRuntime("net.fabricmc:fabric-language-kotlin:1.13.2+kotlin.2.1.20") {
-//        exclude(group: "net.fabricmc.fabric-api")
-//    }
-
-    /* A Good Place */
-    modCompileOnly "maven.modrinth:a-good-place:kD90q4La" // 1.2.10 // TODO:this is a 1.21.4 version
-//    modLocalRuntime "maven.modrinth:a-good-place:kD90q4La" // 1.2.10 // TODO:this is a 1.21.4 version
-
-    /* Physics Mod */
-    modCompileOnly "maven.modrinth:physicsmod:k8blA2yX" // 3.1.9
-//    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v176f-fabric-1.21.5.jar')
-
-    /* Subtle Effects */
-//    localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"
-//    modLocalRuntime "maven.modrinth:subtle-effects:EhcPsdf1" // fabric 1.10.0
-
-    /* What Are They Up To */
-    modCompileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5 // TODO:this is a 1.21.4 version
-//    modLocalRuntime "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5
-
-    /* Immediately Fast */
-    modCompileOnly "maven.modrinth:immediatelyfast:1.11.0+1.21.7-fabric"
+    compileOnly 'maven.modrinth:modmenu:18.0.0-beta.1'
+    localRuntime 'maven.modrinth:modmenu:18.0.0-beta.1'
+//    localRuntime 'maven.modrinth:fabric-permissions-api:0.6.1'
+//    localRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
+//
+//    /* Performance */
+//    compileOnly "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
+//    compileOnly 'maven.modrinth:iris:1.10.4+1.21.11-fabric'
+//    compileOnly 'maven.modrinth:sodium-extra:mc1.21.11-0.8.3+fabric'
+//    localRuntime "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
+//    localRuntime 'maven.modrinth:sodium-extra:mc1.21.11-0.8.3+fabric'
+//    localRuntime 'maven.modrinth:iris:1.10.4+1.21.11-fabric'
+//    localRuntime "org.antlr:antlr4-runtime:4.13.1"
+//    localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
+//    localRuntime "org.anarres:jcpp:1.4.14"
+//    localRuntime 'maven.modrinth:scalablelux:0.1.6+fabric.c25518a'
+//    localRuntime 'maven.modrinth:spark:1.10.156-fabric'
+//    compileOnly 'maven.modrinth:moreculling:kWU8mVq5' // 1.4.0-beta.1
+////    localRuntime 'maven.modrinth:moreculling:ESxkwc6w' // 1.4.0-beta.1
+//
+//    /* Particle Rain/Pretty Rain */
+//    compileOnly "maven.modrinth:particle-rain:v4-beta.5+1.21.11-fabric"
+////    localRuntime "maven.modrinth:particle-rain:3.3.6"
+////    localRuntime("dev.isxander:yet-another-config-lib:3.7.1+1.21.6-fabric"){
+////        exclude(group: "net.fabricmc.fabric-api")
+////    }
+//
+//    /* Effectual */
+////    localRuntime 'maven.modrinth:effectual:1.1.0-1.21.8'
+////    localRuntime 'maven.modrinth:tlib:1.3.0-1.21.8'
+//
+//    /* Lodestone */
+////    localRuntime "maven.modrinth:lodestonelib:1.21.1-1.7.0.5-fabric" // TODO no 1.21.4 version
+//
+//    /* Effective */
+////    localRuntime "maven.modrinth:effective:2.4.8-1.21.1" // TODO no 1.21.4 version
+////    localRuntime fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
+//
+//    /* Particular */
+////    localRuntime "maven.modrinth:particular:1.1.1+1.21.4" // TODO: this is a 1.21.4 version
+//
+//    /* Particle Core */
+////    localRuntime "maven.modrinth:particle-core:0.2.6+1.21.5"
+////    localRuntime "maven.modrinth:fzzy-config:0.6.9+1.21.5"
+////    localRuntime("net.fabricmc:fabric-language-kotlin:1.13.2+kotlin.2.1.20") {
+////        exclude(group: "net.fabricmc.fabric-api")
+////    }
+//
+//    /* A Good Place */
+//    compileOnly "maven.modrinth:a-good-place:kD90q4La" // 1.2.10 // TODO:this is a 1.21.4 version
+////    localRuntime "maven.modrinth:a-good-place:kD90q4La" // 1.2.10 // TODO:this is a 1.21.4 version
+//
+//    /* Physics Mod */
+//    compileOnly "maven.modrinth:physicsmod:k8blA2yX" // 3.1.9
+////    localRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v176f-fabric-1.21.5.jar')
+//
+//    /* Subtle Effects */
+////    localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"
+////    localRuntime "maven.modrinth:subtle-effects:EhcPsdf1" // fabric 1.10.0
+//
+//    /* What Are They Up To */
+//    compileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5 // TODO:this is a 1.21.4 version
+////    localRuntime "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5
+//
+//    /* Immediately Fast */
+//    compileOnly "maven.modrinth:immediatelyfast:1.11.0+1.21.7-fabric"
 }
 
 processResources {
@@ -127,13 +126,18 @@ processResources {
     }
 }
 
-shadowJar {
-    configurations = [project.configurations.shadowBundle]
-    archiveClassifier = 'dev-shadow'
+jar {
+    archiveClassifier = "raw"
 }
 
-remapJar {
-    inputFile.set shadowJar.archiveFile
+shadowJar {
+    dependsOn(jar)
+    mainSpec.sourcePaths.clear()       // Remove default source set inclusion
+    from(zipTree(jar.archiveFile))     // Unpack jar output (preserves Loom modifications)
+
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier = null           // shadowJar becomes the main artifact
+    from rootProject.file("LICENSE.md")
 }
 
 runClient {

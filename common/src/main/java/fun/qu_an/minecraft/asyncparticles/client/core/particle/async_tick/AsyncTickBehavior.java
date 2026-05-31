@@ -201,33 +201,48 @@ public class AsyncTickBehavior {
 		waitCleanupFuture();
 		Minecraft mc = Minecraft.getInstance();
 		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
-		if (levelRunning) {
-			mc.particleEngine.tick();
-			if (!isTheLastTick) {
-				tickTasks.forEach(Runnable::run);
-			} else {
-				ForkJoinTask<?>[] tasks = tickTasks.stream()
-					.map(EXECUTOR::submit)
-					.toArray(ForkJoinTask[]::new);
-				tickFuture = () -> {
-					for (ForkJoinTask<?> task : tasks) {
-						if (task == null) {
-							break;
-						}
-						try {
-							task.get();
-						} catch (InterruptedException | ExecutionException e) {
-							throw new RuntimeException(e);
-						}
-					}
-				};
-			}
-			tickTasks.clear();
+		if (!levelRunning) {
+			return;
 		}
+		mc.particleEngine.tick();
+		if (tickTasks.isEmpty()) {
+			return;
+		}
+		if (!isTheLastTick) {
+			tickTasks.forEach(Runnable::run);
+		} else {
+			ForkJoinTask<?>[] tasks = tickTasks.stream()
+				.map(EXECUTOR::submit)
+				.toArray(ForkJoinTask[]::new);
+			tickFuture = () -> {
+				for (ForkJoinTask<?> task : tasks) {
+					if (task == null) {
+						break;
+					}
+					try {
+						task.get();
+					} catch (InterruptedException | ExecutionException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			};
+		}
+		tickTasks.clear();
 	}
 
 	public static void dispatch(Runnable tickParticles) {
 		tickTasks.add(tickParticles);
 	}
 
+	public static void reloadLater() {
+		// TODO
+	}
+
+	public static boolean shouldSync(Class<?> aClass) {
+		return false; // TODO
+	}
+
+	public static void recordSync(Particle particle) {
+		// TODO
+	}
 }

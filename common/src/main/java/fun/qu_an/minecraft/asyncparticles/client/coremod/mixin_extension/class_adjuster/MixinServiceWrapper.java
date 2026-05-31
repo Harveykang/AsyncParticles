@@ -131,6 +131,16 @@ public class MixinServiceWrapper implements IMixinService, IClassBytecodeProvide
     }
 
     @Override
+    public IFeatureValidator getFeatureValidator() {
+        return delegate.getFeatureValidator();
+    }
+
+    @Override
+    public IAdviceProvider getAdviceProvider() {
+        return delegate.getAdviceProvider();
+    }
+
+    @Override
     public Collection<String> getPlatformAgents() {
         return delegate.getPlatformAgents();
     }

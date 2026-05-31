@@ -30,14 +30,12 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		}
 		ExtensionRegistrar.register(new ExtensionMemberCancelApplication());
 
-		MixinClassAdjusterRegistrar.register(new AdjusterParticlesNoCulling());
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesNoLightCache());
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockProvider());
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired_Tick());
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired_Extract());
 		MixinClassAdjusterRegistrar.register(new AdjusterReplaceRandom());
-		MixinClassAdjusterRegistrar.register(new AdjusterParticlesAsyncTickableGroup());
-		MixinClassAdjusterRegistrar.register(new AdjusterParticlesModifyTheFromParticleMethod());
+		MixinClassAdjusterRegistrar.register(new AdjusterParticlesModifyFromParticleMethod());
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesTestAliveBeforeRender());
 		MixinMemberCancellerRegistrar.register(new AsyncParticlesMixinMemberCanceller());
 		MixinCancellerRegistrar.register(new AsyncParticlesMixinCanceller());

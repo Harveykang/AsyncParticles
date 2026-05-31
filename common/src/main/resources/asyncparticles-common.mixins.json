@@ -6,14 +6,13 @@
   },
   "package": "fun.qu_an.minecraft.asyncparticles.client.mixin",
   "compatibilityLevel": "JAVA_17",
-  "refmap": "asyncparticles-common-refmap.json",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin",
   "client": [
     "compat.sodium_extra.MixinFireworkParticles$Starter",
     "compat.sodium_extra.MixinParticleEngine",
     "conditional.Mixin_ReplaceRandom",
     "conditional.MixinAsyncTick_AsyncTickableParticleGroup",
-    "conditional.MixinAsyncTick_ModifyTheFromParticleMethod",
+    "conditional.MixinAsyncTick_ModifyFromParticleMethod",
     "conditional.MixinAsyncTick_TestAliveBeforeRender",
     "conditional.MixinClassInstanceMultiMap",
     "conditional.MixinLegacyRandomSource",
@@ -22,7 +21,6 @@
     "conditional.MixinParticles_LockProvider",
     "conditional.MixinParticles_LockRequired_Extract",
     "conditional.MixinParticles_LockRequired_Tick",
-    "conditional.MixinParticles_NoCulling",
     "core.MixinARGB",
     "core.MixinTextureManager",
     "core.MixinWaterFluid",
@@ -38,12 +36,16 @@
     "core.particle.async_tick.MixinMinecraft",
     "core.particle.async_tick.MixinParticleEngine",
     "core.particle.async_tick.MixinParticleGroup",
-    "core.particle.fix_black_destroy_particle.MixinParticleEngine_FixBlackDestroyParticle",
-    "core.particle.fix_black_destroy_particle.MixinTerrainParticle_FixBlackDestroyParticle",
+    "core.particle.fix_black_destruction_particle.MixinParticleEngine_FixBlackDestroyParticle",
+    "core.particle.fix_black_destruction_particle.MixinTerrainParticle_FixBlackDestroyParticle",
     "off_thread_access.MixinClientChunkCache",
     "off_thread_access.MixinClientLevel",
     "off_thread_access.MixinLevelRenderer",
-    "off_thread_access.MixinSoundEngine"
+    "off_thread_access.MixinSoundEngine",
+    "compat.cloth_config.AbstractConfigEntryAccessor",
+    "compat.cloth_config.AbstractConfigListEntryAccessor",
+    "compat.cloth_config.AccessorSubCategoryListEntry",
+    "compat.cloth_config.AccessorBaseListEntry"
   ],
   "injectors": {
     "defaultRequire": 1

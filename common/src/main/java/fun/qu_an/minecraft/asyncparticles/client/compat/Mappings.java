@@ -1,10 +1,23 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
-
 public class Mappings {
-	@ExpectPlatform
 	public static String getTickParticlesMethod() {
-		throw new AssertionError();
+		return "tickParticles";
+	}
+
+	public static String getRenderMethod() {
+		return "extract";
+	}
+
+	public static String getRenderRotatedQuadMethod1() {
+		return "extractRotatedQuad";
+	}
+
+	public static String getRenderRotatedQuadMethod2() {
+		return "extractRotatedQuad";
+	}
+
+	public static String getFireworkSparkClass() {
+		return "net.minecraft.client.particle.FireworkParticles$SparkParticle";
 	}
 }

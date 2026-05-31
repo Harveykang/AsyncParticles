@@ -2,13 +2,20 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.async_tick;
 
 import com.google.common.collect.Lists;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickParticleGroupBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickableParticleGroup;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.util.profiling.Profiler;
 import org.spongepowered.asm.mixin.*;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -36,13 +43,16 @@ public abstract class MixinParticleEngine {
 	 */
 	@Overwrite
 	public void tick() {
+		Particle particle;
+		boolean tickAsync = ConfigHelper.isTickAsync();
 		this.particles.forEach((particleRenderType, particleGroup) -> {
 			Profiler.get().push(particleRenderType.name());
-			if (particleGroup instanceof AsyncTickableParticleGroup &&
-				AsyncTickParticleGroupBehavior.canTickAsync(particleGroup)){
-				AsyncTickBehavior.dispatch(particleGroup::tickParticles);
-			} else {
+			if (!tickAsync
+				|| !(particleGroup instanceof AsyncTickableParticleGroup)
+				|| !AsyncTickParticleGroupBehavior.canTickAsync(particleGroup)) {
 				particleGroup.tickParticles();
+			} else {
+				AsyncTickBehavior.dispatch(particleGroup::tickParticles);
 			}
 			Profiler.get().pop();
 		});
@@ -50,7 +60,7 @@ public abstract class MixinParticleEngine {
 			List<TrackingEmitter> list = Lists.newArrayList();
 
 			for (TrackingEmitter trackingEmitter : this.trackingEmitters) {
-				trackingEmitter.tick();
+				trackingEmitter.tick(); // TODO can be async-lized safely?
 				if (!trackingEmitter.isAlive()) {
 					list.add(trackingEmitter);
 				}
@@ -59,10 +69,45 @@ public abstract class MixinParticleEngine {
 			this.trackingEmitters.removeAll(list);
 		}
 
-		Particle particle;
-		if (!this.particlesToAdd.isEmpty()) {
-			while ((particle = this.particlesToAdd.poll()) != null) {
-				this.particles.computeIfAbsent(particle.getGroup(), this::createParticleGroup).add(particle);
+		boolean gpuParticles = ConfigHelper.isGpuParticles();
+		if (!particlesToAdd.isEmpty()) {
+			boolean appendNewParticlesToRenderer = ConfigHelper.isAppendNewParticlesToRenderer();
+			// Write like this to be compatible with e.g. Spectrum mod
+			//noinspection ForLoopReplaceableByForEach
+			for (Iterator<Particle> iterator = particlesToAdd.iterator(); iterator.hasNext(); ) {
+				particle = iterator.next();
+				boolean canComputeFast;
+				if (!gpuParticles || !tickAsync) {
+					canComputeFast = false;
+				} else if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
+					AsyncTickBehavior.recordSync(particle);
+					canComputeFast = false;
+				} else {
+					canComputeFast = particle instanceof SingleQuadParticle tsp && GpuParticleBehavior.INSTANCE.canRenderFast(tsp);
+				}
+				ParticleGroup<?> group;
+				ParticleRenderType renderType = particle.getGroup();
+				if (!canComputeFast) {
+					group = this.particles.computeIfAbsent(renderType, this::createParticleGroup);
+				} else {
+					group = this.particles.computeIfAbsent(renderType, k -> {
+						GpuParticleBehavior.INSTANCE.createRenderer(k);
+						return createParticleGroup(k);
+					});
+					if (appendNewParticlesToRenderer) {
+						GpuParticleBehavior.INSTANCE.getRenderer(renderType).append(GpuParticleBehavior.INSTANCE.getCameraPos(), ((SingleQuadParticle) particle));
+					}
+				}
+				group.add(particle);
+			}
+			particlesToAdd.clear();
+		}
+		if (tickAsync) {
+			if (gpuParticles) {
+				GpuParticleBehavior.INSTANCE.swapAllBuffers();
+				GpuParticleBehavior.INSTANCE.setGpuParticleLimit(ConfigHelper.getParticleLimit());
+				Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+				GpuParticleBehavior.INSTANCE.setCameraPos(camera.position());
 			}
 		}
 	}

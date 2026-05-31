@@ -7,7 +7,6 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
-import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleVertexStorageAddition;
 import fun.qu_an.minecraft.asyncparticles.client.addon.SingleQuadParticleLayerAddition;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
@@ -15,7 +14,7 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import net.minecraft.client.particle.ParticleGroup;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.feature.ParticleFeatureRenderer;
-import net.minecraft.client.renderer.state.QuadParticleRenderState;
+import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,11 +25,7 @@ import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ForkJoinTask;
 
 // add() -> afterAdd() -> waitFuture() -> submit() -> prepare() -> render()
 public class AsyncQuadParticleRenderState extends QuadParticleRenderState implements AsyncParticleRenderState {
@@ -38,9 +33,11 @@ public class AsyncQuadParticleRenderState extends QuadParticleRenderState implem
 	private MeshData meshData;
 	private ByteBufferBuilder byteBufferBuilder;
 	private final Map<SingleQuadParticle.Layer, PreparedLayer> preparedLayers = new Reference2ObjectArrayMap<>();
+	private final boolean translucent;
 
-	public AsyncQuadParticleRenderState(ParticleGroup<SingleQuadParticle> group) {
+	public AsyncQuadParticleRenderState(ParticleGroup<SingleQuadParticle> group, boolean translucent) {
 		this.group = group;
+		this.translucent = translucent;
 	}
 
 	@Override
@@ -62,11 +59,11 @@ public class AsyncQuadParticleRenderState extends QuadParticleRenderState implem
 
 	@Override
 	public void afterAdd() {
-		particleCount = ParticleLayerAttached.getParticleCount();
+		particleCount = ParticleLayerAttached.getParticleCount(translucent);
 		if (particleCount == 0) {
 			return;
 		}
-		particles.putAll(ParticleLayerAttached.getParticles());
+		particles.putAll(ParticleLayerAttached.getParticles(translucent));
 		int vertexCount = particleCount * 4;
 		byteBufferBuilder = ByteBufferBuilder.exactlySized(vertexCount * DefaultVertexFormat.PARTICLE.getVertexSize());
 		long target = byteBufferBuilder.reserve(vertexCount * DefaultVertexFormat.PARTICLE.getVertexSize());
@@ -99,10 +96,10 @@ public class AsyncQuadParticleRenderState extends QuadParticleRenderState implem
 				Storage storage = entry.getValue();
 				int count = storage.count();
 				if (count > 0) {
-					storage.forEachParticle((f, g, h, ix, jx, k, l, m, n, o, p, q, r, s) -> {
+					storage.forEachParticle((x, y, z, xRot, yRot, zRot, wRot, scale, u0, u1, v0, v1, color, lightCoords) -> {
 						int targetOffset = MemoryUtil.memGetInt(offsetPtr);
-						this.renderRotatedQuad(targetAddress + targetOffset, f, g, h, ix, jx, k, l, m, n, o, p, q, r, s);
-						MemoryUtil.memPutInt(offsetPtr, targetOffset + 112);
+						this.renderRotatedQuad(targetAddress + targetOffset, x, y, z, xRot, yRot, zRot, wRot, scale, u0, u1, v0, v1, color, lightCoords);
+						MemoryUtil.memPutInt(offsetPtr, targetOffset + 112); // DefaultVertexFormat.PARTICLE.getVertexSize() * 4
 
 //						int i = offset[0];
 //						this.renderRotatedQuad(i + targetAddress, f, g, h, ix, jx, k, l, m, n, o, p, q, r, s);
@@ -114,65 +111,6 @@ public class AsyncQuadParticleRenderState extends QuadParticleRenderState implem
 					j += count * 4;
 				}
 			}
-		}
-	}
-
-	public void renderParticles2(long targetAddress) {
-		Set<Map.Entry<SingleQuadParticle.Layer, Storage>> entries = this.particles.entrySet();
-		List<ForkJoinTask<?>> tasks = new ArrayList<>(AsyncRenderBehavior.THREADS);
-		int j = 0;
-		for (Map.Entry<SingleQuadParticle.Layer, Storage> entry : entries) {
-			Storage storage = entry.getValue();
-			int count = storage.count();
-			if (count > 0) {
-				int slice = (count + 1023) / 1024;
-				for (int i = 0; i < slice; i++) {
-					int start = i * 1024;
-					int end = Math.min(start + 1024, count);
-					final long finalTarget = targetAddress;
-					tasks.add(AsyncRenderBehavior.EXECUTOR.submit(() -> {
-						try (MemoryStack memoryStack = MemStackUtil.stackPush()) {
-							long offsetPtr = memoryStack.nmalloc(4);
-							MemoryUtil.memPutInt(offsetPtr, 0);
-							((ParticleVertexStorageAddition) storage)
-								.asyncparticles$slice(start, end)
-								.forEachParticle((f, g, h, ix, jx, k, l, m, n, o, p, q, r, s) -> {
-									int targetOffset = MemoryUtil.memGetInt(offsetPtr);
-									this.renderRotatedQuad(finalTarget + targetOffset, f, g, h, ix, jx, k, l, m, n, o, p, q, r, s);
-									MemoryUtil.memPutInt(offsetPtr, targetOffset + 112);
-								});
-						}
-					}));
-					targetAddress += (end - start) * 112L;
-				}
-				preparedLayers.put(entry.getKey(), new PreparedLayer(j, count * 6));
-				j += count * 4;
-			}
-//			if (count > 0) {
-//				final long finalTarget = targetAddress;
-//				tasks[idx++] = AsyncRenderBehavior.EXECUTOR.submit(() -> {
-//					try (MemoryStack memoryStack = MemStackUtil.stackPush()) {
-//						long offsetPtr = memoryStack.nmalloc(4);
-//						MemoryUtil.memPutInt(offsetPtr, 0);
-//
-//						storage.forEachParticle((f, g, h, ix, jx, k, l, m, n, o, p, q, r, s) -> {
-//							int targetOffset = MemoryUtil.memGetInt(offsetPtr);
-//							this.renderRotatedQuad(finalTarget + targetOffset, f, g, h, ix, jx, k, l, m, n, o, p, q, r, s);
-//							MemoryUtil.memPutInt(offsetPtr, targetOffset + 112);
-//						});
-//					}
-//				});
-//
-//				preparedLayers.put(entry.getKey(), new PreparedLayer(j, count * 6));
-//				j += count * 4;
-//				targetAddress += count * 112L;
-//			}
-		}
-		for (ForkJoinTask<?> task : tasks) {
-			if (task == null) {
-				break;
-			}
-			task.join();
 		}
 	}
 
@@ -230,7 +168,10 @@ public class AsyncQuadParticleRenderState extends QuadParticleRenderState implem
 
 	@Nullable
 	@Override
-	public QuadParticleRenderState.PreparedBuffers prepare(ParticleFeatureRenderer.ParticleBufferCache particleBufferCache) {
+	public QuadParticleRenderState.PreparedBuffers prepare(final ParticleFeatureRenderer.ParticleBufferCache particleBufferCache, final boolean translucent) {
+		if (translucent != this.translucent) {
+			throw new IllegalStateException("translucency mismatch!");
+		}
 		if (((ParticleGroupAddition) group).asyncparticles$getFuture() != null) {
 			throw new IllegalStateException("submit() has not been called!");
 		}

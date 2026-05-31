@@ -1,8 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.async_render;
 
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.state.CameraRenderState;
-import net.minecraft.client.renderer.state.ParticleGroupRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.state.level.ParticleGroupRenderState;
 
 public class DeferredParticleRenderState implements ParticleGroupRenderState {
 	private ParticleGroupRenderState delegate;

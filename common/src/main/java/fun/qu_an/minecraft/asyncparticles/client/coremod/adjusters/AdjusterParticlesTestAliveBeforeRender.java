@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AdjusterParticlesTestAliveBeforeRender implements MixinClassAdjuster {
-	private static final String CLASS_NAME = "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinAsyncTick_ModifyTheFromParticleMethod";
+	private static final String CLASS_NAME = "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinAsyncTick_TestAliveBeforeRender";
 	@Override
 	public String getMixinClassName() {
 		return CLASS_NAME;
@@ -17,7 +17,7 @@ public class AdjusterParticlesTestAliveBeforeRender implements MixinClassAdjuste
 	@Override
 	public List<String> getTargets(List<String> originalTargets) {
 		ArrayList<String> list = new ArrayList<>(originalTargets);
-		list.addAll(MixinConfigHelper.getModifyTheFromParticleMethod());
+		list.addAll(MixinConfigHelper.getModifyFromParticleMethod());
 		return list;
 	}
 

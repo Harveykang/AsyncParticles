@@ -1,10 +1,10 @@
-accessWidener v2 named
+accessWidener v2 official
 
-accessible field net/minecraft/client/renderer/state/QuadParticleRenderState particles Ljava/util/Map;
-accessible field net/minecraft/client/renderer/state/QuadParticleRenderState particleCount I
-accessible class net/minecraft/client/renderer/state/QuadParticleRenderState$Storage
+accessible field net/minecraft/client/renderer/state/level/QuadParticleRenderState particles Ljava/util/Map;
+accessible field net/minecraft/client/renderer/state/level/QuadParticleRenderState particleCount I
+accessible class net/minecraft/client/renderer/state/level/QuadParticleRenderState$Storage
 accessible field net/minecraft/client/renderer/feature/ParticleFeatureRenderer$ParticleBufferCache ringBuffer Lnet/minecraft/client/renderer/MappableRingBuffer;
-accessible field net/minecraft/client/particle/QuadParticleGroup particleTypeRenderState Lnet/minecraft/client/renderer/state/QuadParticleRenderState;
+accessible field net/minecraft/client/particle/QuadParticleGroup particleTypeRenderState Lnet/minecraft/client/renderer/state/level/QuadParticleRenderState;
 accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;
 transitive-mutable field net/minecraft/world/level/chunk/ChunkAccess blockEntities Ljava/util/Map;
 transitive-mutable field net/minecraft/world/level/chunk/ChunkAccess pendingBlockEntities Ljava/util/Map;
@@ -23,8 +23,14 @@ accessible field net/minecraft/client/particle/QuadParticleGroup particleType Ln
 accessible field net/minecraft/client/particle/Particle x D
 accessible field net/minecraft/client/particle/Particle y D
 accessible field net/minecraft/client/particle/Particle z D
+accessible field net/minecraft/client/particle/Particle bbWidth F
+accessible field net/minecraft/client/particle/Particle bbHeight F
+accessible field net/minecraft/client/renderer/culling/Frustum intersection Lorg/joml/FrustumIntersection;
+accessible field net/minecraft/client/renderer/culling/Frustum camX D
+accessible field net/minecraft/client/renderer/culling/Frustum camY D
+accessible field net/minecraft/client/renderer/culling/Frustum camZ D
 accessible method net/minecraft/util/Util onThreadException (Ljava/lang/Thread;Ljava/lang/Throwable;)V
-accessible method net/minecraft/client/renderer/state/QuadParticleRenderState$Storage <init> ()V
+accessible method net/minecraft/client/renderer/state/level/QuadParticleRenderState$Storage <init> ()V
 accessible method net/minecraft/client/particle/ParticleEngine updateCount (Lnet/minecraft/core/particles/ParticleLimit;I)V
 accessible field net/minecraft/client/particle/ParticleEngine particles Ljava/util/Map;
 transitive-mutable field net/minecraft/world/level/Level random Lnet/minecraft/util/RandomSource;

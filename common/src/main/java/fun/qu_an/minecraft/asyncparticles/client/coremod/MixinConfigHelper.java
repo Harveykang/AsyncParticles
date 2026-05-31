@@ -5,10 +5,6 @@ import java.util.Collection;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.CONFIG;
 
 public class MixinConfigHelper {
-	public static Collection<String> getNoCulling() {
-		return CONFIG.getNoCulling();
-	}
-
 	public static Collection<String> getNoLightCache() {
 		return CONFIG.getNoLightCache();
 	}
@@ -41,7 +37,11 @@ public class MixinConfigHelper {
 		return CONFIG.getAsyncTickableParticleGroups();
 	}
 
-	public static Collection<String> getModifyTheFromParticleMethod() {
-		return CONFIG.getModifyTheFromParticleMethod();
+	public static Collection<String> getModifyFromParticleMethod() {
+		return CONFIG.getModifyFromParticleMethod();
+	}
+
+	public static boolean isParticleSplitTick() {
+		return CONFIG.isParticleSplitTick();
 	}
 }

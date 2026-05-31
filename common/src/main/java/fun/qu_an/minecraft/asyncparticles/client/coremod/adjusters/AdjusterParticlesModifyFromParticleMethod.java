@@ -7,8 +7,8 @@ import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_a
 import java.util.ArrayList;
 import java.util.List;
 
-public class AdjusterParticlesModifyTheFromParticleMethod implements MixinClassAdjuster {
-	private static final String CLASS_NAME = "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinAsyncTick_ModifyTheFromParticleMethod";
+public class AdjusterParticlesModifyFromParticleMethod implements MixinClassAdjuster {
+	private static final String CLASS_NAME = "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinAsyncTick_ModifyFromParticleMethod";
 	@Override
 	public String getMixinClassName() {
 		return CLASS_NAME;
@@ -17,7 +17,7 @@ public class AdjusterParticlesModifyTheFromParticleMethod implements MixinClassA
 	@Override
 	public List<String> getTargets(List<String> originalTargets) {
 		ArrayList<String> list = new ArrayList<>(originalTargets);
-		list.addAll(MixinConfigHelper.getModifyTheFromParticleMethod());
+		list.addAll(MixinConfigHelper.getModifyFromParticleMethod());
 		return list;
 	}
 

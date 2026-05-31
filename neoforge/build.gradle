@@ -11,7 +11,6 @@ loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
 
     mixin {
-        useLegacyMixinAp = true
 //        defaultRefmapName = "asyncparticles-neoforge-refmap.json"
     }
 }
@@ -27,7 +26,7 @@ configurations {
 
     // Files in this configuration will be bundled into your mod using the Shadow plugin.
     // Don't use the `shadow` configuration from the plugin itself as it's meant for excluding files.
-    shadowBundle {
+    shadowCommon {
         canBeResolved = true
         canBeConsumed = false
     }
@@ -46,77 +45,77 @@ dependencies {
     implementation(include("com.github.bawnorton.mixinsquared:mixinsquared-neoforge:0.3.3"))
 
     neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
-    common(project(path: ':common', configuration: 'namedElements')) { transitive false }
-    shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
-//    common(project(path: ':common_legacy_mod_compat', configuration: 'namedElements')) { transitive false }
-//    shadowBundle project(path: ':common_legacy_mod_compat', configuration: 'transformProductionNeoForge')
+    common(project(path: ':common')) { transitive false }
+    shadowCommon(project(path: ':common', configuration: 'transformProductionNeoForge'))
+//    common(project(path: ':common_legacy_mod_compat')) { transitive false }
+//    shadowCommon project(path: ':common_legacy_mod_compat', configuration: 'transformProductionNeoForge')
 
     /* APIs */
-    modLocalRuntime 'maven.modrinth:architectury-api:17.0.8+neoforge'
-    modLocalRuntime "me.shedaniel.cloth:cloth-config-neoforge:19.0.147"
-    modLocalRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
-
-    /* Performance */
-//    modLocalRuntime "maven.modrinth:spark:1.10.139-neoforge"
-//    modCompileOnly 'maven.modrinth:embeddium:1.0.12-beta.1+mc1.21.4'
-    modCompileOnly 'maven.modrinth:sodium:mc1.21.6-0.6.13-neoforge'
-//    modLocalRuntime 'maven.modrinth:embeddium:1.0.12-beta.1+mc1.21.4'
-//    modLocalRuntime 'maven.modrinth:sodium:mc1.21.6-0.6.13-neoforge'
-//    modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.6-0.6.6+neoforge'
-//    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-renderer-api-v1-7.0.0.jar')
-//    modLocalRuntime fileTree(dir: '../libs', include: 'net.caffeinemc.sodium-neoforge-0.6.13+mc1.21.6-service.jar')
-
-//    modLocalRuntime fileTree(dir: '../libs', include: 'fabric-api-base-0.4.42+d1308ded19.jar')
-    modCompileOnly "maven.modrinth:iris:1.9.1+1.21.7-neoforge"
-//    modLocalRuntime 'maven.modrinth:monocle-iris:0.1.8' // no 1.21.4 version
-//    modLocalRuntime "maven.modrinth:iris:1.9.1+1.21.7-neoforge"
-//    modLocalRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
-//    localRuntime "org.antlr:antlr4-runtime:4.13.1"
-//    localRuntime "io.github.douira:glsl-transformer:2.0.1"
-//    localRuntime "org.anarres:jcpp:1.4.14"
-//    modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
-//    modCompileOnly "curse.maven:flerovium-1142875:6258259"
-//    modLocalRuntime "curse.maven:flerovium-1142875:6258259"
-    modCompileOnly 'maven.modrinth:moreculling:1.4.0-beta.1'
-    modLocalRuntime 'maven.modrinth:moreculling:1.4.0-beta.1'
-
-    /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:pretty-rain:2tO4FX8T" // 1.1.4
-//    modLocalRuntime "maven.modrinth:pretty-rain:2tO4FX8T" // 1.1.4
-
-    /* Particle Core */
-    modCompileOnly "maven.modrinth:particle-core:0.2.6+1.21.5+neoforge"
-//    modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.21.4+neoforge"
-//    modLocalRuntime "maven.modrinth:fzzy-config:0.6.8+1.21.3+neoforge"
-//    modLocalRuntime 'thedarkcolour:kfflang:5.7.0'
-//    modLocalRuntime 'thedarkcolour:kfflib:5.7.0'
-//    modLocalRuntime 'thedarkcolour:kffmod:5.7.0'
-//    modLocalRuntime('thedarkcolour:kotlinforforge-neoforge:5.7.0') {
-//        exclude(group: "net.neoforged.fancymodloader", module: "loader")
-//    }
-
-    /* Simple Weather */
-    modCompileOnly "curse.maven:simple-weather-983390:6842087" // 1.1.4
-//    modLocalRuntime "curse.maven:simple-weather-983390:6842087" // 1.1.4
-//    modLocalRuntime "tv.soaryn:volumetrics:1.0.0"
-
-    /* A Good Place */
-    modCompileOnly "maven.modrinth:a-good-place:1.21.4-1.2.10" // 1.2.10 // TODO:this is a 1.21.4 version
-//    modLocalRuntime "maven.modrinth:a-good-place:1.21.4-1.2.10" // 1.2.10 // TODO:this is a 1.21.4 version
-
-    /* Physics Mod */
-    modCompileOnly "maven.modrinth:physicsmod:idA1Lmwe" // 3.1.9
-//    modLocalRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v176f-neoforge-1.21.5.jar')
-
-    /* Particular Reforged */
-    modCompileOnly "curse.maven:particular-reforged-1219053:6912482" // 1.1.5
-//    modLocalRuntime "curse.maven:particular-reforged-1219053:6912482"
-
-    /* What Are They Up To */
-    modCompileOnly "maven.modrinth:what-are-they-up-to:1.21.4-1.2.5" // 1.2.5 // TODO:this is a 1.21.4 version
-
-    /* Immediately Fast */
-    modCompileOnly "maven.modrinth:immediatelyfast:1.11.0+1.21.7-neoforge"
+//    localRuntime 'maven.modrinth:architectury-api:17.0.8+neoforge'
+    localRuntime "me.shedaniel.cloth:cloth-config-neoforge:26.1.154"
+//    localRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
+//
+//    /* Performance */
+////    localRuntime "maven.modrinth:spark:1.10.139-neoforge"
+////    compileOnly 'maven.modrinth:embeddium:1.0.12-beta.1+mc1.21.4'
+//    compileOnly 'maven.modrinth:sodium:mc1.21.6-0.6.13-neoforge'
+////    localRuntime 'maven.modrinth:embeddium:1.0.12-beta.1+mc1.21.4'
+////    localRuntime 'maven.modrinth:sodium:mc1.21.6-0.6.13-neoforge'
+////    localRuntime 'maven.modrinth:sodium-extra:mc1.21.6-0.6.6+neoforge'
+////    localRuntime fileTree(dir: '../libs', include: 'fabric-renderer-api-v1-7.0.0.jar')
+////    localRuntime fileTree(dir: '../libs', include: 'net.caffeinemc.sodium-neoforge-0.6.13+mc1.21.6-service.jar')
+//
+////    localRuntime fileTree(dir: '../libs', include: 'fabric-api-base-0.4.42+d1308ded19.jar')
+//    compileOnly "maven.modrinth:iris:1.9.1+1.21.7-neoforge"
+////    localRuntime 'maven.modrinth:monocle-iris:0.1.8' // no 1.21.4 version
+////    localRuntime "maven.modrinth:iris:1.9.1+1.21.7-neoforge"
+////    localRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
+////    localRuntime "org.antlr:antlr4-runtime:4.13.1"
+////    localRuntime "io.github.douira:glsl-transformer:2.0.1"
+////    localRuntime "org.anarres:jcpp:1.4.14"
+////    localRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
+////    compileOnly "curse.maven:flerovium-1142875:6258259"
+////    localRuntime "curse.maven:flerovium-1142875:6258259"
+//    compileOnly 'maven.modrinth:moreculling:1.4.0-beta.1'
+//    localRuntime 'maven.modrinth:moreculling:1.4.0-beta.1'
+//
+//    /* Particle Rain/Pretty Rain */
+//    compileOnly "maven.modrinth:pretty-rain:2tO4FX8T" // 1.1.4
+////    localRuntime "maven.modrinth:pretty-rain:2tO4FX8T" // 1.1.4
+//
+//    /* Particle Core */
+//    compileOnly "maven.modrinth:particle-core:0.2.6+1.21.5+neoforge"
+////    localRuntime "maven.modrinth:particle-core:0.2.5+1.21.4+neoforge"
+////    localRuntime "maven.modrinth:fzzy-config:0.6.8+1.21.3+neoforge"
+////    localRuntime 'thedarkcolour:kfflang:5.7.0'
+////    localRuntime 'thedarkcolour:kfflib:5.7.0'
+////    localRuntime 'thedarkcolour:kffmod:5.7.0'
+////    localRuntime('thedarkcolour:kotlinforforge-neoforge:5.7.0') {
+////        exclude(group: "net.neoforged.fancymodloader", module: "loader")
+////    }
+//
+//    /* Simple Weather */
+//    compileOnly "curse.maven:simple-weather-983390:6842087" // 1.1.4
+////    localRuntime "curse.maven:simple-weather-983390:6842087" // 1.1.4
+////    localRuntime "tv.soaryn:volumetrics:1.0.0"
+//
+//    /* A Good Place */
+//    compileOnly "maven.modrinth:a-good-place:1.21.4-1.2.10" // 1.2.10 // TODO:this is a 1.21.4 version
+////    localRuntime "maven.modrinth:a-good-place:1.21.4-1.2.10" // 1.2.10 // TODO:this is a 1.21.4 version
+//
+//    /* Physics Mod */
+//    compileOnly "maven.modrinth:physicsmod:idA1Lmwe" // 3.1.9
+////    localRuntime fileTree(dir: '../libs', include: 'physics-mod-pro-v176f-neoforge-1.21.5.jar')
+//
+//    /* Particular Reforged */
+//    compileOnly "curse.maven:particular-reforged-1219053:6912482" // 1.1.5
+////    localRuntime "curse.maven:particular-reforged-1219053:6912482"
+//
+//    /* What Are They Up To */
+//    compileOnly "maven.modrinth:what-are-they-up-to:1.21.4-1.2.5" // 1.2.5 // TODO:this is a 1.21.4 version
+//
+//    /* Immediately Fast */
+//    compileOnly "maven.modrinth:immediatelyfast:1.11.0+1.21.7-neoforge"
 }
 
 processResources {
@@ -136,13 +135,35 @@ processResources {
     }
 }
 
-shadowJar {
-    configurations = [project.configurations.shadowBundle]
-    archiveClassifier = 'dev-shadow'
+jar {
+    archiveClassifier = "raw"
 }
 
-remapJar {
-    inputFile.set shadowJar.archiveFile
-    injectAccessWidener = true
-    atAccessWideners.add(project(":common").loom.accessWidenerPath.get().asFile.name)
+import dev.architectury.at.AccessTransformSet;
+import dev.architectury.at.io.AccessTransformFormats;
+import dev.architectury.loom.accesstransformer.Aw2At;
+import dev.architectury.loom.util.LfWriter;
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files;
+shadowJar {
+    dependsOn(jar)
+    mainSpec.sourcePaths.clear()       // Remove default source set inclusion
+    from(zipTree(jar.archiveFile))     // Unpack jar output (preserves Loom modifications)
+
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier = null           // shadowJar becomes the main artifact
+    from rootProject.file("LICENSE.md")
+
+    AccessTransformSet at
+    File awFile = loom.accessWidenerPath.get().asFile
+    try (BufferedReader reader = Files.newBufferedReader(awFile.toPath(), StandardCharsets.UTF_8)) {
+        at = Aw2At.toAccessTransformSet(reader)
+    }
+    java.nio.file.Path tempPath = java.nio.file.Path.of("temp").toAbsolutePath()
+    java.nio.file.Path atPath = tempPath.resolve("META-INF/accesstransformer.cfg")
+    Files.createDirectories(atPath.getParent())
+    try (Writer writer = new LfWriter(Files.newBufferedWriter(atPath))) {
+        AccessTransformFormats.FML.write(writer, at)
+    }
+    from tempPath.toString()
 }

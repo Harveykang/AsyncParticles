@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.async_render;
 
 import net.minecraft.client.particle.SingleQuadParticle;
-import net.minecraft.client.renderer.state.QuadParticleRenderState;
+import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 
 import java.util.List;
 import java.util.Map;
@@ -24,8 +24,13 @@ public class ParticleLayerAttached {
 		return attaches.stream().mapToInt(l -> l.storage.count()).sum();
 	}
 
-	public static Map<SingleQuadParticle.Layer, ? extends QuadParticleRenderState.Storage> getParticles() {
-		return attaches.stream().filter(l -> l.storage.count() > 0)
+	public static int getParticleCount(boolean translucent) {
+		return attaches.stream().filter(l -> l.layer.translucent() == translucent)
+			.mapToInt(l -> l.storage.count()).sum();
+	}
+
+	public static Map<SingleQuadParticle.Layer, ? extends QuadParticleRenderState.Storage> getParticles(boolean translucent) {
+		return attaches.stream().filter(l -> l.layer.translucent() == translucent && l.storage.count() > 0)
 			.collect(Collectors.toMap(l -> l.layer, l -> l.storage));
 	}
 

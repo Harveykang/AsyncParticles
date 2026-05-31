@@ -6,7 +6,6 @@ loom {
     accessWidenerPath = file('src/main/resources/asyncparticles-common.accesswidener')
 
     mixin {
-        useLegacyMixinAp = true
         defaultRefmapName = "asyncparticles-common-refmap.json"
     }
 }
@@ -18,55 +17,55 @@ dependencies {
 
     implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.3.3"))
 
-    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
-    modCompileOnly "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
+    implementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+    compileOnly "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 //    compileOnly "org.sinytra:connector:2.0.0-beta.7+1.21.1"
-    modCompileOnly("me.shedaniel.cloth:cloth-config:19.0.147")
-
-    /* APIs */
-    modCompileOnly "maven.modrinth:fzzy-config:0.7.2+1.21.6"
-
-    /* Performance */
-    modCompileOnly "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
-    modCompileOnly 'maven.modrinth:iris:1.10.4+1.21.11-fabric'
-    modCompileOnly 'maven.modrinth:sodium-extra:mc1.21.11-0.8.3+fabric'
-    modCompileOnly 'maven.modrinth:moreculling:kWU8mVq5' // 1.5.0-beta.2
-
-    /* Particle Rain/Pretty Rain */
-    modCompileOnly "maven.modrinth:particle-rain:v4-beta.9+1.21.11-fabric"
-
-    /* Effectual */
-    modCompileOnly 'maven.modrinth:effectual:1.1.0-1.21.8'
-
-    /* Lodestone */
-//    modCompileOnly "maven.modrinth:lodestonelib:1.21.1-1.7.0.5-fabric" // no 1.21.4 version
-
-    /* Effective */
-//    modCompileOnly "maven.modrinth:effective:2.4.8-1.21.1" // no 1.21.4 version
-//    modCompileOnly fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
-
-    /* Particular */
-    modCompileOnly "maven.modrinth:particular-reforged:1.1.1+1.21.6"
-
-    /* Particle Core */
-    modCompileOnly "maven.modrinth:particle-core:0.2.6+1.21.6"
-//    modCompileOnly("me.fallenbreath:conditional-mixin-fabric:0.6.4")
-
-    /* A Good Place */
-    modCompileOnly "maven.modrinth:a-good-place:kD90q4La" // 1.2.10 // TODO:this is a 1.21.4 version
-
-    /* Physics Mod */
-    modCompileOnly "maven.modrinth:physicsmod:k8blA2yX" // 3.1.9
-
-    /* Subtle Effects */
-    modCompileOnly "maven.modrinth:subtle-effects:HP8Dccia" // fabric 1.12.0
-
-    /* What Are They Up To */
-    modCompileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5 // TODO:this is a 1.21.4 version
-
-    /* Immediately Fast */
-    modCompileOnly "maven.modrinth:immediatelyfast:1.9.5+1.21.5-fabric"
-
-    /* Figura */
-    modCompileOnly "maven.modrinth:figura:0.1.5b+1.21.4" // TODO 1.21.4 version
+    compileOnly("me.shedaniel.cloth:cloth-config:26.1.154")
+//
+//    /* APIs */
+//    compileOnly "maven.modrinth:fzzy-config:0.7.2+1.21.6"
+//
+//    /* Performance */
+//    compileOnly "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
+//    compileOnly 'maven.modrinth:iris:1.10.4+1.21.11-fabric'
+//    compileOnly 'maven.modrinth:sodium-extra:mc1.21.11-0.8.3+fabric'
+//    compileOnly 'maven.modrinth:moreculling:kWU8mVq5' // 1.5.0-beta.2
+//
+//    /* Particle Rain/Pretty Rain */
+//    compileOnly "maven.modrinth:particle-rain:v4-beta.9+1.21.11-fabric"
+//
+//    /* Effectual */
+//    compileOnly 'maven.modrinth:effectual:1.1.0-1.21.8'
+//
+//    /* Lodestone */
+////    compileOnly "maven.modrinth:lodestonelib:1.21.1-1.7.0.5-fabric" // no 1.21.4 version
+//
+//    /* Effective */
+////    compileOnly "maven.modrinth:effective:2.4.8-1.21.1" // no 1.21.4 version
+////    compileOnly fileTree(dir: '../libs', include: 'effective-1.0.2-all.jar')
+//
+//    /* Particular */
+//    compileOnly "maven.modrinth:particular-reforged:1.1.1+1.21.6"
+//
+//    /* Particle Core */
+//    compileOnly "maven.modrinth:particle-core:0.2.6+1.21.6"
+////    compileOnly("me.fallenbreath:conditional-mixin-fabric:0.6.4")
+//
+//    /* A Good Place */
+//    compileOnly "maven.modrinth:a-good-place:kD90q4La" // 1.2.10 // TODO:this is a 1.21.4 version
+//
+//    /* Physics Mod */
+//    compileOnly "maven.modrinth:physicsmod:k8blA2yX" // 3.1.9
+//
+//    /* Subtle Effects */
+//    compileOnly "maven.modrinth:subtle-effects:HP8Dccia" // fabric 1.12.0
+//
+//    /* What Are They Up To */
+//    compileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5 // TODO:this is a 1.21.4 version
+//
+//    /* Immediately Fast */
+//    compileOnly "maven.modrinth:immediatelyfast:1.9.5+1.21.5-fabric"
+//
+//    /* Figura */
+//    compileOnly "maven.modrinth:figura:0.1.5b+1.21.4" // TODO 1.21.4 version
 }

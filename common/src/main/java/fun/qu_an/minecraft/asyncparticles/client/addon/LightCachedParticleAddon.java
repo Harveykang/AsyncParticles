@@ -25,8 +25,6 @@ public interface LightCachedParticleAddon {
 
 	void asyncparticles$refresh();
 
-	int asyncparticles$invoke_getLightColor(float partialTick);
-
 	void asyncparticles$enableLightCache();
 
 	void asyncparticles$disableLightCache();

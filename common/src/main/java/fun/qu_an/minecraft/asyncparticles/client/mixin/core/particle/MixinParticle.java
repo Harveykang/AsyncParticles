@@ -2,10 +2,14 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_render.AsyncRenderBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.world.phys.AABB;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -23,31 +27,24 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	public double z;
 	@Shadow
 	@Final
-	public ClientLevel level;
+	protected ClientLevel level;
 	@Unique
-	private boolean asyncparticles$ticked = false;
+	private boolean asyncparticles$ticked = true; // always true at first tick
 	@Unique
-	private byte asyncparticles$renderFlag = 2; // 2 is unused
+	private byte asyncparticles$renderFlag = 2;
 	@Unique
 	private byte asyncparticles$tickFlag;
 
 	@Inject(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V", at = @At("RETURN"))
 	protected void onInit(CallbackInfo ci) {
-//		Class<?> aClass = asyncparticles$getRealClass();
-//		if (AsyncTickBehavior.shouldSync(aClass)) {
-//			asyncparticles$setTickSync();
-//		}
-//		if (AsyncRenderBehavior.shouldSync(aClass)) {
-//			asyncparticles$setRenderSync();
-//		}
+		Class<?> aClass = asyncparticles$getRealClass();
+		if (AsyncTickBehavior.shouldSync(aClass)) {
+			asyncparticles$setTickSync();
+		}
+		if (AsyncRenderBehavior.shouldSync(aClass)) {
+			asyncparticles$setRenderSync();
+		}
 	}
-
-	@SuppressWarnings("unused")
-	@Shadow
-	public abstract int getLightColor(float partialTick);
-
-	@Shadow
-	public abstract AABB getBoundingBox();
 
 	@Shadow
 	protected double xd;
@@ -57,12 +54,6 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 
 	@Shadow
 	protected double zd;
-
-	@Shadow
-	public float bbWidth;
-
-	@Shadow
-	public float bbHeight;
 
 	@Override
 	public void asyncparticles$setTicked() {
@@ -99,10 +90,12 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 		return (asyncparticles$tickFlag & 1) != 0;
 	}
 
+	@Override
 	public void asyncparticles$enableLightCache() {
 		asyncparticles$tickFlag |= 2;
 	}
 
+	@Override
 	public void asyncparticles$disableLightCache() {
 		asyncparticles$tickFlag &= ~2;
 	}
@@ -113,23 +106,6 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 
 	public boolean asyncparticles$isVisibleOnScreen() {
 		return (asyncparticles$renderFlag & 4) != 0;
-	}
-
-	public void asyncparticles$tickAABBCulling() {
-//		AABB aabb = getBoundingBox().expandTowards(xd, yd, zd);
-//		if (FrustumUtil.isVisible(AsyncRenderBehavior.getFrustum(), aabb)) {
-//			asyncparticles$renderFlag |= 4;
-//		} else {
-//			asyncparticles$renderFlag &= ~4;
-//		}
-	}
-
-	public void asyncparticles$tickSphereCulling() {
-//		if (FrustumUtil.isVisible(AsyncRenderBehavior.getFrustum(), (Particle) (Object) this)) {
-//			asyncparticles$renderFlag |= 4;
-//		} else {
-//			asyncparticles$renderFlag &= ~4;
-//		}
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})

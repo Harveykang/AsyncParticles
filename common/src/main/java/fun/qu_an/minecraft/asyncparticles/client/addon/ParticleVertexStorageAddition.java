@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.addon;
 
-import net.minecraft.client.renderer.state.QuadParticleRenderState;
+import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 
 public interface ParticleVertexStorageAddition {
 	ParticleSlice asyncparticles$slice(int start, int end);
