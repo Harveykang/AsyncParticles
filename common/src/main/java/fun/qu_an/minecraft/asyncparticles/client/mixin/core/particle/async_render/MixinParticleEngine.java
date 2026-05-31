@@ -15,8 +15,6 @@ import net.minecraft.client.renderer.state.level.ParticleGroupRenderState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-import java.util.concurrent.ForkJoinTask;
-
 @Mixin(ParticleEngine.class)
 public abstract class MixinParticleEngine {
 	/**
@@ -29,14 +27,13 @@ public abstract class MixinParticleEngine {
 	                                                     float v,
 	                                                     Operation<ParticleGroupRenderState> original) {
 		DeferredParticleRenderState state = new DeferredParticleRenderState();
-		ForkJoinTask<?> task = AsyncRenderBehavior.EXECUTOR.submit(() -> {
+		AsyncRenderBehavior.submit(() -> {
 			ParticleGroupRenderState renderState = original.call(instance, frustum, camera, v);
 			if (renderState instanceof AsyncParticleRenderState asyncState) {
 				asyncState.afterAdd();
 			}
 			state.setDelegate(renderState);
 		});
-		AsyncRenderBehavior.addRenderingFuture(task);
 		return state;
 	}
 }

@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.async_render;
 
-import net.minecraft.client.particle.ParticleGroup;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.feature.ParticleFeatureRenderer;
 import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
@@ -12,9 +11,9 @@ public class DualAsyncQuadParticleRenderState extends QuadParticleRenderState im
 	private final AsyncQuadParticleRenderState group;
 	private final AsyncQuadParticleRenderState translucentGroup;
 
-	public DualAsyncQuadParticleRenderState(ParticleGroup<SingleQuadParticle> group) {
-		this.group = new AsyncQuadParticleRenderState(group, false);
-		translucentGroup = new AsyncQuadParticleRenderState(group, true);
+	public DualAsyncQuadParticleRenderState() {
+		group = new AsyncQuadParticleRenderState(false);
+		translucentGroup = new AsyncQuadParticleRenderState(true);
 	}
 
 	@Override

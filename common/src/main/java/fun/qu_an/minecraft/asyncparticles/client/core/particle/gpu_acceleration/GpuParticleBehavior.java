@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_render.AsyncRenderBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.GpuParticleGroup;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
@@ -19,15 +19,14 @@ import org.spongepowered.asm.mixin.Unique;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.function.Predicate;
 
 public class GpuParticleBehavior {
 	public static final String RENDER_METHOD = Mappings.getRenderMethod();
 	public static final String RENDER_ROTATED_QUAD_METHOD_1 = Mappings.getRenderRotatedQuadMethod1();
 	public static final String RENDER_ROTATED_QUAD_METHOD_2 = Mappings.getRenderRotatedQuadMethod2();
-	public static final ParticleThreadLocal<Boolean> GPU_PARTICLE_PHASE = ParticleThreadLocal.withInitial(() -> false);
 	public static final GpuParticleBehavior INSTANCE = new GpuParticleBehavior();
+	public final Map<ParticleRenderType, GpuParticleGroup> gpuParticles = new Reference2ObjectOpenHashMap<>();
 	// reuse buffers
 	private final Map<ParticleRenderType, IParticleRenderer> renderers = new Reference2ObjectOpenHashMap<>();
 	/**
@@ -68,7 +67,7 @@ public class GpuParticleBehavior {
 	}
 
 	private IParticleRenderer newParticleRenderer() {
-		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer(particleLimit);
+		if (GLCaps.tfSupport.isSupported()) return new DuckParticleRenderer(particleLimit);
 		throw new IllegalStateException("No compatible particle renderer found");
 	}
 

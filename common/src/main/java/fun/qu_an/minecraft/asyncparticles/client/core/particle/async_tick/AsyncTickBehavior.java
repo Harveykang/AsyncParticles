@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AsyncTickBehavior {
 	public static final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 	public static final ForkJoinPool EXECUTOR;
-	public static final String THREAD_PREFIX = "AsyncParticleTicker";
+	public static final String THREAD_PREFIX = "AsyncParticleTickWorker";
 	private static Runnable tickFuture;
 	private static Runnable cleanupFuture;
 	private static final List<Runnable> tickTasks = new ArrayList<>();

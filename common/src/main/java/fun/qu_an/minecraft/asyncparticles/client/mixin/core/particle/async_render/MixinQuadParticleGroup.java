@@ -15,8 +15,8 @@ public abstract class MixinQuadParticleGroup extends ParticleGroup<SingleQuadPar
 	@Redirect(method = "<init>", at = @At(value = "NEW",
 		target = "()Lnet/minecraft/client/renderer/state/level/QuadParticleRenderState;"))
 	private QuadParticleRenderState redirectNewQuadParticleRenderState() {
-		if (((QuadParticleGroup) (Object) this).getClass() == QuadParticleGroup.class) {
-			return new DualAsyncQuadParticleRenderState(this);
+		if (((QuadParticleGroup) (Object) this).getClass() == QuadParticleGroup.class) { // TODO improve this with reflection
+			return new DualAsyncQuadParticleRenderState();
 		} else {
 			return new QuadParticleRenderState();
 		}

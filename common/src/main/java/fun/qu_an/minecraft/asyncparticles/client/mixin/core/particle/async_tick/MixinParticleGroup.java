@@ -7,9 +7,11 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickableParticleGroup;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.GpuParticleGroup;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.core.ParticleHelper;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
 import net.minecraft.ReportedException;
 import net.minecraft.client.particle.Particle;
@@ -23,7 +25,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
 
 @Mixin(ParticleGroup.class)
 public abstract class MixinParticleGroup implements ParticleGroupAddition {
@@ -31,8 +32,6 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 	@Shadow
 	@Final
 	protected Queue<? extends Particle> particles;
-	@Unique
-	private CompletableFuture<Void> asyncparticles$future;
 
 	@Shadow
 	protected abstract void tickParticle(Particle particle);
@@ -54,40 +53,62 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 	 * @reason Too many changes, need to rewrite the entire method.
 	 */
 	@Overwrite
-	public void tickParticles() {
+	public void tickParticles() { // TODO move to implementations
+		if (particles.isEmpty()) {
+			return;
+		}
 		boolean enableLightCache = ConfigHelper.particleLightCache();
+		boolean isOnMainThread = ThreadUtil.isOnMainThread();
+		boolean isGpu = (Object) this instanceof GpuParticleGroup;
 		boolean forceDone = ConfigHelper.forceDoneParticleTick();
 		for (Particle particle : particles) {
 			if (AsyncTickBehavior.isCancelled() && !forceDone) {
 				return;
 			}
 			if (!particle.isAlive()) {
-				// To be compatible with certain mods that require this injection point.
+				// This is to be compatible with e.g. Figura mod
+				// Trust JIT
 				Utils.DUMMY_ITERATOR.remove();
 				continue;
 			}
-			if (((ParticleAddon) particle).asyncparticles$isTicked()) {
-				// Skip the first tick that the particle is added to the queue.
-				if (enableLightCache) {
-					((LightCachedParticleAddon) particle).asyncparticles$refresh();
-				}
+			ParticleAddon particleAddon = (ParticleAddon) particle;
+			boolean shouldTick;
+			boolean shouldRefresh;
+			if (isOnMainThread) {
+				shouldTick = true;
+				shouldRefresh = false;
+			} else if (particleAddon.asyncparticles$isTicked()) {
+				// Skip the first tick after enqueued that the particle is added to the queue.
+				// only GPU particles don't skip the first tick, but skip the first refresh.
+				// skip the first refresh will fix black destruction gpu particles.
+				shouldTick = isGpu;
+				shouldRefresh = !isGpu && enableLightCache;
+			} else if (particleAddon.asyncparticles$isTickSync()) {
+				AsyncTickBehavior.recordSync(particle);
 				continue;
+			} else {
+				shouldTick = true;
+				shouldRefresh = enableLightCache;
 			}
-			if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
-//					AsyncTickBehavior.recordSync(particle);
-				continue;
-			}
-			try {
-				tickParticle(particle);
-			} catch (Throwable t) {
-				ReportedException re = AsyncTickBehavior.onTickParticleException(particle, t);
-				if (re != null) {
-					throw re;
+			if (shouldTick) {
+				try {
+					// We must ensure `tickParticle` method appear once in this method,
+					// otherwise the other mod's mixins will not work properly.
+					tickParticle(particle);
+				} catch (Throwable t) {
+					ReportedException re = AsyncTickBehavior.onTickParticleException(particle, t);
+					if (re != null) {
+						throw re;
+					}
 				}
+				particleAddon.asyncparticles$setTicked();
 			}
-			((ParticleAddon) particle).asyncparticles$setTicked();
-			if (enableLightCache) {
-				((LightCachedParticleAddon) particle).asyncparticles$refresh();
+			LightCachedParticleAddon lightCachedParticle = (LightCachedParticleAddon) particle;
+			if (shouldRefresh) {
+				lightCachedParticle.asyncparticles$enableLightCache();
+				lightCachedParticle.asyncparticles$refresh();
+			} else {
+				lightCachedParticle.asyncparticles$disableLightCache();
 			}
 		}
 	}
@@ -105,15 +126,5 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 			particles.removeIf(particle ->
 				AsyncTickBehavior.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()));
 		}
-	}
-
-	@Override
-	public void asyncparticles$setFuture(CompletableFuture<Void> future) {
-		this.asyncparticles$future = future;
-	}
-
-	@Override
-	public CompletableFuture<Void> asyncparticles$getFuture() {
-		return this.asyncparticles$future;
 	}
 }

@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AsyncRenderBehavior {
 	public static final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 	public static final ForkJoinPool EXECUTOR;
-	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
+	public static final String THREAD_PREFIX = "AsyncParticleRenderWorker";
 	private static boolean particlePhase;
 	private static final List<ForkJoinTask<?>> futures = new ArrayList<>();
 	private static Frustum frustum;
@@ -99,5 +99,9 @@ public class AsyncRenderBehavior {
 
 	public static boolean shouldSync(Class<?> aClass) {
 		return false;
+	}
+
+	public static void submit(Runnable task) {
+		futures.add(EXECUTOR.submit(task));
 	}
 }

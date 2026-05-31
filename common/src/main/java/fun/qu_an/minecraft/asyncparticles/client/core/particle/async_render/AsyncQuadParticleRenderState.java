@@ -6,12 +6,9 @@ import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
-import fun.qu_an.minecraft.asyncparticles.client.addon.SingleQuadParticleLayerAddition;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
-import net.minecraft.client.particle.ParticleGroup;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.feature.ParticleFeatureRenderer;
 import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
@@ -29,41 +26,37 @@ import java.util.Map;
 
 // add() -> afterAdd() -> waitFuture() -> submit() -> prepare() -> render()
 public class AsyncQuadParticleRenderState extends QuadParticleRenderState implements AsyncParticleRenderState {
-	private final ParticleGroup<SingleQuadParticle> group;
 	private MeshData meshData;
 	private ByteBufferBuilder byteBufferBuilder;
 	private final Map<SingleQuadParticle.Layer, PreparedLayer> preparedLayers = new Reference2ObjectArrayMap<>();
 	private final boolean translucent;
 
-	public AsyncQuadParticleRenderState(ParticleGroup<SingleQuadParticle> group, boolean translucent) {
-		this.group = group;
+	public AsyncQuadParticleRenderState(boolean translucent) {
 		this.translucent = translucent;
 	}
 
 	@Override
 	public void clear() {
-		if (((ParticleGroupAddition) group).asyncparticles$getFuture() != null) {
-			throw new IllegalStateException("submit() has not been called!");
-		}
 		freeBuffers();
 		super.clear();
 	}
 
 	@Override
 	public void add(@NotNull SingleQuadParticle.Layer layer,
-					float f, float g, float h, float i, float j, float k, float l, float m, float n, float o, float p, float q,
-					int r, int s) {
-		ParticleLayerAttached attached = ((SingleQuadParticleLayerAddition) (Object) layer).asyncparticles$getAttached();
-		attached.add(f, g, h, i, j, k, l, m, n, o, p, q, r, s);
+	                float f, float g, float h, float i, float j, float k, float l, float m, float n, float o, float p, float q,
+	                int r, int s) {
+		Storage storage = particles.computeIfAbsent(layer, _ -> new QuadParticleRenderState.Storage());
+		storage.add(f, g, h, i, j, k, l, m, n, o, p, q, r, s);
 	}
 
 	@Override
 	public void afterAdd() {
-		particleCount = ParticleLayerAttached.getParticleCount(translucent);
+		particleCount = particles.values().stream()
+			.filter(storage -> storage.count() > 0)
+			.mapToInt(Storage::count).sum();
 		if (particleCount == 0) {
 			return;
 		}
-		particles.putAll(ParticleLayerAttached.getParticles(translucent));
 		int vertexCount = particleCount * 4;
 		byteBufferBuilder = ByteBufferBuilder.exactlySized(vertexCount * DefaultVertexFormat.PARTICLE.getVertexSize());
 		long target = byteBufferBuilder.reserve(vertexCount * DefaultVertexFormat.PARTICLE.getVertexSize());
@@ -172,9 +165,6 @@ public class AsyncQuadParticleRenderState extends QuadParticleRenderState implem
 		if (translucent != this.translucent) {
 			throw new IllegalStateException("translucency mismatch!");
 		}
-		if (((ParticleGroupAddition) group).asyncparticles$getFuture() != null) {
-			throw new IllegalStateException("submit() has not been called!");
-		}
 		if (meshData == null) {
 			freeBuffers();
 			return null;
@@ -187,7 +177,7 @@ public class AsyncQuadParticleRenderState extends QuadParticleRenderState implem
 					RenderSystem.getModelViewMatrix(),
 					new Vector4f(1.0F, 1.0F, 1.0F, 1.0F),
 					new Vector3f(),
-						new Matrix4f()
+					new Matrix4f()
 				);
 			return new PreparedBuffers(meshData.drawState().indexCount(), gpuBufferSlice, preparedLayers);
 

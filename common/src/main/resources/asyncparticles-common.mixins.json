@@ -31,7 +31,6 @@
     "core.particle.async_render.MixinParticleEngine",
     "core.particle.async_render.MixinParticlesRenderState",
     "core.particle.async_render.MixinQuadParticleGroup",
-    "core.particle.async_render.MixinSingleQuadParticle$Layer",
     "core.particle.async_render.MixinVertexVertexStorage",
     "core.particle.async_tick.MixinMinecraft",
     "core.particle.async_tick.MixinParticleEngine",

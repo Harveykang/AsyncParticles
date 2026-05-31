@@ -3,12 +3,14 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.async_tick
 
 import com.google.common.collect.Lists;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickParticleGroupBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickableParticleGroup;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
@@ -35,7 +37,7 @@ public abstract class MixinParticleEngine {
 	public Map<ParticleRenderType, ParticleGroup<?>> particles;
 
 	@Shadow
-	protected abstract ParticleGroup<?> createParticleGroup(ParticleRenderType particleRenderType);
+	protected abstract ParticleGroup<?> createParticleGroup(ParticleRenderType type);
 
 	/**
 	 * @author Harvey_Husky
@@ -43,19 +45,7 @@ public abstract class MixinParticleEngine {
 	 */
 	@Overwrite
 	public void tick() {
-		Particle particle;
-		boolean tickAsync = ConfigHelper.isTickAsync();
-		this.particles.forEach((particleRenderType, particleGroup) -> {
-			Profiler.get().push(particleRenderType.name());
-			if (!tickAsync
-				|| !(particleGroup instanceof AsyncTickableParticleGroup)
-				|| !AsyncTickParticleGroupBehavior.canTickAsync(particleGroup)) {
-				particleGroup.tickParticles();
-			} else {
-				AsyncTickBehavior.dispatch(particleGroup::tickParticles);
-			}
-			Profiler.get().pop();
-		});
+
 		if (!this.trackingEmitters.isEmpty()) {
 			List<TrackingEmitter> list = Lists.newArrayList();
 
@@ -69,6 +59,8 @@ public abstract class MixinParticleEngine {
 			this.trackingEmitters.removeAll(list);
 		}
 
+		Particle particle;
+		boolean tickAsync = ConfigHelper.isTickAsync();
 		boolean gpuParticles = ConfigHelper.isGpuParticles();
 		if (!particlesToAdd.isEmpty()) {
 			boolean appendNewParticlesToRenderer = ConfigHelper.isAppendNewParticlesToRenderer();
@@ -90,9 +82,9 @@ public abstract class MixinParticleEngine {
 				if (!canComputeFast) {
 					group = this.particles.computeIfAbsent(renderType, this::createParticleGroup);
 				} else {
-					group = this.particles.computeIfAbsent(renderType, k -> {
+					group = GpuParticleBehavior.INSTANCE.gpuParticles.computeIfAbsent(renderType, k -> {
 						GpuParticleBehavior.INSTANCE.createRenderer(k);
-						return createParticleGroup(k);
+						return new GpuParticleGroup((ParticleEngine) (Object) this, renderType);
 					});
 					if (appendNewParticlesToRenderer) {
 						GpuParticleBehavior.INSTANCE.getRenderer(renderType).append(GpuParticleBehavior.INSTANCE.getCameraPos(), ((SingleQuadParticle) particle));
@@ -102,13 +94,40 @@ public abstract class MixinParticleEngine {
 			}
 			particlesToAdd.clear();
 		}
-		if (tickAsync) {
-			if (gpuParticles) {
-				GpuParticleBehavior.INSTANCE.swapAllBuffers();
-				GpuParticleBehavior.INSTANCE.setGpuParticleLimit(ConfigHelper.getParticleLimit());
-				Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-				GpuParticleBehavior.INSTANCE.setCameraPos(camera.position());
-			}
+		if (tickAsync && gpuParticles) {
+			GpuParticleBehavior.INSTANCE.swapAllBuffers();
+			GpuParticleBehavior.INSTANCE.setGpuParticleLimit(ConfigHelper.getParticleLimit());
+			Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+			GpuParticleBehavior.INSTANCE.setCameraPos(camera.position());
+			GpuParticleBehavior.INSTANCE.gpuParticles.forEach(((renderType, group) -> {
+				if (group.isEmpty()) {
+					return;
+				}
+				Profiler.get().push(renderType.name());
+				IParticleRenderer renderer = GpuParticleBehavior.INSTANCE.getRenderer(renderType);
+				renderer.mapBuffer();
+				AsyncTickBehavior.dispatch(() -> {
+					group.tickParticles();
+					((ParticleGroupAddition) group).asyncparticles$cleanUp();
+					renderer.tick(GpuParticleBehavior.INSTANCE.getCameraPos(), group.getAll());
+				});
+				Profiler.get().pop();
+			}));
 		}
+
+		this.particles.forEach((renderType, group) -> {
+			if (group.isEmpty()) {
+				return;
+			}
+			Profiler.get().push(renderType.name());
+			if (!tickAsync
+				|| !(group instanceof AsyncTickableParticleGroup)
+				|| !AsyncTickParticleGroupBehavior.canTickAsync(group)) {
+				group.tickParticles();
+			} else {
+				AsyncTickBehavior.dispatch(group::tickParticles);
+			}
+			Profiler.get().pop();
+		});
 	}
 }
