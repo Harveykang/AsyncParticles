@@ -7,13 +7,17 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
+import java.util.function.Supplier;
 
 public interface IParticleRenderer {
 	void beginFrame();
 
 	void unmapBufferAndSwap();
 
-	void mapBuffer();
+	void mapBuffer(Supplier<Set<SingleQuadParticle.Layer>> potentialLayer);
+
+	boolean isMapped();
 
 	void unmapBuffer();
 
@@ -39,5 +43,5 @@ public interface IParticleRenderer {
 
 	void resize(int particleLimit);
 
-	Collection<SingleQuadParticle.Layer> getLayers();
+	Collection<SingleQuadParticle.Layer> getComputeLayers();
 }

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.IParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.ParticleMultiRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.ParticleRenderer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
@@ -186,7 +187,8 @@ public class GpuParticleBehavior {
 	}
 
 	public IParticleRenderer createRenderer() {
-		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer();
+		if (GLCaps.tfSupport.isSupported()) return new ParticleMultiRenderer();
+//		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer();
 
 		throw new IllegalStateException("No compatible particle renderer found");
 	}

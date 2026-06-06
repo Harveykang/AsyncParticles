@@ -4,6 +4,7 @@ import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import fun.qu_an.minecraft.asyncparticles.client.core.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.ComputeResult;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.IParticleRenderer;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
@@ -23,6 +24,7 @@ import org.joml.Vector4f;
 import org.jspecify.annotations.NonNull;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 	// reuse buffers
@@ -58,6 +60,9 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 
 		Map<SingleQuadParticle.Layer, PreparedLayer> layers = preparedBuffers.layers();
 		for (ComputeResult.ParticleSlice slice : results.slices()) {
+			if (slice.count() == 0) {
+				continue;
+			}
 			SingleQuadParticle.Layer layer = slice.layer();
 			if (!layers.containsKey(layer)) {
 				continue;
@@ -74,12 +79,17 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 		}
 	}
 
-	public void mapBuffers() {
-		renderer.mapBuffer();
+	public void mapBuffers(Supplier<Set<SingleQuadParticle.Layer>> potentialLayerSupplier) {
+		renderer.mapBuffer(potentialLayerSupplier);
 	}
 
-	public void tickRenderers(Vec3 camPos, Map<SingleQuadParticle.Layer, Queue<SingleQuadParticle>> particles) {
-		renderer.tick(camPos, particles);
+	public void tickRenderers(Vec3 camPos, Queue<SingleQuadParticle> particles) {
+		Map<SingleQuadParticle.Layer, Queue<SingleQuadParticle>> particleMap = new Reference2ReferenceOpenHashMap<>();
+		int size = (int) (particles.size() * 0.5);
+		for (SingleQuadParticle sqp : particles) {
+			particleMap.computeIfAbsent(sqp.getLayer(), _ -> ParticleHelper.newParticleQueue(size)).add(sqp);
+		}
+		renderer.tick(camPos, particleMap);
 	}
 
 	public void unmapBuffersAndSwap() {
@@ -130,7 +140,7 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 		}
 		GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
 			.writeTransform(RenderSystem.getModelViewMatrix(), new Vector4f(1.0F, 1.0F, 1.0F, 1.0F), new Vector3f(), new Matrix4f());
-		Collection<SingleQuadParticle.Layer> layers = renderer.getLayers();
+		Collection<SingleQuadParticle.Layer> layers = renderer.getComputeLayers();
 		Map<SingleQuadParticle.Layer, PreparedLayer> preparedLayers = new Reference2ReferenceOpenHashMap<>(layers.size());
 		for (SingleQuadParticle.Layer layer : layers) {
 			if (layer.translucent() == translucent){

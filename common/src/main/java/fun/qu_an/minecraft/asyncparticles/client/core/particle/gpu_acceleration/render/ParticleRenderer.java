@@ -24,42 +24,23 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
+import java.util.function.Supplier;
 
 public class ParticleRenderer implements IParticleRenderer {
-	private static final int[] multiDrawIndex = {0, 0};
-	private static final int[] multiDrawCount = {0, 0};
-	public static final VertexFormat RAW_PARTICLE = VertexFormat.builder()
-		.add("oPosition", VertexFormatElement.POSITION)
-		.add("Position", VertexFormatElement.POSITION)
-		.add("Sizes", VertexFormatElement.UV0)
-		.add("oUV0", VertexFormatElement.UV0)
-		.add("UV0", VertexFormatElement.UV0)
-		.add("oColor", VertexFormatElement.COLOR)
-		.add("Color", VertexFormatElement.COLOR)
-		.add("Light", VertexFormatElement.UV2)
-		.add("Rolls", VertexFormatElement.UV0)
-		.build();
 	protected final int[] particleCount = new int[4];
 	protected ByteBuffer mappedBuffer;
 	protected final ParticleVertexBuffer[] sources = new ParticleVertexBuffer[2];
 	protected final ParticleVertexBuffer target;
 	protected final GpuBuffer targetMoj;
 	protected final Vec3[] camPositions = {Vec3.ZERO, Vec3.ZERO};
+	protected final ComputeData[] computeData = {new ComputeData(), new ComputeData()};
 	protected int particleLimit;
 	protected int processingIndex = 0;
 	protected final int tf;
 	protected boolean shouldSkip = true;
 	protected boolean computed = false;
-	protected final ComputeData[] computeData = {new ComputeData(), new ComputeData()};
 
-	/**
-	 * @see com.mojang.blaze3d.opengl.VertexArrayCache.Separate#bindVertexArray
-	 */
-	@SuppressWarnings("JavadocReference")
 	public ParticleRenderer() {
 //		sources[0].bind();
 //		ParticleVertexFormats.RAW_PARTICLE.setupBufferState(); // attributes
@@ -72,9 +53,9 @@ public class ParticleRenderer implements IParticleRenderer {
 		// see com.mojang.blaze3d.opengl.VertexArrayCache.Separate.bindVertexArray
 
 		sources[0] = new ParticleVertexBuffer(true);
-		bindAttr(RAW_PARTICLE, sources[0]);
+		bindAttr(GpuParticlePipelines.RAW_PARTICLE, sources[0]);
 		sources[1] = new ParticleVertexBuffer(true);
-		bindAttr(RAW_PARTICLE, sources[1]);
+		bindAttr(GpuParticlePipelines.RAW_PARTICLE, sources[1]);
 
 		target = new ParticleVertexBuffer(-1, true);
 		targetMoj = RenderSystem.getDevice().createBuffer(
@@ -88,10 +69,10 @@ public class ParticleRenderer implements IParticleRenderer {
 		tf = GLCaps.tfSupport.genTransformFeedback();
 		if (tf != -1) {
 			GLCaps.tfSupport.glBindTransformFeedback(tf);
-			GLCaps.tfSupport.glBindTransformFeedbackBuffer(0, target.vbo);
+			GLCaps.tfSupport.glBindTransformFeedbackBuffer(tf, 0, target.vbo);
 			GLCaps.tfSupport.glBindTransformFeedback(0);
 		}
-		resize(AsyncParticlesConfig.MIN_PARTICLE_LIMIT); // this.particleLimit = particleLimit;
+		resize(AsyncParticlesConfig.DEFAULT_PARTICLE_LIMIT); // this.particleLimit = particleLimit;
 	}
 
 	private void bindAttr(VertexFormat format, ParticleVertexBuffer buffer) {
@@ -121,9 +102,9 @@ public class ParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void unmapBufferAndSwap() {
-		if (mappedBuffer != null) {
+		if (isMapped()) {
 			unmapBuffer();
-			shouldSkip = false;
+			shouldSkip = particleCount[processingIndex] == 0;
 			processingIndex ^= 1;
 		} else {
 			shouldSkip = true;
@@ -133,12 +114,17 @@ public class ParticleRenderer implements IParticleRenderer {
 	}
 
 	@Override
-	public void mapBuffer() {
-		if (mappedBuffer != null) {
+	public void mapBuffer(Supplier<Set<SingleQuadParticle.Layer>> potentialLayer) {
+		if (isMapped()) {
 			throw new IllegalStateException("Mapped buffer is not null");
 		}
 		ParticleVertexBuffer source = sources[processingIndex];
-		mappedBuffer = source.map(this.particleLimit * RAW_PARTICLE.getVertexSize());
+		mappedBuffer = source.map(this.particleLimit * GpuParticlePipelines.RAW_PARTICLE.getVertexSize());
+	}
+
+	@Override
+	public boolean isMapped() {
+		return mappedBuffer != null;
 	}
 
 	@Override
@@ -147,10 +133,10 @@ public class ParticleRenderer implements IParticleRenderer {
 		// correct the particle count
 		particleCount[2 | processingIndex] = Math.max(0, particleCount[processingIndex] - particleLimit);
 		particleCount[processingIndex] = Math.min(particleLimit, this.particleCount[processingIndex]);
-		if (mappedBuffer == null) {
+		if (!isMapped()) {
 			throw new IllegalStateException("Mapped buffer is null!");
 		}
-		sources[processingIndex].unmap(particleCount[processingIndex] * RAW_PARTICLE.getVertexSize());
+		sources[processingIndex].unmap(particleCount[processingIndex] * GpuParticlePipelines.RAW_PARTICLE.getVertexSize());
 //		debugPrintBuffer(mappedBuffer);
 		mappedBuffer = null;
 	}
@@ -162,7 +148,7 @@ public class ParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void tick(Vec3 cameraPos, Map<SingleQuadParticle.Layer, Queue<SingleQuadParticle>> particles) {
-		if (mappedBuffer == null) {
+		if (!isMapped()) {
 			throw new IllegalStateException("Mapped buffer is null!");
 		}
 		camPositions[processingIndex] = cameraPos;
@@ -173,7 +159,7 @@ public class ParticleRenderer implements IParticleRenderer {
 		final long bufferAddress = MemoryUtil.memAddress(mappedBuffer);
 
 		int position = 0;
-		final int vertexSize = RAW_PARTICLE.getVertexSize();
+		final int vertexSize = GpuParticlePipelines.RAW_PARTICLE.getVertexSize();
 		ComputeData computeData = this.computeData[processingIndex];
 		computeData.clear();
 		try (final MemoryStack stack = MemStackUtil.stackPush()) {
@@ -314,7 +300,7 @@ public class ParticleRenderer implements IParticleRenderer {
 		sources[processingIndex ^ 1].bind();
 
 		if (tf == -1) {
-			GLCaps.tfSupport.glBindTransformFeedbackBuffer(0, target.vbo);
+			GLCaps.tfSupport.glBindTransformFeedbackBuffer(0, 0, target.vbo);
 		}
 
 		GL11C.glEnable(GL30C.GL_RASTERIZER_DISCARD);
@@ -324,12 +310,12 @@ public class ParticleRenderer implements IParticleRenderer {
 		if (overflow <= 0) {
 			GL11C.glDrawArrays(GL11C.GL_POINTS, 0, particleCount[processingIndex ^ 1]);
 		} else {
-			multiDrawIndex[0] = overflow;
-			multiDrawCount[0] = this.particleLimit - overflow;
-			multiDrawCount[1] = overflow;
+			GpuParticlePipelines.multiDrawIndex[0] = overflow;
+			GpuParticlePipelines.multiDrawCount[0] = this.particleLimit - overflow;
+			GpuParticlePipelines.multiDrawCount[1] = overflow;
 			GL14C.glMultiDrawArrays(GL11C.GL_POINTS,
-				multiDrawIndex,
-				multiDrawCount);
+				GpuParticlePipelines.multiDrawIndex,
+				GpuParticlePipelines.multiDrawCount);
 		}
 		GLCaps.tfSupport.glEndTransformFeedback();
 
@@ -456,7 +442,7 @@ public class ParticleRenderer implements IParticleRenderer {
 		final int particleCount = this.particleCount[processingIndex];
 		final int particleLimit = this.particleLimit;
 		final int offset;
-		final int vertexSize = RAW_PARTICLE.getVertexSize();
+		final int vertexSize = GpuParticlePipelines.RAW_PARTICLE.getVertexSize();
 		if (particleCount >= particleLimit) {
 //			baseVertex = particleCount % particleLimit * ParticleVertexFormats.RAW_PARTICLE_BYTES;
 			// particleCount can not greater than 2 * particleLimit, so '%' is unnecessary.
@@ -464,12 +450,12 @@ public class ParticleRenderer implements IParticleRenderer {
 		} else {
 			offset = particleCount * vertexSize;
 		}
-		if (mappedBuffer != null) {
+		if (isMapped()) {
 			cx = camPositions[processingIndex].x;
 			cy = camPositions[processingIndex].y;
 			cz = camPositions[processingIndex].z;
 		} else {
-			mapBuffer();
+			mapBuffer(null);
 			this.camPositions[processingIndex] = cameraPos;
 			cx = cameraPos.x;
 			cy = cameraPos.y;
@@ -560,7 +546,7 @@ public class ParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void resize(int particleLimit) {
-		int rawSize = particleLimit * RAW_PARTICLE.getVertexSize();
+		int rawSize = particleLimit * GpuParticlePipelines.RAW_PARTICLE.getVertexSize();
 		if (rawSize != sources[0].getSize()) {
 			sources[0].resize0(rawSize);
 		}
@@ -576,7 +562,7 @@ public class ParticleRenderer implements IParticleRenderer {
 	}
 
 	@Override
-	public Collection<SingleQuadParticle.Layer> getLayers() {
+	public Collection<SingleQuadParticle.Layer> getComputeLayers() {
 		return computeData[processingIndex ^ 1].getLayers();
 	}
 }

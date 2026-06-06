@@ -15,6 +15,20 @@ public class GpuParticlePipelines {
 	public static final VertexFormatElement PLAIN_COLOR = new VertexFormatElement(1, 0, VertexFormatElement.Type.FLOAT, false, 4);
 	public static final VertexFormatElement PLAIN_UV2 = new VertexFormatElement(4, 0, VertexFormatElement.Type.INT, false, 2);
 	public static final VertexFormat PLAIN_PARTICLE;
+	public static final VertexFormat RAW_PARTICLE = VertexFormat.builder()
+		.add("oPosition", VertexFormatElement.POSITION)
+		.add("Position", VertexFormatElement.POSITION)
+		.add("Sizes", VertexFormatElement.UV0)
+		.add("oUV0", VertexFormatElement.UV0)
+		.add("UV0", VertexFormatElement.UV0)
+		.add("oColor", VertexFormatElement.COLOR)
+		.add("Color", VertexFormatElement.COLOR)
+		.add("Light", VertexFormatElement.UV2)
+		.add("Rolls", VertexFormatElement.UV0)
+		.build();
+	public static final int[] multiDrawIndex = {0, 0};
+	public static final int[] multiDrawCount = {0, 0};
+
 	static {
 		VertexFormat.Builder add = VertexFormat.builder()
 			.add("Position", VertexFormatElement.POSITION) // 3 floats

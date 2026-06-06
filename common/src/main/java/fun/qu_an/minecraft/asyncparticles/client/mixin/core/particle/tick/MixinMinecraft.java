@@ -15,13 +15,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
-	private void runTick(boolean bl, CallbackInfo ci, @Local(ordinal = 1) int index) {
-		AsyncTickBehavior.getInstance().preTick(index == 0);
+	private void onPreTick(boolean advanceGameTime, CallbackInfo ci, @Local(ordinal = 1) int i) {
+		AsyncTickBehavior.getInstance().preTick(i == 0);
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V", shift = At.Shift.AFTER))
-	private void runTickAfter(boolean bl, CallbackInfo ci, @Local(ordinal = 0) int max, @Local(ordinal = 1) int index) {
-		AsyncTickBehavior.getInstance().postTick(index == max - 1);
+	private void onPostTick(boolean advanceGameTime, CallbackInfo ci, @Local(ordinal = 0) int ticksToDo, @Local(ordinal = 1) int i) {
+		AsyncTickBehavior.getInstance().postTick(i == ticksToDo - 1);
 	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;tick()V"))

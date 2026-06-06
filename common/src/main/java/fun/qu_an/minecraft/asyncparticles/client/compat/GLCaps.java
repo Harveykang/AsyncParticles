@@ -91,7 +91,9 @@ public class GLCaps {
 
 		void glBindTransformFeedback(int tf);
 
-		void glBindTransformFeedbackBuffer(int index, int vbo);
+		void glBindTransformFeedbackBuffer(int tf, int index, int vbo);
+
+		void glBindTransformFeedbackBufferRange(int tf, int index, int vbo, long offset, long size);
 
 		void glBeginTransformFeedback(int primitiveMode);
 
@@ -121,7 +123,12 @@ public class GLCaps {
 			}
 
 			@Override
-			public void glBindTransformFeedbackBuffer(int index, int vbo) {
+			public void glBindTransformFeedbackBuffer(int tf, int index, int vbo) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void glBindTransformFeedbackBufferRange(int tf, int index, int vbo, long offset, long size) {
 				throw new UnsupportedOperationException();
 			}
 
@@ -162,8 +169,13 @@ public class GLCaps {
 			}
 
 			@Override
-			public void glBindTransformFeedbackBuffer(int index, int vbo) {
+			public void glBindTransformFeedbackBuffer(int tf, int index, int vbo) {
 				GL30C.glBindBufferBase(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, vbo);
+			}
+
+			@Override
+			public void glBindTransformFeedbackBufferRange(int tf, int index, int vbo, long offset, long size) {
+				GL30C.glBindBufferRange(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, vbo, offset, size);
 			}
 
 			@Override
@@ -224,8 +236,13 @@ public class GLCaps {
 			}
 
 			@Override
-			public void glBindTransformFeedbackBuffer(int index, int vbo) {
+			public void glBindTransformFeedbackBuffer(int tf, int index, int vbo) {
 				GL40C.glBindBufferBase(GL40C.GL_TRANSFORM_FEEDBACK_BUFFER, index, vbo);
+			}
+
+			@Override
+			public void glBindTransformFeedbackBufferRange(int tf, int index, int vbo, long offset, long size) {
+				GL40C.glBindBufferRange(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, vbo, offset, size);
 			}
 
 			@Override
@@ -241,6 +258,53 @@ public class GLCaps {
 			@Override
 			public void glTransformFeedbackVaryings(int tshProg, String[] varyings, int glInterleavedAttribs) {
 				GL40C.glTransformFeedbackVaryings(tshProg, varyings, glInterleavedAttribs);
+			}
+		}
+
+		class GL_45 implements TfSupport {
+			@Override
+			public boolean isSupportsTfo() {
+				return true;
+			}
+
+			@Override
+			public boolean isSupported() {
+				return true;
+			}
+
+			@Override
+			public int genTransformFeedback() {
+				return GL45C.glGenTransformFeedbacks();
+			}
+
+			@Override
+			public void glBindTransformFeedback(int tf) {
+				GL45C.glBindTransformFeedback(GL45C.GL_TRANSFORM_FEEDBACK, tf);
+			}
+
+			@Override
+			public void glBindTransformFeedbackBuffer(int tf, int index, int vbo) {
+				GL45C.glTransformFeedbackBufferBase(tf, index, vbo);
+			}
+
+			@Override
+			public void glBindTransformFeedbackBufferRange(int tf, int index, int vbo, long offset, long size) {
+				GL45C.glTransformFeedbackBufferRange(tf, index, vbo, offset, size);
+			}
+
+			@Override
+			public void glBeginTransformFeedback(int primitiveMode) {
+				GL45C.glBeginTransformFeedback(primitiveMode);
+			}
+
+			@Override
+			public void glEndTransformFeedback() {
+				GL45C.glEndTransformFeedback();
+			}
+
+			@Override
+			public void glTransformFeedbackVaryings(int tshProg, String[] varyings, int glInterleavedAttribs) {
+				GL45C.glTransformFeedbackVaryings(tshProg, varyings, glInterleavedAttribs);
 			}
 		}
 	}

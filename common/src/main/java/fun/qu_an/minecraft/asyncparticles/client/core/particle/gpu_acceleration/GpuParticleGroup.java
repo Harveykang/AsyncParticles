@@ -1,8 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
-import fun.qu_an.minecraft.asyncparticles.client.core.ParticleHelper;
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -12,8 +12,8 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.state.level.ParticleGroupRenderState;
 import org.jspecify.annotations.NonNull;
 
-import java.util.Map;
-import java.util.Queue;
+import java.util.HashSet;
+import java.util.Set;
 
 public class GpuParticleGroup extends QuadParticleGroup implements ParticleGroupAddition {
 	private final GpuQuadParticleRenderState renderState;
@@ -30,18 +30,19 @@ public class GpuParticleGroup extends QuadParticleGroup implements ParticleGroup
 	}
 
 	public void mapBuffers() {
-		renderState.mapBuffers();
+		renderState.mapBuffers(() -> {
+			Set<SingleQuadParticle.Layer> potentialLayer = new ReferenceOpenHashSet<>();
+			for (SingleQuadParticle sqp : particles) {
+				potentialLayer.add(sqp.getLayer());
+			}
+			return potentialLayer;
+		});
 	}
 
 	public void tickParticles() {
 		super.tickParticles();
 		asyncparticles$removeDeadParticles();
-		Map<SingleQuadParticle.Layer, Queue<SingleQuadParticle>> particleMap = new Reference2ReferenceOpenHashMap<>();
-		int size = size();
-		for (SingleQuadParticle sqp : particles) {
-			particleMap.computeIfAbsent(sqp.getLayer(), _ -> ParticleHelper.newParticleQueue(size)).add(sqp);
-		}
-		renderState.tickRenderers(GpuParticleBehavior.INSTANCE.getCameraPos(), particleMap);
+		renderState.tickRenderers(GpuParticleBehavior.INSTANCE.getCameraPos(), particles);
 	}
 
 	public void unmapBuffersAndSwap() {
