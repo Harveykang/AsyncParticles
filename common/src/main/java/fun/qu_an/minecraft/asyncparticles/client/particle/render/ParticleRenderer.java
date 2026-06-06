@@ -4,19 +4,15 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
-import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.particle.buffer.BufferHelper;
 import fun.qu_an.minecraft.asyncparticles.client.particle.buffer.ParticleVertexBuffer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.shader.ParticleTransformFeedbackShader;
-import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import it.unimi.dsi.fastutil.HashCommon;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11C;
@@ -34,8 +30,8 @@ public class ParticleRenderer implements IParticleRenderer {
 	private static final int[] multiDrawIndex = {0, 0};
 	private static final int[] multiDrawCount = {0, 0};
 	private static final boolean DIRECT_BUFFER = true;
-	private final ParticleVertexBuffer[] sources = {new ParticleVertexBuffer(), new ParticleVertexBuffer()};
-	private final ParticleVertexBuffer target = new ParticleVertexBuffer();
+	private final ParticleVertexBuffer[] sources = {new ParticleVertexBuffer(false), new ParticleVertexBuffer(false)};
+	private final ParticleVertexBuffer target = new ParticleVertexBuffer(true);
 	private int particleLimit;
 	private int current = 0;
 	private ByteBuffer mappedBuffer;
@@ -58,9 +54,11 @@ public class ParticleRenderer implements IParticleRenderer {
 		autoStorageIndexBuffer.bind(256);
 		ParticleVertexBuffer.unbind();
 		tf = GLCaps.tfSupport.genTransformFeedback();
-		GLCaps.tfSupport.glBindTransformFeedback(tf);
-		GLCaps.tfSupport.glBindTransformFeedbackBuffer(0, target.vbo);
-		GLCaps.tfSupport.glBindTransformFeedback(0);
+		if (tf != -1) {
+			GLCaps.tfSupport.glBindTransformFeedback(tf);
+			GLCaps.tfSupport.glBindTransformFeedbackBuffer(0, target.vbo);
+			GLCaps.tfSupport.glBindTransformFeedback(0);
+		}
 		resize(particleLimit); // this.particleLimit = particleLimit;
 	}
 
@@ -72,7 +70,7 @@ public class ParticleRenderer implements IParticleRenderer {
 	public void unmapBufferAndSwap() {
 		if (DIRECT_BUFFER ? mappedBuffer != null : bufferHelper.isBuilding()) {
 			unmapBuffer();
-			shouldSkip = false;
+			shouldSkip = particleCount[current] == 0;
 			current ^= 1;
 		} else {
 			shouldSkip = true;
@@ -476,14 +474,16 @@ public class ParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void resize(int particleLimit) {
-		if (particleLimit != sources[0].getSize()) {
-			sources[0].resize0(particleLimit);
+		int rawSize = particleLimit * ParticleVertexFormats.RAW_PARTICLE_BYTES;
+		if (rawSize != sources[0].getSize()) {
+			sources[0].resize0(rawSize);
 		}
-		if (particleLimit != sources[1].getSize()) {
-			sources[1].resize0(particleLimit);
+		if (rawSize != sources[1].getSize()) {
+			sources[1].resize0(rawSize);
 		}
-		if (particleLimit < target.getSize()) {
-			target.resize0(particleLimit * 4 * ParticleVertexFormats.PROCESSED_PARTICLE_VERTEX_BYTES);
+		int proceedSize = particleLimit * 4 * ParticleVertexFormats.PROCESSED_PARTICLE_VERTEX_BYTES;
+		if (proceedSize != target.getSize()) {
+			target.resize0(proceedSize);
 		}
 		this.particleLimit = particleLimit;
 	}

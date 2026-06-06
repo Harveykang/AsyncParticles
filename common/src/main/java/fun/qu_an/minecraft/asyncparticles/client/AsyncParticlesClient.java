@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
 import fun.qu_an.minecraft.asyncparticles.client.compat.moreculling.MoreCullingCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 
@@ -15,6 +16,8 @@ public class AsyncParticlesClient {
 		if (MORE_CULLING_LOADED) {
 			MoreCullingCompat.init();
 		}
-
+		if (PARTICLERAIN_LOADED) {
+			ParticleRainCompat.init();
+		}
 	}
 }

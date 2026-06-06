@@ -13,15 +13,18 @@ public class ParticleVertexBuffer {
 	private ByteBuffer oldBuffer;
 	private int size;
 	private boolean mapped = false;
+	private final boolean streamDraw;
 
-	public ParticleVertexBuffer() {
+	public ParticleVertexBuffer(boolean streamDraw) {
+		this.streamDraw = streamDraw;
 		this.vao = GL30C.glGenVertexArrays();
 		this.vbo = GL15C.glGenBuffers();
 	}
 
-	public ParticleVertexBuffer(int vao, int vbo) {
+	public ParticleVertexBuffer(int vao, int vbo, boolean streamDraw) {
 		this.vao = vao;
 		this.vbo = vbo;
+		this.streamDraw = streamDraw;
 	}
 
 	public static void unbind() {
@@ -44,7 +47,7 @@ public class ParticleVertexBuffer {
 
 	public void resize0(int size) {
 		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, vbo);
-		GL15C.glBufferData(GL15C.GL_ARRAY_BUFFER, size, GL15C.GL_DYNAMIC_DRAW);
+		GL15C.glBufferData(GL15C.GL_ARRAY_BUFFER, size, streamDraw ? GL15C.GL_STREAM_DRAW : GL15C.GL_DYNAMIC_DRAW);
 		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
 		this.size = size;
 	}

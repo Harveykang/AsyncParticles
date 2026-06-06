@@ -16,10 +16,8 @@ import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.lighting.LayerLightEventListener;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.spongepowered.asm.mixin.Unique;
 
 import java.util.Queue;
-import java.util.function.LongPredicate;
 import java.util.function.Predicate;
 
 import static java.lang.Math.abs;
@@ -59,7 +57,6 @@ public class GameUtil {
 			AsyncTickBehavior.INSTANCE::onEvicted);
 	}
 
-	@Unique
 	public static int getLightColorFromNeighbor(ClientLevel level, BlockPos pos) {
 		var asyncparticles$mutable = new BlockPos.MutableBlockPos();
 		int x = pos.getX();
@@ -74,28 +71,28 @@ public class GameUtil {
 		LayerLightEventListener sky = level.getLightEngine().getLayerListener(LightLayer.SKY);
 		DataLayer skyDataLayerData = sky.getDataLayerData(SectionPos.of(pos));
 		if (skyDataLayerData == null) {
-			i = 15;
+			i = 0;
 		} else {
 			i = ly == 15 ? sky.getLightValue(asyncparticles$mutable.set(x, y + 1, z)) :
-					skyDataLayerData.get(lx, ly + 1, lz);
-		}
-		if (i < 15) {
-			i = max(i, lz == 0 ? sky.getLightValue(asyncparticles$mutable.set(x, y, z - 1)) :
-					skyDataLayerData.get(lx, ly, lz - 1));
+				skyDataLayerData.get(lx, ly + 1, lz);
 			if (i < 15) {
-				i = max(i, lx == 0 ? sky.getLightValue(asyncparticles$mutable.set(x - 1, y, z)) :
-					skyDataLayerData.get(lx - 1, ly, lz));
+				i = max(i, lz == 0 ? sky.getLightValue(asyncparticles$mutable.set(x, y, z - 1)) :
+					skyDataLayerData.get(lx, ly, lz - 1));
 				if (i < 15) {
-					i = max(i, lz == 15 ? sky.getLightValue(asyncparticles$mutable.set(x, y, z + 1)) :
-						skyDataLayerData.get(lx, ly, lz + 1));
+					i = max(i, lx == 0 ? sky.getLightValue(asyncparticles$mutable.set(x - 1, y, z)) :
+						skyDataLayerData.get(lx - 1, ly, lz));
 					if (i < 15) {
-						i = max(i, lx == 15 ? sky.getLightValue(asyncparticles$mutable.set(x + 1, y, z)) :
-							skyDataLayerData.get(lx + 1, ly, lz));
+						i = max(i, lz == 15 ? sky.getLightValue(asyncparticles$mutable.set(x, y, z + 1)) :
+							skyDataLayerData.get(lx, ly, lz + 1));
 						if (i < 15) {
-							i = max(i, ly == 0 ? sky.getLightValue(asyncparticles$mutable.set(x, y - 1, z)) :
-								skyDataLayerData.get(lx, ly - 1, lz));
-							if (i < 15 && i > 0) {
-								--i;
+							i = max(i, lx == 15 ? sky.getLightValue(asyncparticles$mutable.set(x + 1, y, z)) :
+								skyDataLayerData.get(lx + 1, ly, lz));
+							if (i < 15) {
+								i = max(i, ly == 0 ? sky.getLightValue(asyncparticles$mutable.set(x, y - 1, z)) :
+									skyDataLayerData.get(lx, ly - 1, lz));
+								if (i < 15 && i > 0) {
+									--i;
+								}
 							}
 						}
 					}
@@ -110,22 +107,22 @@ public class GameUtil {
 		} else {
 			j = ly == 15 ? block.getLightValue(asyncparticles$mutable.set(x, y + 1, z)) :
 				blockDataLayerData.get(lx, ly + 1, lz);
-		}
-		if (j < 15) {
-			j = max(j, lz == 0 ? block.getLightValue(asyncparticles$mutable.set(x, y, z - 1)) :
-				blockDataLayerData.get(lx, ly, lz - 1));
 			if (j < 15) {
-				j = max(j, lx == 0 ? block.getLightValue(asyncparticles$mutable.set(x - 1, y, z)) :
-					blockDataLayerData.get(lx - 1, ly, lz));
+				j = max(j, lz == 0 ? block.getLightValue(asyncparticles$mutable.set(x, y, z - 1)) :
+					blockDataLayerData.get(lx, ly, lz - 1));
 				if (j < 15) {
-					j = max(j, lz == 15 ? block.getLightValue(asyncparticles$mutable.set(x, y, z + 1)) :
-						blockDataLayerData.get(lx, ly, lz + 1));
+					j = max(j, lx == 0 ? block.getLightValue(asyncparticles$mutable.set(x - 1, y, z)) :
+						blockDataLayerData.get(lx - 1, ly, lz));
 					if (j < 15) {
-						j = max(j, lx == 15 ? block.getLightValue(asyncparticles$mutable.set(x + 1, y, z)) :
-							blockDataLayerData.get(lx + 1, ly, lz));
+						j = max(j, lz == 15 ? block.getLightValue(asyncparticles$mutable.set(x, y, z + 1)) :
+							blockDataLayerData.get(lx, ly, lz + 1));
 						if (j < 15) {
-							j = max(j, ly == 0 ? block.getLightValue(asyncparticles$mutable.set(x, y - 1, z)) :
-								blockDataLayerData.get(lx, ly - 1, lz));
+							j = max(j, lx == 15 ? block.getLightValue(asyncparticles$mutable.set(x + 1, y, z)) :
+								blockDataLayerData.get(lx + 1, ly, lz));
+							if (j < 15) {
+								j = max(j, ly == 0 ? block.getLightValue(asyncparticles$mutable.set(x, y - 1, z)) :
+									blockDataLayerData.get(lx, ly - 1, lz));
+							}
 						}
 					}
 				}
