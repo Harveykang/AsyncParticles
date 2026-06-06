@@ -34,8 +34,8 @@ public class ParticleRenderer implements IParticleRenderer {
 	private static final int[] multiDrawIndex = {0, 0};
 	private static final int[] multiDrawCount = {0, 0};
 	private static final boolean DIRECT_BUFFER = true;
-	private final ParticleVertexBuffer[] sources = {new ParticleVertexBuffer(), new ParticleVertexBuffer()};
-	private final ParticleVertexBuffer target = new ParticleVertexBuffer();
+	private final ParticleVertexBuffer[] sources = {new ParticleVertexBuffer(false), new ParticleVertexBuffer(false)};
+	private final ParticleVertexBuffer target = new ParticleVertexBuffer(true);
 	private int particleLimit;
 	private int current = 0;
 	private ByteBuffer mappedBuffer;
@@ -72,7 +72,7 @@ public class ParticleRenderer implements IParticleRenderer {
 	public void unmapBufferAndSwap() {
 		if (DIRECT_BUFFER ? mappedBuffer != null : bufferHelper.isBuilding()) {
 			unmapBuffer();
-			shouldSkip = false;
+			shouldSkip = particleCount[current] == 0;
 			current ^= 1;
 		} else {
 			shouldSkip = true;
