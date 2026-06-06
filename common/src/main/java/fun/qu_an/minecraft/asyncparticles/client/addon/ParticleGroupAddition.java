@@ -1,5 +1,15 @@
 package fun.qu_an.minecraft.asyncparticles.client.addon;
 
 public interface ParticleGroupAddition {
-	void asyncparticles$cleanUp();
+	default void asyncparticles$removeDeadParticles() {
+		throw new AssertionError("Must be implemented!");
+	}
+
+	default void asyncparticles$clear() {
+		throw new AssertionError("Must be implemented!");
+	}
+
+	default void asyncparticle$tickSyncParticles() {
+		throw new AssertionError("Must be implemented!");
+	}
 }

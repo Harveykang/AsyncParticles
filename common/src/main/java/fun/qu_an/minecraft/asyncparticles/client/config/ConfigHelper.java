@@ -13,7 +13,7 @@ public class ConfigHelper {
 		AsyncParticlesConfig.load();
 	}
 
-	public static boolean asyncAnimateTick() {
+	public static boolean isAsyncAnimateTick() {
 		return tick$animationTickMode != TickMode.SYNCHRONOUSLY;
 	}
 
@@ -70,7 +70,7 @@ public class ConfigHelper {
 		return tick$failPerSecLimit;
 	}
 
-	public static RenderingMode particleRenderingMode() {
+	public static RenderingMode getParticleRenderingMode() {
 		return rendering$particleRenderingMode;
 	}
 
@@ -97,10 +97,6 @@ public class ConfigHelper {
 
 	public static boolean isRemoveIfMissedTick() {
 		return particle$removeIfMissedTick;
-	}
-
-	public static RenderingMode getParticleRenderingMode() {
-		return rendering$particleRenderingMode;
 	}
 
 	public static boolean isCullWeathers() {

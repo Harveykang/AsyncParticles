@@ -1,19 +1,21 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_render.AsyncRenderBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.GpuParticleGroup;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.IParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.ParticleRenderer;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -26,15 +28,17 @@ public class GpuParticleBehavior {
 	public static final String RENDER_ROTATED_QUAD_METHOD_1 = Mappings.getRenderRotatedQuadMethod1();
 	public static final String RENDER_ROTATED_QUAD_METHOD_2 = Mappings.getRenderRotatedQuadMethod2();
 	public static final GpuParticleBehavior INSTANCE = new GpuParticleBehavior();
+	private static final ParticleRenderType GPU_SINGLE_QUADS = new ParticleRenderType("gpu_single_quads");
 	public final Map<ParticleRenderType, GpuParticleGroup> gpuParticles = new Reference2ObjectOpenHashMap<>();
-	// reuse buffers
-	private final Map<ParticleRenderType, IParticleRenderer> renderers = new Reference2ObjectOpenHashMap<>();
 	/**
 	 * Code adapted from <a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/src/main/java/me/jellysquid/mods/sodium/mixin/features/render/particle/ParticleManagerMixin.java#L51">wahfl2/sodium-fabric</a>
 	 * <p>
 	 * License: <a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/README.md#-license">README.md#-license</a> and <a/><a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/COPYING.LESSER">LGPL-3.0</a>
 	 */
 	private final List<Class<? extends Particle>> GPU_PARTICLE_CLASSES;
+	private float partialTick;
+	private Frustum frustum = new Frustum(new Matrix4f(), new Matrix4f());
+	private final Map<ParticleRenderType, ParticleRenderType> renderTypes = new Object2ObjectArrayMap<>();
 
 	{
 		try {
@@ -66,18 +70,13 @@ public class GpuParticleBehavior {
 	public static void init() {
 	}
 
-	private IParticleRenderer newParticleRenderer() {
-		if (GLCaps.tfSupport.isSupported()) return new DuckParticleRenderer(particleLimit);
-		throw new IllegalStateException("No compatible particle renderer found");
-	}
-
-	public IParticleRenderer getRenderer(ParticleRenderType type) {
-		return renderers.get(type);
+	public GpuParticleGroup getGpuGroup(ParticleRenderType type) {
+		return gpuParticles.get(type);
 	}
 
 	public void swapAllBuffers() {
 		RenderSystem.assertOnRenderThread();
-		renderers.values().forEach(IParticleRenderer::unmapBufferAndSwap);
+		gpuParticles.values().forEach(GpuParticleGroup::unmapBuffersAndSwap);
 	}
 
 	public void setCameraPos(Vec3 pos) {
@@ -100,20 +99,25 @@ public class GpuParticleBehavior {
 	 */
 	@Unique
 	public boolean canRenderFast(SingleQuadParticle sqp) {
+		if (sqp.getFacingCameraMode() != SingleQuadParticle.FacingCameraMode.LOOKAT_XYZ) {
+			return false;
+		}
 		return CAN_RENDER_FAST_CACHE.computeIfAbsent(sqp.getClass(), (Predicate<Class<? extends SingleQuadParticle>>)
 			k -> {
 				try {
 					Class<?> renderMethodDeclaringClass = k.getMethod(RENDER_METHOD,
-						VertexConsumer.class,
+						QuadParticleRenderState.class,
 						Camera.class,
 						float.class).getDeclaringClass();
-					Class<?> renderRotatedQuadMethod1DeclaringClass = findDeclaringClass(k, RENDER_ROTATED_QUAD_METHOD_1,
-						VertexConsumer.class,
+					Class<?> renderRotatedQuadMethod1DeclaringClass = findDeclaringClass(k,
+						RENDER_ROTATED_QUAD_METHOD_1,
+						QuadParticleRenderState.class,
 						Camera.class,
 						Quaternionf.class,
 						float.class);
-					Class<?> renderRotatedQuadMethod2DeclaringClass = findDeclaringClass(k, RENDER_ROTATED_QUAD_METHOD_2,
-						VertexConsumer.class,
+					Class<?> renderRotatedQuadMethod2DeclaringClass = findDeclaringClass(k,
+						RENDER_ROTATED_QUAD_METHOD_2,
+						QuadParticleRenderState.class,
 						Quaternionf.class,
 						float.class,
 						float.class,
@@ -145,7 +149,7 @@ public class GpuParticleBehavior {
 	public void setGpuParticleLimit(int particleLimit) {
 		if (particleLimit != this.particleLimit) {
 			this.particleLimit = particleLimit;
-			renderers.values().forEach(renderer -> renderer.resize(particleLimit));
+			gpuParticles.values().forEach(group -> group.resize(particleLimit));
 		}
 	}
 
@@ -154,31 +158,40 @@ public class GpuParticleBehavior {
 		return particleLimit;
 	}
 
-	@ApiStatus.Internal
-	public void compute(Camera camera, float f) {
-//		if (GLCaps.supportsUniformBufferObject) {
-//			TFUniformBuffer.TF_UNIFORM_BUFFER.update(camera, f, getPrevCameraPos());
-//		}
-		renderers.values().forEach(renderer -> {
-			if (!renderer.isShouldSkip()) {
-				renderer.compute(camera, f);
-			}
-		});
-	}
-
-	@ApiStatus.Internal
-	public void createRenderer(ParticleRenderType type) {
-		RenderSystem.assertOnRenderThread();
-		renderers.computeIfAbsent(type, k -> newParticleRenderer());
+	public void setFrustum(Frustum frustum) {
+		this.frustum = frustum;
 	}
 
 	public Frustum getFrustum() {
-		return AsyncRenderBehavior.getFrustum();
+		return frustum;
+	}
+
+	public float getPartialTicks() {
+		return partialTick;
+	}
+
+	public void setPartialTick(float deltaPartialTick) {
+		this.partialTick = deltaPartialTick;
 	}
 
 	public void beginFrame() {
-		for (IParticleRenderer renderer : renderers.values()) {
-			renderer.beginFrame();
+		gpuParticles.values().forEach(GpuParticleGroup::beginFrame);
+	}
+
+	public ParticleRenderType getRenderType(ParticleRenderType renderType) {
+		if (renderType == ParticleRenderType.SINGLE_QUADS) {
+			return GPU_SINGLE_QUADS;
 		}
+		return renderTypes.computeIfAbsent(renderType, _ -> new ParticleRenderType("gpu_" + renderType.name()));
+	}
+
+	public IParticleRenderer createRenderer() {
+		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer();
+
+		throw new IllegalStateException("No compatible particle renderer found");
+	}
+
+	public void onClearParticles() {
+		gpuParticles.values().forEach(GpuParticleGroup::asyncparticles$clear);
 	}
 }

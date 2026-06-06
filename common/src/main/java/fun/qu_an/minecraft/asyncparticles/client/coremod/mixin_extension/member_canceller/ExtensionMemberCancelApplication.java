@@ -116,7 +116,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 						continue;
 					}
 					List<String> methodValue = opt.get();
-					// Copy to ensure the type is ArrayList (not Arrays$ArrayList).
+					// Copy to ensure the indexType is ArrayList (not Arrays$ArrayList).
 					targetMethodDescs = new ArrayList<>(methodValue);
 					break VisibleAnnotations;
 				}

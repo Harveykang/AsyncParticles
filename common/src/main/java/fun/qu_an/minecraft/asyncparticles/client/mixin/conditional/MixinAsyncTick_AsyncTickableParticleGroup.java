@@ -3,16 +3,19 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickableParticleGroup;
+import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ReferenceSets;
 import net.minecraft.client.Camera;
-import net.minecraft.client.particle.ElderGuardianParticleGroup;
-import net.minecraft.client.particle.ItemPickupParticleGroup;
-import net.minecraft.client.particle.QuadParticleGroup;
-import net.minecraft.client.particle.SingleQuadParticle;
+import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+
+import java.util.Collections;
+import java.util.Set;
 
 @Mixin({
 	QuadParticleGroup.class,
@@ -20,6 +23,9 @@ import org.spongepowered.asm.mixin.injection.At;
 	ElderGuardianParticleGroup.class
 })
 public abstract class MixinAsyncTick_AsyncTickableParticleGroup implements AsyncTickableParticleGroup {
+	@Unique
+	private final Set<Particle> asyncparticles$syncParticles = new ReferenceOpenHashSet<>();
+
 	@Dynamic
 	@WrapOperation(method = "extractRenderState", require = 0, at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/client/particle/SingleQuadParticle;extract(Lnet/minecraft/client/renderer/state/level/QuadParticleRenderState;Lnet/minecraft/client/Camera;F)V"))
@@ -31,5 +37,16 @@ public abstract class MixinAsyncTick_AsyncTickableParticleGroup implements Async
 			f += 1.0F;
 		}
 		original.call(instance, quadParticleRenderState, camera, f);
+	}
+
+	public Set<Particle> asyncparticle$getSyncParticles() {
+		return Collections.unmodifiableSet(asyncparticles$syncParticles);
+	}
+
+	@Override
+	public void asyncparticle$recordSync(Particle particle) {
+		synchronized (asyncparticles$syncParticles) {
+			asyncparticles$syncParticles.add(particle);
+		}
 	}
 }

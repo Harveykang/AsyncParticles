@@ -3,13 +3,11 @@ package fun.qu_an.minecraft.asyncparticles.client.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
-import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -35,6 +33,7 @@ import static java.util.Objects.requireNonNullElse;
 
 public class AsyncParticlesConfig {
 	public static final int MIN_PARTICLE_LIMIT = 1024;
+	public static final int DEFAULT_PARTICLE_LIMIT = 16384;
 	public static final int MAX_PARTICLE_LIMIT = 262144;
 	public static final int VERSION = 1;
 	public static final Path CONFIG_FILE = Path.of("config", AsyncParticlesClient.MOD_ID, AsyncParticlesClient.MOD_ID + ".json");
@@ -113,7 +112,7 @@ public class AsyncParticlesConfig {
 						Minecraft.getInstance().setScreen(current);
 						return;
 					} finally {
-						AsyncTickBehavior.reloadLater();
+						AsyncTickBehavior.getInstance().reloadLater();
 					}
 					current.message = msg.append("\n").append(
 						Component.translatable("gui.asyncparticles.reload-successfully")
@@ -149,7 +148,7 @@ public class AsyncParticlesConfig {
 						Minecraft.getInstance().setScreen(current);
 						return;
 					} finally {
-						AsyncTickBehavior.reloadLater();
+						AsyncTickBehavior.getInstance().reloadLater();
 					}
 					current.message = msg.append("\n").append(
 						Component.translatable("gui.asyncparticles.reset-successfully")
@@ -249,7 +248,7 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Particle {
-			int particleLimit = 16384;
+			int particleLimit = DEFAULT_PARTICLE_LIMIT;
 			boolean removeIfMissedTick = false;
 			boolean parallelQueueRemoval = true;
 			boolean parallelQueueEviction = true;

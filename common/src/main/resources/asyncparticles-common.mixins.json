@@ -8,6 +8,11 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin",
   "client": [
+    "compat.cloth_config.AbstractConfigEntryAccessor",
+    "compat.cloth_config.AbstractConfigListEntryAccessor",
+    "compat.cloth_config.AccessorBaseListEntry",
+    "compat.cloth_config.AccessorSubCategoryListEntry",
+    "compat.sodium.MixinQuadParticleRenderState",
     "compat.sodium_extra.MixinFireworkParticles$Starter",
     "compat.sodium_extra.MixinParticleEngine",
     "conditional.Mixin_ReplaceRandom",
@@ -24,31 +29,31 @@
     "core.MixinARGB",
     "core.MixinTextureManager",
     "core.MixinWaterFluid",
+    "core.deffered_texture_tick.MixinTextureManager",
     "core.particle.MixinParticle",
     "core.particle.MixinParticleEngine",
-    "core.particle.async_render.MixinLevelRenderer",
-    "core.particle.async_render.MixinParticle_LightCache",
-    "core.particle.async_render.MixinParticleEngine",
-    "core.particle.async_render.MixinParticlesRenderState",
-    "core.particle.async_render.MixinQuadParticleGroup",
-    "core.particle.async_render.MixinVertexVertexStorage",
-    "core.particle.async_tick.MixinMinecraft",
-    "core.particle.async_tick.MixinParticleEngine",
-    "core.particle.async_tick.MixinParticleGroup",
     "core.particle.fix_black_destruction_particle.MixinParticleEngine_FixBlackDestroyParticle",
     "core.particle.fix_black_destruction_particle.MixinTerrainParticle_FixBlackDestroyParticle",
+    "core.particle.gpu_acceleration.MixinDustColorTransitionParticle",
+    "core.particle.gpu_acceleration.MixinFireworkParticles$OverlayParticle",
+    "core.particle.gpu_acceleration.MixinFireworkParticles$SparkParticle",
+    "core.particle.gpu_acceleration.MixinLevelRenderer",
+    "core.particle.gpu_acceleration.MixinParticleEngine",
+    "core.particle.gpu_acceleration.MixinSingleQuadParticle",
+    "core.particle.render.MixinParticleEngine",
+    "core.particle.tick.MixinMinecraft",
+    "core.particle.tick.MixinParticle_LightCache",
+    "core.particle.tick.MixinParticleEngine",
+    "core.particle.tick.MixinParticleGroup",
     "off_thread_access.MixinClientChunkCache",
     "off_thread_access.MixinClientLevel",
     "off_thread_access.MixinLevelRenderer",
-    "off_thread_access.MixinSoundEngine",
-    "compat.cloth_config.AbstractConfigEntryAccessor",
-    "compat.cloth_config.AbstractConfigListEntryAccessor",
-    "compat.cloth_config.AccessorSubCategoryListEntry",
-    "compat.cloth_config.AccessorBaseListEntry"
+    "off_thread_access.MixinSoundEngine"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
+    "core.particle.gpu_acceleration.MixinQuadParticleGroup"
   ]
 }

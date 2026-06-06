@@ -26,9 +26,9 @@ dependencies {
 //    compileOnly "maven.modrinth:fzzy-config:0.7.2+1.21.6"
 //
 //    /* Performance */
-//    compileOnly "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
-//    compileOnly 'maven.modrinth:iris:1.10.4+1.21.11-fabric'
-//    compileOnly 'maven.modrinth:sodium-extra:mc1.21.11-0.8.3+fabric'
+    compileOnly "maven.modrinth:sodium:mc26.1.2-0.8.12-fabric"
+    compileOnly 'maven.modrinth:iris:1.10.9+26.1-fabric'
+    compileOnly 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+fabric'
 //    compileOnly 'maven.modrinth:moreculling:kWU8mVq5' // 1.5.0-beta.2
 //
 //    /* Particle Rain/Pretty Rain */

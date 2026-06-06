@@ -17,7 +17,7 @@ public class MixinParticleEngine {
 	)
 	@Redirect(method = "@MixinSquared:Handler", require = 0, at = @At(value = "INVOKE",
 		target = "Ljava/util/Map;computeIfAbsent(Ljava/lang/Object;Ljava/util/function/Function;)Ljava/lang/Object;"))
-	private Object addParticle(Map instance, Object key, Function function) {
+	private Object addParticle(Map<?, Boolean> instance, Object key, Function<?, ?> mappingFunction) {
 		return instance.getOrDefault(key, true);
 	}
 }

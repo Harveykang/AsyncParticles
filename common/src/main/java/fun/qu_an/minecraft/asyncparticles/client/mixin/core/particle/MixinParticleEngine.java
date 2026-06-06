@@ -1,8 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
 
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.TrackedParticleCountsMap;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.TrackedParticleCountsMap;
 import fun.qu_an.minecraft.asyncparticles.client.util.BusyWaitEvictingQueue;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.particle.*;
@@ -37,7 +37,7 @@ public class MixinParticleEngine {
 	@Inject(order = 1500, method = "<init>", at = @At(value = "RETURN"))
 	public void initTail(CallbackInfo ci) {
 		trackedParticleCounts = new TrackedParticleCountsMap();
-		particlesToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getParticleLimit(), AsyncTickBehavior::onEvict);
-		trackingEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTickBehavior::onEvict);
+		particlesToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getParticleLimit(), AsyncTickBehavior.getInstance()::onEvict);
+		trackingEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), AsyncTickBehavior.getInstance()::onEvict);
 	}
 }

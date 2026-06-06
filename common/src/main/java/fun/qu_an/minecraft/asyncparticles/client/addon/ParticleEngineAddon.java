@@ -5,7 +5,11 @@ import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public interface ParticleEngineAddon {
-	void asyncparticle$addRenderType(ParticleRenderType particleRenderType);
+	default void asyncparticle$addRenderType(ParticleRenderType particleRenderType) {
+		throw new AssertionError("Must be implemented!");
+	}
 
-	void asyncparticle$sortRenderOrder();
+	default void asyncparticle$tickSyncParticles() {
+		throw new AssertionError("Must be implemented!");
+	}
 }

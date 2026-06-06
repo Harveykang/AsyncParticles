@@ -5,26 +5,35 @@ accessible field net/minecraft/client/renderer/state/level/QuadParticleRenderSta
 accessible class net/minecraft/client/renderer/state/level/QuadParticleRenderState$Storage
 accessible field net/minecraft/client/renderer/feature/ParticleFeatureRenderer$ParticleBufferCache ringBuffer Lnet/minecraft/client/renderer/MappableRingBuffer;
 accessible field net/minecraft/client/particle/QuadParticleGroup particleTypeRenderState Lnet/minecraft/client/renderer/state/level/QuadParticleRenderState;
+accessible field net/minecraft/client/particle/QuadParticleGroup particleType Lnet/minecraft/client/particle/ParticleRenderType;
+transitive-mutable field net/minecraft/client/particle/ParticleGroup particles Ljava/util/Queue;
 accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;
 transitive-mutable field net/minecraft/world/level/chunk/ChunkAccess blockEntities Ljava/util/Map;
 transitive-mutable field net/minecraft/world/level/chunk/ChunkAccess pendingBlockEntities Ljava/util/Map;
-accessible field com/mojang/blaze3d/opengl/GlBuffer handle I
-accessible method com/mojang/blaze3d/opengl/DirectStateAccess mapBufferRange (IJJII)Ljava/nio/ByteBuffer;
-accessible method com/mojang/blaze3d/opengl/DirectStateAccess  flushMappedBufferRange (IJJI)V
-accessible method com/mojang/blaze3d/opengl/DirectStateAccess unmapBuffer (II)V
-accessible class com/mojang/blaze3d/opengl/GlBuffer$GlMappedView
-accessible method com/mojang/blaze3d/opengl/GlBuffer$GlMappedView <init> (Ljava/lang/Runnable;Lcom/mojang/blaze3d/opengl/GlBuffer;Ljava/nio/ByteBuffer;)V
 accessible method net/minecraft/client/renderer/feature/ParticleFeatureRenderer$ParticleBufferCache rotate ()V
 accessible field net/minecraft/client/renderer/feature/FeatureRenderDispatcher particleFeatureRenderer Lnet/minecraft/client/renderer/feature/ParticleFeatureRenderer;
 accessible field net/minecraft/client/renderer/feature/ParticleFeatureRenderer availableBuffers Ljava/util/Queue;
 accessible field net/minecraft/client/renderer/feature/ParticleFeatureRenderer usedBuffers Ljava/util/List;
-accessible method net/minecraft/client/particle/SingleQuadParticle getLayer ()Lnet/minecraft/client/particle/SingleQuadParticle$Layer;
-accessible field net/minecraft/client/particle/QuadParticleGroup particleType Lnet/minecraft/client/particle/ParticleRenderType;
 accessible field net/minecraft/client/particle/Particle x D
 accessible field net/minecraft/client/particle/Particle y D
 accessible field net/minecraft/client/particle/Particle z D
+accessible field net/minecraft/client/particle/Particle xo D
+accessible field net/minecraft/client/particle/Particle yo D
+accessible field net/minecraft/client/particle/Particle zo D
+accessible field net/minecraft/client/particle/SingleQuadParticle rCol F
+accessible field net/minecraft/client/particle/SingleQuadParticle gCol F
+accessible field net/minecraft/client/particle/SingleQuadParticle bCol F
+accessible field net/minecraft/client/particle/SingleQuadParticle alpha F
+accessible field net/minecraft/client/particle/SingleQuadParticle oRoll F
+accessible field net/minecraft/client/particle/SingleQuadParticle roll F
 accessible field net/minecraft/client/particle/Particle bbWidth F
 accessible field net/minecraft/client/particle/Particle bbHeight F
+accessible method net/minecraft/client/particle/Particle getLightCoords (F)I
+accessible method net/minecraft/client/particle/SingleQuadParticle getLayer ()Lnet/minecraft/client/particle/SingleQuadParticle$Layer;
+accessible method net/minecraft/client/particle/SingleQuadParticle getU0 ()F
+accessible method net/minecraft/client/particle/SingleQuadParticle getU1 ()F
+accessible method net/minecraft/client/particle/SingleQuadParticle getV0 ()F
+accessible method net/minecraft/client/particle/SingleQuadParticle getV1 ()F
 accessible field net/minecraft/client/renderer/culling/Frustum intersection Lorg/joml/FrustumIntersection;
 accessible field net/minecraft/client/renderer/culling/Frustum camX D
 accessible field net/minecraft/client/renderer/culling/Frustum camY D
@@ -33,4 +42,18 @@ accessible method net/minecraft/util/Util onThreadException (Ljava/lang/Thread;L
 accessible method net/minecraft/client/renderer/state/level/QuadParticleRenderState$Storage <init> ()V
 accessible method net/minecraft/client/particle/ParticleEngine updateCount (Lnet/minecraft/core/particles/ParticleLimit;I)V
 accessible field net/minecraft/client/particle/ParticleEngine particles Ljava/util/Map;
+accessible field net/minecraft/client/particle/ParticleEngine RENDER_ORDER Ljava/util/List;
 transitive-mutable field net/minecraft/world/level/Level random Lnet/minecraft/util/RandomSource;
+
+accessible field com/mojang/blaze3d/buffers/GpuBuffer size J
+transitive-mutable field com/mojang/blaze3d/buffers/GpuBuffer size J
+accessible method com/mojang/blaze3d/vertex/VertexFormat <init> (Ljava/util/List;Ljava/util/List;Lit/unimi/dsi/fastutil/ints/IntList;I)V
+accessible field com/mojang/blaze3d/opengl/GlBuffer handle I
+transitive-mutable field com/mojang/blaze3d/opengl/GlBuffer handle I
+accessible method com/mojang/blaze3d/opengl/DirectStateAccess mapBufferRange (IJJII)Ljava/nio/ByteBuffer;
+accessible method com/mojang/blaze3d/opengl/DirectStateAccess  flushMappedBufferRange (IJJI)V
+accessible method com/mojang/blaze3d/opengl/DirectStateAccess unmapBuffer (II)V
+accessible class com/mojang/blaze3d/opengl/GlBuffer$GlMappedView
+accessible method com/mojang/blaze3d/opengl/GlBuffer$GlMappedView <init> (Ljava/lang/Runnable;Lcom/mojang/blaze3d/opengl/GlBuffer;Ljava/nio/ByteBuffer;)V
+accessible method com/mojang/blaze3d/pipeline/RenderPipeline <init> (Lnet/minecraft/resources/Identifier;Lnet/minecraft/resources/Identifier;Lnet/minecraft/resources/Identifier;Lnet/minecraft/client/renderer/ShaderDefines;Ljava/util/List;Ljava/util/List;Lcom/mojang/blaze3d/pipeline/ColorTargetState;Lcom/mojang/blaze3d/pipeline/DepthStencilState;Lcom/mojang/blaze3d/platform/PolygonMode;ZLcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;I)V
+accessible field com/mojang/blaze3d/vertex/VertexFormat$Builder offsets Lit/unimi/dsi/fastutil/ints/IntList;

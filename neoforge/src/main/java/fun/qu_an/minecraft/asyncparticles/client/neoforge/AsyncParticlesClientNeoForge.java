@@ -9,7 +9,7 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
@@ -147,7 +147,7 @@ public final class AsyncParticlesClientNeoForge {
 						source.sendSystemMessage(Component.literal("Failed to reload config"));
 						return 1;
 					}
-					AsyncTickBehavior.reloadLater();
+					AsyncTickBehavior.getInstance().reloadLater();
 					source.sendSystemMessage(Component.literal("AsyncParticles config reloaded"));
 					return 1;
 				})));

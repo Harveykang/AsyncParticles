@@ -56,17 +56,17 @@ dependencies {
 //    localRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
 //
 //    /* Performance */
-//    compileOnly "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
-//    compileOnly 'maven.modrinth:iris:1.10.4+1.21.11-fabric'
-//    compileOnly 'maven.modrinth:sodium-extra:mc1.21.11-0.8.3+fabric'
-//    localRuntime "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
-//    localRuntime 'maven.modrinth:sodium-extra:mc1.21.11-0.8.3+fabric'
-//    localRuntime 'maven.modrinth:iris:1.10.4+1.21.11-fabric'
-//    localRuntime "org.antlr:antlr4-runtime:4.13.1"
-//    localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
-//    localRuntime "org.anarres:jcpp:1.4.14"
+//    compileOnly "maven.modrinth:sodium:mc26.1.2-0.8.12-fabric"
+//    compileOnly 'maven.modrinth:iris:1.10.9+26.1-fabric'
+//    compileOnly 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+fabric'
+    localRuntime "maven.modrinth:sodium:mc26.1.2-0.8.12-fabric"
+    localRuntime 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+fabric'
+    localRuntime 'maven.modrinth:iris:1.10.9+26.1-fabric'
+    localRuntime "org.antlr:antlr4-runtime:4.13.1"
+    localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
+    localRuntime "org.anarres:jcpp:1.4.14"
 //    localRuntime 'maven.modrinth:scalablelux:0.1.6+fabric.c25518a'
-//    localRuntime 'maven.modrinth:spark:1.10.156-fabric'
+    localRuntime 'maven.modrinth:spark:1.10.172-fabric'
 //    compileOnly 'maven.modrinth:moreculling:kWU8mVq5' // 1.4.0-beta.1
 ////    localRuntime 'maven.modrinth:moreculling:ESxkwc6w' // 1.4.0-beta.1
 //

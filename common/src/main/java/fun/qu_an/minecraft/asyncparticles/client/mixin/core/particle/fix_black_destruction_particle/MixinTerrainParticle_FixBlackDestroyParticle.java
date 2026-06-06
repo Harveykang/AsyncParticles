@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.fix_black_
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.fix_black_destruction_particle.TerrainParticleBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.async_render.MixinParticle_LightCache;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick.MixinParticle_LightCache;
 import net.minecraft.client.particle.TerrainParticle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

@@ -2,8 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_render.AsyncRenderBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import org.spongepowered.asm.mixin.Final;
@@ -38,12 +37,12 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	@Inject(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V", at = @At("RETURN"))
 	protected void onInit(CallbackInfo ci) {
 		Class<?> aClass = asyncparticles$getRealClass();
-		if (AsyncTickBehavior.shouldSync(aClass)) {
+		if (AsyncTickBehavior.getInstance().shouldSync(aClass)) {
 			asyncparticles$setTickSync();
 		}
-		if (AsyncRenderBehavior.shouldSync(aClass)) {
-			asyncparticles$setRenderSync();
-		}
+//		if (AsyncRenderBehavior.shouldSync(aClass)) {
+//			asyncparticles$setRenderSync();
+//		}
 	}
 
 	@Shadow

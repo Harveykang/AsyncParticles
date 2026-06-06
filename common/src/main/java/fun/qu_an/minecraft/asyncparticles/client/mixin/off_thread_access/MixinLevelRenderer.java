@@ -26,6 +26,9 @@ public abstract class MixinLevelRenderer {
 	@Shadow
 	public abstract void destroyBlockProgress(int i, BlockPos blockPos, int j);
 
+	@Shadow
+	public abstract void onSectionBecomingNonEmpty(long sectionNode);
+
 	@Inject(method = "setSectionDirty(IIIZ)V", at = @At("HEAD"), cancellable = true)
 	public void injectSetSectionDirty(int i, int j, int k, boolean bl, CallbackInfo ci) {
 		if (ThreadUtil.isOnParticleThread()) {
@@ -58,11 +61,19 @@ public abstract class MixinLevelRenderer {
 		}
 	}
 
-	@Inject(method = "destroyBlockProgress", at = @At("HEAD"), cancellable = true)
-	public void injectDestroyBlockProgress(int breakerId, BlockPos pos, int progress, CallbackInfo ci) {
+	@Inject(method = "onSectionBecomingNonEmpty", at = @At("HEAD"), cancellable = true)
+	public void injectOnSectionBecomingNonEmpty(long sectionNode, CallbackInfo ci) {
 		if (ThreadUtil.isOnParticleThread()) {
 			ci.cancel();
-			ThreadUtil.enqueueClientTask(() -> this.destroyBlockProgress(breakerId, pos, progress));
+			ThreadUtil.enqueueClientTask(() -> this.onSectionBecomingNonEmpty(sectionNode));
+		}
+	}
+
+	@Inject(method = "destroyBlockProgress", at = @At("HEAD"), cancellable = true)
+	public void injectDestroyBlockProgress(int id, BlockPos pos, int progress, CallbackInfo ci) {
+		if (ThreadUtil.isOnParticleThread()) {
+			ci.cancel();
+			ThreadUtil.enqueueClientTask(() -> this.destroyBlockProgress(id, pos, progress));
 		}
 	}
 }

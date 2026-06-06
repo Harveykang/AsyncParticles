@@ -25,7 +25,7 @@ public class ExceptionTracker<T> {
 	}
 
 	/**
-	 * @return true if the exception rate exceeds the threshold for the given object and type of exception
+	 * @return true if the exception rate exceeds the threshold for the given object and indexType of exception
 	 * @apiNote MUST pay attention to memory leak, cause the obj will be KEPT IN MEMORY
 	 */
 	public boolean addException(T obj, Throwable t) {
