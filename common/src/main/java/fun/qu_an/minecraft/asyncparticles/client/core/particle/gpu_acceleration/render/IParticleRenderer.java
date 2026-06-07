@@ -13,13 +13,11 @@ import java.util.function.Supplier;
 public interface IParticleRenderer {
 	void beginFrame();
 
-	void unmapBufferAndSwap();
+	void unmapBufferAndSwap(Vec3 prevGpuCamPos);
 
 	void mapBuffer(Supplier<Set<SingleQuadParticle.Layer>> potentialLayer);
 
 	boolean isMapped();
-
-	void unmapBuffer();
 
 	boolean isShouldSkip();
 

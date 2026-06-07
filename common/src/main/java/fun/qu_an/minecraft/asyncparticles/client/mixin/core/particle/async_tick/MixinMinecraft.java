@@ -1,9 +1,9 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.async_tick;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import org.spongepowered.asm.mixin.Mixin;

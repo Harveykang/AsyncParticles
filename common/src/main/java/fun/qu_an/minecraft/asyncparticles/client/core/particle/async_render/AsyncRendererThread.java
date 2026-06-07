@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.async_render;
 
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.util.AsyncParticleWorkerThread;
@@ -6,10 +6,10 @@ import org.slf4j.Logger;
 
 import java.util.concurrent.ForkJoinPool;
 
-public class AsyncTickerThread extends AsyncParticleWorkerThread {
+public class AsyncRendererThread extends AsyncParticleWorkerThread {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
-	public AsyncTickerThread(ForkJoinPool forkJoinPool) {
+	public AsyncRendererThread(ForkJoinPool forkJoinPool) {
 		super(forkJoinPool);
 	}
 

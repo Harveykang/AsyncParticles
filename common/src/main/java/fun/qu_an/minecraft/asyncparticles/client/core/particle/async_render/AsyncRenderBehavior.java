@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.core.particle.render;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.async_render;
 
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionTracker;

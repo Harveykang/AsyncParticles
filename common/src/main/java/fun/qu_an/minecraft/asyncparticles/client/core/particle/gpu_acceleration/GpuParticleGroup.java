@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
-import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
@@ -10,9 +9,9 @@ import net.minecraft.client.particle.QuadParticleGroup;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.state.level.ParticleGroupRenderState;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.NonNull;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class GpuParticleGroup extends QuadParticleGroup implements ParticleGroupAddition {
@@ -45,16 +44,16 @@ public class GpuParticleGroup extends QuadParticleGroup implements ParticleGroup
 		renderState.tickRenderers(GpuParticleBehavior.INSTANCE.getCameraPos(), particles);
 	}
 
-	public void unmapBuffersAndSwap() {
-		renderState.unmapBuffersAndSwap();
+	public void unmapBuffersAndSwap(Vec3 prevGpuCamPos) {
+		renderState.unmapBuffersAndSwap(prevGpuCamPos);
 	}
 
 	public void beginFrame() {
 		renderState.beginFrame();
 	}
 
-	public void append(SingleQuadParticle particle) {
-		renderState.append(GpuParticleBehavior.INSTANCE.getCameraPos(), particle);
+	public void append(Vec3 camPos, SingleQuadParticle particle) {
+		renderState.append(camPos, particle);
 	}
 
 	public void resize(int particleLimit) {

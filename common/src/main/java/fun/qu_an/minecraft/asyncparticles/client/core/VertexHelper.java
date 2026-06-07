@@ -3,7 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.core;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.render.AsyncRenderBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_render.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import org.slf4j.Logger;
 

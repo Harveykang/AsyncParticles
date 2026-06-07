@@ -57,3 +57,4 @@ accessible class com/mojang/blaze3d/opengl/GlBuffer$GlMappedView
 accessible method com/mojang/blaze3d/opengl/GlBuffer$GlMappedView <init> (Ljava/lang/Runnable;Lcom/mojang/blaze3d/opengl/GlBuffer;Ljava/nio/ByteBuffer;)V
 accessible method com/mojang/blaze3d/pipeline/RenderPipeline <init> (Lnet/minecraft/resources/Identifier;Lnet/minecraft/resources/Identifier;Lnet/minecraft/resources/Identifier;Lnet/minecraft/client/renderer/ShaderDefines;Ljava/util/List;Ljava/util/List;Lcom/mojang/blaze3d/pipeline/ColorTargetState;Lcom/mojang/blaze3d/pipeline/DepthStencilState;Lcom/mojang/blaze3d/platform/PolygonMode;ZLcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;I)V
 accessible field com/mojang/blaze3d/vertex/VertexFormat$Builder offsets Lit/unimi/dsi/fastutil/ints/IntList;
+accessible field com/mojang/blaze3d/opengl/GlBuffer MEMORY_POOl Lcom/mojang/jtracy/MemoryPool;

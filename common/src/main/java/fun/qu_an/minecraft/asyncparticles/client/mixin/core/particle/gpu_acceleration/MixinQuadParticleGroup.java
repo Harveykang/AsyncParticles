@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuQuadParticleRenderState;
-import fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick.MixinParticleGroup;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.async_tick.MixinParticleGroup;
 import net.minecraft.client.particle.ParticleGroup;
 import net.minecraft.client.particle.QuadParticleGroup;
 import net.minecraft.client.renderer.state.level.QuadParticleRenderState;

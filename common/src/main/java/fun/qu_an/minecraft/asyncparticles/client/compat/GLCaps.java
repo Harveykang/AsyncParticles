@@ -161,7 +161,7 @@ public class GLCaps {
 
 			@Override
 			public int genTransformFeedback() {
-				return -1;
+				return 0;
 			}
 
 			@Override

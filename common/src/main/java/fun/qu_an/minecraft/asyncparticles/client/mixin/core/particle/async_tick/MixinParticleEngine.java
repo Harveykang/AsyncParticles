@@ -1,13 +1,13 @@
 
-package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.async_tick;
 
 import com.google.common.collect.Lists;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickParticleGroupBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickParticleGroupBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
@@ -15,6 +15,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.util.profiling.Profiler;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -64,9 +65,9 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		Particle particle;
 		boolean tickAsync = ConfigHelper.isTickAsync();
 		boolean gpuParticles = tickAsync && ConfigHelper.isGpuParticles();
+		Vec3 prevGpuCamPos = GpuParticleBehavior.INSTANCE.getCameraPos();
 		if (!particlesToAdd.isEmpty()) {
 			boolean appendNewParticlesToRenderer = ConfigHelper.isAppendNewParticlesToRenderer();
-			int gpuParticleLimit = GpuParticleBehavior.INSTANCE.getGpuParticleLimit();
 			// Write like this to be compatible with e.g. Spectrum mod
 			//noinspection ForLoopReplaceableByForEach
 			for (Iterator<Particle> iterator = particlesToAdd.iterator(); iterator.hasNext(); ) {
@@ -90,7 +91,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 						});
 					this.particles.put(gpuRenderType, group);
 					if (appendNewParticlesToRenderer) {
-						((GpuParticleGroup) group).append(((SingleQuadParticle) particle));
+						((GpuParticleGroup) group).append(prevGpuCamPos, ((SingleQuadParticle) particle));
 					}
 				}
 				group.add(particle);
@@ -98,10 +99,10 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			particlesToAdd.clear();
 		}
 		if (gpuParticles) {
-			GpuParticleBehavior.INSTANCE.swapAllBuffers();
+			GpuParticleBehavior.INSTANCE.swapAllBuffers(prevGpuCamPos);
 			GpuParticleBehavior.INSTANCE.setGpuParticleLimit(ConfigHelper.getParticleLimit());
 			Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-			GpuParticleBehavior.INSTANCE.setCameraPos(camera.position());
+			GpuParticleBehavior.INSTANCE.setCameraPos(camera.position()); // Set the next camera position
 			GpuParticleBehavior.INSTANCE.gpuParticles.forEach(((renderType, gpuGroup) -> {
 				if (gpuGroup.isEmpty()) {
 					return;
@@ -143,5 +144,14 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	private void clearParticles(CallbackInfo ci) {
 		this.particles.values().forEach(group -> ((ParticleGroupAddition) group).asyncparticles$removeDeadParticles());
+	}
+
+	@Override
+	public void asyncparticle$tickSyncParticles() {
+		particles.values().forEach(g -> {
+			if (g instanceof AsyncTickableParticleGroup asyncGroup) {
+				asyncGroup.asyncparticle$tickSyncParticles();
+			}
+		});
 	}
 }

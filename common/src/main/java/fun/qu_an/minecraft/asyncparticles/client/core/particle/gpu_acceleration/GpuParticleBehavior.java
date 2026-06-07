@@ -4,8 +4,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.IParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.NewParticleMultiRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.ParticleMultiRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.ParticleRenderer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
@@ -75,9 +75,9 @@ public class GpuParticleBehavior {
 		return gpuParticles.get(type);
 	}
 
-	public void swapAllBuffers() {
+	public void swapAllBuffers(Vec3 prevGpuCamPos) {
 		RenderSystem.assertOnRenderThread();
-		gpuParticles.values().forEach(GpuParticleGroup::unmapBuffersAndSwap);
+		gpuParticles.values().forEach(gpuParticleGroup -> gpuParticleGroup.unmapBuffersAndSwap(prevGpuCamPos));
 	}
 
 	public void setCameraPos(Vec3 pos) {
@@ -187,7 +187,8 @@ public class GpuParticleBehavior {
 	}
 
 	public IParticleRenderer createRenderer() {
-		if (GLCaps.tfSupport.isSupported()) return new ParticleMultiRenderer();
+		if (GLCaps.tfSupport.isSupported()) return new NewParticleMultiRenderer();
+//		if (GLCaps.tfSupport.isSupported()) return new ParticleMultiRenderer();
 //		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer();
 
 		throw new IllegalStateException("No compatible particle renderer found");

@@ -1,5 +1,5 @@
 
-package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.render;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.async_render;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
@@ -39,14 +39,5 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				renderOrder.add(particleRenderType);
 			}
 		}
-	}
-
-	@Override
-	public void asyncparticle$tickSyncParticles() {
-		particles.values().forEach(g -> {
-			if (g instanceof AsyncTickableParticleGroup asyncGroup) {
-				asyncGroup.asyncparticle$tickSyncParticles();
-			}
-		});
 	}
 }

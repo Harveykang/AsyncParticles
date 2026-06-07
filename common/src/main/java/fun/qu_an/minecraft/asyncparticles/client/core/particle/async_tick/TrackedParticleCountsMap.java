@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick;
 
 import fun.qu_an.minecraft.asyncparticles.client.util.ReentrantSpinLock;
 import fun.qu_an.minecraft.asyncparticles.client.util.SpinLock;

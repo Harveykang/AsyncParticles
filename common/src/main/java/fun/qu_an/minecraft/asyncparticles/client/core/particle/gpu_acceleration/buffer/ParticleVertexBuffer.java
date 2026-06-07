@@ -35,7 +35,7 @@ public class ParticleVertexBuffer {
 	}
 
 	public void bind() {
-		if (vao != -1) {
+		if (vao > 0) {
 			GL30C.glBindVertexArray(vao);
 		}
 		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, vbo);
@@ -57,60 +57,82 @@ public class ParticleVertexBuffer {
 	}
 
 	public ByteBuffer map(int size) {
-		if (size > this.size) {
-			resize(size);
-		}
-		if (mapped) {
-			throw new IllegalStateException("Buffer is already mapped");
-		}
-		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, vbo);
-		ByteBuffer oldBuffer = GL30C.glMapBufferRange(GL15C.GL_ARRAY_BUFFER,
-			0,
-			size,
-			GL30C.GL_MAP_WRITE_BIT |
-				GL30C.GL_MAP_INVALIDATE_BUFFER_BIT |
-				GL30C.GL_MAP_FLUSH_EXPLICIT_BIT |
-				GL30C.GL_MAP_UNSYNCHRONIZED_BIT |
-				0,
-			this.oldBuffer);
-		mapped = true;
-		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
-		Objects.requireNonNull(oldBuffer);
-		return this.oldBuffer = oldBuffer;
+		return map(size, true);
 	}
 
-	public void unmap(int size) {
-		if (size > this.size) {
-			throw new IllegalArgumentException("Unmapping more bytes than buffer size: " + size + " > " + this.size);
+	public ByteBuffer map(int size, boolean invalidateBufferBit) {
+		return mapRange(0, size, invalidateBufferBit);
+	}
+
+    public ByteBuffer mapRange(int offset, int size, boolean invalidateBufferBit) {
+        if (offset + size > this.size) {
+			throw new IllegalArgumentException("Range exceeds buffer size: " + (offset + size) + " > " + this.size);
+        }
+        if (mapped) {
+			throw new IllegalStateException("Buffer is already mapped");
+        }
+        GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, vbo);
+        ByteBuffer buf = GL30C.glMapBufferRange(GL15C.GL_ARRAY_BUFFER,
+            offset, size,
+            GL30C.GL_MAP_WRITE_BIT |
+				(invalidateBufferBit ? GL30C.GL_MAP_INVALIDATE_BUFFER_BIT : 0) |
+                GL30C.GL_MAP_FLUSH_EXPLICIT_BIT |
+                GL30C.GL_MAP_UNSYNCHRONIZED_BIT,
+            this.oldBuffer);
+        mapped = true;
+        GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+        Objects.requireNonNull(buf);
+        return this.oldBuffer = buf;
+    }
+
+	public void flush(int offset, int size) {
+		if (offset + size > this.size) {
+			throw new IllegalArgumentException("Flushing more bytes than buffer size: " + (offset + size) + " > " + this.size);
 		}
 		if (!mapped) {
 			throw new IllegalStateException("Buffer is not mapped");
 		}
 		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, vbo);
-		GL30C.glFlushMappedBufferRange(GL15C.GL_ARRAY_BUFFER, 0, size);
+		GL30C.glFlushMappedBufferRange(GL15C.GL_ARRAY_BUFFER, offset, size);
+		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+	}
+
+	public void unmap() {
+		if (!mapped) {
+			throw new IllegalStateException("Buffer is not mapped");
+		}
+		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, vbo);
+		GL15C.glUnmapBuffer(GL15C.GL_ARRAY_BUFFER);
+		mapped = false;
+		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+	}
+
+	public void unmap(int offset, int size) {
+		if (offset + size > this.size) {
+			throw new IllegalArgumentException("Unmapping more bytes than buffer size: " + (offset + size) + " > " + this.size);
+		}
+		if (!mapped) {
+			throw new IllegalStateException("Buffer is not mapped");
+		}
+		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, vbo);
+		GL30C.glFlushMappedBufferRange(GL15C.GL_ARRAY_BUFFER, offset, size);
 		GL15C.glUnmapBuffer(GL15C.GL_ARRAY_BUFFER);
 		mapped = false;
 		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
 	}
 
 	public void delete() {
-		if (mapped) {
-			unmap(size);
-		}
-		if (vao != -1) {
-			GL30C.glDeleteVertexArrays(vao);
-		}
-		GL15C.glDeleteBuffers(vbo);
+		delete(true, true);
 	}
 
 	public void delete(boolean deleteVao, boolean deleteVbo) {
 		if (mapped) {
-			unmap(size);
+			unmap();
 		}
-		if (deleteVao && vao != -1) {
+		if (deleteVao && vao > 0) {
 			GL30C.glDeleteVertexArrays(vao);
 		}
-		if (deleteVbo) {
+		if (deleteVbo && vbo > 0) {
 			GL15C.glDeleteBuffers(vbo);
 		}
 	}

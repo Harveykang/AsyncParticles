@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.core.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.ComputeResult;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.GpuParticlePipelines;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.IParticleRenderer;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.minecraft.client.Minecraft;
@@ -92,8 +93,8 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 		renderer.tick(camPos, particleMap);
 	}
 
-	public void unmapBuffersAndSwap() {
-		renderer.unmapBufferAndSwap();
+	public void unmapBuffersAndSwap(Vec3 prevGpuCamPos) {
+		renderer.unmapBufferAndSwap(prevGpuCamPos);
 	}
 
 	public void beginFrame() {

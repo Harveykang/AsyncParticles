@@ -65,27 +65,29 @@ void main() {
     // Author: MoePus
     // Link: https://github.com/MoePus/Flerovium/blob/e7e43403191613c77b0beded2f12136897c5041c/src/main/java/com/moepus/flerovium/mixins/Particle/SingleQuadParticleMixin.java#L89
     // Lisence: https://github.com/MoePus/Flerovium/blob/e7e43403191613c77b0beded2f12136897c5041c/LICENSE
-    float sinRoll = sin(nroll);
-    float cosRoll = cos(nroll);
-    vec3 left = cosRoll * CameraLeft + sinRoll * CameraUp;
-    vec3 up = -sinRoll * CameraLeft + cosRoll * CameraUp;
+    float ss = sin(nroll) * size;
+    float cs = cos(nroll) * size;
+    float a = cs - ss;
+    float b = cs + ss;
+    vec3 c = a * CameraLeft + b * CameraUp;// (left + up) * size
+    vec3 d = b * CameraLeft - a * CameraUp;// (left - up) * size
 
-    Position_0 = -(left + up) * size + pos;// left bottom
+    Position_0 = pos - c;// left bottom
     UV0_0 = UVMax; // maxU, maxV
     Color_0 = color;
     UV2_0 = Light;
 
-    Position_1 = -(left - up) * size + pos;// left top
+    Position_1 = pos - d;// left top
     UV0_1 = vec2(UVMax.x, UVMin.y); // maxU, minV
     Color_1 = color;
     UV2_1 = Light;
 
-    Position_2 =  (left + up) * size + pos;// right top
+    Position_2 = pos + c;// right top
     UV0_2 = UVMin; // minU, minV
     Color_2 = color;
     UV2_2 = Light;
 
-    Position_3 =  (left - up) * size + pos;// right bottom
+    Position_3 = pos + d;// right bottom
     UV0_3 = vec2(UVMin.x, UVMax.y); // minU, maxV
     Color_3 = color;
     UV2_3 = Light;
