@@ -24,6 +24,8 @@ import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.Supplier;
 
+import static fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.GpuParticlePipelines.RAW_PARTICLE;
+
 public class ParticleRenderer implements IParticleRenderer {
 	protected final int[] particleCount = new int[4];
 	protected ByteBuffer mappedBuffer;
@@ -50,9 +52,9 @@ public class ParticleRenderer implements IParticleRenderer {
 		// see com.mojang.blaze3d.opengl.VertexArrayCache.Separate.bindVertexArray
 
 		sources[0] = new ParticleVertexBuffer(true);
-		GpuParticlePipelines.bindAttr(GpuParticlePipelines.RAW_PARTICLE, sources[0]);
+		GpuParticlePipelines.bindAttr(RAW_PARTICLE, sources[0]);
 		sources[1] = new ParticleVertexBuffer(true);
-		GpuParticlePipelines.bindAttr(GpuParticlePipelines.RAW_PARTICLE, sources[1]);
+		GpuParticlePipelines.bindAttr(RAW_PARTICLE, sources[1]);
 
 		target = new ParticleVertexBuffer(-1, true);
 		targetMoj = RenderSystem.getDevice().createBuffer(
@@ -101,7 +103,7 @@ public class ParticleRenderer implements IParticleRenderer {
 		if (mappedBuffer == null) {
 			throw new IllegalStateException("Mapped buffer is null!");
 		}
-		sources[processingIndex].unmap(0, particleCount[processingIndex] * GpuParticlePipelines.RAW_PARTICLE.getVertexSize());
+		sources[processingIndex].unmap(0, particleCount[processingIndex] * RAW_PARTICLE.getVertexSize());
 //		debugPrintBuffer(mappedBuffer);
 		mappedBuffer = null;
 	}
@@ -112,7 +114,7 @@ public class ParticleRenderer implements IParticleRenderer {
 			throw new IllegalStateException("Mapped buffer is not null");
 		}
 		ParticleVertexBuffer source = sources[processingIndex];
-		mappedBuffer = source.map(this.particleLimit * GpuParticlePipelines.RAW_PARTICLE.getVertexSize());
+		mappedBuffer = source.map(this.particleLimit * RAW_PARTICLE.getVertexSize());
 	}
 
 	@Override
@@ -138,7 +140,7 @@ public class ParticleRenderer implements IParticleRenderer {
 		final long bufferAddress = MemoryUtil.memAddress(mappedBuffer);
 
 		int position = 0;
-		final int vertexSize = GpuParticlePipelines.RAW_PARTICLE.getVertexSize();
+		final int vertexSize = RAW_PARTICLE.getVertexSize();
 		ComputeData computeData = this.computeData[processingIndex];
 		computeData.clear();
 		try (final MemoryStack stack = MemStackUtil.stackPush()) {
@@ -405,7 +407,7 @@ public class ParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void resize(int particleLimit) {
-		int rawSize = particleLimit * GpuParticlePipelines.RAW_PARTICLE.getVertexSize();
+		int rawSize = particleLimit * RAW_PARTICLE.getVertexSize();
 		if (rawSize != sources[0].getSize()) {
 			sources[0].resize0(rawSize);
 		}

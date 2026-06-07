@@ -96,7 +96,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 					case "sodium_0_6" -> SODIUM_LOADED && versionCheck("sodium", "0.6", "0.7");
 					case "sodium_0_7" -> SODIUM_LOADED && versionCheck("sodium", "0.6.999999", "0.8");
 					case "sodium_extra" -> SODIUM_EXTRA_LOADED;
-					case "iris_like" -> IRIS_LIKE_LOADED;
+					case "iris_like" -> IRIS_LOADED;
 					case "a_good_place" -> A_GOOD_PLACE_LOADED;
 					case "watut" -> WATUT_LOADED;
 					case "physicsmod" -> PHYSICSMOD_LOADED;

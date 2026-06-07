@@ -89,6 +89,8 @@ public class GLCaps {
 
 		int genTransformFeedback();
 
+		void deleteTransformFeedback(int tf);
+
 		void glBindTransformFeedback(int tf);
 
 		void glBindTransformFeedbackBuffer(int tf, int index, int vbo);
@@ -114,6 +116,11 @@ public class GLCaps {
 
 			@Override
 			public int genTransformFeedback() {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void deleteTransformFeedback(int tf) {
 				throw new UnsupportedOperationException();
 			}
 
@@ -162,6 +169,10 @@ public class GLCaps {
 			@Override
 			public int genTransformFeedback() {
 				return 0;
+			}
+
+			@Override
+			public void deleteTransformFeedback(int tf) {
 			}
 
 			@Override
@@ -231,6 +242,11 @@ public class GLCaps {
 			}
 
 			@Override
+			public void deleteTransformFeedback(int tf) {
+				GL40C.glDeleteTransformFeedbacks(tf);
+			}
+
+			@Override
 			public void glBindTransformFeedback(int tf) {
 				GL40C.glBindTransformFeedback(GL40C.GL_TRANSFORM_FEEDBACK, tf);
 			}
@@ -275,6 +291,11 @@ public class GLCaps {
 			@Override
 			public int genTransformFeedback() {
 				return GL45C.glGenTransformFeedbacks();
+			}
+
+			@Override
+			public void deleteTransformFeedback(int tf) {
+				GL45C.glDeleteTransformFeedbacks(tf);
 			}
 
 			@Override

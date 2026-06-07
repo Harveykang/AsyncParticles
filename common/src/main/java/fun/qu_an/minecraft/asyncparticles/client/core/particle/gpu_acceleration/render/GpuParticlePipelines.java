@@ -6,14 +6,18 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.buffer.ParticleVertexBuffer;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import net.irisshaders.iris.api.v0.IrisApi;
+import net.irisshaders.iris.api.v0.IrisProgram;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.opengl.ARBVertexAttribBinding;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 public class GpuParticlePipelines {
 	public static final VertexFormatElement PLAIN_COLOR = new VertexFormatElement(1, 0, VertexFormatElement.Type.FLOAT, false, 4);
@@ -38,7 +42,7 @@ public class GpuParticlePipelines {
 			.add("Position", VertexFormatElement.POSITION) // 3 floats
 			.add("UV0", VertexFormatElement.UV0) // 2 floats
 			.add("Color", PLAIN_COLOR) // 4 floats
-			.add("UV2", PLAIN_UV2); // 2 shorts
+			.add("UV2", PLAIN_UV2); // 2 ints
 		VertexFormat format = add.build();
 		PLAIN_PARTICLE = new PlainParticleVertexFormat(format.getElements(),
 			format.getElementAttributeNames(),
@@ -48,24 +52,31 @@ public class GpuParticlePipelines {
 
 	private static final Map<RenderPipeline, RenderPipeline> pipelines = new Reference2ReferenceOpenHashMap<>();
 
-	public static RenderPipeline of(RenderPipeline original) {
+	public static RenderPipeline of(RenderPipeline original, BooleanSupplier translucentSupplier) {
 		if (original.getVertexFormat() != DefaultVertexFormat.PARTICLE) {
 			throw new IllegalArgumentException("Invalid vertex format");
 		}
-		return pipelines.computeIfAbsent(original, original1 -> new RenderPipeline(
-			original1.getLocation(),
-			original1.getVertexShader(),
-			original1.getFragmentShader(),
-			original1.getShaderDefines(),
-			original1.getSamplers(),
-			original1.getUniforms(),
-			original1.getColorTargetState(),
-			original1.getDepthStencilState(),
-			original1.getPolygonMode(),
-			original1.isCull(),
-			PLAIN_PARTICLE,
-			original1.getVertexFormatMode(),
-			original1.getSortKey()));
+		return pipelines.computeIfAbsent(original, original1 -> {
+			RenderPipeline pipeline = new RenderPipeline(
+				original1.getLocation(),
+				original1.getVertexShader(),
+				original1.getFragmentShader(),
+				original1.getShaderDefines(),
+				original1.getSamplers(),
+				original1.getUniforms(),
+				original1.getColorTargetState(),
+				original1.getDepthStencilState(),
+				original1.getPolygonMode(),
+				original1.isCull(),
+				PLAIN_PARTICLE,
+				original1.getVertexFormatMode(),
+				original1.getSortKey());
+			if (ModListHelper.IRIS_LOADED) {
+				IrisApi.getInstance().assignPipeline(pipeline,
+					translucentSupplier.getAsBoolean() ? IrisProgram.PARTICLES_TRANSLUCENT : IrisProgram.PARTICLES);
+			}
+			return pipeline;
+		});
 	}
 
 	public static void bindAttr(VertexFormat format, ParticleVertexBuffer buffer) {

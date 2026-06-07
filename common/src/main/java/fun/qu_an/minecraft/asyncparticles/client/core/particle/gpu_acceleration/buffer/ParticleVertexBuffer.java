@@ -14,6 +14,7 @@ public class ParticleVertexBuffer {
 	private int size;
 	private boolean mapped = false;
 	private final boolean streamDraw;
+	private int mapOffset;
 
 	public ParticleVertexBuffer(boolean streamDraw) {
 		this(GL30C.glGenVertexArrays(), GL15C.glGenBuffers(), streamDraw);
@@ -80,22 +81,35 @@ public class ParticleVertexBuffer {
                 GL30C.GL_MAP_UNSYNCHRONIZED_BIT,
             this.oldBuffer);
         mapped = true;
+		mapOffset = offset;
         GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
         Objects.requireNonNull(buf);
         return this.oldBuffer = buf;
     }
 
-	public void flush(int offset, int size) {
-		if (offset + size > this.size) {
-			throw new IllegalArgumentException("Flushing more bytes than buffer size: " + (offset + size) + " > " + this.size);
+	public void flush(int size) {
+		if (mapOffset + size > this.size) {
+			throw new IllegalArgumentException("Flushing more bytes than buffer size: " + (mapOffset + size) + " > " + this.size);
 		}
 		if (!mapped) {
 			throw new IllegalStateException("Buffer is not mapped");
 		}
 		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, vbo);
-		GL30C.glFlushMappedBufferRange(GL15C.GL_ARRAY_BUFFER, offset, size);
+		GL30C.glFlushMappedBufferRange(GL15C.GL_ARRAY_BUFFER, 0, size);
 		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
 	}
+
+//	public void flush(int offsetRelatedToMapOffset, int size) {
+//		if (mapOffset + size > this.size) {
+//			throw new IllegalArgumentException("Flushing more bytes than buffer size: " + (mapOffset + size) + " > " + this.size);
+//		}
+//		if (!mapped) {
+//			throw new IllegalStateException("Buffer is not mapped");
+//		}
+//		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, vbo);
+//		GL30C.glFlushMappedBufferRange(GL15C.GL_ARRAY_BUFFER, 0, size);
+//		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+//	}
 
 	public void unmap() {
 		if (!mapped) {

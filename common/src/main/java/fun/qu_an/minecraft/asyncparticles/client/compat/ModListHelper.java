@@ -21,11 +21,8 @@ public class ModListHelper {
 	public static final boolean SODIUM_EXTRA_LOADED = isModLoaded("sodium-extra") || isModLoaded("sodium_extra");
 	/* IRIS */
 	// What the hell of compatibility is this!
-	public static final boolean IRIS_LIKE_LOADED = isModLoaded("iris") || isModLoaded("oculus");
+	public static final boolean IRIS_LOADED = isModLoaded("iris");
 	public static final boolean FABRIC_IRIS_LOADED = isFabricModLoaded("iris");
-	public static final boolean FORGE_IRIS_LIKE_LOADED = isForgeModLoaded("iris") || isForgeModLoaded("oculus");
-	public static final boolean FORGE_IRIS_LOADED = isForgeModLoaded("iris");
-	public static final boolean FORGE_OCULUS_LOADED = isForgeModLoaded("oculus");
 	/* Dummmmmmy */
 	public static final boolean DUMMMMMMY_LOADED = isModLoaded("dummmmmmy");
 	/* Effectual */

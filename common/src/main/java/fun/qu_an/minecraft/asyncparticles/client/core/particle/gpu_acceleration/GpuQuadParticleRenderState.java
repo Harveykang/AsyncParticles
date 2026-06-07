@@ -8,6 +8,8 @@ import fun.qu_an.minecraft.asyncparticles.client.core.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.ComputeResult;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.GpuParticlePipelines;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.IParticleRenderer;
+import it.unimi.dsi.fastutil.objects.Reference2BooleanArrayMap;
+import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.QuadParticleGroup;
@@ -24,14 +26,19 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.jspecify.annotations.NonNull;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.function.Supplier;
 
+// add() -> submit() -> prepare() -> render()
 public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 	// reuse buffers
 	private final IParticleRenderer renderer;
 	private final QuadParticleGroup particleGroup;
 	private float partialTick;
+	private final Reference2BooleanMap<PreparedBuffers> translucentMap = new Reference2BooleanArrayMap<>(2);
 
 	public GpuQuadParticleRenderState(QuadParticleGroup particleGroup) {
 		this.particleGroup = particleGroup;
@@ -68,7 +75,7 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 			if (!layers.containsKey(layer)) {
 				continue;
 			}
-			renderPass.setPipeline(GpuParticlePipelines.of(layer.pipeline()));
+			renderPass.setPipeline(GpuParticlePipelines.of(layer.pipeline(), () -> translucentMap.getBoolean(preparedBuffers)));
 			AbstractTexture texture = textureManager.getTexture(layer.textureAtlasLocation());
 			renderPass.bindTexture("Sampler0", texture.getTextureView(), texture.getSampler());
 
@@ -148,7 +155,9 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 				preparedLayers.put(layer, null);
 			}
 		}
-		return new PreparedBuffers(0, dynamicTransforms, preparedLayers);
+		PreparedBuffers preparedBuffers = new PreparedBuffers(0, dynamicTransforms, preparedLayers);
+		this.translucentMap.put(preparedBuffers, translucent);
+		return preparedBuffers;
 	}
 
 	@Override
@@ -156,5 +165,6 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 		if (!isEmpty()) {
 			submitNodeCollector.submitParticleGroup(this);
 		}
+		translucentMap.clear();
 	}
 }
