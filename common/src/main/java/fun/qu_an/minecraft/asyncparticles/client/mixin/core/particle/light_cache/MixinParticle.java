@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.async_tick;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.light_cache;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.Unique;
 import static fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon.compress;
 
 @Mixin(Particle.class)
-public abstract class MixinParticle_LightCache implements LightCachedParticleAddon {
+public abstract class MixinParticle implements LightCachedParticleAddon {
 	@Shadow
 	@Final
 	protected ClientLevel level;

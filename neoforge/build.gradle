@@ -139,12 +139,12 @@ jar {
     archiveClassifier = "raw"
 }
 
-import dev.architectury.at.AccessTransformSet;
-import dev.architectury.at.io.AccessTransformFormats;
-import dev.architectury.loom.accesstransformer.Aw2At;
-import dev.architectury.loom.util.LfWriter;
+import dev.architectury.at.AccessTransformSet
+import dev.architectury.at.io.AccessTransformFormats
+import dev.architectury.loom.accesstransformer.Aw2At
+import dev.architectury.loom.util.LfWriter
 import java.nio.charset.StandardCharsets
-import java.nio.file.Files;
+import java.nio.file.Files
 shadowJar {
     dependsOn(jar)
     mainSpec.sourcePaths.clear()       // Remove default source set inclusion

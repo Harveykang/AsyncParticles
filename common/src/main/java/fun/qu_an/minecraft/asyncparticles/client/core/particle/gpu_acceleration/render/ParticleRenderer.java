@@ -60,7 +60,7 @@ public class ParticleRenderer implements IParticleRenderer {
 		targetMoj = RenderSystem.getDevice().createBuffer(
 			() -> "GPU_PARTICLE_BUFFER",
 			GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_HINT_CLIENT_STORAGE,
-			(long) AsyncParticlesConfig.DEFAULT_PARTICLE_LIMIT * 4 * GpuParticlePipelines.PLAIN_PARTICLE.getVertexSize()
+			1L // minimal; resized in resize()
 		);
 		int handle = ((GlBuffer) targetMoj).handle;
 		GL15C.glDeleteBuffers(handle);
@@ -129,7 +129,7 @@ public class ParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void tick(Vec3 cameraPos, Map<SingleQuadParticle.Layer, Queue<SingleQuadParticle>> particles) {
-		if (!(mappedBuffer != null)) {
+		if (mappedBuffer == null) {
 			throw new IllegalStateException("Mapped buffer is null!");
 		}
 		camPositions[processingIndex] = cameraPos;
@@ -317,17 +317,17 @@ public class ParticleRenderer implements IParticleRenderer {
 		}
 
 		int vertexCount = particleCount * 4;
-		int vertexSize = GpuParticlePipelines.PLAIN_PARTICLE.getVertexSize();
+		int vertexSize = GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
 		int bufferSize = vertexCount * vertexSize;
 		System.out.println("=== DEBUG: Buffer Layout ===");
 		System.out.println("Vertex count: " + vertexCount);
 		System.out.println("Vertex size: " + vertexSize + " bytes");
 		System.out.println("Buffer size: " + bufferSize + " bytes");
 
-		List<VertexFormatElement> elements = GpuParticlePipelines.PLAIN_PARTICLE.getElements();
+		List<VertexFormatElement> elements = GpuParticlePipelines.IDENTITY_PARTICLE.getElements();
 		for (int i = 0; i < elements.size(); i++) {
 			VertexFormatElement elem = elements.get(i);
-			int offset = GpuParticlePipelines.PLAIN_PARTICLE.getOffset(elem);
+			int offset = GpuParticlePipelines.IDENTITY_PARTICLE.getOffset(elem);
 			System.out.println("Element " + i + ": "
 				+ " indexType=" + elem.type()
 				+ " count=" + elem.count()
@@ -362,10 +362,10 @@ public class ParticleRenderer implements IParticleRenderer {
 	}
 
 	private void parseParticleData(ByteBuffer buffer, int vertexCount, int vertexSize) {
-		int positionOffset = GpuParticlePipelines.PLAIN_PARTICLE.getOffset(VertexFormatElement.POSITION);
-		int uv0Offset = GpuParticlePipelines.PLAIN_PARTICLE.getOffset(VertexFormatElement.UV0);
-		int colorOffset = GpuParticlePipelines.PLAIN_PARTICLE.getOffset(GpuParticlePipelines.PLAIN_COLOR);
-		int uv2Offset = GpuParticlePipelines.PLAIN_PARTICLE.getOffset(GpuParticlePipelines.PLAIN_UV2);
+		int positionOffset = GpuParticlePipelines.IDENTITY_PARTICLE.getOffset(VertexFormatElement.POSITION);
+		int uv0Offset = GpuParticlePipelines.IDENTITY_PARTICLE.getOffset(VertexFormatElement.UV0);
+		int colorOffset = GpuParticlePipelines.IDENTITY_PARTICLE.getOffset(GpuParticlePipelines.IDENTITY_COLOR);
+		int uv2Offset = GpuParticlePipelines.IDENTITY_PARTICLE.getOffset(GpuParticlePipelines.IDENTITY_UV2);
 
 		for (int i = 0; i < vertexCount; i++) {
 			int baseOffset = i * vertexSize;
@@ -414,7 +414,7 @@ public class ParticleRenderer implements IParticleRenderer {
 		if (rawSize != sources[1].getSize()) {
 			sources[1].resize0(rawSize);
 		}
-		int proceedSize = particleLimit * 4 * GpuParticlePipelines.PLAIN_PARTICLE.getVertexSize();
+		int proceedSize = particleLimit * 4 * GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
 		if (proceedSize != target.getSize()) {
 			GlBuffer.MEMORY_POOl.free(target.vbo);
 			target.resize0(proceedSize);

@@ -2,24 +2,22 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.async_tick;
 
 import com.google.common.collect.Lists;
-import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
-import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickParticleGroupBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleGroup;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.phys.Vec3;
-import org.spongepowered.asm.mixin.*;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Iterator;
 import java.util.List;
@@ -128,22 +126,6 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			}
 			Profiler.get().pop();
 		});
-	}
-
-	@Inject(method = "add", at = @At(value = "HEAD"))
-	public void add(Particle p, CallbackInfo ci) {
-		if (ConfigHelper.particleLightCache()) {
-			// Enable the light only if the particle is added to the current ParticleEngine instance.
-			((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
-			// refresh the light cache here since this method can run in other threads.
-			// so it can avoid to slower the main thread.
-			((LightCachedParticleAddon) p).asyncparticles$refresh();
-		}
-	}
-
-	@Inject(method = "clearParticles", at = @At("HEAD"))
-	private void clearParticles(CallbackInfo ci) {
-		this.particles.values().forEach(group -> ((ParticleGroupAddition) group).asyncparticles$removeDeadParticles());
 	}
 
 	@Override

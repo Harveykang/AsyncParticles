@@ -43,7 +43,7 @@ public class ParticleMultiRenderer implements IParticleRenderer {
 		targetMoj = RenderSystem.getDevice().createBuffer(
 			() -> "GPU_PARTICLE_BUFFER",
 			GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_HINT_CLIENT_STORAGE,
-			(long) AsyncParticlesConfig.DEFAULT_PARTICLE_LIMIT * 4 * GpuParticlePipelines.PLAIN_PARTICLE.getVertexSize()
+			1L // minimal; resized in resize()
 		);
 		int handle = ((GlBuffer) targetMoj).handle;
 		GL15C.glDeleteBuffers(handle);
@@ -129,7 +129,7 @@ public class ParticleMultiRenderer implements IParticleRenderer {
 
 		List<ComputeResult.ParticleSlice> slices = new ArrayList<>(rendererMap.size());
 		int baseCount = 0;
-		int vertexSize = GpuParticlePipelines.PLAIN_PARTICLE.getVertexSize();
+		int vertexSize = GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
 		int summed = 0;
 		for (SubRenderer r : rendererMap.values()) {
 			if (!r.shouldSkip()){
@@ -170,7 +170,7 @@ public class ParticleMultiRenderer implements IParticleRenderer {
 	}
 
 	private void resizeTarget(int particleLimit) {
-		int proceedSize = 4 * particleLimit * GpuParticlePipelines.PLAIN_PARTICLE.getVertexSize();
+		int proceedSize = 4 * particleLimit * GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
 		int size = target.getSize();
 		if (proceedSize >= size || proceedSize < size * 0.33f) {
 			GlBuffer.MEMORY_POOl.free(target.vbo);
@@ -367,7 +367,7 @@ public class ParticleMultiRenderer implements IParticleRenderer {
 			}
 			sources[processingIndex ^ 1].bind();
 
-			int vertexSize = PLAIN_PARTICLE.getVertexSize();
+			int vertexSize = IDENTITY_PARTICLE.getVertexSize();
 			GLCaps.tfSupport.glBindTransformFeedbackBufferRange(Math.max(tf, 0), 0, target.vbo,
 				(long) baseCount * 4 * vertexSize,
 				(long) particleCount[processingIndex ^ 1] * 4 * vertexSize);

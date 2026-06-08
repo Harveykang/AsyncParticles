@@ -412,7 +412,7 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 			(float) (camPositions[usingIdx].y - camera.position().y),
 			(float) (camPositions[usingIdx].z - camera.position().z));
 
-		int processedVertexSize = GpuParticlePipelines.PLAIN_PARTICLE.getVertexSize();
+		int processedVertexSize = GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
 
 		// Resize target to fit actual particle count
 		int needSize = (particleLimit + appendCount[usingIdx]) * 4 * processedVertexSize;
@@ -491,7 +491,7 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 		}
 		this.particleLimit = particleLimit;
 
-		int proceedSize = 4 * particleLimit * GpuParticlePipelines.PLAIN_PARTICLE.getVertexSize();
+		int proceedSize = 4 * particleLimit * GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
 		int size = target.getSize();
 		if (proceedSize >= size * 0.75f || proceedSize < size * 0.33f) {
 			resizeTarget(proceedSize);

@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 public class GpuParticlePipelines {
-	public static final VertexFormatElement PLAIN_COLOR = new VertexFormatElement(1, 0, VertexFormatElement.Type.FLOAT, false, 4);
-	public static final VertexFormatElement PLAIN_UV2 = new VertexFormatElement(4, 0, VertexFormatElement.Type.INT, false, 2);
+	public static final VertexFormatElement IDENTITY_COLOR = new VertexFormatElement(1, 0, VertexFormatElement.Type.FLOAT, false, 4);
+	public static final VertexFormatElement IDENTITY_UV2 = new VertexFormatElement(4, 0, VertexFormatElement.Type.INT, false, 2);
 	public static final VertexFormat RAW_PARTICLE = VertexFormat.builder()
 		.add("oPosition", VertexFormatElement.POSITION)
 		.add("Position", VertexFormatElement.POSITION)
@@ -35,16 +35,16 @@ public class GpuParticlePipelines {
 		.build();
 	public static final int[] multiDrawFirst = {0, 0};
 	public static final int[] multiDrawCount = {0, 0};
-	public static final VertexFormat PLAIN_PARTICLE;
+	public static final VertexFormat IDENTITY_PARTICLE;
 
 	static {
 		VertexFormat.Builder add = VertexFormat.builder()
 			.add("Position", VertexFormatElement.POSITION) // 3 floats
 			.add("UV0", VertexFormatElement.UV0) // 2 floats
-			.add("Color", PLAIN_COLOR) // 4 floats
-			.add("UV2", PLAIN_UV2); // 2 ints
+			.add("Color", IDENTITY_COLOR) // 4 floats
+			.add("UV2", IDENTITY_UV2); // 2 ints
 		VertexFormat format = add.build();
-		PLAIN_PARTICLE = new PlainParticleVertexFormat(format.getElements(),
+		IDENTITY_PARTICLE = new IdentityParticleVertexFormat(format.getElements(),
 			format.getElementAttributeNames(),
 			add.offsets,
 			format.getVertexSize());
@@ -68,7 +68,7 @@ public class GpuParticlePipelines {
 				original1.getDepthStencilState(),
 				original1.getPolygonMode(),
 				original1.isCull(),
-				PLAIN_PARTICLE,
+				IDENTITY_PARTICLE,
 				original1.getVertexFormatMode(),
 				original1.getSortKey());
 			if (ModListHelper.IRIS_LOADED) {
@@ -97,23 +97,23 @@ public class GpuParticlePipelines {
 		ParticleVertexBuffer.unbind();
 	}
 
-	private static class PlainParticleVertexFormat extends VertexFormat {
-		private final int plainColorOffset;
-		private final int plainUv2Offset;
+	private static class IdentityParticleVertexFormat extends VertexFormat {
+		private final int identityColorOffset;
+		private final int identityUv2Offset;
 
-		private PlainParticleVertexFormat(List<VertexFormatElement> elements, List<String> names, IntList offsets, int vertexSize) {
+		private IdentityParticleVertexFormat(List<VertexFormatElement> elements, List<String> names, IntList offsets, int vertexSize) {
 			super(elements, names, offsets, vertexSize);
-			plainColorOffset = offsets.getInt(elements.indexOf(PLAIN_COLOR));
-			plainUv2Offset = offsets.getInt(elements.indexOf(PLAIN_UV2));
+			identityColorOffset = offsets.getInt(elements.indexOf(IDENTITY_COLOR));
+			identityUv2Offset = offsets.getInt(elements.indexOf(IDENTITY_UV2));
 		}
 
 		@Override
 		public int getOffset(@NonNull VertexFormatElement element) {
-			if (element == PLAIN_COLOR) {
-				return plainColorOffset;
+			if (element == IDENTITY_COLOR) {
+				return identityColorOffset;
 			}
-			if (element == PLAIN_UV2) {
-				return plainUv2Offset;
+			if (element == IDENTITY_UV2) {
+				return identityUv2Offset;
 			}
 			return super.getOffset(element);
 		}

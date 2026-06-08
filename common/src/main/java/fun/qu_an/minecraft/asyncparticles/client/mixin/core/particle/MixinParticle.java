@@ -45,15 +45,6 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 //		}
 	}
 
-	@Shadow
-	protected double xd;
-
-	@Shadow
-	protected double yd;
-
-	@Shadow
-	protected double zd;
-
 	@Override
 	public void asyncparticles$setTicked() {
 		this.asyncparticles$ticked = true;
@@ -99,10 +90,12 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 		asyncparticles$tickFlag &= ~2;
 	}
 
+	@Override
 	public boolean asyncparticles$isEnabledLightCache() {
 		return (asyncparticles$tickFlag & 2) != 0;
 	}
 
+	@Override
 	public boolean asyncparticles$isVisibleOnScreen() {
 		return (asyncparticles$renderFlag & 4) != 0;
 	}

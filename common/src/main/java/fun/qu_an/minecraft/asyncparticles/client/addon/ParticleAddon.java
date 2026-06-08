@@ -23,4 +23,6 @@ public interface ParticleAddon {
 	boolean asyncparticles$isVisibleOnScreen();
 
 	Class<? extends Particle> asyncparticles$getRealClass();
+
+	byte getTickFlag();
 }

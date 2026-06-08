@@ -1,14 +1,13 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.fix_black_destruction_particle;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.light_cache;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.fix_black_destruction_particle.TerrainParticleBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.async_tick.MixinParticle_LightCache;
 import net.minecraft.client.particle.TerrainParticle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(TerrainParticle.class)
-public abstract class MixinTerrainParticle_FixBlackDestroyParticle extends MixinParticle_LightCache implements LightCachedParticleAddon {
+public abstract class MixinTerrainParticle_FixBlackDestroyParticle extends MixinParticle implements LightCachedParticleAddon {
 	@Unique
 	private boolean asyncparticles$isFirstRefresh = true;
 

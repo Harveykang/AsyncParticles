@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.fix_black_destruction_particle;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.light_cache;
 
 import fun.qu_an.minecraft.asyncparticles.client.core.GameUtil;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.fix_black_destruction_particle.TerrainParticleBehavior;
