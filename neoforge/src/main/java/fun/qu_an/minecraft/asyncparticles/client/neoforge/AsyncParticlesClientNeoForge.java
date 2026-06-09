@@ -9,12 +9,15 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -68,10 +71,10 @@ public final class AsyncParticlesClientNeoForge {
 			.then(literal("debug")
 				.executes(context -> {
 					CommandSourceStack source = context.getSource();
-//					AsyncTickBehavior.debugLater(s -> source.sendSystemMessage(Component.literal(s)
-//						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(s))
-//							.withHoverEvent(new HoverEvent.ShowText(Component.literal("Copy to clipboard"))))));
-//					AsyncRenderBehavior.debugLater(s -> source.sendSystemMessage(Component.literal(s)
+					AsyncTickBehavior.getInstance().debugLater(s -> source.sendSystemMessage(Component.literal(s)
+						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(s))
+							.withHoverEvent(new HoverEvent.ShowText(Component.literal("Copy to clipboard"))))));
+//					AsyncRenderBehavior.getInstance().debugLater(s -> source.sendSystemMessage(Component.literal(s)
 //						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(s))
 //							.withHoverEvent(new HoverEvent.ShowText(Component.literal("Copy to clipboard"))))));
 					return 1;

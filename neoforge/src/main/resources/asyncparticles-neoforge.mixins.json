@@ -8,6 +8,7 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.neoforge.APMixinPluginNeoForge",
   "client": [
+    "core.particle.render.MixinParticleEngine"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -14,9 +14,6 @@ public class AsyncParticlesMixinCanceller implements MixinCanceller {
 		return switch (mixinClassName) {
 			case "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer",
 				 "net.irisshaders.iris.mixin.fabric.MixinLevelRenderer",
-				 // disable this because our implementation is better
-//				 "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin",
-//				 "net.diebuddies.mixins.ocean.MixinParticleEngine", // Physics mod
 				 // rain/snow culling
 				 "ca.fxco.moreculling.mixin.WeatherEffectRenderer_rainMixin"
 				-> true;

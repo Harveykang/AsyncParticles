@@ -167,4 +167,8 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 		}
 		translucentMap.clear();
 	}
+
+	public void reload() {
+		renderer.reload();
+	}
 }

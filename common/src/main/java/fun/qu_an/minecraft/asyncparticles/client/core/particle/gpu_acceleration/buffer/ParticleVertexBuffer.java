@@ -154,4 +154,8 @@ public class ParticleVertexBuffer {
 	public int getSize() {
 		return size;
 	}
+
+	public boolean isMapped() {
+		return mapped;
+	}
 }

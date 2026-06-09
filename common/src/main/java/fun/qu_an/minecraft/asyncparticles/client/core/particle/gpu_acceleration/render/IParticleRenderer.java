@@ -4,13 +4,14 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.world.phys.Vec3;
 
+import java.io.Closeable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public interface IParticleRenderer {
+public interface IParticleRenderer extends Closeable {
 	void beginFrame();
 
 	void unmapBufferAndSwap(Vec3 prevGpuCamPos);
@@ -42,4 +43,9 @@ public interface IParticleRenderer {
 	void resize(int particleLimit);
 
 	Collection<SingleQuadParticle.Layer> getComputeLayers();
+
+	void reload();
+
+	@Override
+	void close();
 }

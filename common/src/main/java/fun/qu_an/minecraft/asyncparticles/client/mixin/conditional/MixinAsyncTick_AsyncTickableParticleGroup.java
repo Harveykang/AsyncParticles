@@ -39,12 +39,12 @@ public abstract class MixinAsyncTick_AsyncTickableParticleGroup implements Async
 		original.call(instance, quadParticleRenderState, camera, f);
 	}
 
-	public Set<Particle> asyncparticle$getSyncParticles() {
+	public Set<Particle> asyncparticles$getSyncParticles() {
 		return Collections.unmodifiableSet(asyncparticles$syncParticles);
 	}
 
 	@Override
-	public void asyncparticle$recordSync(Particle particle) {
+	public void asyncparticles$recordSync(Particle particle) {
 		synchronized (asyncparticles$syncParticles) {
 			asyncparticles$syncParticles.add(particle);
 		}

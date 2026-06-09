@@ -36,10 +36,6 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 		LayerBatch(SingleQuadParticle.Layer layer) {
 			this.layer = layer;
 		}
-
-		int totalCount() {
-			return tickCount + appendCount;
-		}
 	}
 
 	protected final ParticleVertexBuffer[] sources = new ParticleVertexBuffer[2];
@@ -48,12 +44,13 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 	protected int particleLimit;
 
 	// tick: ordered layer batches
+	@SuppressWarnings("unchecked")
 	protected final List<LayerBatch>[] layerBatches = new List[]{new ArrayList<>(), new ArrayList<>()};
 	protected final int[] tickCount = new int[2];
-	protected final int[] appendCount = new int[2];
 
 	// append: temporarily stored particles
-	protected final List<SingleQuadParticle>[] pendingAppends = new List[]{new ArrayList<>(), new ArrayList<>()};
+	protected final List<SingleQuadParticle> pendingAppends = new ArrayList<>();
+	protected int appendCount;
 
 	protected final Vec3[] camPositions = {Vec3.ZERO, Vec3.ZERO};
 
@@ -62,7 +59,6 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 	protected final int tf;
 
 	protected boolean shouldSkip = true;
-	protected boolean computed = false;
 
 	private ComputeResult computeResult;
 
@@ -95,7 +91,7 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void beginFrame() {
-		computed = false;
+		computeResult = null;
 	}
 
 	@Override
@@ -103,21 +99,23 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 		int pi = processingIndex;
 		int vertexSize = RAW_PARTICLE.getVertexSize();
 
-		List<SingleQuadParticle> pending = pendingAppends[pi];
 		int tickCount = this.tickCount[pi];
-		int appendCount = pending.size();
+		int appendCount = pendingAppends.size();
 		if (appendCount == 0) {
 			if (tickCount > 0) {
 				sources[pi].flush(tickCount * vertexSize);
 			}
 		} else {
-			extractAppendParticles(prevGpuCamPos, pending, layerBatches[pi]);
+			extractAppendParticles(prevGpuCamPos, pendingAppends, layerBatches[pi]);
 			if (tickCount > 0) {
 				sources[pi].flush((particleLimit + tickCount) * vertexSize);
 			} else {
 				sources[pi].flush(appendCount * vertexSize);
+				if (camPositions[pi] == Vec3.ZERO){ // first append
+					camPositions[pi] = prevGpuCamPos;
+				}
 			}
-			this.appendCount[pi] = appendCount;
+			this.appendCount = appendCount;
 		}
 
 		if (mappedBuffer != null) {
@@ -132,8 +130,7 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 		// Reset for next frame
 		int next = processingIndex;
 		this.tickCount[next] = 0;
-		this.appendCount[next] = 0;
-//		this.pendingAppends[next].clear(); // Clear in tick() method
+//		this.pendingAppends.clear(); // Clear in tick() method
 //		this.layerBatches[next].clear(); // Clear in tick() method
 	}
 
@@ -386,12 +383,12 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 		this.tickCount[pi] = position / vertexSize;
 
 		// Clear to prepare pending list
-		pendingAppends[pi].clear();
+		pendingAppends.clear();
 	}
 
 	@Override
 	public ComputeResult compute(Camera camera, float partialTicks) {
-		if (computed) {
+		if (computeResult != null) {
 			return computeResult;
 		}
 		if (shouldSkip) {
@@ -415,7 +412,7 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 		int processedVertexSize = GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
 
 		// Resize target to fit actual particle count
-		int needSize = (particleLimit + appendCount[usingIdx]) * 4 * processedVertexSize;
+		int needSize = (particleLimit + appendCount) * 4 * processedVertexSize;
 		if (needSize > target.getSize()) {
 			resizeTarget(needSize);
 		}
@@ -469,14 +466,13 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 
 		if (tf > 0) GLCaps.tfSupport.glBindTransformFeedback(0);
 
-		computed = true;
 		return computeResult = new ComputeResult(targetMoj, baseCount, slices);
 	}
 
 	@Override
 	public void append(Vec3 camPos, SingleQuadParticle sqp) {
 		if (((GpuParticleAddon) sqp).asyncparticles$shouldRender()) {
-			pendingAppends[processingIndex].add(sqp);
+			pendingAppends.add(sqp);
 		}
 	}
 
@@ -516,20 +512,32 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 		return result;
 	}
 
+	@Override
 	public void close() {
+		reload();
 		for (int i = 0; i < 2; i++) {
 			sources[i].delete();
-			pendingAppends[i].clear();
 			layerBatches[i].clear();
-			tickCount[i] = 0;
-			appendCount[i] = 0;
-			camPositions[i] = Vec3.ZERO;
 		}
 		targetMoj.close();
 		target.delete(true, false);
-		computed = false;
+		GLCaps.tfSupport.deleteTransformFeedback(tf);
+	}
+
+	@Override
+	public void reload() {
+		for (int i = 0; i < 2; i++) {
+			tickCount[i] = 0;
+			camPositions[i] = Vec3.ZERO;
+			if (sources[i].isMapped()) {
+				sources[i].unmap();
+			}
+		}
+		pendingAppends.clear();
+		appendCount = 0;
 		shouldSkip = true;
 		processingIndex = 0;
-		GLCaps.tfSupport.deleteTransformFeedback(tf);
+		computeResult = null;
+		mappedBuffer = null;
 	}
 }

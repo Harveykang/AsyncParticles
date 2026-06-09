@@ -42,8 +42,9 @@ accessible method net/minecraft/util/Util onThreadException (Ljava/lang/Thread;L
 accessible method net/minecraft/client/renderer/state/level/QuadParticleRenderState$Storage <init> ()V
 accessible method net/minecraft/client/particle/ParticleEngine updateCount (Lnet/minecraft/core/particles/ParticleLimit;I)V
 accessible field net/minecraft/client/particle/ParticleEngine particles Ljava/util/Map;
-accessible field net/minecraft/client/particle/ParticleEngine RENDER_ORDER Ljava/util/List;
 transitive-mutable field net/minecraft/world/level/Level random Lnet/minecraft/util/RandomSource;
+accessible field net/minecraft/client/sounds/SoundEngine loaded Z
+accessible field net/minecraft/client/particle/ParticleEngine particlesToAdd Ljava/util/Queue;
 
 accessible field com/mojang/blaze3d/buffers/GpuBuffer size J
 transitive-mutable field com/mojang/blaze3d/buffers/GpuBuffer size J

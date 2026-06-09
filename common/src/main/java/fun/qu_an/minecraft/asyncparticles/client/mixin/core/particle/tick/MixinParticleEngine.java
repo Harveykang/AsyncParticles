@@ -1,19 +1,18 @@
 
-package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.async_tick;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick;
 
 import com.google.common.collect.Lists;
 import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickParticleGroupBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickParticleGroupBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleGroup;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.util.profiling.Profiler;
-import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -63,7 +62,6 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		Particle particle;
 		boolean tickAsync = ConfigHelper.isTickAsync();
 		boolean gpuParticles = tickAsync && ConfigHelper.isGpuParticles();
-		Vec3 prevGpuCamPos = GpuParticleBehavior.INSTANCE.getCameraPos();
 		if (!particlesToAdd.isEmpty()) {
 			boolean appendNewParticlesToRenderer = ConfigHelper.isAppendNewParticlesToRenderer();
 			// Write like this to be compatible with e.g. Spectrum mod
@@ -81,23 +79,20 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				if (!canComputeFast) {
 					group = this.particles.computeIfAbsent(renderType, this::createParticleGroup);
 				} else {
-					ParticleRenderType gpuRenderType = GpuParticleBehavior.INSTANCE.getRenderType(renderType);
-					group = GpuParticleBehavior.INSTANCE.gpuParticles.computeIfAbsent(gpuRenderType,
-						k -> {
-							asyncparticle$addRenderType(k);
-							return new GpuParticleGroup((ParticleEngine) (Object) this, gpuRenderType);
-						});
-					this.particles.put(gpuRenderType, group);
-					if (appendNewParticlesToRenderer) {
-						((GpuParticleGroup) group).append(prevGpuCamPos, ((SingleQuadParticle) particle));
-					}
+					ParticleRenderType gpuRenderType = GpuParticleBehavior.INSTANCE.ofRenderType(renderType);
+					group = this.particles.computeIfAbsent(gpuRenderType, gpuRenderType1 ->
+						GpuParticleBehavior.INSTANCE.gpuParticles.computeIfAbsent(gpuRenderType1,
+							gpuRenderType2 -> {
+								asyncparticle$addRenderType(gpuRenderType2);
+								return new GpuParticleGroup((ParticleEngine) (Object) this, gpuRenderType2);
+							}));
 				}
 				group.add(particle);
 			}
 			particlesToAdd.clear();
 		}
 		if (gpuParticles) {
-			GpuParticleBehavior.INSTANCE.swapAllBuffers(prevGpuCamPos);
+			GpuParticleBehavior.INSTANCE.swapAllBuffers();
 			GpuParticleBehavior.INSTANCE.setGpuParticleLimit(ConfigHelper.getParticleLimit());
 			Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
 			GpuParticleBehavior.INSTANCE.setCameraPos(camera.position()); // Set the next camera position
@@ -132,7 +127,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	public void asyncparticle$tickSyncParticles() {
 		particles.values().forEach(g -> {
 			if (g instanceof AsyncTickableParticleGroup asyncGroup) {
-				asyncGroup.asyncparticle$tickSyncParticles();
+				asyncGroup.asyncparticles$tickSyncParticles();
 			}
 		});
 	}

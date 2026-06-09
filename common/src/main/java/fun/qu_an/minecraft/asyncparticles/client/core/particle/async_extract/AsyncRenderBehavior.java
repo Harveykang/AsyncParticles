@@ -1,8 +1,9 @@
-package fun.qu_an.minecraft.asyncparticles.client.core.particle.async_render;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.async_extract;
 
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionTracker;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -17,6 +18,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.ForkJoinWorkerThread;
@@ -24,15 +26,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class AsyncRenderBehavior {
 	public static final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
-	public static final ForkJoinPool EXECUTOR;
 	public static final String THREAD_PREFIX = "AsyncParticleRenderWorker";
-	private static boolean particlePhase;
-	private static final List<ForkJoinTask<?>> futures = new ArrayList<>();
-	private static Frustum frustum;
+	private static final AsyncRenderBehavior INSTANCE = new AsyncRenderBehavior();
+	private final ForkJoinPool executor;
+	private boolean particlePhase;
+	private final List<ForkJoinTask<?>> futures = new ArrayList<>();
+	private Frustum frustum;
+	private final Set<Class<?>> syncParticleTypes = new ReferenceOpenHashSet<>();
 
-	static {
+	{
 		AtomicInteger workerCount = new AtomicInteger(1);
-		EXECUTOR = new ForkJoinPool(THREADS, (forkJoinPool) -> {
+		executor = new ForkJoinPool(THREADS, (forkJoinPool) -> {
 			ForkJoinWorkerThread forkJoinWorkerThread = new AsyncRendererThread(forkJoinPool);
 			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());
 			forkJoinWorkerThread.setDaemon(true);
@@ -40,12 +44,16 @@ public class AsyncRenderBehavior {
 		}, Util::onThreadException, true);
 	}
 
-	private static final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
+	public static AsyncRenderBehavior getInstance() {
+		return INSTANCE;
+	}
+
+	private final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
 		() -> 5000,
-		ConfigHelper::getTickFailurePerSecondThreshold
+		ConfigHelper::getRenderFailurePerSecondThreshold
 	);
 
-	public static boolean isTolerable(@NotNull Throwable e) {
+	public boolean isTolerable(@NotNull Throwable e) {
 		if (!(e instanceof Exception)) {
 			return false;
 		}
@@ -57,11 +65,11 @@ public class AsyncRenderBehavior {
 			|| (rootCause instanceof ConcurrentModificationException && ConfigHelper.suppressCME());
 	}
 
-	public static boolean isParticlePhase() {
+	public boolean isParticlePhase() {
 		return particlePhase;
 	}
 
-	public static void waitRenderingFuture() {
+	public void waitRenderingFuture() {
 		CrashReport crashReport = null;
 		CrashReportCategory category = null;
 		for (ForkJoinTask<?> task : futures) {
@@ -85,27 +93,33 @@ public class AsyncRenderBehavior {
 		}
 	}
 
-	public static void addRenderingFuture(ForkJoinTask<?> future) {
+	public void addRenderingFuture(ForkJoinTask<?> future) {
 		futures.add(future);
 	}
 
-	public static void setFrustum(Frustum frustum) {
-		AsyncRenderBehavior.frustum = frustum;
+	public void setFrustum(Frustum frustum) {
+		this.frustum = frustum;
 	}
 
-	public static Frustum getFrustum() {
+	public Frustum getFrustum() {
 		return frustum;
 	}
 
-	public static boolean shouldSync(Class<?> aClass) {
-		return false;
+	public boolean shouldSync(Class<?> aClass) {
+		return syncParticleTypes.contains(aClass);
 	}
 
-	public static void submit(Runnable task) {
-		futures.add(EXECUTOR.submit(task));
+	public void submit(Runnable task) {
+		futures.add(getExecutor().submit(task));
 	}
 
-	public static void reset() {
+	public void reset() {
 		waitRenderingFuture();
+		syncParticleTypes.clear();
+		syncParticleTypes.addAll(ConfigHelper.getSyncParticleClassesRender());
+	}
+
+	public ForkJoinPool getExecutor() {
+		return executor;
 	}
 }

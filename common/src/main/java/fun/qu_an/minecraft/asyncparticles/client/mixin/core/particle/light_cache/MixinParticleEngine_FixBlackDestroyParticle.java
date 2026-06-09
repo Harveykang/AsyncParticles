@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.light_cache;
 
 import fun.qu_an.minecraft.asyncparticles.client.core.GameUtil;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.fix_black_destruction_particle.TerrainParticleBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.light_cache.TerrainParticleBehavior;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;

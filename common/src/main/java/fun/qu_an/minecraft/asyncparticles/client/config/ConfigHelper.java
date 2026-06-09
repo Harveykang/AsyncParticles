@@ -115,7 +115,7 @@ public class ConfigHelper {
 		return rendering$particleCulling;
 	}
 
-	public static List<? extends Class<?>> getRenderSyncParticleClasses() {
+	public static List<? extends Class<?>> getSyncParticleClassesRender() {
 		return rendering$syncParticleClasses
 			.stream()
 			.map(className -> {
@@ -129,7 +129,7 @@ public class ConfigHelper {
 			.toList();
 	}
 
-	public static List<? extends Class<?>> getTickSyncParticleClasses() {
+	public static List<? extends Class<?>> getSyncParticleClassesTick() {
 		return tick$syncParticleClasses
 			.stream()
 			.map(className -> {

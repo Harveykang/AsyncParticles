@@ -10,6 +10,8 @@ import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.buffer.ParticleVertexBuffer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.shader.ParticleTransformFeedbackShader;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.util.ARGB;
@@ -27,12 +29,12 @@ import java.util.function.Supplier;
 import static fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.GpuParticlePipelines.RAW_PARTICLE;
 
 public class ParticleRenderer implements IParticleRenderer {
-	protected final int[] particleCount = new int[4];
-	protected ByteBuffer mappedBuffer;
 	protected final ParticleVertexBuffer[] sources = new ParticleVertexBuffer[2];
 	protected final ParticleVertexBuffer target;
 	protected final GpuBuffer targetMoj;
+	protected ByteBuffer mappedBuffer;
 	protected final Vec3[] camPositions = {Vec3.ZERO, Vec3.ZERO};
+	protected final int[] particleCount = new int[4];
 	protected final ComputeData[] computeData = {new ComputeData(), new ComputeData()};
 	protected int particleLimit;
 	protected int processingIndex = 0;
@@ -430,10 +432,84 @@ public class ParticleRenderer implements IParticleRenderer {
 		return computeData[processingIndex ^ 1].getLayers();
 	}
 
+	@Override
+	public void reload() {
+		mappedBuffer = null;
+		for (int i = 0; i < 2; i++) {
+			camPositions[i] = Vec3.ZERO;
+			particleCount[i] = 0;
+			computeData[i].clear();
+			if (sources[i].isMapped()) {
+				sources[i].unmap();
+			}
+		}
+		particleLimit = AsyncParticlesConfig.DEFAULT_PARTICLE_LIMIT;
+		processingIndex = 0;
+		shouldSkip = true;
+		computed = false;
+	}
+
 	public void close() {
+		reload();
 		sources[0].delete();
 		sources[1].delete();
 		targetMoj.close();
 		target.delete(true, false);
+	}
+
+	protected static class ComputeData {
+		private final Reference2IntMap<SingleQuadParticle.Layer> layerMap = new Reference2IntOpenHashMap<>();
+		private ComputeResult result;
+
+		public void clear() {
+			layerMap.clear();
+			result = null;
+		}
+
+		public void add(SingleQuadParticle.Layer layer, int count) {
+			if (result != null) {
+				throw new IllegalStateException("Cannot update layer while result is present");
+			}
+			layerMap.merge(layer, count, Integer::sum);
+		}
+
+		public void set(SingleQuadParticle.Layer layer, int count) {
+			if (result != null) {
+				throw new IllegalStateException("Cannot update layer while result is present");
+			}
+			layerMap.put(layer, count);
+		}
+
+		public Collection<SingleQuadParticle.Layer> getLayers() {
+			return layerMap.keySet();
+		}
+
+		public int getCount(SingleQuadParticle.Layer layer) {
+			return layerMap.getInt(layer);
+		}
+
+		public int getTotalCount() {
+			int count = 0;
+			for (int c : layerMap.values()) {
+				count += c;
+			}
+			return count;
+		}
+
+		public ComputeResult getResult(GpuBuffer buffer) {
+			if (result != null) {
+				return result;
+			}
+			ComputeResult.ParticleSlice[] slices = new ComputeResult.ParticleSlice[layerMap.size()];
+	//		VertexFormat.Mode quads = VertexFormat.Mode.QUADS;
+			int i = 0;
+			int baseCount = 0;
+			for (Reference2IntMap.Entry<SingleQuadParticle.Layer> entry : layerMap.reference2IntEntrySet()) {
+				int count = entry.getIntValue();
+				slices[i++] = new ComputeResult.ParticleSlice(entry.getKey(), baseCount, count);
+				baseCount += count;
+			}
+			return result = new ComputeResult(buffer, getTotalCount(), slices);
+		}
 	}
 }

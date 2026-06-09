@@ -74,9 +74,9 @@ public class GpuParticleBehavior {
 		return gpuParticles.get(type);
 	}
 
-	public void swapAllBuffers(Vec3 prevGpuCamPos) {
+	public void swapAllBuffers() {
 		RenderSystem.assertOnRenderThread();
-		gpuParticles.values().forEach(gpuParticleGroup -> gpuParticleGroup.unmapBuffersAndSwap(prevGpuCamPos));
+		gpuParticles.values().forEach(gpuParticleGroup -> gpuParticleGroup.unmapBuffersAndSwap(cameraPos));
 	}
 
 	public void setCameraPos(Vec3 pos) {
@@ -178,7 +178,7 @@ public class GpuParticleBehavior {
 		gpuParticles.values().forEach(GpuParticleGroup::beginFrame);
 	}
 
-	public ParticleRenderType getRenderType(ParticleRenderType renderType) {
+	public ParticleRenderType ofRenderType(ParticleRenderType renderType) {
 		if (renderType == ParticleRenderType.SINGLE_QUADS) {
 			return GPU_SINGLE_QUADS;
 		}
@@ -194,5 +194,6 @@ public class GpuParticleBehavior {
 
 	public void onClearParticles() {
 		gpuParticles.values().forEach(GpuParticleGroup::asyncparticles$clear);
+		gpuParticles.values().forEach(GpuParticleGroup::reload);
 	}
 }

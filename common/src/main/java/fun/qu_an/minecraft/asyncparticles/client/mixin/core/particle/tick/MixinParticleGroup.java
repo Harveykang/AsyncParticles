@@ -1,11 +1,11 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.async_tick;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick;
 
 import com.google.common.collect.EvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
@@ -54,7 +54,7 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 	private void injectAdd(Particle particle, CallbackInfo ci) {
 		if (this instanceof AsyncTickableParticleGroup asyncGroup
 			&& ((ParticleAddon) particle).asyncparticles$isTickSync()) {
-			asyncGroup.asyncparticle$recordSync(particle);
+			asyncGroup.asyncparticles$recordSync(particle);
 		}
 	}
 
@@ -93,8 +93,9 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 				// skip the first refresh will fix black destruction gpu particles.
 				shouldTick = isGpu;
 				shouldRefresh = !isGpu && enableLightCache;
-			} else if (particleAddon.asyncparticles$isTickSync()) {
-				AsyncTickBehavior.getInstance().recordSync(particle);
+			} else if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
+//				assert this instanceof AsyncTickableParticleGroup;
+				((AsyncTickableParticleGroup) this).asyncparticles$recordSync(particle);
 				continue;
 			} else {
 				shouldTick = true;
@@ -128,28 +129,29 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 		if (ConfigHelper.isParallelQueueRemoval()) {
 			((IterationSafeEvictingQueue<? extends Particle>) particles)
 				.parallelRemoveIf(particle ->
-						AsyncTickBehavior.getInstance().shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()),
+						AsyncTickBehavior.getInstance().shouldRemove(particle),
 					ConfigHelper.isParallelQueueEviction(),
 					AsyncTickBehavior.THREADS,
 					AsyncTickBehavior.getInstance().getExecutor());
 		} else {
 			particles.removeIf(particle ->
-				AsyncTickBehavior.getInstance().shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()));
+				AsyncTickBehavior.getInstance().shouldRemove(particle));
 		}
 	}
 
 	@Override
 	public void asyncparticles$clear() {
+		particles.forEach(AsyncTickBehavior.getInstance()::onEvict);
 		particles.clear();
 	}
 
 	@Override
-	public void asyncparticle$tickSyncParticles() {
+	public void asyncparticles$tickSyncParticles() {
 		if (!ConfigHelper.isTickAsync()
 			|| !(this instanceof AsyncTickableParticleGroup asyncGroup)) {
 			return;
 		}
-		Set<Particle> syncParticles = asyncGroup.asyncparticle$getSyncParticles();
+		Set<Particle> syncParticles = asyncGroup.asyncparticles$getSyncParticles();
 		if (syncParticles.isEmpty()) {
 			return;
 		}

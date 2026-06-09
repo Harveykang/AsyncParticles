@@ -13,13 +13,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = ClientChunkCache.class, priority = 500)
 public abstract class MixinClientChunkCache {
 	@Shadow
-	public abstract void onLightUpdate(LightLayer lightLayer, SectionPos sectionPos);
+	public abstract void onLightUpdate(LightLayer layer, SectionPos pos);
 
 	@Inject(method = "onLightUpdate", at = @At("HEAD"), cancellable = true)
-	public void onLightUpdateWrap(LightLayer lightLayer, SectionPos sectionPos, CallbackInfo ci) {
+	public void onLightUpdateWrap(LightLayer layer, SectionPos pos, CallbackInfo ci) {
 		if (ThreadUtil.isOnParticleThread()) {
 			ci.cancel();
-			ThreadUtil.enqueueClientTask(() -> this.onLightUpdate(lightLayer, sectionPos));
+			ThreadUtil.enqueueClientTask(() -> this.onLightUpdate(layer, pos));
 		}
 	}
 }

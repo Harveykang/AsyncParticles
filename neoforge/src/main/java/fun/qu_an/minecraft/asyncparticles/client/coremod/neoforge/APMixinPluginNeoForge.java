@@ -35,6 +35,7 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 			return true;
 		}
 		return switch (split[0]) {
+			case "core" -> IS_FORGE;
 			case "prettyrain" -> FORGE_PRETTY_RAIN_LOADED;
 			case "subtle_effects" -> FORGE_SUBTLE_EFFECTS_LOADED;
 			case "simple_weather" -> FORGE_SIMPLE_WEATHER_LOADED;

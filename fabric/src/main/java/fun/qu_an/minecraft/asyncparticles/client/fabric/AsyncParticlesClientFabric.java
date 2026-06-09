@@ -8,7 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_tick.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -16,7 +16,10 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -57,10 +60,10 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 					.then(literal("debug")
 						.executes(context -> {
 							FabricClientCommandSource source = context.getSource();
-//							AsyncTickBehavior.debugLater(s -> source.sendFeedback(Component.literal(s)
-//								.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(s))
-//									.withHoverEvent(new HoverEvent.ShowText(Component.literal("Copy to clipboard"))))));
-//							AsyncRenderBehavior.debugLater(s -> source.sendFeedback(Component.literal(s)
+							AsyncTickBehavior.getInstance().debugLater(s -> source.sendFeedback(Component.literal(s)
+								.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(s))
+									.withHoverEvent(new HoverEvent.ShowText(Component.literal("Copy to clipboard"))))));
+//							AsyncRenderBehavior.getInstance().debugLater(s -> source.sendFeedback(Component.literal(s)
 //								.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(s))
 //									.withHoverEvent(new HoverEvent.ShowText(Component.literal("Copy to clipboard"))))));
 							return 1;
@@ -68,7 +71,7 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 					.then(literal("dump")
 						.executes(context -> {
 							FabricClientCommandSource source = context.getSource();
-//							AsyncRenderBehavior.dumpParticles();
+//							AsyncRenderBehavior.getInstance().dumpParticles();
 //							source.sendFeedback(Component.literal("Particles have been dumped to log."));
 							return 1;
 						}))

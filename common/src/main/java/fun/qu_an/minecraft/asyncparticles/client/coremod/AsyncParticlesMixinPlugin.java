@@ -70,21 +70,17 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "MixinLegacyRandomSource" -> MixinConfigHelper.isSafeLegacyRandomSource();
 				default -> true;
 			};
-			case "fabric" -> {
-				if (split.length == 2) {
-					yield !IS_FORGE;
-				}
-				yield switch (split[1]) {
-					case "particlerain_3" -> FABRIC_PARTICLERAIN_LOADED &&
-											 versionCheck("particlerain", null, "3.999999");
-					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
-					case "particular" -> FABRIC_PARTICULAR_LOADED;
-					case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
-					case "iris" -> FABRIC_IRIS_LOADED;
-					case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;
-					default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
-				};
-			}
+			case "fabric" -> switch (split[1]) {
+				case "core" -> !IS_FORGE;
+				case "particlerain_3" -> FABRIC_PARTICLERAIN_LOADED &&
+										 versionCheck("particlerain", null, "3.999999");
+				case "effectual" -> FABRIC_EFFECTUAL_LOADED;
+				case "particular" -> FABRIC_PARTICULAR_LOADED;
+				case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
+				case "iris" -> FABRIC_IRIS_LOADED;
+				case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;
+				default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
+			};
 			case "core", "off_thread_access" -> true;
 			case "compat" -> {
 				if (split.length == 2) {

@@ -26,12 +26,14 @@ public final class TaskManager {
 		futures.add(executor.submit(task));
 	}
 
-	public void submitAll() {
-		tasks.forEach(task -> {
-			ForkJoinTask<?> submit = executor.submit(task);
-			futures.add(submit);
-		});
+	public void submitAllSequentially() {
+		Runnable[] tasksArray = tasks.toArray(Runnable[]::new);
 		tasks.clear();
+		futures.add(executor.submit(() -> {
+			for (Runnable runnable : tasksArray) {
+				runnable.run();
+			}
+		}));
 	}
 
 	public void waitForCompletion() {
@@ -57,12 +59,16 @@ public final class TaskManager {
 		return !futures.isEmpty();
 	}
 
-	public void runAllTasksDirectly() {
+	public void runAllTasks() {
 		tasks.forEach(Runnable::run);
 		tasks.clear();
 	}
 
 	public void disposeTasks() {
 		tasks.clear();
+	}
+
+	public int taskCount() {
+		return tasks.size();
 	}
 }

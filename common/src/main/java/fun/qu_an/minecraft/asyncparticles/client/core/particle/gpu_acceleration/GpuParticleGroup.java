@@ -1,12 +1,10 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.client.Camera;
-import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.particle.QuadParticleGroup;
-import net.minecraft.client.particle.SingleQuadParticle;
+import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.state.level.ParticleGroupRenderState;
 import net.minecraft.world.phys.Vec3;
@@ -58,5 +56,16 @@ public class GpuParticleGroup extends QuadParticleGroup implements ParticleGroup
 
 	public void resize(int particleLimit) {
 		renderState.resize(particleLimit);
+	}
+
+	public void reload() {
+		renderState.reload();
+	}
+
+	public void add(final @NonNull Particle particle) {
+		super.add(particle);
+		if (ConfigHelper.isAppendNewParticlesToRenderer()) {
+			renderState.append(GpuParticleBehavior.INSTANCE.getCameraPos(), (SingleQuadParticle) particle);
+		}
 	}
 }

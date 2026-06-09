@@ -56,26 +56,18 @@ dependencies {
 //    localRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
 //
 //    /* Performance */
-////    localRuntime "maven.modrinth:spark:1.10.139-neoforge"
-////    compileOnly 'maven.modrinth:embeddium:1.0.12-beta.1+mc1.21.4'
-//    compileOnly 'maven.modrinth:sodium:mc1.21.6-0.6.13-neoforge'
-////    localRuntime 'maven.modrinth:embeddium:1.0.12-beta.1+mc1.21.4'
-////    localRuntime 'maven.modrinth:sodium:mc1.21.6-0.6.13-neoforge'
-////    localRuntime 'maven.modrinth:sodium-extra:mc1.21.6-0.6.6+neoforge'
-////    localRuntime fileTree(dir: '../libs', include: 'fabric-renderer-api-v1-7.0.0.jar')
-////    localRuntime fileTree(dir: '../libs', include: 'net.caffeinemc.sodium-neoforge-0.6.13+mc1.21.6-service.jar')
+    localRuntime "maven.modrinth:spark:1.10.139-neoforge"
+//    compileOnly 'maven.modrinth:sodium:mc26.1.2-0.8.12-neoforge'
+    localRuntime 'maven.modrinth:sodium:mc26.1.2-0.8.12-neoforge'
+    localRuntime 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+neoforge'
 //
-////    localRuntime fileTree(dir: '../libs', include: 'fabric-api-base-0.4.42+d1308ded19.jar')
-//    compileOnly "maven.modrinth:iris:1.9.1+1.21.7-neoforge"
-////    localRuntime 'maven.modrinth:monocle-iris:0.1.8' // no 1.21.4 version
-////    localRuntime "maven.modrinth:iris:1.9.1+1.21.7-neoforge"
-////    localRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
-////    localRuntime "org.antlr:antlr4-runtime:4.13.1"
-////    localRuntime "io.github.douira:glsl-transformer:2.0.1"
-////    localRuntime "org.anarres:jcpp:1.4.14"
-////    localRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
-////    compileOnly "curse.maven:flerovium-1142875:6258259"
-////    localRuntime "curse.maven:flerovium-1142875:6258259"
+//    compileOnly "maven.modrinth:iris:1.10.9+26.1-neoforge"
+    localRuntime "maven.modrinth:iris:1.10.9+26.1-neoforge"
+//    localRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
+    localRuntime "org.antlr:antlr4-runtime:4.13.1"
+    localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
+    localRuntime "org.anarres:jcpp:1.4.14"
+//    localRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
 //    compileOnly 'maven.modrinth:moreculling:1.4.0-beta.1'
 //    localRuntime 'maven.modrinth:moreculling:1.4.0-beta.1'
 //
