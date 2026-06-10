@@ -9,10 +9,6 @@ architectury {
 
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
-
-    mixin {
-//        defaultRefmapName = "asyncparticles-neoforge-refmap.json"
-    }
 }
 
 configurations {
@@ -46,7 +42,7 @@ dependencies {
 
     neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
     common(project(path: ':common')) { transitive false }
-    shadowCommon(project(path: ':common', configuration: 'transformProductionNeoForge'))
+//    shadowCommon(project(path: ':common', configuration: 'transformProductionNeoForge'))
 //    common(project(path: ':common_legacy_mod_compat')) { transitive false }
 //    shadowCommon project(path: ':common_legacy_mod_compat', configuration: 'transformProductionNeoForge')
 
@@ -110,6 +106,10 @@ dependencies {
 //    compileOnly "maven.modrinth:immediatelyfast:1.11.0+1.21.7-neoforge"
 }
 
+import dev.architectury.at.io.AccessTransformFormats
+import dev.architectury.loom.accesstransformer.Aw2At
+import dev.architectury.loom.util.LfWriter
+
 processResources {
     inputs.property 'version', project.version
 
@@ -125,18 +125,31 @@ processResources {
             line.replaceAll(/.*"refmap".*/, '')
         }
     }
+
+    // Generate NeoForge access transformer from common access widener
+    doFirst {
+        def awFile = loom.accessWidenerPath.get().asFile
+        def at
+        awFile.withReader('UTF-8') { reader ->
+            at = Aw2At.toAccessTransformSet(reader)
+        }
+        def atDir = layout.buildDirectory.dir('generated/resources/main/META-INF/').get().asFile
+        atDir.mkdirs()
+        def atFile = new File(atDir, 'accesstransformer.cfg')
+        if (!atFile.exists()) {
+            atFile.createNewFile()
+        }
+        new LfWriter(atFile.newWriter('UTF-8')).withCloseable { writer ->
+            AccessTransformFormats.FML.write(writer, at)
+        }
+    }
+    from { layout.buildDirectory.dir('generated/resources/main').get().asFile }
 }
 
 jar {
     archiveClassifier = "raw"
 }
 
-import dev.architectury.at.AccessTransformSet
-import dev.architectury.at.io.AccessTransformFormats
-import dev.architectury.loom.accesstransformer.Aw2At
-import dev.architectury.loom.util.LfWriter
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
 shadowJar {
     dependsOn(jar)
     mainSpec.sourcePaths.clear()       // Remove default source set inclusion
@@ -145,17 +158,4 @@ shadowJar {
     configurations = [project.configurations.shadowCommon]
     archiveClassifier = null           // shadowJar becomes the main artifact
     from rootProject.file("LICENSE.md")
-
-    AccessTransformSet at
-    File awFile = loom.accessWidenerPath.get().asFile
-    try (BufferedReader reader = Files.newBufferedReader(awFile.toPath(), StandardCharsets.UTF_8)) {
-        at = Aw2At.toAccessTransformSet(reader)
-    }
-    java.nio.file.Path tempPath = java.nio.file.Path.of("temp").toAbsolutePath()
-    java.nio.file.Path atPath = tempPath.resolve("META-INF/accesstransformer.cfg")
-    Files.createDirectories(atPath.getParent())
-    try (Writer writer = new LfWriter(Files.newBufferedWriter(atPath))) {
-        AccessTransformFormats.FML.write(writer, at)
-    }
-    from tempPath.toString()
 }

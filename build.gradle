@@ -2,7 +2,6 @@ plugins {
     id 'dev.architectury.loom-no-remap' version '1.14-SNAPSHOT' apply false
     id 'architectury-plugin' version '3.5-SNAPSHOT'
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
-    id "io.github.pacifistmc.forgix" version "1.2.9"
 }
 
 architectury {
@@ -12,15 +11,6 @@ architectury {
 allprojects {
     group = rootProject.maven_group
     version = rootProject.mod_version
-
-    forgix {
-        group = rootProject.group
-        mergedJarName = rootProject.archives_name + '-' + rootProject.mod_version +
-                (rootProject.snapshot == 'true' ?
-                        '-SNAPSHOT.' + Long.toHexString(new Random().nextLong(0x10000000L, 0xFFFFFFFFL)) :
-                        '') +
-                '+' + rootProject.minecraft_version + '.jar'
-    }
 }
 
 subprojects {
@@ -147,6 +137,54 @@ subprojects {
         }
     }
 
-    build.finalizedBy(mergeJars)
-    assemble.finalizedBy(mergeJars)
+}
+
+// ===== Merged universal jar (replaces Forgix) =====
+
+def mergedJarName = "${rootProject.archives_name}-${rootProject.mod_version}" +
+        (rootProject.snapshot == 'true' ? '-SNAPSHOT.' + Long.toHexString(new Random().nextLong(0x10000000L, 0xFFFFFFFFL)) : '') +
+        "+${rootProject.minecraft_version}.jar"
+
+tasks.register('mergeJars') {
+    group = 'build'
+    description = 'Merges Fabric and NeoForge jars into a single universal jar'
+
+    def mergedJar = layout.buildDirectory.file("libs/${mergedJarName}")
+    outputs.file(mergedJar)
+
+    doLast {
+        def out = mergedJar.get().asFile
+        out.parentFile.mkdirs()
+        Set<String> seen = []
+        out.deleteOnExit()
+
+        def jarFiles = [
+                file("common/build/libs/${rootProject.archives_name}-common-${rootProject.mod_version}-raw.jar"),
+                file("fabric/build/libs/${rootProject.archives_name}-fabric-${rootProject.mod_version}-raw.jar"),
+                file("neoforge/build/libs/${rootProject.archives_name}-neoforge-${rootProject.mod_version}-raw.jar")
+        ]
+
+        new java.util.jar.JarOutputStream(new FileOutputStream(out)).withCloseable { jos ->
+            jarFiles.each { jarFile ->
+                new java.util.zip.ZipFile(jarFile).withCloseable { zf ->
+                    zf.entries().findAll { !it.directory }.each { entry ->
+                        def name = entry.name
+                        if (name == 'META-INF/MANIFEST.MF' || name.endsWith('.SF') || name.endsWith('.DSA') || name.endsWith('.RSA')) return
+                        if (seen.add(name)) {
+                            jos.putNextEntry(new java.util.jar.JarEntry(name).tap { time = entry.time })
+                            zf.getInputStream(entry).withCloseable { it.transferTo(jos) }
+                            jos.closeEntry()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+tasks.register('build') {
+    group = 'build'
+    description = 'Assembles all subprojects, then merges jars'
+    dependsOn subprojects.collect { it.tasks.named('build') }
+    finalizedBy mergeJars
 }

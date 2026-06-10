@@ -7,12 +7,7 @@ import net.fabricmc.loader.api.VersionParsingException;
 
 import java.util.Optional;
 
-@SuppressWarnings("unused")
 public class ModListHelperImpl {
-	public static boolean isForge() {
-		return false;
-	}
-
 	public static boolean isClient() {
 		return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
 	}

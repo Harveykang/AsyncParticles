@@ -2,18 +2,12 @@ package fun.qu_an.minecraft.asyncparticles.client.compat.neoforge;
 
 
 import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.fml.loading.LoadingModList;
 import net.neoforged.neoforgespi.language.IModFileInfo;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.Restriction;
 
-@SuppressWarnings("unused")
 public class ModListHelperImpl {
-	public static boolean isForge() {
-		return true;
-	}
-
 	public static boolean isClient() {
 		return FMLLoader.getCurrent().getDist().isClient();
 	}

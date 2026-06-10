@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.core;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.Platform;
 import net.minecraft.ReportedException;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -15,9 +15,8 @@ import net.minecraft.world.phys.AABB;
 import static org.joml.Math.max;
 
 public class GameUtil {
-	@ExpectPlatform
 	public static AABB infinityAABB() {
-		throw new AssertionError();
+		return Platform.PLATFORM.infinityAABB();
 	}
 
 	public static Identifier id(String path) {

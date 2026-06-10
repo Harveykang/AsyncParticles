@@ -4,10 +4,6 @@ architectury {
 
 loom {
     accessWidenerPath = file('src/main/resources/asyncparticles-common.accesswidener')
-
-    mixin {
-        defaultRefmapName = "asyncparticles-common-refmap.json"
-    }
 }
 
 dependencies {
@@ -68,4 +64,8 @@ dependencies {
 //
 //    /* Figura */
 //    compileOnly "maven.modrinth:figura:0.1.5b+1.21.4" // TODO 1.21.4 version
+}
+
+jar {
+    archiveClassifier = "raw"
 }

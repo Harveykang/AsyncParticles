@@ -1,7 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
+
+import static fun.qu_an.minecraft.asyncparticles.client.Platform.PLATFORM;
 
 public class ModListHelper {
 	public static final boolean IS_FORGE = isForge();
@@ -100,45 +101,36 @@ public class ModListHelper {
 	/* Axiom */
 	public static final boolean AXIOM_LOADED = isModLoaded("axiom");
 
-	@ExpectPlatform
 	private static boolean isForge() {
-		throw new AssertionError();
+		return PLATFORM.isForge();
 	}
 
-	@ExpectPlatform
 	private static boolean isClient() {
-		throw new AssertionError();
+		return PLATFORM.isClient();
 	}
 
-	@ExpectPlatform
 	public static boolean isModLoaded(String modId) {
-		ExceptionUtil.throwAssertionError();
-		return false;
+		return PLATFORM.isModLoaded(modId);
 	}
 
-	@ExpectPlatform
 	public static boolean versionCheck(String modId, String minInclusive, String maxExclusive) {
-		// Suppressing the ConstantValue check because this is a generated method.
-		ExceptionUtil.throwAssertionError();
-		return true;
+		return PLATFORM.versionCheck(modId, minInclusive, maxExclusive);
 	}
 
-	@ExpectPlatform
 	public static String versionToString(String modId) {
-		throw new AssertionError();
+		return PLATFORM.versionToString(modId);
 	}
 
 	public static boolean isForgeModLoaded(String modId) {
-		return IS_FORGE && isModLoaded(modId);
+		return PLATFORM.isForgeModLoaded(modId);
 	}
 
 	public static boolean isFabricModLoaded(String modId) {
-		return !IS_FORGE && isModLoaded(modId);
+		return PLATFORM.isFabricModLoaded(modId);
 	}
 
-	@ExpectPlatform
 	public static boolean isDevelopmentEnvironment() {
-		throw new AssertionError();
+		return PLATFORM.isDevelopmentEnvironment();
 	}
 
 	public static boolean classExists(String className) {
