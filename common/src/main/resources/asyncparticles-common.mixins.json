@@ -105,6 +105,7 @@
     "core.render.MixinLevelRenderer",
     "core.render.MixinLevelRenderer_Late",
     "core.render.MixinMultiBufferSource$BufferSource",
+    "core.render.MixinRenderSystem",
     "core.render.MixinTesselator",
     "core.render.MixinVertexConsumer",
     "core.tick.MixinClientLevel_AnimateTick",

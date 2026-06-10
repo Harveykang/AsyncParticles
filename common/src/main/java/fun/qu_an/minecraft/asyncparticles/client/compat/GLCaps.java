@@ -37,6 +37,9 @@ public class GLCaps {
 		return (tfSupport.isSupported()) && supportsExplicitAttribLocation;
 	}
 
+	public static void init() {
+	}
+
 	public interface CsSupport {
 		boolean isSupported();
 
