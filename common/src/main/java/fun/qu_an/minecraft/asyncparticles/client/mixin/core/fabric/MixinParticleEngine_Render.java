@@ -47,7 +47,6 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 				RENDER_ORDER = new ArrayList<>(RENDER_ORDER);
 			}
 			RENDER_ORDER.add(particleRenderType);
-			asyncparticle$sortRenderOrder();
 		}
 	}
 

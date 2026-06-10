@@ -13,6 +13,7 @@ import it.unimi.dsi.fastutil.HashCommon;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11C;
@@ -193,25 +194,18 @@ public class ParticleRenderer implements IParticleRenderer {
 				MemoryUtil.memPutFloat(ptr, maxV);
 				ptr += 4L;
 
+				int color = FastColor.ABGR32.color(
+					(int) (tsp.alpha * 255.0f),
+					(int) (tsp.bCol * 255.0f),
+					(int) (tsp.gCol * 255.0f),
+					(int) (tsp.rCol * 255.0f));
 				// oColor (48-51)
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.rCol * 255f));
-				ptr += 1L;
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.gCol * 255f));
-				ptr += 1L;
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.bCol * 255f));
-				ptr += 1L;
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.alpha * 255f));
-				ptr += 1L;
+				MemoryUtil.memPutInt(ptr, color);
+				ptr += 4L;
 
 				// Color (52-55)
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.rCol * 255f));
-				ptr += 1L;
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.gCol * 255f));
-				ptr += 1L;
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.bCol * 255f));
-				ptr += 1L;
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.alpha * 255f));
-				ptr += 1L;
+				MemoryUtil.memPutInt(ptr, color);
+				ptr += 4L;
 
 				// Light (56-59): 两个 short
 				MemoryUtil.memPutInt(ptr, light);
@@ -430,25 +424,18 @@ public class ParticleRenderer implements IParticleRenderer {
 			MemoryUtil.memPutFloat(ptr, maxV);
 			ptr += 4L;
 
+			int color = FastColor.ABGR32.color(
+				(int) (tsp.alpha * 255.0f),
+				(int) (tsp.bCol * 255.0f),
+				(int) (tsp.gCol * 255.0f),
+				(int) (tsp.rCol * 255.0f));
 			// oColor (48-51)
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.rCol * 255f));
-			ptr += 1L;
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.gCol * 255f));
-			ptr += 1L;
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.bCol * 255f));
-			ptr += 1L;
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.alpha * 255f));
-			ptr += 1L;
+			MemoryUtil.memPutInt(ptr, color);
+			ptr += 4L;
 
 			// Color (52-55)
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.rCol * 255f));
-			ptr += 1L;
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.gCol * 255f));
-			ptr += 1L;
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.bCol * 255f));
-			ptr += 1L;
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.alpha * 255f));
-			ptr += 1L;
+			MemoryUtil.memPutInt(ptr, color);
+			ptr += 4L;
 
 			// Light (56-59): 2 shorts
 			MemoryUtil.memPutInt(ptr, light);
