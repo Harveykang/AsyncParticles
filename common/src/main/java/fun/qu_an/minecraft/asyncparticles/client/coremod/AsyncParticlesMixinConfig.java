@@ -111,6 +111,7 @@ public class AsyncParticlesMixinConfig {
 		{
 			particle$noCulling.add("pigcart.particlerain.particle.GroundFogParticle");
 			particle$noCulling.add("com.lowdragmc.photon.client.gameobject.FXObject");
+			particle$noCulling.add("net.bettercombat.client.particle.SlashParticle");
 		}
 
 		private Set<String> particle$noLightCache = new LinkedHashSet<>();
