@@ -48,7 +48,7 @@ public class AsyncTickBehavior {
 	public static final String THREAD_PREFIX = "AsyncParticleTicker";
 	public static final AsyncTickBehavior INSTANCE = new AsyncTickBehavior();
 //	public final Map<ParticleRenderType, ByteBuffer> UNUPLOADED_BUFFERS = new ConcurrentHashMap<>();
-	private final Set<Class<? extends Particle>> syncParticleTypes = Collections.newSetFromMap(new IdentityHashMap<>());
+	private final Set<Class<?>> syncParticleTypes = Collections.newSetFromMap(new IdentityHashMap<>());
 	private final List<ParticleRenderType> parallelledRenderTypes = new ArrayList<>(List.of(
 		ParticleRenderType.TERRAIN_SHEET,
 		ParticleRenderType.PARTICLE_SHEET_OPAQUE,
@@ -492,15 +492,15 @@ public class AsyncTickBehavior {
 				endTickOperationList,
 				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
-					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
+					.stream().map(e -> {
 						Queue<Particle> queue = e.getValue();
-						return queue.size() + "/" + ((IterationSafeEvictingQueue<Particle>) queue).arraySize();
-					})),
+						return e.getKey() + ": " + queue.size() + "/" + ((IterationSafeEvictingQueue<Particle>) queue).arraySize();
+					}).toList(),
 				GpuParticleBehavior.INSTANCE.gpuParticles.entrySet()
-					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
+					.stream().map(e -> {
 						Queue<TextureSheetParticle> queue = e.getValue();
-						return queue.size() + "/" + ((IterationSafeEvictingQueue<TextureSheetParticle>) queue).arraySize();
-					})),
+						return e.getKey() + ": " + queue.size() + "/" + ((IterationSafeEvictingQueue<TextureSheetParticle>) queue).arraySize();
+					}).toList(),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
 				syncParticles.size(),
 				syncParticleTypes.stream().map(Class::getName).toList())));
@@ -619,6 +619,8 @@ public class AsyncTickBehavior {
 		particleOperations.clear();
 		endTickOperationList.clear();
 		syncParticles.clear();
+		syncParticleTypes.clear();
+		syncParticleTypes.addAll(ConfigHelper.getTickSyncParticleClasses());
 	}
 
 	/* Events */

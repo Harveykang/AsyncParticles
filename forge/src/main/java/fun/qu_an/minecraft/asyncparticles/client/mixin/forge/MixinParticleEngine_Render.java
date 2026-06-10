@@ -99,7 +99,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 		boolean irisEarlyOpaquePhase = AsyncRenderBehavior.INSTANCE.isIrisEarlyOpaquePhase();
 		// We don't use entrySet() to be compatible with iris.
 		Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = GpuParticleBehavior.INSTANCE.gpuParticles;
-		for (ParticleRenderType particleRenderType : CombinedIterable.ofIdentitySet(particles.keySet(), gpuParticles.keySet())) {
+		for (ParticleRenderType particleRenderType : CombinedIterable.ofIdentitySet(gpuParticles.keySet(), particles.keySet())) {
 			// FORGE doesn't skip NO_RENDER
 			if (particleRenderType == ParticleRenderType.NO_RENDER) {
 				continue;

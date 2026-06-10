@@ -4,19 +4,16 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
-import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.particle.buffer.BufferHelper;
 import fun.qu_an.minecraft.asyncparticles.client.particle.buffer.ParticleVertexBuffer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.shader.ParticleTransformFeedbackShader;
-import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import it.unimi.dsi.fastutil.HashCommon;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11C;
@@ -195,25 +192,18 @@ public class ParticleRenderer implements IParticleRenderer {
 				MemoryUtil.memPutFloat(ptr, maxV);
 				ptr += 4L;
 
+				int color = FastColor.ABGR32.color(
+					(int) (tsp.alpha * 255.0f),
+					(int) (tsp.bCol * 255.0f),
+					(int) (tsp.gCol * 255.0f),
+					(int) (tsp.rCol * 255.0f));
 				// oColor (48-51)
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.rCol * 255f));
-				ptr += 1L;
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.gCol * 255f));
-				ptr += 1L;
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.bCol * 255f));
-				ptr += 1L;
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.alpha * 255f));
-				ptr += 1L;
+				MemoryUtil.memPutInt(ptr, color);
+				ptr += 4L;
 
 				// Color (52-55)
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.rCol * 255f));
-				ptr += 1L;
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.gCol * 255f));
-				ptr += 1L;
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.bCol * 255f));
-				ptr += 1L;
-				MemoryUtil.memPutByte(ptr, (byte) (tsp.alpha * 255f));
-				ptr += 1L;
+				MemoryUtil.memPutInt(ptr, color);
+				ptr += 4L;
 
 				// Light (56-59): 两个 short
 				MemoryUtil.memPutInt(ptr, light);
@@ -432,25 +422,18 @@ public class ParticleRenderer implements IParticleRenderer {
 			MemoryUtil.memPutFloat(ptr, maxV);
 			ptr += 4L;
 
+			int color = FastColor.ABGR32.color(
+				(int) (tsp.alpha * 255.0f),
+				(int) (tsp.bCol * 255.0f),
+				(int) (tsp.gCol * 255.0f),
+				(int) (tsp.rCol * 255.0f));
 			// oColor (48-51)
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.rCol * 255f));
-			ptr += 1L;
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.gCol * 255f));
-			ptr += 1L;
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.bCol * 255f));
-			ptr += 1L;
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.alpha * 255f));
-			ptr += 1L;
+			MemoryUtil.memPutInt(ptr, color);
+			ptr += 4L;
 
 			// Color (52-55)
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.rCol * 255f));
-			ptr += 1L;
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.gCol * 255f));
-			ptr += 1L;
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.bCol * 255f));
-			ptr += 1L;
-			MemoryUtil.memPutByte(ptr, (byte) (tsp.alpha * 255f));
-			ptr += 1L;
+			MemoryUtil.memPutInt(ptr, color);
+			ptr += 4L;
 
 			// Light (56-59): 2 shorts
 			MemoryUtil.memPutInt(ptr, light);
@@ -476,14 +459,16 @@ public class ParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void resize(int particleLimit) {
-		if (particleLimit != sources[0].getSize()) {
-			sources[0].resize0(particleLimit);
+		int rawSize = particleLimit * ParticleVertexFormats.RAW_PARTICLE_BYTES;
+		if (rawSize != sources[0].getSize()) {
+			sources[0].resize0(rawSize);
 		}
-		if (particleLimit != sources[1].getSize()) {
-			sources[1].resize0(particleLimit);
+		if (rawSize != sources[1].getSize()) {
+			sources[1].resize0(rawSize);
 		}
-		if (particleLimit < target.getSize()) {
-			target.resize0(particleLimit * 4 * ParticleVertexFormats.PROCESSED_PARTICLE_VERTEX_BYTES);
+		int proceedSize = particleLimit * 4 * ParticleVertexFormats.PROCESSED_PARTICLE_VERTEX_BYTES;
+		if (proceedSize != target.getSize()) {
+			target.resize0(proceedSize);
 		}
 		this.particleLimit = particleLimit;
 	}

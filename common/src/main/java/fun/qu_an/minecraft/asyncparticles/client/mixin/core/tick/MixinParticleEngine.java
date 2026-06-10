@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
@@ -34,7 +35,7 @@ import java.util.Map;
 import java.util.Queue;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
-public abstract class MixinParticleEngine {
+public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	@Shadow
 	public Queue<Particle> particlesToAdd;
 	@Shadow
@@ -94,6 +95,7 @@ public abstract class MixinParticleEngine {
 			}));
 		}
 
+		int lastSize = particles.size();
 		boolean gpuParticles = ConfigHelper.isGpuParticles();
 		if (!particlesToAdd.isEmpty()) {
 			boolean appendNewParticlesToRenderer = ConfigHelper.isAppendNewParticlesToRenderer();
@@ -126,6 +128,9 @@ public abstract class MixinParticleEngine {
 				queue.add(particle);
 			}
 			particlesToAdd.clear();
+		}
+		if (lastSize != particles.size()) {
+			asyncparticle$sortRenderOrder();
 		}
 		if (tickAsync) {
 			if (gpuParticles) {
