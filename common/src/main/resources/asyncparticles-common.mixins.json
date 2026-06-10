@@ -80,6 +80,7 @@
     "core.particle.MixinTextureSheetParticle",
     "core.render.MixinLevelRenderer",
     "core.render.MixinMultiBufferSource$BufferSource",
+    "core.render.MixinRenderSystem",
     "core.render.MixinTesselator",
     "core.render.MixinVertexConsumer",
     "core.tick.MixinClientLevel_AnimateTick",
