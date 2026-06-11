@@ -88,8 +88,8 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 				shouldTick = true;
 				shouldRefresh = false;
 			} else if (particleAddon.asyncparticles$isTicked()) {
-				// Skip the first tick after enqueued that the particle is added to the queue.
-				// only GPU particles don't skip the first tick, but skip the first refresh.
+				// Skip the first tick after the particle is added to the queue.
+				// GPU particles don't skip the first tick, but skip the first refresh.
 				// skip the first refresh will fix black destruction gpu particles.
 				shouldTick = isGpu;
 				shouldRefresh = !isGpu && enableLightCache;

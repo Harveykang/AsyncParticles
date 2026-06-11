@@ -72,16 +72,16 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				if (!gpuParticles) {
 					canComputeFast = false;
 				} else {
-					canComputeFast = particle instanceof SingleQuadParticle tsp && GpuParticleBehavior.INSTANCE.canRenderFast(tsp);
+					canComputeFast = particle instanceof SingleQuadParticle sqp && GpuParticleBehavior.getInstance().canRenderFast(sqp);
 				}
 				ParticleRenderType renderType = particle.getGroup();
 				ParticleGroup<?> group;
 				if (!canComputeFast) {
 					group = this.particles.computeIfAbsent(renderType, this::createParticleGroup);
 				} else {
-					ParticleRenderType gpuRenderType = GpuParticleBehavior.INSTANCE.ofRenderType(renderType);
+					ParticleRenderType gpuRenderType = GpuParticleBehavior.getInstance().ofRenderType(renderType);
 					group = this.particles.computeIfAbsent(gpuRenderType, gpuRenderType1 ->
-						GpuParticleBehavior.INSTANCE.gpuParticles.computeIfAbsent(gpuRenderType1,
+						GpuParticleBehavior.getInstance().gpuParticles.computeIfAbsent(gpuRenderType1,
 							gpuRenderType2 -> {
 								asyncparticle$addRenderType(gpuRenderType2);
 								return new GpuParticleGroup((ParticleEngine) (Object) this, gpuRenderType2);
@@ -92,11 +92,11 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			particlesToAdd.clear();
 		}
 		if (gpuParticles) {
-			GpuParticleBehavior.INSTANCE.swapAllBuffers();
-			GpuParticleBehavior.INSTANCE.setGpuParticleLimit(ConfigHelper.getParticleLimit());
+			GpuParticleBehavior.getInstance().swapAllBuffers();
+			GpuParticleBehavior.getInstance().setGpuParticleLimit(ConfigHelper.getParticleLimit());
 			Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-			GpuParticleBehavior.INSTANCE.setCameraPos(camera.position()); // Set the next camera position
-			GpuParticleBehavior.INSTANCE.gpuParticles.forEach(((renderType, gpuGroup) -> {
+			GpuParticleBehavior.getInstance().setCameraPos(camera.position()); // Set the next camera position
+			GpuParticleBehavior.getInstance().gpuParticles.forEach(((renderType, gpuGroup) -> {
 				if (gpuGroup.isEmpty()) {
 					return;
 				}

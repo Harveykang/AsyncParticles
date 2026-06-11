@@ -3,9 +3,9 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
+import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskManager;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionTracker;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
@@ -261,13 +261,15 @@ public class AsyncTickBehavior {
 			return;
 		}
 		debugConsumer.accept(String.format("""
-			[Debug AsyncTicker]
+			[AsyncParticles Debug]
 			particle task count: %d,
 			particle limit: %d,
-			particles queue size/allocated: %s,
-			GPU particles size/allocated: %s,
+			particles groups (render order, size/allocated):
+			%s,
 			particles to add size: %d
-			sync particle types: %s,"""
+			sync particle types: %s,
+			glCapabilities: TransformFeedback: %s,
+			                ExplicitAttribLocation: %s"""
 			.formatted(
 				tickTaskManager.taskCount(),
 				ConfigHelper.getParticleLimit(),
@@ -280,16 +282,12 @@ public class AsyncTickBehavior {
 						}
 						return "Unsupported Queue";
 					})),
-				GpuParticleBehavior.INSTANCE.gpuParticles.entrySet()
-					.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
-						Queue<?> queue = e.getValue().getAll();
-						if (queue instanceof IterationSafeEvictingQueue<?> q1) {
-							return queue.size() + "/" + q1.arraySize();
-						}
-						return "Unsupported Queue";
-					})),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
-				syncParticleTypes.stream().map(Class::getName).toList())));
+				syncParticleTypes.stream().map(Class::getName).toList(),
+				GLCaps.tfSupport.getClass().getSimpleName(),
+				GLCaps.supportsExplicitAttribLocation
+			)));
+
 		debugConsumer = null;
 	}
 

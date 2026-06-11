@@ -24,6 +24,6 @@ public class ParticleHelper {
 	public static void onClearParticles() {
 		AsyncRenderBehavior.getInstance().reset();
 		AsyncTickBehavior.getInstance().reset();
-		GpuParticleBehavior.INSTANCE.onClearParticles();
+		GpuParticleBehavior.getInstance().onClearParticles();
 	}
 }

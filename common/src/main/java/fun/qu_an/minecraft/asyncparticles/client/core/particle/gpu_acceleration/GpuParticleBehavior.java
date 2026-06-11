@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration
 import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
+import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.TickAndAppendParticleRenderer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -27,7 +28,7 @@ public class GpuParticleBehavior {
 	public static final String RENDER_METHOD = Mappings.getRenderMethod();
 	public static final String RENDER_ROTATED_QUAD_METHOD_1 = Mappings.getRenderRotatedQuadMethod1();
 	public static final String RENDER_ROTATED_QUAD_METHOD_2 = Mappings.getRenderRotatedQuadMethod2();
-	public static final GpuParticleBehavior INSTANCE = new GpuParticleBehavior();
+	private static final GpuParticleBehavior INSTANCE = new GpuParticleBehavior();
 	private static final ParticleRenderType GPU_SINGLE_QUADS = new ParticleRenderType("gpu_single_quads");
 	public final Map<ParticleRenderType, GpuParticleGroup> gpuParticles = new Reference2ObjectOpenHashMap<>();
 	/**
@@ -65,9 +66,13 @@ public class GpuParticleBehavior {
 //		"method_3070",
 //		"()V"
 //	);
-	private int particleLimit = -1;
+	private int particleLimit = AsyncParticlesConfig.MIN_PARTICLE_LIMIT;
 
 	public static void init() {
+	}
+
+	public static GpuParticleBehavior getInstance() {
+		return INSTANCE;
 	}
 
 	public GpuParticleGroup getGpuGroup(ParticleRenderType type) {

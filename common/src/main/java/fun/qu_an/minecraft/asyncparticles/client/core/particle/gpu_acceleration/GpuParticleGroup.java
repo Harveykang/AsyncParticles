@@ -39,7 +39,7 @@ public class GpuParticleGroup extends QuadParticleGroup implements ParticleGroup
 	public void tickParticles() {
 		super.tickParticles();
 		asyncparticles$removeDeadParticles();
-		renderState.tickRenderers(GpuParticleBehavior.INSTANCE.getCameraPos(), particles);
+		renderState.tickRenderers(GpuParticleBehavior.getInstance().getCameraPos(), particles);
 	}
 
 	public void unmapBuffersAndSwap(Vec3 prevGpuCamPos) {
@@ -65,7 +65,7 @@ public class GpuParticleGroup extends QuadParticleGroup implements ParticleGroup
 	public void add(final @NonNull Particle particle) {
 		super.add(particle);
 		if (ConfigHelper.isAppendNewParticlesToRenderer()) {
-			renderState.append(GpuParticleBehavior.INSTANCE.getCameraPos(), (SingleQuadParticle) particle);
+			renderState.append(GpuParticleBehavior.getInstance().getCameraPos(), (SingleQuadParticle) particle);
 		}
 	}
 }

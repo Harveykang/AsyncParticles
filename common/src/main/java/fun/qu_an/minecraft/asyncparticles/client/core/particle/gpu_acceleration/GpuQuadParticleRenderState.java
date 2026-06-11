@@ -42,7 +42,7 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 
 	public GpuQuadParticleRenderState(QuadParticleGroup particleGroup) {
 		this.particleGroup = particleGroup;
-		this.renderer = GpuParticleBehavior.INSTANCE.createRenderer();
+		this.renderer = GpuParticleBehavior.getInstance().createRenderer();
 	}
 
 	@Override
