@@ -100,28 +100,23 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 		int vertexSize = RAW_PARTICLE.getVertexSize();
 
 		int tickCount = this.tickCount[pi];
+		if (tickCount > 0) {
+			sources[pi].flush(tickCount * vertexSize); // offsetRelativeToMap = 0
+		}
 		int appendCount = pendingAppends.size();
-		if (appendCount == 0) {
-			if (tickCount > 0) {
-				sources[pi].flush(tickCount * vertexSize);
-			}
-		} else {
-			extractAppendParticles(prevGpuCamPos, pendingAppends, layerBatches[pi]);
-			if (tickCount > 0) {
-				sources[pi].flush((particleLimit + tickCount) * vertexSize);
-			} else {
-				sources[pi].flush(appendCount * vertexSize);
-				if (camPositions[pi] == Vec3.ZERO){ // first append
-					camPositions[pi] = prevGpuCamPos;
-				}
+		if (appendCount > 0) {
+			int offsetRelativeToMap = extractAppendParticles(prevGpuCamPos, pendingAppends, layerBatches[pi]);
+			sources[pi].flush(offsetRelativeToMap, appendCount * vertexSize);
+			if (offsetRelativeToMap == 0 && camPositions[pi] == Vec3.ZERO) { // first append
+				camPositions[pi] = prevGpuCamPos;
 			}
 			this.appendCount = appendCount;
 		}
 
 		if (mappedBuffer != null) {
-			shouldSkip = false;
-			processingIndex ^= 1;
+			shouldSkip = tickCount + appendCount == 0;
 			sources[pi].unmap();
+			processingIndex ^= 1;
 			mappedBuffer = null;
 		} else {
 			shouldSkip = true;
@@ -134,9 +129,9 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 //		this.layerBatches[next].clear(); // Clear in tick() method
 	}
 
-	private void extractAppendParticles(Vec3 prevGpuCamPos,
-	                                    List<SingleQuadParticle> pending,
-	                                    List<LayerBatch> batches) {
+	private int extractAppendParticles(Vec3 prevGpuCamPos,
+	                                   List<SingleQuadParticle> pending,
+	                                   List<LayerBatch> batches) {
 		int appendCount = pending.size();
 		int vertexSize = RAW_PARTICLE.getVertexSize();
 		final double cx = prevGpuCamPos.x;
@@ -144,14 +139,14 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 		final double cz = prevGpuCamPos.z;
 
 		int pi = processingIndex;
-		int addressOffset;
+		int offsetRelativeToMap;
 		if (mappedBuffer != null) {
-			addressOffset = particleLimit * vertexSize;
+			offsetRelativeToMap = particleLimit * vertexSize;
 		} else {
 			mappedBuffer = sources[pi].mapRange(particleLimit * vertexSize, appendCount * vertexSize, true);
-			addressOffset = 0;
+			offsetRelativeToMap = 0;
 		}
-		final long bufferAddress = MemoryUtil.memAddress(mappedBuffer) + addressOffset;
+		final long bufferAddress = MemoryUtil.memAddress(mappedBuffer) + offsetRelativeToMap;
 
 		Map<SingleQuadParticle.Layer, List<SingleQuadParticle>> layerMap = new Reference2ReferenceOpenHashMap<>();
 		for (SingleQuadParticle particle : pending) {
@@ -253,6 +248,7 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 				baseCount += layerAppend;
 			}
 		}
+		return offsetRelativeToMap;
 	}
 
 	@Override

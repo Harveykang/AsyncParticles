@@ -37,7 +37,7 @@
   ],
   "depends": {
     "fabricloader": ">=0.17.0",
-    "minecraft": ">=1.21.11",
+    "minecraft": ">=26.1",
     "mixinextras": ">=0.5.0",
     "mixinsquared": "*"
   },

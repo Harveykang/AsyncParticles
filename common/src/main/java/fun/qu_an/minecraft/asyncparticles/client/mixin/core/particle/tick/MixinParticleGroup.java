@@ -9,7 +9,7 @@ import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBeh
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
-import fun.qu_an.minecraft.asyncparticles.client.core.ParticleHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
 import net.minecraft.ReportedException;

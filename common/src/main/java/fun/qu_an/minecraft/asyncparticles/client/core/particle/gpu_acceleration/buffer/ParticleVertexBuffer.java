@@ -99,6 +99,18 @@ public class ParticleVertexBuffer {
 		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
 	}
 
+	public void flush(int offset, int size) {
+		if (mapOffset + offset + size > this.size) {
+			throw new IllegalArgumentException("Flushing more bytes than buffer size: " + (mapOffset + offset + size) + " > " + this.size);
+		}
+		if (!mapped) {
+			throw new IllegalStateException("Buffer is not mapped");
+		}
+		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, vbo);
+		GL30C.glFlushMappedBufferRange(GL15C.GL_ARRAY_BUFFER, offset, size);
+		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+	}
+
 //	public void flush(int offsetRelatedToMapOffset, int size) {
 //		if (mapOffset + size > this.size) {
 //			throw new IllegalArgumentException("Flushing more bytes than buffer size: " + (mapOffset + size) + " > " + this.size);
