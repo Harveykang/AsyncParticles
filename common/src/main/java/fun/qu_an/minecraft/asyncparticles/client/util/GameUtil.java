@@ -102,7 +102,7 @@ public class GameUtil {
 		LayerLightEventListener block = level.getLightEngine().getLayerListener(LightLayer.BLOCK);
 		DataLayer blockDataLayerData = block.getDataLayerData(SectionPos.of(pos));
 		if (blockDataLayerData == null) {
-			j = 15;
+			j = 0;
 		} else {
 			j = ly == 15 ? block.getLightValue(asyncparticles$mutable.set(x, y + 1, z)) :
 				blockDataLayerData.get(lx, ly + 1, lz);

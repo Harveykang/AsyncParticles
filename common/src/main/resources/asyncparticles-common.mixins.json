@@ -35,6 +35,8 @@
     "compat.fabric.sodium_extra.MixinParticleEngine",
     "compat.figura.MixinParticleEngine",
     "compat.immediatelyfast.MixinBatchableBufferSource",
+    "compat.immersive_portals.MixinParticleEngine",
+    "compat.immersive_portals.MixinParticleRenderer",
     "compat.iris_like.MixinDSAUnsupported",
     "compat.iris_like.MixinFullyBufferedMultiBufferSource",
     "compat.iris_like.MixinIris",
@@ -122,5 +124,6 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "compat.cosycritters.MixinBirdParticle"
   ]
 }

@@ -12,16 +12,15 @@ import net.minecraft.network.chat.Component;
 import java.io.IOException;
 import java.util.*;
 
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.IRONS_SPELLBOOKS_LOADED;
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.MAKE_BUBBLES_POP_LOADED;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.MixinConfigObj;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.getToSaveConfig;
 
 // No more NoClassDefFoundError
 public class ClothConfigMixinMenus {
 	public static Runnable buildCategory(ConfigCategory mixinCategory,
-										 ConfigEntryBuilder entryBuilder,
-										 ConfigEntryBuilder mixinEntryBuilder) {
+	                                     ConfigEntryBuilder entryBuilder,
+	                                     ConfigEntryBuilder mixinEntryBuilder) {
 		MixinConfigObj defaultConfig = new MixinConfigObj();
 		MixinConfigObj newConfig = new MixinConfigObj();
 		MixinConfigObj lastConfig = getToSaveConfig();
@@ -64,12 +63,17 @@ public class ClothConfigMixinMenus {
 						list.add(Component.translatable("config.asyncparticles.limited", "Make Bubbles Pop")
 							.withStyle(ChatFormatting.DARK_RED));
 					}
+					if (COSYCRITTERS_LOADED) {
+						list.add(Component.translatable("config.asyncparticles.limited", "Cosy Critters")
+							.withStyle(ChatFormatting.DARK_RED));
+					}
 					return Optional.of(list.toArray(new Component[0]));
 				}
 			})
 			.requireRestart()
 			.setRequirement(() -> !IRONS_SPELLBOOKS_LOADED &&
-								  !MAKE_BUBBLES_POP_LOADED)
+				!MAKE_BUBBLES_POP_LOADED &&
+				!COSYCRITTERS_LOADED)
 			.build());
 		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap"),
@@ -203,9 +207,9 @@ public class ClothConfigMixinMenus {
 	}
 
 	public static void addModCompatCategory(ConfigEntryBuilder entryBuilder,
-											ConfigEntryBuilder mixinEntryBuilder,
-											@SuppressWarnings("rawtypes") List<AbstractConfigListEntry> vsEntries,
-											@SuppressWarnings("rawtypes") List<AbstractConfigListEntry> createEntries) {
+	                                        ConfigEntryBuilder mixinEntryBuilder,
+	                                        @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> vsEntries,
+	                                        @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> createEntries) {
 		MixinConfigObj defaultConfig = new MixinConfigObj();
 		MixinConfigObj newConfig = new MixinConfigObj();
 		MixinConfigObj lastConfig = getToSaveConfig();

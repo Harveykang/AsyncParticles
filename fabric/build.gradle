@@ -44,62 +44,20 @@ dependencies {
     shadowBundle project(path: ':common_legacy_mod_compat', configuration: 'transformProductionFabric')
 
     modCompileOnly 'maven.modrinth:modmenu:7.2.2'
-    modLocalRuntime 'maven.modrinth:modmenu:7.2.2'
-    modLocalRuntime 'maven.modrinth:architectury-api:9.2.14+fabric'
-    modLocalRuntime("me.shedaniel.cloth:cloth-config-fabric:11.1.136") {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
     modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:11.1.136") {
         exclude(group: "net.fabricmc.fabric-api")
     }
-    modLocalRuntime "maven.modrinth:forge-config-api-port:v8.0.2-1.20.1-Fabric"
-
-    if (rootProject.vulkan_enabled == 'true') {
-        modLocalRuntime 'maven.modrinth:vulkanmod:0.5.2'
-        localRuntime("org.lwjgl:lwjgl-glfw:3.3.3")
-        localRuntime("org.lwjgl:lwjgl-vulkan:3.3.3")
-        localRuntime("org.lwjgl:lwjgl-vma:3.3.3")
-        localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3")
-        localRuntime("org.lwjgl:lwjgl-vma:3.3.3:natives-windows")
-        localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3:natives-windows")
-        return
-    }
-
-    /* Performance */
-    modLocalRuntime "maven.modrinth:spark:1.10.53-fabric"
-    modLocalRuntime "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
-    modLocalRuntime "maven.modrinth:sodium-extras:fabric-1.20.1-1.0.7"
-    modLocalRuntime "maven.modrinth:sodium-options-api:fabric-1.20.1-1.0.10"
-    modLocalRuntime "maven.modrinth:reeses-sodium-options:mc1.20.1-1.7.2"
-    modLocalRuntime 'maven.modrinth:iris:1.7.6+1.20.1'
-    if (rootProject.physics_enabled != 'true') {
-//        modLocalRuntime 'maven.modrinth:starlight:1.1.2+1.20'
-    }
-    localRuntime "org.antlr:antlr4-runtime:4.13.1"
-    localRuntime "io.github.douira:glsl-transformer:2.0.1"
-    localRuntime "org.anarres:jcpp:1.4.14"
-    modLocalRuntime "maven.modrinth:indium:1.0.36+mc1.20.1"
     modCompileOnly 'maven.modrinth:lithium:mc1.20.1-0.11.3-fabric'
 //    modLocalRuntime 'maven.modrinth:lithium:mc1.20.1-0.11.3-fabric'
 
     modCompileOnly "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
     modCompileOnly 'maven.modrinth:iris:1.7.6+1.20.1'
 
-    /* APIs */
-//    modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
-    modLocalRuntime "dev.isxander:yet-another-config-lib:3.6.6+1.20.1-fabric"
-
-    /* Valkyrien Skies */
-    modLocalRuntime "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
-    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.4.11"
-    modLocalRuntime 'maven.modrinth:eureka:1.20.1-fabric-1.6.3'
-
     modCompileOnly "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
     modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.4.11"
     modCompileOnly 'maven.modrinth:eureka:1.20.1-fabric-1.6.3'
 
     /* Create */
-    modLocalRuntime("com.simibubi.create:create-fabric-1.20.1:$fabric_create_version")
 //    modLocalRuntime 'maven.modrinth:iris-flw-compat:1.1.4'
     // keep this line to compile properly
     // 否则被模组重写的原版方法不会正确重映射...
@@ -139,10 +97,6 @@ dependencies {
 //    modLocalRuntime "maven.modrinth:fzzy-config:0.7.2+1.20.1"
 //    modLocalRuntime "me.fallenbreath:conditional-mixin:0.5.1"
 
-    /* Subtle Effects */
-//    localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"
-//    modLocalRuntime "maven.modrinth:subtle-effects:mRWsAYqN" // fabric 1.12.1
-
     /* A Good Place */
 //    modLocalRuntime "maven.modrinth:a-good-place:1.20-1.2.7"
     modCompileOnly "maven.modrinth:a-good-place:1.20-1.2.7"
@@ -164,8 +118,62 @@ dependencies {
     /* Real Camera */
 //    modLocalRuntime "maven.modrinth:real-camera:XZ9lHrLr"
 
+    /* APIs */
+//    modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
+    modLocalRuntime "dev.isxander:yet-another-config-lib:3.6.6+1.20.1-fabric"
+    modLocalRuntime "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
+    modLocalRuntime 'maven.modrinth:modmenu:7.2.2'
+    modLocalRuntime 'maven.modrinth:architectury-api:9.2.14+fabric'
+    modLocalRuntime("me.shedaniel.cloth:cloth-config-fabric:11.1.136") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+    modLocalRuntime "maven.modrinth:fzzy-config:0.7.6+1.20.1"
+    modLocalRuntime "maven.modrinth:forge-config-api-port:v8.0.2-1.20.1-Fabric"
+
+//    modLocalRuntime "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
+//    modLocalRuntime("com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:1.20.1-SNAPSHOT") { transitive = false }
+//    modLocalRuntime("com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:1.20.1-SNAPSHOT") { transitive = false }
+//    modLocalRuntime("com.github.iPortalTeam.ImmersivePortalsMod:build:1.20.1-SNAPSHOT") { transitive = false }
+//    return
+
+    if (rootProject.vulkan_enabled == 'true') {
+        modLocalRuntime 'maven.modrinth:vulkanmod:0.5.2'
+        localRuntime("org.lwjgl:lwjgl-glfw:3.3.3")
+        localRuntime("org.lwjgl:lwjgl-vulkan:3.3.3")
+        localRuntime("org.lwjgl:lwjgl-vma:3.3.3")
+        localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3")
+        localRuntime("org.lwjgl:lwjgl-vma:3.3.3:natives-windows")
+        localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3:natives-windows")
+        return
+    }
+
+    /* Performance */
+    modLocalRuntime "maven.modrinth:spark:1.10.53-fabric"
+    modLocalRuntime "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
+    modLocalRuntime "maven.modrinth:sodium-extras:fabric-1.20.1-1.0.7"
+    modLocalRuntime "maven.modrinth:sodium-options-api:fabric-1.20.1-1.0.10"
+    modLocalRuntime "maven.modrinth:reeses-sodium-options:mc1.20.1-1.7.2"
+    modLocalRuntime 'maven.modrinth:iris:1.7.6+1.20.1'
+    if (rootProject.physics_enabled != 'true') {
+//        modLocalRuntime 'maven.modrinth:starlight:1.1.2+1.20'
+    }
+    localRuntime "org.antlr:antlr4-runtime:4.13.1"
+    localRuntime "io.github.douira:glsl-transformer:2.0.1"
+    localRuntime "org.anarres:jcpp:1.4.14"
+    modLocalRuntime "maven.modrinth:indium:1.0.36+mc1.20.1"
+
+    /* Valkyrien Skies */
+    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-fabric-2.4.11"
+    modLocalRuntime 'maven.modrinth:eureka:1.20.1-fabric-1.6.3'
+
     /* LambDynamicLights */
     modLocalRuntime("dev.lambdaurora.lambdynamiclights:lambdynamiclights-runtime:4.4.0+1.20.1")
+
+    modLocalRuntime("com.simibubi.create:create-fabric-1.20.1:$fabric_create_version")
+
+    /* Subtle Effects */
+    localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"
+    modLocalRuntime "maven.modrinth:subtle-effects:mRWsAYqN" // fabric 1.12.1
 }
 
 processResources {

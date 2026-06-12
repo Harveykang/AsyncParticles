@@ -105,4 +105,12 @@ dependencies {
 
     /* LambDynamicLights */
     modCompileOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:4.4.0+1.20.1")
+
+    /* Immersive Portals */
+    modCompileOnly("com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:1.20.1-SNAPSHOT") { transitive = false }
+    modCompileOnly("com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:1.20.1-SNAPSHOT") { transitive = false }
+    modCompileOnly("com.github.iPortalTeam.ImmersivePortalsMod:build:1.20.1-SNAPSHOT") { transitive = false }
+
+    /* Cosy Critters */
+    modCompileOnly "maven.modrinth:cosy-critters:v0.3.2+1.20.1-fabric"
 }

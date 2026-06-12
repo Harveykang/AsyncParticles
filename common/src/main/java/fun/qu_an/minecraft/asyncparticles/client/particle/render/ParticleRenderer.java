@@ -10,6 +10,8 @@ import fun.qu_an.minecraft.asyncparticles.client.particle.buffer.ParticleVertexB
 import fun.qu_an.minecraft.asyncparticles.client.particle.shader.ParticleTransformFeedbackShader;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import it.unimi.dsi.fastutil.HashCommon;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -27,6 +29,7 @@ import java.nio.ByteBuffer;
 import java.util.Objects;
 import java.util.Queue;
 
+@Environment(EnvType.CLIENT)
 public class ParticleRenderer implements IParticleRenderer {
 	private static final int[] multiDrawIndex = {0, 0};
 	private static final int[] multiDrawCount = {0, 0};

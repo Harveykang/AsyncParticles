@@ -69,6 +69,9 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	 */
 	@Overwrite
 	public void tick() {
+		if (!AsyncTickBehavior.INSTANCE.shouldTickParticleEngine()) {
+			return;
+		}
 		//		assert AsyncTicker.shouldTickParticles;
 		if (!trackingEmitters.isEmpty()) {
 			AsyncTickBehavior.INSTANCE.particleOperations.add(this::asyncparticles$tickEmitters);

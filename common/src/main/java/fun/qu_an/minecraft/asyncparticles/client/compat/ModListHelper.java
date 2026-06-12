@@ -112,6 +112,11 @@ public class ModListHelper {
 	public static final boolean PARTICLE_INTERACTIONS_LOADED = isModLoaded("eg_particle_interactions");
 	/* Lambdynights */
 	public static final boolean LAMBDYNLIGHTS_LOADED = isModLoaded("lambdynlights");
+	/* Immersive Portals */
+	public static final boolean IMMERSIVE_PORTALS_LOADED = isModLoaded("immersive_portals");
+	/* CosyCritters */
+	public static final boolean COSYCRITTERS_LOADED = isModLoaded("cosycritters");
+
 	@ExpectPlatform
 	private static boolean isForge() {
 		throw new AssertionError();

@@ -74,6 +74,8 @@
   "config.asyncparticles.mixin.particle.lockRequired": "需要加锁的粒子",
   "config.asyncparticles.mixin.replaceRandom": "替换随机数源",
   "config.asyncparticles.mixin.replaceRandom.tooltip": "避免并发访问崩溃。",
+  "config.asyncparticles.mixin.particle.safeLegacyRandomSource": "使“LegacyRandomSource”线程安全",
+  "config.asyncparticles.mixin.particle.safeLegacyRandomSource.tooltip": "如果你遇到了与“LegacyRandomSource”有关的崩溃，可以打开它。",
   "config.asyncparticles.mixin.particle.invalid-class": "类不存在或不是“net.minecraft.client.particle.Particle”的子类",
   "config.asyncparticles.mixin.create.contraptionsNoParticleCollision": "禁用粒子碰撞的动态结构",
   "config.asyncparticles.mixin.create.contraptionsNoParticleCollision.tooltip": "在特定动态结构类上禁用粒子碰撞。",

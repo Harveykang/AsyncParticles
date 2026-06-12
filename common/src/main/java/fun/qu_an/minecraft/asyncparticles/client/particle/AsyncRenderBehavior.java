@@ -583,7 +583,7 @@ public class AsyncRenderBehavior {
 		this.frustum = frustum;
 	}
 
-	public class AsyncRendererThread extends AsyncParticleWorkerThread {
+	public static class AsyncRendererThread extends AsyncParticleWorkerThread {
 		public AsyncRendererThread(ForkJoinPool forkJoinPool) {
 			super(forkJoinPool);
 		}

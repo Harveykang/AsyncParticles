@@ -27,13 +27,13 @@ public class MixinMinecraft {
 	private boolean asyncparticles$sorted = false;
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
-	private void onTick(boolean bl, CallbackInfo ci, @Local(ordinal = 0) int i, @Local(ordinal = 1) int j) {
-		AsyncTickBehavior.INSTANCE.onTickBefore(j, Math.min(10, i));
+	private void preTick(boolean bl, CallbackInfo ci, @Local(ordinal = 0) int i, @Local(ordinal = 1) int j) {
+		AsyncTickBehavior.INSTANCE.preTick(j, Math.min(10, i));
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/Minecraft;tick()V"))
-	private void onTickAfter(boolean bl, CallbackInfo ci, @Local(ordinal = 0) int i, @Local(ordinal = 1) int j) {
-		AsyncTickBehavior.INSTANCE.onTickAfter(j, Math.min(10, i));
+	private void postTick(boolean bl, CallbackInfo ci, @Local(ordinal = 0) int i, @Local(ordinal = 1) int j) {
+		AsyncTickBehavior.INSTANCE.postTick(j, Math.min(10, i));
 	}
 
 	@Inject(method = "setLevel", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, ordinal = 0,

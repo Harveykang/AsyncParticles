@@ -12,8 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.IRONS_SPELLBOOKS_LOADED;
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.MAKE_BUBBLES_POP_LOADED;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.LOGGER;
 
 public class AsyncParticlesMixinConfig {
@@ -103,7 +102,8 @@ public class AsyncParticlesMixinConfig {
 	static class MixinConfigObj {
 		private int version = 0;
 		private boolean particle$splitTick = false;
-		private boolean safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED;
+		private boolean safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED
+			|| COSYCRITTERS_LOADED;
 		private boolean safeBlockEntityMap = false;
 		private boolean safeLegacyRandomSource = false;
 		private Set<String> particle$noCulling = new LinkedHashSet<>();
@@ -186,8 +186,8 @@ public class AsyncParticlesMixinConfig {
 			}
 			MixinConfigObj defaultConfig = new MixinConfigObj();
 			particle$splitTick = getBoolean(properties, "particle$splitTick", defaultConfig.particle$splitTick);
-			safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED ||
-										getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
+			safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED ||
+				getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
 			safeBlockEntityMap = getBoolean(properties, "safeBlockEntityMap", defaultConfig.safeBlockEntityMap);
 			safeLegacyRandomSource = getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);
 			particle$noCulling = getSet(properties, "particle$noCulling", defaultConfig.particle$noCulling);
@@ -316,7 +316,7 @@ public class AsyncParticlesMixinConfig {
 		public void setSafeClassInstanceMultiMap(boolean safeClassInstanceMultiMap) {
 			assertNotGlobal();
 			this.safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED ||
-											 safeClassInstanceMultiMap;
+				safeClassInstanceMultiMap;
 		}
 
 		public boolean isSafeBlockEntityMap() {

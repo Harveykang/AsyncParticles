@@ -46,7 +46,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 	}
 
 	private static final int PACKAGE_LENGTH = AsyncParticlesClient.class.getPackage().getName().length() +
-											  ".mixin.".length();
+		".mixin.".length();
 
 	/// - mixins located in `mixin/fabric` or `mixin/<mod_id>/fabric` package only take effect on fabric.
 	/// - mixins located in `mixin/fabric/<mod_id>` take effect on fabric or Sinytra Connector.
@@ -72,6 +72,18 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				default -> true;
 			};
 			case "compat" -> switch (split[1]) {
+				case "fabric" -> switch (split[2]) {
+					case "effective" -> FABRIC_EFFECTIVE_LOADED;
+					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
+					case "particular" -> FABRIC_PARTICULAR_LOADED;
+					case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
+					case "iris" -> FABRIC_IRIS_LOADED;
+					case "iris_else" -> !IS_FORGE && !FABRIC_IRIS_LOADED;
+					case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;
+					case "loot_beams_up" -> FABRIC_LOOT_BEAMS_UP_LOADED;
+					case "sodium_extra" -> FABRIC_SODIUM_EXTRA_LOADED;
+					default -> throw new IllegalArgumentException("Unknown fabric compat mixin: " + mixinClassName);
+				};
 				case "particlerain" -> PARTICLERAIN_LOADED;
 				case "particlerain_vs" -> PARTICLERAIN_LOADED && VS_LOADED;
 				case "particlerain_create" -> PARTICLERAIN_LOADED && CREATE_LOADED;
@@ -95,18 +107,8 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "shimmer" -> SHIMMER_LOADED;
 				case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
 				case "figura" -> FIGURA_LOADED;
-				case "fabric" -> switch (split[2]) {
-					case "effective" -> FABRIC_EFFECTIVE_LOADED;
-					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
-					case "particular" -> FABRIC_PARTICULAR_LOADED;
-					case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
-					case "iris" -> FABRIC_IRIS_LOADED;
-					case "iris_else" -> !IS_FORGE && !FABRIC_IRIS_LOADED;
-					case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;
-					case "loot_beams_up" -> FABRIC_LOOT_BEAMS_UP_LOADED;
-					case "sodium_extra" -> FABRIC_SODIUM_EXTRA_LOADED;
-					default -> throw new IllegalArgumentException("Unknown fabric compat mixin: " + mixinClassName);
-				};
+				case "immersive_portals" -> IMMERSIVE_PORTALS_LOADED;
+				case "cosycritters" -> COSYCRITTERS_LOADED;
 				default -> throw new IllegalArgumentException("Unknown compat mixin: " + mixinClassName);
 			};
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
