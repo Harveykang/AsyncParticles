@@ -36,8 +36,6 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	@Shadow
 	public Map<ParticleRenderType, Queue<Particle>> particles;
 	@Shadow
-	protected ClientLevel level;
-	@Shadow
 	public Queue<TrackingEmitter> trackingEmitters;
 	@Mutable
 	@Shadow
@@ -75,7 +73,9 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	 */
 	@Overwrite
 	public void tick() {
-		//		assert AsyncTicker.shouldTickParticles;
+		if (!AsyncTickBehavior.INSTANCE.shouldTickParticleEngine()) {
+			return;
+		}
 		if (!trackingEmitters.isEmpty()) {
 			AsyncTickBehavior.INSTANCE.particleOperations.add(this::asyncparticles$tickEmitters);
 		}

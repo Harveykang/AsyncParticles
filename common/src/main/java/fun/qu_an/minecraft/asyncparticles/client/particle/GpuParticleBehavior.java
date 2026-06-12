@@ -103,6 +103,9 @@ public class GpuParticleBehavior {
 	 */
 	@Unique
 	public boolean canRenderFast(TextureSheetParticle tsp) {
+		if (tsp.getFacingCameraMode() != TextureSheetParticle.FacingCameraMode.LOOKAT_XYZ) {
+			return false;
+		}
 		return CAN_RENDER_FAST_CACHE.computeIfAbsent(tsp.getClass(), (Predicate<Class<? extends TextureSheetParticle>>)
 			k -> {
 				try {

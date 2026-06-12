@@ -18,8 +18,8 @@ import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMi
 // No more NoClassDefFoundError
 public class ClothConfigMixinMenus {
 	public static Runnable buildCategory(ConfigCategory mixinCategory,
-										 ConfigEntryBuilder entryBuilder,
-										 ConfigEntryBuilder revertEntryBuilder) {
+	                                     ConfigEntryBuilder entryBuilder,
+	                                     ConfigEntryBuilder revertEntryBuilder) {
 		MixinConfigObj defaultConfig = new MixinConfigObj();
 		MixinConfigObj newConfig = new MixinConfigObj();
 		MixinConfigObj lastConfig = getToSaveConfig();
@@ -41,8 +41,9 @@ public class ClothConfigMixinMenus {
 			.setSaveConsumer(newConfig::setSafeClassInstanceMultiMap)
 			.setTooltipSupplier(() -> {
 				if ((!IRONS_SPELLBOOKS_LOADED ||
-					 !IRONS_SPELLBOOKS_LESS_THAN_3_13_0) &&
-					!MAKE_BUBBLES_POP_LOADED) {
+					!IRONS_SPELLBOOKS_LESS_THAN_3_13_0) &&
+					!MAKE_BUBBLES_POP_LOADED &&
+					!COSYCRITTERS_LOADED) {
 					return Optional.of(new Component[]{
 						Component.translatable("text.cloth-config.restart_required")
 							.withStyle(ChatFormatting.DARK_RED),
@@ -64,13 +65,18 @@ public class ClothConfigMixinMenus {
 						list.add(Component.translatable("config.asyncparticles.limited", "Make Bubbles Pop")
 							.withStyle(ChatFormatting.DARK_RED));
 					}
+					if (COSYCRITTERS_LOADED) {
+						list.add(Component.translatable("config.asyncparticles.limited", "Cosy Critters")
+							.withStyle(ChatFormatting.DARK_RED));
+					}
 					return Optional.of(list.toArray(new Component[0]));
 				}
 			})
 			.requireRestart()
 			.setRequirement(() -> (!IRONS_SPELLBOOKS_LOADED ||
-								   !IRONS_SPELLBOOKS_LESS_THAN_3_13_0) &&
-								  !MAKE_BUBBLES_POP_LOADED)
+				!IRONS_SPELLBOOKS_LESS_THAN_3_13_0) &&
+				!MAKE_BUBBLES_POP_LOADED &&
+				!COSYCRITTERS_LOADED)
 			.build());
 		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap"),
@@ -204,9 +210,9 @@ public class ClothConfigMixinMenus {
 	}
 
 	public static void addModCompatCategory(ConfigEntryBuilder entryBuilder,
-											ConfigEntryBuilder mixinEntryBuilder,
-											@SuppressWarnings("rawtypes") List<AbstractConfigListEntry> vsEntries,
-											@SuppressWarnings("rawtypes") List<AbstractConfigListEntry> createEntries) {
+	                                        ConfigEntryBuilder mixinEntryBuilder,
+	                                        @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> vsEntries,
+	                                        @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> createEntries) {
 		MixinConfigObj defaultConfig = new MixinConfigObj();
 		MixinConfigObj newConfig = new MixinConfigObj();
 		MixinConfigObj lastConfig = getToSaveConfig();

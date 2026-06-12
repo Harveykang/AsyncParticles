@@ -76,6 +76,7 @@ public class AsyncTickBehavior {
 		ConfigHelper::getTickFailurePerSecondThreshold
 	);
 	private final AtomicLong timeUsageNano = new AtomicLong(0L);
+	private boolean particlePhase;
 
 	{
 		AtomicInteger workerCount = new AtomicInteger(1);
@@ -222,7 +223,9 @@ public class AsyncTickBehavior {
 		if (levelRunning) {
 			profiler.push("particle_tick");
 			if (i == to - 1) {
+				particlePhase = true;
 				mc.particleEngine.tick();
+				particlePhase = false;
 			} else {
 				waitForCleanUp();
 			}
@@ -671,6 +674,20 @@ public class AsyncTickBehavior {
 
 	public boolean isShouldTickParticles() {
 		return shouldTickParticles;
+	}
+
+	public boolean isParticlePhase() {
+		return particlePhase;
+	}
+
+	public boolean shouldTickParticleEngine() {
+		if (isParticlePhase() || !ConfigHelper.isTickAsync()) {
+			return true;
+		}
+		if (ModListHelper.IMMERSIVE_PORTALS_LOADED) {
+			return false;
+		}
+		throw new IllegalStateException("ParticleEngine.tick() called outside the particle phase unexpectedly.");
 	}
 
 	public static class AsyncTickerThread extends AsyncParticleWorkerThread {

@@ -23,6 +23,8 @@
     "compat.fabric.porting_lib_base.MixinMixinParticleEngine",
     "compat.figura.MixinParticleEngine",
     "compat.immediatelyfast.MixinBatchableBufferSource",
+    "compat.immersive_portals.MixinParticleEngine",
+    "compat.immersive_portals.MixinParticleRenderer",
     "compat.iris_like.MixinDSAUnsupported",
     "compat.iris_like.MixinFullyBufferedMultiBufferSource",
     "compat.iris_like.MixinIris",
@@ -90,7 +92,8 @@
     "core.tick.MixinTextureManager",
     "core.tick.MixinWaterFluid",
     "core.weather.MixinLevelRenderer_TickRain",
-    "core.weather.MixinLevelRenderer_WeatherCulling"
+    "core.weather.MixinLevelRenderer_WeatherCulling",
+    "compat.cosycritters.MixinBirdParticle"
   ],
   "injectors": {
     "defaultRequire": 1

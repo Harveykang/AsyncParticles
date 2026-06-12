@@ -106,6 +106,8 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "figura" -> FIGURA_LOADED;
 				case "veil" -> VEIL_LOADED && versionCheck("veil", "1.999999", null);
 				case "particle_interactions" -> PARTICLE_INTERACTIONS_LOADED;
+				case "immersive_portals" -> IMMERSIVE_PORTALS_LOADED;
+				case "cosycritters" -> COSYCRITTERS_LOADED;
 				default -> throw new IllegalArgumentException("Unknown compat mixin: " + mixinClassName);
 			};
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);

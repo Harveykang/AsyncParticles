@@ -104,7 +104,7 @@ public class AsyncParticlesMixinConfig {
 		private int version = 0;
 		private boolean particle$splitTick = false;
 		private boolean safeClassInstanceMultiMap = (IRONS_SPELLBOOKS_LOADED && IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
-													MAKE_BUBBLES_POP_LOADED;
+													MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED;
 		private boolean safeBlockEntityMap = false;
 		private boolean safeLegacyRandomSource = false;
 		private Set<String> particle$noCulling = new LinkedHashSet<>();
@@ -177,7 +177,7 @@ public class AsyncParticlesMixinConfig {
 			MixinConfigObj defaultConfig = new MixinConfigObj();
 			particle$splitTick = getBoolean(properties, "particle$splitTick", defaultConfig.particle$splitTick);
 			safeClassInstanceMultiMap = (IRONS_SPELLBOOKS_LOADED && IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
-										MAKE_BUBBLES_POP_LOADED ||
+										MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED ||
 										getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
 			safeBlockEntityMap = getBoolean(properties, "safeBlockEntityMap", defaultConfig.safeBlockEntityMap);
 			safeLegacyRandomSource = getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);

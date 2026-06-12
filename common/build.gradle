@@ -69,7 +69,7 @@ dependencies {
         modCompileOnly "maven.modrinth:physicsmod:di4A1Lqo" // 3.0.26
 
     /* Subtle Effects */
-    modCompileOnly "maven.modrinth:subtle-effects:1.14.1"
+//    modCompileOnly "maven.modrinth:subtle-effects:1.14.1"
 
     /* What Are They Up To */
     modCompileOnly "maven.modrinth:what-are-they-up-to:1.21.0-1.2.7" // 1.2.7
@@ -99,8 +99,15 @@ dependencies {
     /* RUOK */
     modCompileOnly "maven.modrinth:ruok:l0jVfXsH" // 1.7.4
 
-    api("foundry.veil:veil-neoforge-${project.minecraft_version}:4.1.1") {
+    /* Immersive Portals */
+    modCompileOnly "maven.modrinth:immersiveportals:v6.0.6-mc1.21.1"
+
+    modCompileOnly("foundry.veil:veil-fabric-${project.minecraft_version}:4.1.1") {
         exclude group: "maven.modrinth"
         exclude group: "me.fallenbreath"
+        exclude(group: "net.fabricmc.fabric-api")
     }
+
+    /* Cosy Critters */
+    modCompileOnly "maven.modrinth:cosy-critters:v0.3.2+1.21.1-fabric"
 }

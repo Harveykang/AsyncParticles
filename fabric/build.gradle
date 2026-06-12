@@ -58,11 +58,19 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
+    /* Iris */
+    modCompileOnly 'maven.modrinth:iris:1.8.8+1.21.1-fabric'
+
+    /* Immersive Portals */
+//    modLocalRuntime "maven.modrinth:immersiveportals:v6.0.6-mc1.21.1"
+//    modLocalRuntime "maven.modrinth:sodium:mc1.21.1-0.6.0-fabric"
+//    modLocalRuntime fileTree(dir: '../libs', include: '*.jar')
+//    return
+
     /* Performance */
 //    modLocalRuntime "maven.modrinth:sodium:mc1.21.1-0.8.12-alpha.3-fabric"
     modLocalRuntime "maven.modrinth:sodium:mc1.21.1-0.6.13-fabric"
     modLocalRuntime "maven.modrinth:sodium-extra:mc1.21.1-0.6.0+fabric"
-    modCompileOnly 'maven.modrinth:iris:1.8.8+1.21.1-fabric'
     modLocalRuntime 'maven.modrinth:iris:1.8.8+1.21.1-fabric'
     localRuntime "org.antlr:antlr4-runtime:4.13.1"
     localRuntime "io.github.douira:glsl-transformer:2.0.1"
@@ -126,7 +134,7 @@ dependencies {
 
     /* Subtle Effects */
     localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"
-    modLocalRuntime "maven.modrinth:subtle-effects:1.14.1" // fabric 1.9.3
+    modLocalRuntime "maven.modrinth:subtle-effects:1.14.3"
 
     /* What Are They Up To */
 //    modCompileOnly "maven.modrinth:what-are-they-up-to:1.21.0-1.2.7"
