@@ -19,7 +19,7 @@ public class MixinWeatherEffectRenderer {
 	                          ParticleStatus particleStatus,
 	                          int weatherRadius,
 	                          Operation<Void> original) {
-		if (ConfigHelper.isTickWeatherAsync() && AsyncTickBehavior.getInstance().isTailTick()) {
+		if (ConfigHelper.isTickWeatherAsync()) {
 			AsyncTickBehavior.getInstance().dispatch(() -> original.call(level, camera, ticks, particleStatus, weatherRadius));
 		} else {
 			original.call(level, camera, ticks, particleStatus, weatherRadius);

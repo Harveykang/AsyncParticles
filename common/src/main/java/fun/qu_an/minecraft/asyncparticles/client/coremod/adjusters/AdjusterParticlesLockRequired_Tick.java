@@ -20,6 +20,6 @@ public class AdjusterParticlesLockRequired_Tick implements MixinClassAdjuster {
 
 	@Override
 	public String getRefMapperConfig() {
-		return MixinUtil.getRefMapperName(CLASS_NAME,"asyncparticles-common-refmap.json");
+		return null;
 	}
 }

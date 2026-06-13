@@ -9,14 +9,10 @@ import org.spongepowered.asm.mixin.Pseudo;
 @Mixin(value = {
 	HugeExplosionParticle.class,
 	AttackSweepParticle.class,
-	SculkChargeParticle.class,
-	SculkChargePopParticle.class,
+	FireflyParticle.class,
 	SimpleAnimatedParticle.class,
-	FlyStraightTowardsParticle.class,
 	GustParticle.class,
-	ShriekParticle.class,
-	TrialSpawnerDetectionParticle.class,
-	VibrationSignalParticle.class,
+	TrailParticle.class,
 }) // Will be replaced with the actual targets
 public abstract class MixinParticles_LightCacheNoRefresh implements LightCachedParticleAddon {
 	@Override

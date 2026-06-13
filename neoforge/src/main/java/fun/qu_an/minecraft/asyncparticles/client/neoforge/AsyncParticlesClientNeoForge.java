@@ -145,7 +145,7 @@ public final class AsyncParticlesClientNeoForge {
 				.executes(context -> {
 					CommandSourceStack source = context.getSource();
 					try {
-						ConfigHelper.load();
+						AsyncParticlesConfig.load();
 					} catch (Exception e) {
 						source.sendSystemMessage(Component.literal("Failed to reload config"));
 						return 1;

@@ -38,16 +38,30 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 	private final IParticleRenderer renderer;
 	private final QuadParticleGroup particleGroup;
 	private float partialTick;
-	private final Reference2BooleanMap<PreparedBuffers> translucentMap = new Reference2BooleanArrayMap<>(2);
 
 	public GpuQuadParticleRenderState(QuadParticleGroup particleGroup) {
 		this.particleGroup = particleGroup;
 		this.renderer = GpuParticleBehavior.getInstance().createRenderer();
 	}
 
-	@Override
-	public boolean isEmpty() {
-		return particleGroup.isEmpty();
+	public PreparedBuffers prepare(final ParticleFeatureRenderer.@NonNull ParticleBufferCache cachedBuffer,
+	                               final boolean translucent) {
+		if (isEmpty()) {
+			return null;
+		}
+		Collection<SingleQuadParticle.Layer> layers = renderer.getComputeLayers();
+		Map<SingleQuadParticle.Layer, PreparedLayer> preparedLayers = new Reference2ReferenceOpenHashMap<>(layers.size());
+		for (SingleQuadParticle.Layer layer : layers) {
+			if (layer.translucent() == translucent){
+				preparedLayers.put(layer, null);
+			}
+		}
+		if (preparedLayers.isEmpty()) {
+			return null;
+		}
+		GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
+			.writeTransform(RenderSystem.getModelViewMatrix(), new Vector4f(1.0F, 1.0F, 1.0F, 1.0F), new Vector3f(), new Matrix4f());
+		return new PreparedBuffers(translucent ? 1 : 10, dynamicTransforms, preparedLayers);
 	}
 
 	@Override
@@ -60,7 +74,7 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 		if (renderer.isShouldSkip()) {
 			return;
 		}
- 		ComputeResult results = renderer.compute(Minecraft.getInstance().gameRenderer.getMainCamera(), partialTick);
+		ComputeResult results = renderer.compute(Minecraft.getInstance().gameRenderer.getMainCamera(), partialTick);
 		renderPass.setVertexBuffer(0, results.buffer());
 		RenderSystem.AutoStorageIndexBuffer indexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
 		renderPass.setIndexBuffer(indexBuffer.getBuffer(results.totalIndexCount()), indexBuffer.type());
@@ -75,7 +89,7 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 			if (!layers.containsKey(layer)) {
 				continue;
 			}
-			renderPass.setPipeline(GpuParticlePipelines.of(layer.pipeline(), () -> translucentMap.getBoolean(preparedBuffers)));
+			renderPass.setPipeline(GpuParticlePipelines.of(layer.pipeline(), () -> preparedBuffers.indexCount() == 1));
 			AbstractTexture texture = textureManager.getTexture(layer.textureAtlasLocation());
 			renderPass.bindTexture("Sampler0", texture.getTextureView(), texture.getSampler());
 
@@ -87,10 +101,6 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 		}
 	}
 
-	public void mapBuffers(Supplier<Set<SingleQuadParticle.Layer>> potentialLayerSupplier) {
-		renderer.mapBuffer(potentialLayerSupplier);
-	}
-
 	public void tickRenderers(Vec3 camPos, Queue<SingleQuadParticle> particles) {
 		Map<SingleQuadParticle.Layer, Queue<SingleQuadParticle>> particleMap = new Reference2ReferenceOpenHashMap<>();
 		int size = (int) (particles.size() * 0.5);
@@ -98,6 +108,15 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 			particleMap.computeIfAbsent(sqp.getLayer(), _ -> ParticleHelper.newParticleQueue(size)).add(sqp);
 		}
 		renderer.tick(camPos, particleMap);
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return particleGroup.isEmpty();
+	}
+
+	public void mapBuffers(Supplier<Set<SingleQuadParticle.Layer>> potentialLayerSupplier) {
+		renderer.mapBuffer(potentialLayerSupplier);
 	}
 
 	public void unmapBuffersAndSwap(Vec3 prevGpuCamPos) {
@@ -141,31 +160,11 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 		throw new UnsupportedOperationException();
 	}
 
-	public PreparedBuffers prepare(final ParticleFeatureRenderer.@NonNull ParticleBufferCache cachedBuffer,
-	                               final boolean translucent) {
-		if (isEmpty()) {
-			return null;
-		}
-		GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
-			.writeTransform(RenderSystem.getModelViewMatrix(), new Vector4f(1.0F, 1.0F, 1.0F, 1.0F), new Vector3f(), new Matrix4f());
-		Collection<SingleQuadParticle.Layer> layers = renderer.getComputeLayers();
-		Map<SingleQuadParticle.Layer, PreparedLayer> preparedLayers = new Reference2ReferenceOpenHashMap<>(layers.size());
-		for (SingleQuadParticle.Layer layer : layers) {
-			if (layer.translucent() == translucent){
-				preparedLayers.put(layer, null);
-			}
-		}
-		PreparedBuffers preparedBuffers = new PreparedBuffers(0, dynamicTransforms, preparedLayers);
-		this.translucentMap.put(preparedBuffers, translucent);
-		return preparedBuffers;
-	}
-
 	@Override
 	public void submit(final @NonNull SubmitNodeCollector submitNodeCollector, final @NonNull CameraRenderState camera) {
 		if (!isEmpty()) {
 			submitNodeCollector.submitParticleGroup(this);
 		}
-		translucentMap.clear();
 	}
 
 	public void reload() {

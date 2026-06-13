@@ -64,19 +64,21 @@ public class ParticleRenderer implements IParticleRenderer {
 			GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_HINT_CLIENT_STORAGE,
 			1L // minimal; resized in resize()
 		);
+
 		int handle = ((GlBuffer) targetMoj).handle;
 		GL15C.glDeleteBuffers(handle);
 		GlBuffer.MEMORY_POOl.free(handle);
 		((GlBuffer) targetMoj).handle = target.vbo;
 		GlBuffer.MEMORY_POOl.malloc(target.vbo, target.getSize());
 
+		resize(AsyncParticlesConfig.DEFAULT_PARTICLE_LIMIT); // this.particleLimit = particleLimit;
+
 		tf = GLCaps.tfSupport.genTransformFeedback();
 		if (tf > 0) {
 			GLCaps.tfSupport.glBindTransformFeedback(tf);
-			GLCaps.tfSupport.glBindTransformFeedbackBuffer(tf, 0, target.vbo);
+			GLCaps.tfSupport.glBindTransformFeedbackBufferBase(tf, 0, target.vbo);
 			GLCaps.tfSupport.glBindTransformFeedback(0);
 		}
-		resize(AsyncParticlesConfig.DEFAULT_PARTICLE_LIMIT); // this.particleLimit = particleLimit;
 	}
 
 	@Override
@@ -280,7 +282,7 @@ public class ParticleRenderer implements IParticleRenderer {
 		sources[processingIndex ^ 1].bind();
 
 		if (tf <= 0) {
-			GLCaps.tfSupport.glBindTransformFeedbackBuffer(0, 0, target.vbo);
+			GLCaps.tfSupport.glBindTransformFeedbackBufferBase(0, 0, target.vbo);
 		}
 
 		GL11C.glEnable(GL30C.GL_RASTERIZER_DISCARD);

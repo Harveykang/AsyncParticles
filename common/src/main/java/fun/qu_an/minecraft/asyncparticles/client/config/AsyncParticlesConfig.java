@@ -49,21 +49,19 @@ public class AsyncParticlesConfig {
 	public static boolean particle$parallelQueueEviction;
 	public static boolean particle$particleLightCache;
 	public static boolean particle$cullUnderwaterParticleType;
-	public static TickMode tick$animationTickMode;
-	public static TickMode tick$particleTickMode;
+	public static boolean tick$asyncAnimateTick;
+	public static ParticleAsyncMode tick$particleAsyncMode;
 	public static boolean tick$tickWeatherAsync;
 	public static boolean tick$deferredTextureTick;
 	public static int tick$failPerSecLimit;
-	public static FailBehavior tick$failBehavior;
+//	public static FailBehavior tick$failBehavior;
 	public static boolean tick$suppressCME;
 	public static Set<String> tick$syncParticleClasses = new LinkedHashSet<>();
 	public static RenderingMode rendering$particleRenderingMode;
 	public static boolean rendering$gpuAcceleration;
 	public static boolean rendering$appendNewParticlesToRenderer;
-	public static ParticleCullingMode rendering$particleCulling;
-	public static boolean rendering$cullWeathers;
 	public static int rendering$failPerSecLimit;
-	public static FailBehavior rendering$failBehavior;
+//	public static FailBehavior rendering$failBehavior;
 	public static Set<String> rendering$syncParticleClasses = new LinkedHashSet<>();
 	public static RainEffect valkyrienSkies$rainEffect;
 	public static boolean valkyrienSkies$fixParticleLights;
@@ -223,6 +221,12 @@ public class AsyncParticlesConfig {
 		}
 	}
 
+	static ConfigObj getCurrentConfig() {
+		ConfigObj configObj = new ConfigObj();
+		configObj.fold();
+		return configObj;
+	}
+
 	static class ConfigObj {
 		int version = 0; // 0 means no version, will reset to default values.
 		Particle particle = new Particle();
@@ -231,7 +235,7 @@ public class AsyncParticlesConfig {
 		ValkyrienSkies valkyrienSkies = new ValkyrienSkies();
 		Create create = new Create();
 
-		private void flat() {
+		void flat() {
 			particle.flat();
 			tick.flat();
 			rendering.flat();
@@ -239,7 +243,7 @@ public class AsyncParticlesConfig {
 			create.flat();
 		}
 
-		private void fold() {
+		void fold() {
 			particle.fold();
 			tick.fold();
 			rendering.fold();
@@ -275,8 +279,8 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Tick {
-			TickMode animationTickMode = TickMode.INTERRUPTIBLE;
-			TickMode particleTickMode = TickMode.INTERRUPTIBLE;
+			boolean animationTickMode = true;
+			ParticleAsyncMode particleAsyncMode = ParticleAsyncMode.SEQUENTIAL;
 			boolean tickWeatherAsync = true;
 			boolean deferredTextureTick = !ModListHelper.AXIOM_LOADED;
 			int failPerSecLimit = 5;
@@ -287,36 +291,34 @@ public class AsyncParticlesConfig {
 			}
 
 			private void flat() {
-				tick$animationTickMode = requireNonNullElse(animationTickMode, TickMode.INTERRUPTIBLE);
-				tick$particleTickMode = requireNonNullElse(particleTickMode, TickMode.INTERRUPTIBLE);
+				tick$asyncAnimateTick = animationTickMode;
+				tick$particleAsyncMode = requireNonNullElse(particleAsyncMode, ParticleAsyncMode.SEQUENTIAL);
 				tick$tickWeatherAsync = tickWeatherAsync;
 				tick$deferredTextureTick = deferredTextureTick && !ModListHelper.AXIOM_LOADED;
 				tick$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
-				tick$failBehavior = requireNonNullElse(failBehavior, FailBehavior.RAISE_CRASH);
+//				tick$failBehavior = requireNonNullElse(failBehavior, FailBehavior.RAISE_CRASH);
 				tick$suppressCME = suppressCME;
 				tick$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
 			}
 
 			private void fold() {
-				animationTickMode = tick$animationTickMode;
-				particleTickMode = tick$particleTickMode;
+				animationTickMode = tick$asyncAnimateTick;
+				particleAsyncMode = tick$particleAsyncMode;
 				tickWeatherAsync = tick$tickWeatherAsync;
 				deferredTextureTick = tick$deferredTextureTick;
 				failPerSecLimit = tick$failPerSecLimit;
-				failBehavior = tick$failBehavior;
+//				failBehavior = tick$failBehavior;
 				suppressCME = tick$suppressCME;
 				syncParticleClasses = new LinkedHashSet<>(tick$syncParticleClasses);
 			}
 		}
 
 		static class Rendering {
-			ParticleCullingMode particleCulling = ParticleCullingMode.SPHERE;
 			RenderingMode particleRenderingMode = RenderingMode.SYNCHRONOUSLY;
 			boolean gpuAcceleration = GLCaps.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
-			boolean cullWeathers = true;
 			int failPerSecLimit = 20;
-			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
+//			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
 			Set<String> syncParticleClasses = new LinkedHashSet<>();
 			{
 				syncParticleClasses.add("com.lootbeams.VFXParticle");
@@ -332,24 +334,20 @@ public class AsyncParticlesConfig {
 			}
 
 			private void flat() {
-				rendering$particleCulling = requireNonNullElse(particleCulling, ParticleCullingMode.SPHERE);
 				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
 				rendering$gpuAcceleration = gpuAcceleration && GLCaps.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
-				rendering$cullWeathers = cullWeathers;
 				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
-				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
+//				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
 				rendering$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
 			}
 
 			private void fold() {
-				particleCulling = rendering$particleCulling;
 				particleRenderingMode = rendering$particleRenderingMode;
 				gpuAcceleration = rendering$gpuAcceleration;
 				appendNewParticlesToRenderer = rendering$appendNewParticlesToRenderer;
-				cullWeathers = rendering$cullWeathers;
 				failPerSecLimit = rendering$failPerSecLimit;
-				failBehavior = rendering$failBehavior;
+//				failBehavior = rendering$failBehavior;
 				syncParticleClasses = new LinkedHashSet<>(rendering$syncParticleClasses);
 			}
 		}

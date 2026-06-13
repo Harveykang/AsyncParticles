@@ -12,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.MAKE_BUBBLES_POP_LOADED;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.LOGGER;
 
 public class AsyncParticlesMixinConfig {
@@ -102,8 +102,7 @@ public class AsyncParticlesMixinConfig {
 
 	static class MixinConfigObj {
 		private int version = 0;
-		private boolean particle$splitTick = false;
-		private boolean safeClassInstanceMultiMap = MAKE_BUBBLES_POP_LOADED;
+		private boolean safeClassInstanceMultiMap = MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED;
 		private boolean safeBlockEntityMap = false;
 		private boolean safeLegacyRandomSource = false;
 
@@ -161,7 +160,6 @@ public class AsyncParticlesMixinConfig {
 
 		private void fold() {
 			assertNotGlobal();
-			particle$splitTick = toSaveConfig.particle$splitTick;
 			safeClassInstanceMultiMap = toSaveConfig.safeClassInstanceMultiMap;
 			safeBlockEntityMap = toSaveConfig.safeBlockEntityMap;
 			safeLegacyRandomSource = toSaveConfig.safeLegacyRandomSource;
@@ -180,8 +178,7 @@ public class AsyncParticlesMixinConfig {
 			} catch (NumberFormatException ignored) {
 			}
 			MixinConfigObj defaultConfig = new MixinConfigObj();
-			particle$splitTick = getBoolean(properties, "particle$splitTick", defaultConfig.particle$splitTick);
-			safeClassInstanceMultiMap = MAKE_BUBBLES_POP_LOADED ||
+			safeClassInstanceMultiMap = MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED ||
 				getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
 			safeBlockEntityMap = getBoolean(properties, "safeBlockEntityMap", defaultConfig.safeBlockEntityMap);
 			safeLegacyRandomSource = getBoolean(properties, "safeLegacyRandomSource", defaultConfig.safeLegacyRandomSource);
@@ -197,7 +194,6 @@ public class AsyncParticlesMixinConfig {
 
 		private void write(Properties properties) {
 			properties.setProperty("version", Integer.toString(version));
-			properties.setProperty("particle$splitTick", Boolean.toString(particle$splitTick));
 			properties.setProperty("safeClassInstanceMultiMap", Boolean.toString(safeClassInstanceMultiMap));
 			properties.setProperty("safeBlockEntityMap", Boolean.toString(safeBlockEntityMap));
 			properties.setProperty("safeLegacyRandomSource", Boolean.toString(safeLegacyRandomSource));
@@ -324,15 +320,6 @@ public class AsyncParticlesMixinConfig {
 		public void setModifyTheFromParticleMethod(Set<String> modifyTheFromParticleMethod) {
 			assertNotGlobal();
 			this.modifyTheFromParticleMethod = modifyTheFromParticleMethod;
-		}
-
-		public boolean isParticleSplitTick() {
-			return particle$splitTick;
-		}
-
-		public void setParticleSplitTick(boolean splitTick) {
-			assertNotGlobal();
-			this.particle$splitTick = splitTick;
 		}
 	}
 }

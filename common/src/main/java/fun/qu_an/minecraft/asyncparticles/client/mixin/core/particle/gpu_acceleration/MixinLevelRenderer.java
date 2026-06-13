@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.gpu_acceleration;
 
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -13,7 +14,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinLevelRenderer {
 	@Inject(method = "extractLevel", at = @At("HEAD"))
 	private void extractLevel(DeltaTracker deltaTracker, Camera camera, float deltaPartialTick, CallbackInfo ci) {
-		GpuParticleBehavior.getInstance().beginFrame();
-		GpuParticleBehavior.getInstance().setPartialTick(deltaPartialTick);
+		if (ConfigHelper.isGpuParticles()){
+			GpuParticleBehavior.getInstance().beginFrame();
+			GpuParticleBehavior.getInstance().setPartialTick(deltaPartialTick);
+		}
 	}
 }

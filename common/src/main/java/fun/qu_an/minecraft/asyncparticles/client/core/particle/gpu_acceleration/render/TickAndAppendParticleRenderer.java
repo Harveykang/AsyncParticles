@@ -9,6 +9,7 @@ import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.buffer.ParticleVertexBuffer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.shader.ParticleTransformFeedbackShader;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
@@ -57,12 +58,14 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 	protected final ParticleVertexBuffer target;
 	protected final GpuBuffer targetMoj;
 	protected final int tf;
+	protected int[] multiDrawFirst;
+	protected int[] multiDrawCount;
 
 	protected boolean shouldSkip = true;
-
+	private boolean computed = false;
 	private ComputeResult computeResult;
 
-	public TickAndAppendParticleRenderer() {
+	public TickAndAppendParticleRenderer(int particleLimit) {
 		sources[0] = new ParticleVertexBuffer(true);
 		GpuParticlePipelines.bindAttr(RAW_PARTICLE, sources[0]);
 		sources[1] = new ParticleVertexBuffer(true);
@@ -74,6 +77,7 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 			GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_HINT_CLIENT_STORAGE,
 			1L // minimal; resized in resize()
 		);
+
 		int handle = ((GlBuffer) targetMoj).handle;
 		GL15C.glDeleteBuffers(handle);
 		GlBuffer.MEMORY_POOl.free(handle);
@@ -83,14 +87,16 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 		tf = GLCaps.tfSupport.genTransformFeedback();
 		if (tf > 0) {
 			GLCaps.tfSupport.glBindTransformFeedback(tf);
-			GLCaps.tfSupport.glBindTransformFeedbackBuffer(tf, 0, target.vbo);
+			GLCaps.tfSupport.glBindTransformFeedbackBuffer(target.vbo);
 			GLCaps.tfSupport.glBindTransformFeedback(0);
 		}
-		resize(AsyncParticlesConfig.DEFAULT_PARTICLE_LIMIT);
+
+		resize(Math.max(particleLimit, AsyncParticlesConfig.MIN_PARTICLE_LIMIT));
 	}
 
 	@Override
 	public void beginFrame() {
+		computed = false;
 		computeResult = null;
 	}
 
@@ -160,6 +166,9 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 			long address = stack.nmalloc(vertexSize);
 			for (Map.Entry<SingleQuadParticle.Layer, List<SingleQuadParticle>> entry : layerMap.entrySet()) {
 				List<SingleQuadParticle> list = entry.getValue();
+				if (list.isEmpty()) {
+					throw new AssertionError();
+				}
 				LayerBatch batch = null;
 				for (LayerBatch b : batches) {
 					if (b.layer == entry.getKey()) {
@@ -294,7 +303,7 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 			for (Map.Entry<SingleQuadParticle.Layer, Queue<SingleQuadParticle>> entry : particles.entrySet()) {
 				Queue<SingleQuadParticle> queue = entry.getValue();
 				if (queue.size() > particleLimit) {
-					throw new IllegalStateException("Particle limit exceeded!");
+					throw new IllegalStateException("Particle limit exceeded! particle limit: " + particleLimit + ", queue size: " + queue.size());
 				}
 
 				int layerTick = 0;
@@ -384,7 +393,7 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public ComputeResult compute(Camera camera, float partialTicks) {
-		if (computeResult != null) {
+		if (computed) {
 			return computeResult;
 		}
 		if (shouldSkip) {
@@ -405,64 +414,69 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 			(float) (camPositions[usingIdx].y - camera.position().y),
 			(float) (camPositions[usingIdx].z - camera.position().z));
 
-		int processedVertexSize = GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
-
 		// Resize target to fit actual particle count
-		int needSize = (particleLimit + appendCount) * 4 * processedVertexSize;
+		int needSize = 4 * (tickCount[usingIdx] + appendCount) * GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
 		if (needSize > target.getSize()) {
 			resizeTarget(needSize);
 		}
 
 		sources[usingIdx].bind();
 		if (tf <= 0) {
-			GLCaps.tfSupport.glBindTransformFeedbackBuffer(0, 0, target.vbo);
+			GLCaps.tfSupport.glBindTransformFeedbackBuffer(target.vbo);
 		}
+		GLCaps.tfSupport.glBindTransformFeedbackBufferRange(tf,
+			0,
+			target.vbo,
+			0L,
+			needSize);
+
 		GL11C.glEnable(GL30C.GL_RASTERIZER_DISCARD);
+		GLCaps.tfSupport.glBeginTransformFeedback(GL11C.GL_POINTS);
 
-		List<LayerBatch> batches = layerBatches[usingIdx];
-		ComputeResult.ParticleSlice[] slices = new ComputeResult.ParticleSlice[batches.size()];
-		int baseCount = 0;
-		for (int i = 0, batchesSize = batches.size(); i < batchesSize; i++) {
-			LayerBatch batch = batches.get(i);
-			int tc = batch.tickCount;
-			int ac = batch.appendCount;
-			int layerCount = tc + ac;
-			if (layerCount <= 0) {
-				continue;
-			}
-
-			GLCaps.tfSupport.glBindTransformFeedbackBufferRange(
-				Math.max(tf, 0), 0, target.vbo,
-				(long) baseCount * 4 * processedVertexSize,
-				(long) layerCount * 4 * processedVertexSize);
-
-			GLCaps.tfSupport.glBeginTransformFeedback(GL11C.GL_POINTS);
-
-			if (ac <= 0) {
-				GL11C.glDrawArrays(GL11C.GL_POINTS, batch.tickOffset, tc);
-			} else if (tc <= 0) {
-				GL11C.glDrawArrays(GL11C.GL_POINTS, particleLimit + batch.appendOffset, ac);
-			} else {
-				multiDrawFirst[0] = batch.tickOffset;
-				multiDrawCount[0] = tc;
-				multiDrawFirst[1] = particleLimit + batch.appendOffset;
-				multiDrawCount[1] = ac;
-				GL14C.glMultiDrawArrays(GL11C.GL_POINTS,
-					multiDrawFirst, multiDrawCount);
-			}
-
-			GLCaps.tfSupport.glEndTransformFeedback();
-
-			slices[i] = new ComputeResult.ParticleSlice(batch.layer, baseCount, layerCount);
-			baseCount += layerCount;
+		if (computeResult == null) {
+			buildDrawStuffs(layerBatches[usingIdx]);
 		}
+		GL14C.glMultiDrawArrays(GL11C.GL_POINTS, multiDrawFirst, multiDrawCount);
 
+		GLCaps.tfSupport.glEndTransformFeedback();
 		GL11C.glDisable(GL30C.GL_RASTERIZER_DISCARD);
 		ParticleVertexBuffer.unbind();
 
-		if (tf > 0) GLCaps.tfSupport.glBindTransformFeedback(0);
+		if (tf > 0) {
+			GLCaps.tfSupport.glBindTransformFeedback(0);
+		} else {
+			GLCaps.tfSupport.glBindTransformFeedbackBuffer(0);
+		}
 
-		return computeResult = new ComputeResult(targetMoj, baseCount, slices);
+		computed = true;
+		return computeResult;
+	}
+
+	private void buildDrawStuffs(List<LayerBatch> layerBatch) {
+		int size = layerBatch.size();
+		ComputeResult.ParticleSlice[] slices = new ComputeResult.ParticleSlice[size];
+		IntArrayList first = new IntArrayList(size * 2);
+		IntArrayList count = new IntArrayList(size * 2);
+		int baseCount = 0;
+		for (int i = 0, layerBatchSize = layerBatch.size(); i < layerBatchSize; i++) {
+			LayerBatch batch = layerBatch.get(i);
+			int appendCount = batch.appendCount;
+			int tickCount = batch.tickCount;
+			if (tickCount > 0) {
+				first.add(batch.tickOffset);
+				count.add(tickCount);
+			}
+			if (appendCount > 0) {
+				first.add(particleLimit + batch.appendOffset);
+				count.add(appendCount);
+			}
+			int batchCount = tickCount + appendCount;
+			slices[i] = new ComputeResult.ParticleSlice(batch.layer, baseCount, batchCount);
+			baseCount += batchCount;
+		}
+		multiDrawFirst = first.toIntArray();
+		multiDrawCount = count.toIntArray();
+		computeResult = new ComputeResult(targetMoj, baseCount, slices);
 	}
 
 	@Override
@@ -484,8 +498,7 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 		this.particleLimit = particleLimit;
 
 		int proceedSize = 4 * particleLimit * GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
-		int size = target.getSize();
-		if (proceedSize >= size * 0.75f || proceedSize < size * 0.33f) {
+		if (proceedSize != target.getSize()) {
 			resizeTarget(proceedSize);
 		}
 	}

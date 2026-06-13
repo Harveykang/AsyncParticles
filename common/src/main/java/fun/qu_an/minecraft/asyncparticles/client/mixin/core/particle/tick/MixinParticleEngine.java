@@ -46,6 +46,9 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	 */
 	@Overwrite
 	public void tick() {
+		if (!AsyncTickBehavior.getInstance().shouldTickParticleEngine()) {
+			return;
+		}
 		if (!this.trackingEmitters.isEmpty()) {
 			List<TrackingEmitter> list = Lists.newArrayList();
 
@@ -81,11 +84,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				} else {
 					ParticleRenderType gpuRenderType = GpuParticleBehavior.getInstance().ofRenderType(renderType);
 					group = this.particles.computeIfAbsent(gpuRenderType, gpuRenderType1 ->
-						GpuParticleBehavior.getInstance().gpuParticles.computeIfAbsent(gpuRenderType1,
-							gpuRenderType2 -> {
-								asyncparticle$addRenderType(gpuRenderType2);
-								return new GpuParticleGroup((ParticleEngine) (Object) this, gpuRenderType2);
-							}));
+						GpuParticleBehavior.getInstance().getOrCreateGroup(this, gpuRenderType1));
 				}
 				group.add(particle);
 			}

@@ -8,6 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.TickParticleRecursiveAction;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
@@ -34,6 +35,10 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 	@Shadow
 	@Final
 	protected Queue<? extends Particle> particles;
+	@Unique
+	private int asyncparticles$particleLimit;
+	@Unique
+	private boolean asyncparticles$canRemoveInParallel;
 
 	@Shadow
 	protected abstract void tickParticle(Particle particle);
@@ -64,17 +69,19 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 	 */
 	@Overwrite
 	public void tickParticles() { // TODO move to implementations
+		this.asyncparticles$canRemoveInParallel = true;
 		if (particles.isEmpty()) {
+			return;
+		}
+		if (ThreadUtil.isOnParticleTickerThread() && ConfigHelper.isSplitParticleTick()) {
+			new TickParticleRecursiveAction<>((ParticleGroup<?>) (Object) this, particles.spliterator())
+				.compute();
 			return;
 		}
 		boolean enableLightCache = ConfigHelper.particleLightCache();
 		boolean isOnMainThread = ThreadUtil.isOnMainThread();
 		boolean isGpu = (ParticleGroup<?>) (Object) this instanceof GpuParticleGroup;
-		boolean forceDone = ConfigHelper.forceDoneParticleTick();
 		for (Particle particle : particles) {
-			if (AsyncTickBehavior.getInstance().isCancelled() && !forceDone) {
-				return;
-			}
 			if (!particle.isAlive()) {
 				// This is to be compatible with e.g. Figura mod
 				// Trust JIT
@@ -126,6 +133,9 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 
 	@Override
 	public void asyncparticles$removeDeadParticles() {
+		if (!asyncparticles$canRemoveInParallel) {
+			return;
+		}
 		if (ConfigHelper.isParallelQueueRemoval()) {
 			((IterationSafeEvictingQueue<? extends Particle>) particles)
 				.parallelRemoveIf(particle ->

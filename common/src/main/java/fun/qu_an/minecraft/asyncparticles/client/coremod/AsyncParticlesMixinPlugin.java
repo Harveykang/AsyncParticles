@@ -48,7 +48,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 
 	//	private static final int L = "fun.qu_an.minecraft.asyncparticles.client.mixin.".length();
 	private static final int PACKAGE_LENGTH = AsyncParticlesClient.class.getPackage().getName().length() +
-											  ".mixin.".length();
+		".mixin.".length();
 
 	/// - mixins located in `mixin/fabric` or `mixin/<mod_id>/fabric` package only take effect on fabric.
 	/// - mixins located in `mixin/fabric/<mod_id>` take effect on fabric or Sinytra Connector.
@@ -73,7 +73,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "fabric" -> switch (split[1]) {
 				case "core" -> !IS_FORGE;
 				case "particlerain_3" -> FABRIC_PARTICLERAIN_LOADED &&
-										 versionCheck("particlerain", null, "3.999999");
+					versionCheck("particlerain", null, "3.999999");
 				case "effectual" -> FABRIC_EFFECTUAL_LOADED;
 				case "particular" -> FABRIC_PARTICULAR_LOADED;
 				case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
@@ -82,26 +82,22 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 			};
 			case "core", "off_thread_access" -> true;
-			case "compat" -> {
-				if (split.length == 2) {
-					throw new IllegalArgumentException("Unknown compat mixin: " + mixinClassName);
-				}
-				yield switch (split[1]) {
-					case "modernui" -> MODERN_UI_LOADED;
-					case "sodium" -> SODIUM_LOADED;
-					case "sodium_0_6" -> SODIUM_LOADED && versionCheck("sodium", "0.6", "0.7");
-					case "sodium_0_7" -> SODIUM_LOADED && versionCheck("sodium", "0.6.999999", "0.8");
-					case "sodium_extra" -> SODIUM_EXTRA_LOADED;
-					case "iris_like" -> IRIS_LOADED;
-					case "a_good_place" -> A_GOOD_PLACE_LOADED;
-					case "watut" -> WATUT_LOADED;
-					case "physicsmod" -> PHYSICSMOD_LOADED;
-					case "cloth_config" -> CLOTH_CONFIG_LOADED;
-					case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
-					case "figura" -> FIGURA_LOADED;
-					default -> throw new IllegalStateException("Unknown compat mixin: " + mixinClassName);
-				};
-			}
+			case "compat" -> switch (split[1]) {
+				case "modernui" -> MODERN_UI_LOADED;
+				case "sodium" -> SODIUM_LOADED;
+				case "sodium_0_6" -> SODIUM_LOADED && versionCheck("sodium", "0.6", "0.7");
+				case "sodium_0_7" -> SODIUM_LOADED && versionCheck("sodium", "0.6.999999", "0.8");
+				case "sodium_extra" -> SODIUM_EXTRA_LOADED;
+				case "iris" -> IRIS_LOADED;
+				case "a_good_place" -> A_GOOD_PLACE_LOADED;
+				case "watut" -> WATUT_LOADED;
+				case "physicsmod" -> PHYSICSMOD_LOADED;
+				case "cloth_config" -> CLOTH_CONFIG_LOADED;
+				case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
+				case "figura" -> FIGURA_LOADED;
+				case "cosycritters" -> COSYCRITTERS_LOADED;
+				default -> throw new IllegalStateException("Unknown compat mixin: " + mixinClassName);
+			};
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}

@@ -134,7 +134,7 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 						.executes(context -> {
 							FabricClientCommandSource source = context.getSource();
 							try {
-								ConfigHelper.load();
+								AsyncParticlesConfig.load();
 							} catch (Exception e) {
 								source.sendFeedback(Component.literal("Failed to reload config"));
 								return 1;

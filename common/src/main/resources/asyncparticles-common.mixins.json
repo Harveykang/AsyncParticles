@@ -26,7 +26,6 @@
     "conditional.MixinParticles_LockProvider",
     "conditional.MixinParticles_LockRequired_Extract",
     "conditional.MixinParticles_LockRequired_Tick",
-    "core.MixinARGB",
     "core.MixinParticleEngine",
     "core.MixinRenderSystem",
     "core.MixinTextureManager",
@@ -56,12 +55,13 @@
     "off_thread_access.MixinLevel",
     "off_thread_access.MixinLevelRenderer",
     "off_thread_access.MixinSoundEngine",
-    "off_thread_access.MixinSoundManager"
+    "off_thread_access.MixinSoundManager",
+    "compat.cosycritters.MixinBirdParticle",
+    "core.animate_tick.MixinWaterFluid"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
-    "core.animate_tick.MixinWaterFluid"
   ]
 }

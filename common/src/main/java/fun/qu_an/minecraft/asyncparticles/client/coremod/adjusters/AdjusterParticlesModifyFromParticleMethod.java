@@ -23,6 +23,6 @@ public class AdjusterParticlesModifyFromParticleMethod implements MixinClassAdju
 
 	@Override
 	public String getRefMapperConfig() {
-		return MixinUtil.getRefMapperName(CLASS_NAME,"asyncparticles-common-refmap.json");
+		return null;
 	}
 }

@@ -100,6 +100,8 @@ public class ModListHelper {
 	public static final boolean FIGURA_LOADED = isModLoaded("figura");
 	/* Axiom */
 	public static final boolean AXIOM_LOADED = isModLoaded("axiom");
+	/* CosyCritters */
+	public static final boolean COSYCRITTERS_LOADED = isModLoaded("cosycritters");
 
 	private static boolean isForge() {
 		return PLATFORM.isForge();

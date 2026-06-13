@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 
-public final class TaskManager {
+public final class TaskHelper {
 	private final ForkJoinPool executor;
 	private final List<Runnable> tasks = new ArrayList<>();
 	private final List<ForkJoinTask<?>> futures = new ArrayList<>();
 	private final Consumer<Exception> exceptionHandler;
 
-	public TaskManager(ForkJoinPool executor, Consumer<Exception> exceptionHandler) {
+	public TaskHelper(ForkJoinPool executor, Consumer<Exception> exceptionHandler) {
 		this.executor = executor;
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -27,6 +27,9 @@ public final class TaskManager {
 	}
 
 	public void submitAllSequentially() {
+		if (tasks.isEmpty()) {
+			return;
+		}
 		Runnable[] tasksArray = tasks.toArray(Runnable[]::new);
 		tasks.clear();
 		futures.add(executor.submit(() -> {
@@ -36,11 +39,24 @@ public final class TaskManager {
 		}));
 	}
 
+	public void submitAll() {
+		if (tasks.isEmpty()) {
+			return;
+		}
+		for (Runnable runnable : tasks) {
+			futures.add(executor.submit(runnable));
+		}
+		tasks.clear();
+	}
+
 	public void waitForCompletion() {
 		waitForCompletion(exceptionHandler);
 	}
 
 	public void waitForCompletion(Consumer<Exception> exceptionHandler) {
+		if (futures.isEmpty()) {
+			return;
+		}
 		for (ForkJoinTask<?> task : futures) {
 			try {
 				task.get();
@@ -60,6 +76,9 @@ public final class TaskManager {
 	}
 
 	public void runAllTasks() {
+		if (tasks.isEmpty()) {
+			return;
+		}
 		tasks.forEach(Runnable::run);
 		tasks.clear();
 	}

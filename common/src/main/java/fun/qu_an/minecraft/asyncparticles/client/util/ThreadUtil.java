@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.async_extract.AsyncRendererThread;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickerThread;
 import net.minecraft.client.Minecraft;
 
@@ -38,11 +37,11 @@ public class ThreadUtil {
 
 	public static boolean isOnParticleThread() {
 		Class<? extends Thread> tClass = Thread.currentThread().getClass();
-		return tClass == AsyncRendererThread.class || tClass == AsyncTickerThread.class;
+		return tClass == AsyncTickerThread.class;
 	}
 
 	public static boolean isOnParticleRendererThread() {
-		return Thread.currentThread().getClass() == AsyncRendererThread.class;
+		return false;
 	}
 
 	public static boolean isOnParticleTickerThread() {

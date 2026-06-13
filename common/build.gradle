@@ -64,6 +64,9 @@ dependencies {
 //
 //    /* Figura */
 //    compileOnly "maven.modrinth:figura:0.1.5b+1.21.4" // TODO 1.21.4 version
+
+    /* Cosy Critters */
+    compileOnly "maven.modrinth:cosy-critters:v0.3.2+26.1-fabric"
 }
 
 jar {

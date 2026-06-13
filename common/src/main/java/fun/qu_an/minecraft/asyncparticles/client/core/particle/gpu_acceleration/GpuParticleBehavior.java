@@ -1,9 +1,11 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.TickAndAppendParticleRenderer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -191,7 +193,7 @@ public class GpuParticleBehavior {
 	}
 
 	public IParticleRenderer createRenderer() {
-		if (GLCaps.tfSupport.isSupported()) return new TickAndAppendParticleRenderer();
+		if (GLCaps.tfSupport.isSupported()) return new TickAndAppendParticleRenderer(ConfigHelper.getParticleLimit());
 //		if (GLCaps.tfSupport.isSupported()) return new ParticleMultiRenderer();
 //		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer();
 		throw new IllegalStateException("No compatible particle renderer found");
@@ -200,5 +202,13 @@ public class GpuParticleBehavior {
 	public void onClearParticles() {
 		gpuParticles.values().forEach(GpuParticleGroup::asyncparticles$clear);
 		gpuParticles.values().forEach(GpuParticleGroup::reload);
+	}
+
+	public ParticleGroup<?> getOrCreateGroup(ParticleEngineAddon particleEngine, ParticleRenderType gpuRenderType1) {
+		return gpuParticles.computeIfAbsent(gpuRenderType1,
+			gpuRenderType2 -> {
+				particleEngine.asyncparticle$addRenderType(gpuRenderType2);
+				return new GpuParticleGroup((ParticleEngine) particleEngine, gpuRenderType2);
+			});
 	}
 }

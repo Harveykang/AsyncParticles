@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import java.io.IOException;
 import java.util.*;
 
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.COSYCRITTERS_LOADED;
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.MAKE_BUBBLES_POP_LOADED;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.MixinConfigObj;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.getToSaveConfig;
@@ -23,25 +24,15 @@ public class ClothConfigMixinMenus {
 										 ConfigEntryBuilder revertEntryBuilder) {
 		MixinConfigObj defaultConfig = new MixinConfigObj();
 		MixinConfigObj newConfig = new MixinConfigObj();
-		MixinConfigObj lastConfig = getToSaveConfig();
-		mixinCategory.addEntry(entryBuilder
-			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.particle.splitTick"),
-				lastConfig.isParticleSplitTick())
-			.setDefaultValue(defaultConfig.isParticleSplitTick())
-			.setSaveConsumer(newConfig::setParticleSplitTick)
-			.setTooltip(
-				Component.translatable("text.cloth-config.restart_required")
-					.withStyle(ChatFormatting.DARK_RED),
-				Component.translatable("config.asyncparticles.mixin.particle.splitTick.tooltip"))
-			.requireRestart()
-			.build());
+		MixinConfigObj oldConfig = getToSaveConfig();
 		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap"),
-				lastConfig.isSafeClassInstanceMultiMap())
+				oldConfig.isSafeClassInstanceMultiMap())
 			.setDefaultValue(defaultConfig.isSafeClassInstanceMultiMap())
 			.setSaveConsumer(newConfig::setSafeClassInstanceMultiMap)
 			.setTooltipSupplier(() -> {
-				if (!MAKE_BUBBLES_POP_LOADED) {
+				if (!MAKE_BUBBLES_POP_LOADED
+					&& !COSYCRITTERS_LOADED) {
 					return Optional.of(new Component[]{
 						Component.translatable("text.cloth-config.restart_required")
 							.withStyle(ChatFormatting.DARK_RED),
@@ -57,15 +48,20 @@ public class ClothConfigMixinMenus {
 						list.add(Component.translatable("config.asyncparticles.limited", "Make Bubbles Pop")
 							.withStyle(ChatFormatting.DARK_RED));
 					}
+					if (COSYCRITTERS_LOADED) {
+						list.add(Component.translatable("config.asyncparticles.limited", "Cosy Critters")
+							.withStyle(ChatFormatting.DARK_RED));
+					}
 					return Optional.of(list.toArray(new Component[0]));
 				}
 			})
 			.requireRestart()
-			.setRequirement(() -> !MAKE_BUBBLES_POP_LOADED)
+			.setRequirement(() -> !MAKE_BUBBLES_POP_LOADED
+				&& !COSYCRITTERS_LOADED)
 			.build());
 		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap"),
-				lastConfig.isSafeBlockEntityMap())
+				oldConfig.isSafeBlockEntityMap())
 			.setDefaultValue(defaultConfig.isSafeBlockEntityMap())
 			.setSaveConsumer(newConfig::setSafeBlockEntityMap)
 			.setTooltip(
@@ -74,7 +70,7 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap.tooltip"))
 			.requireRestart()
 			.build());
-		List<String> lastNoLightCache = List.copyOf(lastConfig.getNoLightCache());
+		List<String> lastNoLightCache = List.copyOf(oldConfig.getNoLightCache());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noLightCache"),
 				lastNoLightCache)
@@ -91,7 +87,7 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
 			.build()));
-		List<String> lastLockProvider = List.copyOf(lastConfig.getLockProvider());
+		List<String> lastLockProvider = List.copyOf(oldConfig.getLockProvider());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockProvider"), lastLockProvider)
 			.setDefaultValue(lastLockProvider)
@@ -107,7 +103,7 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
 			.build()));
-		List<String> lastLockRequired = List.copyOf(lastConfig.getLockRequired());
+		List<String> lastLockRequired = List.copyOf(oldConfig.getLockRequired());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockRequired"), lastLockRequired)
 			.setDefaultValue(lastLockRequired)
@@ -123,7 +119,7 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
 			.build()));
-		List<String> lastReplaceRandom = List.copyOf(lastConfig.getReplaceRandom());
+		List<String> lastReplaceRandom = List.copyOf(oldConfig.getReplaceRandom());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.replaceRandom"), lastReplaceRandom)
 			.setDefaultValue(lastReplaceRandom)
@@ -142,7 +138,7 @@ public class ClothConfigMixinMenus {
 			.build()));
 		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.particle.safeLegacyRandomSource"),
-				lastConfig.isSafeLegacyRandomSource())
+				oldConfig.isSafeLegacyRandomSource())
 			.setDefaultValue(defaultConfig.isSafeLegacyRandomSource())
 			.setSaveConsumer(newConfig::setSafeLegacyRandomSource)
 			.setTooltip(
