@@ -12,12 +12,12 @@
     "compat.cloth_config.AbstractConfigListEntryAccessor",
     "compat.cloth_config.AccessorBaseListEntry",
     "compat.cloth_config.AccessorSubCategoryListEntry",
+    "compat.cosycritters.MixinBirdParticle",
     "compat.sodium.MixinQuadParticleRenderState",
     "compat.sodium_extra.MixinFireworkParticles$Starter",
     "compat.sodium_extra.MixinParticleEngine",
     "conditional.Mixin_ReplaceRandom",
     "conditional.MixinAsyncTick_AsyncTickableParticleGroup",
-    "conditional.MixinAsyncTick_ModifyFromParticleMethod",
     "conditional.MixinAsyncTick_TestAliveBeforeRender",
     "conditional.MixinClassInstanceMultiMap",
     "conditional.MixinLegacyRandomSource",
@@ -31,6 +31,7 @@
     "core.MixinTextureManager",
     "core.MixinWaterFluid",
     "core.animate_tick.MixinClientLevel",
+    "core.animate_tick.MixinWaterFluid",
     "core.deffered_texture_tick.MixinTextureManager",
     "core.particle.MixinParticle",
     "core.particle.MixinParticleEngine",
@@ -44,6 +45,8 @@
     "core.particle.light_cache.MixinParticleEngine",
     "core.particle.light_cache.MixinParticleEngine_FixBlackDestroyParticle",
     "core.particle.light_cache.MixinTerrainParticle_FixBlackDestroyParticle",
+    "core.particle.tick.MixinElderGuardianParticleGroup$ElderGuardianParticleRenderState",
+    "core.particle.tick.MixinItemPickupParticleGroup$ParticleInstance",
     "core.particle.tick.MixinMinecraft",
     "core.particle.tick.MixinParticleEngine",
     "core.particle.tick.MixinParticleGroup",
@@ -55,9 +58,7 @@
     "off_thread_access.MixinLevel",
     "off_thread_access.MixinLevelRenderer",
     "off_thread_access.MixinSoundEngine",
-    "off_thread_access.MixinSoundManager",
-    "compat.cosycritters.MixinBirdParticle",
-    "core.animate_tick.MixinWaterFluid"
+    "off_thread_access.MixinSoundManager"
   ],
   "injectors": {
     "defaultRequire": 1

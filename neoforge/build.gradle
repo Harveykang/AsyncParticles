@@ -52,7 +52,7 @@ dependencies {
 //    localRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
 //
 //    /* Performance */
-    localRuntime "maven.modrinth:spark:1.10.139-neoforge"
+    localRuntime "maven.modrinth:spark:1.10.172-neoforge"
 //    compileOnly 'maven.modrinth:sodium:mc26.1.2-0.8.12-neoforge'
     localRuntime 'maven.modrinth:sodium:mc26.1.2-0.8.12-neoforge'
     localRuntime 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+neoforge'
