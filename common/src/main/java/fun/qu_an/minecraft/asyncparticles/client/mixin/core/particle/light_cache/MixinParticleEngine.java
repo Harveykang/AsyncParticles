@@ -4,6 +4,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.light_cach
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import net.minecraft.client.particle.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,7 +20,12 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
 			// refresh the light cache here since this method can run in other threads.
 			// so it can avoid to slower the main thread.
-			((LightCachedParticleAddon) p).asyncparticles$refresh();
+			Integer i = ParticleHelper.DESTRUCTION_LIGHT_CACHE.get();
+			if (i == null){
+				((LightCachedParticleAddon) p).asyncparticles$refresh();
+			} else {
+				((LightCachedParticleAddon) p).asyncparticles$setLight(i);
+			}
 		}
 	}
 }

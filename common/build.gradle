@@ -27,8 +27,8 @@ dependencies {
     compileOnly 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+fabric'
 //    compileOnly 'maven.modrinth:moreculling:kWU8mVq5' // 1.5.0-beta.2
 //
-//    /* Particle Rain/Pretty Rain */
-//    compileOnly "maven.modrinth:particle-rain:v4-beta.9+1.21.11-fabric"
+//    /* Particle Rain */
+    compileOnly "maven.modrinth:particle-rain:v4-beta.10+26.1-fabric"
 //
 //    /* Effectual */
 //    compileOnly 'maven.modrinth:effectual:1.1.0-1.21.8'
@@ -48,7 +48,7 @@ dependencies {
 ////    compileOnly("me.fallenbreath:conditional-mixin-fabric:0.6.4")
 //
 //    /* A Good Place */
-//    compileOnly "maven.modrinth:a-good-place:kD90q4La" // 1.2.10 // TODO:this is a 1.21.4 version
+    compileOnly "maven.modrinth:a-good-place:EtPUeDP1" // 1.3.7
 //
 //    /* Physics Mod */
 //    compileOnly "maven.modrinth:physicsmod:k8blA2yX" // 3.1.9
@@ -57,13 +57,13 @@ dependencies {
 //    compileOnly "maven.modrinth:subtle-effects:HP8Dccia" // fabric 1.12.0
 //
 //    /* What Are They Up To */
-//    compileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5 // TODO:this is a 1.21.4 version
+//    compileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5
 //
 //    /* Immediately Fast */
-//    compileOnly "maven.modrinth:immediatelyfast:1.9.5+1.21.5-fabric"
+    compileOnly "maven.modrinth:immediatelyfast:1.15.2+26.1.2-fabric"
 //
 //    /* Figura */
-//    compileOnly "maven.modrinth:figura:0.1.5b+1.21.4" // TODO 1.21.4 version
+//    compileOnly "maven.modrinth:figura:0.1.5b+1.21.4"
 
     /* Cosy Critters */
     compileOnly "maven.modrinth:cosy-critters:v0.3.2+26.1-fabric"

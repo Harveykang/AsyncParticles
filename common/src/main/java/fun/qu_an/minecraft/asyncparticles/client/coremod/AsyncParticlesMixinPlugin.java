@@ -92,6 +92,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "watut" -> WATUT_LOADED;
 				case "physicsmod" -> PHYSICSMOD_LOADED;
 				case "cloth_config" -> CLOTH_CONFIG_LOADED;
+				case "particlerain" -> PARTICLERAIN_LOADED;
 				case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
 				case "figura" -> FIGURA_LOADED;
 				case "cosycritters" -> COSYCRITTERS_LOADED;
