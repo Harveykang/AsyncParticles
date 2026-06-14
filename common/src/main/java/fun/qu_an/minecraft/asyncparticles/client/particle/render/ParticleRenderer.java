@@ -57,10 +57,13 @@ public class ParticleRenderer implements IParticleRenderer {
 		RenderSystem.AutoStorageIndexBuffer autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
 		autoStorageIndexBuffer.bind(256);
 		ParticleVertexBuffer.unbind();
+
 		tf = GLCaps.tfSupport.genTransformFeedback();
-		GLCaps.tfSupport.glBindTransformFeedback(tf);
-		GLCaps.tfSupport.glBindTransformFeedbackBuffer(0, target.vbo);
-		GLCaps.tfSupport.glBindTransformFeedback(0);
+		if (tf > 0){
+			GLCaps.tfSupport.glBindTransformFeedback(tf);
+			GLCaps.tfSupport.glBindTransformFeedbackBuffer(target.vbo);
+			GLCaps.tfSupport.glBindTransformFeedback(0);
+		}
 		resize(particleLimit); // this.particleLimit = particleLimit;
 	}
 
@@ -251,7 +254,7 @@ public class ParticleRenderer implements IParticleRenderer {
 		}
 		RenderSystem.assertOnRenderThread();
 		BufferUploader.invalidate();
-		if (tf != -1) {
+		if (tf > 0) {
 			GLCaps.tfSupport.glBindTransformFeedback(tf);
 		}
 		Vector3f cameraLeftVector = camera.getLeftVector();
@@ -274,16 +277,20 @@ public class ParticleRenderer implements IParticleRenderer {
 			(float) (lastCamPos.z - camPos.z));
 //		}
 
-		if (maxParticleCount < particleCount[current ^ 1]) {
-			int nextCount = Math.min(HashCommon.nextPowerOfTwo(particleCount[current ^ 1]), this.particleLimit);
-			target.resize(nextCount * 4 * ParticleVertexFormats.PROCESSED_PARTICLE_VERTEX_BYTES);
-			maxParticleCount = nextCount;
+		int needSize = 4 * particleCount[current ^ 1] * ParticleVertexFormats.PROCESSED_PARTICLE_VERTEX_BYTES;
+		if (needSize > target.getSize()) {
+			target.resize(needSize);
 		}
 		sources[current ^ 1].bind();
 
-		if (tf == -1) {
-			GLCaps.tfSupport.glBindTransformFeedbackBuffer(0, target.vbo);
+		if (tf <= 0) {
+			GLCaps.tfSupport.glBindTransformFeedbackBuffer(target.vbo);
 		}
+		GLCaps.tfSupport.glBindTransformFeedbackBufferRange(tf,
+			0,
+			target.vbo,
+			0L,
+			needSize);
 
 		GL11C.glEnable(GL30C.GL_RASTERIZER_DISCARD);
 
@@ -306,8 +313,10 @@ public class ParticleRenderer implements IParticleRenderer {
 
 		ParticleVertexBuffer.unbind();
 
-		if (tf != -1) {
+		if (tf > 0) {
 			GLCaps.tfSupport.glBindTransformFeedback(0);
+		} else {
+			GLCaps.tfSupport.glBindTransformFeedbackBuffer(0);
 		}
 
 		computed = true;
