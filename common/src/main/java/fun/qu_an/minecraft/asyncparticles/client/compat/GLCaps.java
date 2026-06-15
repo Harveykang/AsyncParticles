@@ -1,10 +1,14 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import org.lwjgl.opengl.*;
+
+import java.util.List;
 
 public class GLCaps {
 	public static final boolean supportsExplicitAttribLocation;
 	public static final boolean supportsDirectStateAccess;
+	public static final boolean supportsARBVertexAttribBinding;
 	public static final TfSupport tfSupport;
 	public static final CsSupport csSupport;
 
@@ -12,14 +16,13 @@ public class GLCaps {
 		GLCapabilities glCaps = GL.getCapabilities();
 		supportsExplicitAttribLocation = glCaps.OpenGL33 ||
 			glCaps.GL_ARB_explicit_attrib_location; // FIXME fix this!!!
-		supportsDirectStateAccess = glCaps.OpenGL45 ||
-			glCaps.GL_ARB_direct_state_access;
+		List<String> enabledExtensions = RenderSystem.getDevice().getEnabledExtensions();
+		supportsDirectStateAccess = enabledExtensions.contains("GL_ARB_direct_state_access");
+		supportsARBVertexAttribBinding = enabledExtensions.contains("GL_ARB_vertex_attrib_binding");
 		if (glCaps.OpenGL45) {
 			tfSupport = new TfSupport.GL_45();
 		} else if (glCaps.OpenGL40) {
 			tfSupport = new TfSupport.GL_40();
-		} else if (glCaps.GL_ARB_transform_feedback3) {
-			tfSupport = new TfSupport.ARB_3();
 		} else if (glCaps.GL_ARB_transform_feedback2) {
 			tfSupport = new TfSupport.ARB_2();
 		} else if (glCaps.OpenGL30) {

@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(RenderSystem.class)
 public class MixinRenderSystem {
-	@Inject(method = "initRenderer", at = @At("HEAD"))
+	@Inject(method = "initRenderer", at = @At("RETURN"))
 	private static void onInitRenderer(GpuDevice device, CallbackInfo ci) {
 		GLCaps.init();
 	}

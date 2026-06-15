@@ -45,11 +45,11 @@ public class ParticleRenderer implements IParticleRenderer {
 
 	// tick: ordered layer batches
 	@SuppressWarnings("unchecked")
-	protected final List<LayerBatch>[] layerBatches = new List[]{new ArrayList<>(), new ArrayList<>()};
+	protected final List<LayerBatch>[] layerBatches = new List[]{new ReferenceArrayList<>(), new ReferenceArrayList<>()};
 	protected final int[] tickCount = new int[2];
 
 	// append: temporarily stored particles
-	protected final List<SingleQuadParticle> pendingAppends = new ArrayList<>();
+	protected final List<SingleQuadParticle> pendingAppends = new ReferenceArrayList<>();
 	protected int appendCount;
 
 	protected final Vec3[] camPositions = {Vec3.ZERO, Vec3.ZERO};

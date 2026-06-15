@@ -6,6 +6,7 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
+import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.buffer.ParticleVertexBuffer;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -81,19 +82,35 @@ public class GpuParticlePipelines {
 
 	public static void bindAttr(VertexFormat format, ParticleVertexBuffer buffer) {
 		buffer.bind();
-		List<VertexFormatElement> elements = format.getElements();
-		for (int i = 0, offset = 0; i < elements.size(); i++) {
-			VertexFormatElement element = elements.get(i);
-			GlStateManager._enableVertexAttribArray(i);
-			if (!element.normalized() && element.type() != VertexFormatElement.Type.FLOAT) {
-				ARBVertexAttribBinding.glVertexAttribIFormat(i, element.count(), GlConst.toGl(element.type()), offset);
-			} else {
-				ARBVertexAttribBinding.glVertexAttribFormat(i, element.count(), GlConst.toGl(element.type()), element.normalized(), offset);
+		if (GLCaps.supportsARBVertexAttribBinding) {
+			List<VertexFormatElement> elements = format.getElements();
+			for (int i = 0, offset = 0; i < elements.size(); i++) {
+				VertexFormatElement element = elements.get(i);
+				GlStateManager._enableVertexAttribArray(i);
+				if (!element.normalized() && element.type() != VertexFormatElement.Type.FLOAT) {
+					ARBVertexAttribBinding.glVertexAttribIFormat(i, element.count(), GlConst.toGl(element.type()), offset);
+				} else {
+					ARBVertexAttribBinding.glVertexAttribFormat(i, element.count(), GlConst.toGl(element.type()), element.normalized(), offset);
+				}
+				ARBVertexAttribBinding.glVertexAttribBinding(i, 0);
+				offset += element.byteSize();
 			}
-			ARBVertexAttribBinding.glVertexAttribBinding(i, 0);
-			offset += element.byteSize();
+			ARBVertexAttribBinding.glBindVertexBuffer(0, buffer.vbo, 0L, format.getVertexSize());
+		} else {
+			int vertexSize = format.getVertexSize();
+			List<VertexFormatElement> elements = format.getElements();
+			for (int i = 0, offset = 0; i < elements.size(); i++) {
+				VertexFormatElement element = elements.get(i);
+				GlStateManager._enableVertexAttribArray(i);
+
+				if (!element.normalized() && element.type() != VertexFormatElement.Type.FLOAT) {
+					GlStateManager._vertexAttribIPointer(i, element.count(), GlConst.toGl(element.type()), vertexSize, offset);
+				} else {
+					GlStateManager._vertexAttribPointer(i, element.count(), GlConst.toGl(element.type()), element.normalized(), vertexSize, offset);
+				}
+				offset += element.byteSize();
+			}
 		}
-		ARBVertexAttribBinding.glBindVertexBuffer(0, buffer.vbo, 0L, format.getVertexSize());
 		ParticleVertexBuffer.unbind();
 	}
 
