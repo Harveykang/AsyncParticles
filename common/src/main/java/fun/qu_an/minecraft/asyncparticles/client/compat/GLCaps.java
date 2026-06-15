@@ -18,8 +18,6 @@ public class GLCaps {
 			tfSupport = new TfSupport.GL_45();
 		} else if (glCaps.OpenGL40) {
 			tfSupport = new TfSupport.GL_40();
-		} else if (glCaps.GL_ARB_transform_feedback3) {
-			tfSupport = new TfSupport.ARB_3();
 		} else if (glCaps.GL_ARB_transform_feedback2) {
 			tfSupport = new TfSupport.ARB_2();
 		} else if (glCaps.OpenGL30) {
@@ -287,9 +285,6 @@ public class GLCaps {
 			public void glResumeTransformFeedback(int primitiveMode) {
 				ARBTransformFeedback2.glResumeTransformFeedback();
 			}
-		}
-
-		class ARB_3 extends ARB_2 {
 		}
 
 		class GL_40 extends GL_30 {
