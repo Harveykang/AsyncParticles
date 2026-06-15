@@ -14,7 +14,75 @@ public interface GpuParticleAddon {
 	int COLOR_BLUE_OFFSET = COLOR_OFFSET + 2;
 	int COLOR_ALPHA_OFFSET = COLOR_OFFSET + 3;
 
-	void asyncparticles$postTick(long address);
+	default void asyncparticles$postTick(long address) {
+		throw new IllegalStateException("Not implemented");
+	}
 
-	boolean asyncparticles$shouldRender();
+	default boolean asyncparticles$shouldRender() {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default float asyncparticles$getQuadSize(float partialTickTime) {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default float asyncparticles$getU0() {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default float asyncparticles$getV0() {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default float asyncparticles$getU1() {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default float asyncparticles$getV1() {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default int asyncparticles$getLightCoords(float partialTickTime) {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default double asyncparticles$getXo() {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default double asyncparticles$getYo() {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default double asyncparticles$getZo() {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default double asyncparticles$getX() {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default double asyncparticles$getY() {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default double asyncparticles$getZ() {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default float asyncparticles$getORoll() {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default float asyncparticles$getRoll() {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default int asyncparticles$getOColor() {
+		throw new IllegalStateException("Not implemented");
+	}
+
+	default int asyncparticles$getColor(int oColor) {
+		throw new IllegalStateException("Not implemented");
+	}
 }

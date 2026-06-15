@@ -90,9 +90,6 @@ subprojects {
             name = "FallenBreath"
             url = uri("https://maven.fallenbreath.me/releases")
         }
-        maven { // Fabric ASM for Porting Lib
-            url 'https://jitpack.io'
-        }
 //        maven {
 //            name = "Xander Maven"
 //            url = "https://maven.isxander.dev/releases"
@@ -100,6 +97,9 @@ subprojects {
         maven { // LambDynamicLights
             name = "Gegy"
             url = uri("https://maven.gegy.dev")
+        }
+        maven { // Fabric ASM for Porting Lib
+            url 'https://jitpack.io'
         }
     }
 
