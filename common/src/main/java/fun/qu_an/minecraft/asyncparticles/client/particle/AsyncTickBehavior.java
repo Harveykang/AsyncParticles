@@ -569,8 +569,7 @@ public class AsyncTickBehavior {
 				Queue<Particle> newCpuQueue = ParticleHelper.newParticleQueue();
 				oldCpuQueue.forEach(p -> {
 					if (enableLightCache) {
-						((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
-						((LightCachedParticleAddon) p).asyncparticles$refresh();
+						LightCachedParticleAddon.doFirstRefresh(p);
 					} else {
 						((LightCachedParticleAddon) p).asyncparticles$disableLightCache();
 					}
@@ -602,8 +601,7 @@ public class AsyncTickBehavior {
 				GpuParticleBehavior.INSTANCE.gpuParticles.forEach((key, oldGpuQueue) -> {
 					oldGpuQueue.forEach(p -> {
 						if (enableLightCache) {
-							((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
-							((LightCachedParticleAddon) p).asyncparticles$refresh();
+							LightCachedParticleAddon.doFirstRefresh(p);
 						} else {
 							((LightCachedParticleAddon) p).asyncparticles$disableLightCache();
 						}

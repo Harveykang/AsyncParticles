@@ -20,7 +20,7 @@ public class MixinCustomParticleEngine {
 	private boolean onAdd(Queue<Particle> instance, Object p, Operation<Boolean> original) {
 		if (ConfigHelper.particleLightCache()) {
 			((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
-			((LightCachedParticleAddon) p).asyncparticles$refresh();
+			LightCachedParticleAddon.doFirstRefresh((Particle) p);
 		}
 		switch (ConfigHelper.getParticleCullingMode()) {
 			case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();

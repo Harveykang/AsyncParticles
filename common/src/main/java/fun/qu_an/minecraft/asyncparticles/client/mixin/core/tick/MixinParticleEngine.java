@@ -278,11 +278,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			// otherwise it may cause memory leak with some mods
 		} else {
 			if (ConfigHelper.particleLightCache()) {
-				// Enable the light only if the particle is added to the current ParticleEngine instance.
-				((LightCachedParticleAddon) particle).asyncparticles$enableLightCache();
-				// refresh the light cache here since this method can run in other threads.
-				// so it can avoid to slower the main thread.
-				((LightCachedParticleAddon) particle).asyncparticles$refresh();
+				LightCachedParticleAddon.doFirstRefresh(particle);
 			}
 			switch (ConfigHelper.getParticleCullingMode()) {
 				case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
