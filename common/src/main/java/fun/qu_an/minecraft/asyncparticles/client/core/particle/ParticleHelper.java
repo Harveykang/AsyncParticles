@@ -1,12 +1,13 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 
 import java.util.Queue;
@@ -28,5 +29,8 @@ public class ParticleHelper {
 	public static void onClearParticles() {
 		AsyncTickBehavior.getInstance().reset();
 		GpuParticleBehavior.getInstance().onClearParticles();
+		if (ModListHelper.A_GOOD_PLACE_LOADED) {
+			AGoodPlaceCompat.onParticleEngineClear();
+		}
 	}
 }

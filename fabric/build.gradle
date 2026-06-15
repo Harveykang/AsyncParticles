@@ -112,7 +112,19 @@ dependencies {
 ////    localRuntime "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5
 //
 //    /* Immediately Fast */
-//    compileOnly "maven.modrinth:immediatelyfast:1.11.0+1.21.7-fabric"
+//    localRuntime "maven.modrinth:immediatelyfast:1.11.0+1.21.7-fabric"
+
+    /* Particle Rain */
+    localRuntime "maven.modrinth:particle-rain:v4-beta.10+26.1-fabric"
+
+    /* A Good Place */
+    localRuntime "maven.modrinth:a-good-place:EtPUeDP1" // 1.3.7
+
+    /* Cosy Critters */
+    localRuntime "maven.modrinth:cosy-critters:v0.3.2+26.1-fabric"
+
+    /* Particle Interactions */
+    localRuntime "maven.modrinth:particle-interactions:0.9.5+26.1-fabric"
 }
 
 processResources {

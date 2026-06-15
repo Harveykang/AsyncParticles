@@ -60,7 +60,7 @@ dependencies {
 //    compileOnly "maven.modrinth:what-are-they-up-to:K1Qp2Cga" // 1.2.5
 //
 //    /* Immediately Fast */
-    compileOnly "maven.modrinth:immediatelyfast:1.15.2+26.1.2-fabric"
+//    compileOnly "maven.modrinth:immediatelyfast:1.15.2+26.1.2-fabric"
 //
 //    /* Figura */
 //    compileOnly "maven.modrinth:figura:0.1.5b+1.21.4"

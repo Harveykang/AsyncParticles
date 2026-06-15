@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import java.util.Set;
 
 @Mixin(BlocksParticlesManager.class)
-public interface InvokerBlocksParticlesManager {
+public interface AccessorBlocksParticlesManager {
 	@Accessor(value = "HIDDEN_BLOCKS", remap = false)
 	static Set<BlockPos> accessor_getHiddenBlocks() {
 		throw new AssertionError();

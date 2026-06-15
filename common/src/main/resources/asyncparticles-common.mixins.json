@@ -8,7 +8,7 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin",
   "client": [
-    "compat.a_good_place.InvokerBlocksParticlesManager",
+    "compat.a_good_place.AccessorBlocksParticlesManager",
     "compat.a_good_place.MixinBlocksParticlesManager",
     "compat.a_good_place.MixinPlacingBlockParticle",
     "compat.cloth_config.AbstractConfigEntryAccessor",
@@ -16,7 +16,6 @@
     "compat.cloth_config.AccessorBaseListEntry",
     "compat.cloth_config.AccessorSubCategoryListEntry",
     "compat.cosycritters.MixinBirdParticle",
-    "compat.immediatelyfast.MixinBatchableBufferSource",
     "compat.modernui.MixinRenderSystem",
     "compat.particlerain.MixinParticleRain",
     "compat.particlerain.MixinParticleSpawner",
