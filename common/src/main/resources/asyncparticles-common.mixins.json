@@ -101,7 +101,7 @@
     "core.particle.MixinParticle",
     "core.particle.MixinParticle_LightCache",
     "core.particle.MixinParticleEngine_FixBlackDestructionParticle",
-    "core.particle.MixinTerrainParticle_FixBlackDestructionParticle",
+    "core.particle.MixinParticleEngine_FixBlackDestructionParticle_Late",
     "core.particle.MixinTextureSheetParticle",
     "core.render.MixinCustomParticleRenderType",
     "core.render.MixinLevelRenderer",

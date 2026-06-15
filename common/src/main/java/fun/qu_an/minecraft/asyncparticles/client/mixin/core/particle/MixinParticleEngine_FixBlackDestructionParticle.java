@@ -11,20 +11,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ParticleEngine.class)
+@Mixin(value = ParticleEngine.class, priority = 99)
 public class MixinParticleEngine_FixBlackDestructionParticle {
 	@Shadow
 	protected ClientLevel level;
 
-	// TODO Forge?
-	@Inject(method = "method_34020", at = @At("HEAD"))
-	private void fixBlackDestroyParticle1(BlockPos blockPos, BlockState blockState, double d, double e, double f, double g, double h, double i, CallbackInfo ci) {
+	@Inject(method = "destroy",
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/phys/shapes/VoxelShape;"))
+	private void fixBlackDestroyParticle1(BlockPos blockPos, BlockState blockState, CallbackInfo ci) {
 		int lightColor = GameUtil.getLightColorFromNeighbor(level, blockPos);
 		GameUtil.DESTRUCTION_LIGHT_CACHE.set(lightColor);
-	}
-
-	@Inject(method = "method_34020", at = @At("RETURN"))
-	private void fixBlackDestroyParticle2(BlockPos blockPos, BlockState blockState, double d, double e, double f, double g, double h, double i, CallbackInfo ci) {
-		GameUtil.DESTRUCTION_LIGHT_CACHE.remove();
 	}
 }

@@ -19,8 +19,7 @@ public class MixinCustomParticleEngine {
 	@WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
 	private boolean onAdd(Queue<Particle> instance, Object p, Operation<Boolean> original) {
 		if (ConfigHelper.particleLightCache()) {
-			((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
-			((LightCachedParticleAddon) p).asyncparticles$refresh();
+			LightCachedParticleAddon.doFirstRefresh((Particle) p);
 		}
 		switch (ConfigHelper.getParticleCullingMode()) {
 			case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();
