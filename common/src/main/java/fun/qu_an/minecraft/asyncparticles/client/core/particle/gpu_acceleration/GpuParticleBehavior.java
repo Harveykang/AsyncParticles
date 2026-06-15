@@ -48,6 +48,7 @@ public class GpuParticleBehavior {
 			//noinspection unchecked
 			GPU_PARTICLE_CLASSES = new ReferenceArrayList<>(List.of(
 				SingleQuadParticle.class,
+				FlyTowardsPositionParticle.class,
 				FireworkParticles.OverlayParticle.class,
 				(Class<? extends Particle>) Class.forName(Mappings.getFireworkSparkClass()),
 				DustColorTransitionParticle.class

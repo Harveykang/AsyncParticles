@@ -69,6 +69,7 @@
   "config.asyncparticles.mixin.safeBlockEntityMap": "使“LevelChunk#blockEntities”线程安全",
   "config.asyncparticles.mixin.safeBlockEntityMap.tooltip": "如果你安装的模组中包含会访问世界中方块实体的\n非标准的粒子实现，则必须启用这个选项。\n否则可能会导致游戏崩溃。",
   "config.asyncparticles.mixin.particle.noCulling": "粒子剔除黑名单",
+  "config.asyncparticles.mixin.particle.asyncTickableGroup": "可异步 Tick 的粒子组",
   "config.asyncparticles.mixin.particle.noLightCache": "粒子光照缓存黑名单",
   "config.asyncparticles.mixin.particle.lockProvider": "提供锁的粒子",
   "config.asyncparticles.mixin.particle.lockRequired": "需要加锁的粒子",

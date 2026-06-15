@@ -47,7 +47,6 @@ public abstract class MixinClientLevel extends Level {
 			return;
 		}
 		AnimateTickBehavior.CULL_UNDERWATER_PARTICLE_TYPE.set(!ConfigHelper.isCullUnderwaterParticleType() ||
-			Minecraft.useShaderTransparency() ||
 			cameraEntity.level().getFluidState(cameraEntity.blockPosition()).is(FluidTags.WATER));
 	}
 

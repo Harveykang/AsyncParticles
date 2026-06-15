@@ -14,7 +14,11 @@ public interface GpuParticleAddon {
 	int COLOR_BLUE_OFFSET = COLOR_OFFSET + 2;
 	int COLOR_ALPHA_OFFSET = COLOR_OFFSET + 3;
 
-	void asyncparticles$postTick(long address);
+	default void asyncparticles$postTick(long address) {
+		throw new IllegalStateException("Not implemented");
+	}
 
-	boolean asyncparticles$shouldRender();
+	default boolean asyncparticles$shouldRender() {
+		throw new IllegalStateException("Not implemented");
+	}
 }
