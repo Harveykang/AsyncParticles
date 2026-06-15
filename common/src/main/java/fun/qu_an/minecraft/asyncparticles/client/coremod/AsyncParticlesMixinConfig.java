@@ -142,13 +142,7 @@ public class AsyncParticlesMixinConfig {
 		private Set<String> asyncTickableParticleGroups = new LinkedHashSet<>();
 
 		{
-
-		}
-
-		private Set<String> modifyTheFromParticleMethod = new LinkedHashSet<>();
-
-		{
-
+			asyncTickableParticleGroups.add("games.enchanted.eg_particle_interactions.common.particle.render.group.CustomGeometryParticleGroup");
 		}
 
 //		private Set<String> create$contraptionNoParticleCollision = new LinkedHashSet<>();
@@ -168,7 +162,6 @@ public class AsyncParticlesMixinConfig {
 			particle$lockRequired = toSaveConfig.particle$lockRequired;
 			replaceRandom = toSaveConfig.replaceRandom;
 			asyncTickableParticleGroups = toSaveConfig.asyncTickableParticleGroups;
-			modifyTheFromParticleMethod = toSaveConfig.modifyTheFromParticleMethod;
 		}
 
 		private void read(Properties properties) {
@@ -186,6 +179,7 @@ public class AsyncParticlesMixinConfig {
 			particle$lockProvider = getSet(properties, "particle$lockProvider", defaultConfig.particle$lockProvider);
 			particle$lockRequired = getSet(properties, "particle$lockRequired", defaultConfig.particle$lockRequired);
 			replaceRandom = getSet(properties, "replaceRandom", defaultConfig.replaceRandom);
+			asyncTickableParticleGroups = getSet(properties, "asyncTickableParticleGroups", defaultConfig.asyncTickableParticleGroups);
 		}
 
 		void flat() {
@@ -201,6 +195,7 @@ public class AsyncParticlesMixinConfig {
 			properties.setProperty("particle$lockProvider", String.join(",", particle$lockProvider));
 			properties.setProperty("particle$lockRequired", String.join(",", particle$lockRequired));
 			properties.setProperty("replaceRandom", String.join(",", replaceRandom));
+			properties.setProperty("asyncTickableParticleGroups", String.join(",", asyncTickableParticleGroups));
 		}
 
 		private static Set<String> getSet(Properties properties, String key, Set<String> defaultValue) {
@@ -311,15 +306,6 @@ public class AsyncParticlesMixinConfig {
 		public void setAsyncTickableParticleGroups(Set<String> asyncTickableParticleGroups) {
 			assertNotGlobal();
 			this.asyncTickableParticleGroups = asyncTickableParticleGroups;
-		}
-
-		public Collection<String> getModifyFromParticleMethod() {
-			return modifyTheFromParticleMethod;
-		}
-
-		public void setModifyTheFromParticleMethod(Set<String> modifyTheFromParticleMethod) {
-			assertNotGlobal();
-			this.modifyTheFromParticleMethod = modifyTheFromParticleMethod;
 		}
 	}
 }

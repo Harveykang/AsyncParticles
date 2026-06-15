@@ -35,7 +35,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired_Tick());
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired_Extract());
 		MixinClassAdjusterRegistrar.register(new AdjusterReplaceRandom());
-		MixinClassAdjusterRegistrar.register(new AdjusterParticlesTestAliveBeforeRender());
+		MixinClassAdjusterRegistrar.register(new AdjusterParticlesAsyncTickableGroup());
 		MixinMemberCancellerRegistrar.register(new AsyncParticlesMixinMemberCanceller());
 		MixinCancellerRegistrar.register(new AsyncParticlesMixinCanceller());
 	}
@@ -78,6 +78,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
 				case "iris" -> FABRIC_IRIS_LOADED;
 				case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;
+				case "compat" -> throw new IllegalStateException("Unknown fabric compat mixin: " + mixinClassName);
 				default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 			};
 			case "core", "off_thread_access" -> true;
@@ -96,6 +97,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
 				case "figura" -> FIGURA_LOADED;
 				case "cosycritters" -> COSYCRITTERS_LOADED;
+				case "particle_interactions" -> PARTICLE_INTERACTIONS_LOADED;
 				default -> throw new IllegalStateException("Unknown compat mixin: " + mixinClassName);
 			};
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);

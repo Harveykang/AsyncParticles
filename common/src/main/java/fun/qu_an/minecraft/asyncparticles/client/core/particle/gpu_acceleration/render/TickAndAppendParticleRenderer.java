@@ -62,8 +62,8 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 	protected int[] multiDrawCount;
 
 	protected boolean shouldSkip = true;
-	private boolean computed = false;
-	private ComputeResult computeResult;
+	protected boolean computed = false;
+	protected ComputeResult computeResult;
 
 	public TickAndAppendParticleRenderer(int particleLimit) {
 		sources[0] = new ParticleVertexBuffer(true);
@@ -135,7 +135,7 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 //		this.layerBatches[next].clear(); // Clear in tick() method
 	}
 
-	private int extractAppendParticles(Vec3 prevGpuCamPos,
+	protected int extractAppendParticles(Vec3 prevGpuCamPos,
 	                                   List<SingleQuadParticle> pending,
 	                                   List<LayerBatch> batches) {
 		int appendCount = pending.size();
@@ -452,7 +452,7 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 		return computeResult;
 	}
 
-	private void buildDrawStuffs(List<LayerBatch> layerBatch) {
+	protected void buildDrawStuffs(List<LayerBatch> layerBatch) {
 		int size = layerBatch.size();
 		ComputeResult.ParticleSlice[] slices = new ComputeResult.ParticleSlice[size];
 		IntArrayList first = new IntArrayList(size * 2);
@@ -503,7 +503,7 @@ public class TickAndAppendParticleRenderer implements IParticleRenderer {
 		}
 	}
 
-	private void resizeTarget(int neededBytes) {
+	protected void resizeTarget(int neededBytes) {
 		GlBuffer.MEMORY_POOl.free(target.vbo);
 		target.resize0(neededBytes);
 		int newSize = target.getSize();

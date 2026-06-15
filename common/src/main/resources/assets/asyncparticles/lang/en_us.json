@@ -69,6 +69,7 @@
   "config.asyncparticles.mixin.safeBlockEntityMap": "Make 'LevelChunk#blockEntities' Thread-Safe",
   "config.asyncparticles.mixin.safeBlockEntityMap.tooltip": "Enable this if you're encountering crashes related\nto non-standard particle implementations in your\ninstalled mods that access block entities in the world.",
   "config.asyncparticles.mixin.particle.noCulling": "Particle Culling Blacklist",
+  "config.asyncparticles.mixin.particle.asyncTickableGroup": "Async Tickable Particle Groups",
   "config.asyncparticles.mixin.particle.noLightCache": "Particles Light Cache Blacklist",
   "config.asyncparticles.mixin.particle.lockProvider": "Particles Lock Provider",
   "config.asyncparticles.mixin.particle.lockRequired": "Particles Lock Required",

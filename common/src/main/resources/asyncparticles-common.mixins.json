@@ -25,7 +25,6 @@
     "compat.sodium_extra.MixinParticleEngine",
     "conditional.Mixin_ReplaceRandom",
     "conditional.MixinAsyncTick_AsyncTickableParticleGroup",
-    "conditional.MixinAsyncTick_TestAliveBeforeRender",
     "conditional.MixinClassInstanceMultiMap",
     "conditional.MixinLegacyRandomSource",
     "conditional.MixinLevelChunk_BlockEntityMap",

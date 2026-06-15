@@ -284,13 +284,13 @@ public class AsyncTickBehavior {
 				tickTaskHelper.taskCount(),
 				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
-					.stream().filter(entry -> entry.getValue() instanceof QuadParticleGroup)
+					.stream()
 					.collect(Collectors.toMap(Map.Entry::getKey, e -> {
 						Queue<?> queue = e.getValue().getAll();
 						if (queue instanceof IterationSafeEvictingQueue<?> q1) {
 							return queue.size() + "/" + q1.arraySize();
 						}
-						return "Unsupported Queue";
+						return queue.size() + "/" + "Unknown";
 					})),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
 				syncParticleTypes.stream().map(Class::getName).toList(),

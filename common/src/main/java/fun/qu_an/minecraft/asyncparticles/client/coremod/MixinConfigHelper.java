@@ -36,8 +36,4 @@ public class MixinConfigHelper {
 	public static Collection<String> getAsyncTickableParticleGroups() {
 		return CONFIG.getAsyncTickableParticleGroups();
 	}
-
-	public static Collection<String> getModifyFromParticleMethod() {
-		return CONFIG.getModifyFromParticleMethod();
-	}
 }

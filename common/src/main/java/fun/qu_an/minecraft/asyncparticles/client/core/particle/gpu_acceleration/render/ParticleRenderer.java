@@ -12,6 +12,8 @@ import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.util.ARGB;
@@ -28,6 +30,8 @@ import java.util.function.Supplier;
 
 import static fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.GpuParticlePipelines.RAW_PARTICLE;
 
+@Deprecated
+@Environment(EnvType.CLIENT)
 public class ParticleRenderer implements IParticleRenderer {
 	protected final ParticleVertexBuffer[] sources = new ParticleVertexBuffer[2];
 	protected final ParticleVertexBuffer target;

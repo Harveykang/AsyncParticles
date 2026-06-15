@@ -20,8 +20,8 @@ import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMi
 // No more NoClassDefFoundError
 public class ClothConfigMixinMenus {
 	public static Runnable buildCategory(ConfigCategory mixinCategory,
-										 ConfigEntryBuilder entryBuilder,
-										 ConfigEntryBuilder revertEntryBuilder) {
+	                                     ConfigEntryBuilder entryBuilder,
+	                                     ConfigEntryBuilder revertEntryBuilder) {
 		MixinConfigObj defaultConfig = new MixinConfigObj();
 		MixinConfigObj newConfig = new MixinConfigObj();
 		MixinConfigObj oldConfig = getToSaveConfig();
@@ -70,6 +70,23 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap.tooltip"))
 			.requireRestart()
 			.build());
+		List<String> lastAsyncTickableParticleGroups = List.copyOf(oldConfig.getAsyncTickableParticleGroups());
+		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.asyncTickableGroup"),
+				lastAsyncTickableParticleGroups)
+			.setDefaultValue(lastAsyncTickableParticleGroups)
+			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getAsyncTickableParticleGroups().contains(s)))
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultConfig.getAsyncTickableParticleGroups());
+				newConfig.setAsyncTickableParticleGroups(Collections.unmodifiableSet(s));
+			})
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.tooltip"))
+			.requireRestart()
+			.build()));
 		List<String> lastNoLightCache = List.copyOf(oldConfig.getNoLightCache());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noLightCache"),
@@ -174,9 +191,9 @@ public class ClothConfigMixinMenus {
 	}
 
 	public static void addModCompatCategory(ConfigEntryBuilder entryBuilder,
-											ConfigEntryBuilder mixinEntryBuilder,
-											@SuppressWarnings("rawtypes") List<AbstractConfigListEntry> vsEntries,
-											@SuppressWarnings("rawtypes") List<AbstractConfigListEntry> createEntries) {
+	                                        ConfigEntryBuilder mixinEntryBuilder,
+	                                        @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> vsEntries,
+	                                        @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> createEntries) {
 		MixinConfigObj defaultConfig = new MixinConfigObj();
 		MixinConfigObj newConfig = new MixinConfigObj();
 		MixinConfigObj lastConfig = getToSaveConfig();

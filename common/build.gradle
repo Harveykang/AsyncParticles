@@ -67,6 +67,9 @@ dependencies {
 
     /* Cosy Critters */
     compileOnly "maven.modrinth:cosy-critters:v0.3.2+26.1-fabric"
+
+    /* Particle Interactions */
+    compileOnly "maven.modrinth:particle-interactions:0.9.5+26.1-fabric"
 }
 
 jar {
