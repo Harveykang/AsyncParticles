@@ -13,7 +13,7 @@ import pigcart.cosycritters.particle.BirdParticle;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Mixin(value = BirdParticle.class, remap = false)
 public class MixinBirdParticle {
@@ -29,6 +29,6 @@ public class MixinBirdParticle {
 
 	@Inject(method = "<clinit>", at = @At("RETURN"))
 	private static void onInit(CallbackInfo ci) {
-		birds = new CopyOnWriteArrayList<>();
+		birds = ConcurrentHashMap.newKeySet();
 	}
 }
