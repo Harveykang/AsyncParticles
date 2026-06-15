@@ -4,7 +4,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.FireworkParticles;
 import net.minecraft.client.particle.TextureSheetParticle;
-import org.lwjgl.system.MemoryUtil;
+import net.minecraft.util.FastColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -30,12 +30,19 @@ public class MixinFireworkParticles {
 			super(level, x, y, z);
 		}
 
-		@Override
-		public void asyncparticles$postTick(long address) {
-   			float alpha = 0.6F - this.age * 0.125f;
+		public int asyncparticles$getOColor() {
+			float alpha = 0.6F - (this.age - 1) * 0.125f;
+			return FastColor.ABGR32.color( // ABGR
+				(int) (alpha * 255.0f),
+				(int) (bCol * 255.0f),
+				(int) (gCol * 255.0f),
+				(int) (rCol * 255.0f));
+		}
+
+		public int asyncparticles$getColor(int oColor) {
+			float alpha = 0.6F - this.age * 0.125f;
 			this.setAlpha(alpha);
-			MemoryUtil.memPutByte(address + oCOLOR_ALPHA_OFFSET, (byte) (0.6f * 255f - (this.age - 1) * (0.125f * 255f)));
-			MemoryUtil.memPutByte(address + COLOR_ALPHA_OFFSET, (byte) (alpha * 255f));
+			return FastColor.ABGR32.color((int) (alpha * 255.0f), oColor);
 		}
 	}
 }

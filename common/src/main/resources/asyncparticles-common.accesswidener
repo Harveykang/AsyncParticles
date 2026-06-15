@@ -14,14 +14,6 @@ accessible field net/minecraft/client/particle/Particle xo D
 accessible field net/minecraft/client/particle/Particle yo D
 accessible field net/minecraft/client/particle/Particle zo D
 accessible field net/minecraft/client/particle/Particle alpha F
-accessible method net/minecraft/client/particle/TextureSheetParticle getU0 ()F
-accessible method net/minecraft/client/particle/TextureSheetParticle getU1 ()F
-accessible method net/minecraft/client/particle/TextureSheetParticle getV0 ()F
-accessible method net/minecraft/client/particle/TextureSheetParticle getV1 ()F
-accessible method net/minecraft/client/particle/SingleQuadParticle getU0 ()F
-accessible method net/minecraft/client/particle/SingleQuadParticle getU1 ()F
-accessible method net/minecraft/client/particle/SingleQuadParticle getV0 ()F
-accessible method net/minecraft/client/particle/SingleQuadParticle getV1 ()F
 accessible field net/minecraft/client/particle/Particle bCol F
 accessible field net/minecraft/client/particle/Particle gCol F
 accessible field net/minecraft/client/particle/Particle rCol F

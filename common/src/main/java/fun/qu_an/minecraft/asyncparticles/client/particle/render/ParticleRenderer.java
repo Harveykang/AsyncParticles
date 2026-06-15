@@ -148,78 +148,67 @@ public class ParticleRenderer implements IParticleRenderer {
 //		ParticleCullingMode particleCullingMode = ConfigHelper.getGpuParticleCullingMode();
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			final long address = stack.nmalloc(ParticleVertexFormats.RAW_PARTICLE_BYTES);
-			for (TextureSheetParticle tsp : particles) {
-				if (!((GpuParticleAddon) tsp).asyncparticles$shouldRender()) {
+			for (TextureSheetParticle particle : particles) {
+				GpuParticleAddon gpuParticle = (GpuParticleAddon) particle;
+				if (!gpuParticle.asyncparticles$shouldRender()) {
 					continue;
 				}
-//				if (shouldCull(particleCullingMode, frustum, tsp)) {
+//				if (shouldCull(particleCullingMode, frustum, particle)) {
 //					continue;
 //				}
-				float oSize = tsp.getQuadSize(0f);
-				float size = tsp.getQuadSize(1f);
-				float minU = tsp.getU0();
-				float minV = tsp.getV0();
-				float maxU = tsp.getU1();
-				float maxV = tsp.getV1();
-				int light = tsp.getLightColor(0f); // TODO lerp
 
 				long ptr = address;
-
 				// oPosition (0-11)
-				MemoryUtil.memPutFloat(ptr, (float) (tsp.xo - cx));
+				MemoryUtil.memPutFloat(ptr, (float) (gpuParticle.asyncparticles$getXo() - cx));
 				ptr += 4L;
-				MemoryUtil.memPutFloat(ptr, (float) (tsp.yo - cy));
+				MemoryUtil.memPutFloat(ptr, (float) (gpuParticle.asyncparticles$getYo() - cy));
 				ptr += 4L;
-				MemoryUtil.memPutFloat(ptr, (float) (tsp.zo - cz));
+				MemoryUtil.memPutFloat(ptr, (float) (gpuParticle.asyncparticles$getZo() - cz));
 				ptr += 4L;
 
 				// Position (12-23)
-				MemoryUtil.memPutFloat(ptr, (float) (tsp.x - cx));
+				MemoryUtil.memPutFloat(ptr, (float) (gpuParticle.asyncparticles$getX() - cx));
 				ptr += 4L;
-				MemoryUtil.memPutFloat(ptr, (float) (tsp.y - cy));
+				MemoryUtil.memPutFloat(ptr, (float) (gpuParticle.asyncparticles$getY() - cy));
 				ptr += 4L;
-				MemoryUtil.memPutFloat(ptr, (float) (tsp.z - cz));
+				MemoryUtil.memPutFloat(ptr, (float) (gpuParticle.asyncparticles$getZ() - cz));
 				ptr += 4L;
 
 				// oSize, size (24-31)
-				MemoryUtil.memPutFloat(ptr, oSize);
+				MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getQuadSize(0f));
 				ptr += 4L;
-				MemoryUtil.memPutFloat(ptr, size);
+				MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getQuadSize(1f));
 				ptr += 4L;
 
 				// UVMinMax (32-47)
-				MemoryUtil.memPutFloat(ptr, minU);
+				MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getU0());
 				ptr += 4L;
-				MemoryUtil.memPutFloat(ptr, minV);
+				MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getV0());
 				ptr += 4L;
-				MemoryUtil.memPutFloat(ptr, maxU);
+				MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getU1());
 				ptr += 4L;
-				MemoryUtil.memPutFloat(ptr, maxV);
+				MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getV1());
 				ptr += 4L;
 
-				int color = FastColor.ABGR32.color(
-					(int) (tsp.alpha * 255.0f),
-					(int) (tsp.bCol * 255.0f),
-					(int) (tsp.gCol * 255.0f),
-					(int) (tsp.rCol * 255.0f));
+				int oColor = gpuParticle.asyncparticles$getOColor();
 				// oColor (48-51)
-				MemoryUtil.memPutInt(ptr, color);
+				MemoryUtil.memPutInt(ptr, oColor);
 				ptr += 4L;
 
 				// Color (52-55)
-				MemoryUtil.memPutInt(ptr, color);
+				MemoryUtil.memPutInt(ptr, gpuParticle.asyncparticles$getColor(oColor));
 				ptr += 4L;
 
-				// Light (56-59): 两个 short
-				MemoryUtil.memPutInt(ptr, light);
+				// Light (56-59): 2 shorts
+				MemoryUtil.memPutInt(ptr, gpuParticle.asyncparticles$getLightCoords(0f));
 				ptr += 4L;
 
 				// Rolls (60-67)
-				MemoryUtil.memPutFloat(ptr, tsp.oRoll);
+				MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getORoll());
 				ptr += 4L;
-				MemoryUtil.memPutFloat(ptr, tsp.roll);
+				MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getRoll());
 
-				((GpuParticleAddon) tsp).asyncparticles$postTick(address);
+				gpuParticle.asyncparticles$postTick(address);
 
 				if (DIRECT_BUFFER) {
 					MemoryUtil.memCopy(address, bufferAddress + (long) position, ParticleVertexFormats.RAW_PARTICLE_BYTES);
@@ -353,8 +342,9 @@ public class ParticleRenderer implements IParticleRenderer {
 	}
 
 	@Override
-	public void append(Vec3 cameraPos, TextureSheetParticle tsp) {
-		if (!((GpuParticleAddon) tsp).asyncparticles$shouldRender()) {
+	public void append(Vec3 cameraPos, TextureSheetParticle particle) {
+		GpuParticleAddon gpuParticle = (GpuParticleAddon) particle;
+		if (!gpuParticle.asyncparticles$shouldRender()) {
 			return;
 		}
 //		ParticleCullingMode particleCullingMode = ConfigHelper.getGpuParticleCullingMode();
@@ -389,73 +379,61 @@ public class ParticleRenderer implements IParticleRenderer {
 			cy = cameraPos.y;
 			cz = cameraPos.z;
 		}
-		float oSize = tsp.getQuadSize(0f);
-		float size = tsp.getQuadSize(1f);
-		float minU = tsp.getU0();
-		float minV = tsp.getV0();
-		float maxU = tsp.getU1();
-		float maxV = tsp.getV1();
-		int light = tsp.getLightColor(0f); // TODO lerp
 
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			final long address = stack.nmalloc(ParticleVertexFormats.RAW_PARTICLE_BYTES);
 			long ptr = address;
-
 			// oPosition (0-11)
-			MemoryUtil.memPutFloat(ptr, (float) (tsp.xo - cx));
+			MemoryUtil.memPutFloat(ptr, (float) (gpuParticle.asyncparticles$getXo() - cx));
 			ptr += 4L;
-			MemoryUtil.memPutFloat(ptr, (float) (tsp.yo - cy));
+			MemoryUtil.memPutFloat(ptr, (float) (gpuParticle.asyncparticles$getYo() - cy));
 			ptr += 4L;
-			MemoryUtil.memPutFloat(ptr, (float) (tsp.zo - cz));
+			MemoryUtil.memPutFloat(ptr, (float) (gpuParticle.asyncparticles$getZo() - cz));
 			ptr += 4L;
 
 			// Position (12-23)
-			MemoryUtil.memPutFloat(ptr, (float) (tsp.x - cx));
+			MemoryUtil.memPutFloat(ptr, (float) (gpuParticle.asyncparticles$getX() - cx));
 			ptr += 4L;
-			MemoryUtil.memPutFloat(ptr, (float) (tsp.y - cy));
+			MemoryUtil.memPutFloat(ptr, (float) (gpuParticle.asyncparticles$getY() - cy));
 			ptr += 4L;
-			MemoryUtil.memPutFloat(ptr, (float) (tsp.z - cz));
+			MemoryUtil.memPutFloat(ptr, (float) (gpuParticle.asyncparticles$getZ() - cz));
 			ptr += 4L;
 
 			// oSize, size (24-31)
-			MemoryUtil.memPutFloat(ptr, oSize);
+			MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getQuadSize(0f));
 			ptr += 4L;
-			MemoryUtil.memPutFloat(ptr, size);
+			MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getQuadSize(1f));
 			ptr += 4L;
 
 			// UVMinMax (32-47)
-			MemoryUtil.memPutFloat(ptr, minU);
+			MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getU0());
 			ptr += 4L;
-			MemoryUtil.memPutFloat(ptr, minV);
+			MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getV0());
 			ptr += 4L;
-			MemoryUtil.memPutFloat(ptr, maxU);
+			MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getU1());
 			ptr += 4L;
-			MemoryUtil.memPutFloat(ptr, maxV);
+			MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getV1());
 			ptr += 4L;
 
-			int color = FastColor.ABGR32.color(
-				(int) (tsp.alpha * 255.0f),
-				(int) (tsp.bCol * 255.0f),
-				(int) (tsp.gCol * 255.0f),
-				(int) (tsp.rCol * 255.0f));
+			int oColor = gpuParticle.asyncparticles$getOColor();
 			// oColor (48-51)
-			MemoryUtil.memPutInt(ptr, color);
+			MemoryUtil.memPutInt(ptr, oColor);
 			ptr += 4L;
 
 			// Color (52-55)
-			MemoryUtil.memPutInt(ptr, color);
+			MemoryUtil.memPutInt(ptr, gpuParticle.asyncparticles$getColor(oColor));
 			ptr += 4L;
 
 			// Light (56-59): 2 shorts
-			MemoryUtil.memPutInt(ptr, light);
+			MemoryUtil.memPutInt(ptr, gpuParticle.asyncparticles$getLightCoords(0f));
 			ptr += 4L;
 
 			// Rolls (60-67)
-			MemoryUtil.memPutFloat(ptr, tsp.oRoll);
+			MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getORoll());
 			ptr += 4L;
-			MemoryUtil.memPutFloat(ptr, tsp.roll);
+			MemoryUtil.memPutFloat(ptr, gpuParticle.asyncparticles$getRoll());
 
-			((GpuParticleAddon) tsp).asyncparticles$postTick(address);
+			gpuParticle.asyncparticles$postTick(address);
 
 			if (DIRECT_BUFFER) {
 				long bufferAddress = MemoryUtil.memAddress(mappedBuffer);
