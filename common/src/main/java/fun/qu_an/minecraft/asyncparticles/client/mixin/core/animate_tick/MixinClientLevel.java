@@ -29,7 +29,7 @@ public abstract class MixinClientLevel extends Level {
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int xt, int yt, int zt, Operation<Void> original) {
 		if (!AsyncTickBehavior.getInstance().isTailTick() &&
-			ConfigHelper.isTickAsync()) {
+			ConfigHelper.isAsyncTickParticle()) {
 			// don't tick animate if the game is lagging
 			return;
 		}

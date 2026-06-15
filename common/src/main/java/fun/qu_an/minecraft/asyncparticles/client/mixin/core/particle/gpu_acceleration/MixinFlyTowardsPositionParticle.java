@@ -5,6 +5,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.FlyTowardsPositionParticle;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.util.ARGB;
 import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,11 +21,18 @@ public abstract class MixinFlyTowardsPositionParticle extends SingleQuadParticle
 		super(level, x, y, z, sprite);
 	}
 
-	public void asyncparticles$postTick(long address) {
-		this.setAlpha(this.lifetimeAlpha.currentAlphaForAge(this.age, this.lifetime, 0f));
-		MemoryUtil.memPutByte(address + oCOLOR_ALPHA_OFFSET, (byte) (alpha * 255f));
+	public int asyncparticles$getOColor() {
+		float alpha = this.lifetimeAlpha.currentAlphaForAge(this.age, this.lifetime, 0f);
+		return ARGB.color( // ABGR
+			(int) (alpha * 255.0f),
+			(int) (bCol * 255.0f),
+			(int) (gCol * 255.0f),
+			(int) (rCol * 255.0f));
+	}
 
-		this.setAlpha(this.lifetimeAlpha.currentAlphaForAge(this.age, this.lifetime, 1f));
-		MemoryUtil.memPutByte(address + COLOR_ALPHA_OFFSET, (byte) (alpha * 255f));
+	public int asyncparticles$getColor(int oColor) {
+		float alpha = this.lifetimeAlpha.currentAlphaForAge(this.age, this.lifetime, 1f);
+		this.setAlpha(alpha);
+		return ARGB.color((int) (alpha * 255.0f), oColor);
 	}
 }

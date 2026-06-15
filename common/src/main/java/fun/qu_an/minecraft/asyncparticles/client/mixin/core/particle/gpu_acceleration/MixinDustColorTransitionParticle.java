@@ -5,6 +5,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.DustColorTransitionParticle;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.util.ARGB;
 import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,22 +19,21 @@ public abstract class MixinDustColorTransitionParticle extends SingleQuadParticl
 	@Shadow
 	protected abstract void lerpColors(float partialTickTime);
 
-	@Override
-	public void asyncparticles$postTick(long address) {
+	public int asyncparticles$getOColor() {
 		lerpColors(0f);
-		long ptr = address + oCOLOR_OFFSET;
-		MemoryUtil.memPutByte(ptr, (byte) (rCol * 255f));
-		ptr += 1;
-		MemoryUtil.memPutByte(ptr, (byte) (gCol * 255f));
-		ptr += 1;
-		MemoryUtil.memPutByte(ptr, (byte) (bCol * 255f));
+		return ARGB.color( // ABGR
+			(int) (alpha * 255.0f),
+			(int) (bCol * 255.0f),
+			(int) (gCol * 255.0f),
+			(int) (rCol * 255.0f));
+	}
 
+	public int asyncparticles$getColor(int oColor) {
 		lerpColors(1f);
-		ptr = address + COLOR_OFFSET;
-		MemoryUtil.memPutByte(ptr, (byte) (rCol * 255f));
-		ptr += 1;
-		MemoryUtil.memPutByte(ptr, (byte) (gCol * 255f));
-		ptr += 1;
-		MemoryUtil.memPutByte(ptr, (byte) (bCol * 255f));
+		return ARGB.color( // ABGR
+			oColor >>> 24,
+			(int) (bCol * 255.0f),
+			(int) (gCol * 255.0f),
+			(int) (rCol * 255.0f));
 	}
 }

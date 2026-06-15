@@ -119,7 +119,9 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 						throw re;
 					}
 				}
-				particleAddon.asyncparticles$setTicked();
+				if (!isOnMainThread) {
+					particleAddon.asyncparticles$setTicked();
+				}
 			}
 			LightCachedParticleAddon lightCachedParticle = (LightCachedParticleAddon) particle;
 			if (shouldRefresh) {
@@ -157,7 +159,7 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 
 	@Override
 	public void asyncparticles$tickSyncParticles() {
-		if (!ConfigHelper.isTickAsync()
+		if (!ConfigHelper.isAsyncTickParticle()
 			|| !(this instanceof AsyncTickableParticleGroup asyncGroup)) {
 			return;
 		}

@@ -1,9 +1,9 @@
 
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick;
 
-import com.google.common.collect.Lists;
 import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickParticleGroupBehavior;
@@ -19,7 +19,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
@@ -49,21 +48,32 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		if (!AsyncTickBehavior.getInstance().shouldTickParticleEngine()) {
 			return;
 		}
-		if (!this.trackingEmitters.isEmpty()) {
-			List<TrackingEmitter> list = Lists.newArrayList();
-
-			for (TrackingEmitter trackingEmitter : this.trackingEmitters) {
-				trackingEmitter.tick(); // TODO can be async-lized safely?
-				if (!trackingEmitter.isAlive()) {
-					list.add(trackingEmitter);
-				}
-			}
-
-			this.trackingEmitters.removeAll(list);
-		}
 
 		Particle particle;
-		boolean tickAsync = ConfigHelper.isTickAsync();
+		boolean tickAsync = ConfigHelper.isAsyncTickParticle();
+		this.particles.forEach((renderType, group) -> {
+			if (group.isEmpty() || group instanceof GpuParticleGroup) {
+				return;
+			}
+			Profiler.get().push(renderType.name());
+			if (tickAsync && group instanceof AsyncTickableParticleGroup
+				&& AsyncTickParticleGroupBehavior.canTickAsync(group)) {
+				AsyncTickBehavior.getInstance().dispatch(group::tickParticles);
+			} else {
+				group.tickParticles();
+			}
+			Profiler.get().pop();
+		});
+		if (!this.trackingEmitters.isEmpty()) {
+			for (TrackingEmitter trackingEmitter : this.trackingEmitters) {
+				trackingEmitter.tick(); // TODO can be async-lized safely?
+			}
+		}
+		if (!tickAsync) {
+			particles.values().forEach(g -> ((ParticleGroupAddition) g).asyncparticles$removeDeadParticles());
+			AsyncTickBehavior.getInstance().doEmittersRemoveIf(trackingEmitters);
+		}
+
 		boolean gpuParticles = tickAsync && ConfigHelper.isGpuParticles();
 		if (!particlesToAdd.isEmpty()) {
 			boolean appendNewParticlesToRenderer = ConfigHelper.isAppendNewParticlesToRenderer();
@@ -105,21 +115,6 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				Profiler.get().pop();
 			}));
 		}
-
-		this.particles.forEach((renderType, group) -> {
-			if (group.isEmpty() || group instanceof GpuParticleGroup) {
-				return;
-			}
-			Profiler.get().push(renderType.name());
-			if (!tickAsync
-				|| !(group instanceof AsyncTickableParticleGroup)
-				|| !AsyncTickParticleGroupBehavior.canTickAsync(group)) {
-				group.tickParticles();
-			} else {
-				AsyncTickBehavior.getInstance().dispatch(group::tickParticles);
-			}
-			Profiler.get().pop();
-		});
 	}
 
 	@Override

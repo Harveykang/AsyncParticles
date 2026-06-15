@@ -1,10 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
-import net.minecraft.resources.Identifier;
-
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
 
@@ -25,7 +22,7 @@ public class ConfigHelper {
 		return tick$suppressCME;
 	}
 
-	public static boolean isTickAsync() {
+	public static boolean isAsyncTickParticle() {
 		return tick$particleAsyncMode != ParticleAsyncMode.DISABLE;
 	}
 

@@ -5,6 +5,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.FireworkParticles;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.util.ARGB;
 import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,12 +32,19 @@ public class MixinFireworkParticles {
 			super(level, x, y, z, sprite);
 		}
 
-		@Override
-		public void asyncparticles$postTick(long address) {
-   			float alpha = 0.6F - this.age * 0.125f;
+		public int asyncparticles$getOColor() {
+			float alpha = 0.6F - (this.age - 1.0F) * 0.125f;
+			return ARGB.color( // ABGR
+				(int) (alpha * 255.0f),
+				(int) (bCol * 255.0f),
+				(int) (gCol * 255.0f),
+				(int) (rCol * 255.0f));
+		}
+
+		public int asyncparticles$getColor(int oColor) {
+			float alpha = 0.6F - this.age * 0.25F * 0.5F;
 			this.setAlpha(alpha);
-			MemoryUtil.memPutByte(address + oCOLOR_ALPHA_OFFSET, (byte) (0.6f * 255f - (this.age - 1) * (0.125f * 255f)));
-			MemoryUtil.memPutByte(address + COLOR_ALPHA_OFFSET, (byte) (alpha * 255f));
+			return ARGB.color((int) (alpha * 255.0f), oColor);
 		}
 	}
 }

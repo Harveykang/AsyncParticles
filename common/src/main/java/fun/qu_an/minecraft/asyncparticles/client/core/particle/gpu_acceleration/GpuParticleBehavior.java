@@ -7,7 +7,7 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.IParticleRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.TickAndAppendParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.ParticleRenderer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
@@ -194,7 +194,7 @@ public class GpuParticleBehavior {
 	}
 
 	public IParticleRenderer createRenderer() {
-		if (GLCaps.tfSupport.isSupported()) return new TickAndAppendParticleRenderer(ConfigHelper.getParticleLimit());
+		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer(ConfigHelper.getParticleLimit());
 //		if (GLCaps.tfSupport.isSupported()) return new ParticleMultiRenderer();
 //		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer();
 		throw new IllegalStateException("No compatible particle renderer found");

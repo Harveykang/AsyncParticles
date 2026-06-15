@@ -6,6 +6,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionTracker;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
@@ -17,7 +18,6 @@ import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleGroup;
-import net.minecraft.client.particle.QuadParticleGroup;
 import net.minecraft.client.particle.TrackingEmitter;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
@@ -86,7 +86,7 @@ public class AsyncTickBehavior {
 		if (particleAddon.asyncparticles$isTickSync()) {
 			return false;
 		}
-		if (particleAddon.asyncparticles$isTicked()) {
+		if (ConfigHelper.isAsyncTickParticle() && particleAddon.asyncparticles$isTicked()) {
 			particleAddon.asyncparticles$resetTicked();
 			return false;
 		}
@@ -170,7 +170,7 @@ public class AsyncTickBehavior {
 			tickTaskHelper.waitForCompletion();
 		}
 		this.isTailTick = isTailTick;
-		if (!ConfigHelper.isTickAsync()) {
+		if (!ConfigHelper.isAsyncTickParticle()) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -183,7 +183,7 @@ public class AsyncTickBehavior {
 		}
 		Collection<ParticleGroup<?>> groups = mc.particleEngine.particles.values();
 		for (ParticleGroup<?> group : groups) {
-			if (!groups.isEmpty()) {
+			if (!groups.isEmpty() && !(group instanceof GpuParticleGroup)) {
 				cleanupTaskHelper.submitImmediately(((ParticleGroupAddition) group)::asyncparticles$removeDeadParticles);
 			}
 		}
@@ -193,7 +193,7 @@ public class AsyncTickBehavior {
 		});
 	}
 
-	private void doEmittersRemoveIf(Queue<? extends TrackingEmitter> queue) {
+	public void doEmittersRemoveIf(Queue<? extends TrackingEmitter> queue) {
 		if (ConfigHelper.isParallelQueueRemoval()) {
 			((IterationSafeEvictingQueue<? extends TrackingEmitter>) queue)
 				.parallelRemoveIf(particle -> !particle.isAlive(),
@@ -209,7 +209,7 @@ public class AsyncTickBehavior {
 		cleanupTaskHelper.waitForCompletion();
 		Minecraft mc = Minecraft.getInstance();
 		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
-		if (!ConfigHelper.isTickAsync()) {
+		if (!ConfigHelper.isAsyncTickParticle()) {
 			tryReload();
 			tryDebug();
 			if (levelRunning) {
@@ -326,7 +326,7 @@ public class AsyncTickBehavior {
 	}
 
 	public boolean shouldTickParticleEngine() {
-		if (isParticlePhase() || !ConfigHelper.isTickAsync()) {
+		if (isParticlePhase() || !ConfigHelper.isAsyncTickParticle()) {
 			return true;
 		}
 		throw new IllegalStateException("ParticleEngine.tick() called outside the particle phase unexpectedly.");

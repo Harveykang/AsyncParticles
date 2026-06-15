@@ -69,8 +69,6 @@ public class TickParticleRecursiveAction<T extends Particle> extends RecursiveAc
 				}
 				if (shouldTick) {
 					try {
-						// We must ensure `tickParticle` method appear once in this method,
-						// otherwise the other mod's mixins will not work properly.
 						group.tickParticle(particle);
 					} catch (Throwable t) {
 						ReportedException re = AsyncTickBehavior.getInstance().onTickParticleException(particle, t);

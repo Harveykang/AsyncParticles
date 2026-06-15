@@ -70,9 +70,9 @@ dependencies {
 //    /* Particle Rain/Pretty Rain */
 //    compileOnly "maven.modrinth:particle-rain:v4-beta.5+1.21.11-fabric"
 ////    localRuntime "maven.modrinth:particle-rain:3.3.6"
-////    localRuntime("dev.isxander:yet-another-config-lib:3.7.1+1.21.6-fabric"){
-////        exclude(group: "net.fabricmc.fabric-api")
-////    }
+    localRuntime("dev.isxander:yet-another-config-lib:3.9.4+26.1-fabric"){
+        exclude(group: "net.fabricmc.fabric-api")
+    }
 //
 //    /* Effectual */
 ////    localRuntime 'maven.modrinth:effectual:1.1.0-1.21.8'
@@ -124,7 +124,7 @@ dependencies {
     localRuntime "maven.modrinth:cosy-critters:v0.3.2+26.1-fabric"
 
     /* Particle Interactions */
-    localRuntime "maven.modrinth:particle-interactions:0.9.5+26.1-fabric"
+//    localRuntime "maven.modrinth:particle-interactions:0.9.5+26.1-fabric"
 }
 
 processResources {
