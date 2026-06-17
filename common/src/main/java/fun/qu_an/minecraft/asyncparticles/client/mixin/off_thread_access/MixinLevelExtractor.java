@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.extract.LevelExtractor;
 import net.minecraft.core.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = LevelRenderer.class, priority = 500)
-public abstract class MixinLevelRenderer {
+@Mixin(value = LevelExtractor.class, priority = 500)
+public abstract class MixinLevelExtractor {
 	@Shadow
 	protected abstract void setSectionDirty(int i, int j, int k, boolean bl);
 
@@ -22,12 +22,6 @@ public abstract class MixinLevelRenderer {
 
 	@Shadow
 	public abstract void setSectionRangeDirty(int i, int j, int k, int l, int m, int n);
-
-	@Shadow
-	public abstract void destroyBlockProgress(int i, BlockPos blockPos, int j);
-
-	@Shadow
-	public abstract void onSectionBecomingNonEmpty(long sectionNode);
 
 	@Inject(method = "setSectionDirty(IIIZ)V", at = @At("HEAD"), cancellable = true)
 	public void injectSetSectionDirty(int i, int j, int k, boolean bl, CallbackInfo ci) {
@@ -58,22 +52,6 @@ public abstract class MixinLevelRenderer {
 		if (ThreadUtil.isOnParticleThread()) {
 			ci.cancel();
 			ThreadUtil.enqueueClientTask(() -> this.setSectionRangeDirty(i, j, k, l, m, n));
-		}
-	}
-
-	@Inject(method = "onSectionBecomingNonEmpty", at = @At("HEAD"), cancellable = true)
-	public void injectOnSectionBecomingNonEmpty(long sectionNode, CallbackInfo ci) {
-		if (ThreadUtil.isOnParticleThread()) {
-			ci.cancel();
-			ThreadUtil.enqueueClientTask(() -> this.onSectionBecomingNonEmpty(sectionNode));
-		}
-	}
-
-	@Inject(method = "destroyBlockProgress", at = @At("HEAD"), cancellable = true)
-	public void injectDestroyBlockProgress(int id, BlockPos pos, int progress, CallbackInfo ci) {
-		if (ThreadUtil.isOnParticleThread()) {
-			ci.cancel();
-			ThreadUtil.enqueueClientTask(() -> this.destroyBlockProgress(id, pos, progress));
 		}
 	}
 }

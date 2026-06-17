@@ -1,53 +1,8 @@
-package fun.qu_an.minecraft.asyncparticles.client.compat;
+package fun.qu_an.minecraft.asyncparticles.client.core.backend;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import org.lwjgl.opengl.*;
 
-import java.util.List;
-
 public class GLCaps {
-	public static final boolean supportsExplicitAttribLocation;
-	public static final boolean supportsDirectStateAccess;
-	public static final boolean supportsARBVertexAttribBinding;
-	public static final TfSupport tfSupport;
-	public static final CsSupport csSupport;
-
-	static {
-		GLCapabilities glCaps = GL.getCapabilities();
-		supportsExplicitAttribLocation = glCaps.OpenGL33 ||
-			glCaps.GL_ARB_explicit_attrib_location; // FIXME fix this!!!
-		List<String> enabledExtensions = RenderSystem.getDevice().getEnabledExtensions();
-		supportsDirectStateAccess = enabledExtensions.contains("GL_ARB_direct_state_access");
-		supportsARBVertexAttribBinding = enabledExtensions.contains("GL_ARB_vertex_attrib_binding");
-		if (glCaps.OpenGL45) {
-			tfSupport = new TfSupport.GL_45();
-		} else if (glCaps.OpenGL40) {
-			tfSupport = new TfSupport.GL_40();
-		} else if (glCaps.GL_ARB_transform_feedback2) {
-			tfSupport = new TfSupport.ARB_2();
-		} else if (glCaps.OpenGL30) {
-			tfSupport = new TfSupport.GL_30();
-		} else {
-			tfSupport = new TfSupport.Unsupported(); // impossible
-		}
-		if (glCaps.OpenGL43) {
-			csSupport = new CsSupport.GL_43();
-		} else if (glCaps.GL_ARB_compute_shader &&
-			glCaps.GL_ARB_shader_storage_buffer_object &&
-			glCaps.GL_ARB_shader_atomic_counters) {
-			csSupport = new CsSupport.ARB();
-		} else {
-			csSupport = new CsSupport.Unsupported();
-		}
-	}
-
-	public static boolean supportsGpuAcceleration() {
-		return (tfSupport.isSupported()) && supportsExplicitAttribLocation;
-	}
-
-	public static void init() {
-	}
-
 	public interface CsSupport {
 		boolean isSupported();
 
@@ -218,7 +173,7 @@ public class GLCaps {
 
 			@Override
 			public void glBindTransformFeedbackBufferBase(int tf, int index, int vbo) {
-				if (supportsDirectStateAccess) {
+				if (BackendCaps.GL_ARB_direct_state_access) {
 					ARBDirectStateAccess.glTransformFeedbackBufferBase(tf, index, vbo);
 				} else {
 					GL30C.glBindBufferBase(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, vbo);
@@ -227,7 +182,7 @@ public class GLCaps {
 
 			@Override
 			public void glBindTransformFeedbackBufferRange(int tf, int index, int vbo, long offset, long size) {
-				if (supportsDirectStateAccess){
+				if (BackendCaps.GL_ARB_direct_state_access){
 					ARBDirectStateAccess.glTransformFeedbackBufferRange(tf, index, vbo, offset, size);
 				} else {
 					GL30C.glBindBufferRange(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, vbo, offset, size);

@@ -2,6 +2,14 @@ pluginManagement {
     repositories {
         maven { url "https://maven.fabricmc.net/" }
         maven { url "https://maven.architectury.dev/" }
+        maven {
+            name = "Maven for PR #3198" // https://github.com/neoforged/NeoForge/pull/3198
+            url = uri("https://prmaven.neoforged.net/NeoForge/pr3198")
+            content {
+                includeModule("net.neoforged", "neoforge")
+                includeModule("net.neoforged", "testframework")
+            }
+        }
         maven { url "https://maven.neoforged.net/releases" }
         maven { url "https://maven.neoforged.net/snapshots" }
         gradlePluginPortal()

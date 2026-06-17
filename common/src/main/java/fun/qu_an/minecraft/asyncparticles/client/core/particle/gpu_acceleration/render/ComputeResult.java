@@ -24,5 +24,9 @@ public record ComputeResult(GpuBuffer buffer, int totalCount, ParticleSlice[] sl
 		public int indexCount() {
 			return count * 6;
 		}
+
+		public int indexOffset() {
+			return baseCount * 6;
+		}
 	}
 }

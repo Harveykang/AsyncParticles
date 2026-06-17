@@ -41,14 +41,14 @@ dependencies {
 
     /* APIs */
 //    localRuntime 'maven.modrinth:architectury-api:17.0.6+fabric'
-    localRuntime("me.shedaniel.cloth:cloth-config-fabric:26.1.154") {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
+//    localRuntime("me.shedaniel.cloth:cloth-config-fabric:26.1.154") {
+//        exclude(group: "net.fabricmc.fabric-api")
+//    }
 //    localRuntime("io.wispforest:owo-lib:0.12.21+1.21.6") {
 //        exclude(group: "net.fabricmc.fabric-api")
 //    }
-    compileOnly 'maven.modrinth:modmenu:18.0.0-beta.1'
-    localRuntime 'maven.modrinth:modmenu:18.0.0-beta.1'
+    compileOnly 'maven.modrinth:modmenu:20.0.0-beta.2'
+    localRuntime 'maven.modrinth:modmenu:20.0.0-beta.2'
 //    localRuntime 'maven.modrinth:fabric-permissions-api:0.6.1'
 //    localRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
 //
@@ -56,23 +56,23 @@ dependencies {
 //    compileOnly "maven.modrinth:sodium:mc26.1.2-0.8.12-fabric"
 //    compileOnly 'maven.modrinth:iris:1.10.9+26.1-fabric'
 //    compileOnly 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+fabric'
-    localRuntime "maven.modrinth:sodium:mc26.1.2-0.8.12-fabric"
-    localRuntime 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+fabric'
-    localRuntime 'maven.modrinth:iris:1.10.9+26.1-fabric'
-    localRuntime "org.antlr:antlr4-runtime:4.13.1"
-    localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
-    localRuntime "org.anarres:jcpp:1.4.14"
+//    localRuntime "maven.modrinth:sodium:mc26.1.2-0.8.12-fabric"
+//    localRuntime 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+fabric'
+//    localRuntime 'maven.modrinth:iris:1.10.9+26.1-fabric'
+//    localRuntime "org.antlr:antlr4-runtime:4.13.1"
+//    localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
+//    localRuntime "org.anarres:jcpp:1.4.14"
 //    localRuntime 'maven.modrinth:scalablelux:0.1.6+fabric.c25518a'
-    localRuntime 'maven.modrinth:spark:1.10.172-fabric'
+//    localRuntime 'maven.modrinth:spark:1.10.172-fabric'
 //    compileOnly 'maven.modrinth:moreculling:kWU8mVq5' // 1.4.0-beta.1
 ////    localRuntime 'maven.modrinth:moreculling:ESxkwc6w' // 1.4.0-beta.1
 //
 //    /* Particle Rain/Pretty Rain */
 //    compileOnly "maven.modrinth:particle-rain:v4-beta.5+1.21.11-fabric"
 ////    localRuntime "maven.modrinth:particle-rain:3.3.6"
-    localRuntime("dev.isxander:yet-another-config-lib:3.9.4+26.1-fabric"){
-        exclude(group: "net.fabricmc.fabric-api")
-    }
+//    localRuntime("dev.isxander:yet-another-config-lib:3.9.4+26.1-fabric"){
+//        exclude(group: "net.fabricmc.fabric-api")
+//    }
 //
 //    /* Effectual */
 ////    localRuntime 'maven.modrinth:effectual:1.1.0-1.21.8'
@@ -115,13 +115,13 @@ dependencies {
 //    localRuntime "maven.modrinth:immediatelyfast:1.11.0+1.21.7-fabric"
 
     /* Particle Rain */
-    localRuntime "maven.modrinth:particle-rain:v4-beta.10+26.1-fabric"
+//    localRuntime "maven.modrinth:particle-rain:v4-beta.10+26.1-fabric"
 
     /* A Good Place */
-    localRuntime "maven.modrinth:a-good-place:EtPUeDP1" // 1.3.7
+//    localRuntime "maven.modrinth:a-good-place:EtPUeDP1" // 1.3.7
 
     /* Cosy Critters */
-    localRuntime "maven.modrinth:cosy-critters:v0.3.2+26.1-fabric"
+//    localRuntime "maven.modrinth:cosy-critters:v0.3.2+26.1-fabric"
 
     /* Particle Interactions */
 //    localRuntime "maven.modrinth:particle-interactions:0.9.5+26.1-fabric"

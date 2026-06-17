@@ -4,7 +4,6 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGrou
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
 import it.unimi.dsi.fastutil.HashCommon;
 import net.minecraft.ReportedException;
@@ -22,8 +21,8 @@ public class TickParticleRecursiveAction<T extends Particle> extends RecursiveAc
 	private final int depth;
 	private final boolean isGpu;
 
-	public TickParticleRecursiveAction(ParticleGroup<?> group, Spliterator<T> spliterator) {
-		this(group, spliterator, 0, group instanceof GpuParticleGroup);
+	public TickParticleRecursiveAction(ParticleGroup<?> group, Spliterator<T> spliterator, boolean isGpu) {
+		this(group, spliterator, 0, isGpu);
 	}
 
 	private TickParticleRecursiveAction(ParticleGroup<?> group, Spliterator<T> spliterator, int depth, boolean isGpu) {

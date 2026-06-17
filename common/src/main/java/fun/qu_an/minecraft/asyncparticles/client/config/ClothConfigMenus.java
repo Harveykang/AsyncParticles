@@ -1,7 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.ClothConfigMixinMenus;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
@@ -180,7 +181,7 @@ class ClothConfigMenus {
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.gpuAcceleration.tooltip"))
 				// todo add gpu acceleration requirement
 				.setSaveConsumer(newValue -> newConfig.rendering.gpuAcceleration = newValue)
-				.setRequirement(GLCaps::supportsGpuAcceleration)
+				.setRequirement(GpuParticleBehavior.getInstance()::supportsGpuAcceleration)
 				.build())
 			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.appendNewParticlesToRenderer"),
@@ -305,17 +306,17 @@ class ClothConfigMenus {
 			} catch (Exception e) {
 				AsyncParticlesConfig.LOGGER.error("Failed to save config", e);
 				Minecraft mc = Minecraft.getInstance();
-				Screen configScreen = mc.screen;
+				Screen configScreen = mc.gui.screen();
 				ThreadUtil.enqueueClientTask(() -> {
-					Screen prevScreen = mc.screen;
-					mc.setScreen(new FallbackScreen(
+					Screen prevScreen = mc.gui.screen();
+					mc.gui.setScreen(new FallbackScreen(
 						null,
 						Component.translatable("gui.asyncparticles.error"),
 						Component.translatable("gui.asyncparticles.failed-to-save", e.toString()),
 						Component.translatable("gui.back"),
-						current -> Minecraft.getInstance().setScreen(configScreen),
+						_ -> mc.gui.setScreen(configScreen),
 						Component.translatable("gui.continue"),
-						current -> Minecraft.getInstance().setScreen(prevScreen)));
+						_ -> mc.gui.setScreen(prevScreen)));
 				});
 			}
 			AsyncTickBehavior.getInstance().reloadLater();

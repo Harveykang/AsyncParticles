@@ -28,10 +28,6 @@ public class MixinParticleEngine implements ParticleEngineAddon {
 		if (!(renderOrder instanceof ArrayList<ParticleRenderType>)) {
 			renderOrder = RENDER_ORDER = new ArrayList<>(RENDER_ORDER);
 		}
-		if (particleRenderType == GpuParticleBehavior.getInstance().ofRenderType(ParticleRenderType.SINGLE_QUADS)) {
-			renderOrder.add(renderOrder.indexOf(ParticleRenderType.SINGLE_QUADS), particleRenderType);
-		} else {
-			renderOrder.add(particleRenderType);
-		}
+		renderOrder.add(particleRenderType);
 	}
 }

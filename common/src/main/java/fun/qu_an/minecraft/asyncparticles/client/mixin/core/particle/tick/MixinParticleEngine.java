@@ -2,25 +2,25 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
+import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickParticleGroupBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleGroup;
-import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.particle.*;
+import net.minecraft.core.particles.ParticleLimit;
 import net.minecraft.util.profiling.Profiler;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 @Mixin(ParticleEngine.class)
 public abstract class MixinParticleEngine implements ParticleEngineAddon {
@@ -39,6 +39,9 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	@Shadow
 	protected abstract ParticleGroup<?> createParticleGroup(ParticleRenderType type);
 
+	@Shadow
+	protected abstract void updateCount(ParticleLimit limit, int change);
+
 	/**
 	 * @author Harvey_Husky
 	 * @reason Too many changes, need to rewrite the entire method.
@@ -49,10 +52,11 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			return;
 		}
 
+		// Keep local var table as they were
 		Particle particle;
 		boolean tickAsync = ConfigHelper.isAsyncTickParticle();
 		this.particles.forEach((renderType, group) -> {
-			if (group.isEmpty() || group instanceof GpuParticleGroup) {
+			if (group.isEmpty()) {
 				return;
 			}
 			Profiler.get().push(renderType.name());
@@ -74,46 +78,41 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			AsyncTickBehavior.getInstance().doEmittersRemoveIf(trackingEmitters);
 		}
 
-		boolean gpuParticles = tickAsync && ConfigHelper.isGpuParticles();
 		if (!particlesToAdd.isEmpty()) {
-			boolean appendNewParticlesToRenderer = ConfigHelper.isAppendNewParticlesToRenderer();
-			// Write like this to be compatible with e.g. Spectrum mod
 			//noinspection ForLoopReplaceableByForEach
 			for (Iterator<Particle> iterator = particlesToAdd.iterator(); iterator.hasNext(); ) {
 				particle = iterator.next();
-				boolean canComputeFast;
-				if (!gpuParticles) {
-					canComputeFast = false;
-				} else {
-					canComputeFast = particle instanceof SingleQuadParticle sqp && GpuParticleBehavior.getInstance().canRenderFast(sqp);
+				if (!this.particles.computeIfAbsent(particle.getGroup(), this::createParticleGroup).add(particle)) {
+					particle.getParticleLimit().ifPresent(options -> this.updateCount(options, -1));
 				}
-				ParticleRenderType renderType = particle.getGroup();
-				ParticleGroup<?> group;
-				if (!canComputeFast) {
-					group = this.particles.computeIfAbsent(renderType, this::createParticleGroup);
-				} else {
-					ParticleRenderType gpuRenderType = GpuParticleBehavior.getInstance().ofRenderType(renderType);
-					group = this.particles.computeIfAbsent(gpuRenderType, gpuRenderType1 ->
-						GpuParticleBehavior.getInstance().getOrCreateGroup(this, gpuRenderType1));
-				}
-				group.add(particle);
 			}
 			particlesToAdd.clear();
 		}
-		if (gpuParticles) {
+
+		if (ConfigHelper.isGpuParticles()) {
 			GpuParticleBehavior.getInstance().swapAllBuffers();
-			GpuParticleBehavior.getInstance().setGpuParticleLimit(ConfigHelper.getParticleLimit());
-			Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-			GpuParticleBehavior.getInstance().setCameraPos(camera.position()); // Set the next camera position
-			GpuParticleBehavior.getInstance().gpuParticles.forEach(((renderType, gpuGroup) -> {
-				if (gpuGroup.isEmpty()) {
-					return;
+			GpuParticleBehavior.getInstance().setUpNextTickRendering(ConfigHelper.getParticleLimit());
+			IParticleRenderer renderer = GpuParticleBehavior.getInstance().getOrCreateRenderer(ParticleRenderType.SINGLE_QUADS);
+			renderer.mapBuffer();
+			AsyncTickBehavior.getInstance().dispatch(() -> {
+				Map<SingleQuadParticle.Layer, Collection<SingleQuadParticle>> particles = new Reference2ReferenceOpenHashMap<>();
+				for (Map.Entry<ParticleRenderType, ParticleGroup<?>> entry : this.particles.entrySet()) {
+					ParticleGroup<?> particleGroup = entry.getValue();
+					if (!(particleGroup instanceof GpuParticleGroup gpuParticleGroup)) {
+						continue;
+					}
+					Queue<SingleQuadParticle> gpuParticles = gpuParticleGroup.asyncparticles$getGpuParticles();
+					if (gpuParticles.isEmpty()) {
+						continue;
+					}
+					int size = Math.max(8, gpuParticles.size() >> 1);
+					for (SingleQuadParticle tsp : gpuParticles) {
+						particles.computeIfAbsent(tsp.getLayer(), _ -> new ReferenceArrayList<>(size)).add(tsp);
+					}
 				}
-				Profiler.get().push(renderType.name());
-				gpuGroup.mapBuffers();
-				AsyncTickBehavior.getInstance().dispatch(gpuGroup::tickParticles);
-				Profiler.get().pop();
-			}));
+				renderer.tick(GpuParticleBehavior.getInstance().getCameraPos(), particles);
+			});
+
 		}
 	}
 

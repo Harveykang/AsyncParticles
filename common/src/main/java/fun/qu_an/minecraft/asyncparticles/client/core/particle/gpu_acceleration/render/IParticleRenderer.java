@@ -8,15 +8,13 @@ import java.io.Closeable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
-import java.util.function.Supplier;
 
 public interface IParticleRenderer extends Closeable {
 	void beginFrame();
 
 	void unmapBufferAndSwap(Vec3 prevGpuCamPos);
 
-	void mapBuffer(Supplier<Set<SingleQuadParticle.Layer>> potentialLayer);
+	void mapBuffer();
 
 	boolean isMapped();
 
@@ -26,7 +24,7 @@ public interface IParticleRenderer extends Closeable {
 	 * Called per tick.
 	 * Can be called on non-main thread.
 	 */
-	void tick(Vec3 cameraPos, Map<SingleQuadParticle.Layer, Queue<SingleQuadParticle>> particles);
+	void tick(Vec3 cameraPos, Map<SingleQuadParticle.Layer, Collection<SingleQuadParticle>> particles);
 
 	/**
 	 * Called per frame.

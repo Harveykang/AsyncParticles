@@ -3,10 +3,9 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
-import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionTracker;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
@@ -183,7 +182,7 @@ public class AsyncTickBehavior {
 		}
 		Collection<ParticleGroup<?>> groups = mc.particleEngine.particles.values();
 		for (ParticleGroup<?> group : groups) {
-			if (!groups.isEmpty() && !(group instanceof GpuParticleGroup)) {
+			if (!groups.isEmpty()) {
 				cleanupTaskHelper.submitImmediately(((ParticleGroupAddition) group)::asyncparticles$removeDeadParticles);
 			}
 		}
@@ -274,7 +273,7 @@ public class AsyncTickBehavior {
 			[AsyncParticles Debug]
 			particle task count: %d,
 			particle limit: %d,
-			particles groups (render order, size/allocated):
+			particles groups (render order, size):
 			%s,
 			particles to add size: %d
 			sync particle types: %s,
@@ -285,17 +284,11 @@ public class AsyncTickBehavior {
 				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
 					.stream()
-					.collect(Collectors.toMap(Map.Entry::getKey, e -> {
-						Queue<?> queue = e.getValue().getAll();
-						if (queue instanceof IterationSafeEvictingQueue<?> q1) {
-							return queue.size() + "/" + q1.arraySize();
-						}
-						return queue.size() + "/" + "Unknown";
-					})),
+					.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().size())),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
 				syncParticleTypes.stream().map(Class::getName).toList(),
-				GLCaps.tfSupport.getClass().getSimpleName(),
-				GLCaps.supportsExplicitAttribLocation
+				BackendCaps.glTfSupport.getClass().getSimpleName(),
+				BackendCaps.GL_ARB_explicit_attrib_location
 			)));
 
 		debugConsumer = null;

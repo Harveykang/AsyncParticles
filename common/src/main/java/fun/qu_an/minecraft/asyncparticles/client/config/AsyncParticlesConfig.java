@@ -5,7 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.ChatFormatting;
@@ -91,14 +92,14 @@ public class AsyncParticlesConfig {
 			Component.translatable("gui.asyncparticles.menu-unavailable"),
 			Component.translatable("gui.asyncparticles.menu-unavailable.message"),
 			Component.translatable("gui.back"),
-			current -> Minecraft.getInstance().setScreen(current.parent),
+			current -> Minecraft.getInstance().gui.setScreen(current.parent),
 			Component.translatable("gui.asyncparticles.reload"),
-			current -> Minecraft.getInstance().setScreen(
+			current -> Minecraft.getInstance().gui.setScreen(
 				new ConfirmScreen(b -> {
 					MutableComponent msg = Component.translatable("gui.asyncparticles.menu-unavailable.message");
 					if (!b) {
 						current.message = msg;
-						Minecraft.getInstance().setScreen(current);
+						Minecraft.getInstance().gui.setScreen(current);
 						return;
 					}
 					try {
@@ -107,7 +108,7 @@ public class AsyncParticlesConfig {
 						current.message = msg.append("\n").append(
 							Component.translatable("gui.asyncparticles.failed-to-reload", e.toString())
 								.withStyle(ChatFormatting.DARK_RED));
-						Minecraft.getInstance().setScreen(current);
+						Minecraft.getInstance().gui.setScreen(current);
 						return;
 					} finally {
 						AsyncTickBehavior.getInstance().reloadLater();
@@ -115,7 +116,7 @@ public class AsyncParticlesConfig {
 					current.message = msg.append("\n").append(
 						Component.translatable("gui.asyncparticles.reload-successfully")
 							.withStyle(ChatFormatting.DARK_GREEN));
-					Minecraft.getInstance().setScreen(current);
+					Minecraft.getInstance().gui.setScreen(current);
 				},
 					Component.translatable("gui.asyncparticles.menu-unavailable"),
 					Component.translatable("gui.asyncparticles.reload-confirmation"))));
@@ -129,12 +130,12 @@ public class AsyncParticlesConfig {
 			br.setMessage(Component.translatable("gui.asyncparticles.reset")
 				.withStyle(ChatFormatting.RED));
 			fs.buttonRightTick = tickCallbacks[1];
-			fs.buttonRightCallback = current -> Minecraft.getInstance().setScreen(
+			fs.buttonRightCallback = current -> Minecraft.getInstance().gui.setScreen(
 				new ConfirmScreen(b -> {
 					MutableComponent msg = Component.translatable("gui.asyncparticles.menu-unavailable.message");
 					if (!b) {
 						current.message = msg;
-						Minecraft.getInstance().setScreen(current);
+						Minecraft.getInstance().gui.setScreen(current);
 						return;
 					}
 					try {
@@ -143,7 +144,7 @@ public class AsyncParticlesConfig {
 						current.message = msg.append("\n").append(
 							Component.translatable("gui.asyncparticles.failed-to-reset", e.toString())
 								.withStyle(ChatFormatting.DARK_RED));
-						Minecraft.getInstance().setScreen(current);
+						Minecraft.getInstance().gui.setScreen(current);
 						return;
 					} finally {
 						AsyncTickBehavior.getInstance().reloadLater();
@@ -151,7 +152,7 @@ public class AsyncParticlesConfig {
 					current.message = msg.append("\n").append(
 						Component.translatable("gui.asyncparticles.reset-successfully")
 							.withStyle(ChatFormatting.DARK_GREEN));
-					Minecraft.getInstance().setScreen(current);
+					Minecraft.getInstance().gui.setScreen(current);
 				},
 					Component.translatable("gui.asyncparticles.menu-unavailable"),
 					Component.translatable("gui.asyncparticles.reset-confirmation")
@@ -315,7 +316,7 @@ public class AsyncParticlesConfig {
 
 		static class Rendering {
 			RenderingMode particleRenderingMode = RenderingMode.SYNCHRONOUSLY;
-			boolean gpuAcceleration = GLCaps.supportsGpuAcceleration();
+			boolean gpuAcceleration = BackendCaps.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
 			int failPerSecLimit = 20;
 //			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
@@ -335,7 +336,7 @@ public class AsyncParticlesConfig {
 
 			private void flat() {
 				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
-				rendering$gpuAcceleration = gpuAcceleration && GLCaps.supportsGpuAcceleration();
+				rendering$gpuAcceleration = gpuAcceleration && BackendCaps.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
 				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 //				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);

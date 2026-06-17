@@ -8,6 +8,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -60,7 +61,7 @@ public abstract class MixinParticle implements LightCachedParticleAddon {
 		BlockPos blockPos = GameUtil.SHARED_POS.get().set(x, y, z);
 		int light;
 		try {
-			light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightCoords(level, blockPos) : 0;
+			light = level.hasChunkAt(blockPos) ? LightCoordsUtil.getLightCoords(level, blockPos) : 0;
 		} catch (MissingPaletteEntryException ignore) {
 			// chunk not loaded yet maybe, ignore
 			light = 0;
