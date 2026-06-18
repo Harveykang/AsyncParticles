@@ -14,12 +14,22 @@ accessible field net/minecraft/client/sounds/SoundEngine loaded Z
 accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;
 transitive-mutable field net/minecraft/client/particle/ParticleGroup particles Ljava/util/Queue;
 accessible class net/minecraft/client/renderer/feature/QuadParticleFeatureRenderer$PreparedGroup
+accessible field net/minecraft/client/renderer/culling/Frustum intersection Lorg/joml/FrustumIntersection;
 
-# blaze3d:OpenGL
+# Blaze3D
+accessible class com/mojang/blaze3d/pipeline/RenderPipeline
+accessible method com/mojang/blaze3d/pipeline/RenderPipeline <init> (Lnet/minecraft/resources/Identifier;Lnet/minecraft/resources/Identifier;Lnet/minecraft/resources/Identifier;Lnet/minecraft/client/renderer/ShaderDefines;Ljava/util/List;[Lcom/mojang/blaze3d/pipeline/ColorTargetState;Lcom/mojang/blaze3d/pipeline/DepthStencilState;Lcom/mojang/blaze3d/platform/PolygonMode;Z[Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/PrimitiveTopology;I)V
+accessible field com/mojang/blaze3d/systems/GpuDevice backend Lcom/mojang/blaze3d/systems/GpuDeviceBackend;
+## OpenGL
+accessible class com/mojang/blaze3d/opengl/GlDevice
+accessible class com/mojang/blaze3d/opengl/GlCommandEncoder
 accessible field com/mojang/blaze3d/opengl/GlBuffer MEMORY_POOL Lcom/mojang/jtracy/MemoryPool;
 accessible field com/mojang/blaze3d/opengl/GlBuffer handle I
 transitive-mutable field com/mojang/blaze3d/opengl/GlBuffer handle I
 accessible field com/mojang/blaze3d/buffers/GpuBuffer size J
 transitive-mutable  field com/mojang/blaze3d/buffers/GpuBuffer size J
-accessible class com/mojang/blaze3d/pipeline/RenderPipeline
-accessible method com/mojang/blaze3d/pipeline/RenderPipeline <init> (Lnet/minecraft/resources/Identifier;Lnet/minecraft/resources/Identifier;Lnet/minecraft/resources/Identifier;Lnet/minecraft/client/renderer/ShaderDefines;Ljava/util/List;[Lcom/mojang/blaze3d/pipeline/ColorTargetState;Lcom/mojang/blaze3d/pipeline/DepthStencilState;Lcom/mojang/blaze3d/platform/PolygonMode;Z[Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/PrimitiveTopology;I)V
+## Vulkan
+accessible field com/mojang/blaze3d/vulkan/VulkanGpuBuffer$Direct vmaAllocation J
+accessible field com/mojang/blaze3d/vulkan/VulkanGpuBuffer$Direct mappingRefCount I
+accessible field com/mojang/blaze3d/vulkan/VulkanCommandEncoder currentSubmitIndex J
+accessible method com/mojang/blaze3d/vulkan/VulkanCommandEncoder awaitSubmitCompletion (JJ)Z

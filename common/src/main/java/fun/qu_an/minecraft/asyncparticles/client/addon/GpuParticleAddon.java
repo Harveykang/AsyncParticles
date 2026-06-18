@@ -22,7 +22,7 @@ public interface GpuParticleAddon {
 		throw new IllegalStateException("Not implemented");
 	}
 
-	default float asyncparticles$getQuadSize(float partialTickTime) {
+	default float asyncparticles$getQuadSize(float deltaPartialTick) {
 		throw new IllegalStateException("Not implemented");
 	}
 
@@ -42,7 +42,7 @@ public interface GpuParticleAddon {
 		throw new IllegalStateException("Not implemented");
 	}
 
-	default int asyncparticles$getLightCoords(float partialTickTime) {
+	default int asyncparticles$getLightCoords(float deltaPartialTick) {
 		throw new IllegalStateException("Not implemented");
 	}
 

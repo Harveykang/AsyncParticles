@@ -24,8 +24,7 @@ public class ParticleHelper {
 	public static <T extends Particle> Queue<T> newParticleQueue(int initSize) {
 		return IterationSafeEvictingQueue.newInstance(
 			initSize,
-			AsyncParticlesConfig.MAX_PARTICLE_LIMIT,
-			AsyncTickBehavior.getInstance()::onEvict);
+			AsyncParticlesConfig.MAX_PARTICLE_LIMIT);
 	}
 
 	public static<T extends Particle> Queue<T> newBusyWaitParticleQueue() {
@@ -34,8 +33,7 @@ public class ParticleHelper {
 
 	public static<T extends Particle> Queue<T> newBusyWaitParticleQueue(int initSize) {
 		return BusyWaitEvictingQueue.newInstance(initSize,
-			AsyncParticlesConfig.MAX_PARTICLE_LIMIT,
-			AsyncTickBehavior.getInstance()::onEvict);
+			AsyncParticlesConfig.MAX_PARTICLE_LIMIT);
 	}
 
 	public static void onClearParticles() {

@@ -17,7 +17,7 @@ public abstract class MixinDustColorTransitionParticle extends SingleQuadParticl
 	}
 
 	@Shadow
-	protected abstract void lerpColors(float partialTickTime);
+	protected abstract void lerpColors(float deltaPartialTick);
 
 	public int asyncparticles$getOColor() {
 		lerpColors(0f);

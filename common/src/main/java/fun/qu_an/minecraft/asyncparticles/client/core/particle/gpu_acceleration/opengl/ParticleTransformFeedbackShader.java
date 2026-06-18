@@ -1,8 +1,7 @@
-package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.shader;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl;
 
 import com.mojang.blaze3d.opengl.GlConst;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
-import fun.qu_an.minecraft.asyncparticles.client.core.backend.GLCaps;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL30C;
 
@@ -18,7 +17,7 @@ public class ParticleTransformFeedbackShader {
 	protected ParticleTransformFeedbackShader() {
 		programId = ShaderCompiler.createShaderProgram(
 			GlConst.GL_VERTEX_SHADER,
-			"/assets/asyncparticles/particle_gpu_acceleration/particle_tf.vert",
+			"/assets/asyncparticles/particle_gpu_acceleration/gl_particle_transformfeedback.vert",
 			programId -> BackendCaps.glTfSupport.glTransformFeedbackVaryings(programId,
 				new String[]{
 					"Position_0", "UV0_0", "Color_0", "UV2_0",

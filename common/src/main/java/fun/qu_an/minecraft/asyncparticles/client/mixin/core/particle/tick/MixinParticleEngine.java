@@ -6,7 +6,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.IParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickParticleGroupBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
@@ -90,12 +90,12 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		}
 
 		if (ConfigHelper.isGpuParticles()) {
-			GpuParticleBehavior.getInstance().swapAllBuffers();
+			GpuParticleBehavior.getInstance().flushBufferAndSwap();
 			GpuParticleBehavior.getInstance().setUpNextTickRendering(ConfigHelper.getParticleLimit());
-			IParticleRenderer renderer = GpuParticleBehavior.getInstance().getOrCreateRenderer(ParticleRenderType.SINGLE_QUADS);
-			renderer.mapBuffer();
+			IParticleRenderer renderer = GpuParticleBehavior.getInstance().getOrCreateRenderer();
+			renderer.prepareBuffer();
 			AsyncTickBehavior.getInstance().dispatch(() -> {
-				Map<SingleQuadParticle.Layer, Collection<SingleQuadParticle>> particles = new Reference2ReferenceOpenHashMap<>();
+				Map<SingleQuadParticle.Layer, List<SingleQuadParticle>> particles = new Reference2ReferenceOpenHashMap<>();
 				for (Map.Entry<ParticleRenderType, ParticleGroup<?>> entry : this.particles.entrySet()) {
 					ParticleGroup<?> particleGroup = entry.getValue();
 					if (!(particleGroup instanceof GpuParticleGroup gpuParticleGroup)) {
@@ -106,11 +106,11 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 						continue;
 					}
 					int size = Math.max(8, gpuParticles.size() >> 1);
-					for (SingleQuadParticle tsp : gpuParticles) {
-						particles.computeIfAbsent(tsp.getLayer(), _ -> new ReferenceArrayList<>(size)).add(tsp);
+					for (SingleQuadParticle sqp : gpuParticles) {
+						particles.computeIfAbsent(sqp.getLayer(), _ -> new ReferenceArrayList<>(size)).add(sqp);
 					}
 				}
-				renderer.tick(GpuParticleBehavior.getInstance().getCameraPos(), particles);
+				renderer.tick(GpuParticleBehavior.getInstance().getPerTickCameraPos(), particles);
 			});
 
 		}

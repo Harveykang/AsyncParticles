@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
 
+import com.mojang.blaze3d.systems.GpuDevice;
+import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
@@ -68,13 +70,6 @@ public class AsyncTickBehavior {
 
 	public static AsyncTickBehavior getInstance() {
 		return INSTANCE;
-	}
-
-	public <T extends Particle> void onEvict(T particle) {
-		particle.getParticleLimit().ifPresent(limit -> Minecraft.getInstance().particleEngine.updateCount(limit, -1));
-		if (particle.isAlive()) {
-			particle.remove();
-		}
 	}
 
 	public boolean shouldRemove(Particle particle) {
@@ -153,10 +148,8 @@ public class AsyncTickBehavior {
 		if (t instanceof ReportedException re) {
 			return re;
 		}
-//		debugLater(LOGGER::info);
-//		tryDebug();
-//		AsyncRenderBehavior.getInstance().debugLater(LOGGER::info);
-//		AsyncRenderBehavior.getInstance().tryDebug();
+		debugLater(LOGGER::info);
+		tryDebug();
 		CrashReport crashReport = CrashReport.forThrowable(t, "Ticking Particle");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being ticked");
 		crashReportCategory.setDetail("Particle", particle::toString);
@@ -221,7 +214,6 @@ public class AsyncTickBehavior {
 		}
 		if (!isTailTick) {
 			tickTaskHelper.disposeTasks();
-			mc.particleEngine.particlesToAdd.forEach(this::onEvict);
 			mc.particleEngine.particlesToAdd.clear();
 		} else {
 			particlePhase = true;
@@ -269,16 +261,16 @@ public class AsyncTickBehavior {
 		if (debugConsumer == null) {
 			return;
 		}
+		GpuDevice device = RenderSystem.getDevice();
 		debugConsumer.accept(String.format("""
 			[AsyncParticles Debug]
-			particle task count: %d,
-			particle limit: %d,
-			particles groups (render order, size):
+			Particle task count: %d,
+			Particle limit: %d,
+			Particles groups (render order, size):
 			%s,
-			particles to add size: %d
-			sync particle types: %s,
-			glCapabilities: TransformFeedback: %s,
-			                ExplicitAttribLocation: %s"""
+			Particles to add size: %d
+			Sync particle types: %s,
+			Backend: %s"""
 			.formatted(
 				tickTaskHelper.taskCount(),
 				ConfigHelper.getParticleLimit(),
@@ -287,8 +279,14 @@ public class AsyncTickBehavior {
 					.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().size())),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
 				syncParticleTypes.stream().map(Class::getName).toList(),
-				BackendCaps.glTfSupport.getClass().getSimpleName(),
-				BackendCaps.GL_ARB_explicit_attrib_location
+				device.getDeviceInfo().backendName() + "{" + (BackendCaps.isGl()
+					? BackendCaps.glTfSupport.getClass().getSimpleName()
+					  + ", GL_ARB_explicit_attrib_location: " + BackendCaps.GL_ARB_explicit_attrib_location
+					  + ", GL_ARB_direct_state_access: " + BackendCaps.GL_ARB_direct_state_access
+					  + ", GL_ARB_vertex_attrib_binding: " + BackendCaps.GL_ARB_vertex_attrib_binding
+					: BackendCaps.vkCaps.getClass().getSimpleName())
+					+ "}, "
+					+ device.getDeviceInfo()
 			)));
 
 		debugConsumer = null;

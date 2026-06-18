@@ -2,17 +2,19 @@ package fun.qu_an.minecraft.asyncparticles.client.core.backend;
 
 import org.lwjgl.opengl.*;
 
-public class GLCaps {
-	public interface CsSupport {
-		boolean isSupported();
+public interface GLCaps {
+	interface CsSupport {
+		boolean isComputeShaderSupported();
 
 		void glBindShaderStorageBuffer(int ssbo);
 
 		void glBindShaderStorageBufferBase(int bindingPoint, int ssbo);
 
+		void glShaderStorageBufferData(int size, int usage);
+
 		class Unsupported implements CsSupport {
 			@Override
-			public boolean isSupported() {
+			public boolean isComputeShaderSupported() {
 				return false;
 			}
 
@@ -25,11 +27,16 @@ public class GLCaps {
 			public void glBindShaderStorageBufferBase(int bindingPoint, int ssbo) {
 				throw new UnsupportedOperationException();
 			}
+
+			@Override
+			public void glShaderStorageBufferData(int size, int usage) {
+				throw new UnsupportedOperationException();
+			}
 		}
 
 		class ARB implements CsSupport {
 			@Override
-			public boolean isSupported() {
+			public boolean isComputeShaderSupported() {
 				return true;
 			}
 
@@ -42,16 +49,21 @@ public class GLCaps {
 			public void glBindShaderStorageBufferBase(int bindingPoint, int ssbo) {
 				GL30C.glBindBufferBase(ARBShaderStorageBufferObject.GL_SHADER_STORAGE_BUFFER, bindingPoint, ssbo);
 			}
+
+			@Override
+			public void glShaderStorageBufferData(int size, int usage) {
+				GL15C.glBufferData(ARBShaderStorageBufferObject.GL_SHADER_STORAGE_BUFFER, size, usage);
+			}
 		}
 
 		class GL_43 extends ARB {
 		}
 	}
 
-	public interface TfSupport {
-		boolean isSupportsTfo();
+	interface TfSupport {
+		boolean isTfObjectSupported();
 
-		boolean isSupported();
+		boolean isTfSupported();
 
 		int genTransformFeedback();
 
@@ -77,12 +89,12 @@ public class GLCaps {
 
 		class Unsupported implements TfSupport {
 			@Override
-			public boolean isSupportsTfo() {
+			public boolean isTfObjectSupported() {
 				return false;
 			}
 
 			@Override
-			public boolean isSupported() {
+			public boolean isTfSupported() {
 				return false;
 			}
 
@@ -144,12 +156,12 @@ public class GLCaps {
 
 		class GL_30 implements TfSupport {
 			@Override
-			public boolean isSupportsTfo() {
+			public boolean isTfObjectSupported() {
 				return false;
 			}
 
 			@Override
-			public boolean isSupported() {
+			public boolean isTfSupported() {
 				return true;
 			}
 
@@ -217,7 +229,7 @@ public class GLCaps {
 
 		class ARB_2 extends GL_30 {
 			@Override
-			public boolean isSupportsTfo() {
+			public boolean isTfObjectSupported() {
 				return true;
 			}
 
@@ -252,7 +264,7 @@ public class GLCaps {
 
 		class GL_40 extends GL_30 {
 			@Override
-			public boolean isSupportsTfo() {
+			public boolean isTfObjectSupported() {
 				return true;
 			}
 

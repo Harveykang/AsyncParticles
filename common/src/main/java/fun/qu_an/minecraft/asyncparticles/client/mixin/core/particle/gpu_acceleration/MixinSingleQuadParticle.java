@@ -57,8 +57,8 @@ public abstract class MixinSingleQuadParticle extends Particle implements GpuPar
 		return true;
 	}
 
-	public float asyncparticles$getQuadSize(float partialTickTime) {
-		return getQuadSize(partialTickTime);
+	public float asyncparticles$getQuadSize(float deltaPartialTick) {
+		return getQuadSize(deltaPartialTick);
 	}
 
 	public float asyncparticles$getU0() {
@@ -77,8 +77,8 @@ public abstract class MixinSingleQuadParticle extends Particle implements GpuPar
 		return getV1();
 	}
 
-	public int asyncparticles$getLightCoords(float partialTickTime) {
-		return getLightCoords(partialTickTime);
+	public int asyncparticles$getLightCoords(float deltaPartialTick) {
+		return getLightCoords(deltaPartialTick);
 	}
 
 	public double asyncparticles$getXo() {

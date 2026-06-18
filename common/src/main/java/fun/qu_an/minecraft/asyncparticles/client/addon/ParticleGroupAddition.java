@@ -5,10 +5,6 @@ public interface ParticleGroupAddition {
 		throw new AssertionError("Must be implemented!");
 	}
 
-	default void asyncparticles$clear() {
-		throw new AssertionError("Must be implemented!");
-	}
-
 	default void asyncparticles$tickSyncParticles() {
 		throw new AssertionError("Must be implemented!");
 	}

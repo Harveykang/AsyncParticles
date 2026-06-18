@@ -48,21 +48,21 @@ dependencies {
 
     /* APIs */
 //    localRuntime 'maven.modrinth:architectury-api:17.0.8+neoforge'
-    localRuntime "me.shedaniel.cloth:cloth-config-neoforge:26.1.154"
+    localRuntime "me.shedaniel.cloth:cloth-config-neoforge:26.2.155"
 //    localRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
 //
 //    /* Performance */
     localRuntime "maven.modrinth:spark:1.10.172-neoforge"
-//    compileOnly 'maven.modrinth:sodium:mc26.1.2-0.8.12-neoforge'
-    localRuntime 'maven.modrinth:sodium:mc26.1.2-0.8.12-neoforge'
-    localRuntime 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+neoforge'
+//    compileOnly 'maven.modrinth:sodium:mc26.2-0.9.0-neoforge'
+    localRuntime 'maven.modrinth:sodium:mc26.2-0.9.0-neoforge'
+    localRuntime 'maven.modrinth:sodium-extra:mc26.2-0.8.9+neoforge'
 //
 //    compileOnly "maven.modrinth:iris:1.10.9+26.1-neoforge"
-    localRuntime "maven.modrinth:iris:1.10.9+26.1-neoforge"
+//    localRuntime "maven.modrinth:iris:1.10.9+26.1-neoforge"
 //    localRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
-    localRuntime "org.antlr:antlr4-runtime:4.13.1"
-    localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
-    localRuntime "org.anarres:jcpp:1.4.14"
+//    localRuntime "org.antlr:antlr4-runtime:4.13.1"
+//    localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
+//    localRuntime "org.anarres:jcpp:1.4.14"
 //    localRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
 //    compileOnly 'maven.modrinth:moreculling:1.4.0-beta.1'
 //    localRuntime 'maven.modrinth:moreculling:1.4.0-beta.1'

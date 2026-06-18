@@ -192,4 +192,3 @@ tasks.register('build') {
     dependsOn subprojects.collect { it.tasks.named('build') }
     finalizedBy mergeJars
 }
-

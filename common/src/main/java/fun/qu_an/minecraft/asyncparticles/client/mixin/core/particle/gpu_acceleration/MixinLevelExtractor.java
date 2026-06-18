@@ -18,8 +18,8 @@ public class MixinLevelExtractor {
 	                          float deltaPartialTick,
 	                          CallbackInfo ci) {
 		if (ConfigHelper.isGpuParticles()) {
-			GpuParticleBehavior.getInstance().beginFrame();
-			GpuParticleBehavior.getInstance().setPartialTick(deltaPartialTick);
+			GpuParticleBehavior.getInstance().beginFrame(deltaPartialTick);
+			GpuParticleBehavior.getInstance().compute();
 		}
 	}
 }

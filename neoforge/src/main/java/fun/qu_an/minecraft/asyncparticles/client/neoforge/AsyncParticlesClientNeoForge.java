@@ -138,7 +138,7 @@ public final class AsyncParticlesClientNeoForge {
 			.then(literal("config")
 				.executes(context -> {
 					Minecraft mc = Minecraft.getInstance();
-					ThreadUtil.enqueueClientTask(() -> mc.setScreen(AsyncParticlesConfig.newConfigScreen(null)));
+					ThreadUtil.enqueueClientTask(() -> mc.gui.setScreen(AsyncParticlesConfig.newConfigScreen(null)));
 					return 1;
 				}))
 			.then(literal("reload")

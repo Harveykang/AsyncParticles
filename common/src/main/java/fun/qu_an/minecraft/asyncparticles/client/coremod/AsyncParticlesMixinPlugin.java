@@ -81,7 +81,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "compat" -> throw new IllegalStateException("Unknown fabric compat mixin: " + mixinClassName);
 				default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 			};
-			case "core", "off_thread_access" -> true;
+			case "core", "off_thread_access", "accessor" -> true;
 			case "compat" -> switch (split[1]) {
 				case "modernui" -> MODERN_UI_LOADED;
 				case "sodium" -> SODIUM_LOADED;

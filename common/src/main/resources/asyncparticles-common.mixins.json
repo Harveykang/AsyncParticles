@@ -72,5 +72,6 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "accessor.AccessorFrustumIntersection"
   ]
 }

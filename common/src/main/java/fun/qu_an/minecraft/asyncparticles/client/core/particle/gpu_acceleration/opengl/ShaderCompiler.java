@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.shader;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl;
 
 import com.mojang.blaze3d.opengl.GlConst;
 import org.apache.commons.io.IOUtils;

@@ -37,10 +37,10 @@ public abstract class MixinAsyncTick_AsyncTickableParticleGroup implements Async
 	@Inject(method = "extractRenderState", require = 0, at = @At(value = "HEAD"))
 	private static void injectExtra(Frustum frustum,
 	                                Camera camera,
-	                                float partialTickTime,
+	                                float deltaPartialTick,
 	                                CallbackInfoReturnable<ParticleGroupRenderState> cir,
 	                                @Share("originalPartialTick") LocalFloatRef originalPartialTick) {
-		originalPartialTick.set(partialTickTime);
+		originalPartialTick.set(deltaPartialTick);
 	}
 
 	@Dynamic
@@ -48,9 +48,9 @@ public abstract class MixinAsyncTick_AsyncTickableParticleGroup implements Async
 	@ModifyExpressionValue(method = "extractRenderState", require = 0, at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"))
 	private static Object wrapNext(@Coerce Object original,
 	                                  @Share("originalPartialTick") LocalFloatRef originalPartialTick,
-	                                  @Local(argsOnly = true, ordinal = 0) LocalFloatRef partialTickTime) {
-		if (partialTickTime.get() <= 1.0f && !((ParticleAddon) original).asyncparticles$isTicked()) {
-			partialTickTime.set(originalPartialTick.get() + 1f);
+	                                  @Local(argsOnly = true, ordinal = 0) LocalFloatRef deltaPartialTick) {
+		if (deltaPartialTick.get() <= 1.0f && !((ParticleAddon) original).asyncparticles$isTicked()) {
+			deltaPartialTick.set(originalPartialTick.get() + 1f);
 		}
 		return original;
 	}

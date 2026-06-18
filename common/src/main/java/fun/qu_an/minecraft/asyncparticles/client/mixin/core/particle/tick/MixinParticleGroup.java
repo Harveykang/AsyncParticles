@@ -6,7 +6,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.addon.*;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.TickParticleRecursiveAction;
 import fun.qu_an.minecraft.asyncparticles.client.util.CombinedIterable;
@@ -66,7 +65,7 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 	 * @author Harvey_Husky
 	 * @reason Too many changes, need to rewrite the entire method.
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes", "ConstantValue"})
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Overwrite
 	public void tickParticles() { // TODO move to implementations
 		this.asyncparticles$shouldRemoveInParallel = true;
@@ -74,19 +73,18 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 			&& (!(this instanceof GpuParticleGroup gpuParticleGroup) || gpuParticleGroup.asyncparticles$getGpuParticles().isEmpty())) {
 			return;
 		}
-//		if (ThreadUtil.isOnParticleTickerThread() && ConfigHelper.isSplitParticleTick()) {
-//			new TickParticleRecursiveAction<>((ParticleGroup<?>) (Object) this, particles.spliterator(), isGpu)
-//				.compute();
-//			return;
-//		}
+		if (ThreadUtil.isOnParticleTickerThread() && ConfigHelper.isSplitParticleTick()) {
+			TickParticleRecursiveAction.execute((ParticleGroup<?>) (Object) this, particles.spliterator());
+			return;
+		}
 		boolean enableLightCache = ConfigHelper.particleLightCache();
 		boolean isOnMainThread = ThreadUtil.isOnMainThread();
-		CombinedIterable.CombinedIterator<Particle> iterator = CombinedIterable.ofIterator(
+		CombinedIterable.CombinedIterator<Particle> iterator = CombinedIterable.of(
 			this.particles,
 			this instanceof GpuParticleGroup gpuParticleGroup
 				? (Iterable<Particle>) (Iterable) gpuParticleGroup.asyncparticles$getGpuParticles()
 				: List.of()
-		);
+		).iterator(); // iterator() could be an inject point.
 		while (iterator.hasNext()) {
 			Particle particle = iterator.next();
 			if (!particle.isAlive()) {
@@ -184,12 +182,6 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 					AsyncTickBehavior.getInstance().shouldRemove(particle));
 			}
 		}
-	}
-
-	@Override
-	public void asyncparticles$clear() {
-		particles.forEach(AsyncTickBehavior.getInstance()::onEvict);
-		particles.clear();
 	}
 
 	@Override

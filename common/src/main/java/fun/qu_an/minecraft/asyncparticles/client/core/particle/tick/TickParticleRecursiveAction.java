@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
+import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -9,7 +10,9 @@ import it.unimi.dsi.fastutil.HashCommon;
 import net.minecraft.ReportedException;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleGroup;
+import net.minecraft.client.particle.SingleQuadParticle;
 
+import java.util.Queue;
 import java.util.Spliterator;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveAction;
@@ -21,15 +24,23 @@ public class TickParticleRecursiveAction<T extends Particle> extends RecursiveAc
 	private final int depth;
 	private final boolean isGpu;
 
-	public TickParticleRecursiveAction(ParticleGroup<?> group, Spliterator<T> spliterator, boolean isGpu) {
-		this(group, spliterator, 0, isGpu);
-	}
-
 	private TickParticleRecursiveAction(ParticleGroup<?> group, Spliterator<T> spliterator, int depth, boolean isGpu) {
 		this.group = group;
 		this.spliterator = spliterator;
 		this.depth = depth;
 		this.isGpu = isGpu;
+	}
+
+	public static void execute(ParticleGroup<?> group, Spliterator<Particle> spliterator) {
+		Queue<SingleQuadParticle> gpuQueue;
+		if (!(group instanceof GpuParticleGroup gpuGroup)
+			|| (gpuQueue = gpuGroup.asyncparticles$getGpuParticles()).isEmpty()) {
+			new TickParticleRecursiveAction<>(group, spliterator, 0, false).compute();
+		} else {
+			ForkJoinTask<Void> fork = new TickParticleRecursiveAction<>(group, spliterator, 0, false).fork();
+			new TickParticleRecursiveAction<>(group, gpuQueue.spliterator(), 0, true).compute();
+			fork.join();
+		}
 	}
 
 	@Override
