@@ -46,7 +46,7 @@ public class AsyncParticlesConfig {
 	public static int particle$particleLimit;
 	public static boolean particle$removeIfMissedTick;
 	public static boolean particle$parallelQueueRemoval;
-	public static boolean particle$parallelQueueEviction;
+//	public static boolean particle$parallelQueueEviction;
 	public static boolean particle$particleLightCache;
 	public static boolean particle$cullUnderwaterParticleType;
 	public static boolean tick$asyncAnimateTick;
@@ -60,7 +60,7 @@ public class AsyncParticlesConfig {
 	public static RenderingMode rendering$particleRenderingMode;
 	public static boolean rendering$gpuAcceleration;
 	public static boolean rendering$appendNewParticlesToRenderer;
-	public static int rendering$failPerSecLimit;
+//	public static int rendering$failPerSecLimit;
 //	public static FailBehavior rendering$failBehavior;
 //	public static Set<String> rendering$syncParticleClasses = new LinkedHashSet<>();
 	public static RainEffect valkyrienSkies$rainEffect;
@@ -255,7 +255,7 @@ public class AsyncParticlesConfig {
 			int particleLimit = DEFAULT_PARTICLE_LIMIT;
 			boolean removeIfMissedTick = false;
 			boolean parallelQueueRemoval = true;
-			boolean parallelQueueEviction = true;
+//			boolean parallelQueueEviction = true;
 			boolean particleLightCache = true;
 			boolean cullUnderwaterParticleType = true;
 
@@ -263,7 +263,7 @@ public class AsyncParticlesConfig {
 				particle$particleLimit = Mth.clamp(particleLimit, MIN_PARTICLE_LIMIT, MAX_PARTICLE_LIMIT);
 				particle$removeIfMissedTick = removeIfMissedTick;
 				particle$parallelQueueRemoval = parallelQueueRemoval;
-				particle$parallelQueueEviction = parallelQueueEviction;
+//				particle$parallelQueueEviction = parallelQueueEviction;
 				particle$particleLightCache = particleLightCache;
 				particle$cullUnderwaterParticleType = cullUnderwaterParticleType;
 			}
@@ -272,7 +272,7 @@ public class AsyncParticlesConfig {
 				particleLimit = particle$particleLimit;
 				removeIfMissedTick = particle$removeIfMissedTick;
 				parallelQueueRemoval = particle$parallelQueueRemoval;
-				parallelQueueEviction = particle$parallelQueueEviction;
+//				parallelQueueEviction = particle$parallelQueueEviction;
 				particleLightCache = particle$particleLightCache;
 				cullUnderwaterParticleType = particle$cullUnderwaterParticleType;
 			}
@@ -284,7 +284,7 @@ public class AsyncParticlesConfig {
 			boolean tickWeatherAsync = true;
 			boolean deferredTextureTick = !ModListHelper.AXIOM_LOADED;
 			int failPerSecLimit = 5;
-			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
+//			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
 			boolean suppressCME = false;
 			Set<String> syncParticleClasses = new LinkedHashSet<>();
 			{
@@ -317,7 +317,7 @@ public class AsyncParticlesConfig {
 			RenderingMode particleRenderingMode = RenderingMode.SYNCHRONOUSLY;
 			boolean gpuAcceleration = BackendCaps.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
-			int failPerSecLimit = 20;
+//			int failPerSecLimit = 20;
 //			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
 //			Set<String> syncParticleClasses = new LinkedHashSet<>();
 //			{
@@ -337,7 +337,7 @@ public class AsyncParticlesConfig {
 				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
 				rendering$gpuAcceleration = gpuAcceleration && BackendCaps.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
-				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
+//				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 //				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
 //				rendering$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
 			}
@@ -346,7 +346,7 @@ public class AsyncParticlesConfig {
 				particleRenderingMode = rendering$particleRenderingMode;
 				gpuAcceleration = rendering$gpuAcceleration;
 				appendNewParticlesToRenderer = rendering$appendNewParticlesToRenderer;
-				failPerSecLimit = rendering$failPerSecLimit;
+//				failPerSecLimit = rendering$failPerSecLimit;
 //				failBehavior = rendering$failBehavior;
 //				syncParticleClasses = new LinkedHashSet<>(rendering$syncParticleClasses);
 			}

@@ -22,7 +22,6 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
 
@@ -53,14 +52,6 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 		particles = ParticleHelper.newParticleQueue();
 	}
 
-	@Inject(method = "add", at = @At("HEAD"))
-	private void injectAdd(Particle particle, CallbackInfoReturnable<Boolean> cir) {
-		if (this instanceof AsyncTickableParticleGroup asyncGroup
-			&& ((ParticleAddon) particle).asyncparticles$isTickSync()) {
-			asyncGroup.asyncparticles$recordSync(particle);
-		}
-	}
-
 	/**
 	 * @author Harvey_Husky
 	 * @reason Too many changes, need to rewrite the entire method.
@@ -68,17 +59,18 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Overwrite
 	public void tickParticles() { // TODO move to implementations
-		this.asyncparticles$shouldRemoveInParallel = true;
+		this.asyncparticles$shouldRemoveInParallel = true; // otherwise this method is overwritten and don't call super.
 		if (this.particles.isEmpty() // Are there any modules that rely on this injection point?
 			&& (!(this instanceof GpuParticleGroup gpuParticleGroup) || gpuParticleGroup.asyncparticles$getGpuParticles().isEmpty())) {
 			return;
 		}
-		if (ThreadUtil.isOnParticleTickerThread() && ConfigHelper.isSplitParticleTick()) {
+		boolean isOnMainThread = ThreadUtil.isOnMainThread();
+		if (!isOnMainThread && ConfigHelper.isSplitParticleTick()) {
+			// assert this instanceof AsyncTickableParticleGroup
 			TickParticleRecursiveAction.execute((ParticleGroup<?>) (Object) this, particles.spliterator());
 			return;
 		}
 		boolean enableLightCache = ConfigHelper.particleLightCache();
-		boolean isOnMainThread = ThreadUtil.isOnMainThread();
 		CombinedIterable.CombinedIterator<Particle> iterator = CombinedIterable.of(
 			this.particles,
 			this instanceof GpuParticleGroup gpuParticleGroup

@@ -8,6 +8,7 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin",
   "client": [
+    "accessor.AccessorFrustumIntersection",
     "compat.a_good_place.AccessorBlocksParticlesManager",
     "compat.a_good_place.MixinBlocksParticlesManager",
     "compat.a_good_place.MixinPlacingBlockParticle",
@@ -45,6 +46,7 @@
     "core.particle.gpu_acceleration.MixinFireworkParticles$SparkParticle",
     "core.particle.gpu_acceleration.MixinFlyTowardsPositionParticle",
     "core.particle.gpu_acceleration.MixinLevelExtractor",
+    "core.particle.gpu_acceleration.MixinParticleEngine",
     "core.particle.gpu_acceleration.MixinParticleGroup",
     "core.particle.gpu_acceleration.MixinQuadParticleFeatureRenderer",
     "core.particle.gpu_acceleration.MixinQuadParticleGroup",
@@ -72,6 +74,5 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "accessor.AccessorFrustumIntersection"
   ]
 }

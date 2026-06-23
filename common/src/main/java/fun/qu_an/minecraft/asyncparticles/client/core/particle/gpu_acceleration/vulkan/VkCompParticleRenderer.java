@@ -327,22 +327,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		}
 	}
 
-	private int acquireSourceSlot(int reservedSrcIdx) {
-		int firstCandidate = -1;
-		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
-			if (i == reservedSrcIdx) {
-				continue;
-			}
-			if (firstCandidate == -1) {
-				firstCandidate = i;
-			}
-			if (sourceSlots[i].isReady()) {
-				return i;
-			}
-		}
-		if (firstCandidate == -1) {
-			throw new IllegalStateException("No source slot available");
-		}
+	private int acquireSourceSlot(int idx) {
+		int firstCandidate = (idx + 1) % SOURCE_SLOT_COUNT;
 		sourceSlots[firstCandidate].waitReady();
 		return firstCandidate;
 	}
@@ -536,16 +522,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		source.lastSubmitIndex = commandEncoder.currentSubmitIndex;
 	}
 
-	private int writeSegmentGroups(int[] records, int recordPos, int srcBase, int dstBase, int count) {
-		for (int localBase = 0; localBase < count; localBase += WORKGROUP_SIZE) {
-			int groupCount = Math.min(WORKGROUP_SIZE, count - localBase);
-			records[recordPos++] = srcBase + localBase;
-			records[recordPos++] = dstBase + localBase;
-			records[recordPos++] = groupCount;
-		}
-		return recordPos;
-	}
-
 	@Override
 	public ComputeResult awaitCompute() {
 		return renderSrcIdx == -1 ? null : submitSlot.preparedComputeResult;
@@ -675,22 +651,32 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			}
 			int[] records = new int[groups * GROUP_RECORD_INTS];
 			int recordPos = 0;
-			int baseCount = 0;
+			int dstBase = 0;
 			for (int i = 0; i < sz; i++) {
 				LayerBatch batch = batches.get(i);
 				int layerTotal = batch.tickCount + batch.appendCount;
-				this.slices[i] = new ComputeResult.ParticleSlice(batch.layer, baseCount, layerTotal);
-				recordPos = writeSegmentGroups(records, recordPos, batch.tickOffset, baseCount, batch.tickCount);
+				this.slices[i] = new ComputeResult.ParticleSlice(batch.layer, dstBase, layerTotal);
+				recordPos = writeSegmentGroups(records, recordPos, batch.tickOffset, dstBase, batch.tickCount);
 				recordPos = writeSegmentGroups(records, recordPos,
 					particleLimit + batch.appendOffset,
-					baseCount + batch.tickCount,
+					dstBase + batch.tickCount,
 					batch.appendCount);
-				baseCount += layerTotal;
+				dstBase += layerTotal;
 			}
-			this.totalCount = baseCount;
+			this.totalCount = dstBase;
 			this.workgroupCount = groups;
 			this.groupRecords = records;
 			this.prepared = true;
+		}
+
+		private int writeSegmentGroups(int[] records, int recordPos, int srcBase, int dstBase, int count) {
+			for (int localBase = 0; localBase < count; localBase += WORKGROUP_SIZE) {
+				int groupCount = Math.min(WORKGROUP_SIZE, count - localBase);
+				records[recordPos++] = srcBase + localBase;
+				records[recordPos++] = dstBase + localBase;
+				records[recordPos++] = groupCount;
+			}
+			return recordPos;
 		}
 
 		private void reset() {
@@ -703,10 +689,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			layerBatches.clear();
 			lastSubmitIndex = -1L;
 			prepared = false;
-		}
-
-		private boolean isReady() {
-			return lastSubmitIndex == -1L || vkBackend.createCommandEncoder().awaitSubmitCompletion(lastSubmitIndex, 0L);
 		}
 
 		private void waitReady() {

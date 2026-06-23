@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.util;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -48,6 +49,10 @@ public class BusyWaitEvictingQueue<E> extends IterationSafeEvictingQueue<E> {
 	@Override
 	public boolean removeIf(@NotNull Predicate<? super E> filter) {
 		return lock.wrap(() -> super.removeIf(filter));
+	}
+
+	public void parallelRemoveIf(@NotNull Predicate<? super E> filter, boolean parallelEvicting, int threads, ExecutorService executor) {
+		lock.wrap(() -> super.parallelRemoveIf(filter, parallelEvicting, threads, executor));
 	}
 
 	@Override

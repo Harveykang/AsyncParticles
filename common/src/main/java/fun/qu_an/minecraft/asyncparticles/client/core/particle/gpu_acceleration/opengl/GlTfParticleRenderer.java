@@ -141,36 +141,10 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		computeResult = null;
 	}
 
-	private int acquireSourceSlot(int reservedSrcIdx) {
-		int firstCandidate = -1;
-		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
-			if (i == reservedSrcIdx) {
-				continue;
-			}
-			if (firstCandidate == -1) {
-				firstCandidate = i;
-			}
-			if (isSourceSlotReady(i)) {
-				return i;
-			}
-		}
-		if (firstCandidate == -1) {
-			throw new IllegalStateException("No source slot available");
-		}
-		waitForSourceSlot(firstCandidate);
-		return firstCandidate;
-	}
-
-	private boolean isSourceSlotReady(int idx) {
-		long submitIndex = lastGraphicsSubmitIndex[idx];
-		if (submitIndex == -1L) {
-			return true;
-		}
-		if (((GlCommandEncoder) glDevice.createCommandEncoder()).awaitSubmit(submitIndex, 0L)) {
-			lastGraphicsSubmitIndex[idx] = -1L;
-			return true;
-		}
-		return false;
+	private int acquireSourceSlot(int idx) {
+		int newIdx = (idx + 1) % SOURCE_SLOT_COUNT;
+		waitForSourceSlot(newIdx);
+		return newIdx;
 	}
 
 	private void waitForSourceSlot(int idx) {

@@ -85,7 +85,7 @@ tasks.register('compileSpirv', Exec) {
             shaderSrc.absolutePath, '-o', dest.absolutePath
 }
 
-classes {
+processResources {
     dependsOn compileSpirv
 }
 

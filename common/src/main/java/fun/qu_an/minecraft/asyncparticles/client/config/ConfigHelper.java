@@ -34,10 +34,6 @@ public class ConfigHelper {
 		return particle$particleLimit;
 	}
 
-	public static int getRenderFailurePerSecondThreshold() {
-		return rendering$failPerSecLimit;
-	}
-
 	public static int getTickFailurePerSecondThreshold() {
 		return tick$failPerSecLimit;
 	}
@@ -73,7 +69,7 @@ public class ConfigHelper {
 	}
 
 	public static boolean isGpuParticles() {
-		return rendering$gpuAcceleration;
+		return rendering$gpuAcceleration && isAsyncTickParticle();
 	}
 
 	public static boolean isParallelQueueRemoval() {
@@ -81,7 +77,7 @@ public class ConfigHelper {
 	}
 
 	public static boolean isParallelQueueEviction() {
-		return particle$parallelQueueEviction;
+		return false;
 	}
 
 	public static boolean isAppendNewParticlesToRenderer() {

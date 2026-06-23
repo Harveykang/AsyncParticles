@@ -59,13 +59,13 @@ class ClothConfigMenus {
 				.setTooltip(Component.translatable("config.asyncparticles.particle.parallelQueueRemoval.tooltip"))
 				.setSaveConsumer(newValue -> newConfig.particle.parallelQueueRemoval = newValue)
 				.build())
-			.addEntry(entryBuilder
-				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.parallelQueueEviction"),
-					globalConfig.particle.parallelQueueEviction)
-				.setDefaultValue(defaultConfig.particle.parallelQueueEviction)
-				.setTooltip(Component.translatable("config.asyncparticles.particle.parallelQueueEviction.tooltip"))
-				.setSaveConsumer(newValue -> newConfig.particle.parallelQueueEviction = newValue)
-				.build())
+//			.addEntry(entryBuilder
+//				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.parallelQueueEviction"),
+//					globalConfig.particle.parallelQueueEviction)
+//				.setDefaultValue(defaultConfig.particle.parallelQueueEviction)
+//				.setTooltip(Component.translatable("config.asyncparticles.particle.parallelQueueEviction.tooltip"))
+//				.setSaveConsumer(newValue -> newConfig.particle.parallelQueueEviction = newValue)
+//				.build())
 			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.particleLightCache"),
 					globalConfig.particle.particleLightCache)

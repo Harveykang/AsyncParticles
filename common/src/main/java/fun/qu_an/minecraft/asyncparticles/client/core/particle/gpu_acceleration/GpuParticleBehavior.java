@@ -36,6 +36,7 @@ public class GpuParticleBehavior {
 	private final List<Class<? extends Particle>> GPU_PARTICLE_CLASSES;
 	private float partialTick;
 	private Frustum frustum;
+	private int boost = 1;
 
 	{
 		try {
@@ -133,7 +134,27 @@ public class GpuParticleBehavior {
 	}
 
 	@ApiStatus.Internal
-	public void setUpNextTickRendering(int particleLimit) {
+	public void initRendering() {
+		int particleLimit = ConfigHelper.getParticleLimit();
+		boost = 1;
+		if (particleLimit != this.particleLimit) {
+			this.particleLimit = particleLimit;
+			if (renderer != null) {
+				renderer.resize(particleLimit);
+			}
+		}
+		Camera camera = Minecraft.getInstance().gameRenderer.mainCamera();
+		frustum = new Frustum(camera.getCullFrustum()).offset(-3);
+		perTickCameraPos = camera.position();
+	}
+
+	@ApiStatus.Internal
+	public void setUpNextTickRendering(int actualCount) {
+		int particleLimit = ConfigHelper.getParticleLimit();
+		if (actualCount > particleLimit) {
+			boost = (actualCount + particleLimit - 1) / particleLimit;
+		}
+		particleLimit *= boost;
 		if (particleLimit != this.particleLimit) {
 			this.particleLimit = particleLimit;
 			if (renderer != null) {
@@ -169,7 +190,10 @@ public class GpuParticleBehavior {
 	}
 
 	public void onClearParticles() {
+		boost = 1;
+		particleLimit = ConfigHelper.getParticleLimit();
 		if (renderer != null) {
+			renderer.resize(ConfigHelper.getParticleLimit());
 			renderer.reload();
 		}
 	}
@@ -202,5 +226,9 @@ public class GpuParticleBehavior {
 
 	public Frustum getFrustum() {
 		return frustum;
+	}
+
+	public int getParticleLimit() {
+		return particleLimit;
 	}
 }
