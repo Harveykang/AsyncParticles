@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.spongepowered.asm.mixin.Final;
@@ -41,6 +42,10 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 	public TextureManager textureManager;
 	@Shadow
 	public static List<ParticleRenderType> RENDER_ORDER;
+
+	@Shadow
+	@Final
+	private TextureAtlas textureAtlas;
 
 	@Override
 	public void asyncparticle$addRenderType(ParticleRenderType particleRenderType) {
@@ -90,6 +95,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 		poseStack2.pushPose();
 		poseStack2.mulPoseMatrix(poseStack.last().pose());
 		RenderSystem.applyModelViewMatrix();
+		textureAtlas.setFilter(false, textureAtlas.mipmap);
 		profiler.pop();
 
 		GpuParticleBehavior.INSTANCE.compute(camera, f);
