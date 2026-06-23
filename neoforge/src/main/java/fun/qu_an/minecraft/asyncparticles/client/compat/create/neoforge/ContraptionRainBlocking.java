@@ -32,10 +32,6 @@ public class ContraptionRainBlocking {
 	}
 
 	/**
-	 * ------------------------------------------------------------------------
-	 * 原始可读版 BOX_FACE_INDICES（保留作维护对照，不参与运行）
-	 * ------------------------------------------------------------------------
-	 * <p>
 	 * 8 个角点固定编号：
 	 * <p>
 	 * 0 = (minX, minY, minZ)
@@ -47,19 +43,7 @@ public class ContraptionRainBlocking {
 	 * 6 = (maxX, maxY, minZ)
 	 * 7 = (maxX, maxY, maxZ)
 	 * <p>
-	 * private static final int[][] BOX_FACE_INDICES = {
-	 * {0, 1, 3, 2}, // -X
-	 * {4, 6, 7, 5}, // +X
-	 * {0, 4, 5, 1}, // -Y
-	 * {2, 3, 7, 6}, // +Y
-	 * {0, 2, 6, 4}, // -Z
-	 * {1, 5, 7, 3}  // +Z
-	 * };
-	 * <p>
-	 * 现在运行时改成扁平 int[]，少一层数组解引用。
-	 * <p>
 	 * 盒子 6 个面的扁平索引表。
-	 * 面顺序仍然与原先一致，便于维护：
 	 * 0: -X -> {0, 1, 3, 2}
 	 * 1: +X -> {4, 6, 7, 5}
 	 * 2: -Y -> {0, 4, 5, 1}
@@ -211,26 +195,6 @@ public class ContraptionRainBlocking {
 			final double ez = colliders.extentsZ[i];
 
 			/*
-			 * ----------------------------------------------------------------
-			 * 上一版优化（保留作对照，不参与运行）
-			 * ----------------------------------------------------------------
-			 *
-			 * final double minX = cx - ex;
-			 * final double minY = cy - ey;
-			 * final double minZ = cz - ez;
-			 * final double maxX = cx + ex;
-			 * final double maxY = cy + ey;
-			 * final double maxZ = cz + ez;
-			 *
-			 * setTransformedCorner(0, minX, minY, minZ, ...);
-			 * setTransformedCorner(1, minX, minY, maxZ, ...);
-			 * ...
-			 * setTransformedCorner(7, maxX, maxY, maxZ, ...);
-			 *
-			 * ----------------------------------------------------------------
-			 * 当前进一步优化：
-			 * ----------------------------------------------------------------
-			 *
 			 * 局部 AABB 的 8 个角点可以写成：
 			 *   centerLocal ± (ex,0,0) ± (0,ey,0) ± (0,0,ez)
 			 *
@@ -378,94 +342,12 @@ public class ContraptionRainBlocking {
 	 * - cornerX / cornerY / cornerZ 三个数组
 	 * - 四个顶点索引 ia/ib/ic/id
 	 * <p>
-	 * 这样避免了 Vec3 对象和额外解引用。
-	 * <p>
-	 * ------------------------------------------------------------------------
-	 * 上一版未继续优化的实现（保留作对照，不参与运行）
-	 * ------------------------------------------------------------------------
-	 * <p>
-	 * final double invNy = 1.0 / ny;
-	 * final double kx = -nx * invNy;
-	 * final double kz = -nz * invNy;
-	 * final double kb = ay + (nx * ax + nz * az) * invNy;
-	 * <p>
-	 * <code>for (int x = fromX; x <= toX; x++) {
-	 * final double sampleX = x + 0.5;
-	 * <p>
-	 * for (int z = fromZ; z <= toZ; z++) {
-	 * final double sampleZ = z + 0.5;
-	 * <p>
-	 * if (!isPointInConvexQuadXZRaw(sampleX, sampleZ, ax, az, bx, bz, cx, cz, dx, dz)) {
-	 * continue;
-	 * }
-	 * <p>
-	 * final double y = kx * sampleX + kz * sampleZ + kb;
-	 * long key = packXZ(x, z);
-	 * float old = heightMap.getOrDefault(key, Float.NEGATIVE_INFINITY);
-	 * if (y > old) heightMap.put(key, (float) y);
-	 * }
-	 * }</code>
-	 * <p>
-	 * ------------------------------------------------------------------------
-	 * 当前进一步优化：
-	 * ------------------------------------------------------------------------
-	 * <p>
-	 * 1. 不再每格调用 isPointInConvexQuadXZRaw()
-	 * 2. 把四条边都写成：
-	 * E(x,z) = A*x + B*z + C
-	 * 3. 在 x/z 双循环中对 E 做增量更新
-	 * 4. 平面高度 y = kx*x + kz*z + kb 也做增量更新
-	 * <p>
-	 * 将一个世界空间中的四边形面直接 rasterize 到 XZ 网格上。
-	 * <p>
-	 * 输入是：
-	 * - cornerX / cornerY / cornerZ 三个数组
-	 * - 四个顶点索引 ia/ib/ic/id
-	 * <p>
-	 * 这样避免了 Vec3 对象和额外解引用。
-	 * <p>
-	 * ------------------------------------------------------------------------
-	 * 旧版（保留思路对照，不参与运行）
-	 * ------------------------------------------------------------------------
-	 * <p>
-	 * <code>final double area2 =
-	 * ax * bz - az * bx +
-	 * bx * cz - bz * cx +
-	 * cx * dz - cz * dx +
-	 * dx * az - dz * ax;</code>
-	 * <p>
-	 * <code>if (Math.abs(area2) <= FACE_EPS) {
-	 * return;
-	 * }</code>
-	 * <p>
-	 * final boolean ccw = area2 > 0.0;
-	 * <p>
-	 * <code>if (ccw) {
-	 * for (...) {
-	 * if (e1 >= -FACE_EPS && e2 >= -FACE_EPS && e3 >= -FACE_EPS && e4 >= -FACE_EPS) {
-	 * ...
-	 * }
-	 * }
-	 * } else {
-	 * for (...) {
-	 * if (e1 <= FACE_EPS && e2 <= FACE_EPS && e3 <= FACE_EPS && e4 <= FACE_EPS) {
-	 * ...
-	 * }
-	 * }
-	 * }</code>
-	 * <p>
-	 * ------------------------------------------------------------------------
-	 * 当前“分支更少版”
-	 * ------------------------------------------------------------------------
-	 * <p>
 	 * 做法：
 	 * 1. 先求投影四边形有向面积 area2
 	 * 2. 用 orientSign = +1 或 -1 表示绕序
 	 * 3. 把四条边函数整体乘上 orientSign
 	 * 4. 之后统一判断：
 	 * e1 >= -FACE_EPS && e2 >= -FACE_EPS && e3 >= -FACE_EPS && e4 >= -FACE_EPS
-	 * <p>
-	 * 这样就去掉了整块 ccw/cw 双分支循环。
 	 */
 	private static void rasterizeTopQuadFaceRaw(
 		Long2FloatMap tempHeightMap,

@@ -23,6 +23,7 @@ import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.spongepowered.asm.mixin.Final;
@@ -46,6 +47,10 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 
 	@Shadow
 	public static List<ParticleRenderType> RENDER_ORDER;
+
+	@Shadow
+	@Final
+	private TextureAtlas textureAtlas;
 
 	@Override
 	public void asyncparticle$addRenderType(ParticleRenderType particleRenderType) {
@@ -90,6 +95,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 		lightTexture.turnOnLightLayer();
 		RenderSystem.activeTexture(33986);
 		RenderSystem.activeTexture(33984);
+		textureAtlas.setFilter(false, textureAtlas.mipmap);
 		profiler.pop();
 
 		GpuParticleBehavior.INSTANCE.compute(camera, f);
@@ -152,11 +158,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			if (hasGpu) {
 				gpuParticleRenderer.render();
 			}
-			if (bufferBuilder == null) {
-				profiler.pop();
-				continue;
-			}
-			if (hasCpu && !syncParticles.isEmpty()) {
+			if (bufferBuilder != null && hasCpu && !syncParticles.isEmpty()) {
 				float f2 = f + 1f;
 				for (Particle particle : syncParticles) {
 					if (!particle.isAlive()) {
@@ -195,11 +197,12 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 				}
 			}
 			profiler.popPush("build_buffer");
-			MeshData meshData = bufferBuilder.build();
+			MeshData meshData = bufferBuilder == null ? null : bufferBuilder.build();
 			if (meshData != null) {
 				profiler.popPush("upload_particles");
 				BufferUploader.drawWithShader(meshData);
 			}
+			// Qliphoth Awakening injects end() here so we can't use continue after begin() in this loop
 			profiler.pop();
 		}
 
