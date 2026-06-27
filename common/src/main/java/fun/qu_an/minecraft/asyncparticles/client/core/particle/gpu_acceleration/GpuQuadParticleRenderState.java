@@ -5,14 +5,8 @@ import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.ComputeResult;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.GpuParticlePipelines;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.IParticleRenderer;
-import it.unimi.dsi.fastutil.objects.Reference2BooleanArrayMap;
-import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.QuadParticleGroup;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.feature.ParticleFeatureRenderer;
@@ -29,18 +23,14 @@ import org.jspecify.annotations.NonNull;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
-import java.util.function.Supplier;
 
 // add() -> submit() -> prepare() -> render()
 public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 	// reuse buffers
 	private final IParticleRenderer renderer;
-	private final QuadParticleGroup particleGroup;
 	private float partialTick;
 
-	public GpuQuadParticleRenderState(QuadParticleGroup particleGroup) {
-		this.particleGroup = particleGroup;
+	public GpuQuadParticleRenderState() {
 		this.renderer = GpuParticleBehavior.getInstance().createRenderer();
 	}
 
@@ -71,10 +61,11 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 		final @NonNull RenderPass renderPass,
 		final @NonNull TextureManager textureManager
 	) {
-		if (renderer.isShouldSkip()) {
+		if (isEmpty()) {
 			return;
 		}
-		ComputeResult results = renderer.compute(Minecraft.getInstance().gameRenderer.getMainCamera(), partialTick);
+		renderer.compute(Minecraft.getInstance().gameRenderer.getMainCamera(), partialTick);
+		ComputeResult results = renderer.awaitCompute();
 		renderPass.setVertexBuffer(0, results.buffer());
 		RenderSystem.AutoStorageIndexBuffer indexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
 		renderPass.setIndexBuffer(indexBuffer.getBuffer(results.totalIndexCount()), indexBuffer.type());
@@ -112,19 +103,19 @@ public class GpuQuadParticleRenderState extends QuadParticleRenderState {
 
 	@Override
 	public boolean isEmpty() {
-		return particleGroup.isEmpty();
+		return renderer.isShouldSkip();
 	}
 
-	public void mapBuffers(Supplier<Set<SingleQuadParticle.Layer>> potentialLayerSupplier) {
-		renderer.mapBuffer(potentialLayerSupplier);
+	public void prepareBuffer() {
+		renderer.prepareBuffer();
 	}
 
-	public void unmapBuffersAndSwap(Vec3 prevGpuCamPos) {
-		renderer.unmapBufferAndSwap(prevGpuCamPos);
+	public void flushBufferAndSwap(Vec3 prevGpuCamPos) {
+		renderer.flushBufferAndSwap(prevGpuCamPos);
 	}
 
 	public void beginFrame() {
-		renderer.beginFrame();
+		renderer.beginFrame(partialTick);
 	}
 
 	public void append(Vec3 camPos, SingleQuadParticle particle) {

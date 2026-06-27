@@ -58,20 +58,6 @@ public class ConfigHelper {
 		return tick$deferredTextureTick;
 	}
 
-	public static List<? extends Class<?>> getSyncParticleClassesRender() {
-		return rendering$syncParticleClasses
-			.stream()
-			.map(className -> {
-				try {
-					return Class.forName(className);
-				} catch (ClassNotFoundException e) {
-					return null;
-				}
-			})
-			.filter(Objects::nonNull)
-			.toList();
-	}
-
 	public static List<? extends Class<?>> getSyncParticleClassesTick() {
 		return tick$syncParticleClasses
 			.stream()

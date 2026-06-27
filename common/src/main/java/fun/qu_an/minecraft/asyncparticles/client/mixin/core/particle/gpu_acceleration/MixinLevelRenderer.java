@@ -15,8 +15,7 @@ public class MixinLevelRenderer {
 	@Inject(method = "extractLevel", at = @At("HEAD"))
 	private void extractLevel(DeltaTracker deltaTracker, Camera camera, float deltaPartialTick, CallbackInfo ci) {
 		if (ConfigHelper.isGpuParticles()){
-			GpuParticleBehavior.getInstance().beginFrame();
-			GpuParticleBehavior.getInstance().setPartialTick(deltaPartialTick);
+			GpuParticleBehavior.getInstance().beginFrame(deltaPartialTick);
 		}
 	}
 }

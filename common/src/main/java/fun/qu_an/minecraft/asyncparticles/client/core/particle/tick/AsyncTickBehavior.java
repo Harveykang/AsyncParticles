@@ -3,7 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
-import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleGroup;
@@ -294,8 +294,8 @@ public class AsyncTickBehavior {
 					})),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
 				syncParticleTypes.stream().map(Class::getName).toList(),
-				GLCaps.tfSupport.getClass().getSimpleName(),
-				GLCaps.supportsExplicitAttribLocation
+				BackendCaps.glTfSupport.getClass().getSimpleName(),
+				BackendCaps.GL_ARB_explicit_attrib_location
 			)));
 
 		debugConsumer = null;

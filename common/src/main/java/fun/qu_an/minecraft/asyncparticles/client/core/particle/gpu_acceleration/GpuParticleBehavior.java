@@ -2,12 +2,12 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
-import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.IParticleRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render.ParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.GlTfParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
@@ -82,9 +82,9 @@ public class GpuParticleBehavior {
 		return gpuParticles.get(type);
 	}
 
-	public void swapAllBuffers() {
+	public void flushBufferAndSwap() {
 		RenderSystem.assertOnRenderThread();
-		gpuParticles.values().forEach(gpuParticleGroup -> gpuParticleGroup.unmapBuffersAndSwap(cameraPos));
+		gpuParticles.values().forEach(gpuParticleGroup -> gpuParticleGroup.flushBufferAndSwap(cameraPos));
 	}
 
 	public void setCameraPos(Vec3 pos) {
@@ -113,6 +113,9 @@ public class GpuParticleBehavior {
 		return CAN_RENDER_FAST_CACHE.computeIfAbsent(sqp.getClass(), (Predicate<Class<? extends SingleQuadParticle>>)
 			k -> {
 				try {
+					if (AsyncTickBehavior.getInstance().shouldSync(k)) {
+						return false;
+					}
 					Class<?> renderMethodDeclaringClass = k.getMethod(RENDER_METHOD,
 						QuadParticleRenderState.class,
 						Camera.class,
@@ -178,11 +181,8 @@ public class GpuParticleBehavior {
 		return partialTick;
 	}
 
-	public void setPartialTick(float deltaPartialTick) {
-		this.partialTick = deltaPartialTick;
-	}
-
-	public void beginFrame() {
+	public void beginFrame(float deltaPartialTick) {
+		partialTick = deltaPartialTick;
 		gpuParticles.values().forEach(GpuParticleGroup::beginFrame);
 	}
 
@@ -194,7 +194,7 @@ public class GpuParticleBehavior {
 	}
 
 	public IParticleRenderer createRenderer() {
-		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer(ConfigHelper.getParticleLimit());
+		if (BackendCaps.glTfSupport.isTfSupported()) return new GlTfParticleRenderer(ConfigHelper.getParticleLimit());
 //		if (GLCaps.tfSupport.isSupported()) return new ParticleMultiRenderer();
 //		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer();
 		throw new IllegalStateException("No compatible particle renderer found");

@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.ClothConfigMixinMenus;
@@ -180,7 +180,7 @@ class ClothConfigMenus {
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.gpuAcceleration.tooltip"))
 				// todo add gpu acceleration requirement
 				.setSaveConsumer(newValue -> newConfig.rendering.gpuAcceleration = newValue)
-				.setRequirement(GLCaps::supportsGpuAcceleration)
+				.setRequirement(BackendCaps::supportsGpuAcceleration)
 				.build())
 			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.appendNewParticlesToRenderer"),
@@ -188,7 +188,7 @@ class ClothConfigMenus {
 				.setDefaultValue(defaultConfig.rendering.appendNewParticlesToRenderer)
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.appendNewParticlesToRenderer.tooltip"))
 				.setSaveConsumer(newValue -> newConfig.rendering.appendNewParticlesToRenderer = newValue)
-				.build())
+				.build());
 //			.addEntry(entryBuilder
 //				.startSelector(Component.translatable("config.asyncparticles.rendering.particleCulling"),
 //					ParticleCullingMode.values(), globalConfig.rendering.particleCulling)
@@ -226,13 +226,13 @@ class ClothConfigMenus {
 //				.setSaveConsumer(newValue -> newConfig.rendering.failBehavior = newValue)
 //				.setRequirement(() -> false)
 //				.build())
-			.addEntry(entryBuilder
-				.startStrList(Component.translatable("config.asyncparticles.rendering.syncParticleClasses"),
-					new ArrayList<>(globalConfig.rendering.syncParticleClasses))
-				.setDefaultValue(new ArrayList<>(defaultConfig.rendering.syncParticleClasses))
-				.setTooltip(Component.translatable("config.asyncparticles.rendering.syncParticleClasses.tooltip"))
-				.setSaveConsumer(newValue -> newConfig.rendering.syncParticleClasses = new LinkedHashSet<>(newValue))
-				.build());
+//			.addEntry(entryBuilder
+//				.startStrList(Component.translatable("config.asyncparticles.rendering.syncParticleClasses"),
+//					new ArrayList<>(globalConfig.rendering.syncParticleClasses))
+//				.setDefaultValue(new ArrayList<>(defaultConfig.rendering.syncParticleClasses))
+//				.setTooltip(Component.translatable("config.asyncparticles.rendering.syncParticleClasses.tooltip"))
+//				.setSaveConsumer(newValue -> newConfig.rendering.syncParticleClasses = new LinkedHashSet<>(newValue))
+//				.build());
 		// endregion
 		// region Compat Category
 

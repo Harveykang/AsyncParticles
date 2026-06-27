@@ -36,8 +36,6 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 	@Final
 	protected Queue<? extends Particle> particles;
 	@Unique
-	private int asyncparticles$particleLimit;
-	@Unique
 	private boolean asyncparticles$canRemoveInParallel;
 
 	@Shadow

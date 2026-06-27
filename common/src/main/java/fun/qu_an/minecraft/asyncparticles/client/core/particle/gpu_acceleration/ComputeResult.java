@@ -1,9 +1,13 @@
-package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.render;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import net.minecraft.client.particle.SingleQuadParticle;
 
 public record ComputeResult(GpuBuffer buffer, int totalCount, ParticleSlice[] slices) {
+	public static ComputeResult of(GpuBuffer targetMoj, int baseCount, ParticleSlice[] slices) {
+		return new ComputeResult(targetMoj, baseCount, slices);
+	}
+
 	public int totalVertexCount() {
 		return totalCount * 4;
 	}

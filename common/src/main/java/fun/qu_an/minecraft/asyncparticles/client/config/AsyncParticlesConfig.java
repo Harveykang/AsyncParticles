@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.ChatFormatting;
@@ -62,7 +62,7 @@ public class AsyncParticlesConfig {
 	public static boolean rendering$appendNewParticlesToRenderer;
 	public static int rendering$failPerSecLimit;
 //	public static FailBehavior rendering$failBehavior;
-	public static Set<String> rendering$syncParticleClasses = new LinkedHashSet<>();
+//	public static Set<String> rendering$syncParticleClasses = new LinkedHashSet<>();
 	public static RainEffect valkyrienSkies$rainEffect;
 	public static boolean valkyrienSkies$fixParticleLights;
 	public static RainEffect create$rainEffect;
@@ -315,31 +315,31 @@ public class AsyncParticlesConfig {
 
 		static class Rendering {
 			RenderingMode particleRenderingMode = RenderingMode.SYNCHRONOUSLY;
-			boolean gpuAcceleration = GLCaps.supportsGpuAcceleration();
+			boolean gpuAcceleration = BackendCaps.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
 			int failPerSecLimit = 20;
 //			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
-			Set<String> syncParticleClasses = new LinkedHashSet<>();
-			{
-				syncParticleClasses.add("com.lootbeams.VFXParticle");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleCasting");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleGhost");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleGraveSoul");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleMagicCircle");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleMarker");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleRounding");
-				syncParticleClasses.add("concerrox.effective.particle.SplashParticle");
-				syncParticleClasses.add("org.ladysnake.effective.particle.SplashParticle");
-				syncParticleClasses.add("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
-			}
+//			Set<String> syncParticleClasses = new LinkedHashSet<>();
+//			{
+//				syncParticleClasses.add("com.lootbeams.VFXParticle");
+//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleCasting");
+//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleGhost");
+//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleGraveSoul");
+//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleMagicCircle");
+//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleMarker");
+//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleRounding");
+//				syncParticleClasses.add("concerrox.effective.particle.SplashParticle");
+//				syncParticleClasses.add("org.ladysnake.effective.particle.SplashParticle");
+//				syncParticleClasses.add("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
+//			}
 
 			private void flat() {
 				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
-				rendering$gpuAcceleration = gpuAcceleration && GLCaps.supportsGpuAcceleration();
+				rendering$gpuAcceleration = gpuAcceleration && BackendCaps.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
 				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 //				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
-				rendering$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
+//				rendering$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
 			}
 
 			private void fold() {
@@ -348,7 +348,7 @@ public class AsyncParticlesConfig {
 				appendNewParticlesToRenderer = rendering$appendNewParticlesToRenderer;
 				failPerSecLimit = rendering$failPerSecLimit;
 //				failBehavior = rendering$failBehavior;
-				syncParticleClasses = new LinkedHashSet<>(rendering$syncParticleClasses);
+//				syncParticleClasses = new LinkedHashSet<>(rendering$syncParticleClasses);
 			}
 		}
 

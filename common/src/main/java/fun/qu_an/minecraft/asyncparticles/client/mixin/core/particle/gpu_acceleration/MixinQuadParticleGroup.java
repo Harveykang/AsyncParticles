@@ -17,7 +17,7 @@ public abstract class MixinQuadParticleGroup extends MixinParticleGroup {
 		target = "()Lnet/minecraft/client/renderer/state/level/QuadParticleRenderState;"))
 	private QuadParticleRenderState redirectNewQuadParticleRenderState(Operation<QuadParticleRenderState> original) {
 		if ((ParticleGroup<?>) (Object) this instanceof GpuParticleGroup) {
-			return new GpuQuadParticleRenderState((QuadParticleGroup) (Object) this);
+			return new GpuQuadParticleRenderState();
 		} else {
 			return original.call();
 		}

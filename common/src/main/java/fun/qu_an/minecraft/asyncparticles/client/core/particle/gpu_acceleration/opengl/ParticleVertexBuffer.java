@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.buffer;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl;
 
 import org.lwjgl.opengl.GL15C;
 import org.lwjgl.opengl.GL30C;
@@ -13,21 +13,21 @@ public class ParticleVertexBuffer {
 	private ByteBuffer oldBuffer;
 	private int size;
 	private boolean mapped = false;
-	private final boolean streamDraw;
+	private final int usage;
 	private int mapOffset;
 
-	public ParticleVertexBuffer(boolean streamDraw) {
-		this(GL30C.glGenVertexArrays(), GL15C.glGenBuffers(), streamDraw);
+	public ParticleVertexBuffer(int usage) {
+		this(GL30C.glGenVertexArrays(), GL15C.glGenBuffers(), usage);
 	}
 
-	public ParticleVertexBuffer(int vao, boolean streamDraw) {
-		this(vao, GL15C.glGenBuffers(), streamDraw);
+	public ParticleVertexBuffer(int vao, int usage) {
+		this(vao, GL15C.glGenBuffers(), usage);
 	}
 
-	public ParticleVertexBuffer(int vao, int vbo, boolean streamDraw) {
+	public ParticleVertexBuffer(int vao, int vbo, int usage) {
 		this.vao = vao;
 		this.vbo = vbo;
-		this.streamDraw = streamDraw;
+		this.usage = usage;
 	}
 
 	public static void unbind() {
@@ -52,7 +52,7 @@ public class ParticleVertexBuffer {
 
 	public void resize0(int size) {
 		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, vbo);
-		GL15C.glBufferData(GL15C.GL_ARRAY_BUFFER, size, streamDraw ? GL15C.GL_STREAM_DRAW : GL15C.GL_DYNAMIC_DRAW);
+		GL15C.glBufferData(GL15C.GL_ARRAY_BUFFER, size, usage);
 		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
 		this.size = size;
 	}
@@ -65,27 +65,27 @@ public class ParticleVertexBuffer {
 		return mapRange(0, size, invalidateBufferBit);
 	}
 
-    public ByteBuffer mapRange(int offset, int size, boolean invalidateBufferBit) {
-        if (offset + size > this.size) {
+	public ByteBuffer mapRange(int offset, int size, boolean invalidateBufferBit) {
+		if (offset + size > this.size) {
 			throw new IllegalArgumentException("Range exceeds buffer size: " + (offset + size) + " > " + this.size);
-        }
-        if (mapped) {
+		}
+		if (mapped) {
 			throw new IllegalStateException("Buffer is already mapped");
-        }
-        GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, vbo);
-        ByteBuffer buf = GL30C.glMapBufferRange(GL15C.GL_ARRAY_BUFFER,
-            offset, size,
-            GL30C.GL_MAP_WRITE_BIT |
+		}
+		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, vbo);
+		ByteBuffer buf = GL30C.glMapBufferRange(GL15C.GL_ARRAY_BUFFER,
+			offset, size,
+			GL30C.GL_MAP_WRITE_BIT |
 				(invalidateBufferBit ? GL30C.GL_MAP_INVALIDATE_BUFFER_BIT : 0) |
-                GL30C.GL_MAP_FLUSH_EXPLICIT_BIT |
-                GL30C.GL_MAP_UNSYNCHRONIZED_BIT,
-            this.oldBuffer);
-        mapped = true;
+				GL30C.GL_MAP_FLUSH_EXPLICIT_BIT |
+				GL30C.GL_MAP_UNSYNCHRONIZED_BIT,
+			this.oldBuffer);
+		mapped = true;
 		mapOffset = offset;
-        GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
-        Objects.requireNonNull(buf);
-        return this.oldBuffer = buf;
-    }
+		GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+		Objects.requireNonNull(buf);
+		return this.oldBuffer = buf;
+	}
 
 	public void flush(int size) {
 		if (mapOffset + size > this.size) {

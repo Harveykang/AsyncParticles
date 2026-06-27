@@ -1,7 +1,7 @@
-package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.shader;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl;
 
 import com.mojang.blaze3d.opengl.GlConst;
-import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL30C;
 
@@ -17,8 +17,8 @@ public class ParticleTransformFeedbackShader {
 	protected ParticleTransformFeedbackShader() {
 		programId = ShaderCompiler.createShaderProgram(
 			GlConst.GL_VERTEX_SHADER,
-			"/assets/asyncparticles/particle_gpu_acceleration/particle_tf.vert",
-			programId -> GLCaps.tfSupport.glTransformFeedbackVaryings(programId,
+			"/assets/asyncparticles/particle_gpu_acceleration/gl_particle_tf.vert",
+			programId -> BackendCaps.glTfSupport.glTransformFeedbackVaryings(programId,
 				new String[]{
 					"Position_0", "UV0_0", "Color_0", "UV2_0",
 					"Position_1", "UV0_1", "Color_1", "UV2_1",
@@ -33,6 +33,10 @@ public class ParticleTransformFeedbackShader {
 		CameraLeft = GL20C.glGetUniformLocation(programId, "CameraLeft");
 		CameraUp = GL20C.glGetUniformLocation(programId, "CameraUp");
 		PartialCameraPos = GL20C.glGetUniformLocation(programId, "PartialCameraPos");
+	}
+
+	public static void unuse() {
+		GL30C.glUseProgram(0);
 	}
 
 	public void use() {

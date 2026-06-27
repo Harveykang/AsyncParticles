@@ -3,7 +3,6 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -12,7 +11,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Queue;
-import java.util.Set;
 
 public class GpuParticleGroup extends QuadParticleGroup implements ParticleGroupAddition {
 	private final GpuQuadParticleRenderState renderState;
@@ -30,14 +28,8 @@ public class GpuParticleGroup extends QuadParticleGroup implements ParticleGroup
 		return renderState;
 	}
 
-	public void mapBuffers() {
-		renderState.mapBuffers(() -> {
-			Set<SingleQuadParticle.Layer> potentialLayer = new ReferenceOpenHashSet<>();
-			for (SingleQuadParticle sqp : particles) {
-				potentialLayer.add(sqp.getLayer());
-			}
-			return potentialLayer;
-		});
+	public void prepareBuffer() {
+		renderState.prepareBuffer();
 	}
 
 	public void tickParticles() {
@@ -46,8 +38,8 @@ public class GpuParticleGroup extends QuadParticleGroup implements ParticleGroup
 		renderState.tickRenderers(GpuParticleBehavior.getInstance().getCameraPos(), particles);
 	}
 
-	public void unmapBuffersAndSwap(Vec3 prevGpuCamPos) {
-		renderState.unmapBuffersAndSwap(prevGpuCamPos);
+	public void flushBufferAndSwap(Vec3 prevGpuCamPos) {
+		renderState.flushBufferAndSwap(prevGpuCamPos);
 	}
 
 	public void beginFrame() {

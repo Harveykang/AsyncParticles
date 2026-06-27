@@ -101,7 +101,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			particlesToAdd.clear();
 		}
 		if (gpuParticles) {
-			GpuParticleBehavior.getInstance().swapAllBuffers();
+			GpuParticleBehavior.getInstance().flushBufferAndSwap();
 			GpuParticleBehavior.getInstance().setGpuParticleLimit(ConfigHelper.getParticleLimit());
 			Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
 			GpuParticleBehavior.getInstance().setCameraPos(camera.position()); // Set the next camera position
@@ -110,7 +110,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 					return;
 				}
 				Profiler.get().push(renderType.name());
-				gpuGroup.mapBuffers();
+				gpuGroup.prepareBuffer();
 				AsyncTickBehavior.getInstance().dispatch(gpuGroup::tickParticles);
 				Profiler.get().pop();
 			}));
