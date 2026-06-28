@@ -38,16 +38,6 @@ public abstract class MixinQuadParticleGroup implements GpuParticleGroup {
 
 	@Override
 	public void asyncparticles$removeDeadGpuParticles() {
-		if (ConfigHelper.isParallelQueueRemoval()) {
-			((IterationSafeEvictingQueue<? extends Particle>) asyncparticles$gpuParticles)
-				.parallelRemoveIf(particle ->
-						AsyncTickBehavior.getInstance().shouldRemove(particle),
-					ConfigHelper.isParallelQueueEviction(),
-					AsyncTickBehavior.THREADS,
-					AsyncTickBehavior.getInstance().getExecutor());
-		} else {
-			asyncparticles$gpuParticles.removeIf(particle ->
-				AsyncTickBehavior.getInstance().shouldRemove(particle));
-		}
+		AsyncTickBehavior.getInstance().doParticlesRemoveIf(asyncparticles$gpuParticles);
 	}
 }

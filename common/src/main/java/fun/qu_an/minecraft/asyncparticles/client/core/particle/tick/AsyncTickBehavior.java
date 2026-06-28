@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class AsyncTickBehavior {
@@ -194,14 +195,22 @@ public class AsyncTickBehavior {
 	}
 
 	public void doEmittersRemoveIf(Queue<? extends TrackingEmitter> queue) {
+		doRemoveIf(queue, p -> !p.isAlive());
+	}
+
+	public void doParticlesRemoveIf(Queue<? extends Particle> particles) {
+		doRemoveIf(particles, this::shouldRemove);
+	}
+
+	public void doRemoveIf(Queue<? extends Particle> particles, Predicate<? super Particle> shouldRemove) {
 		if (ConfigHelper.isParallelQueueRemoval()) {
-			((IterationSafeEvictingQueue<? extends TrackingEmitter>) queue)
-				.parallelRemoveIf(particle -> !particle.isAlive(),
+			((IterationSafeEvictingQueue<? extends Particle>) particles)
+				.parallelRemoveIf(shouldRemove,
 					ConfigHelper.isParallelQueueEviction(),
 					AsyncTickBehavior.THREADS,
 					tickTaskHelper.executor());
 		} else {
-			queue.removeIf(this::shouldRemove);
+			particles.removeIf(shouldRemove);
 		}
 	}
 

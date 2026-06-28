@@ -73,7 +73,7 @@ public class ConfigHelper {
 	}
 
 	public static boolean isGpuParticles() {
-		return rendering$gpuAcceleration;
+		return rendering$gpuAcceleration && isAsyncTickParticle();
 	}
 
 	public static boolean isParallelQueueRemoval() {

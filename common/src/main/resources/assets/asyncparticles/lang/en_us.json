@@ -15,7 +15,7 @@
   "config.asyncparticles.tick.animationTickMode": "Async Animation Tick",
   "config.asyncparticles.tick.animationTickMode.tooltip": "Choose how animations are ticked.\n.'Synchronously' means no optimization.",
   "config.asyncparticles.tick.particleAsyncMode": "Async Particle Tick",
-  "config.asyncparticles.tick.particleAsyncMode.tooltip": "Selects how particles are ticked asynchronously.\n'Sequenced' tick the entire queue asynchronously without splitting.\n'Split' partitions the particle queue and ticks each partition asynchronously in parallel,\nbut may conflict with other mods.",
+  "config.asyncparticles.tick.particleAsyncMode.tooltip": "Selects how particles are ticked asynchronously.\n'Sequenced' tick the entire queue asynchronously without splitting.\n'Split' partitions the particle queue and ticks each partition asynchronously in parallel,\nbut may conflict with other mods.\n'Disable' doesn't support 'GPU Particle Acceleration'",
   "config.asyncparticles.tick.tickWeatherAsync": "Async Weather Tick",
   "config.asyncparticles.tick.tickWeatherAsync.tooltip": "Enable asynchronous weather ticking.",
   "config.asyncparticles.tick.deferredTextureTick": "Deferred Texture Tick",
