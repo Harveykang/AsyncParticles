@@ -384,7 +384,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 				baseCount += tickCount;
 			}
 		}
-		this.tickCount[pi] = position / vertexSize;
+		this.tickCount[pi] = baseCount;
 
 		// Clear to prepare pending list
 		pendingAppends.clear();
@@ -413,16 +413,11 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 			(float) (camPositions[usingIdx].y - camera.position().y),
 			(float) (camPositions[usingIdx].z - camera.position().z));
 
-		// Resize target to fit actual particle count
-		int needSize = 4 * (tickCount[usingIdx] + appendCount) * GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
-		if (needSize > target.getSize()) {
-			resizeTarget(needSize);
-		}
-
 		sources[usingIdx].bind();
 		if (tf <= 0) {
 			BackendCaps.glTfSupport.glBindTransformFeedbackBuffer(target.vbo);
 		}
+		int needSize = 4 * (tickCount[usingIdx] + appendCount) * GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
 		BackendCaps.glTfSupport.glBindTransformFeedbackBufferRange(tf,
 			0,
 			target.vbo,
@@ -453,11 +448,8 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public ComputeResult awaitCompute() {
-		if (!computed) {
+		if (shouldSkip || !computed) {
 			return null;
-		}
-		if (shouldSkip) {
-			throw new IllegalStateException("Should skip rendering during this tick!");
 		}
 		return computeResult;
 	}
@@ -506,18 +498,14 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		}
 		this.particleLimit = particleLimit;
 
-		int proceedSize = 4 * particleLimit * GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
+		int proceedSize = 2 * 4 * particleLimit * GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
 		if (proceedSize != target.getSize()) {
-			resizeTarget(proceedSize);
+			GlBuffer.MEMORY_POOl.free(target.vbo);
+			target.resize0(proceedSize);
+			int newSize = target.getSize();
+			targetMoj.size = newSize;
+			GlBuffer.MEMORY_POOl.malloc(target.vbo, newSize);
 		}
-	}
-
-	private void resizeTarget(int neededBytes) {
-		GlBuffer.MEMORY_POOl.free(target.vbo);
-		target.resize0(neededBytes);
-		int newSize = target.getSize();
-		targetMoj.size = newSize;
-		GlBuffer.MEMORY_POOl.malloc(target.vbo, newSize);
 	}
 
 	@Override
@@ -535,7 +523,6 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		reload();
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			sources[i].delete();
-			layerBatches[i].clear();
 		}
 		targetMoj.close();
 		target.delete(true, false);
@@ -547,10 +534,10 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			tickCount[i] = 0;
 			camPositions[i] = Vec3.ZERO;
+			layerBatches[i].clear();
 			if (sources[i].isMapped()) {
 				sources[i].unmap();
 			}
-			layerBatches[i].clear();
 		}
 		pendingAppends.clear();
 		appendCount = 0;

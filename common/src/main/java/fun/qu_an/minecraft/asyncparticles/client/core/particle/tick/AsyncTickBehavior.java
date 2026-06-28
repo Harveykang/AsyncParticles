@@ -274,7 +274,7 @@ public class AsyncTickBehavior {
 			[AsyncParticles Debug]
 			particle task count: %d,
 			particle limit: %d,
-			particles groups (render order, size/allocated):
+			particles groups (render order, size):
 			%s,
 			particles to add size: %d
 			sync particle types: %s,
@@ -285,13 +285,7 @@ public class AsyncTickBehavior {
 				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
 					.stream()
-					.collect(Collectors.toMap(Map.Entry::getKey, e -> {
-						Queue<?> queue = e.getValue().getAll();
-						if (queue instanceof IterationSafeEvictingQueue<?> q1) {
-							return queue.size() + "/" + q1.arraySize();
-						}
-						return queue.size() + "/" + "Unknown";
-					})),
+					.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().size())),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
 				syncParticleTypes.stream().map(Class::getName).toList(),
 				BackendCaps.glTfSupport.getClass().getSimpleName(),
