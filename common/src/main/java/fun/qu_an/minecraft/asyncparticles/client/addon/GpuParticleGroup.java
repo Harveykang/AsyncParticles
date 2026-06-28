@@ -6,4 +6,6 @@ import java.util.Queue;
 
 public interface GpuParticleGroup {
 	Queue<SingleQuadParticle> asyncparticles$getGpuParticles();
+
+	void asyncparticles$removeDeadGpuParticles();
 }

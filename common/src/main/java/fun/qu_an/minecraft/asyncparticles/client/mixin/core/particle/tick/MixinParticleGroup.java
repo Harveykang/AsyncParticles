@@ -158,21 +158,12 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 					ConfigHelper.isParallelQueueEviction(),
 					AsyncTickBehavior.THREADS,
 					AsyncTickBehavior.getInstance().getExecutor());
-			if (this instanceof GpuParticleGroup gpuParticleGroup) {
-				((IterationSafeEvictingQueue<? extends Particle>) gpuParticleGroup.asyncparticles$getGpuParticles())
-					.parallelRemoveIf(particle ->
-							AsyncTickBehavior.getInstance().shouldRemove(particle),
-						ConfigHelper.isParallelQueueEviction(),
-						AsyncTickBehavior.THREADS,
-						AsyncTickBehavior.getInstance().getExecutor());
-			}
 		} else {
 			particles.removeIf(particle ->
 				AsyncTickBehavior.getInstance().shouldRemove(particle));
-			if (this instanceof GpuParticleGroup gpuParticleGroup) {
-				gpuParticleGroup.asyncparticles$getGpuParticles().removeIf(particle ->
-					AsyncTickBehavior.getInstance().shouldRemove(particle));
-			}
+		}
+		if (this instanceof GpuParticleGroup gpuParticleGroup) {
+			gpuParticleGroup.asyncparticles$removeDeadGpuParticles();
 		}
 	}
 

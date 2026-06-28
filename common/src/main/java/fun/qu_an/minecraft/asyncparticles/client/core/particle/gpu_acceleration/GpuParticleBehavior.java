@@ -7,6 +7,7 @@ import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.GlTfParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan.VkCompParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
@@ -16,6 +17,7 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -35,7 +37,7 @@ public class GpuParticleBehavior {
 	 */
 	private final List<Class<? extends Particle>> GPU_PARTICLE_CLASSES;
 	private float partialTick;
-	private Frustum frustum;
+//	private Frustum frustum = new Frustum(new Matrix4f(), new Matrix4f());
 	private int boost = 1;
 
 	{
@@ -92,6 +94,9 @@ public class GpuParticleBehavior {
 		}
 		return CAN_RENDER_FAST_CACHE.computeIfAbsent(sqp.getClass(), (Predicate<Class<? extends SingleQuadParticle>>)
 			k -> {
+				if (AsyncTickBehavior.getInstance().shouldSync(k)) {
+					return false;
+				}
 				try {
 					Class<?> renderMethodDeclaringClass = k.getMethod(RENDER_METHOD,
 						QuadParticleRenderState.class,
@@ -144,7 +149,7 @@ public class GpuParticleBehavior {
 			}
 		}
 		Camera camera = Minecraft.getInstance().gameRenderer.mainCamera();
-		frustum = new Frustum(camera.getCullFrustum()).offset(-3);
+//		frustum = new Frustum(camera.getCullFrustum()).offset(-3);
 		perTickCameraPos = camera.position();
 	}
 
@@ -162,7 +167,7 @@ public class GpuParticleBehavior {
 			}
 		}
 		Camera camera = Minecraft.getInstance().gameRenderer.mainCamera();
-		frustum = new Frustum(camera.getCullFrustum()).offset(-3);
+//		frustum = new Frustum(camera.getCullFrustum()).offset(-3);
 		perTickCameraPos = camera.position();
 	}
 
@@ -224,9 +229,9 @@ public class GpuParticleBehavior {
 		}
 	}
 
-	public Frustum getFrustum() {
-		return frustum;
-	}
+//	public Frustum getFrustum() {
+//		return frustum;
+//	}
 
 	public int getParticleLimit() {
 		return particleLimit;
