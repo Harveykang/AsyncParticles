@@ -151,8 +151,8 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 	}
 
 	private int extractAppendParticles(Vec3 prevGpuCamPos,
-	                                     List<SingleQuadParticle> pending,
-	                                     List<LayerBatch> batches) {
+	                                   List<SingleQuadParticle> pending,
+	                                   List<LayerBatch> batches) {
 		int appendCount = pending.size();
 		int vertexSize = GpuParticlePipelines.RAW_PARTICLE.getVertexSize();
 		final double cx = prevGpuCamPos.x;
@@ -161,7 +161,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 
 		int pi = processingSrcIdx;
 		int offsetRelativeToMap;
-		if (mappedBuffer != null) {
+		if (isMapped()) {
 			offsetRelativeToMap = particleLimit * vertexSize;
 		} else {
 			mappedBuffer = sources[pi].mapRange(particleLimit * vertexSize, appendCount * vertexSize, true);
@@ -170,20 +170,17 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		final long bufferAddress = MemoryUtil.memAddress(mappedBuffer) + offsetRelativeToMap;
 
 		Map<SingleQuadParticle.Layer, List<SingleQuadParticle>> layerMap = new Reference2ReferenceOpenHashMap<>();
-		for (SingleQuadParticle particle : pending) {
-			List<SingleQuadParticle> list = layerMap.computeIfAbsent(particle.getLayer(),
-				_ -> new ReferenceArrayList<>(appendCount >> 1)); // To reduce re-allocation
-			list.add(particle);
+		for (int i = 0, pendingSize = Math.min(particleLimit, pending.size()); i < pendingSize; i++) {
+			SingleQuadParticle p = pending.get(i);
+			layerMap.computeIfAbsent(p.getLayer(), _ -> new ReferenceArrayList<>(appendCount / 2)).add(p);
 		}
 
 		int baseCount = 0;
+		int baseWrite = 0;
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			long address = stack.nmalloc(vertexSize);
 			for (Map.Entry<SingleQuadParticle.Layer, List<SingleQuadParticle>> entry : layerMap.entrySet()) {
 				List<SingleQuadParticle> list = entry.getValue();
-				if (list.isEmpty()) {
-					throw new AssertionError();
-				}
 				LayerBatch batch = null;
 				for (LayerBatch b : batches) {
 					if (b.layer == entry.getKey()) {
@@ -195,12 +192,10 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 				if (batch == null) {
 					batch = new LayerBatch(entry.getKey());
 					batch.tickOffset = this.tickCount[pi];
-//					batch.tickCount = 0;
 					batches.add(batch);
 				}
 				batch.appendOffset = baseCount;
 				batch.appendCount = layerAppend;
-				int baseWrite = baseCount * vertexSize;
 				for (SingleQuadParticle particle : list) {
 					GpuParticleAddon gpuParticle = (GpuParticleAddon) particle;
 
@@ -304,18 +299,21 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		batches.clear();
 
 		int position = 0;
+		int baseCount = 0;
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			final long address = stack.nmalloc(vertexSize);
 			for (Map.Entry<SingleQuadParticle.Layer, T> entry : particles.entrySet()) {
 				Collection<SingleQuadParticle> collection = entry.getValue();
-				if (collection.size() > particleLimit) {
-					throw new IllegalStateException("Particle limit exceeded! particle limit: " + particleLimit + ", collection size: " + collection.size());
+				if (baseCount + collection.size() > particleLimit) {
+					throw new IllegalStateException("Particle limit exceeded! particle limit: " + particleLimit
+						+ ", baseCount: " + baseCount
+						+ ", collection size: " + collection.size());
 				}
 
-				int layerTick = 0;
+				int tickCount = 0;
 				for (SingleQuadParticle particle : collection) {
 					GpuParticleAddon gpuParticle = (GpuParticleAddon) particle;
-					if (!gpuParticle.asyncparticles$shouldRender()) {
+					if (!particle.isAlive() || !gpuParticle.asyncparticles$shouldRender()) {
 						continue;
 					}
 
@@ -372,17 +370,18 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 
 					gpuParticle.asyncparticles$postTick(address);
 
-					MemoryUtil.memCopy(address, bufferAddress + (long) position, vertexSize);
+					MemoryUtil.memCopy(address, bufferAddress + position, vertexSize);
 					position += vertexSize;
-					layerTick++;
+					tickCount++;
 				}
 
-				if (layerTick > 0) {
+				if (tickCount > 0) {
 					LayerBatch batch = new LayerBatch(entry.getKey());
-					batch.tickOffset = position / vertexSize - layerTick;
-					batch.tickCount = layerTick;
+					batch.tickOffset = baseCount;
+					batch.tickCount = tickCount;
 					batches.add(batch);
 				}
+				baseCount += tickCount;
 			}
 		}
 		this.tickCount[pi] = position / vertexSize;

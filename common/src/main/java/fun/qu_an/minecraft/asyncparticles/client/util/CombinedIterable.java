@@ -7,28 +7,51 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.Set;
 
-public class CombinedIterable {
-	public static <T> Iterable<T> of(Iterable<T> left, Iterable<T> right) {
-		return new Iterable<>() {
-			@Override
-			public @NotNull Iterator<T> iterator() {
-				return new Iterator<>() {
-					private final Iterator<T> l = left.iterator();
-					private final Iterator<T> r = right.iterator();
-					private boolean isLeft;
+public class CombinedIterable<T> implements Iterable<T> {
+	private final Iterable<T> left;
+	private final Iterable<T> right;
 
-					@Override
-					public boolean hasNext() {
-						return (isLeft && (isLeft = l.hasNext())) || r.hasNext();
-					}
+	public CombinedIterable(Iterable<T> left, Iterable<T> right) {
+		this.left = left;
+		this.right = right;
+	}
 
-					@Override
-					public T next() {
-						return isLeft ? l.next() : r.next();
-					}
-				};
-			}
-		};
+	@Override
+	public @NotNull CombinedIterator<T> iterator() {
+		return new CombinedIterator<>(left, right);
+	}
+
+	public static class CombinedIterator<T> implements Iterator<T> {
+		private final Iterator<T> l;
+		private final Iterator<T> r;
+		private boolean isLeft = true;
+
+		public CombinedIterator(Iterable<T> left, Iterable<T> right) {
+			l = left.iterator();
+			r = right.iterator();
+		}
+
+		@Override
+		public boolean hasNext() {
+			return (isLeft && (isLeft = l.hasNext())) || r.hasNext();
+		}
+
+		@Override
+		public T next() {
+			return isLeft ? l.next() : r.next();
+		}
+
+		public boolean isLeft() {
+			return isLeft;
+		}
+	}
+
+	public static <T> CombinedIterable<T> of(Iterable<T> left, Iterable<T> right) {
+		return new CombinedIterable<>(left, right);
+	}
+
+	public static <T> CombinedIterator<T> ofIterator(Iterable<T> left, Iterable<T> right) {
+		return new CombinedIterator<>(left, right);
 	}
 
 	public static <T> Set<T> ofSet(Set<T> left, Set<T> right) {

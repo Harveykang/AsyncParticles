@@ -34,8 +34,6 @@ public class GpuParticlePipelines {
 		.add("Light", VertexFormatElement.UV2)
 		.add("Rolls", VertexFormatElement.UV0)
 		.build();
-	public static final int[] multiDrawFirst = {0, 0};
-	public static final int[] multiDrawCount = {0, 0};
 	public static final VertexFormat IDENTITY_PARTICLE;
 
 	static {

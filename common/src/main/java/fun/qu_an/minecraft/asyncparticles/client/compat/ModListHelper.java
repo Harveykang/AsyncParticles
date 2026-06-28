@@ -102,8 +102,6 @@ public class ModListHelper {
 	public static final boolean AXIOM_LOADED = isModLoaded("axiom");
 	/* CosyCritters */
 	public static final boolean COSYCRITTERS_LOADED = isModLoaded("cosycritters");
-	/* Particle Interactions */
-	public static final boolean PARTICLE_INTERACTIONS_LOADED = isModLoaded("eg_particle_interactions");
 
 	private static boolean isForge() {
 		return PLATFORM.isForge();

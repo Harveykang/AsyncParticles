@@ -5,12 +5,13 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGrou
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickParticleGroupBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleGroup;
-import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
+import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleGroup;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.particle.*;
 import net.minecraft.util.profiling.Profiler;
 import org.spongepowered.asm.mixin.Final;
@@ -19,6 +20,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
@@ -52,12 +54,11 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		Particle particle;
 		boolean tickAsync = ConfigHelper.isAsyncTickParticle();
 		this.particles.forEach((renderType, group) -> {
-			if (group.isEmpty() || group instanceof GpuParticleGroup) {
+			if (group.isEmpty()) {
 				return;
 			}
 			Profiler.get().push(renderType.name());
-			if (tickAsync && group instanceof AsyncTickableParticleGroup
-				&& AsyncTickParticleGroupBehavior.canTickAsync(group)) {
+			if (tickAsync && AsyncTickParticleGroupBehavior.canTickAsync(group)) {
 				AsyncTickBehavior.getInstance().dispatch(group::tickParticles);
 			} else {
 				group.tickParticles();
@@ -74,55 +75,62 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			AsyncTickBehavior.getInstance().doEmittersRemoveIf(trackingEmitters);
 		}
 
-		boolean gpuParticles = tickAsync && ConfigHelper.isGpuParticles();
+		boolean enableGpu = tickAsync && ConfigHelper.isGpuParticles();
 		if (!particlesToAdd.isEmpty()) {
 			boolean appendNewParticlesToRenderer = ConfigHelper.isAppendNewParticlesToRenderer();
 			// Write like this to be compatible with e.g. Spectrum mod
 			//noinspection ForLoopReplaceableByForEach
 			for (Iterator<Particle> iterator = particlesToAdd.iterator(); iterator.hasNext(); ) {
 				particle = iterator.next();
-				boolean canComputeFast;
-				if (!gpuParticles) {
-					canComputeFast = false;
-				} else {
-					canComputeFast = particle instanceof SingleQuadParticle sqp && GpuParticleBehavior.getInstance().canRenderFast(sqp);
-				}
 				ParticleRenderType renderType = particle.getGroup();
-				ParticleGroup<?> group;
-				if (!canComputeFast) {
-					group = this.particles.computeIfAbsent(renderType, this::createParticleGroup);
+				ParticleGroup<?> group = this.particles.computeIfAbsent(renderType, this::createParticleGroup);
+				if (enableGpu
+					&& group instanceof GpuParticleGroup gpuParticleGroup
+					&& particle instanceof SingleQuadParticle sqp
+					&& GpuParticleBehavior.getInstance().canRenderFast(sqp)) {
+					GpuParticleBehavior.getInstance().onAdd(sqp);
+					gpuParticleGroup.asyncparticles$getGpuParticles().add(sqp);
 				} else {
-					ParticleRenderType gpuRenderType = GpuParticleBehavior.getInstance().ofRenderType(renderType);
-					group = this.particles.computeIfAbsent(gpuRenderType, gpuRenderType1 ->
-						GpuParticleBehavior.getInstance().getOrCreateGroup(this, gpuRenderType1));
+					group.add(particle);
 				}
-				group.add(particle);
 			}
 			particlesToAdd.clear();
 		}
-		if (gpuParticles) {
+
+		if (enableGpu) {
 			GpuParticleBehavior.getInstance().flushBufferAndSwap();
-			GpuParticleBehavior.getInstance().setGpuParticleLimit(ConfigHelper.getParticleLimit());
-			Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-			GpuParticleBehavior.getInstance().setCameraPos(camera.position()); // Set the next camera position
-			GpuParticleBehavior.getInstance().gpuParticles.forEach(((renderType, gpuGroup) -> {
-				if (gpuGroup.isEmpty()) {
-					return;
+			int sum = 0;
+			for (ParticleGroup<?> group : particles.values()) {
+				if (group instanceof GpuParticleGroup gpuGroup) {
+					sum += gpuGroup.asyncparticles$getGpuParticles().size();
 				}
-				Profiler.get().push(renderType.name());
-				gpuGroup.prepareBuffer();
-				AsyncTickBehavior.getInstance().dispatch(gpuGroup::tickParticles);
-				Profiler.get().pop();
-			}));
+			}
+			GpuParticleBehavior.getInstance().setUpNextTickRendering(sum);
+			IParticleRenderer renderer = GpuParticleBehavior.getInstance().getOrCreateRenderer();
+			renderer.prepareBuffer();
+			AsyncTickBehavior.getInstance().dispatch(() -> {
+				int size = Math.max(8, ConfigHelper.getParticleLimit() >> 1);
+				Map<SingleQuadParticle.Layer, List<SingleQuadParticle>> particles = new Reference2ReferenceOpenHashMap<>();
+				for (Map.Entry<ParticleRenderType, ParticleGroup<?>> entry : this.particles.entrySet()) {
+					ParticleGroup<?> particleGroup = entry.getValue();
+					if (!(particleGroup instanceof GpuParticleGroup gpuGroup)) {
+						continue;
+					}
+					Queue<SingleQuadParticle> gpuParticles = gpuGroup.asyncparticles$getGpuParticles();
+					if (gpuParticles.isEmpty()) {
+						continue;
+					}
+					for (SingleQuadParticle sqp : gpuParticles) {
+						particles.computeIfAbsent(sqp.getLayer(), _ -> new ReferenceArrayList<>(size)).add(sqp);
+					}
+				}
+				renderer.tick(GpuParticleBehavior.getInstance().getPerTickCameraPos(), particles);
+			});
 		}
 	}
 
 	@Override
 	public void asyncparticle$tickSyncParticles() {
-		particles.values().forEach(g -> {
-			if (g instanceof AsyncTickableParticleGroup asyncGroup) {
-				asyncGroup.asyncparticles$tickSyncParticles();
-			}
-		});
+		particles.values().forEach(AsyncTickParticleGroupBehavior::tickSyncParticles);
 	}
 }

@@ -6,7 +6,6 @@ import net.minecraft.client.particle.FireworkParticles;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ARGB;
-import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -33,7 +32,7 @@ public class MixinFireworkParticles {
 		}
 
 		public int asyncparticles$getOColor() {
-			float alpha = 0.6F - (this.age - 1) * 0.125f;
+			float alpha = 0.6F - (this.age - 1.0F) * 0.125f;
 			return ARGB.color( // ABGR
 				(int) (alpha * 255.0f),
 				(int) (bCol * 255.0f),

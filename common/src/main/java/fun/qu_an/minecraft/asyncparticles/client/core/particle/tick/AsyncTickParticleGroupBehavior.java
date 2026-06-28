@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
 
+import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
@@ -23,7 +24,8 @@ public class AsyncTickParticleGroupBehavior {
 	}
 
 	public static boolean canTickAsync(ParticleGroup<?> particleGroup) {
-		return CAN_TICK_PARTICLES_ASYNC.computeIfAbsent(particleGroup.getClass(), (Predicate<Class<? extends ParticleGroup>>)
+		return particleGroup instanceof AsyncTickableParticleGroup
+			&& CAN_TICK_PARTICLES_ASYNC.computeIfAbsent(particleGroup.getClass(), (Predicate<Class<? extends ParticleGroup>>)
 			k -> {
 				try {
 					Class<?> declaringClass = k.getMethod(TICK_PARTICLES_METHOD).getDeclaringClass();
@@ -32,5 +34,11 @@ public class AsyncTickParticleGroupBehavior {
 					return false;
 				}
 			});
+	}
+
+	public static void tickSyncParticles(ParticleGroup<?> g) {
+		if (canTickAsync(g)) {
+			((AsyncTickableParticleGroup) g).asyncparticles$tickSyncParticles();
+		}
 	}
 }

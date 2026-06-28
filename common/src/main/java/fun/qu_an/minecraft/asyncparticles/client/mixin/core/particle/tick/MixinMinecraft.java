@@ -35,7 +35,7 @@ public class MixinMinecraft {
 	@Inject(method = "setLevel", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
 		target = "Lnet/minecraft/client/Minecraft;updateLevelInEngines(Lnet/minecraft/client/multiplayer/ClientLevel;)V"))
 	private void afterSetLevel(CallbackInfo ci) {
-		GpuParticleBehavior.getInstance().setGpuParticleLimit(ConfigHelper.getParticleLimit());
+		GpuParticleBehavior.getInstance().initRendering();
 	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;tick()V"))

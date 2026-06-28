@@ -1,18 +1,17 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
-import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.GlTfParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
@@ -32,7 +31,7 @@ public class GpuParticleBehavior {
 	public static final String RENDER_ROTATED_QUAD_METHOD_2 = Mappings.getRenderRotatedQuadMethod2();
 	private static final GpuParticleBehavior INSTANCE = new GpuParticleBehavior();
 	private static final ParticleRenderType GPU_SINGLE_QUADS = new ParticleRenderType("gpu_single_quads");
-	public final Map<ParticleRenderType, GpuParticleGroup> gpuParticles = new Reference2ObjectOpenHashMap<>();
+	public IParticleRenderer renderer;
 	/**
 	 * Code adapted from <a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/src/main/java/me/jellysquid/mods/sodium/mixin/features/render/particle/ParticleManagerMixin.java#L51">wahfl2/sodium-fabric</a>
 	 * <p>
@@ -40,8 +39,9 @@ public class GpuParticleBehavior {
 	 */
 	private final List<Class<? extends Particle>> GPU_PARTICLE_CLASSES;
 	private float partialTick;
-	private Frustum frustum = new Frustum(new Matrix4f(), new Matrix4f());
+//	private Frustum frustum = new Frustum(new Matrix4f(), new Matrix4f());
 	private final Map<ParticleRenderType, ParticleRenderType> renderTypes = new Object2ObjectArrayMap<>();
+	private int limitMultiplier = 1;
 
 	{
 		try {
@@ -60,15 +60,7 @@ public class GpuParticleBehavior {
 
 	private final Reference2BooleanOpenHashMap<Class<? extends SingleQuadParticle>> CAN_RENDER_FAST_CACHE =
 		new Reference2BooleanOpenHashMap<>();
-	private Vec3 cameraPos = Vec3.ZERO;
-	//	private Vec3 prevCameraPos = Vec3.ZERO;
-
-	//	public final String TICK_METHOD = FabricLoader.getInstance().getMappingResolver().mapMethodName(
-//		"intermediary",
-//		"net.minecraft.class_703",
-//		"method_3070",
-//		"()V"
-//	);
+	private Vec3 perTickCameraPos = Vec3.ZERO;
 	private int particleLimit = AsyncParticlesConfig.MIN_PARTICLE_LIMIT;
 
 	public static void init() {
@@ -78,22 +70,15 @@ public class GpuParticleBehavior {
 		return INSTANCE;
 	}
 
-	public GpuParticleGroup getGpuGroup(ParticleRenderType type) {
-		return gpuParticles.get(type);
-	}
-
 	public void flushBufferAndSwap() {
 		RenderSystem.assertOnRenderThread();
-		gpuParticles.values().forEach(gpuParticleGroup -> gpuParticleGroup.flushBufferAndSwap(cameraPos));
+		if (renderer != null) {
+			renderer.flushBufferAndSwap(getPerTickCameraPos());
+		}
 	}
 
-	public void setCameraPos(Vec3 pos) {
-//		prevCameraPos = cameraPos;
-		cameraPos = pos;
-	}
-
-	public Vec3 getCameraPos() {
-		return cameraPos;
+	public Vec3 getPerTickCameraPos() {
+		return perTickCameraPos;
 	}
 
 //	public Vec3 getPrevCameraPos() {
@@ -157,24 +142,36 @@ public class GpuParticleBehavior {
 	}
 
 	@ApiStatus.Internal
-	public void setGpuParticleLimit(int particleLimit) {
+	public void initRendering() {
+		int particleLimit = ConfigHelper.getParticleLimit();
+		limitMultiplier = 1;
 		if (particleLimit != this.particleLimit) {
 			this.particleLimit = particleLimit;
-			gpuParticles.values().forEach(group -> group.resize(particleLimit));
+			if (renderer != null) {
+				renderer.resize(particleLimit);
+			}
 		}
+		Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+//		frustum = new Frustum(camera.getCullFrustum()).offset(-3);
+		perTickCameraPos = camera.position();
 	}
 
 	@ApiStatus.Internal
-	public int getGpuParticleLimit() {
-		return particleLimit;
-	}
-
-	public void setFrustum(Frustum frustum) {
-		this.frustum = frustum;
-	}
-
-	public Frustum getFrustum() {
-		return frustum;
+	public void setUpNextTickRendering(int actualCount) {
+		int particleLimit = ConfigHelper.getParticleLimit();
+		if (actualCount > particleLimit) {
+			limitMultiplier = (actualCount + particleLimit - 1) / particleLimit;
+		}
+		particleLimit *= limitMultiplier;
+		if (particleLimit != this.particleLimit) {
+			this.particleLimit = particleLimit;
+			if (renderer != null) {
+				renderer.resize(particleLimit);
+			}
+		}
+		Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+//		frustum = new Frustum(camera.getCullFrustum()).offset(-3);
+		perTickCameraPos = camera.position();
 	}
 
 	public float getPartialTicks() {
@@ -182,8 +179,10 @@ public class GpuParticleBehavior {
 	}
 
 	public void beginFrame(float deltaPartialTick) {
-		partialTick = deltaPartialTick;
-		gpuParticles.values().forEach(GpuParticleGroup::beginFrame);
+		this.partialTick = deltaPartialTick;
+		if (renderer != null) {
+			renderer.beginFrame(deltaPartialTick);
+		}
 	}
 
 	public ParticleRenderType ofRenderType(ParticleRenderType renderType) {
@@ -194,22 +193,55 @@ public class GpuParticleBehavior {
 	}
 
 	public IParticleRenderer createRenderer() {
-		if (BackendCaps.glTfSupport.isTfSupported()) return new GlTfParticleRenderer(ConfigHelper.getParticleLimit());
-//		if (GLCaps.tfSupport.isSupported()) return new ParticleMultiRenderer();
-//		if (GLCaps.tfSupport.isSupported()) return new ParticleRenderer();
+		if (BackendCaps.isGl()) {
+			if (BackendCaps.glTfSupport.isTfSupported()) {
+				return new GlTfParticleRenderer(ConfigHelper.getParticleLimit());
+			}
+		}
 		throw new IllegalStateException("No compatible particle renderer found");
 	}
 
 	public void onClearParticles() {
-		gpuParticles.values().forEach(GpuParticleGroup::asyncparticles$clear);
-		gpuParticles.values().forEach(GpuParticleGroup::reload);
+		limitMultiplier = 1;
+		particleLimit = ConfigHelper.getParticleLimit();
+		if (renderer != null) {
+			renderer.resize(ConfigHelper.getParticleLimit());
+			renderer.reload();
+		}
+		GpuParticleGroupRenderer.getInstance().clear();
 	}
 
-	public ParticleGroup<?> getOrCreateGroup(ParticleEngineAddon particleEngine, ParticleRenderType gpuRenderType1) {
-		return gpuParticles.computeIfAbsent(gpuRenderType1,
-			gpuRenderType2 -> {
-				particleEngine.asyncparticle$addRenderType(gpuRenderType2);
-				return new GpuParticleGroup((ParticleEngine) particleEngine, gpuRenderType2);
-			});
+	public void compute() {
+		if (renderer == null || renderer.isShouldSkip()) {
+			return;
+		}
+		Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+		float partialTicks = getPartialTicks();
+		renderer.compute(camera, partialTicks);
+	}
+
+	public ComputeResult ensureComputeReady() {
+		if (renderer == null || renderer.isShouldSkip()) {
+			return null;
+		}
+		return renderer.awaitCompute();
+	}
+
+	public IParticleRenderer getOrCreateRenderer() {
+		return renderer == null ? renderer = createRenderer() : renderer;
+	}
+
+	public void onAdd(SingleQuadParticle particle) {
+		if (ConfigHelper.isAppendNewParticlesToRenderer()) {
+			getOrCreateRenderer().append(getPerTickCameraPos(), particle);
+		}
+	}
+
+//	public Frustum getFrustum() {
+//		return frustum;
+//	}
+
+	public int getParticleLimit() {
+		return particleLimit;
 	}
 }

@@ -6,7 +6,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleGroup;
+import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionTracker;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
@@ -183,7 +183,7 @@ public class AsyncTickBehavior {
 		}
 		Collection<ParticleGroup<?>> groups = mc.particleEngine.particles.values();
 		for (ParticleGroup<?> group : groups) {
-			if (!groups.isEmpty() && !(group instanceof GpuParticleGroup)) {
+			if (!groups.isEmpty()) {
 				cleanupTaskHelper.submitImmediately(((ParticleGroupAddition) group)::asyncparticles$removeDeadParticles);
 			}
 		}
