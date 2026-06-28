@@ -170,14 +170,6 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		}
 	}
 
-	private void resetSourceForWrite(int idx, boolean clearBatches) {
-		tickCount[idx] = 0;
-		camPositions[idx] = Vec3.ZERO;
-		if (clearBatches) {
-			layerBatches[idx].clear();
-		}
-	}
-
 	private int extractAppendParticles(Vec3 prevGpuCamPos,
 	                                   List<SingleQuadParticle> pending,
 	                                   List<LayerBatch> batches) {
@@ -412,7 +404,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 				baseCount += tickCount;
 			}
 		}
-		this.tickCount[pi] = position / vertexSize;
+		this.tickCount[pi] = baseCount;
 
 		// Clear to prepare pending list
 		pendingAppends.clear();
@@ -566,7 +558,9 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 	public void reload() {
 		waitForAllSourceSlots();
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
-			resetSourceForWrite(i, true);
+			tickCount[i] = 0;
+			camPositions[i] = Vec3.ZERO;
+			layerBatches[i].clear();
 			if (sources[i].isMapped()) {
 				sources[i].unmap();
 			}
