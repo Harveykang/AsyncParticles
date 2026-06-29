@@ -180,7 +180,7 @@ public class AsyncTickBehavior {
 					THREADS,
 					this.executor);
 		} else {
-			queue.removeIf(particle -> this.shouldRemove(particle, ConfigHelper.isRemoveIfMissedTick()));
+			queue.removeIf(particle ->  !particle.isAlive());
 		}
 	}
 
