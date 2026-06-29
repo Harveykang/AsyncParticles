@@ -5,12 +5,14 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.particle.buffer.ParticleVertexBuffer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.shader.ParticleTransformFeedbackShader;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
@@ -21,6 +23,7 @@ import org.lwjgl.opengl.GL30C;
 import org.lwjgl.opengl.GL32C;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
+import qouteall.imm_ptl.core.mixin.client.particle.IEParticle;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
@@ -145,7 +148,7 @@ public class ParticleRenderer implements IParticleRenderer {
 			final long address = stack.nmalloc(ParticleVertexFormats.RAW_PARTICLE_BYTES);
 			for (TextureSheetParticle particle : particles) {
 				GpuParticleAddon gpuParticle = (GpuParticleAddon) particle;
-				if (!gpuParticle.asyncparticles$shouldRender()) {
+				if (!shouldRenderParticle(gpuParticle)) {
 					continue;
 				}
 //				if (shouldCull(particleCullingMode, frustum, particle)) {
@@ -335,7 +338,7 @@ public class ParticleRenderer implements IParticleRenderer {
 	@Override
 	public void append(Vec3 cameraPos, TextureSheetParticle particle) {
 		GpuParticleAddon gpuParticle = (GpuParticleAddon) particle;
-		if (!gpuParticle.asyncparticles$shouldRender()) {
+		if (!shouldRenderParticle(gpuParticle)) {
 			return;
 		}
 //		ParticleCullingMode particleCullingMode = ConfigHelper.getGpuParticleCullingMode();
@@ -427,6 +430,15 @@ public class ParticleRenderer implements IParticleRenderer {
 				ParticleVertexFormats.RAW_PARTICLE_BYTES);
 			this.particleCount[processingSrcIdx] = particleCount + 1;
 		}
+	}
+
+	private static boolean shouldRenderParticle(GpuParticleAddon gpuParticle) {
+		boolean shouldRender = gpuParticle.asyncparticles$shouldRender();
+		if (ModListHelper.IMMERSIVE_PORTALS_LOADED && shouldRender) {
+			IEParticle ie = (IEParticle) gpuParticle;
+			return ie.portal_getWorld() == Minecraft.getInstance().player.level();
+		}
+		return shouldRender;
 	}
 
 	@Override
