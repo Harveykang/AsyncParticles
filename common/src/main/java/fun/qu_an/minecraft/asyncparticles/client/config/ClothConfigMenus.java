@@ -94,6 +94,21 @@ class ClothConfigMenus {
 				.setDefaultValue(defaultConfig.tick.animationTickMode)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip"))
 				.setSaveConsumer(newValue -> tick$animationTickMode = newValue)
+				.setTooltipSupplier(() -> {
+					if (ModListHelper.REIGNOFNETHER_LOADED) {
+						return Optional.of(new MutableComponent[]{
+							Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip")
+								.withStyle(ChatFormatting.STRIKETHROUGH),
+							Component.translatable("config.asyncparticles.incompatibility", "Reign of Nether")
+								.withStyle(ChatFormatting.YELLOW)
+						});
+					} else {
+						return Optional.of(new MutableComponent[]{
+							Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip")
+						});
+					}
+				})
+				.setRequirement(() -> !ModListHelper.REIGNOFNETHER_LOADED)
 				.build())
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.tick.particleTickMode"),

@@ -274,7 +274,8 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Tick {
-			TickMode animationTickMode = TickMode.INTERRUPTIBLE;
+			TickMode animationTickMode = ModListHelper.REIGNOFNETHER_LOADED
+				? TickMode.SYNCHRONOUSLY : TickMode.INTERRUPTIBLE;
 			TickMode particleTickMode = TickMode.INTERRUPTIBLE;
 			boolean tickWeatherAsync = true;
 			boolean deferredTextureTick = !ModListHelper.AXIOM_LOADED;
@@ -286,7 +287,8 @@ public class AsyncParticlesConfig {
 			}
 
 			private void flat() {
-				tick$animationTickMode = requireNonNullElse(animationTickMode, TickMode.INTERRUPTIBLE);
+				tick$animationTickMode = requireNonNullElse(animationTickMode,
+					ModListHelper.REIGNOFNETHER_LOADED ? TickMode.SYNCHRONOUSLY : TickMode.INTERRUPTIBLE);
 				tick$particleTickMode = requireNonNullElse(particleTickMode, TickMode.INTERRUPTIBLE);
 				tick$tickWeatherAsync = tickWeatherAsync;
 				tick$deferredTextureTick = deferredTextureTick && !ModListHelper.AXIOM_LOADED;
