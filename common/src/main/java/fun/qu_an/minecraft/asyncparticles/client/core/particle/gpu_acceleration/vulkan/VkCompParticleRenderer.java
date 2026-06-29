@@ -529,9 +529,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void resize(int particleLimit) {
-		if (computed) {
-			throw new IllegalStateException("Cannot resize while rendering!");
-		}
 		waitForAllSourceSlots();
 		VK10.vkDeviceWaitIdle(device);
 		this.particleLimit = particleLimit;
