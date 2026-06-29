@@ -36,7 +36,6 @@
     "compat.figura.MixinParticleEngine",
     "compat.immediatelyfast.MixinBatchableBufferSource",
     "compat.immersive_portals.MixinParticleEngine",
-    "compat.immersive_portals.MixinParticleRenderer",
     "compat.iris_like.MixinDSAUnsupported",
     "compat.iris_like.MixinFullyBufferedMultiBufferSource",
     "compat.iris_like.MixinIris",
