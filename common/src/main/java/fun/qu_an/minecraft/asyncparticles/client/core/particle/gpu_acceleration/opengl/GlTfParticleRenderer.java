@@ -137,9 +137,11 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 	}
 
 	private int acquireSourceSlot(int idx) {
-		if (fences[idx] == null) {
-			fences[idx] = new GlFence();
+		if (fences[idx] != null) {
+			// this should not happen
+			fences[idx].awaitCompletion(Long.MAX_VALUE);
 		}
+		fences[idx] = new GlFence();
 		int newIdx = (idx + 1) % SOURCE_SLOT_COUNT;
 		GlFence fence = fences[newIdx];
 		if (fence != null) {

@@ -77,6 +77,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			case "core", "off_thread_access" -> true;
 			case "compat" -> switch (split[1]) {
 				case "vulkanmod" -> VULKAN_MOD_LOADED;
+				case "beryl" -> BERYL_LOADED;
 				case "modernui" -> MODERN_UI_LOADED;
 				case "sodium" -> SODIUM_LOADED;
 				case "sodium_0_6" -> SODIUM_LOADED && versionCheck("sodium", "0.6", "0.7");

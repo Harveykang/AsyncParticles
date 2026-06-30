@@ -1,9 +1,10 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.buffers.GpuFence;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.vulkanmod.RendererAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ComputeResult;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticlePipelines;
@@ -15,22 +16,16 @@ import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.world.phys.Vec3;
-import net.vulkanmod.render.engine.VkCommandEncoder;
 import net.vulkanmod.render.engine.VkGpuBuffer;
-import net.vulkanmod.render.engine.VkGpuDevice;
 import net.vulkanmod.vulkan.Renderer;
-import net.vulkanmod.vulkan.Vulkan;
+import net.vulkanmod.vulkan.Synchronization;
 import net.vulkanmod.vulkan.device.DeviceManager;
 import net.vulkanmod.vulkan.memory.MemoryManager;
-import net.vulkanmod.vulkan.memory.MemoryType;
 import net.vulkanmod.vulkan.memory.MemoryTypes;
 import net.vulkanmod.vulkan.memory.buffer.Buffer;
-import org.jspecify.annotations.NonNull;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.util.vma.Vma;
-import org.lwjgl.util.vma.VmaAllocationCreateInfo;
 import org.lwjgl.vulkan.*;
 
 import java.io.InputStream;
@@ -51,7 +46,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	private static final long GPU_WAIT_TIMEOUT_NS = 5_000_000_000L;
 
 	// VK backend
-	private final VkGpuDevice vkBackend;
 	private final VkDevice device;
 
 	// source buffers (pooled, persistently mapped)
@@ -77,7 +71,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	public VkCompParticleRenderer(int particleLimit) {
 		this.particleLimit = particleLimit;
-		vkBackend = (VkGpuDevice) RenderSystem.getDevice().backend;
 		device = DeviceManager.vkDevice;
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			sourceSlots[i] = new SourceSlot();
@@ -342,9 +335,10 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	}
 
 	private int acquireSourceSlot(int idx) {
-		int firstCandidate = (idx + 1) % SOURCE_SLOT_COUNT;
-		sourceSlots[firstCandidate].waitReady();
-		return firstCandidate;
+		sourceSlots[idx].lastFrameUsed = ((RendererAddon) Renderer.getInstance()).asyncparticles$getActualFrame();
+		int newIdx = (idx + 1) % SOURCE_SLOT_COUNT;
+		sourceSlots[newIdx].waitReady();
+		return newIdx;
 	}
 
 	@Override
@@ -528,8 +522,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				.dstAccessMask(VK10.VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
 			VK10.vkCmdPipelineBarrier(cb, VK10.VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK10.VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, 0, mb, null, null);
 		}
-
-		source.lastSubmitIndex = -1;
 	}
 
 	@Override
@@ -543,7 +535,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		this.particleLimit = particleLimit;
 		int raw = 2 * particleLimit * RAW_PARTICLE.getVertexSize();
 		for (SourceSlot sourceSlot : sourceSlots) {
-			sourceSlot.destroyBuffer();
+			sourceSlot.destroy();
 		}
 		createSourceBuffers(raw);
 		long proceed = 4L * particleLimit * IDENTITY_PARTICLE.getVertexSize();
@@ -565,7 +557,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void reset() {
-		VK10.vkDeviceWaitIdle(device);
+		waitForAllSourceSlots();
 		for (SourceSlot sourceSlot : sourceSlots) {
 			sourceSlot.reset();
 		}
@@ -586,7 +578,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	public void close() {
 		VK10.vkDeviceWaitIdle(device);
 		for (SourceSlot sourceSlot : sourceSlots) {
-			sourceSlot.destroyBuffer();
+			sourceSlot.destroy();
 		}
 		submitSlot.destroy();
 		VK10.vkDestroyPipeline(device, pipeline, null);
@@ -598,13 +590,13 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	private final class SourceSlot {
 		private static final ComputeResult.ParticleSlice[] EMPTY_SLICES = new ComputeResult.ParticleSlice[0];
 		private static final int[] EMPTY_INT_ARR = new int[0];
+		public long lastFrameUsed;
 		private long srcBuf;
 		private long srcMem;
 		private ByteBuffer mapped;
 		private final List<LayerBatch> layerBatches = new ReferenceArrayList<>();
 		private int tickCount;
 		private Vec3 camPosition = Vec3.ZERO;
-		private long lastSubmitIndex = -1L;
 		private long generation;
 		private int totalCount;
 		private int workgroupCount;
@@ -637,7 +629,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			}
 		}
 
-		private void destroyBuffer() {
+		private void destroy() {
+			waitReady();
 			VK10.vkUnmapMemory(device, srcMem);
 			VK10.vkFreeMemory(device, srcMem, null);
 			VK10.vkDestroyBuffer(device, srcBuf, null);
@@ -686,6 +679,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		}
 
 		private void reset() {
+			waitReady();
 			totalCount = 0;
 			workgroupCount = 0;
 			groupRecords = EMPTY_INT_ARR;
@@ -693,16 +687,19 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			tickCount = 0;
 			camPosition = Vec3.ZERO;
 			layerBatches.clear();
-			lastSubmitIndex = -1L;
 			prepared = false;
 		}
 
 		private void waitReady() {
-			if (lastSubmitIndex != -1L) {
-//				if (!vkBackend.createCommandEncoder().awaitSubmitCompletion(lastSubmitIndex, GPU_WAIT_TIMEOUT_NS)) {
-//					throw new IllegalStateException("Timeout waiting for GPU particle source slot submit: " + lastSubmitIndex);
-//				}
-				lastSubmitIndex = -1L;
+			if (lastFrameUsed != -1) {
+				long currentFrame = ((RendererAddon) Renderer.getInstance()).asyncparticles$getActualFrame();
+				long diff = currentFrame - lastFrameUsed;
+				// Check if we need to wait
+				if (diff > 0 && diff < Renderer.getFramesNum()) {
+					long fence = ((RendererAddon) Renderer.getInstance()).asyncparticles$getInFlightFence(lastFrameUsed);
+					Synchronization.waitFence(fence);
+				}
+				lastFrameUsed = -1;
 			}
 		}
 	}

@@ -23,6 +23,8 @@
     "compat.sodium.MixinQuadParticleRenderState",
     "compat.sodium_extra.MixinFireworkParticles$Starter",
     "compat.sodium_extra.MixinParticleEngine",
+    "compat.vulkanmod.MixinGraphicsPipeline",
+    "compat.vulkanmod.MixinRenderer",
     "conditional.Mixin_ReplaceRandom",
     "conditional.MixinAsyncTick_AsyncTickableParticleGroup",
     "conditional.MixinClassInstanceMultiMap",
@@ -74,6 +76,6 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "compat.vulkanmod.MixinGraphicsPipeline"
+    "compat.beryl.MixinRenderingPipeline"
   ]
 }
