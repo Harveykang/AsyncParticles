@@ -53,12 +53,14 @@ dependencies {
 //    localRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
 //
 //    /* Performance */
-//    localRuntime "maven.modrinth:sodium:mc26.1.2-0.8.12-fabric"
-//    localRuntime 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+fabric'
-//    localRuntime 'maven.modrinth:iris:1.10.9+26.1-fabric'
-//    localRuntime "org.antlr:antlr4-runtime:4.13.1"
-//    localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
-//    localRuntime "org.anarres:jcpp:1.4.14"
+    if (true) {
+        localRuntime "maven.modrinth:sodium:mc26.1.2-0.8.12-fabric"
+        localRuntime 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+fabric'
+        localRuntime 'maven.modrinth:iris:1.10.9+26.1-fabric'
+        localRuntime "org.antlr:antlr4-runtime:4.13.1"
+        localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
+        localRuntime "org.anarres:jcpp:1.4.14"
+    }
 //    localRuntime 'maven.modrinth:scalablelux:0.1.6+fabric.c25518a'
     localRuntime 'maven.modrinth:spark:1.10.172-fabric'
 //    compileOnly 'maven.modrinth:moreculling:kWU8mVq5' // 1.4.0-beta.1
@@ -67,7 +69,7 @@ dependencies {
 //    /* Particle Rain/Pretty Rain */
 //    compileOnly "maven.modrinth:particle-rain:v4-beta.5+1.21.11-fabric"
 ////    localRuntime "maven.modrinth:particle-rain:3.3.6"
-    localRuntime("dev.isxander:yet-another-config-lib:3.9.4+26.1-fabric"){
+    localRuntime("dev.isxander:yet-another-config-lib:3.9.4+26.1-fabric") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 //
@@ -124,21 +126,23 @@ dependencies {
 //    localRuntime "maven.modrinth:particle-interactions:0.9.5+26.1-fabric"
 
     /* Vulkan Mod */
-    localRuntime "maven.modrinth:vulkanmod:0.6.8+26.1.2"
-    localRuntime "maven.modrinth:beryl:Wgi6wkQ4" // 0.2.1-alpha
-    localRuntime("org.lwjgl:lwjgl-vulkan:3.3.3")
-    localRuntime("org.lwjgl:lwjgl-vma:3.3.3")
-    localRuntime("org.lwjgl:lwjgl-vma:3.3.3:natives-windows")
+    if (false) {
+        localRuntime "maven.modrinth:vulkanmod:0.6.8+26.1.2"
+        localRuntime "maven.modrinth:beryl:Wgi6wkQ4" // 0.2.1-alpha
+        localRuntime("org.lwjgl:lwjgl-vulkan:3.3.3")
+        localRuntime("org.lwjgl:lwjgl-vma:3.3.3")
+        localRuntime("org.lwjgl:lwjgl-vma:3.3.3:natives-windows")
 //    localRuntime("org.lwjgl:lwjgl-vma:3.3.3:natives-linux")
 //    localRuntime("org.lwjgl:lwjgl-vma:3.3.3:natives-macos")
 //    localRuntime("org.lwjgl:lwjgl-vma:3.3.3:natives-macos-arm64")
-    localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3")
-    localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3:natives-windows")
+        localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3")
+        localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3:natives-windows")
 //    localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3:natives-linux")
 //    localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3:natives-macos")
 //    localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3:natives-macos-arm64")
 //    localRuntime("org.lwjgl:lwjgl-vulkan:3.3.3:natives-macos")
 //    localRuntime("org.lwjgl:lwjgl-vulkan:3.3.3:natives-macos-arm64")
+    }
 }
 
 processResources {
