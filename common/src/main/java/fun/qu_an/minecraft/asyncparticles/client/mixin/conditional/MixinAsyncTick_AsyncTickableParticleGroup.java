@@ -49,10 +49,10 @@ public abstract class MixinAsyncTick_AsyncTickableParticleGroup implements Async
 	private static Object wrapNext(@Coerce Object original,
 	                                  @Share("originalPartialTick") LocalFloatRef originalPartialTick,
 	                                  @Local(argsOnly = true, ordinal = 0) LocalFloatRef partialTickTime) {
-		if (!((ParticleAddon) original).asyncparticles$isTicked()) {
-			partialTickTime.set(originalPartialTick.get() + 1f);
-		} else {
+		if (((ParticleAddon) original).asyncparticles$isTicked()) {
 			partialTickTime.set(originalPartialTick.get());
+		} else {
+			partialTickTime.set(originalPartialTick.get() + 1f);
 		}
 		return original;
 	}
