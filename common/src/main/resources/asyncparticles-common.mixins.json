@@ -45,6 +45,7 @@
     "core.particle.gpu_acceleration.MixinFireworkParticles$SparkParticle",
     "core.particle.gpu_acceleration.MixinFlyTowardsPositionParticle",
     "core.particle.gpu_acceleration.MixinLevelRenderer",
+    "core.particle.gpu_acceleration.MixinMinecraft",
     "core.particle.gpu_acceleration.MixinParticleEngine",
     "core.particle.gpu_acceleration.MixinParticleGroup",
     "core.particle.gpu_acceleration.MixinParticlesRenderState",
@@ -73,5 +74,6 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "compat.vulkanmod.MixinGraphicsPipeline"
   ]
 }

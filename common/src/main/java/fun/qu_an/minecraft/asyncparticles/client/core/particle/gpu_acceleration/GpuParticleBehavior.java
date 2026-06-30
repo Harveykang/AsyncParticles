@@ -6,6 +6,7 @@ import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.GlTfParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan.VkCompParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
@@ -13,11 +14,9 @@ import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -193,6 +192,9 @@ public class GpuParticleBehavior {
 	}
 
 	public IParticleRenderer createRenderer() {
+		if (BackendCaps.isVk()) {
+			return new VkCompParticleRenderer(ConfigHelper.getParticleLimit());
+		}
 		if (BackendCaps.isGl()) {
 			if (BackendCaps.glTfSupport.isTfSupported()) {
 				return new GlTfParticleRenderer(ConfigHelper.getParticleLimit());
@@ -206,7 +208,7 @@ public class GpuParticleBehavior {
 		particleLimit = ConfigHelper.getParticleLimit();
 		if (renderer != null) {
 			renderer.resize(ConfigHelper.getParticleLimit());
-			renderer.reload();
+			renderer.reset();
 		}
 		GpuParticleGroupRenderer.getInstance().clear();
 	}
@@ -243,5 +245,11 @@ public class GpuParticleBehavior {
 
 	public int getParticleLimit() {
 		return particleLimit;
+	}
+
+	public void close() {
+		if (renderer != null) {
+			renderer.close();
+		}
 	}
 }

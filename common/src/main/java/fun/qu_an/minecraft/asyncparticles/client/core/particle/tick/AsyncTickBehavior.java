@@ -287,8 +287,7 @@ public class AsyncTickBehavior {
 			%s,
 			particles to add size: %d
 			sync particle types: %s,
-			glCapabilities: TransformFeedback: %s,
-			                ExplicitAttribLocation: %s"""
+			Backend: %s"""
 			.formatted(
 				tickTaskHelper.taskCount(),
 				ConfigHelper.getParticleLimit(),
@@ -297,8 +296,7 @@ public class AsyncTickBehavior {
 					.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().size())),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
 				syncParticleTypes.stream().map(Class::getName).toList(),
-				BackendCaps.glTfSupport.getClass().getSimpleName(),
-				BackendCaps.GL_ARB_explicit_attrib_location
+				BackendCaps.debugInfo()
 			)));
 
 		debugConsumer = null;

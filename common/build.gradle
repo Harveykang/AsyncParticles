@@ -26,7 +26,12 @@ dependencies {
     compileOnly 'maven.modrinth:iris:1.10.9+26.1-fabric'
     compileOnly 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+fabric'
 //    compileOnly 'maven.modrinth:moreculling:kWU8mVq5' // 1.5.0-beta.2
-//
+    /* Vulkan Mod */
+    compileOnly "maven.modrinth:vulkanmod:0.6.8+26.1.2"
+    compileOnly "maven.modrinth:beryl:Wgi6wkQ4" // 0.2.1-alpha
+    compileOnly "org.lwjgl:lwjgl-vma:3.3.3"
+    compileOnly "org.lwjgl:lwjgl-vulkan:3.3.3"
+
 //    /* Particle Rain */
     compileOnly "maven.modrinth:particle-rain:v4-beta.10+26.1-fabric"
 //
@@ -70,6 +75,23 @@ dependencies {
 
     /* Particle Interactions */
     compileOnly "maven.modrinth:particle-interactions:0.9.5+26.1-fabric"
+}
+
+tasks.register('compileSpirv', Exec) {
+    def shaderSrc = file('src/main/resources/assets/asyncparticles/particle_gpu_acceleration/vk_particle_compute.comp')
+    def spvOutDir = layout.buildDirectory.dir('resources/main/assets/asyncparticles/particle_gpu_acceleration/').get().asFile
+    inputs.file shaderSrc
+
+    def dest = new File(spvOutDir, 'vk_particle_compute.spv')
+    dest.delete()
+    outputs.file dest
+    commandLine rootProject.glsl_validator,
+            '-V', '-S', 'comp', '--target-env', 'vulkan1.0',
+            shaderSrc.absolutePath, '-o', dest.absolutePath
+}
+
+processResources {
+    dependsOn compileSpirv
 }
 
 jar {

@@ -71,18 +71,12 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			};
 			case "fabric" -> switch (split[1]) {
 				case "core" -> !IS_FORGE;
-				case "particlerain_3" -> FABRIC_PARTICLERAIN_LOADED &&
-					versionCheck("particlerain", null, "3.999999");
-				case "effectual" -> FABRIC_EFFECTUAL_LOADED;
-				case "particular" -> FABRIC_PARTICULAR_LOADED;
-				case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
-				case "iris" -> FABRIC_IRIS_LOADED;
-				case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;
 				case "compat" -> throw new IllegalStateException("Unknown fabric compat mixin: " + mixinClassName);
 				default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
 			};
 			case "core", "off_thread_access" -> true;
 			case "compat" -> switch (split[1]) {
+				case "vulkanmod" -> VULKAN_MOD_LOADED;
 				case "modernui" -> MODERN_UI_LOADED;
 				case "sodium" -> SODIUM_LOADED;
 				case "sodium_0_6" -> SODIUM_LOADED && versionCheck("sodium", "0.6", "0.7");

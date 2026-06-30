@@ -520,7 +520,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void close() {
-		reload();
+		reset();
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			sources[i].delete();
 		}
@@ -530,7 +530,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 	}
 
 	@Override
-	public void reload() {
+	public void reset() {
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			tickCount[i] = 0;
 			camPositions[i] = Vec3.ZERO;

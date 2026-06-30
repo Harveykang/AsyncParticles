@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration
 import com.mojang.blaze3d.opengl.GlConst;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
@@ -11,10 +12,21 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.ParticleVertexBuffer;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import net.beryl.BerylMod;
+import net.beryl.render.ShaderRenderPipeline;
+import net.beryl.render.util.SUtil;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.irisshaders.iris.api.v0.IrisProgram;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.vulkanmod.interfaces.shader.ExtendedRenderPipeline;
+import net.vulkanmod.render.engine.EGlProgram;
+import net.vulkanmod.render.engine.VkGpuDevice;
+import net.vulkanmod.vulkan.Renderer;
+import net.vulkanmod.vulkan.Vulkan;
+import net.vulkanmod.vulkan.shader.GraphicsPipeline;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.opengl.ARBVertexAttribBinding;
+import org.lwjgl.vulkan.VkDevice;
 
 import java.util.List;
 import java.util.Map;
@@ -73,6 +85,14 @@ public class GpuParticlePipelines {
 			if (ModListHelper.IRIS_LOADED) {
 				IrisApi.getInstance().assignPipeline(pipeline,
 					translucentSupplier.getAsBoolean() ? IrisProgram.PARTICLES_TRANSLUCENT : IrisProgram.PARTICLES);
+			}
+			if (ModListHelper.VULKAN_MOD_LOADED) {
+				VkGpuDevice device = (VkGpuDevice) RenderSystem.getDevice().backend;
+				device.precompilePipeline(pipeline, null);
+				if (ModListHelper.BERYL_LOADED) {
+					GraphicsPipeline identityPipeline = SUtil.createGraphicsPipeline(IDENTITY_PARTICLE, "particle/particle");
+					ShaderRenderPipeline.of(pipeline).redirectPipeline(identityPipeline);
+				}
 			}
 			return pipeline;
 		});

@@ -56,7 +56,7 @@ public interface IParticleRenderer extends Closeable {
 
 	Collection<SingleQuadParticle.Layer> getComputeLayers();
 
-	void reload();
+	void reset();
 
 	@Override
 	void close();
