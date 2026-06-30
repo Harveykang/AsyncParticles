@@ -5,17 +5,13 @@ public interface VKCaps {
 
 	boolean isTimelineSemaphoreSupported();
 
-	boolean isSameQueueFamilyAsGraphics();
-
 	class VKCapsImpl implements VKCaps {
 		private final boolean isComputeShaderSupported;
 		private final boolean timelineSemaphoreSupported;
-		private final boolean sameQueueFamilyAsGraphics;
 
-		public VKCapsImpl(boolean isComputeShaderSupported, boolean timelineSemaphoreSupported, boolean sameQueueFamilyAsGraphics) {
+		public VKCapsImpl(boolean isComputeShaderSupported, boolean timelineSemaphoreSupported) {
 			this.isComputeShaderSupported = isComputeShaderSupported;
 			this.timelineSemaphoreSupported = timelineSemaphoreSupported;
-			this.sameQueueFamilyAsGraphics = sameQueueFamilyAsGraphics;
 		}
 
 		@Override
@@ -24,17 +20,8 @@ public interface VKCaps {
 		}
 
 		@Override
-		public boolean isSameQueueFamilyAsGraphics() {
-			return sameQueueFamilyAsGraphics;
-		}
-
-		@Override
 		public boolean isComputeShaderSupported() {
 			return isComputeShaderSupported;
-		}
-
-		public boolean sameQueueFamilyAsGraphics() {
-			return sameQueueFamilyAsGraphics;
 		}
 	}
 
@@ -46,11 +33,6 @@ public interface VKCaps {
 
 		@Override
 		public boolean isTimelineSemaphoreSupported() {
-			return false;
-		}
-
-		@Override
-		public boolean isSameQueueFamilyAsGraphics() {
 			return false;
 		}
 	}

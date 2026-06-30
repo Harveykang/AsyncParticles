@@ -80,7 +80,7 @@ tasks.register('compileSpirv', Exec) {
     def dest = new File(spvOutDir, 'vk_particle_compute.spv')
     dest.delete()
     outputs.file dest
-    commandLine 'D:/VulkanSDK/1.4.350.0/Bin/glslangValidator.exe',
+    commandLine rootProject.glsl_validator,
             '-V', '-S', 'comp', '--target-env', 'vulkan1.0',
             shaderSrc.absolutePath, '-o', dest.absolutePath
 }

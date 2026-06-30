@@ -720,7 +720,7 @@ public class VkSepQCompParticleRenderer implements IParticleRenderer {
 	}
 
 	@Override
-	public void reload() {
+	public void reset() {
 		VK10.vkDeviceWaitIdle(device);
 		for (SourceSlot sourceSlot : sourceSlots) {
 			sourceSlot.reset();

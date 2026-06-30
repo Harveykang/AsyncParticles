@@ -97,7 +97,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	private int findMemType(int typeFilter, int props) {
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			VkPhysicalDeviceMemoryProperties mp = VkPhysicalDeviceMemoryProperties.calloc(stack);
-			VK10.vkGetPhysicalDeviceMemoryProperties(vkBackend.vkDevice().getPhysicalDevice(), mp);
+			VK10.vkGetPhysicalDeviceMemoryProperties(device.getPhysicalDevice(), mp);
 			for (int i = 0; i < mp.memoryTypeCount(); i++) {
 				if ((typeFilter & (1 << i)) != 0 && (mp.memoryTypes(i).propertyFlags() & props) == props) {
 					return i;
@@ -479,7 +479,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	private void dispatch(SourceSlot source, Camera camera, float partialTicks) {
 		VulkanCommandEncoder commandEncoder = vkBackend.createCommandEncoder();
-		VkCommandBuffer cb = commandEncoder.allocateAndBeginTransientCommandBuffer();
+		VkCommandBuffer cb = commandEncoder.commandBuffer();
 
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			VK10.vkCmdBindPipeline(cb, VK10.VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
@@ -515,10 +515,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				.sType(VK10.VK_STRUCTURE_TYPE_MEMORY_BARRIER).srcAccessMask(VK10.VK_ACCESS_SHADER_WRITE_BIT)
 				.dstAccessMask(VK10.VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
 			VK10.vkCmdPipelineBarrier(cb, VK10.VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK10.VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, 0, mb, null, null);
-			VK10.vkEndCommandBuffer(cb);
 		}
 
-		commandEncoder.execute(cb);
 		source.lastSubmitIndex = commandEncoder.currentSubmitIndex;
 	}
 
@@ -529,16 +527,17 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void resize(int particleLimit) {
-		waitForAllSourceSlots();
-		VK10.vkDeviceWaitIdle(device);
-		this.particleLimit = particleLimit;
-		int raw = 2 * particleLimit * RAW_PARTICLE.getVertexSize();
-		for (SourceSlot sourceSlot : sourceSlots) {
-			sourceSlot.destroyBuffer();
+		if (particleLimit != this.particleLimit) {
+			waitForAllSourceSlots();
+			this.particleLimit = particleLimit;
+			int raw = 2 * particleLimit * RAW_PARTICLE.getVertexSize();
+			for (SourceSlot sourceSlot : sourceSlots) {
+				sourceSlot.destroyBuffer();
+			}
+			createSourceBuffers(raw);
+			long proceed = 4L * particleLimit * IDENTITY_PARTICLE.getVertexSize();
+			submitSlot.createTargetBuffer(proceed);
 		}
-		createSourceBuffers(raw);
-		long proceed = 4L * particleLimit * IDENTITY_PARTICLE.getVertexSize();
-		submitSlot.createTargetBuffer(proceed);
 	}
 
 	@Override
@@ -555,8 +554,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	}
 
 	@Override
-	public void reload() {
-		VK10.vkDeviceWaitIdle(device);
+	public void reset() {
+		waitForAllSourceSlots();
 		for (SourceSlot sourceSlot : sourceSlots) {
 			sourceSlot.reset();
 		}
@@ -631,7 +630,9 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		private void destroyBuffer() {
 			VK10.vkUnmapMemory(device, srcMem);
 			VK10.vkFreeMemory(device, srcMem, null);
+			srcMem = VK10.VK_NULL_HANDLE;
 			VK10.vkDestroyBuffer(device, srcBuf, null);
+			srcBuf = VK10.VK_NULL_HANDLE;
 		}
 
 		private void buildLayout() {
@@ -775,8 +776,9 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 					.size(size)
 					.usage(VK10.VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK10.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
 					.sharingMode(VK10.VK_SHARING_MODE_EXCLUSIVE);
-				VmaAllocationCreateInfo allocCI = VmaAllocationCreateInfo.calloc(stack);
-				allocCI.usage(8);
+				VmaAllocationCreateInfo allocCI = VmaAllocationCreateInfo.calloc(stack)
+					.usage(Vma.VMA_MEMORY_USAGE_GPU_ONLY)
+					.preferredFlags(VK10.VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 				LongBuffer bufPtr = stack.callocLong(1);
 				PointerBuffer allocPtr = stack.callocPointer(1);
 				Vma.vmaCreateBuffer(vkBackend.vma(), bufCI, allocCI, bufPtr, allocPtr, null);
@@ -787,20 +789,19 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 					@Override
 					public void destroy() {
-						Vma.vmaDestroyBuffer(vkBackend.vma(), vkBuf, alloc);
-						closed = true;
+						Vma.vmaDestroyBuffer(vkBackend.vma(), vkBuffer(), alloc);
 					}
 
 					@Override
 					public boolean isClosed() {
-						return closed;
+						return this.closed;
 					}
 
 					@Override
 					public void close() {
 						if (!isClosed()) {
-							closed = true;
-							destroy();
+							this.closed = true;
+							vkBackend.createCommandEncoder().queueForDestroy(this);
 						}
 					}
 
@@ -840,9 +841,12 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		private void destroy() {
 			VK10.vkUnmapMemory(device, indMem);
 			VK10.vkFreeMemory(device, indMem, null);
+			indMem = VK10.VK_NULL_HANDLE;
 			VK10.vkDestroyBuffer(device, indBuf, null);
+			indBuf = VK10.VK_NULL_HANDLE;
 			if (targetBuffer != null) {
 				targetBuffer.close();
+				targetBuffer = null;
 			}
 		}
 

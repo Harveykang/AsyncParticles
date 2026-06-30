@@ -46,6 +46,7 @@
     "core.particle.gpu_acceleration.MixinFireworkParticles$SparkParticle",
     "core.particle.gpu_acceleration.MixinFlyTowardsPositionParticle",
     "core.particle.gpu_acceleration.MixinLevelExtractor",
+    "core.particle.gpu_acceleration.MixinMinecraft",
     "core.particle.gpu_acceleration.MixinParticleEngine",
     "core.particle.gpu_acceleration.MixinParticleGroup",
     "core.particle.gpu_acceleration.MixinQuadParticleFeatureRenderer",

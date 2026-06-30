@@ -71,8 +71,7 @@ public class BackendCaps {
 			boolean isSync2 = isVk12 && VK10.vkGetDeviceProcAddr(vkBackend.vkDevice(), "vkQueueSubmit2KHR") != 0L;
 			vkCaps = new VKCaps.VKCapsImpl(
 				true,
-				isVk12 && isSync2,
-				vkBackend.computeQueue().queueFamilyIndex() == vkBackend.graphicsQueue().queueFamilyIndex()
+				isVk12 && isSync2
 			);
 			isGl = false;
 		} else {
@@ -96,5 +95,17 @@ public class BackendCaps {
 
 	public static boolean isVk() {
 		return !isGl;
+	}
+
+	public static String debugInfo() {
+		GpuDevice device = RenderSystem.getDevice();
+		return device.getDeviceInfo().backendName() + "{\n" + (BackendCaps.isGl()
+			? BackendCaps.glTfSupport.getClass().getSimpleName()
+			  + "GL_ARB_explicit_attrib_location: " + BackendCaps.GL_ARB_explicit_attrib_location
+			  + ",\nGL_ARB_direct_state_access: " + BackendCaps.GL_ARB_direct_state_access
+			  + ",\nGL_ARB_vertex_attrib_binding: " + BackendCaps.GL_ARB_vertex_attrib_binding
+			: BackendCaps.vkCaps.getClass().getSimpleName())
+			+ "\n},\n"
+			+ device.getDeviceInfo();
 	}
 }

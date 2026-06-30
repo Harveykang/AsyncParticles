@@ -13,11 +13,9 @@ import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -199,7 +197,7 @@ public class GpuParticleBehavior {
 		particleLimit = ConfigHelper.getParticleLimit();
 		if (renderer != null) {
 			renderer.resize(ConfigHelper.getParticleLimit());
-			renderer.reload();
+			renderer.reset();
 		}
 	}
 
@@ -235,5 +233,11 @@ public class GpuParticleBehavior {
 
 	public int getParticleLimit() {
 		return particleLimit;
+	}
+
+	public void close() {
+		if (renderer != null) {
+			renderer.close();
+		}
 	}
 }

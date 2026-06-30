@@ -270,7 +270,6 @@ public class AsyncTickBehavior {
 		if (debugConsumer == null) {
 			return;
 		}
-		GpuDevice device = RenderSystem.getDevice();
 		debugConsumer.accept(String.format("""
 			[AsyncParticles Debug]
 			Particle task count: %d,
@@ -288,14 +287,7 @@ public class AsyncTickBehavior {
 					.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().size())),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
 				syncParticleTypes.stream().map(Class::getName).toList(),
-				device.getDeviceInfo().backendName() + "{" + (BackendCaps.isGl()
-					? BackendCaps.glTfSupport.getClass().getSimpleName()
-					  + ", GL_ARB_explicit_attrib_location: " + BackendCaps.GL_ARB_explicit_attrib_location
-					  + ", GL_ARB_direct_state_access: " + BackendCaps.GL_ARB_direct_state_access
-					  + ", GL_ARB_vertex_attrib_binding: " + BackendCaps.GL_ARB_vertex_attrib_binding
-					: BackendCaps.vkCaps.getClass().getSimpleName())
-					+ "}, "
-					+ device.getDeviceInfo()
+				BackendCaps.debugInfo()
 			)));
 
 		debugConsumer = null;

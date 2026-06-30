@@ -545,7 +545,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void close() {
-		reload();
+		reset();
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			sources[i].delete();
 		}
@@ -555,7 +555,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 	}
 
 	@Override
-	public void reload() {
+	public void reset() {
 		waitForAllSourceSlots();
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			tickCount[i] = 0;

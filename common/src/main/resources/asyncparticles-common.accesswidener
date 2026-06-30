@@ -33,3 +33,4 @@ accessible field com/mojang/blaze3d/vulkan/VulkanGpuBuffer$Direct vmaAllocation 
 accessible field com/mojang/blaze3d/vulkan/VulkanGpuBuffer$Direct mappingRefCount I
 accessible field com/mojang/blaze3d/vulkan/VulkanCommandEncoder currentSubmitIndex J
 accessible method com/mojang/blaze3d/vulkan/VulkanCommandEncoder awaitSubmitCompletion (JJ)Z
+accessible method com/mojang/blaze3d/vulkan/VulkanCommandEncoder commandBuffer ()Lorg/lwjgl/vulkan/VkCommandBuffer;
