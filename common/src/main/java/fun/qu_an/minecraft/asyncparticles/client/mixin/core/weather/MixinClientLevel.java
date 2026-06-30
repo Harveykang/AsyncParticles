@@ -12,7 +12,7 @@ public class MixinClientLevel {
 	@WrapMethod(method = "tickWeatherEffects")
 	private void wrapTickRain(Operation<Void> original) {
 		if (ConfigHelper.isTickWeatherAsync()) {
-			AsyncTickBehavior.getInstance().dispatch(original::call);
+			AsyncTickBehavior.getInstance().getTickTaskManager().addTask(original::call);
 		} else {
 			original.call();
 		}
