@@ -3,10 +3,9 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
-import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
-import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionTracker;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
@@ -234,17 +233,14 @@ public class AsyncTickBehavior {
 			mc.particleEngine.particlesToAdd.forEach(this::onEvict);
 			mc.particleEngine.particlesToAdd.clear();
 		} else {
+			tickTaskHelper.groupTasks(false);
 			particlePhase = true;
 			mc.particleEngine.tick();
 			particlePhase = false;
 			tryReload();
 			tryDebug();
-			tickTaskHelper.submitAllSequentially();
+			tickTaskHelper.submitAll();
 		}
-	}
-
-	public void dispatch(Runnable task) {
-		tickTaskHelper.addTask(task);
 	}
 
 	public void reloadLater() {

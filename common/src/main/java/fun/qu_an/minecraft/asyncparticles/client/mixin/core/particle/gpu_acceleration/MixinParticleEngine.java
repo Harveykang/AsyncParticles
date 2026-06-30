@@ -59,7 +59,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		GpuParticleBehavior.getInstance().setUpNextTickRendering(sum);
 		IParticleRenderer renderer = GpuParticleBehavior.getInstance().getOrCreateRenderer();
 		renderer.prepareBuffer();
-		AsyncTickBehavior.getInstance().dispatch(() -> {
+		AsyncTickBehavior.getInstance().getTickTaskManager().addTask(() -> {
 			int size = Math.max(8, ConfigHelper.getParticleLimit() >> 1);
 			Map<SingleQuadParticle.Layer, List<SingleQuadParticle>> particles = new Reference2ReferenceOpenHashMap<>();
 			for (Map.Entry<ParticleRenderType, ParticleGroup<?>> entry : this.particles.entrySet()) {

@@ -34,7 +34,7 @@ public abstract class MixinClientLevel extends Level {
 			return;
 		}
 		if (ConfigHelper.isAsyncAnimateTick()) {
-			AsyncTickBehavior.getInstance().dispatch(() -> original.call(xt, yt, zt));
+			AsyncTickBehavior.getInstance().getTickTaskManager().addTask(() -> original.call(xt, yt, zt));
 		} else {
 			original.call(xt, yt, zt);
 		}

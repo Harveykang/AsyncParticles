@@ -9,11 +9,9 @@ import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBeh
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import pigcart.particlerain.ParticleSpawner;
 
@@ -21,7 +19,7 @@ import pigcart.particlerain.ParticleSpawner;
 public class MixinParticleSpawner {
 	@WrapMethod(method = "tick")
 	private static void wrapTick(ClientLevel level, Vec3 cameraPos, Operation<Void> original) {
-		AsyncTickBehavior.getInstance().dispatch(() -> original.call(level, cameraPos));
+		AsyncTickBehavior.getInstance().getTickTaskManager().addTask(() -> original.call(level, cameraPos));
 	}
 
 	@WrapWithCondition(method = "tickBlockFX", at = @At(value = "INVOKE",

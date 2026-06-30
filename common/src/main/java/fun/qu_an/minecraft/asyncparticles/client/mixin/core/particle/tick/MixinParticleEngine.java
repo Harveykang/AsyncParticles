@@ -4,10 +4,9 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.config.ParticleAsyncMode;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickParticleGroupBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.TickParticleRecursiveAction;
 import net.minecraft.client.particle.*;
 import net.minecraft.util.profiling.Profiler;
 import org.spongepowered.asm.mixin.Final;
@@ -49,18 +48,20 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		// Keep local var table as they were
 		Particle particle;
 		boolean tickAsync = ConfigHelper.isAsyncTickParticle();
+		TaskHelper taskHelper = AsyncTickBehavior.getInstance().getTickTaskManager();
 		this.particles.forEach((renderType, group) -> {
 			if (group.isEmpty()) {
 				return;
 			}
 			Profiler.get().push(renderType.name());
 			if (tickAsync && AsyncTickParticleGroupBehavior.canTickAsync(group)) {
-				AsyncTickBehavior.getInstance().dispatch(group::tickParticles);
+				taskHelper.addTask(group::tickParticles);
 			} else {
 				group.tickParticles();
 			}
 			Profiler.get().pop();
 		});
+		taskHelper.groupTasks(true);
 		if (!this.trackingEmitters.isEmpty()) {
 			for (TrackingEmitter trackingEmitter : this.trackingEmitters) {
 				trackingEmitter.tick(); // TODO can be async-lized safely?
