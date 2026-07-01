@@ -1,5 +1,9 @@
 package fun.qu_an.minecraft.asyncparticles.client.particle;
 
+import com.github.argon4w.acceleratedrendering.core.CoreFeature;
+import com.github.argon4w.acceleratedrendering.features.entities.AcceleratedEntityRenderingFeature;
+import com.github.argon4w.acceleratedrendering.features.items.AcceleratedItemRenderingFeature;
+import com.github.argon4w.acceleratedrendering.features.text.AcceleratedTextRenderingFeature;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -286,6 +290,13 @@ public class AsyncRenderBehavior {
 //		if (!isMixedParticleRendering()) { // Tested outside.
 //			return;
 //		}
+		if (ModListHelper.ACCELERATED_RENDERING_LOADED
+			&& CoreFeature.isLoaded()) {
+			AcceleratedEntityRenderingFeature.useVanillaPipeline();
+			AcceleratedItemRenderingFeature.useVanillaPipeline();
+			AcceleratedTextRenderingFeature.useVanillaPipeline();
+		}
+
 		PoseStack poseStack2 = null;
 		Minecraft mc = Minecraft.getInstance();
 		ParticleEngine particleEngine = mc.particleEngine;
@@ -367,6 +378,13 @@ public class AsyncRenderBehavior {
 			RenderSystem.depthMask(true);
 			RenderSystem.disableBlend();
 			lightTexture.turnOffLightLayer();
+		}
+
+		if (ModListHelper.ACCELERATED_RENDERING_LOADED
+			&& CoreFeature.isLoaded()) {
+			AcceleratedEntityRenderingFeature.resetPipeline();
+			AcceleratedItemRenderingFeature.resetPipeline();
+			AcceleratedTextRenderingFeature.resetPipeline();
 		}
 	}
 
@@ -535,8 +553,8 @@ public class AsyncRenderBehavior {
 					},
 					ModListHelper.IRIS_LIKE_LOADED && IrisApi.getInstance().isShaderPackInUse()
 						? Optional.ofNullable(IrisCompat.getParticleRenderingSettings())
-						  .map(ParticleRenderingSettings::name)
-						  .orElse("disabled") : "disabled",
+						.map(ParticleRenderingSettings::name)
+						.orElse("disabled") : "disabled",
 					GLCaps.tfSupport.getClass().getSimpleName(),
 					GLCaps.supportsExplicitAttribLocation,
 					GLCaps.csSupport.getClass().getSimpleName()));

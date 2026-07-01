@@ -34,6 +34,7 @@ dependencies {
     modCompileOnly "maven.modrinth:fzzy-config:0.7.2+1.20.1"
 
     /* Performance */
+    modCompileOnly "curse.maven:accelerated-rendering-1314021:8179092" // 1.0.10.1
     modCompileOnly 'maven.modrinth:vulkanmod:0.5.2'
     modCompileOnly "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
     modCompileOnly "maven.modrinth:sodium-extra:mc1.20.1-0.5.9"

@@ -118,6 +118,8 @@ public class ModListHelper {
 	public static final boolean COSYCRITTERS_LOADED = isModLoaded("cosycritters");
 	/* Reign of Nether */
 	public static final boolean REIGNOFNETHER_LOADED = isModLoaded("reignofnether");
+	/* Accelerated Rendering */
+	public static final boolean ACCELERATED_RENDERING_LOADED = isModLoaded("acceleratedrendering");
 
 	@ExpectPlatform
 	private static boolean isForge() {
