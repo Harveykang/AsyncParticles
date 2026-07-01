@@ -51,6 +51,7 @@ public class AsyncParticlesMixinPluginForge implements IMixinConfigPlugin {
 				case "iris_like" -> FORGE_IRIS_LIKE_LOADED;
 				case "iris_like_else" -> !FORGE_IRIS_LIKE_LOADED;
 				case "fluffy_fur" -> FORGE_FLUFFY_FUR_LOADED;
+				case "prettyrain" -> FORGE_PRETTY_RAIN_LOADED;
 				default -> throw new IllegalArgumentException("Unknown forge compat mixin: " + mixinClassName);
 			};
 			default -> throw new IllegalArgumentException("Unknown forge mixin: " + mixinClassName);

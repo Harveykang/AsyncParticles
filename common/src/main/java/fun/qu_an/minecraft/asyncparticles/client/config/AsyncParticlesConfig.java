@@ -373,7 +373,7 @@ public class AsyncParticlesConfig {
 
 		static class Create {
 			RainEffect rainEffect = RainEffect.ALWAYS;
-			int tickRainBlockingRange = ModListHelper.PARTICLERAIN_LOADED ? 32 : 16;
+			int tickRainBlockingRange = ModListHelper.PARTICLERAIN_LOADED || ModListHelper.FORGE_PRETTY_RAIN_LOADED ? 32 : 16;
 
 			private void flat() {
 				create$rainEffect = requireNonNullElse(rainEffect, RainEffect.ALWAYS);
