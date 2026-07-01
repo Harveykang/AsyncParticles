@@ -14,7 +14,8 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 				 "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin",
 				 "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin",
 				 "qouteall.imm_ptl.core.mixin.client.particle.MixinParticleEngine",
-				 "net.diebuddies.mixins.weather.MixinParticleEngine"
+				 "net.diebuddies.mixins.weather.MixinParticleEngine",
+				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin"
 				-> true;
 			default -> false;
 		};
@@ -37,6 +38,8 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 				"tick".equals(mixinMethodName);
 			case "qouteall.imm_ptl.core.mixin.client.particle.MixinParticleEngine" ->
 				"onTickParticle".equals(mixinMethodName);
+			case "me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin" ->
+				"particle_core_synchronizeParticleAdds".equals(mixinMethodName);
 			default -> false;
 		};
 	}

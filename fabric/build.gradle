@@ -93,9 +93,7 @@ dependencies {
     modCompileOnly "maven.modrinth:particular:1.1.1"
 
     /* Particle Core */
-//    modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.20.1"
-//    modLocalRuntime "maven.modrinth:fzzy-config:0.7.2+1.20.1"
-//    modLocalRuntime "me.fallenbreath:conditional-mixin:0.5.1"
+    modCompileOnly "maven.modrinth:particle-core:0.3.3+1.20.1"
 
     /* A Good Place */
 //    modLocalRuntime "maven.modrinth:a-good-place:1.20-1.2.7"
@@ -120,6 +118,7 @@ dependencies {
 
     /* APIs */
 //    modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
+    modLocalRuntime "me.fallenbreath:conditional-mixin:0.5.1"
     modLocalRuntime "dev.isxander:yet-another-config-lib:3.6.6+1.20.1-fabric"
     modLocalRuntime "net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10"
     modLocalRuntime 'maven.modrinth:modmenu:7.2.2'
@@ -177,6 +176,9 @@ dependencies {
 
     /* Cosy Critters */
     modLocalRuntime "maven.modrinth:cosy-critters:v0.3.2+1.20.1-fabric"
+
+    /* Particle Core */
+    modLocalRuntime "maven.modrinth:particle-core:0.3.3+1.20.1"
 }
 
 processResources {

@@ -33,6 +33,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class MixinParticleEngine implements ParticleEngineAddon {
@@ -84,18 +86,17 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		if (tickAsync) {
 			AsyncTickBehavior.INSTANCE.waitForCleanUp();
 		} else {
-			particles.forEach(this::asyncparticles$scheduleParticleTick);
-			AsyncTickBehavior.INSTANCE.particleOperations.forEach(Runnable::run);
-			AsyncTickBehavior.INSTANCE.particleOperations.clear();
+			// forEach is an inject point (eg. ParticleCore)
+			this.particles.forEach((particleRenderType, queue) -> {
+				this.level.getProfiler().push(particleRenderType.toString());
+				this.tickParticleList(queue);
+				this.level.getProfiler().pop();
+			});
+			if (!AsyncTickBehavior.INSTANCE.particleOperations.isEmpty()) {
+				AsyncTickBehavior.INSTANCE.particleOperations.forEach(Runnable::run);
+				AsyncTickBehavior.INSTANCE.particleOperations.clear();
+			}
 			AsyncTickBehavior.INSTANCE.tickSyncParticles();
-			particles.values().forEach(q -> q.removeIf(p -> {
-				if (p.isAlive()) {
-					return false;
-				}
-				// make sure the tracked count is correct
-				p.getParticleGroup().ifPresent(group -> updateCount(group, -1));
-				return true;
-			}));
 		}
 
 		int lastSize = particles.size();
@@ -141,10 +142,15 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				GpuParticleBehavior.INSTANCE.setGpuParticleLimit(ConfigHelper.getParticleLimit());
 				Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
 				GpuParticleBehavior.INSTANCE.setCameraPos(camera.getPosition());
-				GpuParticleBehavior.INSTANCE.gpuParticles.forEach(this::asyncparticles$scheduleGpuParticleTick);
+				asyncparticles$forEach(GpuParticleBehavior.INSTANCE.gpuParticles, this::asyncparticles$scheduleGpuParticleTick);
 			}
-			particles.forEach(this::asyncparticles$scheduleParticleTick);
+			asyncparticles$forEach(particles, this::asyncparticles$scheduleParticleTick);
 		}
+	}
+
+	@Unique
+	private <K, V> void asyncparticles$forEach(Map<K, V> i, BiConsumer<K, V> f) {
+		i.forEach(f);
 	}
 
 	/**
@@ -264,6 +270,16 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				case ASYNC_AABB -> particleAddon.asyncparticles$tickAABBCulling();
 				case ASYNC_SPHERE -> particleAddon.asyncparticles$tickSphereCulling();
 			}
+		}
+		if (isOnMainThread) { // sync tick
+			collection.removeIf(p -> {
+				if (p.isAlive()) {
+					return false;
+				}
+				// make sure the tracked count is correct
+				p.getParticleGroup().ifPresent(group -> updateCount(group, -1));
+				return true;
+			});
 		}
 	}
 

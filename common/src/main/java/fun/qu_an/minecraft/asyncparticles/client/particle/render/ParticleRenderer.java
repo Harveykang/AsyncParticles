@@ -4,15 +4,16 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals.ImmersivePortalsCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particle_core.ParticleCoreCompat;
 import fun.qu_an.minecraft.asyncparticles.client.particle.buffer.ParticleVertexBuffer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.shader.ParticleTransformFeedbackShader;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
@@ -23,7 +24,6 @@ import org.lwjgl.opengl.GL30C;
 import org.lwjgl.opengl.GL32C;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
-import qouteall.imm_ptl.core.mixin.client.particle.IEParticle;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
@@ -62,7 +62,7 @@ public class ParticleRenderer implements IParticleRenderer {
 		ParticleVertexBuffer.unbind();
 
 		tf = GLCaps.tfSupport.genTransformFeedback();
-		if (tf > 0){
+		if (tf > 0) {
 			GLCaps.tfSupport.glBindTransformFeedback(tf);
 			GLCaps.tfSupport.glBindTransformFeedbackBuffer(target.vbo);
 			GLCaps.tfSupport.glBindTransformFeedback(0);
@@ -432,13 +432,10 @@ public class ParticleRenderer implements IParticleRenderer {
 		}
 	}
 
-	private static boolean shouldRenderParticle(GpuParticleAddon gpuParticle) {
-		boolean shouldRender = gpuParticle.asyncparticles$shouldRender();
-		if (ModListHelper.IMMERSIVE_PORTALS_LOADED && shouldRender) {
-			IEParticle ie = (IEParticle) gpuParticle;
-			return ie.portal_getWorld() == Minecraft.getInstance().player.level();
-		}
-		return shouldRender;
+	private boolean shouldRenderParticle(GpuParticleAddon gpuParticle) {
+		return gpuParticle.asyncparticles$shouldRender()
+			&& (!ModListHelper.IMMERSIVE_PORTALS_LOADED || ImmersivePortalsCompat.shouldRenderParticle(gpuParticle))
+			&& (!ModListHelper.PARTICLE_CORE_LOADED || ParticleCoreCompat.shouldRenderParticle(gpuParticle, cameraPositions[processingSrcIdx]));
 	}
 
 	@Override

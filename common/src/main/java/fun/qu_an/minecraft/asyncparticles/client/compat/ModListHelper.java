@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.compat;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
+import me.fzzyhmstrs.particle_core.PcDisable;
 import org.sinytra.connector.loader.ConnectorEarlyLoader;
 
 public class ModListHelper {
@@ -39,7 +40,10 @@ public class ModListHelper {
 	public static final boolean FORGE_EFFECTIVE_LOADED = isForgeModLoaded("effective");
 	public static final boolean FABRIC_EFFECTIVE_LOADED = isFabricModLoaded("effective");
 	/* Particle Rain */
-	public static final boolean PARTICLERAIN_LOADED = isModLoaded("particlerain");
+	public static final boolean PARTICLERAIN_LOADED = isModLoaded("particlerain")
+		&& versionCheck("particlerain", "1.999999", null);
+	public static final boolean FORGE_PRETTY_RAIN_LOADED = isForgeModLoaded("particlerain")
+		&& versionCheck("particlerain", null, "2.0");
 	/* Flywheel */
 	public static final boolean FLYWHEEL_LOADED = isModLoaded("flywheel");
 	/* Create */
@@ -120,6 +124,10 @@ public class ModListHelper {
 	public static final boolean REIGNOFNETHER_LOADED = isModLoaded("reignofnether");
 	/* Accelerated Rendering */
 	public static final boolean ACCELERATED_RENDERING_LOADED = isModLoaded("acceleratedrendering");
+	/* Particle Core */
+	public static final boolean PARTICLE_CORE_LOADED = isModLoaded("particle_core");
+	public static final boolean PARTICLE_CORE_ASYNC_ENABLED = PARTICLE_CORE_LOADED
+		&& !PcDisable.INSTANCE.getDisabledOptimizations().getDisableOptimizations().contains("ASYNC");
 
 	@ExpectPlatform
 	private static boolean isForge() {
