@@ -33,6 +33,7 @@ import static java.util.Objects.requireNonNullElse;
 
 public class AsyncParticlesConfig {
 	public static final int MIN_PARTICLE_LIMIT = 1024;
+	public static final int DEFAULT_PARTICLE_LIMIT = 16384;
 	public static final int MAX_PARTICLE_LIMIT = 262144;
 	public static final int VERSION = 1;
 	public static final Path CONFIG_FILE = Path.of("config", AsyncParticlesClient.MOD_ID, AsyncParticlesClient.MOD_ID + ".json");
@@ -247,7 +248,7 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Particle {
-			int particleLimit = 16384;
+			int particleLimit = DEFAULT_PARTICLE_LIMIT;
 			boolean removeIfMissedTick = false;
 			boolean parallelQueueRemoval = true;
 			boolean parallelQueueEviction = true;

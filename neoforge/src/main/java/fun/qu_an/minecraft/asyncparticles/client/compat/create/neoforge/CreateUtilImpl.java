@@ -100,13 +100,7 @@ public class CreateUtilImpl {
 	}
 
 	public static boolean isUnderContraption(ClientLevel level, double x, double y, double z, double size) {
-		boolean[] result = new boolean[1];
-		GameUtil.forEachBlockPos(x, 0, z, size, (blockPos) -> {
-			boolean b = ContraptionRainBlocking.getHeight(level, blockPos) >= y;
-			result[0] = b;
-			return !b;
-		});
-		return result[0];
+		return GameUtil.forEachBlockPos(x, 0, z, size, 0, size, blockPos -> ContraptionRainBlocking.getHeight(level, blockPos) >= y);
 	}
 
 	public static boolean isUnderContraption(ClientLevel level, int x, int y, int z) {

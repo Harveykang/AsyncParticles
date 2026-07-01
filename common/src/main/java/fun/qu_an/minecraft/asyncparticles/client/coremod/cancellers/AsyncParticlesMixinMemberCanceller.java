@@ -9,11 +9,12 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 	public boolean preCancel(List<String> targetClassNames, String mixinClassName) {
 		return switch (mixinClassName) {
 			case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin",
-				 "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin",
-				 "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
-				 "net.diebuddies.mixins.weather.MixinParticleEngine",
-				 "qouteall.imm_ptl.core.mixin.client.particle.MixinParticleEngine",
-				 "foundry.veil.mixin.performance.client.PerformanceLevelRendererMixin" -> true;
+			     "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin",
+			     "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
+			     "net.diebuddies.mixins.weather.MixinParticleEngine",
+			     "qouteall.imm_ptl.core.mixin.client.particle.MixinParticleEngine",
+			     "foundry.veil.mixin.performance.client.PerformanceLevelRendererMixin",
+			     "me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin" -> true;
 			default -> false;
 		};
 	}
@@ -33,6 +34,8 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 				"onTickParticle".equals(mixinMethodName);
 			case "foundry.veil.mixin.performance.client.PerformanceLevelRendererMixin" ->
 				"clearParticlesColor".equals(mixinMethodName);
+			case "me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin" ->
+				"particle_core_synchronizeParticleAdds".equals(mixinMethodName);
 			default -> false;
 		};
 	}

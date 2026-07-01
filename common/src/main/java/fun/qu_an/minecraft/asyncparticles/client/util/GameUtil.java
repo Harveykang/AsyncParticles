@@ -134,26 +134,27 @@ public class GameUtil {
 		return (i & 0xF) << 20 | (j & 0xF) << 4;
 	}
 
-	public static void forEachBlockPos(double x, double y, double z, double size, Predicate<BlockPos> longConsumer) {
-		int l = Mth.floor(x - size);
-		int m = Mth.floor(x + size);
-		int n = Mth.floor(y - size);
-		int o = Mth.floor(y + size);
-		int p = Mth.floor(z - size);
-		int q = Mth.floor(z + size);
+	public static boolean forEachBlockPos(double x, double y, double z, double xSize, double ySize, double zSize, Predicate<BlockPos> longConsumer) {
+		int l = Mth.floor(x - xSize);
+		int m = Mth.floor(x + xSize);
+		int n = Mth.floor(y - ySize);
+		int o = Mth.floor(y + ySize);
+		int p = Mth.floor(z - zSize);
+		int q = Mth.floor(z + zSize);
 		BlockPos.MutableBlockPos pos = GameUtil.SHARED_POS.get();
 		if (l == m && n == o && p == q) {
-			longConsumer.test(pos.set(l, n, p));
+			return longConsumer.test(pos.set(l, n, p));
 		} else {
 			for (int r = l; r <= m; r++) {
 				for (int s = n; s <= o; s++) {
 					for (int t = p; t <= q; t++) {
-						if (!longConsumer.test(pos.set(r, s, t))) {
-							return;
+						if (longConsumer.test(pos.set(r, s, t))) {
+							return true;
 						}
 					}
 				}
 			}
 		}
+		return false;
 	}
 }

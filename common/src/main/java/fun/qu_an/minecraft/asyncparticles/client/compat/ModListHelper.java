@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.compat;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
+import me.fzzyhmstrs.particle_core.PcDisable;
 import org.sinytra.connector.ConnectorEarlyLoader;
 
 public class ModListHelper {
@@ -125,6 +126,10 @@ public class ModListHelper {
 	public static final boolean COSYCRITTERS_LOADED = isModLoaded("cosycritters");
 	/* Reign of Nether */
 	public static final boolean REIGNOFNETHER_LOADED = isModLoaded("reignofnether");
+	/* Particle Core */
+	public static final boolean PARTICLE_CORE_LOADED = isModLoaded("particle_core");
+	public static final boolean PARTICLE_CORE_ASYNC_ENABLED = PARTICLE_CORE_LOADED
+		&& !PcDisable.INSTANCE.getDisabledOptimizations().getDisableOptimizations().contains("ASYNC");
 
 	@ExpectPlatform
 	private static boolean isForge() {

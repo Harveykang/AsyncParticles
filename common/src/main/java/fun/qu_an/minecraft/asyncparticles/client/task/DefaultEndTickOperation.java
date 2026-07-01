@@ -1,6 +1,9 @@
 package fun.qu_an.minecraft.asyncparticles.client.task;
 
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import net.minecraft.resources.ResourceLocation;
+
+import static fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil.toThrowDirectly;
 
 public final class DefaultEndTickOperation implements EndTickOperation {
 	private final Runnable task;
@@ -25,7 +28,13 @@ public final class DefaultEndTickOperation implements EndTickOperation {
 
 	@Override
 	public void run() {
-		task.run();
+		try {
+			task.run();
+		} catch (Exception e) {
+			if (!AsyncTickBehavior.INSTANCE.isTolerable(e) || AsyncTickBehavior.INSTANCE.exceptionTracker.addException(getId(), e)) {
+				throw toThrowDirectly(e);
+			}
+		}
 	}
 
 	@Override
