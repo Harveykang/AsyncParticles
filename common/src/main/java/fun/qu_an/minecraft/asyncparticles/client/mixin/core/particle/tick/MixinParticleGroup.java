@@ -132,11 +132,8 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 				}
 			}
 			LightCachedParticleAddon lightCachedParticle = (LightCachedParticleAddon) particle;
-			if (shouldRefresh) {
-				lightCachedParticle.asyncparticles$enableLightCache();
+			if (shouldRefresh && lightCachedParticle.asyncparticles$isEnabledLightCache()) {
 				lightCachedParticle.asyncparticles$refresh();
-			} else {
-				lightCachedParticle.asyncparticles$disableLightCache();
 			}
 		}
 	}

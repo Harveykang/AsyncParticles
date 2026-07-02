@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -237,6 +238,7 @@ public class GpuParticleBehavior {
 		if (ConfigHelper.isAppendNewParticlesToRenderer()) {
 			getOrCreateRenderer().append(getPerTickCameraPos(), particle);
 		}
+		((LightCachedParticleAddon) particle).asyncparticles$disableLightCache();
 	}
 
 //	public Frustum getFrustum() {

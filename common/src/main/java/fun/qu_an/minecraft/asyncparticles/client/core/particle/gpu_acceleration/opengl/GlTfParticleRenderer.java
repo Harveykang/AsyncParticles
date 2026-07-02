@@ -31,11 +31,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("resource")
 public class GlTfParticleRenderer implements IParticleRenderer {
 	private static final int SOURCE_SLOT_COUNT = 3;
 	private final ParticleVertexBuffer[] sources = new ParticleVertexBuffer[SOURCE_SLOT_COUNT];
-	private final GlFence[] fences = new GlFence[SOURCE_SLOT_COUNT];
 	private ByteBuffer mappedBuffer;
 	private int processingSrcIdx = 0;
 	private int renderSrcIdx = 0;
@@ -137,19 +135,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 	}
 
 	private int acquireSourceSlot(int idx) {
-		if (fences[idx] != null) {
-			// this should not happen
-			fences[idx].awaitCompletion(Long.MAX_VALUE);
-		}
-		fences[idx] = new GlFence();
-		int newIdx = (idx + 1) % SOURCE_SLOT_COUNT;
-		GlFence fence = fences[newIdx];
-		if (fence != null) {
-			fence.awaitCompletion(Long.MAX_VALUE);
-			fence.close();
-			fences[newIdx] = null;
-		}
-		return newIdx;
+		return (idx + 1) % SOURCE_SLOT_COUNT;
 	}
 
 	private int extractAppendParticles(Vec3 prevGpuCamPos,
@@ -244,7 +230,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 					ptr += 4L;
 
 					// Light (56-59): 2 shorts
-					MemoryUtil.memPutInt(ptr, gpuParticle.asyncparticles$getLightCoords(0f));
+					MemoryUtil.memPutInt(ptr, gpuParticle.asyncparticles$getCachedLight());
 					ptr += 4L;
 
 					// Rolls (60-67)

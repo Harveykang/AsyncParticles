@@ -85,6 +85,6 @@ public class ConfigHelper {
 	}
 
 	public static boolean isAppendNewParticlesToRenderer() {
-		return rendering$appendNewParticlesToRenderer && particle$particleLightCache;
+		return rendering$appendNewParticlesToRenderer;
 	}
 }

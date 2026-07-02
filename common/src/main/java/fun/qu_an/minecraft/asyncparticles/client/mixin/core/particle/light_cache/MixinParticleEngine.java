@@ -3,9 +3,8 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.light_cach
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
-import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
-import net.minecraft.client.particle.*;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleEngine;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,19 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ParticleEngine.class)
 public abstract class MixinParticleEngine implements ParticleEngineAddon {
-	@Inject(method = "add", at = @At(value = "HEAD"))
+	@Inject(method = "add", at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
 	public void add(Particle p, CallbackInfo ci) {
-		if (ConfigHelper.particleLightCache()) {
-			// Enable the light only if the particle is added to the current ParticleEngine instance.
-			((LightCachedParticleAddon) p).asyncparticles$enableLightCache();
-			// refresh the light cache here since this method can run in other threads.
-			// so it can avoid to slower the main thread.
-			Integer i = ParticleHelper.DESTRUCTION_LIGHT_CACHE.get();
-			if (i == null){
-				((LightCachedParticleAddon) p).asyncparticles$refresh();
-			} else {
-				((LightCachedParticleAddon) p).asyncparticles$setLight(i);
-			}
-		}
+		LightCachedParticleAddon.doFirstRefresh(p);
 	}
 }

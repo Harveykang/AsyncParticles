@@ -89,11 +89,8 @@ public class TickParticleRecursiveAction<T extends Particle> extends RecursiveAc
 					particleAddon.asyncparticles$setTicked();
 				}
 				LightCachedParticleAddon lightCachedParticle = (LightCachedParticleAddon) particle;
-				if (shouldRefresh) {
-					lightCachedParticle.asyncparticles$enableLightCache();
+				if (shouldRefresh && lightCachedParticle.asyncparticles$isEnabledLightCache()) {
 					lightCachedParticle.asyncparticles$refresh();
-				} else {
-					lightCachedParticle.asyncparticles$disableLightCache();
 				}
 			});
 		}

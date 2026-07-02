@@ -65,6 +65,7 @@ public class ParticleVertexBuffer {
 		return mapRange(0, size, invalidateBufferBit);
 	}
 
+	@SuppressWarnings("PointlessBitwiseExpression")
 	public ByteBuffer mapRange(int offset, int size, boolean invalidateBufferBit) {
 		if (offset + size > this.size) {
 			throw new IllegalArgumentException("Range exceeds buffer size: " + (offset + size) + " > " + this.size);
@@ -78,7 +79,8 @@ public class ParticleVertexBuffer {
 			GL30C.GL_MAP_WRITE_BIT |
 				(invalidateBufferBit ? GL30C.GL_MAP_INVALIDATE_BUFFER_BIT : 0) |
 				GL30C.GL_MAP_FLUSH_EXPLICIT_BIT |
-				GL30C.GL_MAP_UNSYNCHRONIZED_BIT,
+//				GL30C.GL_MAP_UNSYNCHRONIZED_BIT |
+				0,
 			this.oldBuffer);
 		mapped = true;
 		mapOffset = offset;
