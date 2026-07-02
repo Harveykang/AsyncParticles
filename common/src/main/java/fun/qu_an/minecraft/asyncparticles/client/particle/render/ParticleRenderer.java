@@ -21,7 +21,6 @@ import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL14C;
 import org.lwjgl.opengl.GL30C;
-import org.lwjgl.opengl.GL32C;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
@@ -35,7 +34,6 @@ public class ParticleRenderer implements IParticleRenderer {
 	private static final int[] multiDrawIndex = {0, 0};
 	private static final int[] multiDrawCount = {0, 0};
 	private final ParticleVertexBuffer[] sources = new ParticleVertexBuffer[SOURCE_SLOT_COUNT];
-	private final long[] fences = new long[SOURCE_SLOT_COUNT];
 	private final ParticleVertexBuffer target = new ParticleVertexBuffer(true);
 	private int particleLimit;
 	private int processingSrcIdx = 0;
@@ -88,17 +86,7 @@ public class ParticleRenderer implements IParticleRenderer {
 	}
 
 	private int acquireSourceSlot(int idx) {
-		if (fences[idx] == 0) {
-			fences[idx] = GL32C.glFenceSync(GL32C.GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-		}
-		int newIdx = (idx + 1) % SOURCE_SLOT_COUNT;
-		long fence = fences[newIdx];
-		if (fence != 0) {
-			GL32C.glWaitSync(fence, 0, GL32C.GL_TIMEOUT_IGNORED);
-			GL32C.glDeleteSync(fence);
-			fences[newIdx] = 0;
-		}
-		return newIdx;
+		return (idx + 1) % SOURCE_SLOT_COUNT;
 	}
 
 	@Override
@@ -415,7 +403,7 @@ public class ParticleRenderer implements IParticleRenderer {
 			ptr += 4L;
 
 			// Light (56-59): 2 shorts
-			MemoryUtil.memPutInt(ptr, gpuParticle.asyncparticles$getLightCoords(0f));
+			MemoryUtil.memPutInt(ptr, gpuParticle.asyncparticles$getCachedLight());
 			ptr += 4L;
 
 			// Rolls (60-67)
@@ -451,5 +439,13 @@ public class ParticleRenderer implements IParticleRenderer {
 			target.resize0(proceedSize);
 		}
 		this.particleLimit = particleLimit;
+	}
+
+	@Override
+	public void close() {
+		for (ParticleVertexBuffer source : sources) {
+			source.delete();
+		}
+		target.delete();
 	}
 }

@@ -8,9 +8,10 @@ import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
 
+import java.io.Closeable;
 import java.util.Queue;
 
-public interface IParticleRenderer {
+public interface IParticleRenderer extends Closeable {
 	void beginFrame();
 
 	void unmapBufferAndSwap();
@@ -107,4 +108,6 @@ public interface IParticleRenderer {
 
 		RenderSystem.setupShaderLights(shader);
 	}
+
+	void close();
 }

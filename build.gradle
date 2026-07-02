@@ -101,6 +101,10 @@ subprojects {
         maven { // Fabric ASM for Porting Lib
             url 'https://jitpack.io'
         }
+        maven { // fzzy config
+            name = "FzzyMaven"
+            url = "https://maven.fzzyhmstrs.me/"
+        }
     }
 
     loom {

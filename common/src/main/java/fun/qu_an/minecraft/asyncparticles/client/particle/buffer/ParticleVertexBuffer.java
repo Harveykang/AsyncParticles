@@ -66,7 +66,7 @@ public class ParticleVertexBuffer {
 			GL30C.GL_MAP_WRITE_BIT |
 				GL30C.GL_MAP_INVALIDATE_BUFFER_BIT |
 				GL30C.GL_MAP_FLUSH_EXPLICIT_BIT |
-				GL30C.GL_MAP_UNSYNCHRONIZED_BIT |
+//				GL30C.GL_MAP_UNSYNCHRONIZED_BIT |
 				0,
 			this.oldBuffer);
 		mapped = true;

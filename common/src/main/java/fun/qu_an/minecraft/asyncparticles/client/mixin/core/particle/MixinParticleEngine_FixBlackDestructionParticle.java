@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
 
+import fun.qu_an.minecraft.asyncparticles.client.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleEngine;
@@ -20,6 +21,6 @@ public class MixinParticleEngine_FixBlackDestructionParticle {
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/phys/shapes/VoxelShape;"))
 	private void fixBlackDestroyParticle1(BlockPos blockPos, BlockState blockState, CallbackInfo ci) {
 		int lightColor = GameUtil.getLightColorFromNeighbor(level, blockPos);
-		GameUtil.DESTRUCTION_LIGHT_CACHE.set(lightColor);
+		ParticleHelper.DESTRUCTION_LIGHT_CACHE.set(lightColor);
 	}
 }

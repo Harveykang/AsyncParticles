@@ -31,7 +31,7 @@ dependencies {
     modCompileOnly("me.shedaniel.cloth:cloth-config:11.1.136")
 
     /* APIs */
-    modCompileOnly "maven.modrinth:fzzy-config:0.7.2+1.20.1"
+    modCompileOnly "maven.modrinth:fzzy-config:0.7.6+1.20.1"
 
     /* Performance */
     modCompileOnly "curse.maven:accelerated-rendering-1314021:8179092" // 1.0.10.1
