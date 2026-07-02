@@ -24,7 +24,7 @@ dependencies {
     modCompileOnly("me.shedaniel.cloth:cloth-config:15.0.140")
 
     /* APIs */
-    modCompileOnly "maven.modrinth:fzzy-config:0.6.8+1.21"
+    modCompileOnly "maven.modrinth:fzzy-config:0.7.5+1.21"
 
     /* Performance */
     modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.8.12-alpha.3-fabric"

@@ -112,6 +112,10 @@ subprojects {
             name = 'Kotlin for Forge'
             url = 'https://thedarkcolour.github.io/KotlinForForge/'
         }
+        maven { // fzzy config
+            name = "FzzyMaven"
+            url = "https://maven.fzzyhmstrs.me/"
+        }
     }
 
     dependencies {

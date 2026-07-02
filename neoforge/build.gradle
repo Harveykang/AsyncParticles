@@ -56,6 +56,7 @@ dependencies {
     modLocalRuntime "me.shedaniel.cloth:cloth-config-neoforge:15.0.140"
     localRuntime("dev.isxander:yet-another-config-lib:3.7.1+$minecraft_version-neoforge") {
         exclude group: "net.neoforged.fancymodloader", module: "loader"
+        exclude group: "thedarkcolour"
     }
 //    if (rootProject.use_connector_mod == "true") {
 //        modLocalRuntime 'maven.modrinth:owo-lib:0.11.2+1.20'
@@ -107,12 +108,6 @@ dependencies {
 //    modLocalRuntime "maven.modrinth:iris-flw-compat:9fvGbqdA"
     /* ===End Performance=== */
 
-    /* Valkyrien Skies */
-//    modLocalRuntime 'thedarkcolour:kotlinforforge:4.10.0'
-//    modLocalRuntime "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.5"
-//    modCompileOnly "maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.5"
-//    modLocalRuntime 'maven.modrinth:eureka:1.20.1-forge-1.5.1-beta.3'
-
     /* Particle Rain */
     modLocalRuntime("maven.modrinth:particle-rain:v4-beta.10+$minecraft_version-neoforge")
 
@@ -147,16 +142,18 @@ dependencies {
 //    modCompileOnly "com.github.ConcerroX:Effecticularity:31265b5750" // no they didn't publish 1.0.2 :(
 
     /* Particle Core */
-//    modCompileOnly "maven.modrinth:particle-core:0.2.5+1.21+neoforge"
-//    modLocalRuntime "maven.modrinth:particle-core:0.2.5+1.21+neoforge"
-//    modLocalRuntime "maven.modrinth:fzzy-config:0.6.4+1.21+neoforge"
-//    modLocalRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
-//    modLocalRuntime 'thedarkcolour:kfflang:5.6.0'
-//    modLocalRuntime 'thedarkcolour:kfflib:5.6.0'
-//    modLocalRuntime 'thedarkcolour:kffmod:5.6.0'
-//    modLocalRuntime('thedarkcolour:kotlinforforge-neoforge:5.6.0') {
-//        exclude(group: "net.neoforged.fancymodloader", module: "loader")
-//    }
+//    modCompileOnly "maven.modrinth:particle-core:0.3.3+1.21+neoforge"
+    modLocalRuntime "maven.modrinth:particle-core:0.3.3+1.21+neoforge"
+    localRuntime("me.fzzyhmstrs:fzzy_config:0.7.5+1.21+neoforge") {
+        exclude group: "net.neoforged.fancymodloader", module: "loader"
+        exclude(group: "net.fabricmc.fabric-api")
+        exclude(group: "com.terraformersmc")
+        exclude(group: "thedarkcolour")
+    }
+    modLocalRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
+    localRuntime('thedarkcolour:kotlinforforge-neoforge:5.6.0') {
+        exclude(group: "net.neoforged.fancymodloader", module: "loader")
+    }
 
     /* Physics Mod */
     modCompileOnly "maven.modrinth:physicsmod:TS9jeS6e" // 3.0.26

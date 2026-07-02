@@ -24,7 +24,6 @@ import static java.lang.Math.abs;
 import static org.joml.Math.max;
 
 public class GameUtil {
-	public static final ParticleThreadLocal<Integer> DESTRUCTION_LIGHT_CACHE = new ParticleThreadLocal<>();
 	public static final ParticleThreadLocal<BlockPos.MutableBlockPos> SHARED_POS = ParticleThreadLocal.withInitial(BlockPos.MutableBlockPos::new);
 
 	@ExpectPlatform

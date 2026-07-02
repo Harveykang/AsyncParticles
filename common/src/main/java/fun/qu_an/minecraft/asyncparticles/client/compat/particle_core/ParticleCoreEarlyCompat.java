@@ -7,23 +7,23 @@ import java.util.*;
 public class ParticleCoreEarlyCompat {
 	/**
 	 * These mixins conflict with us
-	 * "me.fzzyhmstrs.particle_core.mixins.ParticleManagerFrustumMixin",
-	 * "me.fzzyhmstrs.particle_core.mixins.ParticleManagerRotationMixin",
-	 * "me.fzzyhmstrs.particle_core.mixins.WorldRendererFrustumMixin",
-	 * "me.fzzyhmstrs.particle_core.mixins.ParticleManagerRenderDistanceMixin",
-	 * "me.fzzyhmstrs.particle_core.mixins.ParticleManagerCountMixin",
-	 * "me.fzzyhmstrs.particle_core.mixins.BillboardParticleMixin",
+	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleManagerFrustumMixin
+	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleManagerRotationMixin
+	 * @see me.fzzyhmstrs.particle_core.mixins.WorldRendererFrustumMixin
+	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleManagerRenderDistanceMixin
+	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleManagerCountMixin
+	 * @see me.fzzyhmstrs.particle_core.mixins.BillboardParticleMixin
 	 * while these are compatible with us
-	 * "me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin",
-	 * "me.fzzyhmstrs.particle_core.mixins.ParticleBrightnessCacheMixin",
-	 * "me.fzzyhmstrs.particle_core.mixins.ParticleManagerCachedLightMixin",
-	 * "me.fzzyhmstrs.particle_core.mixins.ParticleCachePosMixin",
-	 * "me.fzzyhmstrs.particle_core.mixins.BufferBuilderVertexMixin",
-	 * "me.fzzyhmstrs.particle_core.mixins.FireworksSparkParticleMixin",
-	 * "me.fzzyhmstrs.particle_core.mixins.ParticleFrustumBlacklistMixin",
-	 * "me.fzzyhmstrs.particle_core.mixins.ParticleMoveAdjustMixin",
-	 * "me.fzzyhmstrs.particle_core.mixins.WorldRendererDecreaseMixin",
-	 * "me.fzzyhmstrs.particle_core.mixins.WorldRendererTypeMixin"
+	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin
+	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleBrightnessCacheMixin
+	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleManagerCachedLightMixin
+	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleCachePosMixin
+	 * @see me.fzzyhmstrs.particle_core.mixins.BufferBuilderVertexMixin
+	 * @see me.fzzyhmstrs.particle_core.mixins.FireworksSparkParticleMixin
+	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleFrustumBlacklistMixin
+	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleMoveAdjustMixin
+	 * @see me.fzzyhmstrs.particle_core.mixins.WorldRendererDecreaseMixin
+	 * @see me.fzzyhmstrs.particle_core.mixins.WorldRendererTypeMixin
 	 */
 	public static void initEarly() {
 		List<String> disableOptimizations = PcDisable.INSTANCE.getDisabledOptimizations().getDisableOptimizations();

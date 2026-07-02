@@ -35,7 +35,6 @@ public class ParticleRenderer implements IParticleRenderer {
 	private static final int[] multiDrawIndex = {0, 0};
 	private static final int[] multiDrawCount = {0, 0};
 	private final ParticleVertexBuffer[] sources = new ParticleVertexBuffer[SOURCE_SLOT_COUNT];
-	private final long[] fences = new long[SOURCE_SLOT_COUNT];
 	private final ParticleVertexBuffer target = new ParticleVertexBuffer(true);
 	private int particleLimit;
 	private int processingSrcIdx = 0;
@@ -88,17 +87,7 @@ public class ParticleRenderer implements IParticleRenderer {
 	}
 
 	private int acquireSourceSlot(int idx) {
-		if (fences[idx] == 0) {
-			fences[idx] = GL32C.glFenceSync(GL32C.GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-		}
-		int newIdx = (idx + 1) % SOURCE_SLOT_COUNT;
-		long fence = fences[newIdx];
-		if (fence != 0) {
-			GL32C.glWaitSync(fence, 0, GL32C.GL_TIMEOUT_IGNORED);
-			GL32C.glDeleteSync(fence);
-			fences[newIdx] = 0;
-		}
-		return newIdx;
+		return (idx + 1) % SOURCE_SLOT_COUNT;
 	}
 
 	@Override
@@ -415,7 +404,7 @@ public class ParticleRenderer implements IParticleRenderer {
 			ptr += 4L;
 
 			// Light (56-59): 2 shorts
-			MemoryUtil.memPutInt(ptr, gpuParticle.asyncparticles$getLightCoords(0f));
+			MemoryUtil.memPutInt(ptr, gpuParticle.asyncparticles$getCachedLight());
 			ptr += 4L;
 
 			// Rolls (60-67)

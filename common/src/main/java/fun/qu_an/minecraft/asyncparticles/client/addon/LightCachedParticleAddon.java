@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.addon;
 
-import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.particle.ParticleHelper;
 import net.minecraft.client.particle.Particle;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -17,15 +18,26 @@ public interface LightCachedParticleAddon {
 	}
 
 	static void doFirstRefresh(Particle particle) {
-		// Enable the light only if the particle is added to the current ParticleEngine instance.
-		((LightCachedParticleAddon) particle).asyncparticles$enableLightCache();
-		Integer i = GameUtil.DESTRUCTION_LIGHT_CACHE.get();
-		if (i == null){
-			// refresh the light cache here since this method can run in other threads.
-			// so it can avoid to slower the main thread.
-			((LightCachedParticleAddon) particle).asyncparticles$refresh();
-		} else {
-			((LightCachedParticleAddon) particle).asyncparticles$setLight(i);
+		if (ConfigHelper.particleLightCache()) {
+			// Enable the light only if the particle is added to the current ParticleEngine instance.
+			((LightCachedParticleAddon) particle).asyncparticles$enableLightCache();
+			Integer i = ParticleHelper.DESTRUCTION_LIGHT_CACHE.get();
+			if (i == null){
+				// refresh the light cache here since this method can run in other threads.
+				// so it can avoid to slower the main thread.
+				((LightCachedParticleAddon) particle).asyncparticles$refresh();
+			} else {
+				((LightCachedParticleAddon) particle).asyncparticles$setLight(i);
+			}
+		} else if (ConfigHelper.isGpuParticles() && ConfigHelper.isAppendNewParticlesToRenderer()){
+			Integer i = ParticleHelper.DESTRUCTION_LIGHT_CACHE.get();
+			if (i == null){
+				// refresh the light cache here since this method can run in other threads.
+				// so it can avoid to slower the main thread.
+				((LightCachedParticleAddon) particle).asyncparticles$refresh();
+			} else {
+				((LightCachedParticleAddon) particle).asyncparticles$setLight(i);
+			}
 		}
 	}
 

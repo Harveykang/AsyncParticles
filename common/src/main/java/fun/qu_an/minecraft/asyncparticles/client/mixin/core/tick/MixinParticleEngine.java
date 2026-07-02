@@ -8,6 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.fabric.porting_lib_base.MixinMixinParticleEngine;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.particle.ParticleHelper;
@@ -134,6 +135,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 					if (appendNewParticlesToRenderer) {
 						GpuParticleBehavior.INSTANCE.getRenderer(renderType).append(GpuParticleBehavior.INSTANCE.getCameraPos(), ((TextureSheetParticle) particle));
 					}
+					((LightCachedParticleAddon) particle).asyncparticles$disableLightCache();
 				}
 				queue.add(particle);
 			}
@@ -160,7 +162,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	}
 
 	/**
-	 * @see fun.qu_an.minecraft.asyncparticles.client.mixin.compat.fabric.porting_lib_base.MixinMixinParticleEngine
+	 * @see MixinMixinParticleEngine
 	 */
 	@Unique
 	private <T extends Particle> Queue<T> asyncparticles$newParticleQueue(ParticleRenderType k) {
@@ -269,8 +271,9 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				}
 				particleAddon.asyncparticles$setTicked();
 			}
-			if (shouldRefresh) {
-				((LightCachedParticleAddon) particle).asyncparticles$refresh();
+			LightCachedParticleAddon lightCachedParticle = (LightCachedParticleAddon) particle;
+			if (shouldRefresh && lightCachedParticle.asyncparticles$isEnabledLightCache()) {
+				lightCachedParticle.asyncparticles$refresh();
 			}
 			switch (particleCullingMode) {
 				case ASYNC_AABB -> particleAddon.asyncparticles$tickAABBCulling();
@@ -295,14 +298,15 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			particle.remove(); // to compatible with some mods...
 			// don't cancel it,
 			// otherwise it may cause memory leak with some mods
-		} else {
-			if (ConfigHelper.particleLightCache()) {
-				LightCachedParticleAddon.doFirstRefresh(particle);
-			}
-			switch (ConfigHelper.getParticleCullingMode()) {
-				case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
-				case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
-			}
+		}
+	}
+
+	@Inject(method = "add", at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
+	public void onAdd(Particle particle, CallbackInfo ci) {
+		LightCachedParticleAddon.doFirstRefresh(particle);
+		switch (ConfigHelper.getParticleCullingMode()) {
+			case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
+			case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
 		}
 	}
 
