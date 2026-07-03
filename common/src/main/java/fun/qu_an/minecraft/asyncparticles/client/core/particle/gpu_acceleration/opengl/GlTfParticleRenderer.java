@@ -262,7 +262,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 					ptr += 4L;
 
 					// Light (56-59): 2 shorts
-					MemoryUtil.memPutInt(ptr, gpuParticle.asyncparticles$getLightCoords(0f));
+					MemoryUtil.memPutInt(ptr, gpuParticle.asyncparticles$getCachedLight());
 					ptr += 4L;
 
 					// Rolls (60-67)

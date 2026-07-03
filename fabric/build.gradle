@@ -89,11 +89,11 @@ dependencies {
 ////    localRuntime "maven.modrinth:particular:1.1.1+1.21.4" // TODO: this is a 1.21.4 version
 //
 //    /* Particle Core */
-////    localRuntime "maven.modrinth:particle-core:0.2.6+1.21.5"
-////    localRuntime "maven.modrinth:fzzy-config:0.6.9+1.21.5"
-////    localRuntime("net.fabricmc:fabric-language-kotlin:1.13.2+kotlin.2.1.20") {
-////        exclude(group: "net.fabricmc")
-////    }
+//    localRuntime "maven.modrinth:particle-core:0.3.2+26.2"
+    localRuntime "maven.modrinth:fzzy-config:0.7.6+26.2"
+    localRuntime("net.fabricmc:fabric-language-kotlin:1.13.2+kotlin.2.1.20") {
+        exclude(group: "net.fabricmc")
+    }
 //
 //    /* A Good Place */
 //    compileOnly "maven.modrinth:a-good-place:kD90q4La" // 1.2.10 // TODO:this is a 1.21.4 version

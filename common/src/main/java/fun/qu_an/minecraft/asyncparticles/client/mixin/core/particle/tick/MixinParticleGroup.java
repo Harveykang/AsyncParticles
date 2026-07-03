@@ -90,7 +90,7 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 			boolean shouldRefresh;
 			if (isOnMainThread) {
 				shouldTick = true;
-				shouldRefresh = false;
+				shouldRefresh = enableLightCache;
 			} else if (particleAddon.asyncparticles$isTicked()) {
 				// Skip the first tick after the particle is added to the queue.
 				// GPU particles don't skip the first tick, but skip the first refresh.
@@ -121,12 +121,12 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 				}
 			}
 			LightCachedParticleAddon lightCachedParticle = (LightCachedParticleAddon) particle;
-			if (shouldRefresh) {
-				lightCachedParticle.asyncparticles$enableLightCache();
+			if (shouldRefresh && lightCachedParticle.asyncparticles$isEnabledLightCache()) {
 				lightCachedParticle.asyncparticles$refresh();
-			} else {
-				lightCachedParticle.asyncparticles$disableLightCache();
 			}
+		}
+		if (isOnMainThread) {
+			asyncparticles$removeDeadParticles();
 		}
 	}
 

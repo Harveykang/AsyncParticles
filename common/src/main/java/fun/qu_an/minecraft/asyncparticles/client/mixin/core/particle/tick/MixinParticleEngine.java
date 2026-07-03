@@ -10,14 +10,12 @@ import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickPar
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.ParticleLimit;
 import net.minecraft.util.profiling.Profiler;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
+import java.util.function.BiConsumer;
 
 @Mixin(ParticleEngine.class)
 public abstract class MixinParticleEngine implements ParticleEngineAddon {
@@ -52,20 +50,29 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		// Keep local var table as they were
 		Particle particle;
 		boolean tickAsync = ConfigHelper.isAsyncTickParticle();
-		TaskHelper taskHelper = AsyncTickBehavior.getInstance().getTickTaskManager();
-		this.particles.forEach((renderType, group) -> {
-			if (group.isEmpty()) {
-				return;
-			}
-			Profiler.get().push(renderType.name());
-			if (tickAsync && AsyncTickParticleGroupBehavior.canTickAsync(group)) {
-				taskHelper.addTask(group::tickParticles);
-			} else {
+		if (tickAsync) {
+			TaskHelper taskHelper = AsyncTickBehavior.getInstance().getTickTaskManager();
+			asyncparticles$forEach(this.particles, (renderType, group) -> {
+				if (group.isEmpty()) {
+					return;
+				}
+				Profiler.get().push(renderType.name());
+				if (AsyncTickParticleGroupBehavior.canTickAsync(group)) {
+					taskHelper.addTask(group::tickParticles);
+				} else {
+					group.tickParticles();
+				}
+				Profiler.get().pop();
+			});
+			taskHelper.groupTasks(true);
+		} else {
+			// forEach is an inject point (eg. ParticleCore)
+			this.particles.forEach((type, group) -> {
+				Profiler.get().push(type.name());
 				group.tickParticles();
-			}
-			Profiler.get().pop();
-		});
-		taskHelper.groupTasks(true);
+				Profiler.get().pop();
+			});
+		}
 		if (!this.trackingEmitters.isEmpty()) {
 			for (TrackingEmitter trackingEmitter : this.trackingEmitters) {
 				trackingEmitter.tick(); // TODO can be async-lized safely?
@@ -73,7 +80,6 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			}
 		}
 		if (!tickAsync) {
-			particles.values().forEach(g -> ((ParticleGroupAddition) g).asyncparticles$removeDeadParticles());
 			AsyncTickBehavior.getInstance().doEmittersRemoveIf(trackingEmitters);
 		}
 
@@ -87,6 +93,11 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			}
 			particlesToAdd.clear();
 		}
+	}
+
+	@Unique
+	private <K, V> void asyncparticles$forEach(Map<K, V> i, BiConsumer<K, V> f) {
+		i.forEach(f);
 	}
 
 	@Override
