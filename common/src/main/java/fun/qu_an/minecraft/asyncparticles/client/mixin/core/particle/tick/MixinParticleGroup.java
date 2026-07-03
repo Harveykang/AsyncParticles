@@ -136,6 +136,9 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 				lightCachedParticle.asyncparticles$refresh();
 			}
 		}
+		if (isOnMainThread) {
+			asyncparticles$removeDeadParticles();
+		}
 	}
 
 	@Override

@@ -1,5 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
+import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particle_core.ParticleCoreCompat;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.world.phys.Vec3;
@@ -9,6 +12,11 @@ import java.util.Collection;
 import java.util.Map;
 
 public interface IParticleRenderer extends Closeable {
+	static boolean shouldRenderParticle(GpuParticleAddon gpuParticle, Vec3 camPos) {
+		return gpuParticle.asyncparticles$shouldRender()
+			&& (!ModListHelper.PARTICLE_CORE_LOADED || ParticleCoreCompat.shouldRenderParticle(gpuParticle, camPos));
+	}
+
 	void beginFrame(float deltaPartialTick);
 
 	/**

@@ -375,7 +375,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				int tickCount = 0;
 				for (SingleQuadParticle particle : collection) {
 					GpuParticleAddon gpuParticle = (GpuParticleAddon) particle;
-					if (!particle.isAlive() || !gpuParticle.asyncparticles$shouldRender()) {
+					if (!particle.isAlive() || !IParticleRenderer.shouldRenderParticle(gpuParticle, camPos)) {
 						continue;
 					}
 
@@ -454,7 +454,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void append(Vec3 cam, SingleQuadParticle particle) {
-		if (particle.isAlive() && ((GpuParticleAddon) particle).asyncparticles$shouldRender()) {
+		if (particle.isAlive() && IParticleRenderer.shouldRenderParticle(((GpuParticleAddon) particle), cam)) {
 			pendingAppends.add(particle);
 		}
 	}

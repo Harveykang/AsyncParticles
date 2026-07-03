@@ -100,6 +100,10 @@ subprojects {
 //            name = "Fuzs Mod Resources"
 //            url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
 //        }// Forge Config API Port
+        maven { // fzzy config
+            name = "FzzyMaven"
+            url = "https://maven.fzzyhmstrs.me/"
+        }
     }
 
     dependencies {
