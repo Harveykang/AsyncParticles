@@ -1,38 +1,50 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.backend;
 
 public interface VKCaps {
-	boolean isComputeShaderSupported();
+	boolean isSupported();
 
-	boolean isTimelineSemaphoreSupported();
+	boolean pushDescriptor();
+
+	boolean synchronization2();
 
 	class VKCapsImpl implements VKCaps {
-		private final boolean isComputeShaderSupported;
-		private final boolean timelineSemaphoreSupported;
+		private final boolean pushDescriptor;
+		private final boolean synchronization2;
 
-		public VKCapsImpl(boolean isComputeShaderSupported, boolean timelineSemaphoreSupported) {
-			this.isComputeShaderSupported = isComputeShaderSupported;
-			this.timelineSemaphoreSupported = timelineSemaphoreSupported;
+		public VKCapsImpl(boolean pushDescriptor, boolean synchronization2) {
+			this.pushDescriptor = pushDescriptor;
+			this.synchronization2 = synchronization2;
 		}
 
 		@Override
-		public boolean isTimelineSemaphoreSupported() {
-			return timelineSemaphoreSupported;
+		public boolean isSupported() {
+			return true;
 		}
 
 		@Override
-		public boolean isComputeShaderSupported() {
-			return isComputeShaderSupported;
+		public boolean pushDescriptor() {
+			return pushDescriptor;
+		}
+
+		@Override
+		public boolean synchronization2() {
+			return synchronization2;
 		}
 	}
 
 	class Unsupported implements VKCaps {
 		@Override
-		public boolean isComputeShaderSupported() {
+		public boolean isSupported() {
 			return false;
 		}
 
 		@Override
-		public boolean isTimelineSemaphoreSupported() {
+		public boolean pushDescriptor() {
+			return false;
+		}
+
+		@Override
+		public boolean synchronization2() {
 			return false;
 		}
 	}

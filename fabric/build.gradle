@@ -53,7 +53,7 @@ dependencies {
 //    localRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
 //
 //    /* Performance */
-    if (true) {
+    if (false) {
         localRuntime "maven.modrinth:sodium:mc26.1.2-0.8.12-fabric"
         localRuntime 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+fabric'
         localRuntime 'maven.modrinth:iris:1.10.9+26.1-fabric'
@@ -131,7 +131,7 @@ dependencies {
 //    localRuntime "maven.modrinth:particle-interactions:0.9.5+26.1-fabric"
 
     /* Vulkan Mod */
-    if (false) {
+    if (true) {
         localRuntime "maven.modrinth:vulkanmod:0.6.8+26.1.2"
         localRuntime "maven.modrinth:beryl:Wgi6wkQ4" // 0.2.1-alpha
         localRuntime("org.lwjgl:lwjgl-vulkan:3.3.3")
