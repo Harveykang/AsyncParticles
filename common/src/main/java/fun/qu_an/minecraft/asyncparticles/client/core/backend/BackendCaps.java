@@ -8,7 +8,8 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VK10;
-import org.lwjgl.vulkan.VK12;
+import org.lwjgl.vulkan.VK13;
+import org.lwjgl.vulkan.VkDevice;
 import org.lwjgl.vulkan.VkPhysicalDeviceProperties;
 
 import java.util.Locale;
@@ -61,18 +62,25 @@ public class BackendCaps {
 			GL_ARB_vertex_attrib_binding = false;
 			glTfSupport = new GLCaps.TfSupport.Unsupported();
 			glCsSupport = new GLCaps.CsSupport.Unsupported();
-			VulkanDevice vkBackend = (VulkanDevice) device.backend;
-			boolean isVk12;
+
+			// check device capabilities via Vulkan API directly
+			VkDevice vkDevice = ((VulkanDevice) device.backend).vkDevice();
+			boolean isVk13;
 			try (MemoryStack s = MemStackUtil.stackPush()) {
 				VkPhysicalDeviceProperties props = VkPhysicalDeviceProperties.calloc(s);
-				VK10.vkGetPhysicalDeviceProperties(vkBackend.vkDevice().getPhysicalDevice(), props);
-				isVk12 = props.apiVersion() >= VK12.VK_API_VERSION_1_2;
+				VK10.vkGetPhysicalDeviceProperties(vkDevice.getPhysicalDevice(), props);
+				isVk13 = props.apiVersion() >= VK13.VK_API_VERSION_1_3;
 			}
-			boolean isSync2 = isVk12 && VK10.vkGetDeviceProcAddr(vkBackend.vkDevice(), "vkQueueSubmit2KHR") != 0L;
-			vkCaps = new VKCaps.VKCapsImpl(
-				true,
-				isVk12 && isSync2
-			);
+			boolean pushDescriptor;
+			boolean synchronization2;
+			if (isVk13) {
+				pushDescriptor = true;
+				synchronization2 = true;
+			} else {
+				pushDescriptor = VK10.vkGetDeviceProcAddr(vkDevice, "vkCmdPushDescriptorSetKHR") != 0L;
+				synchronization2 = VK10.vkGetDeviceProcAddr(vkDevice, "vkCmdPipelineBarrier2KHR") != 0L;
+			}
+			vkCaps = new VKCaps.VKCapsImpl(pushDescriptor, synchronization2);
 			isGl = false;
 		} else {
 			throw new ExceptionInInitializerError("Unsupported backend: " + backendName);
@@ -86,7 +94,10 @@ public class BackendCaps {
 		if (isGl()) {
 			return glTfSupport.isTfSupported() && GL_ARB_explicit_attrib_location;
 		}
-		return vkCaps.isComputeShaderSupported();
+		if (isVk()){
+			return vkCaps.pushDescriptor() && vkCaps.synchronization2();
+		}
+		return false;
 	}
 
 	public static boolean isGl() {

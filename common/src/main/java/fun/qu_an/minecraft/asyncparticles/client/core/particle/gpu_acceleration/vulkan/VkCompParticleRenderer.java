@@ -33,6 +33,7 @@ import static fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_accele
 public class VkCompParticleRenderer implements IParticleRenderer {
 	private static final int WORKGROUP_SIZE = 64;
 	private static final int GROUP_RECORD_INTS = 3;
+	private static final int DESCRIPTOR_SET_LAYOUT_SIZE = 3;
 	private static final int SOURCE_SLOT_COUNT = 3;
 	private static final long GPU_WAIT_TIMEOUT_NS = 5_000_000_000L;
 
@@ -79,7 +80,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 		createComputePipeline();
 		createCommandResources();
-		submitSlot.updateIndirectionDescriptor();
 	}
 
 	/* buffer creation */
@@ -96,7 +96,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	private int findMemType(int typeFilter, int props) {
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
-			VkPhysicalDeviceMemoryProperties mp = VkPhysicalDeviceMemoryProperties.calloc(stack);
+			VkPhysicalDeviceMemoryProperties mp = VkPhysicalDeviceMemoryProperties.malloc(stack);
 			VK10.vkGetPhysicalDeviceMemoryProperties(device.getPhysicalDevice(), mp);
 			for (int i = 0; i < mp.memoryTypeCount(); i++) {
 				if ((typeFilter & (1 << i)) != 0 && (mp.memoryTypes(i).propertyFlags() & props) == props) {
@@ -111,8 +111,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	private void createComputePipeline() {
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
-			VkDescriptorSetLayoutBinding.Buffer b = VkDescriptorSetLayoutBinding.calloc(3, stack);
-			for (int i = 0; i < 3; i++) {
+			VkDescriptorSetLayoutBinding.Buffer b = VkDescriptorSetLayoutBinding.calloc(DESCRIPTOR_SET_LAYOUT_SIZE, stack);
+			for (int i = 0; i < DESCRIPTOR_SET_LAYOUT_SIZE; i++) {
 				b.get(i).binding(i).descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER).descriptorCount(1).stageFlags(VK10.VK_SHADER_STAGE_COMPUTE_BIT);
 			}
 
@@ -166,18 +166,24 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	private void createCommandResources() {
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			VkDescriptorPoolSize.Buffer ps = VkDescriptorPoolSize.calloc(1, stack);
-			ps.get(0).type(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER).descriptorCount(3);
+			ps.get(0).type(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER).descriptorCount(DESCRIPTOR_SET_LAYOUT_SIZE * SOURCE_SLOT_COUNT);
 			VkDescriptorPoolCreateInfo dpci = VkDescriptorPoolCreateInfo.calloc(stack).sType(VK10.VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO)
-				.maxSets(1).pPoolSizes(ps);
+				.maxSets(SOURCE_SLOT_COUNT).pPoolSizes(ps);
 			LongBuffer pdp = stack.mallocLong(1);
 			VK10.vkCreateDescriptorPool(device, dpci, null, pdp);
 			descriptorPool = pdp.get(0);
-			LongBuffer layouts = stack.mallocLong(1).put(0, descriptorSetLayout);
+
+			LongBuffer layouts = stack.mallocLong(SOURCE_SLOT_COUNT);
+			for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
+				layouts.put(i, descriptorSetLayout);
+			}
 			VkDescriptorSetAllocateInfo ai2 = VkDescriptorSetAllocateInfo.calloc(stack).sType(VK10.VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO)
 				.descriptorPool(descriptorPool).pSetLayouts(layouts);
-			LongBuffer pds2 = stack.mallocLong(1);
+			LongBuffer pds2 = stack.mallocLong(SOURCE_SLOT_COUNT);
 			VK10.vkAllocateDescriptorSets(device, ai2, pds2);
-			submitSlot.descriptorSet = pds2.get(0);
+			for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
+				sourceSlots[i].descriptorSet = pds2.get(i);
+			}
 		}
 	}
 
@@ -484,7 +490,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			VK10.vkCmdBindPipeline(cb, VK10.VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
-			VK10.vkCmdBindDescriptorSets(cb, VK10.VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, stack.longs(submitSlot.descriptorSet), null);
+			VK10.vkCmdBindDescriptorSets(cb, VK10.VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, stack.longs(source.descriptorSet), null);
 
 			float leftX = camera.leftVector().x();
 			float leftY = camera.leftVector().y();
@@ -590,6 +596,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		private long srcBuf;
 		private long srcMem;
 		private ByteBuffer mapped;
+		private long descriptorSet;
 		private final List<LayerBatch> layerBatches = new ReferenceArrayList<>();
 		private int tickCount;
 		private Vec3 camPosition = Vec3.ZERO;
@@ -700,7 +707,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	private final class SubmitSlot {
 		private VulkanGpuBuffer targetBuffer;
-		private long descriptorSet;
 		private long indBuf;
 		private long indMem;
 		private ByteBuffer indMapped;
@@ -742,7 +748,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			VK10.vkDestroyBuffer(device, indBuf, null);
 			VK10.vkFreeMemory(device, indMem, null);
 			createIndirectionBuffer(bytes);
-			updateIndirectionDescriptor();
 			clearPrepared();
 		}
 
@@ -752,17 +757,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 		private void uploadGroupRecords(int[] records) {
 			indMapped.asIntBuffer().position(0).put(records);
-		}
-
-		private void updateIndirectionDescriptor() {
-			try (MemoryStack stack = MemStackUtil.stackPush()) {
-				VkDescriptorBufferInfo.Buffer bi = VkDescriptorBufferInfo.calloc(1, stack);
-				bi.get(0).buffer(indBuf).offset(0).range(VK10.VK_WHOLE_SIZE);
-				VkWriteDescriptorSet.Buffer ws = VkWriteDescriptorSet.calloc(1, stack);
-				ws.get(0).sType(VK10.VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET).dstSet(descriptorSet).dstBinding(2)
-					.descriptorCount(1).descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER).pBufferInfo(bi);
-				VK10.vkUpdateDescriptorSets(device, ws, null);
-			}
 		}
 
 		private void createTargetBuffer(long size) {
@@ -823,16 +817,21 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			preparedComputeResult = null;
 		}
 
-		private void updateDescriptor(SourceSlot source) {
+		private void updateDescriptorFor(SourceSlot source) {
 			try (MemoryStack stack = MemStackUtil.stackPush()) {
-				VkDescriptorBufferInfo.Buffer bi = VkDescriptorBufferInfo.calloc(2, stack);
+				VkDescriptorBufferInfo.Buffer bi = VkDescriptorBufferInfo.calloc(DESCRIPTOR_SET_LAYOUT_SIZE, stack);
 				bi.get(0).buffer(source.srcBuf).offset(0).range(VK10.VK_WHOLE_SIZE);
 				bi.get(1).buffer(targetBuffer.vkBuffer()).offset(0).range(VK10.VK_WHOLE_SIZE);
-				VkWriteDescriptorSet.Buffer ws = VkWriteDescriptorSet.calloc(2, stack);
-				ws.get(0).sType(VK10.VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET).dstSet(descriptorSet).dstBinding(0)
-					.descriptorCount(1).descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER).pBufferInfo(bi.position(0));
-				ws.get(1).sType(VK10.VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET).dstSet(descriptorSet).dstBinding(1)
-					.descriptorCount(1).descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER).pBufferInfo(bi.position(1));
+				bi.get(2).buffer(indBuf).offset(0).range(VK10.VK_WHOLE_SIZE);
+
+				VkWriteDescriptorSet.Buffer ws = VkWriteDescriptorSet.calloc(DESCRIPTOR_SET_LAYOUT_SIZE, stack);
+				for (int i = 0; i < DESCRIPTOR_SET_LAYOUT_SIZE; i++) {
+					ws.get(i).sType(VK10.VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+						.dstSet(source.descriptorSet).dstBinding(i)
+						.descriptorCount(1).descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+						.pBufferInfo(bi.position(i));
+				}
+				ws.position(0);
 				VK10.vkUpdateDescriptorSets(device, ws, null);
 			}
 		}
@@ -854,7 +853,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			this.ensureTargetSize(needBytes);
 			this.ensureIndirectionSize(source.groupRecords.length * Integer.BYTES);
 			this.uploadGroupRecords(source.groupRecords);
-			this.updateDescriptor(source);
+			this.updateDescriptorFor(source);
 			this.preparedSourceGeneration = source.generation;
 			this.preparedComputeResult = ComputeResult.of(this.targetBuffer, source.totalCount, source.slices);
 		}
