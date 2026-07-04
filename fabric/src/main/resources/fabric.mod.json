@@ -43,8 +43,5 @@
   },
   "suggests": {
     "fabric-api": "*"
-  },
-  "breaks": {
-    "particle_core": "*"
   }
 }

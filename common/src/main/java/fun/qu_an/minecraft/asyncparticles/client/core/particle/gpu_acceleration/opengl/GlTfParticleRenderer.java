@@ -333,7 +333,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 				int tickCount = 0;
 				for (SingleQuadParticle particle : collection) {
 					GpuParticleAddon gpuParticle = (GpuParticleAddon) particle;
-					if (!particle.isAlive() || !gpuParticle.asyncparticles$shouldRender()) {
+					if (!particle.isAlive() || !IParticleRenderer.shouldRenderParticle(gpuParticle, camPos)) {
 						continue;
 					}
 
@@ -506,9 +506,9 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 	}
 
 	@Override
-	public void append(Vec3 camPos, SingleQuadParticle sqp) {
-		if (((GpuParticleAddon) sqp).asyncparticles$shouldRender()) {
-			pendingAppends.add(sqp);
+	public void append(Vec3 camPos, SingleQuadParticle particle) {
+		if (particle.isAlive() && IParticleRenderer.shouldRenderParticle((GpuParticleAddon) particle, camPos)) {
+			pendingAppends.add(particle);
 		}
 	}
 

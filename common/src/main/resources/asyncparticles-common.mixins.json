@@ -35,7 +35,6 @@
     "conditional.MixinParticles_LockRequired_Tick",
     "core.MixinParticleEngine",
     "core.MixinRenderSystem",
-    "core.MixinTextureManager",
     "core.animate_tick.MixinClientLevel",
     "core.animate_tick.MixinWaterFluid",
     "core.deffered_texture_tick.MixinTextureManager",

@@ -328,9 +328,10 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	}
 
 	private int acquireSourceSlot(int idx) {
-		int firstCandidate = (idx + 1) % SOURCE_SLOT_COUNT;
-		sourceSlots[firstCandidate].waitReady();
-		return firstCandidate;
+		sourceSlots[idx].lastSubmitIndex = vkBackend.createCommandEncoder().currentSubmitIndex;
+		int newIdx = (idx + 1) % SOURCE_SLOT_COUNT;
+		sourceSlots[newIdx].waitReady();
+		return newIdx;
 	}
 
 	@Override
@@ -367,7 +368,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				int tickCount = 0;
 				for (SingleQuadParticle particle : collection) {
 					GpuParticleAddon gpuParticle = (GpuParticleAddon) particle;
-					if (!particle.isAlive() || !gpuParticle.asyncparticles$shouldRender()) {
+					if (!particle.isAlive() || !IParticleRenderer.shouldRenderParticle(gpuParticle, camPos)) {
 						continue;
 					}
 
@@ -445,8 +446,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	}
 
 	@Override
-	public void append(Vec3 cam, SingleQuadParticle particle) {
-		if (particle.isAlive() && ((GpuParticleAddon) particle).asyncparticles$shouldRender()) {
+	public void append(Vec3 cameraPos, SingleQuadParticle particle) {
+		if (particle.isAlive() && IParticleRenderer.shouldRenderParticle((GpuParticleAddon) particle, cameraPos)) {
 			pendingAppends.add(particle);
 		}
 	}
@@ -516,8 +517,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				.dstAccessMask(VK10.VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
 			VK10.vkCmdPipelineBarrier(cb, VK10.VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK10.VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, 0, mb, null, null);
 		}
-
-		source.lastSubmitIndex = commandEncoder.currentSubmitIndex;
 	}
 
 	@Override

@@ -2,8 +2,9 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle;
 
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
@@ -22,8 +23,12 @@ public final class TaskHelper {
 		this.exceptionHandler = exceptionHandler;
 	}
 
-	public void addTask(@NonNull Runnable task) {
+	public void addTask(@NotNull Runnable task) {
 		tasks.add(task);
+	}
+
+	public void addTasks(Collection<? extends Runnable> tasks) {
+		this.tasks.addAll(tasks);
 	}
 
 	public void groupTasks(boolean parallel) {
@@ -35,7 +40,7 @@ public final class TaskHelper {
 		groups.add(parallel ? new ParallelGroup(taskSnapshot) : new SequentialGroup(taskSnapshot));
 	}
 
-	public void submitImmediately(@NonNull Runnable task) {
+	public void submitImmediately(@NotNull Runnable task) {
 		futures.add(executor.submit(task));
 	}
 
@@ -44,6 +49,12 @@ public final class TaskHelper {
 			groupTasks(false);
 		}
 		if (groups.isEmpty()) {
+			return;
+		}
+
+		if (groups.size() == 1) {
+			ForkJoinTask<?> task = executor.submit(groups.remove(0));
+			futures.add(task);
 			return;
 		}
 

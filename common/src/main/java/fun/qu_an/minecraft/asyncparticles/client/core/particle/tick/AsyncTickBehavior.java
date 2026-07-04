@@ -177,13 +177,15 @@ public class AsyncTickBehavior {
 		Collection<ParticleGroup<?>> groups = mc.particleEngine.particles.values();
 		for (ParticleGroup<?> group : groups) {
 			if (!groups.isEmpty()) {
-				cleanupTaskHelper.submitImmediately(((ParticleGroupAddition) group)::asyncparticles$removeDeadParticles);
+				cleanupTaskHelper.addTask(((ParticleGroupAddition) group)::asyncparticles$removeDeadParticles);
 			}
 		}
-		cleanupTaskHelper.submitImmediately(() -> {
+		cleanupTaskHelper.addTask(() -> {
 			Queue<TrackingEmitter> trackingEmitters = Minecraft.getInstance().particleEngine.trackingEmitters;
 			doEmittersRemoveIf(trackingEmitters);
 		});
+		cleanupTaskHelper.groupTasks(true);
+		cleanupTaskHelper.submitAll();
 	}
 
 	public void doEmittersRemoveIf(Queue<? extends TrackingEmitter> queue) {
