@@ -8,4 +8,11 @@ public interface ParticleGroupAddition {
 	default void asyncparticles$tickSyncParticles() {
 		throw new AssertionError("Must be implemented!");
 	}
+
+	default void asyncparticles$asyncTickParticles() {
+		if (!(this instanceof AsyncTickableParticleGroup)) {
+			throw new IllegalStateException();
+		}
+		throw new AssertionError("Must be implemented!");
+	}
 }

@@ -1,8 +1,8 @@
 
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick;
 
+import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
-import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
@@ -58,7 +58,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				}
 				Profiler.get().push(renderType.name());
 				if (AsyncTickParticleGroupBehavior.canTickAsync(group)) {
-					taskHelper.addTask(group::tickParticles);
+					taskHelper.addTask(((AsyncTickableParticleGroup) group)::asyncparticles$asyncTickParticles);
 				} else {
 					group.tickParticles();
 				}

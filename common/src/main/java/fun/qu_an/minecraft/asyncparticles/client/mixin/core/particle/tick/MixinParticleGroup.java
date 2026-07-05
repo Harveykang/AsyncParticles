@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.addon.*;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
@@ -21,6 +22,7 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
@@ -40,6 +42,10 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 	@Shadow
 	public abstract boolean isEmpty();
 
+	@Shadow
+	@Final
+	protected ParticleEngine engine;
+
 	@WrapOperation(method = "<init>", at = @At(value = "NEW", remap = false,
 		target = "(I)Ljava/util/ArrayDeque;"))
 	private ArrayDeque<?> redirectNewQueue(int numElements, Operation<ArrayDeque<?>> original) {
@@ -52,20 +58,42 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 		particles = ParticleHelper.newParticleQueue();
 	}
 
-	/**
-	 * @author Harvey_Husky
-	 * @reason Too many changes, need to rewrite the entire method.
-	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	@Overwrite
-	public void tickParticles() { // TODO move to implementations
+	@Inject(method = "tickParticles", at = @At("HEAD"))
+	public void injectTickParticlesHead(CallbackInfo ci) {
+		this.asyncparticles$shouldRemoveInParallel = false;
+	}
+
+	@WrapOperation(method = "tickParticles", at = @At(value = "INVOKE", target = "Ljava/util/Queue;isEmpty()Z"))
+	private boolean wrapIsEmpty(Queue<?> instance, Operation<Boolean> original) {
+		return original.call(instance)
+			&& (!(this instanceof GpuParticleGroup gpuParticleGroup) || gpuParticleGroup.asyncparticles$getGpuParticles().isEmpty());
+	}
+
+	@WrapOperation(method = "tickParticles", at = @At(value = "INVOKE", target = "Ljava/util/Queue;iterator()Ljava/util/Iterator;"))
+	private Iterator<Particle> wrapIterator(Queue<Particle> instance, Operation<Iterator<Particle>> original) {
+		Iterator<Particle> call = original.call(instance);
+		if (this instanceof GpuParticleGroup gpuParticleGroup) {
+			return CombinedIterable.of(call, (Iterator) gpuParticleGroup.asyncparticles$getGpuParticles().iterator());
+		}
+		return call;
+	}
+
+	@Inject(method = "tickParticles", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/particle/ParticleGroup;tickParticle(Lnet/minecraft/client/particle/Particle;)V"))
+	public void injectTickParticlesTick(CallbackInfo ci, @Local(ordinal = 0) Particle particle) {
+		LightCachedParticleAddon lightCachedParticle = (LightCachedParticleAddon) particle;
+		if (ConfigHelper.particleLightCache() && lightCachedParticle.asyncparticles$isEnabledLightCache()) {
+			lightCachedParticle.asyncparticles$refresh();
+		}
+	}
+
+	@Override
+	public void asyncparticles$asyncTickParticles() {
 		this.asyncparticles$shouldRemoveInParallel = true; // otherwise this method is overwritten and don't call super.
-		if (this.particles.isEmpty() // Are there any modules that rely on this injection point?
-			&& (!(this instanceof GpuParticleGroup gpuParticleGroup) || gpuParticleGroup.asyncparticles$getGpuParticles().isEmpty())) {
+		if (isEmpty()) {
 			return;
 		}
-		boolean isOnMainThread = ThreadUtil.isOnMainThread();
-		if (!isOnMainThread && ConfigHelper.isSplitParticleTick()) {
+		ThreadUtil.assertParticleTickerThread();
+		if (ConfigHelper.isSplitParticleTick()) {
 			// assert this instanceof AsyncTickableParticleGroup
 			TickParticleRecursiveAction.execute((ParticleGroup<?>) (Object) this, particles.spliterator());
 			return;
@@ -80,35 +108,24 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 		while (iterator.hasNext()) {
 			Particle particle = iterator.next();
 			if (!particle.isAlive()) {
-				// To be compatible with other mod
-				// Trust JIT
-				Utils.DUMMY_ITERATOR.remove();
 				continue;
 			}
 			ParticleAddon particleAddon = (ParticleAddon) particle;
 			boolean shouldTick;
-			boolean shouldRefresh;
-			if (isOnMainThread) {
-				shouldTick = true;
-				shouldRefresh = enableLightCache;
-			} else if (particleAddon.asyncparticles$isTicked()) {
+			if (particleAddon.asyncparticles$isTicked()) {
 				// Skip the first tick after the particle is added to the queue.
 				// GPU particles don't skip the first tick, but skip the first refresh.
 				// skip the first refresh will fix black destruction gpu particles.
 				shouldTick = !iterator.isLeft();
-				shouldRefresh = !shouldTick && enableLightCache;
 			} else if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
 //				assert this instanceof AsyncTickableParticleGroup;
 				((AsyncTickableParticleGroup) this).asyncparticles$recordSync(particle);
 				continue;
 			} else {
 				shouldTick = true;
-				shouldRefresh = enableLightCache;
 			}
 			if (shouldTick) {
 				try {
-					// We must ensure `tickParticle` method appear once in this method,
-					// otherwise the other mod's mixins will not work properly.
 					tickParticle(particle);
 				} catch (Throwable t) {
 					ReportedException re = AsyncTickBehavior.getInstance().onTickParticleException(particle, t);
@@ -116,17 +133,12 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 						throw re;
 					}
 				}
-				if (!isOnMainThread) {
-					particleAddon.asyncparticles$setTicked();
-				}
+				particleAddon.asyncparticles$setTicked();
 			}
-			LightCachedParticleAddon lightCachedParticle = (LightCachedParticleAddon) particle;
-			if (shouldRefresh && lightCachedParticle.asyncparticles$isEnabledLightCache()) {
+			LightCachedParticleAddon lightCachedParticle;
+			if (enableLightCache && (lightCachedParticle = (LightCachedParticleAddon) particle).asyncparticles$isEnabledLightCache()) {
 				lightCachedParticle.asyncparticles$refresh();
 			}
-		}
-		if (isOnMainThread) {
-			asyncparticles$removeDeadParticles();
 		}
 	}
 
@@ -150,9 +162,9 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 	public void asyncparticles$removeDeadParticles() {
 		if (asyncparticles$shouldRemoveInParallel) {
 			AsyncTickBehavior.getInstance().doParticlesRemoveIf(particles);
-		}
-		if (this instanceof GpuParticleGroup gpuParticleGroup) {
-			gpuParticleGroup.asyncparticles$removeDeadGpuParticles();
+			if (this instanceof GpuParticleGroup gpuParticleGroup) {
+				gpuParticleGroup.asyncparticles$removeDeadGpuParticles();
+			}
 		}
 	}
 

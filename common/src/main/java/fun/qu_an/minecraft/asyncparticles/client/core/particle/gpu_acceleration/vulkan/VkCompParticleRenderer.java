@@ -11,6 +11,7 @@ import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.LayerBatch;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
@@ -334,7 +335,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	}
 
 	private int acquireSourceSlot(int idx) {
-		sourceSlots[idx].lastSubmitIndex = vkBackend.createCommandEncoder().currentSubmitIndex;
 		int newIdx = (idx + 1) % SOURCE_SLOT_COUNT;
 		sourceSlots[newIdx].waitReady();
 		return newIdx;
@@ -467,7 +467,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			throw new IllegalStateException("Should skip rendering during this tick!");
 		}
 //		assert renderSrcIdx >= 0;
-		RenderSystem.assertOnRenderThread();
+		ThreadUtil.assertOnMainThread();
 		SourceSlot source = sourceSlots[renderSrcIdx];
 		if (!source.prepared) {
 			source.buildLayout();
@@ -523,6 +523,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				.dstAccessMask(VK10.VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
 			VK10.vkCmdPipelineBarrier(cb, VK10.VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK10.VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, 0, mb, null, null);
 		}
+
+		sourceSlots[renderSrcIdx].lastSubmitIndex = vkBackend.createCommandEncoder().currentSubmitIndex;
 	}
 
 	@Override

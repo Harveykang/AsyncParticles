@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -17,9 +18,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleGroup;
-import net.minecraft.client.particle.TrackingEmitter;
+import net.minecraft.client.particle.*;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
@@ -193,7 +192,14 @@ public class AsyncTickBehavior {
 	}
 
 	public void doParticlesRemoveIf(Queue<? extends Particle> particles) {
-		doRemoveIf(particles, this::shouldRemove);
+		ParticleEngine engine = Minecraft.getInstance().particleEngine;
+		doRemoveIf(particles, p -> {
+			boolean b = shouldRemove(p);
+			if (b) {
+				p.getParticleLimit().ifPresent(options -> engine.updateCount(options, -1));
+			}
+			return b;
+		});
 	}
 
 	public void doRemoveIf(Queue<? extends Particle> particles, Predicate<? super Particle> shouldRemove) {
@@ -283,7 +289,15 @@ public class AsyncTickBehavior {
 				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
 					.stream()
-					.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().size())),
+					.collect(Collectors.toMap(Map.Entry::getKey, e -> {
+						ParticleGroup<?> group = e.getValue();
+						String s = "{total: " + group.size();
+						if (group instanceof GpuParticleGroup) {
+							s += ", GPU: " + ((GpuParticleGroup) group).asyncparticles$getGpuParticles().size();
+						}
+						s += "}";
+						return s;
+					})),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
 				syncParticleTypes.stream().map(Class::getName).toList(),
 				BackendCaps.debugInfo()
@@ -321,5 +335,23 @@ public class AsyncTickBehavior {
 			return true;
 		}
 		throw new IllegalStateException("ParticleEngine.tick() called outside the particle phase unexpectedly.");
+	}
+
+	public void dumpParticles() {
+		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
+		for (Map.Entry<ParticleRenderType, ParticleGroup<?>> entry : particleEngine.particles.entrySet()) {
+			ParticleRenderType particleRenderType = entry.getKey();
+			ParticleGroup<?> value = entry.getValue();
+			LOGGER.info("Particle group: {}, size: {}, particles: ", value, value.size());
+			for (Particle particle : value.particles) {
+				LOGGER.info("{{}, {}}", particle, particle.getClass());
+			}
+			if (value instanceof GpuParticleGroup gpuGroup) {
+				LOGGER.info("GPU particles: ");
+				for (SingleQuadParticle particle : gpuGroup.asyncparticles$getGpuParticles()) {
+					LOGGER.info("{{}, {}}", particle, particle.getClass());
+				}
+			}
+		}
 	}
 }

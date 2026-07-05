@@ -71,8 +71,8 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 					.then(literal("dump")
 						.executes(context -> {
 							FabricClientCommandSource source = context.getSource();
-//							AsyncRenderBehavior.getInstance().dumpParticles();
-//							source.sendFeedback(Component.literal("Particles have been dumped to log."));
+							AsyncTickBehavior.getInstance().dumpParticles();
+							source.sendFeedback(Component.literal("Particles have been dumped to log."));
 							return 1;
 						}))
 					.then(literal("class_exists")

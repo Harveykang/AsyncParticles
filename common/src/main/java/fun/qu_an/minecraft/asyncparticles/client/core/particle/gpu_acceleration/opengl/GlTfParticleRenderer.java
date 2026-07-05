@@ -13,6 +13,7 @@ import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ComputeResult;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.LayerBatch;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
@@ -418,7 +419,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		if (shouldSkip) {
 			throw new IllegalStateException("Should skip rendering during this tick!");
 		}
-		RenderSystem.assertOnRenderThread();
+		ThreadUtil.assertOnMainThread();
 
 		if (tf > 0) {
 			BackendCaps.glTfSupport.glBindTransformFeedback(tf);

@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
+import net.minecraft.client.particle.Particle;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -31,6 +32,11 @@ public class CombinedIterable<T> implements Iterable<T> {
 			r = right.iterator();
 		}
 
+		public CombinedIterator(Iterator<T> left, Iterator<T> right) {
+			l = left;
+			r = right;
+		}
+
 		@Override
 		public boolean hasNext() {
 			return (isLeft && (isLeft = l.hasNext())) || r.hasNext();
@@ -41,9 +47,22 @@ public class CombinedIterable<T> implements Iterable<T> {
 			return isLeft ? l.next() : r.next();
 		}
 
+		@Override
+		public void remove() {
+			if (isLeft) {
+				l.remove();
+			} else {
+				r.remove();
+			}
+		}
+
 		public boolean isLeft() {
 			return isLeft;
 		}
+	}
+
+	public static <T> Iterator<T> of(Iterator<T> left, Iterator<T> right) {
+		return new CombinedIterator<>(left, right);
 	}
 
 	public static <T> CombinedIterable<T> of(Iterable<T> left, Iterable<T> right) {

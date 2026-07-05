@@ -82,8 +82,8 @@ public final class AsyncParticlesClientNeoForge {
 			.then(literal("dump")
 				.executes(context -> {
 					CommandSourceStack source = context.getSource();
-//					AsyncTickBehavior.dumpParticles();
-//					source.sendSystemMessage(Component.literal("Particles have been dumped to log."));
+					AsyncTickBehavior.getInstance().dumpParticles();
+					source.sendSystemMessage(Component.literal("Particles have been dumped to log."));
 					return 1;
 				}))
 			.then(literal("class_exists")
