@@ -51,6 +51,12 @@ public final class TaskHelper {
 			return;
 		}
 
+		if (groups.size() == 1) {
+			ForkJoinTask<?> task = executor.submit(groups.remove(0));
+			futures.add(task);
+			return;
+		}
+
 		List<Runnable> groupsSnapshot = new ReferenceArrayList<>(groups);
 		groups.clear();
 

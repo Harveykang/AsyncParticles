@@ -137,14 +137,16 @@ public class AsyncTickBehavior {
 				ParticleEngine particleEngine = mc.particleEngine;
 				Queue<TrackingEmitter> trackingEmitters = particleEngine.trackingEmitters;
 				if (!trackingEmitters.isEmpty()) {
-					cleanupTasks.submitImmediately(() -> doEmittersRemoveIf(trackingEmitters));
+					cleanupTasks.addTask(() -> doEmittersRemoveIf(trackingEmitters));
 				}
 				for (Queue<Particle> particles : particleEngine.particles.values()) {
 					if (particles.isEmpty()) {
 						continue;
 					}
-					cleanupTasks.submitImmediately(() -> doRemoveIf(particles));
+					cleanupTasks.addTask(() -> doRemoveIf(particles));
 				}
+				cleanupTasks.groupTasks(true);
+				cleanupTasks.submitAll();
 			}
 		}
 		profiler.pop();
