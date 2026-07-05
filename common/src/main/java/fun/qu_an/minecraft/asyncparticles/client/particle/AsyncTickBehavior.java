@@ -633,8 +633,12 @@ public class AsyncTickBehavior {
 	}
 
 	public boolean shouldTickParticleEngine() {
-		if (isParticlePhase() || !ConfigHelper.isTickAsync()) {
+		if (isParticlePhase()) {
 			return true;
+		}
+		if (!ConfigHelper.isTickAsync()) {
+			return !ModListHelper.IMMERSIVE_PORTALS_LOADED
+				|| Minecraft.getInstance().player.level() == Minecraft.getInstance().level;
 		}
 		if (ModListHelper.IMMERSIVE_PORTALS_LOADED) {
 			return false;
