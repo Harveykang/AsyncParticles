@@ -9,6 +9,7 @@ import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.GlTfParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan.VkCompParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
@@ -71,7 +72,7 @@ public class GpuParticleBehavior {
 	}
 
 	public void flushBufferAndSwap() {
-		RenderSystem.assertOnRenderThread();
+		ThreadUtil.assertOnMainThread();
 		if (renderer != null) {
 			renderer.flushBufferAndSwap(getPerTickCameraPos());
 		}

@@ -54,7 +54,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				}
 				Profiler.get().push(renderType.name());
 				if (AsyncTickParticleGroupBehavior.canTickAsync(group)) {
-					taskHelper.addTask(group::tickParticles);
+					taskHelper.addTask(((ParticleGroupAddition) group)::asyncparticles$asyncTickParticles);
 				} else {
 					group.tickParticles();
 				}
