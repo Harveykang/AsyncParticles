@@ -20,6 +20,15 @@ allprojects {
                         '-SNAPSHOT.' + Long.toHexString(new Random().nextLong(0x10000000L, 0xFFFFFFFFL)) :
                         '') +
                 '+' + rootProject.minecraft_version + '.jar'
+        forge {
+            jarLocation = "build/libs/${rootProject.archives_name}-forge-${rootProject.mod_version}.jar"
+//            println(jarLocation)
+        }
+        fabric {
+            jarLocation = "build/libs/${rootProject.archives_name}-fabric-${rootProject.mod_version}.jar"
+//            println(jarLocation)
+        }
+        outputDir = "build/libs"
     }
 }
 
