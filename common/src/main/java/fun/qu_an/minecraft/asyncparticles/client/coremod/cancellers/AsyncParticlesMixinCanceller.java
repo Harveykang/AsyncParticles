@@ -18,7 +18,10 @@ public class AsyncParticlesMixinCanceller implements MixinCanceller {
 				 // disable this because our implementation is better
 				 "com.moepus.flerovium.mixins.Particle.SingleQuadParticleMixin",
 //				 "net.diebuddies.mixins.ocean.MixinParticleEngine", // Physics mod
-				 "ca.fxco.moreculling.mixin.LevelRenderer_rainMixin" -> true;
+				 "ca.fxco.moreculling.mixin.LevelRenderer_rainMixin",
+				 "forge.me.thosea.badoptimizations.mixin.MixinParticleManager",
+				 "fabric.me.thosea.badoptimizations.mixin.MixinParticleManager"
+				-> true;
 			// why? org.spongepowered.asm.mixin.transformer.throwables.IllegalClassLoadError: Illegal classload request for dev.engine_room.flywheel.backend.mixin.light.SkyDataLayerStorageMapAccessor. Mixin is defined in flywheel.backend.mixins.json and cannot be referenced directly
 			case "dev.engine_room.flywheel.backend.mixin.light.SkyLightSectionStorageMixin" -> ModListHelper.isDevelopmentEnvironment();
 			default -> false;

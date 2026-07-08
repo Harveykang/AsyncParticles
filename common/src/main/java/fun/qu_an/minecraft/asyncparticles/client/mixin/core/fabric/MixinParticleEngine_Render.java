@@ -13,6 +13,7 @@ import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.particle.render.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
+import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.Camera;
@@ -193,7 +194,11 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 				}
 			}
 			profiler.popPush("build_buffer");
-			MeshData meshData = bufferBuilder == null ? null : bufferBuilder.build();
+			// Write like this to be compatible with TenshiLib
+			if (bufferBuilder == null) {
+				bufferBuilder = FakeBufferBuilder.INSTANCE;
+			}
+			MeshData meshData = bufferBuilder.build();
 			if (meshData != null) {
 				profiler.popPush("upload_particles");
 				BufferUploader.drawWithShader(meshData);

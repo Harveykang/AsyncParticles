@@ -197,7 +197,11 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 				}
 			}
 			profiler.popPush("build_buffer");
-			MeshData meshData = bufferBuilder == null ? null : bufferBuilder.build();
+			// Write like this to be compatible with TenshiLib
+			if (bufferBuilder == null) {
+				bufferBuilder = FakeBufferBuilder.INSTANCE;
+			}
+			MeshData meshData = bufferBuilder.build();
 			if (meshData != null) {
 				profiler.popPush("upload_particles");
 				BufferUploader.drawWithShader(meshData);
