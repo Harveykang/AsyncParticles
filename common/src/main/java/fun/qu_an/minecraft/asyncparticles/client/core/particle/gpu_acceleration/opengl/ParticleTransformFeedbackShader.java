@@ -35,10 +35,6 @@ public class ParticleTransformFeedbackShader {
 		PartialCameraPos = GL20C.glGetUniformLocation(programId, "PartialCameraPos");
 	}
 
-	public static void unuse() {
-		GL30C.glUseProgram(0);
-	}
-
 	public void use() {
 		GL30C.glUseProgram(programId);
 	}

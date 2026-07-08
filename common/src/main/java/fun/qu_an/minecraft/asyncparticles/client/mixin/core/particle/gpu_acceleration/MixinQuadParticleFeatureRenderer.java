@@ -2,8 +2,11 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.gpu_accele
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import com.mojang.blaze3d.IndexType;
 import com.mojang.blaze3d.PrimitiveTopology;
+import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -25,17 +28,33 @@ import java.util.List;
 
 @Mixin(QuadParticleFeatureRenderer.class)
 public class MixinQuadParticleFeatureRenderer {
-	@Inject(method = "executeGroup", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lcom/mojang/blaze3d/systems/GpuDevice;createCommandEncoder()Lcom/mojang/blaze3d/systems/CommandEncoder;"))
+	@Inject(method = "executeGroup", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/GpuDevice;createCommandEncoder()Lcom/mojang/blaze3d/systems/CommandEncoder;"))
 	public void executeGroupPreDraw(FeatureFrameContext context,
 	                                int groupIndex,
 	                                List<QuadParticleFeatureRenderer.Submit> submits,
 	                                boolean strictlyOrdered,
 	                                CallbackInfo ci,
-	                                @Share("result") LocalRef<ComputeResult> resultRef) {
-		if (ConfigHelper.isGpuParticles()) {
-			ComputeResult result = GpuParticleBehavior.getInstance().ensureComputeReady();
-			resultRef.set(result);
+	                                @Share("result") LocalRef<ComputeResult> resultRef,
+	                                @Share("indexBuffer") LocalRef<GpuBuffer> indexBufferRef,
+	                                @Share("indexType") LocalRef<IndexType> indexTypeRef) {
+		if (!ConfigHelper.isGpuParticles()) {
+			return;
 		}
+		ComputeResult result = GpuParticleBehavior.getInstance().ensureComputeReady();
+		if (result == null) {
+			return;
+		}
+		resultRef.set(result);
+		int indexCount = 0;
+		for (ComputeResult.ParticleSlice slice : result.slices()) {
+			if (slice.count() > indexCount) {
+				indexCount = slice.count();
+			}
+		}
+		indexCount *= 6;
+		RenderSystem.AutoStorageIndexBuffer indexBuffer = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS);
+		indexBufferRef.set(indexBuffer.getBuffer(indexCount));
+		indexTypeRef.set(indexBuffer.type());
 	}
 
 	@Inject(method = "executeGroup", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/renderer/feature/QuadParticleFeatureRenderer;drawLayers(Lnet/minecraft/client/renderer/StagedVertexBuffer;Ljava/util/Map;Lcom/mojang/blaze3d/systems/RenderPass;Lnet/minecraft/client/renderer/texture/TextureManager;)V"))
@@ -46,13 +65,15 @@ public class MixinQuadParticleFeatureRenderer {
 	                                 CallbackInfo ci,
 	                                 @Local(ordinal = 0) QuadParticleFeatureRenderer.PreparedGroup group,
 	                                 @Local(ordinal = 0) RenderPass renderPass,
-	                                 @Share("result") LocalRef<ComputeResult> resultRef) {
+	                                 @Share("result") LocalRef<ComputeResult> resultRef,
+	                                 @Share("indexBuffer") LocalRef<GpuBuffer> indexBufferRef,
+	                                 @Share("indexType") LocalRef<IndexType> indexTypeRef) {
 		ComputeResult result = resultRef.get();
 		if (result == null) {
 			return;
 		}
 		renderPass.setVertexBuffer(0, result.buffer().slice());
-		RenderSystem.AutoStorageIndexBuffer indexBuffer = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS);
+		renderPass.setIndexBuffer(indexBufferRef.get(), indexTypeRef.get());
 		TextureManager textureManager = context.textureManager();
 		ComputeResult.ParticleSlice[] slices = result.slices();
 		if (result.isIndirect()) {
@@ -64,7 +85,6 @@ public class MixinQuadParticleFeatureRenderer {
 					continue;
 				}
 				renderPass.setPipeline(GpuParticlePipelines.of(layer.pipeline(), translucent));
-				renderPass.setIndexBuffer(indexBuffer.getBuffer(slice.indexCount()), indexBuffer.type());
 				AbstractTexture texture = textureManager.getTexture(layer.textureAtlasLocation());
 				renderPass.bindTexture("Sampler0", texture.getTextureView(), texture.getSampler());
 				renderPass.drawIndexedIndirect(result.indirectBuffer().slice((long) i * result.indirectCommandStride(), result.indirectCommandStride()), 1);
@@ -78,7 +98,6 @@ public class MixinQuadParticleFeatureRenderer {
 				continue;
 			}
 			renderPass.setPipeline(GpuParticlePipelines.of(layer.pipeline(), translucent));
-			renderPass.setIndexBuffer(indexBuffer.getBuffer(slice.indexCount()), indexBuffer.type());
 			AbstractTexture texture = textureManager.getTexture(layer.textureAtlasLocation());
 			renderPass.bindTexture("Sampler0", texture.getTextureView(), texture.getSampler());
 			renderPass.drawIndexed(slice.indexCount(), 1, 0, slice.vertexOffset(), 0);

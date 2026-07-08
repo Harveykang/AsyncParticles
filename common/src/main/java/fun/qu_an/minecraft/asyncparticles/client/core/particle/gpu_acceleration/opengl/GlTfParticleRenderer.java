@@ -33,6 +33,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static org.lwjgl.opengl.GL11C.glGetInteger;
+import static org.lwjgl.opengl.GL20C.GL_CURRENT_PROGRAM;
+
 public class GlTfParticleRenderer implements IParticleRenderer {
 	private static final int SOURCE_SLOT_COUNT = 3;
 	private static final long SOURCE_WAIT_TIMEOUT_NS = 5_000_000L;
@@ -428,6 +431,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		if (usingIdx < 0) {
 			throw new IllegalStateException("No published source slot for GPU particle rendering");
 		}
+		int prevProgram = glGetInteger(GL_CURRENT_PROGRAM);
 		ParticleTransformFeedbackShader.INSTANCE.use();
 		ParticleTransformFeedbackShader.INSTANCE.setup(
 			partialTicks,
@@ -465,7 +469,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		} else {
 			BackendCaps.glTfSupport.glBindTransformFeedbackBuffer(0);
 		}
-		ParticleTransformFeedbackShader.unuse();
+		GL30C.glUseProgram(prevProgram);
 
 		lastGraphicsSubmitIndex[usingIdx] = ((GlCommandEncoder) glDevice.createCommandEncoder()).currentSubmitIndex();
 		computed = true;
