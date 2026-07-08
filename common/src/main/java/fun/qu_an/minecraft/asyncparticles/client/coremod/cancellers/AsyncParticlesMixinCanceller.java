@@ -18,7 +18,9 @@ public class AsyncParticlesMixinCanceller implements MixinCanceller {
 				// TODO: 这里处理一下
 				//				 "net.diebuddies.mixins.ocean.MixinParticleEngine"
 				 "indi.yunherry.weather.mixin.MixinParticle",
-				 "ca.fxco.moreculling.mixin.WorldRenderer_rainMixin"
+				 "ca.fxco.moreculling.mixin.WorldRenderer_rainMixin",
+				 "forge.me.thosea.badoptimizations.mixin.MixinParticleManager",
+				 "fabric.me.thosea.badoptimizations.mixin.MixinParticleManager"
 				-> true;
 			default -> false;
 		};
