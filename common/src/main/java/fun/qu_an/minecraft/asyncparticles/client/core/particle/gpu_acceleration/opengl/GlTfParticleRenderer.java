@@ -31,6 +31,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static org.lwjgl.opengl.GL11C.glGetInteger;
+import static org.lwjgl.opengl.GL20C.GL_CURRENT_PROGRAM;
+
 public class GlTfParticleRenderer implements IParticleRenderer {
 	private static final int SOURCE_SLOT_COUNT = 3;
 	private final ParticleVertexBuffer[] sources = new ParticleVertexBuffer[SOURCE_SLOT_COUNT];
@@ -392,6 +395,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 			BackendCaps.glTfSupport.glBindTransformFeedback(tf);
 		}
 		int usingIdx = renderSrcIdx;
+		int prevProgram = glGetInteger(GL_CURRENT_PROGRAM);
 		ParticleTransformFeedbackShader.INSTANCE.use();
 		ParticleTransformFeedbackShader.INSTANCE.setup(
 			partialTicks,
@@ -429,7 +433,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		} else {
 			BackendCaps.glTfSupport.glBindTransformFeedbackBuffer(0);
 		}
-		ParticleTransformFeedbackShader.unuse();
+		GL30C.glUseProgram(prevProgram);
 
 		computed = true;
 	}

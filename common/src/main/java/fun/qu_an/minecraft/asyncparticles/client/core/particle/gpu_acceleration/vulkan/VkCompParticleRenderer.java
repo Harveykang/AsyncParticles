@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vulkanmod.RendererAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
@@ -488,11 +487,11 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		if (!submitSlot.isPreparedFor(source)) {
 			submitSlot.prepare(source);
 		}
-		dispatch(source, camera, partialTicks);
+		dispatch(source, submitSlot.targetBuffer, camera, partialTicks);
 		computed = true;
 	}
 
-	private void dispatch(SourceSlot source, Camera camera, float partialTicks) {
+	private void dispatch(SourceSlot source, VkGpuBuffer targetBuffer, Camera camera, float partialTicks) {
 		VkCommandBuffer cb = Renderer.getCommandBuffer();
 
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
@@ -524,10 +523,20 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			VK10.vkCmdPushConstants(cb, pipelineLayout, VK10.VK_SHADER_STAGE_COMPUTE_BIT, 0, pc);
 			VK10.vkCmdDispatch(cb, source.workgroupCount, 1, 1);
 
-			VkMemoryBarrier.Buffer mb = VkMemoryBarrier.calloc(1, stack)
-				.sType(VK10.VK_STRUCTURE_TYPE_MEMORY_BARRIER).srcAccessMask(VK10.VK_ACCESS_SHADER_WRITE_BIT)
-				.dstAccessMask(VK10.VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
-			VK10.vkCmdPipelineBarrier(cb, VK10.VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK10.VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, 0, mb, null, null);
+			VkBufferMemoryBarrier.Buffer bb = VkBufferMemoryBarrier.calloc(1, stack)
+				.sType(VK10.VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+				.srcAccessMask(VK10.VK_ACCESS_SHADER_WRITE_BIT)
+				.dstAccessMask(VK10.VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT)
+				.buffer(targetBuffer.getBuffer().getId())
+				.offset(0)
+				.size(VK10.VK_WHOLE_SIZE);
+			VK10.vkCmdPipelineBarrier(cb,
+				VK10.VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+				VK10.VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
+				0,
+				null,
+				bb,
+				null);
 		}
 
 		sourceSlots[renderSrcIdx].lastFrameUsed = ((RendererAddon) Renderer.getInstance()).asyncparticles$getActualFrame();

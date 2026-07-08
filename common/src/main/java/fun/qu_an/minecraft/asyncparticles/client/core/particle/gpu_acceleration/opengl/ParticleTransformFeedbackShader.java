@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl;
 
 import com.mojang.blaze3d.opengl.GlConst;
+import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL30C;
@@ -33,10 +34,6 @@ public class ParticleTransformFeedbackShader {
 		CameraLeft = GL20C.glGetUniformLocation(programId, "CameraLeft");
 		CameraUp = GL20C.glGetUniformLocation(programId, "CameraUp");
 		PartialCameraPos = GL20C.glGetUniformLocation(programId, "PartialCameraPos");
-	}
-
-	public static void unuse() {
-		GL30C.glUseProgram(0);
 	}
 
 	public void use() {

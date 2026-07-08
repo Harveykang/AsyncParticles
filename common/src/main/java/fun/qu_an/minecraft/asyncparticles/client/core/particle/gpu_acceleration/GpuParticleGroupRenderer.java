@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
+import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -23,6 +24,8 @@ public class GpuParticleGroupRenderer implements SubmitNodeCollector.ParticleGro
 	private boolean translucent;
 	private ComputeResult result;
 	private GpuBufferSlice dynamicTransforms;
+	private GpuBuffer indexBuffer;
+	private VertexFormat.IndexType indexType;
 
 	public static GpuParticleGroupRenderer getInstance() {
 		return instance;
@@ -51,6 +54,17 @@ public class GpuParticleGroupRenderer implements SubmitNodeCollector.ParticleGro
 		this.dynamicTransforms = RenderSystem.getDynamicUniforms()
 			.writeTransform(RenderSystem.getModelViewMatrix(), new Vector4f(1.0F, 1.0F, 1.0F, 1.0F), new Vector3f(), new Matrix4f());
 
+		RenderSystem.AutoStorageIndexBuffer indexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
+		int indexCount = 0;
+		for (ComputeResult.ParticleSlice slice : result.slices()) {
+			if (slice.count() > indexCount) {
+				indexCount = slice.count();
+			}
+		}
+		indexCount *= 6;
+		this.indexBuffer = indexBuffer.getBuffer(indexCount);
+		this.indexType = indexBuffer.type();
+
 		return emptyBuffers;
 	}
 
@@ -61,13 +75,12 @@ public class GpuParticleGroupRenderer implements SubmitNodeCollector.ParticleGro
 	                   @NonNull TextureManager textureManager) {
 		renderPass.setVertexBuffer(0, result.buffer());
 		renderPass.setUniform("DynamicTransforms", dynamicTransforms);
-		RenderSystem.AutoStorageIndexBuffer indexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
+		renderPass.setIndexBuffer(indexBuffer, indexType);
 		for (ComputeResult.ParticleSlice slice : result.slices()) {
 			SingleQuadParticle.Layer layer = slice.layer();
 			if (translucent != layer.translucent()) {
 				continue;
 			}
-			renderPass.setIndexBuffer(indexBuffer.getBuffer(slice.indexCount()), indexBuffer.type());
 			renderPass.setPipeline(GpuParticlePipelines.of(layer.pipeline(), () -> translucent));
 			AbstractTexture texture = textureManager.getTexture(layer.textureAtlasLocation());
 			renderPass.bindTexture("Sampler0", texture.getTextureView(), texture.getSampler());
@@ -78,6 +91,9 @@ public class GpuParticleGroupRenderer implements SubmitNodeCollector.ParticleGro
 
 	public void clear() {
 		result = null;
+		translucent = false;
 		dynamicTransforms = null;
+		indexBuffer = null;
+		indexType = null;
 	}
 }
