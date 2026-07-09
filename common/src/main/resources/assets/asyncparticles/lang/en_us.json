@@ -110,5 +110,7 @@
   "gui.asyncparticles.reset": "Reset Config",
   "gui.asyncparticles.failed-to-reset": "Failed to reset: %s",
   "gui.asyncparticles.reset-successfully": "Reset successfully!",
-  "gui.asyncparticles.revert": "Revert"
+  "gui.asyncparticles.revert": "Revert",
+  "chat.asyncparticles.warn.get_block_entity_off_main_thread": "Block entity storage accessed off the main thread!\nConsider enabling '%s'.",
+  "chat.asyncparticles.warn.get_entities_off_main_thread": "Entity storage accessed off the main thread!\nConsider enabling '%s'."
 }

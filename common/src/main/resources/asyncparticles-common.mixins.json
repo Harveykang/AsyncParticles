@@ -15,6 +15,7 @@
     "compat.cloth_config.AbstractConfigListEntryAccessor",
     "compat.cloth_config.AccessorSubCategoryListEntry",
     "compat.cloth_config.BaseListEntryAccessor",
+    "compat.cosycritters.MixinBirdParticle",
     "compat.dsurround.MixinParticleRenderCollection",
     "compat.fabric.effective.MixinEffectiveLights",
     "compat.fabric.iris.MixinLevelRenderer",
@@ -51,9 +52,10 @@
     "compat.veil.MixinLightRenderer",
     "compat.watut.MixinCustomParticleEngine",
     "conditional.Mixin_ReplaceRandom",
-    "conditional.MixinClassInstanceMultiMap",
+    "conditional.MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_On",
     "conditional.MixinLegacyRandomSource",
-    "conditional.MixinLevelChunk_BlockEntityMap",
+    "conditional.MixinLevelChunk_SafeBlockEntityMap_Off",
+    "conditional.MixinLevelChunk_SafeBlockEntityMap_On",
     "conditional.MixinParticleEngine_SplitTick",
     "conditional.MixinParticles_LightCacheNoRefresh",
     "conditional.MixinParticles_LockProvider",
@@ -89,7 +91,7 @@
     "core.tick.MixinWaterFluid",
     "core.weather.MixinLevelRenderer_TickRain",
     "core.weather.MixinLevelRenderer_WeatherCulling",
-    "compat.cosycritters.MixinBirdParticle"
+    "conditional.MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_Off"
   ],
   "injectors": {
     "defaultRequire": 1

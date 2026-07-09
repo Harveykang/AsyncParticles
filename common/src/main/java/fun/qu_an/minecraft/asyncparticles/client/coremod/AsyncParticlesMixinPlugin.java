@@ -69,8 +69,10 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		return switch (split[0]) {
 			case "core" -> !"fabric".equals(split[1]) || !IS_FORGE;
 			case "conditional" -> switch (split[1]) {
-				case "MixinClassInstanceMultiMap" -> MixinConfigHelper.isSafeClassInstanceMultiMap();
-				case "MixinLevelChunk_BlockEntityMap" -> MixinConfigHelper.isSafeBlockEntityMap();
+				case "MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_On" -> MixinConfigHelper.isSafeClassInstanceMultiMap();
+				case "MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_Off" -> !MixinConfigHelper.isSafeClassInstanceMultiMap();
+				case "MixinLevelChunk_SafeBlockEntityMap_On" -> MixinConfigHelper.isSafeBlockEntityMap();
+				case "MixinLevelChunk_SafeBlockEntityMap_Off" -> !MixinConfigHelper.isSafeBlockEntityMap();
 				case "MixinLegacyRandomSource" -> MixinConfigHelper.isSafeLegacyRandomSource();
 				case "MixinParticleEngine_SplitTick" -> MixinConfigHelper.isParticleSplitTick();
 				default -> true;
