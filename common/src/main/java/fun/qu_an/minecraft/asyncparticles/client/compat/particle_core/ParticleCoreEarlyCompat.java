@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.particle_core;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import me.fzzyhmstrs.particle_core.PcDisable;
 
 import java.util.*;
@@ -33,6 +34,11 @@ public class ParticleCoreEarlyCompat {
 		set.add("CULLING");
 		set.add("ROTATION");
 		set.add("LIGHTMAP");
+		if (ModListHelper.VS_LOADED) {
+			// this will not prevent me.fzzyhmstrs.particle_core.interfaces.BlockPosStorer casting
+			// we need a canceler to me.fzzyhmstrs.particle_core.mixins.ParticleMoveAdjustMixin
+			set.add("MOVE");
+		}
 		PcDisable.INSTANCE.getDisabledOptimizations().setDisableOptimizations(List.copyOf(set));
 	}
 }

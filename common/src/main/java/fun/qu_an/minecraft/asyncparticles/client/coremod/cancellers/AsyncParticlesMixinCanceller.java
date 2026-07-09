@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers;
 
 import com.bawnorton.mixinsquared.api.MixinCanceller;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinConfigHelper;
 
 import java.util.List;
@@ -22,6 +23,8 @@ public class AsyncParticlesMixinCanceller implements MixinCanceller {
 				 "forge.me.thosea.badoptimizations.mixin.MixinParticleManager",
 				 "fabric.me.thosea.badoptimizations.mixin.MixinParticleManager"
 				-> true;
+			// see fun.qu_an.minecraft.asyncparticles.client.compat.particle_core.ParticleCoreEarlyCompat#initEarly
+			case "me.fzzyhmstrs.particle_core.mixins.ParticleMoveAdjustMixin" -> ModListHelper.VS_LOADED;
 			default -> false;
 		};
 	}

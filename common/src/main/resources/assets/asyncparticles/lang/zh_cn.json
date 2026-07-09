@@ -110,5 +110,7 @@
   "gui.asyncparticles.reset": "重置配置文件",
   "gui.asyncparticles.failed-to-reset": "重置失败：%s",
   "gui.asyncparticles.reset-successfully": "重置成功！",
-  "gui.asyncparticles.revert": "还原"
+  "gui.asyncparticles.revert": "还原",
+  "chat.asyncparticles.warn.get_block_entity_off_main_thread": "检测到正从非主线程获取方块实体（BlockEntity）！\n你可能需要启用“%s”。",
+  "chat.asyncparticles.warn.get_entities_off_main_thread": "检测到正从其他线程获取实体（Entity）！\n你可能需要启用“%s”。"
 }

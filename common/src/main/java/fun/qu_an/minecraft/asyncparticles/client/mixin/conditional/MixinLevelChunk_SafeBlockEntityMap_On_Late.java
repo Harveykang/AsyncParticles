@@ -21,12 +21,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Mixin(value = LevelChunk.class, priority = 1500)
-public abstract class MixinLevelChunk_BlockEntityMap_Late extends ChunkAccess {
+public abstract class MixinLevelChunk_SafeBlockEntityMap_On_Late extends ChunkAccess {
 	@Shadow
 	@Final
 	Level level;
 
-	public MixinLevelChunk_BlockEntityMap_Late(ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, Registry<Biome> biomeRegistry, long inhabitedTime, @Nullable LevelChunkSection[] sections, @Nullable BlendingData blendingData) {
+	public MixinLevelChunk_SafeBlockEntityMap_On_Late(ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, Registry<Biome> biomeRegistry, long inhabitedTime, @Nullable LevelChunkSection[] sections, @Nullable BlendingData blendingData) {
 		super(chunkPos, upgradeData, levelHeightAccessor, biomeRegistry, inhabitedTime, sections, blendingData);
 	}
 

@@ -129,7 +129,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 					if (appendNewParticlesToRenderer) {
 						GpuParticleBehavior.INSTANCE.getRenderer(renderType).append(GpuParticleBehavior.INSTANCE.getCameraPos(), ((TextureSheetParticle) particle));
 					}
-					((LightCachedParticleAddon) particle).asyncparticles$disableLightCache();
+//					((LightCachedParticleAddon) particle).asyncparticles$disableLightCache();
 				}
 				queue.add(particle);
 			}
