@@ -28,7 +28,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	@Final
 	protected ClientLevel level;
 	@Unique
-	private boolean asyncparticles$ticked = true; // always true at first tick
+	private volatile boolean asyncparticles$ticked = true; // always true at first tick
 	@Unique
 	private byte asyncparticles$renderFlag = 2;
 	@Unique

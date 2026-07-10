@@ -36,6 +36,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	private static final int GROUP_RECORD_INTS = 3;
 	private static final int DESCRIPTOR_SET_LAYOUT_SIZE = 3;
 	private static final int SOURCE_SLOT_COUNT = 3;
+	private static final int SUBMIT_SLOT_COUNT = VulkanCommandEncoder.MAX_SUBMITS_IN_FLIGHT;
 	private static final long GPU_WAIT_TIMEOUT_NS = 5_000_000_000L;
 
 	// VK backend
@@ -54,7 +55,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	private final List<SingleQuadParticle> pendingAppends = new ReferenceArrayList<>();
 
 	// compute pipeline
-	private final SubmitSlot submitSlot;
+	private final SubmitSlot[] submitSlots = new SubmitSlot[SUBMIT_SLOT_COUNT];
+	private int renderSubmitIdx = -1;
 	private long pipelineLayout;
 	private long pipeline;
 	private long descriptorSetLayout;
@@ -70,14 +72,16 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			sourceSlots[i] = new SourceSlot();
 		}
-		submitSlot = new SubmitSlot();
+		for (int i = 0; i < SUBMIT_SLOT_COUNT; i++) {
+			submitSlots[i] = new SubmitSlot();
+		}
 
 		int raw = 2 * Math.max(particleLimit, AsyncParticlesConfig.MIN_PARTICLE_LIMIT) * RAW_PARTICLE.getVertexSize();
 		createSourceBuffers(raw);
 		createIndirectionBuffers(particleLimit * 4);
 
-		long proceed = 4L * particleLimit * IDENTITY_PARTICLE.getVertexSize();
-		submitSlot.createTargetBuffer(proceed);
+		int proceed = 4 * particleLimit * IDENTITY_PARTICLE.getVertexSize();
+		createTargetBuffers(proceed);
 
 		createComputePipeline();
 		createCommandResources();
@@ -86,13 +90,21 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	/* buffer creation */
 
 	private void createSourceBuffers(int size) {
-		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
-			sourceSlots[i].createBuffer(size);
+		for (SourceSlot sourceSlot : sourceSlots) {
+			sourceSlot.createBuffer(size);
+		}
+	}
+
+	private void createTargetBuffers(int size) {
+		for (SubmitSlot submitSlot : submitSlots) {
+			submitSlot.createTargetBuffer(size);
 		}
 	}
 
 	private void createIndirectionBuffers(int size) {
-		submitSlot.createIndirectionBuffer(size);
+		for (SubmitSlot slot : submitSlots) {
+			slot.createIndirectionBuffer(size);
+		}
 	}
 
 	private int findMemType(int typeFilter, int props) {
@@ -167,23 +179,23 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	private void createCommandResources() {
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			VkDescriptorPoolSize.Buffer ps = VkDescriptorPoolSize.calloc(1, stack);
-			ps.get(0).type(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER).descriptorCount(DESCRIPTOR_SET_LAYOUT_SIZE * SOURCE_SLOT_COUNT);
+			ps.get(0).type(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER).descriptorCount(DESCRIPTOR_SET_LAYOUT_SIZE * SUBMIT_SLOT_COUNT);
 			VkDescriptorPoolCreateInfo dpci = VkDescriptorPoolCreateInfo.calloc(stack).sType(VK10.VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO)
-				.maxSets(SOURCE_SLOT_COUNT).pPoolSizes(ps);
+				.maxSets(SUBMIT_SLOT_COUNT).pPoolSizes(ps);
 			LongBuffer pdp = stack.mallocLong(1);
 			VK10.vkCreateDescriptorPool(device, dpci, null, pdp);
 			descriptorPool = pdp.get(0);
 
-			LongBuffer layouts = stack.mallocLong(SOURCE_SLOT_COUNT);
-			for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
+			LongBuffer layouts = stack.mallocLong(SUBMIT_SLOT_COUNT);
+			for (int i = 0; i < SUBMIT_SLOT_COUNT; i++) {
 				layouts.put(i, descriptorSetLayout);
 			}
 			VkDescriptorSetAllocateInfo ai2 = VkDescriptorSetAllocateInfo.calloc(stack).sType(VK10.VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO)
 				.descriptorPool(descriptorPool).pSetLayouts(layouts);
-			LongBuffer pds2 = stack.mallocLong(SOURCE_SLOT_COUNT);
+			LongBuffer pds2 = stack.mallocLong(SUBMIT_SLOT_COUNT);
 			VK10.vkAllocateDescriptorSets(device, ai2, pds2);
-			for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
-				sourceSlots[i].descriptorSet = pds2.get(i);
+			for (int i = 0; i < SUBMIT_SLOT_COUNT; i++) {
+				submitSlots[i].descriptorSet = pds2.get(i);
 			}
 		}
 	}
@@ -340,6 +352,12 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		return newIdx;
 	}
 
+	private int acquireSubmitSlot(int idx) {
+		int renderSubmitIdx = (idx + 1) % SUBMIT_SLOT_COUNT;
+		submitSlots[renderSubmitIdx].waitReady();
+		return renderSubmitIdx;
+	}
+
 	@Override
 	public <T extends Collection<SingleQuadParticle>> void tick(Vec3 camPos, Map<SingleQuadParticle.Layer, T> particles) {
 		if (!isMapped()) {
@@ -477,20 +495,21 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			computed = true;
 			return;
 		}
-		if (!submitSlot.isPreparedFor(source)) {
-			submitSlot.prepare(source);
+		SubmitSlot submit = submitSlots[renderSubmitIdx = acquireSubmitSlot(renderSubmitIdx)];
+		if (!submit.isPreparedFor(source)) {
+			submit.prepare(source);
 		}
-		dispatch(source, submitSlot.targetBuffer, camera, partialTicks);
+		dispatch(source, submit, camera, partialTicks);
 		computed = true;
 	}
 
-	private void dispatch(SourceSlot source, VulkanGpuBuffer targetBuffer, Camera camera, float partialTicks) {
+	private void dispatch(SourceSlot source, SubmitSlot submit, Camera camera, float partialTicks) {
 		VulkanCommandEncoder commandEncoder = vkBackend.createCommandEncoder();
 		VkCommandBuffer cb = commandEncoder.commandBuffer();
 
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			VK10.vkCmdBindPipeline(cb, VK10.VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
-			VK10.vkCmdBindDescriptorSets(cb, VK10.VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, stack.longs(source.descriptorSet), null);
+			VK10.vkCmdBindDescriptorSets(cb, VK10.VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, stack.longs(submit.descriptorSet), null);
 
 			float leftX = camera.leftVector().x();
 			float leftY = camera.leftVector().y();
@@ -522,7 +541,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				.sType(VK10.VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
 				.srcAccessMask(VK10.VK_ACCESS_SHADER_WRITE_BIT)
 				.dstAccessMask(VK10.VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT)
-				.buffer(targetBuffer.vkBuffer())
+				.buffer(submit.targetBuffer.vkBuffer())
 				.offset(0)
 				.size(VK10.VK_WHOLE_SIZE);
 			VK10.vkCmdPipelineBarrier(cb,
@@ -534,26 +553,29 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				null);
 		}
 
-		sourceSlots[renderSrcIdx].lastSubmitIndex = vkBackend.createCommandEncoder().currentSubmitIndex;
+		sourceSlots[renderSrcIdx].lastSubmitIndex = commandEncoder.currentSubmitIndex;
+		submitSlots[renderSubmitIdx].lastSubmitIndex = commandEncoder.currentSubmitIndex;
 	}
 
 	@Override
 	public ComputeResult awaitCompute() {
-		return renderSrcIdx == -1 ? null : submitSlot.preparedComputeResult;
+		return renderSrcIdx == -1 || renderSubmitIdx == -1 ? null : submitSlots[renderSubmitIdx].preparedComputeResult;
 	}
 
 	@Override
 	public void resize(int particleLimit) {
 		if (particleLimit != this.particleLimit) {
-			waitForAllSourceSlots();
+			waitForAllSubmissions();
 			this.particleLimit = particleLimit;
 			int raw = 2 * particleLimit * RAW_PARTICLE.getVertexSize();
 			for (SourceSlot sourceSlot : sourceSlots) {
-				sourceSlot.destroyBuffer();
+				sourceSlot.destroy();
 			}
 			createSourceBuffers(raw);
-			long proceed = 4L * particleLimit * IDENTITY_PARTICLE.getVertexSize();
-			submitSlot.createTargetBuffer(proceed);
+			int proceed = 4 * particleLimit * IDENTITY_PARTICLE.getVertexSize();
+			for (SubmitSlot slot : submitSlots) {
+				slot.ensureTargetSize(proceed);
+			}
 		}
 	}
 
@@ -572,20 +594,26 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void reset() {
-		waitForAllSourceSlots();
+		waitForAllSubmissions();
 		for (SourceSlot sourceSlot : sourceSlots) {
 			sourceSlot.reset();
 		}
-		submitSlot.clearPrepared();
+		for (SubmitSlot slot : submitSlots) {
+			slot.clearPrepared();
+		}
 		pendingAppends.clear();
 		processingSrcIdx = 0;
 		renderSrcIdx = -1;
+		renderSubmitIdx = -1;
 		mappedBuffer = null;
 	}
 
-	private void waitForAllSourceSlots() {
-		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
-			sourceSlots[i].waitReady();
+	private void waitForAllSubmissions() {
+		for (SourceSlot sourceSlot : sourceSlots) {
+			sourceSlot.waitReady();
+		}
+		for (SubmitSlot slot : submitSlots) {
+			slot.waitReady();
 		}
 	}
 
@@ -593,9 +621,11 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	public void close() {
 		VK10.vkDeviceWaitIdle(device);
 		for (SourceSlot sourceSlot : sourceSlots) {
-			sourceSlot.destroyBuffer();
+			sourceSlot.destroy();
 		}
-		submitSlot.destroy();
+		for (SubmitSlot slot : submitSlots) {
+			slot.destroy();
+		}
 		VK10.vkDestroyPipeline(device, pipeline, null);
 		VK10.vkDestroyPipelineLayout(device, pipelineLayout, null);
 		VK10.vkDestroyDescriptorSetLayout(device, descriptorSetLayout, null);
@@ -608,7 +638,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		private long srcBuf;
 		private long srcMem;
 		private ByteBuffer mapped;
-		private long descriptorSet;
 		private final List<LayerBatch> layerBatches = new ReferenceArrayList<>();
 		private int tickCount;
 		private Vec3 camPosition = Vec3.ZERO;
@@ -645,12 +674,13 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			}
 		}
 
-		private void destroyBuffer() {
+		private void destroy() {
 			VK10.vkUnmapMemory(device, srcMem);
-			VK10.vkFreeMemory(device, srcMem, null);
-			srcMem = VK10.VK_NULL_HANDLE;
 			VK10.vkDestroyBuffer(device, srcBuf, null);
 			srcBuf = VK10.VK_NULL_HANDLE;
+			VK10.vkFreeMemory(device, srcMem, null);
+			srcMem = VK10.VK_NULL_HANDLE;
+			mapped = null;
 		}
 
 		private void buildLayout() {
@@ -723,6 +753,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		private long indMem;
 		private ByteBuffer indMapped;
 		private int indSize;
+		private long descriptorSet;
+		private long lastSubmitIndex = -1L;
 		private long preparedSourceGeneration = -1L;
 		private ComputeResult preparedComputeResult;
 
@@ -756,6 +788,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			if (bytes <= indSize) {
 				return;
 			}
+			waitReady();
 			VK10.vkUnmapMemory(device, indMem);
 			VK10.vkDestroyBuffer(device, indBuf, null);
 			VK10.vkFreeMemory(device, indMem, null);
@@ -771,11 +804,12 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			indMapped.asIntBuffer().position(0).put(records);
 		}
 
-		private void createTargetBuffer(long size) {
+		private void createTargetBuffer(int size) {
 			if (targetBuffer != null) {
 				targetBuffer.close();
 			}
 			clearPrepared();
+
 			try (MemoryStack stack = MemStackUtil.stackPush()) {
 				VkBufferCreateInfo bufCI = VkBufferCreateInfo.calloc(stack).sType$Default()
 					.size(size)
@@ -818,8 +852,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			}
 		}
 
-		private void ensureTargetSize(long bytes) {
-			if (bytes > targetBuffer.size()) {
+		private void ensureTargetSize(int bytes) {
+			if (targetBuffer == null || bytes > targetBuffer.size()) {
 				createTargetBuffer(bytes);
 			}
 		}
@@ -839,7 +873,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				VkWriteDescriptorSet.Buffer ws = VkWriteDescriptorSet.calloc(DESCRIPTOR_SET_LAYOUT_SIZE, stack);
 				for (int i = 0; i < DESCRIPTOR_SET_LAYOUT_SIZE; i++) {
 					ws.get(i).sType(VK10.VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
-						.dstSet(source.descriptorSet).dstBinding(i)
+						.dstSet(descriptorSet).dstBinding(i)
 						.descriptorCount(1).descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
 						.pBufferInfo(bi.position(i));
 				}
@@ -850,13 +884,23 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 		private void destroy() {
 			VK10.vkUnmapMemory(device, indMem);
-			VK10.vkFreeMemory(device, indMem, null);
-			indMem = VK10.VK_NULL_HANDLE;
 			VK10.vkDestroyBuffer(device, indBuf, null);
 			indBuf = VK10.VK_NULL_HANDLE;
+			VK10.vkFreeMemory(device, indMem, null);
+			indMem = VK10.VK_NULL_HANDLE;
 			if (targetBuffer != null) {
 				targetBuffer.close();
 				targetBuffer = null;
+			}
+		}
+
+		private void waitReady() {
+			if (lastSubmitIndex != -1L) {
+				// Should always ready but just in case
+				if (!vkBackend.createCommandEncoder().awaitSubmitCompletion(lastSubmitIndex, GPU_WAIT_TIMEOUT_NS)) {
+					throw new IllegalStateException("Timeout waiting for GPU particle submit slot submit: " + lastSubmitIndex);
+				}
+				lastSubmitIndex = -1L;
 			}
 		}
 
