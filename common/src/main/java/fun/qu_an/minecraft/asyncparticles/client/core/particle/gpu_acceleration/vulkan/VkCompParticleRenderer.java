@@ -549,7 +549,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void resize(int particleLimit) {
-		waitForAllSourceSlots();
+		waitForAllSubmissions();
 		this.particleLimit = particleLimit;
 		int raw = 2 * particleLimit * RAW_PARTICLE.getVertexSize();
 		for (SourceSlot sourceSlot : sourceSlots) {
@@ -575,7 +575,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void reset() {
-		waitForAllSourceSlots();
+		waitForAllSubmissions();
 		for (SourceSlot sourceSlot : sourceSlots) {
 			sourceSlot.reset();
 		}
@@ -586,7 +586,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		mappedBuffer = null;
 	}
 
-	private void waitForAllSourceSlots() {
+	private void waitForAllSubmissions() {
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			sourceSlots[i].waitReady();
 		}
@@ -649,10 +649,12 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		}
 
 		private void destroy() {
-			waitReady();
 			VK10.vkUnmapMemory(device, srcMem);
-			VK10.vkFreeMemory(device, srcMem, null);
 			VK10.vkDestroyBuffer(device, srcBuf, null);
+			srcBuf = VK10.VK_NULL_HANDLE;
+			VK10.vkFreeMemory(device, srcMem, null);
+			srcMem = VK10.VK_NULL_HANDLE;
+			mapped = null;
 		}
 
 		private void buildLayout() {
@@ -762,6 +764,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			if (bytes <= indSize) {
 				return;
 			}
+			waitForAllSubmissions();
 			VK10.vkUnmapMemory(device, indMem);
 			VK10.vkDestroyBuffer(device, indBuf, null);
 			VK10.vkFreeMemory(device, indMem, null);
@@ -824,10 +827,10 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 		private void destroy() {
 			VK10.vkUnmapMemory(device, indMem);
-			VK10.vkFreeMemory(device, indMem, null);
-			indMem = VK10.VK_NULL_HANDLE;
 			VK10.vkDestroyBuffer(device, indBuf, null);
 			indBuf = VK10.VK_NULL_HANDLE;
+			VK10.vkFreeMemory(device, indMem, null);
+			indMem = VK10.VK_NULL_HANDLE;
 			if (targetBuffer != null) {
 				targetBuffer.close();
 				targetBuffer = null;
