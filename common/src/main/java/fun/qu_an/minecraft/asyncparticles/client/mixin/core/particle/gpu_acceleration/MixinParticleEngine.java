@@ -37,7 +37,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			&& group instanceof GpuParticleGroup gpuParticleGroup
 			&& particle instanceof SingleQuadParticle sqp
 			&& GpuParticleBehavior.getInstance().canRenderFast(sqp)) {
-			GpuParticleBehavior.getInstance().onAdd(sqp);
+			GpuParticleBehavior.getInstance().onAddGpu(sqp);
 			gpuParticleGroup.asyncparticles$getGpuParticles().add(sqp);
 		} else {
 			original.call(group, particle);

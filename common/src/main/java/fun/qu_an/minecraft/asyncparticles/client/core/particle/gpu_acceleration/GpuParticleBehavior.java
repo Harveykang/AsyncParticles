@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
@@ -232,10 +231,14 @@ public class GpuParticleBehavior {
 	}
 
 	public IParticleRenderer getOrCreateRenderer() {
+		if (!ConfigHelper.isGpuParticles()) {
+			throw new IllegalStateException("GPU particle acceleration is not enabled");
+		}
 		return renderer == null ? renderer = createRenderer() : renderer;
 	}
 
-	public void onAdd(SingleQuadParticle particle) {
+	public void onAddGpu(SingleQuadParticle particle) {
+//		assert ConfigHelper.isGpuParticles();
 		if (ConfigHelper.isAppendNewParticlesToRenderer()) {
 			getOrCreateRenderer().append(getPerTickCameraPos(), particle);
 		}

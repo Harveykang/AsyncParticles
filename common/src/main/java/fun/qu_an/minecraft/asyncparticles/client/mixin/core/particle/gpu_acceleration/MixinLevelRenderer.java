@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinLevelRenderer {
 	@Inject(method = "extractLevel", at = @At("HEAD"))
 	private void extractLevel(DeltaTracker deltaTracker, Camera camera, float deltaPartialTick, CallbackInfo ci) {
-		if (ConfigHelper.isGpuParticles()){
+		if (ConfigHelper.isGpuParticles()) {
 			GpuParticleBehavior.getInstance().beginFrame(deltaPartialTick);
 			GpuParticleBehavior.getInstance().compute();
 		}

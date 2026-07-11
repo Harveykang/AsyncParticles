@@ -18,7 +18,7 @@ import java.util.concurrent.Executor;
 @Mixin(TextureManager.class)
 public class MixinTextureManager {
 	@Unique
-	private static volatile boolean asyncparticles$deferredTickEnabled = true;
+	private static boolean asyncparticles$deferredTickEnabled = true;
 
 	@WrapMethod(method = "tick")
 	public void wrapTick(Operation<Void> original) {
@@ -54,6 +54,6 @@ public class MixinTextureManager {
 	) {
 		asyncparticles$deferredTickEnabled = false;
 		return original.call(currentReload, taskExecutor, preparationBarrier, reloadExecutor)
-			.whenComplete((_, _) -> asyncparticles$deferredTickEnabled = true);
+			.whenCompleteAsync((_, _) -> asyncparticles$deferredTickEnabled = true, reloadExecutor);
 	}
 }

@@ -181,4 +181,6 @@ runClient {
             }
         }
     }
+    environment 'VK_INSTANCE_LAYERS', 'VK_LAYER_KHRONOS_validation'
+    environment 'VK_LAYER_PATH', rootProject.vk_layer_path
 }

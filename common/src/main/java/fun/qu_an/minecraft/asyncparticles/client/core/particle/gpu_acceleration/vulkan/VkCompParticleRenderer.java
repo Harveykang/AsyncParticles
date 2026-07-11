@@ -18,6 +18,7 @@ import net.minecraft.world.phys.Vec3;
 import net.vulkanmod.render.engine.VkGpuBuffer;
 import net.vulkanmod.vulkan.Renderer;
 import net.vulkanmod.vulkan.Synchronization;
+import net.vulkanmod.vulkan.Vulkan;
 import net.vulkanmod.vulkan.device.DeviceManager;
 import net.vulkanmod.vulkan.memory.MemoryManager;
 import net.vulkanmod.vulkan.memory.MemoryTypes;
@@ -60,7 +61,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	private final List<SingleQuadParticle> pendingAppends = new ReferenceArrayList<>();
 
 	// compute pipeline
-	private final SubmitSlot submitSlot;
+	private SubmitSlot[] submitSlots;
+	private int renderSubmitIdx = -1;
 	private long pipelineLayout;
 	private long pipeline;
 	private long descriptorSetLayout;
@@ -75,14 +77,17 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			sourceSlots[i] = new SourceSlot();
 		}
-		submitSlot = new SubmitSlot();
+		submitSlots = new SubmitSlot[Renderer.getFramesNum()];
+		for (int i = 0; i < submitSlots.length; i++) {
+			submitSlots[i] = new SubmitSlot();
+		}
 
 		int raw = 2 * Math.max(particleLimit, AsyncParticlesConfig.MIN_PARTICLE_LIMIT) * RAW_PARTICLE.getVertexSize();
 		createSourceBuffers(raw);
-		createIndirectionBuffers(particleLimit * 4);
 
-		long proceed = 4L * particleLimit * IDENTITY_PARTICLE.getVertexSize();
-		submitSlot.createTargetBuffer(proceed);
+		int proceed = 4 * particleLimit * IDENTITY_PARTICLE.getVertexSize();
+		createTargetBuffers(proceed);
+		createIndirectionBuffers(particleLimit * 4);
 
 		createComputePipeline();
 		createCommandResources();
@@ -91,13 +96,31 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	/* buffer creation */
 
 	private void createSourceBuffers(int size) {
-		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
-			sourceSlots[i].createBuffer(size);
+		for (SourceSlot sourceSlot : sourceSlots) {
+			sourceSlot.createBuffer(size);
+		}
+	}
+
+	private void createSubmitSlots(int size, int particleLimit) {
+		submitSlots = new SubmitSlot[Renderer.getFramesNum()];
+		for (int i = 0; i < submitSlots.length; i++) {
+			submitSlots[i] = new SubmitSlot();
+		}
+		createTargetBuffers(size);
+		createIndirectionBuffers(particleLimit * 4);
+		createCommandResources();
+	}
+
+	private void createTargetBuffers(int size) {
+		for (SubmitSlot submitSlot : submitSlots) {
+			submitSlot.createTargetBuffer(size);
 		}
 	}
 
 	private void createIndirectionBuffers(int size) {
-		submitSlot.createIndirectionBuffer(size);
+		for (SubmitSlot slot : submitSlots) {
+			slot.createIndirectionBuffer(size);
+		}
 	}
 
 	private int findMemType(int typeFilter, int props) {
@@ -174,23 +197,23 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	private void createCommandResources() {
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			VkDescriptorPoolSize.Buffer ps = VkDescriptorPoolSize.calloc(1, stack);
-			ps.get(0).type(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER).descriptorCount(DESCRIPTOR_SET_LAYOUT_SIZE * SOURCE_SLOT_COUNT);
+			ps.get(0).type(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER).descriptorCount(DESCRIPTOR_SET_LAYOUT_SIZE * submitSlots.length);
 			VkDescriptorPoolCreateInfo dpci = VkDescriptorPoolCreateInfo.calloc(stack).sType(VK10.VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO)
-				.maxSets(SOURCE_SLOT_COUNT).pPoolSizes(ps);
+				.maxSets(submitSlots.length).pPoolSizes(ps);
 			LongBuffer pdp = stack.mallocLong(1);
 			VK10.vkCreateDescriptorPool(device, dpci, null, pdp);
 			descriptorPool = pdp.get(0);
 
-			LongBuffer layouts = stack.mallocLong(SOURCE_SLOT_COUNT);
-			for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
+			LongBuffer layouts = stack.mallocLong(submitSlots.length);
+			for (int i = 0; i < submitSlots.length; i++) {
 				layouts.put(i, descriptorSetLayout);
 			}
 			VkDescriptorSetAllocateInfo ai2 = VkDescriptorSetAllocateInfo.calloc(stack).sType(VK10.VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO)
 				.descriptorPool(descriptorPool).pSetLayouts(layouts);
-			LongBuffer pds2 = stack.mallocLong(SOURCE_SLOT_COUNT);
+			LongBuffer pds2 = stack.mallocLong(submitSlots.length);
 			VK10.vkAllocateDescriptorSets(device, ai2, pds2);
-			for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
-				sourceSlots[i].descriptorSet = pds2.get(i);
+			for (int i = 0; i < submitSlots.length; i++) {
+				submitSlots[i].descriptorSet = pds2.get(i);
 			}
 		}
 	}
@@ -347,6 +370,12 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		return newIdx;
 	}
 
+	private int acquireSubmitSlot(int idx) {
+		int renderSubmitIdx = (idx + 1) % submitSlots.length;
+//		submitSlots[renderSubmitIdx].waitReady();
+		return renderSubmitIdx;
+	}
+
 	@Override
 	public <T extends Collection<SingleQuadParticle>> void tick(Vec3 camPos, Map<SingleQuadParticle.Layer, T> particles) {
 		if (!isMapped()) {
@@ -470,7 +499,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		if (computed) {
 			return;
 		}
-		if (renderSrcIdx == -1) {
+		if (isShouldSkip()) {
 			throw new IllegalStateException("Should skip rendering during this tick!");
 		}
 //		assert renderSrcIdx >= 0;
@@ -484,19 +513,25 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			computed = true;
 			return;
 		}
-		if (!submitSlot.isPreparedFor(source)) {
-			submitSlot.prepare(source);
+		SubmitSlot submit = submitSlots[renderSubmitIdx = acquireSubmitSlot(renderSubmitIdx)];
+		if (!submit.isPreparedFor(source)) {
+			submit.prepare(source);
 		}
-		dispatch(source, submitSlot.targetBuffer, camera, partialTicks);
+		dispatch(source, submit, camera, partialTicks);
 		computed = true;
 	}
 
-	private void dispatch(SourceSlot source, VkGpuBuffer targetBuffer, Camera camera, float partialTicks) {
+	private void dispatch(SourceSlot source, SubmitSlot submit, Camera camera, float partialTicks) {
 		VkCommandBuffer cb = Renderer.getCommandBuffer();
+
+		// vkCmdDispatch and vkCmdPipelineBarrier cannot be called inside an active render pass.
+		// VulkanMod keeps the render pass active for the entire frame, so we must end it
+		// before issuing compute commands and restore it afterward.
+		Renderer.getInstance().endRenderPass();
 
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			VK10.vkCmdBindPipeline(cb, VK10.VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
-			VK10.vkCmdBindDescriptorSets(cb, VK10.VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, stack.longs(source.descriptorSet), null);
+			VK10.vkCmdBindDescriptorSets(cb, VK10.VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, stack.longs(submit.descriptorSet), null);
 
 			float leftX = camera.leftVector().x();
 			float leftY = camera.leftVector().y();
@@ -527,7 +562,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				.sType(VK10.VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
 				.srcAccessMask(VK10.VK_ACCESS_SHADER_WRITE_BIT)
 				.dstAccessMask(VK10.VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT)
-				.buffer(targetBuffer.getBuffer().getId())
+				.buffer(submit.targetBuffer.getBuffer().getId())
 				.offset(0)
 				.size(VK10.VK_WHOLE_SIZE);
 			VK10.vkCmdPipelineBarrier(cb,
@@ -539,25 +574,33 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				null);
 		}
 
+		// Restore the main render pass
+		// which preserves the framebuffer contents rendered so far.
+		Renderer.getInstance().getMainPass().rebindMainTarget();
+
 		sourceSlots[renderSrcIdx].lastFrameUsed = ((RendererAddon) Renderer.getInstance()).asyncparticles$getActualFrame();
 	}
 
 	@Override
 	public ComputeResult awaitCompute() {
-		return renderSrcIdx == -1 ? null : submitSlot.preparedComputeResult;
+		return isShouldSkip() || renderSubmitIdx == -1 ? null : submitSlots[renderSubmitIdx].preparedComputeResult;
 	}
 
 	@Override
 	public void resize(int particleLimit) {
 		waitForAllSubmissions();
 		this.particleLimit = particleLimit;
-		int raw = 2 * particleLimit * RAW_PARTICLE.getVertexSize();
 		for (SourceSlot sourceSlot : sourceSlots) {
 			sourceSlot.destroy();
 		}
+		int raw = 2 * particleLimit * RAW_PARTICLE.getVertexSize();
 		createSourceBuffers(raw);
-		long proceed = 4L * particleLimit * IDENTITY_PARTICLE.getVertexSize();
-		submitSlot.createTargetBuffer(proceed);
+
+		for (SubmitSlot submitSlot : submitSlots) {
+			submitSlot.destroy();
+		}
+		int proceed = 4 * particleLimit * IDENTITY_PARTICLE.getVertexSize();
+		createSubmitSlots(proceed, particleLimit);
 	}
 
 	@Override
@@ -579,17 +622,33 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		for (SourceSlot sourceSlot : sourceSlots) {
 			sourceSlot.reset();
 		}
-		submitSlot.clearPrepared();
+
+		resetSubmitSlots();
+
 		pendingAppends.clear();
 		processingSrcIdx = 0;
 		renderSrcIdx = -1;
+		renderSubmitIdx = -1;
 		mappedBuffer = null;
 	}
 
-	private void waitForAllSubmissions() {
-		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
-			sourceSlots[i].waitReady();
+	private void resetSubmitSlots() {
+		if (submitSlots.length == Renderer.getFramesNum()){
+			for (SubmitSlot slot : submitSlots) {
+				slot.clearPrepared();
+			}
+		} else {
+			for (SubmitSlot slot : submitSlots) {
+				slot.destroy();
+			}
+
+			int proceed = 4 * particleLimit * IDENTITY_PARTICLE.getVertexSize();
+			createSubmitSlots(proceed, particleLimit);
 		}
+	}
+
+	private void waitForAllSubmissions() {
+		Vulkan.waitIdle(); // Port from 26.2, as a workaround we wait idle for 26.1
 	}
 
 	@Override
@@ -598,7 +657,9 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		for (SourceSlot sourceSlot : sourceSlots) {
 			sourceSlot.destroy();
 		}
-		submitSlot.destroy();
+		for (SubmitSlot slot : submitSlots) {
+			slot.destroy();
+		}
 		VK10.vkDestroyPipeline(device, pipeline, null);
 		VK10.vkDestroyPipelineLayout(device, pipelineLayout, null);
 		VK10.vkDestroyDescriptorSetLayout(device, descriptorSetLayout, null);
@@ -612,7 +673,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		private long srcBuf;
 		private long srcMem;
 		private ByteBuffer mapped;
-		private long descriptorSet;
 		private final List<LayerBatch> layerBatches = new ReferenceArrayList<>();
 		private int tickCount;
 		private Vec3 camPosition = Vec3.ZERO;
@@ -731,6 +791,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		private long indMem;
 		private ByteBuffer indMapped;
 		private int indSize;
+		private long descriptorSet;
 		private long preparedSourceGeneration = -1L;
 		private ComputeResult preparedComputeResult;
 
@@ -764,7 +825,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			if (bytes <= indSize) {
 				return;
 			}
-			waitForAllSubmissions();
+//			waitReady();
 			VK10.vkUnmapMemory(device, indMem);
 			VK10.vkDestroyBuffer(device, indBuf, null);
 			VK10.vkFreeMemory(device, indMem, null);
@@ -780,7 +841,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			indMapped.asIntBuffer().position(0).put(records);
 		}
 
-		private void createTargetBuffer(long size) {
+		private void createTargetBuffer(int size) {
 			if (targetBuffer != null) {
 				targetBuffer.close();
 			}
@@ -795,8 +856,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			targetBuffer = VkGpuBuffer.from(buffer);
 		}
 
-		private void ensureTargetSize(long bytes) {
-			if (bytes > targetBuffer.size()) {
+		private void ensureTargetSize(int bytes) {
+			if (targetBuffer == null || bytes > targetBuffer.size()) {
 				createTargetBuffer(bytes);
 			}
 		}
@@ -816,7 +877,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				VkWriteDescriptorSet.Buffer ws = VkWriteDescriptorSet.calloc(DESCRIPTOR_SET_LAYOUT_SIZE, stack);
 				for (int i = 0; i < DESCRIPTOR_SET_LAYOUT_SIZE; i++) {
 					ws.get(i).sType(VK10.VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
-						.dstSet(source.descriptorSet).dstBinding(i)
+						.dstSet(descriptorSet).dstBinding(i)
 						.descriptorCount(1).descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
 						.pBufferInfo(bi.position(i));
 				}
@@ -836,6 +897,9 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				targetBuffer = null;
 			}
 		}
+
+//		private void waitReady() {
+//		}
 
 		public void prepare(SourceSlot source) {
 			int needBytes = source.totalCount * 4 * IDENTITY_PARTICLE.getVertexSize();
