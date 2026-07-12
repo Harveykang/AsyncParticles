@@ -113,7 +113,7 @@
   "gui.asyncparticles.failed-to-reset": "Failed to reset: %s",
   "gui.asyncparticles.reset-successfully": "Reset successfully!",
   "gui.asyncparticles.revert": "Revert",
-  "chat.asyncparticles.warn.get_block_entity_off_main_thread": "Block entity storage accessed off the main thread!\nConsider enabling '%s'.",
-  "chat.asyncparticles.warn.get_entities_off_main_thread": "Entity storage accessed off the main thread!\nConsider enabling '%s'.",
-  "chat.asyncparticles.warn.temporary_mark_gpuOnlyAsyncParticleTick": "Unexpected error while rendering particles on the main thread: %s\nThis is likely caused by a race condition between the particle tick and render methods.\nTemporarily enabled '%s' internally. You may also want to turn it on manually, otherwise this error will recur after restarting the game.\nIt is highly recommended to report this error to %s to help the author identify and fix potential issues."
+  "chat.asyncparticles.warn.get_block_entity_off_main_thread": "Block entity accessed off the main thread! Check latest.log for details.\nYou may need to enable '%s'. Reporting this issue to the author is strongly recommended for more accurate advice.",
+  "chat.asyncparticles.warn.get_entities_off_main_thread": "Entity accessed off the main thread! Check latest.log for details.\nYou may need to enable '%s'. Reporting this issue to the author is strongly recommended for more accurate advice.",
+  "chat.asyncparticles.warn.temporary_mark_gpuOnlyAsyncParticleTick": "Unexpected error while rendering particles on the main thread: %s\nThis is likely caused by a race condition between the particle tick and render methods.\n'%s' has been temporarily enabled internally. You should also turn it on manually, otherwise this error will recur after restarting the game.\nIt is highly recommended to report this error to %s for more accurate advice and to help the author identify and fix potential issues."
 }

@@ -41,6 +41,8 @@ subprojects {
         runs {
             configureEach {
                 vmArg("-Dmixin.debug.export=true")
+                vmArg("-XX:+UseZGC")
+                vmArg("-XX:+ZGenerational")
 //              vmArg("-Dmixin.env.remapRefMap=true")
 //              vmArg("-Dmixin.env.refMapRemappingFile=${projectDir}/build/createSrgToMcp/output.srg")
             }

@@ -6,7 +6,6 @@ import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -29,6 +28,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static java.util.Objects.requireNonNullElse;
 
 public class AsyncParticlesConfig {
@@ -81,7 +81,7 @@ public class AsyncParticlesConfig {
 	}
 
 	public static Screen newConfigScreen(Screen parent) {
-		if (ModListHelper.CLOTH_CONFIG_LOADED) {
+		if (CLOTH_CONFIG_LOADED) {
 			return ClothConfigMenus.screenBuilder(parent).build();
 		} else {
 			return fallBackScreen(parent);
@@ -276,12 +276,12 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Tick {
-			TickMode animationTickMode = ModListHelper.REIGNOFNETHER_LOADED
+			TickMode animationTickMode = REIGNOFNETHER_LOADED || IMMERSIVE_PORTALS_LOADED
 				? TickMode.SYNCHRONOUSLY : TickMode.INTERRUPTIBLE;
 			TickMode particleTickMode = TickMode.INTERRUPTIBLE;
 			boolean gpuOnlyAsyncParticleTick = false;
-			boolean tickWeatherAsync = !ModListHelper.PHYSICSMOD_LOADED;
-			boolean deferredTextureTick = !ModListHelper.AXIOM_LOADED;
+			boolean tickWeatherAsync = !PHYSICSMOD_LOADED;
+			boolean deferredTextureTick = !AXIOM_LOADED;
 			int failPerSecLimit = 5;
 			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
 			boolean suppressCME = false;
@@ -291,12 +291,13 @@ public class AsyncParticlesConfig {
 			}
 
 			private void flat() {
-				tick$animationTickMode = requireNonNullElse(animationTickMode,
-					ModListHelper.REIGNOFNETHER_LOADED ? TickMode.SYNCHRONOUSLY : TickMode.INTERRUPTIBLE);
+				tick$animationTickMode = REIGNOFNETHER_LOADED || IMMERSIVE_PORTALS_LOADED
+					? TickMode.SYNCHRONOUSLY
+					: requireNonNullElse(animationTickMode, TickMode.INTERRUPTIBLE);
 				tick$particleTickMode = requireNonNullElse(particleTickMode, TickMode.INTERRUPTIBLE);
 				tick$gpuOnlyAsyncParticleTick = gpuOnlyAsyncParticleTick;
-				tick$tickWeatherAsync = tickWeatherAsync && !ModListHelper.PHYSICSMOD_LOADED;
-				tick$deferredTextureTick = deferredTextureTick && !ModListHelper.AXIOM_LOADED;
+				tick$tickWeatherAsync = tickWeatherAsync && !PHYSICSMOD_LOADED;
+				tick$deferredTextureTick = deferredTextureTick && !AXIOM_LOADED;
 				tick$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				tick$failBehavior = requireNonNullElse(failBehavior, FailBehavior.RAISE_CRASH);
 				tick$suppressCME = suppressCME;
@@ -379,7 +380,7 @@ public class AsyncParticlesConfig {
 
 		static class Create {
 			RainEffect rainEffect = RainEffect.ALWAYS;
-			int tickRainBlockingRange = ModListHelper.PARTICLERAIN_LOADED ? 32 : 16;
+			int tickRainBlockingRange = PARTICLERAIN_LOADED ? 32 : 16;
 
 			private void flat() {
 				create$rainEffect = requireNonNullElse(rainEffect, RainEffect.ALWAYS);

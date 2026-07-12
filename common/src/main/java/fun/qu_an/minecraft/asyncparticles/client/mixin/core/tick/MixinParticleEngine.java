@@ -233,7 +233,6 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		if (collection.isEmpty()) {
 			return;
 		}
-		boolean enableLightCache = ConfigHelper.particleLightCache();
 		boolean isOnMainThread = ThreadUtil.isOnRenderThread();
 		boolean isGpu = GpuParticleBehavior.GPU_PARTICLE_PHASE.get();
 		ParticleCullingMode particleCullingMode = isGpu ?
@@ -252,22 +251,18 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			}
 			ParticleAddon particleAddon = (ParticleAddon) particle;
 			boolean shouldTick;
-			boolean shouldRefresh;
 			if (isOnMainThread) {
 				shouldTick = true;
-				shouldRefresh = enableLightCache;
 			} else if (particleAddon.asyncparticles$isTicked()) {
 				// Skip the first tick after enqueued that the particle is added to the queue.
 				// only GPU particles don't skip the first tick, but skip the first refresh.
 				// skip the first refresh will fix black destruction gpu particles.
 				shouldTick = isGpu;
-				shouldRefresh = !isGpu && enableLightCache;
 			} else if (particleAddon.asyncparticles$isTickSync()) {
 				AsyncTickBehavior.INSTANCE.recordSync(particle);
 				continue;
 			} else {
 				shouldTick = true;
-				shouldRefresh = enableLightCache;
 			}
 			if (shouldTick) {
 				try {
@@ -279,10 +274,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				}
 				particleAddon.asyncparticles$setTicked();
 			}
-			LightCachedParticleAddon lightCachedParticle = (LightCachedParticleAddon) particle;
-			if (shouldRefresh && lightCachedParticle.asyncparticles$isEnabledLightCache()) {
-				lightCachedParticle.asyncparticles$refresh();
-			}
+			((LightCachedParticleAddon) particle).asyncparticles$tickLightCache();
 			switch (particleCullingMode) {
 				case ASYNC_AABB -> particleAddon.asyncparticles$tickAABBCulling();
 				case ASYNC_SPHERE -> particleAddon.asyncparticles$tickSphereCulling();
@@ -311,7 +303,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 
 	@Inject(method = "add", at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
 	public void onAdd(Particle particle, CallbackInfo ci) {
-		LightCachedParticleAddon.doFirstRefresh(particle);
+		ParticleHelper.doFirstRefresh(particle);
 		switch (ConfigHelper.getParticleCullingMode()) {
 			case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
 			case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();

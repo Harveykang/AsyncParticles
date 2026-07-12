@@ -52,6 +52,7 @@
     "compat.veil.MixinLightRenderer",
     "compat.watut.MixinCustomParticleEngine",
     "conditional.Mixin_ReplaceRandom",
+    "conditional.MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_Off",
     "conditional.MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_On",
     "conditional.MixinLegacyRandomSource",
     "conditional.MixinLevelChunk_SafeBlockEntityMap_Off",
@@ -76,6 +77,7 @@
     "core.particle.MixinFireworkParticles$SparkParticle",
     "core.particle.MixinParticle",
     "core.particle.MixinParticle_LightCache",
+    "core.particle.MixinParticle_LightCache_Late",
     "core.particle.MixinParticleEngine_FixBlackDestructionParticle",
     "core.particle.MixinTextureSheetParticle",
     "core.render.MixinLevelRenderer",
@@ -90,8 +92,7 @@
     "core.tick.MixinTextureManager",
     "core.tick.MixinWaterFluid",
     "core.weather.MixinLevelRenderer_TickRain",
-    "core.weather.MixinLevelRenderer_WeatherCulling",
-    "conditional.MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_Off"
+    "core.weather.MixinLevelRenderer_WeatherCulling"
   ],
   "injectors": {
     "defaultRequire": 1

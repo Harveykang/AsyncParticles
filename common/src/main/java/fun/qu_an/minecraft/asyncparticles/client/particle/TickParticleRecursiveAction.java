@@ -38,7 +38,6 @@ public class TickParticleRecursiveAction extends RecursiveAction {
 			left.join();
 			right.join();
 		} else {
-			boolean enableLightCache = ConfigHelper.particleLightCache();
 			ParticleCullingMode particleCullingMode = isGpu ?
 				ParticleCullingMode.DISABLED :
 				ConfigHelper.getParticleCullingMode();
@@ -59,13 +58,13 @@ public class TickParticleRecursiveAction extends RecursiveAction {
 					// only GPU particles don't skip the first tick, but skip the first refresh.
 					// skip the first refresh will fix black destruction gpu particles.
 					shouldTick = isGpu;
-					shouldRefresh = !isGpu && enableLightCache;
+					shouldRefresh = !isGpu;
 				} else if (particleAddon.asyncparticles$isTickSync()) {
 					AsyncTickBehavior.INSTANCE.recordSync(particle);
 					return;
 				} else {
 					shouldTick = true;
-					shouldRefresh = enableLightCache;
+					shouldRefresh = true;
 				}
 				if (shouldTick) {
 					try {
@@ -76,7 +75,7 @@ public class TickParticleRecursiveAction extends RecursiveAction {
 					particleAddon.asyncparticles$setTicked();
 				}
 				if (shouldRefresh) {
-					((LightCachedParticleAddon) particle).asyncparticles$refresh();
+					((LightCachedParticleAddon) particle).asyncparticles$tickLightCache();
 				}
 				switch (particleCullingMode) {
 					case ASYNC_AABB -> particleAddon.asyncparticles$tickAABBCulling();

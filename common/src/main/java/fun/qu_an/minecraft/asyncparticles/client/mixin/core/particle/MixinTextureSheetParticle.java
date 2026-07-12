@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.TextureSheetParticle;
@@ -9,7 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(TextureSheetParticle.class)
-public abstract class MixinTextureSheetParticle extends SingleQuadParticle implements GpuParticleAddon {
+public abstract class MixinTextureSheetParticle extends SingleQuadParticle implements GpuParticleAddon, ParticleAddon {
 	protected MixinTextureSheetParticle(ClientLevel clientLevel, double d, double e, double f) {
 		super(clientLevel, d, e, f);
 	}
@@ -57,6 +58,11 @@ public abstract class MixinTextureSheetParticle extends SingleQuadParticle imple
 	}
 
 	public int asyncparticles$getLightCoords(float partialTickTime) {
+		if (asyncparticles$isFirstGpuLightGet()) {
+			// A workaround for level light update latency
+			asyncparticles$setGpuLightGot();
+			return asyncparticles$getCachedLight();
+		}
 		return getLightColor(partialTickTime);
 	}
 

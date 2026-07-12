@@ -1,12 +1,14 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.compat.neoforge.sable_create;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.simibubi.create.content.kinetics.fan.AirFlowParticle;
 import com.simibubi.create.content.kinetics.steamEngine.SteamJetParticle;
 import com.simibubi.create.foundation.particle.AirParticle;
-import dev.ryanhcode.sable.mixinterface.particle.ParticleExtension;
 import dev.ryanhcode.sable.sublevel.SubLevel;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.sable.MixinParticle;
+import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
@@ -14,49 +16,37 @@ import org.joml.Vector3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-import java.lang.ref.WeakReference;
-
 @Mixin(value = {AirFlowParticle.class, AirParticle.class, SteamJetParticle.class}, priority = 1500)
 // Later than mixin.create.MixinParticle_LightCache
 public abstract class MixinParticle_LightCache extends MixinParticle {
+	@WrapMethod(method = "getLightColor")
+	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {
+		return asyncparticles$calcLight(original.call(partialTick), GameUtil.SHARED_POS.get().set(x, y, z));
+	}
+
 	@Override // inject after MixinParticle_LightCache to override
 	public void asyncparticles$refresh() {
 		ClientLevel level = this.level;
 		if (level == null) {
 			return;
 		}
-		ParticleExtension particleExtension = (ParticleExtension) this;
-		BlockPos blockPos = BlockPos.containing(x, y, z);
+		BlockPos blockPos = GameUtil.SHARED_POS.get().set(x, y, z);
 		int light = level.isLoaded(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
-		SubLevel subLevel = particleExtension.sable$getTrackingSubLevel();
-		if (!ConfigHelper.fixParticleLightOnSableSublevel()) {
-			asyncparticles$setLight(light);
-		} else if (subLevel != null) {
-			if (asyncparticle$tracingSubLevel.get() != subLevel) {
-				asyncparticle$tracingSubLevel = new WeakReference<>(subLevel);
-			}
-			asyncparticles$clampLight(subLevel, level, light);
-		} else if ((subLevel = asyncparticle$tracingSubLevel.get()) == null) {
-			asyncparticles$setLight(light);
-			asyncparticle$lossSublevelPos = null;
-		} else if (asyncparticle$lossSublevelPos == null) {
-			asyncparticles$clampLight(subLevel, level, light);
-			asyncparticle$lossSublevelPos = BlockPos.containing(xo, yo, zo);
-		} else if (asyncparticle$lossSublevelPos.distManhattan(blockPos) > 15) {
-			asyncparticles$setLight(light);
+		if (ConfigHelper.fixParticleLightOnSableSublevel()) {
+			asyncparticles$setLight(asyncparticles$calcLight(light, blockPos));
 		} else {
-			asyncparticles$clampLight(subLevel, level, light);
+			asyncparticles$setLight(light);
 		}
 	}
 
+	@Override
 	@Unique
-	private void asyncparticles$clampLight(SubLevel subLevel, ClientLevel level, int light) {
+	protected int asyncparticles$clampLight(SubLevel subLevel, int light) {
 		Vector3d world = new Vector3d(x, y, z);
 		Vector3d transformed = subLevel.logicalPose().transformPositionInverse(world, world);
-		BlockPos pos = BlockPos.containing(transformed.x, transformed.y, transformed.z);
+		BlockPos pos = GameUtil.SHARED_POS.get().set(transformed.x, transformed.y, transformed.z);
 		int shipLight = level.isLoaded(pos) ? LevelRenderer.getLightColor(level, pos) : 0;
-		int finalLight = Math.max(light & 0xFFFF, shipLight & 0xFFFF) | // max for block, min for sky
+		return Math.max(light & 0xFFFF, shipLight & 0xFFFF) | // max for block, min for sky
 			Math.min(light & 0xFFFF0000, shipLight & 0xFFFF0000);
-		asyncparticles$setLight(finalLight);
 	}
 }

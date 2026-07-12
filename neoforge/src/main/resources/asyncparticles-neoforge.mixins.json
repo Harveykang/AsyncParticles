@@ -18,6 +18,7 @@
     "compat.neoforge.create.MixinLevelRenderer_Rain_Early",
     "compat.neoforge.create.MixinParticle",
     "compat.neoforge.create.MixinParticle_LightCache",
+    "compat.neoforge.create.MixinParticle_LightCache_Late",
     "compat.neoforge.epicfight.MixinCustomModelParticle",
     "compat.neoforge.sable_create.MixinParticle_LightCache",
     "compat.neoforge.simple_weather.MixinRainParticle",
