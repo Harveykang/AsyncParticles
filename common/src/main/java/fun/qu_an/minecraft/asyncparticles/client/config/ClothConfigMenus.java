@@ -119,6 +119,13 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> tick$particleTickMode = newValue)
 				.build())
 			.addEntry(entryBuilder
+				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.gpuOnlyAsyncParticleTick"),
+					tick$gpuOnlyAsyncParticleTick)
+				.setDefaultValue(defaultConfig.tick.gpuOnlyAsyncParticleTick)
+				.setTooltip(Component.translatable("config.asyncparticles.tick.gpuOnlyAsyncParticleTick.tooltip"))
+				.setSaveConsumer(newValue -> tick$gpuOnlyAsyncParticleTick = newValue)
+				.build())
+			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.tickWeatherAsync"),
 					tick$tickWeatherAsync)
 				.setDefaultValue(defaultConfig.tick.tickWeatherAsync)

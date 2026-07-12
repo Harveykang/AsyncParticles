@@ -50,11 +50,12 @@ public class MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_Off {
 	@Unique
 	private static void asyncparticles$alert() {
 		if (!asyncparticles$accessedOffThread) {
-			LogUtils.getLogger().warn("Entity storage accessed off the main thread!\nConsider enabling 'safeClassInstanceMultiMap'.", new IllegalStateException(""));
+			LogUtils.getLogger().warn("[AsyncParticles] Entity storage accessed off the main thread!\nConsider enabling 'safeClassInstanceMultiMap'.", new IllegalStateException(""));
 			ThreadUtil.enqueueClientTask(() -> {
 				Minecraft.getInstance().gui.getChat().addMessage(
+					Component.literal("[AsyncParticles] ").append(
 					Component.translatable("chat.asyncparticles.warn.get_entities_off_main_thread",
-							Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap"))
+							Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap")))
 						.withStyle(ChatFormatting.DARK_RED)
 				);
 			});

@@ -4,9 +4,8 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.logging.LogUtils;
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
@@ -22,21 +21,22 @@ import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
 import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
 import net.irisshaders.iris.shaderpack.properties.ParticleRenderingSettings;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
-import net.minecraft.Util;
+import net.minecraft.*;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
-import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -52,7 +52,7 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRendering
 // TODO: Organize this shit
 @Environment(EnvType.CLIENT)
 public abstract class AsyncRenderBehavior {
-	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final Logger LOGGER = LogManager.getLogger();
 	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
 	public static final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
 	public static final AsyncRenderBehavior INSTANCE = newInstance();
@@ -444,6 +444,32 @@ public abstract class AsyncRenderBehavior {
 
 	public void setFrustum(@NotNull Frustum frustum) {
 		this.frustum = frustum;
+	}
+
+	public boolean onRenderOnMainThreadExceptionally(Throwable t, Particle particle, ParticleRenderType prt) {
+		if (!(t instanceof Exception e) || !ConfigHelper.isTickAsync() || ConfigHelper.isGpuOnlyAsyncParticleTick()) {
+			throw constructCrashReport(particle, prt, t);
+		} else {
+			ConfigHelper.temporaryMark_gpuOnlyAsyncParticleTick();
+			LOGGER.error("""
+					[AsyncParticles] Unexpected error while rendering particles on the main thread.
+					This is likely caused by a race condition between the particle tick and render methods.
+					Temporarily enabled 'gpuOnlyAsyncParticleTick' internally. You may also want to turn it on manually,\
+					 otherwise this error will recur after restarting the game.
+					It is highly recommended to report this error to {} to help the author identify and fix potential issues.""",
+				AsyncParticlesClient.ISSUE_URL, e);
+			Minecraft.getInstance().gui.getChat().addMessage(
+				Component.literal("[AsyncParticles] ").append(
+				Component.translatable("chat.asyncparticles.warn.temporary_mark_gpuOnlyAsyncParticleTick",
+						e.toString(),
+						Component.translatable("config.asyncparticles.tick.gpuOnlyAsyncParticleTick"),
+						Component.literal("GitHub Issue")
+							.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncParticlesClient.ISSUE_URL)))
+							.withStyle(ChatFormatting.UNDERLINE)))
+					.withStyle(ChatFormatting.DARK_RED)
+			);
+		}
+		return true;
 	}
 
 	public static class AsyncRendererThread extends AsyncParticleWorkerThread {

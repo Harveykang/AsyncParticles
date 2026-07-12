@@ -3,13 +3,14 @@ package fun.qu_an.minecraft.asyncparticles.client.util;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
-public class TrackedWriteHashMap<K, V> implements Map<K, V> {
+public class TrackedWriteMap<K, V> implements Map<K, V> {
 	private final Runnable onWrite;
 	private final Map<K, V> delegated;
 
 	@SuppressWarnings("unchecked")
-	public TrackedWriteHashMap(Runnable onWrite, Map<? extends K, ? extends V> delegated) {
+	public TrackedWriteMap(Runnable onWrite, Map<? extends K, ? extends V> delegated) {
 		this.onWrite = onWrite;
 		this.delegated = (Map<K, V>) delegated;
 	}
@@ -137,6 +138,11 @@ public class TrackedWriteHashMap<K, V> implements Map<K, V> {
 	}
 
 	@Override
+	public void forEach(BiConsumer<? super K, ? super V> action) {
+		delegated.forEach(action);
+	}
+
+	@Override
 	public String toString() {
 		return "TrackedWriteHashMap{" +
 			"onWrite=" + onWrite +
@@ -147,7 +153,7 @@ public class TrackedWriteHashMap<K, V> implements Map<K, V> {
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass()) return false;
-		TrackedWriteHashMap<?, ?> that = (TrackedWriteHashMap<?, ?>) o;
+		TrackedWriteMap<?, ?> that = (TrackedWriteMap<?, ?>) o;
 		return Objects.equals(onWrite, that.onWrite) && Objects.equals(delegated, that.delegated);
 	}
 

@@ -30,7 +30,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 @Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class MixinParticleEngine implements ParticleEngineAddon {
@@ -92,6 +91,13 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		boolean tickAsync = ConfigHelper.isTickAsync();
 		if (tickAsync) {
 			AsyncTickBehavior.INSTANCE.waitForCleanUp();
+			if (ConfigHelper.isGpuOnlyAsyncParticleTick()) {
+				this.particles.forEach((particleRenderType, queue) -> {
+					this.level.getProfiler().push(particleRenderType.toString());
+					this.tickParticleList(queue);
+					this.level.getProfiler().pop();
+				});
+			}
 		} else {
 			// forEach is an inject point (eg. ParticleCore)
 			this.particles.forEach((particleRenderType, queue) -> {
@@ -152,7 +158,9 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				GpuParticleBehavior.INSTANCE.setCameraPos(camera.getPosition());
 				asyncparticles$forEach(GpuParticleBehavior.INSTANCE.gpuParticles, this::asyncparticles$scheduleGpuParticleTick);
 			}
-			asyncparticles$forEach(particles, this::asyncparticles$scheduleParticleTick);
+			if (!ConfigHelper.isGpuOnlyAsyncParticleTick()) {
+				asyncparticles$forEach(particles, this::asyncparticles$scheduleParticleTick);
+			}
 		}
 	}
 
