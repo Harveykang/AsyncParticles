@@ -51,6 +51,7 @@ public class AsyncParticlesConfig {
 	public static boolean particle$cullUnderwaterParticleType;
 	public static TickMode tick$animationTickMode;
 	public static TickMode tick$particleTickMode;
+	public static boolean tick$gpuOnlyAsyncParticleTick;
 	public static boolean tick$tickWeatherAsync;
 	public static boolean tick$deferredTextureTick;
 	public static int tick$failPerSecLimit;
@@ -278,12 +279,14 @@ public class AsyncParticlesConfig {
 			TickMode animationTickMode = ModListHelper.REIGNOFNETHER_LOADED
 				? TickMode.SYNCHRONOUSLY : TickMode.INTERRUPTIBLE;
 			TickMode particleTickMode = TickMode.INTERRUPTIBLE;
-			boolean tickWeatherAsync = true;
+			boolean gpuOnlyAsyncParticleTick = false;
+			boolean tickWeatherAsync = !ModListHelper.PHYSICSMOD_LOADED;
 			boolean deferredTextureTick = !ModListHelper.AXIOM_LOADED;
 			int failPerSecLimit = 5;
 			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
 			boolean suppressCME = false;
 			Set<String> syncParticleClasses = new LinkedHashSet<>();
+
 			{
 			}
 
@@ -291,7 +294,8 @@ public class AsyncParticlesConfig {
 				tick$animationTickMode = requireNonNullElse(animationTickMode,
 					ModListHelper.REIGNOFNETHER_LOADED ? TickMode.SYNCHRONOUSLY : TickMode.INTERRUPTIBLE);
 				tick$particleTickMode = requireNonNullElse(particleTickMode, TickMode.INTERRUPTIBLE);
-				tick$tickWeatherAsync = tickWeatherAsync;
+				tick$gpuOnlyAsyncParticleTick = gpuOnlyAsyncParticleTick;
+				tick$tickWeatherAsync = tickWeatherAsync && !ModListHelper.PHYSICSMOD_LOADED;
 				tick$deferredTextureTick = deferredTextureTick && !ModListHelper.AXIOM_LOADED;
 				tick$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				tick$failBehavior = requireNonNullElse(failBehavior, FailBehavior.RAISE_CRASH);
@@ -302,6 +306,7 @@ public class AsyncParticlesConfig {
 			private void fold() {
 				animationTickMode = tick$animationTickMode;
 				particleTickMode = tick$particleTickMode;
+				gpuOnlyAsyncParticleTick = tick$gpuOnlyAsyncParticleTick;
 				tickWeatherAsync = tick$tickWeatherAsync;
 				deferredTextureTick = tick$deferredTextureTick;
 				failPerSecLimit = tick$failPerSecLimit;
@@ -320,6 +325,7 @@ public class AsyncParticlesConfig {
 			int failPerSecLimit = 20;
 			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
 			Set<String> syncParticleClasses = new LinkedHashSet<>();
+
 			{
 				syncParticleClasses.add("com.lootbeams.VFXParticle");
 				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleCasting");

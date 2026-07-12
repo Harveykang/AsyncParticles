@@ -78,7 +78,7 @@ dependencies {
     modCompileOnly "maven.modrinth:a-good-place:1.20-1.2.7"
 
     /* Physics Mod */
-    modCompileOnly "maven.modrinth:physicsmod:3.0.14"
+    modCompileOnly "maven.modrinth:physicsmod:3.0.18"
 
     /* Subtle Effects */
     modCompileOnly "maven.modrinth:subtle-effects:mRWsAYqN" // fabric 1.12.1

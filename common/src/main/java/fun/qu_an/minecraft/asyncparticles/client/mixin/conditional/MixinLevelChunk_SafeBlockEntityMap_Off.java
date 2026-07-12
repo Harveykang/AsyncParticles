@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
-import fun.qu_an.minecraft.asyncparticles.client.util.TrackedWriteHashMap;
+import fun.qu_an.minecraft.asyncparticles.client.util.TrackedWriteMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -43,11 +43,12 @@ public abstract class MixinLevelChunk_SafeBlockEntityMap_Off extends ChunkAccess
 	@Unique
 	private static void asyncparticles$alert() {
 		if (ThreadUtil.isOnParticleThread() && !asyncparticles$accessedOffThread) {
-			LogUtils.getLogger().warn("Block entity storage accessed off the main thread!\nConsider enabling 'safeBlockEntityMap'.", new IllegalStateException(""));
+			LogUtils.getLogger().warn("[AsyncParticles] Block entity storage accessed off the main thread!\nConsider enabling 'safeBlockEntityMap'.", new IllegalStateException(""));
 			ThreadUtil.enqueueClientTask(() -> {
 				Minecraft.getInstance().gui.getChat().addMessage(
+					Component.literal("[AsyncParticles] ").append(
 					Component.translatable("chat.asyncparticles.warn.get_block_entity_off_main_thread",
-							Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap"))
+							Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap")))
 						.withStyle(ChatFormatting.DARK_RED)
 				);
 			});
@@ -68,11 +69,11 @@ public abstract class MixinLevelChunk_SafeBlockEntityMap_Off extends ChunkAccess
 	@Inject(method = "<init>*", at = @At("RETURN"))
 	private void onInit1(CallbackInfo ci) {
 		if (level.isClientSide) {
-			if (!(blockEntities instanceof TrackedWriteHashMap)) {
-				blockEntities = new TrackedWriteHashMap<>(() -> asyncparticles$alert(), blockEntities);
+			if (!(blockEntities instanceof TrackedWriteMap)) {
+				blockEntities = new TrackedWriteMap<>(() -> asyncparticles$alert(), blockEntities);
 			}
-			if (!(pendingBlockEntities instanceof TrackedWriteHashMap)) {
-				pendingBlockEntities = new TrackedWriteHashMap<>(() -> asyncparticles$alert(), pendingBlockEntities);
+			if (!(pendingBlockEntities instanceof TrackedWriteMap)) {
+				pendingBlockEntities = new TrackedWriteMap<>(() -> asyncparticles$alert(), pendingBlockEntities);
 			}
 		}
 	}

@@ -9,6 +9,8 @@ import java.util.Set;
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
 
 public class ConfigHelper {
+	private static boolean temporaryMark_gpuOnlyAsyncParticleTick;
+
 	public static void load() throws Exception {
 		AsyncParticlesConfig.load();
 	}
@@ -36,6 +38,14 @@ public class ConfigHelper {
 
 	public static boolean isTickAsync() {
 		return tick$particleTickMode != TickMode.SYNCHRONOUSLY;
+	}
+
+	public static boolean isGpuOnlyAsyncParticleTick() {
+		return tick$gpuOnlyAsyncParticleTick || temporaryMark_gpuOnlyAsyncParticleTick;
+	}
+
+	public static void temporaryMark_gpuOnlyAsyncParticleTick() {
+		temporaryMark_gpuOnlyAsyncParticleTick = true;
 	}
 
 	public static boolean forceDoneParticleTick() {

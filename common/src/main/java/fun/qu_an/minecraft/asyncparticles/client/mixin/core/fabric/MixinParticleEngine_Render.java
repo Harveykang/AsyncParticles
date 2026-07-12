@@ -190,7 +190,9 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 					try {
 						particle.render(bufferBuilder, camera, f3);
 					} catch (Throwable t) {
-						throw AsyncRenderBehavior.INSTANCE.constructCrashReport(particle, particleRenderType, t);
+						if (AsyncRenderBehavior.INSTANCE.onRenderOnMainThreadExceptionally(t, particle, particleRenderType)) {
+							break;
+						}
 					}
 				}
 			}
