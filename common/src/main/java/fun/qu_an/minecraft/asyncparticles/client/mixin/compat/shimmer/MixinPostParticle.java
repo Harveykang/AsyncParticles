@@ -46,18 +46,8 @@ public abstract class MixinPostParticle extends MixinParticle implements LightCa
 	}
 
 	@Override
-	public byte asyncparticles$getCompressedLight() {
-		return ((LightCachedParticleAddon) parent).asyncparticles$getCompressedLight();
-	}
-
-	@Override
 	public void asyncparticles$refresh() {
 		((LightCachedParticleAddon) parent).asyncparticles$refresh();
-	}
-
-	@Override
-	public int asyncparticles$invoke_getLightColor(float partialTick) {
-		return parent.getLightColor(partialTick);
 	}
 
 	@Override

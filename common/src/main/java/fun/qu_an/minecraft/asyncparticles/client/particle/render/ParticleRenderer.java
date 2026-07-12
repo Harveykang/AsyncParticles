@@ -102,7 +102,7 @@ public class ParticleRenderer implements IParticleRenderer {
 	public void unmapBuffer() {
 		RenderSystem.assertOnRenderThread();
 		// correct the particle count
-		particleCount[processingSrcIdx + 3] = particleCount[processingSrcIdx] - particleLimit;
+		particleCount[processingSrcIdx + SOURCE_SLOT_COUNT] = particleCount[processingSrcIdx] - particleLimit;
 		particleCount[processingSrcIdx] = Math.min(particleLimit, this.particleCount[processingSrcIdx]);
 		if (mappedBuffer == null) {
 			throw new IllegalStateException("Mapped buffer is null!");
@@ -265,7 +265,7 @@ public class ParticleRenderer implements IParticleRenderer {
 		GL11C.glEnable(GL30C.GL_RASTERIZER_DISCARD);
 
 		GLCaps.tfSupport.glBeginTransformFeedback(GL11C.GL_POINTS);
-		int overflow = particleCount[renderSrcIdx + 3];
+		int overflow = particleCount[renderSrcIdx + SOURCE_SLOT_COUNT];
 		if (overflow <= 0) {
 			GL11C.glDrawArrays(GL11C.GL_POINTS, 0, particleCount[renderSrcIdx]);
 		} else {
@@ -301,9 +301,7 @@ public class ParticleRenderer implements IParticleRenderer {
 
 		int indexCount = VertexFormat.Mode.QUADS.indexCount(particleCount[renderSrcIdx] * 4);
 		RenderSystem.AutoStorageIndexBuffer autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
-		if (!autoStorageIndexBuffer.hasStorage(indexCount)) {
-			autoStorageIndexBuffer.bind(indexCount);
-		}
+		autoStorageIndexBuffer.bind(indexCount);
 
 		ShaderInstance shader = RenderSystem.getShader();
 		Objects.requireNonNull(shader);

@@ -373,16 +373,13 @@ public class AsyncTickBehavior {
 			return;
 		}
 		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
-		boolean enableLightCache = ConfigHelper.particleLightCache();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		for (Iterator<Particle> iterator = syncParticles.iterator(); iterator.hasNext(); ) {
 			Particle particle = iterator.next();
 			try {
 				particleEngine.tickParticle(particle);
 				if (!(particle instanceof TrackingEmitter)) {
-					if (enableLightCache) {
-						((LightCachedParticleAddon) particle).asyncparticles$refresh();
-					}
+					((LightCachedParticleAddon) particle).asyncparticles$tickLightCache();
 					switch (particleCullingMode) {
 						case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
 						case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
@@ -511,7 +508,7 @@ public class AsyncTickBehavior {
 				Queue<Particle> newCpuQueue = ParticleHelper.newParticleQueue();
 				oldCpuQueue.forEach(p -> {
 					if (enableLightCache) {
-						LightCachedParticleAddon.doFirstRefresh(p);
+						ParticleHelper.doFirstRefresh(p);
 					} else {
 						((LightCachedParticleAddon) p).asyncparticles$disableLightCache();
 					}
@@ -543,7 +540,7 @@ public class AsyncTickBehavior {
 				GpuParticleBehavior.INSTANCE.gpuParticles.forEach((key, oldGpuQueue) -> {
 					oldGpuQueue.forEach(p -> {
 						if (enableLightCache) {
-							LightCachedParticleAddon.doFirstRefresh(p);
+							ParticleHelper.doFirstRefresh(p);
 						} else {
 							((LightCachedParticleAddon) p).asyncparticles$disableLightCache();
 						}

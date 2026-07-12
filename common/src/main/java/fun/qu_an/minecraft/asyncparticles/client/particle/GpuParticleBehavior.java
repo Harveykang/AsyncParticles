@@ -7,6 +7,8 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.particle.render.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.particle.render.ParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
+import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
@@ -17,9 +19,11 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Quaternionf;
+import org.lwjgl.opengl.GL30C;
 import org.spongepowered.asm.mixin.Unique;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 public class GpuParticleBehavior {
@@ -34,7 +38,7 @@ public class GpuParticleBehavior {
 	 * <p>
 	 * License: <a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/README.md#-license">README.md#-license</a> and <a/><a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/COPYING.LESSER">LGPL-3.0</a>
 	 */
-	private final List<Class<? extends Particle>> GPU_PARTICLE_CLASSES;
+	public final List<Class<? extends Particle>> GPU_PARTICLE_CLASSES;
 
 	{
 		try {
@@ -51,8 +55,10 @@ public class GpuParticleBehavior {
 		}
 	}
 
-	private final Reference2BooleanOpenHashMap<Class<? extends TextureSheetParticle>> CAN_RENDER_FAST_CACHE =
+	private final Reference2BooleanMap<Class<? extends TextureSheetParticle>> CAN_RENDER_FAST_CACHE =
 		new Reference2BooleanOpenHashMap<>();
+	private final Map<Class<? extends TextureSheetParticle>, Boolean> CAN_RENDER_FAST_CACHE_OFF_THREAD =
+		new ConcurrentHashMap<>();
 	private Vec3 cameraPos = Vec3.ZERO;
 	//	private Vec3 prevCameraPos = Vec3.ZERO;
 
@@ -101,18 +107,26 @@ public class GpuParticleBehavior {
 	 */
 	@Unique
 	public boolean canRenderFast(TextureSheetParticle tsp) {
-		return CAN_RENDER_FAST_CACHE.computeIfAbsent(tsp.getClass(), (Predicate<Class<? extends TextureSheetParticle>>)
-			k -> {
-				try {
-					Class<?> renderMethodDeclaringClass = k.getMethod(RENDER_METHOD,
-						VertexConsumer.class,
-						Camera.class,
-						float.class).getDeclaringClass();
-					return GPU_PARTICLE_CLASSES.contains(renderMethodDeclaringClass);
-				} catch (NoSuchMethodException e) {
-					return false;
-				}
-			});
+		if (ThreadUtil.isOnRenderThread()) {
+			return CAN_RENDER_FAST_CACHE.computeIfAbsent(tsp.getClass(), this::canRenderFast0);
+		}
+		return CAN_RENDER_FAST_CACHE_OFF_THREAD.computeIfAbsent(tsp.getClass(), k1 -> {
+			boolean b1 = canRenderFast0(k1);
+			ThreadUtil.enqueueClientTask(() -> CAN_RENDER_FAST_CACHE.put(k1, b1));
+			return b1;
+		});
+	}
+
+	private boolean canRenderFast0(Class<? extends TextureSheetParticle> k) {
+		try {
+			Class<?> renderMethodDeclaringClass = k.getMethod(RENDER_METHOD,
+				VertexConsumer.class,
+				Camera.class,
+				float.class).getDeclaringClass();
+			return GPU_PARTICLE_CLASSES.contains(renderMethodDeclaringClass);
+		} catch (NoSuchMethodException e) {
+			return false;
+		}
 	}
 
 //	private static Class<?> findDeclaringClass(Class<?> clazz,
@@ -146,11 +160,16 @@ public class GpuParticleBehavior {
 //		if (GLCaps.supportsUniformBufferObject) {
 //			TFUniformBuffer.TF_UNIFORM_BUFFER.update(camera, f, getPrevCameraPos());
 //		}
+		if (renderers.isEmpty()) {
+			return;
+		}
+		int prevShader = GL30C.glGetInteger(GL30C.GL_CURRENT_PROGRAM);
 		renderers.values().forEach(renderer -> {
 			if (!renderer.isShouldSkip()) {
 				renderer.compute(camera, f);
 			}
 		});
+		GL30C.glUseProgram(prevShader);
 	}
 
 	@ApiStatus.Internal

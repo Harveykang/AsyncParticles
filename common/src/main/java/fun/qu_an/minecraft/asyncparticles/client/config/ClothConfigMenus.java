@@ -16,11 +16,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collector;
 
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
 
 // No more NoClassDefFoundError
@@ -95,20 +94,17 @@ class ClothConfigMenus {
 				.setTooltip(Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip"))
 				.setSaveConsumer(newValue -> tick$animationTickMode = newValue)
 				.setTooltipSupplier(() -> {
-					if (ModListHelper.REIGNOFNETHER_LOADED) {
-						return Optional.of(new MutableComponent[]{
-							Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip")
-								.withStyle(ChatFormatting.STRIKETHROUGH),
-							Component.translatable("config.asyncparticles.incompatibility", "Reign of Nether")
-								.withStyle(ChatFormatting.YELLOW)
-						});
+					if (REIGNOFNETHER_LOADED || IMMERSIVE_PORTALS_LOADED) {
+						return incompatibilityTooltip(
+							REIGNOFNETHER_LOADED ? "Reign of Nether" : null,
+							IMMERSIVE_PORTALS_LOADED ? "Immersive Portals" : null);
 					} else {
 						return Optional.of(new MutableComponent[]{
 							Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip")
 						});
 					}
 				})
-				.setRequirement(() -> !ModListHelper.REIGNOFNETHER_LOADED)
+				.setRequirement(() -> !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED)
 				.build())
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.tick.particleTickMode"),
@@ -138,12 +134,7 @@ class ClothConfigMenus {
 				.setDefaultValue(defaultConfig.tick.deferredTextureTick)
 				.setTooltipSupplier(() -> {
 					if (ModListHelper.AXIOM_LOADED) {
-						return Optional.of(new MutableComponent[]{
-							Component.translatable("config.asyncparticles.tick.deferredTextureTick.tooltip")
-								.withStyle(ChatFormatting.STRIKETHROUGH),
-							Component.translatable("config.asyncparticles.incompatibility", "Axiom")
-								.withStyle(ChatFormatting.YELLOW)
-						});
+						return incompatibilityTooltip("Axiom");
 					} else {
 						return Optional.of(new MutableComponent[]{
 							Component.translatable("config.asyncparticles.tick.deferredTextureTick.tooltip")
@@ -351,5 +342,19 @@ class ClothConfigMenus {
 		});
 
 		return builder;
+	}
+
+	private static Optional<Component[]> incompatibilityTooltip(Object... modNames) {
+		Component modNamesStr = Arrays.stream(modNames)
+			.filter(Objects::nonNull)
+			.map(modName -> modName instanceof Component ? (Component) modName : Component.literal(String.valueOf(modName)))
+			.collect(Collector.of(Component::empty, MutableComponent::append, (a, b) -> a.append(", ").append(b)));
+
+		return Optional.of(new MutableComponent[]{
+			Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip")
+				.withStyle(ChatFormatting.STRIKETHROUGH),
+			Component.translatable("config.asyncparticles.incompatibility", modNamesStr)
+				.withStyle(ChatFormatting.YELLOW)
+		});
 	}
 }

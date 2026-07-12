@@ -4,14 +4,16 @@ import com.bawnorton.mixinsquared.TargetHandler;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import net.minecraft.client.Camera;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.SingleQuadParticle;
+import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import org.lwjgl.system.MemoryStack;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(value = SingleQuadParticle.class, priority = 1001)
+@Mixin(value = SingleQuadParticle.class, priority = 1010)
 public abstract class MixinSingleQuadParticleMixin implements LightCachedParticleAddon {
 	@Dynamic
 	@TargetHandler(
@@ -23,7 +25,12 @@ public abstract class MixinSingleQuadParticleMixin implements LightCachedParticl
 		at = @At(value = "INVOKE", remap = false,
 			target = "Lnet/minecraft/client/particle/SingleQuadParticle;flerovium$getLightColorCached(FLnet/minecraft/client/Camera;)I"))
 	private int redirectGetLightColor(SingleQuadParticle particle, float pt, Camera camera) {
-		return asyncparticles$invoke_getLightColor(pt);
+		try {
+			return ((Particle) (Object) this).getLightColor(pt);
+		} catch (MissingPaletteEntryException ignore) {
+			// chunk not loaded yet maybe, ignore
+			return 0;
+		}
 	}
 
 	/**

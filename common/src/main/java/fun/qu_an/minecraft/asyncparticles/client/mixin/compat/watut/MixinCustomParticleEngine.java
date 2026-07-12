@@ -6,6 +6,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.particle.ParticleHelper;
 import net.minecraft.client.particle.Particle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,7 +19,7 @@ import java.util.Queue;
 public class MixinCustomParticleEngine {
 	@WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
 	private boolean onAdd(Queue<Particle> instance, Object p, Operation<Boolean> original) {
-		LightCachedParticleAddon.doFirstRefresh((Particle) p);
+		ParticleHelper.doFirstRefresh((Particle) p);
 		switch (ConfigHelper.getParticleCullingMode()) {
 			case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();
 			case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();
@@ -28,9 +29,7 @@ public class MixinCustomParticleEngine {
 
 	@Inject(method = "tickParticle", at = @At(value = "HEAD"))
 	private void onTickParticle(Particle p, CallbackInfo ci) {
-		if (ConfigHelper.particleLightCache()) {
-			((LightCachedParticleAddon) p).asyncparticles$refresh();
-		}
+		((LightCachedParticleAddon) p).asyncparticles$tickLightCache();
 		switch (ConfigHelper.getParticleCullingMode()) {
 			case ASYNC_AABB -> ((ParticleAddon) p).asyncparticles$tickAABBCulling();
 			case ASYNC_SPHERE -> ((ParticleAddon) p).asyncparticles$tickSphereCulling();

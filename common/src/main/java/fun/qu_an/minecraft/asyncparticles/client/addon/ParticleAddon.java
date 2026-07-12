@@ -8,6 +8,8 @@ public interface ParticleAddon {
 	void asyncparticles$setTicked();
 	void asyncparticles$resetTicked();
 	boolean asyncparticles$isTicked();
+	void asyncparticles$setGpuLightGot();
+	boolean asyncparticles$isFirstGpuLightGet();
 	void asyncparticles$setRenderSync();
 	boolean asyncparticles$isRenderSync();
 	void asyncparticles$setTickSync();

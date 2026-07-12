@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.compat.vs2;
 
 import com.bawnorton.mixinsquared.TargetHandler;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -8,6 +9,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -76,13 +78,17 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 	)
 	@Inject(method = "@MixinSquared:Handler", at = @At("TAIL"))
 	private void checkShipCoords(CallbackInfo ci,
-								 @SuppressWarnings("LocalMayBeArgsOnly")
-								 @Local(ordinal = 0)
+	                             @Local(ordinal = 0)
 								 @Nullable
 								 ClientShip ship) {
 		if (!asyncparticles$isOnShip()) {
 			asyncparticles$setShip(ship);
 		}
+	}
+
+	@WrapMethod(method = "getLightColor")
+	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {
+		return asyncparticles$calcLight(original.call(partialTick));
 	}
 
 	@Override // inject after MixinParticle_LightCache to override
@@ -91,17 +97,25 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 		if (level == null) {
 			return;
 		}
-		BlockPos blockPos = BlockPos.containing(x, y, z);
+		BlockPos blockPos = GameUtil.SHARED_POS.get().set(x, y, z);
 		int light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
-		if (asyncparticles$vsShip == null || !ConfigHelper.fixParticleLightOnVsShips()) {
+		if (ConfigHelper.fixParticleLightOnSableSublevel()) {
+			asyncparticles$setLight(asyncparticles$calcLight(light));
+		} else {
 			asyncparticles$setLight(light);
+		}
+	}
+
+	@Unique
+	protected int asyncparticles$calcLight(int light) {
+		if (asyncparticles$vsShip == null) {
+			return light;
 		} else {
 			Vector3d transformed = asyncparticles$vsShip.getWorldToShip().transformPosition(x, y, z, new Vector3d());
-			BlockPos pos = BlockPos.containing(transformed.x, transformed.y, transformed.z);
+			BlockPos pos = GameUtil.SHARED_POS.get().set(transformed.x, transformed.y, transformed.z);
 			int shipLight = level.hasChunkAt(pos) ? LevelRenderer.getLightColor(level, pos) : 0;
-			int finalLight = Math.max(light & 0xFFFF, shipLight & 0xFFFF) | // max for block, min for sky
-							 Math.min(light & 0xFFFF0000, shipLight & 0xFFFF0000);
-			asyncparticles$setLight(finalLight);
+			return Math.max(light & 0xFFFF, shipLight & 0xFFFF) | // max for block, min for sky
+				Math.min(light & 0xFFFF0000, shipLight & 0xFFFF0000);
 		}
 	}
 

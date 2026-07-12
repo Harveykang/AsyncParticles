@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
 
+import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
@@ -14,7 +15,19 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Particle.class)
-public abstract class MixinParticle implements ParticleAddon, LightCachedParticleAddon {
+public abstract class MixinParticle implements ParticleAddon, GpuParticleAddon, LightCachedParticleAddon {
+	@Unique
+	private static final int RENDER_FLAG_SYNC = 1;
+//	@Unique
+//	private static final int RENDER_FLAG_ENABLE_CULL = 2;
+	@Unique
+	private static final int RENDER_FLAG_SHOULD_CULL = 4;
+	@Unique
+	private static final int TICK_FLAG_SYNC = 1;
+	@Unique
+	private static final int TICK_FLAG_ENABLE_LIGHT_CACHE = 2;
+	@Unique
+	private static final int TICK_GPU_LIGHT_GOT = 4;
 	@Shadow
 	public abstract void remove();
 
@@ -30,7 +43,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	@Unique
 	private volatile boolean asyncparticles$ticked = true; // always true at first tick
 	@Unique
-	private byte asyncparticles$renderFlag = 2;
+	private byte asyncparticles$renderFlag = 0;
 	@Unique
 	private byte asyncparticles$tickFlag;
 
@@ -83,56 +96,66 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 
 	@Override
 	public void asyncparticles$setRenderSync() {
-		asyncparticles$renderFlag |= 1;
+		asyncparticles$renderFlag |= RENDER_FLAG_SYNC;
 	}
 
 	@Override
 	public boolean asyncparticles$isRenderSync() {
-		return (asyncparticles$renderFlag & 1) != 0;
+		return (asyncparticles$renderFlag & RENDER_FLAG_SYNC) != 0;
+	}
+
+	@Override
+	public void asyncparticles$setGpuLightGot() {
+		asyncparticles$tickFlag |= TICK_GPU_LIGHT_GOT;
+	}
+
+	@Override
+	public boolean asyncparticles$isFirstGpuLightGet() {
+		return (asyncparticles$tickFlag & TICK_GPU_LIGHT_GOT) == 0;
 	}
 
 	@Override
 	public void asyncparticles$setTickSync() {
-		asyncparticles$tickFlag |= 1;
+		asyncparticles$tickFlag |= TICK_FLAG_SYNC;
 	}
 
 	@Override
 	public boolean asyncparticles$isTickSync() {
-		return (asyncparticles$tickFlag & 1) != 0;
+		return (asyncparticles$tickFlag & TICK_FLAG_SYNC) != 0;
 	}
 
 	@Override
 	public void asyncparticles$enableLightCache() {
-		asyncparticles$tickFlag |= 2;
+		asyncparticles$tickFlag |= TICK_FLAG_ENABLE_LIGHT_CACHE;
 	}
 
 	@Override
 	public void asyncparticles$disableLightCache() {
-		asyncparticles$tickFlag &= ~2;
+		asyncparticles$tickFlag &= ~TICK_FLAG_ENABLE_LIGHT_CACHE;
 	}
 
 	public boolean asyncparticles$isEnabledLightCache() {
-		return (asyncparticles$tickFlag & 2) != 0;
+		return (asyncparticles$tickFlag & TICK_FLAG_ENABLE_LIGHT_CACHE) != 0;
 	}
 
 	public boolean asyncparticles$isVisibleOnScreen() {
-		return (asyncparticles$renderFlag & 4) != 0;
+		return (asyncparticles$renderFlag & RENDER_FLAG_SHOULD_CULL) != 0;
 	}
 
 	public void asyncparticles$tickAABBCulling() {
 		AABB aabb = getBoundingBox().expandTowards(xd, yd, zd);
 		if (FrustumUtil.isVisible(AsyncRenderBehavior.INSTANCE.getFrustum(), aabb)) {
-			asyncparticles$renderFlag |= 4;
+			asyncparticles$renderFlag |= RENDER_FLAG_SHOULD_CULL;
 		} else {
-			asyncparticles$renderFlag &= ~4;
+			asyncparticles$renderFlag &= ~RENDER_FLAG_SHOULD_CULL;
 		}
 	}
 
 	public void asyncparticles$tickSphereCulling() {
 		if (FrustumUtil.isVisible(AsyncRenderBehavior.INSTANCE.getFrustum(), (Particle) (Object) this)) {
-			asyncparticles$renderFlag |= 4;
+			asyncparticles$renderFlag |= RENDER_FLAG_SHOULD_CULL;
 		} else {
-			asyncparticles$renderFlag &= ~4;
+			asyncparticles$renderFlag &= ~RENDER_FLAG_SHOULD_CULL;
 		}
 	}
 
