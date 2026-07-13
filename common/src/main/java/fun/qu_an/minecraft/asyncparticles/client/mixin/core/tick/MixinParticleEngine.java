@@ -255,8 +255,6 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				shouldTick = true;
 			} else if (particleAddon.asyncparticles$isTicked()) {
 				// Skip the first tick after enqueued that the particle is added to the queue.
-				// only GPU particles don't skip the first tick, but skip the first refresh.
-				// skip the first refresh will fix black destruction gpu particles.
 				shouldTick = isGpu;
 			} else if (particleAddon.asyncparticles$isTickSync()) {
 				AsyncTickBehavior.INSTANCE.recordSync(particle);

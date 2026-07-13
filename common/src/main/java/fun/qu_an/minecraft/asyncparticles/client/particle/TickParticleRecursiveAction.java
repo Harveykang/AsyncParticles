@@ -52,19 +52,14 @@ public class TickParticleRecursiveAction extends RecursiveAction {
 				}
 				ParticleAddon particleAddon = (ParticleAddon) particle;
 				boolean shouldTick;
-				boolean shouldRefresh;
 				if (particleAddon.asyncparticles$isTicked()) {
 					// Skip the first tick after enqueued that the particle is added to the queue.
-					// only GPU particles don't skip the first tick, but skip the first refresh.
-					// skip the first refresh will fix black destruction gpu particles.
 					shouldTick = isGpu;
-					shouldRefresh = !isGpu;
 				} else if (particleAddon.asyncparticles$isTickSync()) {
 					AsyncTickBehavior.INSTANCE.recordSync(particle);
 					return;
 				} else {
 					shouldTick = true;
-					shouldRefresh = true;
 				}
 				if (shouldTick) {
 					try {
@@ -74,9 +69,7 @@ public class TickParticleRecursiveAction extends RecursiveAction {
 					}
 					particleAddon.asyncparticles$setTicked();
 				}
-				if (shouldRefresh) {
-					((LightCachedParticleAddon) particle).asyncparticles$tickLightCache();
-				}
+				((LightCachedParticleAddon) particle).asyncparticles$tickLightCache();
 				switch (particleCullingMode) {
 					case ASYNC_AABB -> particleAddon.asyncparticles$tickAABBCulling();
 					case ASYNC_SPHERE -> particleAddon.asyncparticles$tickSphereCulling();
