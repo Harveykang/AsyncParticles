@@ -130,6 +130,8 @@ public class ModListHelper {
 		&& !PcDisable.INSTANCE.getDisabledOptimizations().getDisableOptimizations().contains("ASYNC");
 	/* Polytone */
 	public static final boolean POLYTONE_LOADED = isModLoaded("polytone");
+	/* Goop */
+	public static final boolean GOOP_LOADED = isModLoaded("goop");
 
 	@ExpectPlatform
 	private static boolean isForge() {
