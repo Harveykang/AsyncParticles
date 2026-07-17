@@ -68,6 +68,7 @@ public class AsyncParticlesConfig {
 	public static Set<String> rendering$syncParticleClasses = new LinkedHashSet<>();
 	public static RainEffect valkyrienSkies$rainEffect;
 	public static boolean valkyrienSkies$fixParticleLights;
+	public static boolean sable$fixParticleLights;
 	public static RainEffect create$rainEffect;
 	public static int create$tickRainBlockingRange;
 
@@ -230,6 +231,7 @@ public class AsyncParticlesConfig {
 		Tick tick = new Tick();
 		Rendering rendering = new Rendering();
 		ValkyrienSkies valkyrienSkies = new ValkyrienSkies();
+		Sable sable = new Sable();
 		Create create = new Create();
 
 		private void flat() {
@@ -237,6 +239,7 @@ public class AsyncParticlesConfig {
 			tick.flat();
 			rendering.flat();
 			valkyrienSkies.flat();
+			sable.flat();
 			create.flat();
 		}
 
@@ -245,6 +248,7 @@ public class AsyncParticlesConfig {
 			tick.fold();
 			rendering.fold();
 			valkyrienSkies.fold();
+			sable.fold();
 			create.fold();
 		}
 
@@ -375,6 +379,18 @@ public class AsyncParticlesConfig {
 			private void fold() {
 				rainEffect = valkyrienSkies$rainEffect;
 				fixParticleLights = valkyrienSkies$fixParticleLights;
+			}
+		}
+
+		static class Sable {
+			boolean fixParticleLights = true;
+
+			private void flat() {
+				sable$fixParticleLights = fixParticleLights;
+			}
+
+			private void fold() {
+				fixParticleLights = sable$fixParticleLights;
 			}
 		}
 

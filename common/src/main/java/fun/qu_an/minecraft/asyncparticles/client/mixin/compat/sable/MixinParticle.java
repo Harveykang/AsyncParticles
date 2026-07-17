@@ -48,7 +48,12 @@ public abstract class MixinParticle implements LightCachedParticleAddon, Particl
 
 	@WrapMethod(method = "getLightColor")
 	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {
-		return asyncparticles$calcLight(original.call(partialTick), GameUtil.SHARED_POS.get().set(x, y, z));
+		int call = original.call(partialTick);
+		if (ConfigHelper.fixParticleLightOnSableSublevel()) {
+			return asyncparticles$calcLight(call, GameUtil.SHARED_POS.get().set(x, y, z));
+		} else {
+			return call;
+		}
 	}
 
 	@Override // inject after MixinParticle_LightCache to override

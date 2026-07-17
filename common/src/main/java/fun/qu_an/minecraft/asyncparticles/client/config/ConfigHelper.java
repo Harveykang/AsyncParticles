@@ -174,7 +174,7 @@ public class ConfigHelper {
 	}
 
 	public static boolean fixParticleLightOnSableSublevel() {
-		return true;
+		return sable$fixParticleLights;
 	}
 
 	public static ParticleCullingMode getGpuParticleCullingMode() {

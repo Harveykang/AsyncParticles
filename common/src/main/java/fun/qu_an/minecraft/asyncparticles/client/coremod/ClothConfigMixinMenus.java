@@ -212,6 +212,7 @@ public class ClothConfigMixinMenus {
 	public static void addModCompatCategory(ConfigEntryBuilder entryBuilder,
 	                                        ConfigEntryBuilder mixinEntryBuilder,
 	                                        @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> vsEntries,
+	                                        @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> sableEntries,
 	                                        @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> createEntries) {
 		MixinConfigObj defaultConfig = new MixinConfigObj();
 		MixinConfigObj newConfig = new MixinConfigObj();

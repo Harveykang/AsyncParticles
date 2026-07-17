@@ -278,6 +278,17 @@ class ClothConfigMenus {
 			.build());
 
 		@SuppressWarnings("rawtypes")
+		List<AbstractConfigListEntry> sableEntries = new ArrayList<>();
+		sableEntries.add(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.sable.fixParticleLights"),
+				sable$fixParticleLights)
+			.setDefaultValue(defaultConfig.sable.fixParticleLights)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.sable.fixParticleLights.tooltip"))
+			.setSaveConsumer(newValue -> sable$fixParticleLights = newValue)
+			.setRequirement(() -> SABLE_LOADED)
+			.build());
+
+		@SuppressWarnings("rawtypes")
 		List<AbstractConfigListEntry> createEntries = new ArrayList<>();
 		createEntries.add(entryBuilder
 			.startEnumSelector(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect"),
@@ -298,7 +309,7 @@ class ClothConfigMenus {
 			.build());
 
 		// Mixin
-		ClothConfigMixinMenus.addModCompatCategory(entryBuilder, mixinEntryBuilder, vsEntries, createEntries);
+		ClothConfigMixinMenus.addModCompatCategory(entryBuilder, mixinEntryBuilder, vsEntries, sableEntries, createEntries);
 
 		ConfigCategory modCompatCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mod-compat"));
 		modCompatCategory
@@ -306,6 +317,11 @@ class ClothConfigMenus {
 				// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
 				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
 					vsEntries)
+				.build()))
+			.addEntry(new SubCategoryListEntryFix(entryBuilder
+				// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
+				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.sable"),
+					sableEntries)
 				.build()))
 			.addEntry(new SubCategoryListEntryFix(entryBuilder
 				// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
