@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.particle;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.Diagnostic;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
@@ -27,6 +28,8 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
@@ -276,16 +279,24 @@ public class AsyncTickBehavior {
 		profiler.pop();
 	}
 
-	private void tickExceptionally(Throwable e) {
-		if (!(e instanceof Exception)) {
-			throw toThrowDirectly(e);
+	private void tickExceptionally(Throwable t) {
+		if (!(t instanceof Exception e)) {
+			throw toThrowDirectly(t);
 		}
 		Minecraft mc = Minecraft.getInstance();
-		if (!isTolerable(e) ||
-			(mc.level != null && mc.player != null)) {
-			throw toThrowDirectly(e);
+		if (isTolerable(e) &&
+			(mc.level == null || mc.player == null)) {
+			LOGGER.warn("Exception while executing tick tasks.", e);
+			return;
 		}
-		LOGGER.warn("Exception while executing tick tasks.", e);
+		StringWriter out = new StringWriter();
+		t.printStackTrace(new PrintWriter(out));
+		if (out.toString().contains("asyncparticles_animateTick")) {
+			Diagnostic.errorDuringAsyncAnimateTick(e);
+			LOGGER.warn("Exception while executing tick tasks.", e);
+			return;
+		}
+		throw toThrowDirectly(t);
 	}
 
 	public boolean isTolerable(@NotNull Throwable e) {

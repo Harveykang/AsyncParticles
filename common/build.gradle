@@ -110,4 +110,7 @@ dependencies {
 
     /* Cosy Critters */
     modCompileOnly "maven.modrinth:cosy-critters:v0.3.2+1.21.1-fabric"
+
+    /* Goop */
+    modCompileOnly "maven.modrinth:goop:0.4.3-1.21.1"
 }

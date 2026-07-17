@@ -92,7 +92,8 @@
     "core.tick.MixinTextureManager",
     "core.tick.MixinWaterFluid",
     "core.weather.MixinLevelRenderer_TickRain",
-    "core.weather.MixinLevelRenderer_WeatherCulling"
+    "core.weather.MixinLevelRenderer_WeatherCulling",
+    "compat.goop.MixinPuddleParticle"
   ],
   "injectors": {
     "defaultRequire": 1
