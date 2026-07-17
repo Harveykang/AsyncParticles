@@ -129,5 +129,6 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "compat.goop.MixinGoopParticle"
   ]
 }

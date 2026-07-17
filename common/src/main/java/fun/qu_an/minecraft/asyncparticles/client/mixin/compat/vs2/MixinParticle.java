@@ -3,10 +3,8 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.compat.vs2;
 import com.bawnorton.mixinsquared.TargetHandler;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSClientUtils;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vs2.VSParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
@@ -14,11 +12,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import org.spongepowered.asm.mixin.Final;
@@ -29,8 +22,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.valkyrienskies.core.api.ships.ClientShip;
-
-import java.util.List;
 
 @Mixin(value = Particle.class, priority = 1500)
 public abstract class MixinParticle implements LightCachedParticleAddon, VSParticleAddon {
@@ -88,7 +79,12 @@ public abstract class MixinParticle implements LightCachedParticleAddon, VSParti
 
 	@WrapMethod(method = "getLightColor")
 	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {
-		return asyncparticles$calcLight(original.call(partialTick));
+		int call = original.call(partialTick);
+		if (ConfigHelper.fixParticleLightOnVsShips()) {
+			return asyncparticles$calcLight(call);
+		} else {
+			return call;
+		}
 	}
 
 	@Override // inject after MixinParticle_LightCache to override

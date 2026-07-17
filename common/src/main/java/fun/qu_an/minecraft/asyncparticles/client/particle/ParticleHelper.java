@@ -6,6 +6,7 @@ import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 
 import java.util.Queue;
 
@@ -22,7 +23,9 @@ public class ParticleHelper {
 	public static void doFirstRefresh(Particle particle) {
 		LightCachedParticleAddon addon = (LightCachedParticleAddon) particle;
 		boolean b = ConfigHelper.particleLightCache() && !addon.asyncparticles$isStaticLight();
-		if (b) {
+		if (b && !(ConfigHelper.isGpuParticles()
+			&& particle instanceof TextureSheetParticle tsp
+			&& GpuParticleBehavior.INSTANCE.canRenderFast(tsp))) {
 			addon.asyncparticles$enableLightCache();
 		}
 		Integer i = DESTRUCTION_LIGHT_CACHE.get();
@@ -34,7 +37,13 @@ public class ParticleHelper {
 			&& particle instanceof TextureSheetParticle tsp
 			&& GpuParticleBehavior.INSTANCE.canRenderFast(tsp)){
 			// We just use the light cache slot for gpu, but never really enable it.
-			addon.asyncparticles$setLight(particle.getLightColor(0f));
+			int lightColor;
+			try {
+				lightColor = particle.getLightColor(0f);
+			} catch (MissingPaletteEntryException ignore) {
+				lightColor = 0;
+			}
+			addon.asyncparticles$setLight(lightColor);
 		}
 	}
 }

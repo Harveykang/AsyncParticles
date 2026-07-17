@@ -1,13 +1,10 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 
-import com.mojang.logging.LogUtils;
+import fun.qu_an.minecraft.asyncparticles.client.compat.Diagnostic;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.TrackedWriteMap;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -22,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -33,27 +29,9 @@ public abstract class MixinLevelChunk_SafeBlockEntityMap_Off extends ChunkAccess
 	@Shadow
 	@Final
 	private Level level;
-	@Unique
-	private static boolean asyncparticles$accessedOffThread = false;
 
 	public MixinLevelChunk_SafeBlockEntityMap_Off(ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, Registry<Biome> biomeRegistry, long inhabitedTime, @Nullable LevelChunkSection[] sections, @Nullable BlendingData blendingData) {
 		super(chunkPos, upgradeData, levelHeightAccessor, biomeRegistry, inhabitedTime, sections, blendingData);
-	}
-
-	@Unique
-	private static void asyncparticles$alert() {
-		if (ThreadUtil.isOnParticleThread() && !asyncparticles$accessedOffThread) {
-			LogUtils.getLogger().warn("[AsyncParticles] Block entity storage accessed off the main thread!\nConsider enabling 'safeBlockEntityMap'.", new IllegalStateException(""));
-			ThreadUtil.enqueueClientTask(() -> {
-				Minecraft.getInstance().gui.getChat().addMessage(
-					Component.literal("[AsyncParticles] ").append(
-					Component.translatable("chat.asyncparticles.warn.get_block_entity_off_main_thread",
-							Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap")))
-						.withStyle(ChatFormatting.DARK_RED)
-				);
-			});
-			asyncparticles$accessedOffThread = true;
-		}
 	}
 
 	@Inject(method = "getBlockEntity(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/chunk/LevelChunk$EntityCreationType;)Lnet/minecraft/world/level/block/entity/BlockEntity;",
@@ -70,10 +48,10 @@ public abstract class MixinLevelChunk_SafeBlockEntityMap_Off extends ChunkAccess
 	private void onInit1(CallbackInfo ci) {
 		if (level.isClientSide) {
 			if (!(blockEntities instanceof TrackedWriteMap)) {
-				blockEntities = new TrackedWriteMap<>(() -> asyncparticles$alert(), blockEntities);
+				blockEntities = new TrackedWriteMap<>(Diagnostic::illegalBlockEntityStorageAccess, blockEntities);
 			}
 			if (!(pendingBlockEntities instanceof TrackedWriteMap)) {
-				pendingBlockEntities = new TrackedWriteMap<>(() -> asyncparticles$alert(), pendingBlockEntities);
+				pendingBlockEntities = new TrackedWriteMap<>(Diagnostic::illegalBlockEntityStorageAccess, pendingBlockEntities);
 			}
 		}
 	}

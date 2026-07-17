@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.Diagnostic;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
@@ -9,18 +10,16 @@ import java.util.Set;
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
 
 public class ConfigHelper {
-	private static boolean temporaryMark_gpuOnlyAsyncParticleTick;
-
 	public static void load() throws Exception {
 		AsyncParticlesConfig.load();
 	}
 
 	public static boolean asyncAnimateTick() {
-		return tick$animationTickMode != TickMode.SYNCHRONOUSLY;
+		return tick$animationTickMode != TickMode.SYNCHRONOUSLY && !Diagnostic.isTemporaryDisableAnimationTick();
 	}
 
 	public static boolean forceDoneBlockAnimateTick() {
-		return tick$animationTickMode == TickMode.FORCE_COMPLETE;
+		return tick$animationTickMode == TickMode.FORCE_COMPLETE && !Diagnostic.isTemporaryDisableAnimationTick();
 	}
 
 	public static boolean markSyncIfTickFailed() {
@@ -41,11 +40,7 @@ public class ConfigHelper {
 	}
 
 	public static boolean isGpuOnlyAsyncParticleTick() {
-		return tick$gpuOnlyAsyncParticleTick || temporaryMark_gpuOnlyAsyncParticleTick;
-	}
-
-	public static void temporaryMark_gpuOnlyAsyncParticleTick() {
-		temporaryMark_gpuOnlyAsyncParticleTick = true;
+		return tick$gpuOnlyAsyncParticleTick || Diagnostic.isTemporaryGpuOnlyAsyncParticleTick();
 	}
 
 	public static boolean forceDoneParticleTick() {

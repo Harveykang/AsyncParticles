@@ -10,9 +10,9 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.Diagnostic;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.iris.IrisCompat;
@@ -34,9 +34,6 @@ import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.LogManager;
@@ -608,24 +605,7 @@ public class AsyncRenderBehavior {
 		if (!(t instanceof Exception e) || !ConfigHelper.isTickAsync() || ConfigHelper.isGpuOnlyAsyncParticleTick()) {
 			throw constructCrashReport(particle, prt, t);
 		} else {
-			ConfigHelper.temporaryMark_gpuOnlyAsyncParticleTick();
-			LOGGER.error("""
-					[AsyncParticles] Unexpected error while rendering particles on the main thread.
-					This is likely caused by a race condition between the particle tick and render methods.
-					Temporarily enabled 'gpuOnlyAsyncParticleTick' internally. You may also want to turn it on manually,\
-					 otherwise this error will recur after restarting the game.
-					It is highly recommended to report this error to {} to help the author identify and fix potential issues.""",
-				AsyncParticlesClient.ISSUE_URL, e);
-			Minecraft.getInstance().gui.getChat().addMessage(
-				Component.literal("[AsyncParticles] ").append(
-				Component.translatable("chat.asyncparticles.warn.temporary_mark_gpuOnlyAsyncParticleTick",
-						e.toString(),
-						Component.translatable("config.asyncparticles.tick.gpuOnlyAsyncParticleTick"),
-						Component.literal("GitHub Issue")
-							.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncParticlesClient.ISSUE_URL)))
-							.withStyle(ChatFormatting.UNDERLINE)))
-					.withStyle(ChatFormatting.DARK_RED)
-			);
+			Diagnostic.unexpectedRenderErrorOnMainThread(e);
 		}
 		return true;
 	}

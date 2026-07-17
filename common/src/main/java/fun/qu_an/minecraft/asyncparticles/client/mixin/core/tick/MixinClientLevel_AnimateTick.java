@@ -37,7 +37,7 @@ public abstract class MixinClientLevel_AnimateTick extends Level {
 	private static final ResourceLocation asyncparticles$ANIMATE_TICK =
 		GameUtil.id("animate_tick");
 	@WrapMethod(method = "animateTick")
-	public void animateTick(int i, int j, int k, Operation<Void> original) {
+	public void asyncparticles_animateTick(int i, int j, int k, Operation<Void> original) {
 		if (!AsyncTickBehavior.INSTANCE.isShouldTickParticles() &&
 			ConfigHelper.isTickAsync()) {
 			// don't tick animate if the game is lagging
