@@ -120,7 +120,7 @@ public class AsyncTickBehavior {
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
 		profiler.push("async_particles");
 		Minecraft mc = Minecraft.getInstance();
-		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
+		boolean levelRunning = mc.level != null && mc.player != null && mc.cameraEntity != null && !mc.isPaused();
 		if (i != 0) {
 			// tick non-zero, do nothing
 			shouldTickParticles = i == to - 1 && levelRunning; // tick particles only on last tick
@@ -197,7 +197,7 @@ public class AsyncTickBehavior {
 	 */
 	public void postTick(int i, int to) {
 		Minecraft mc = Minecraft.getInstance();
-		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
+		boolean levelRunning = mc.level != null && mc.player != null && mc.cameraEntity != null && !mc.isPaused();
 		if (!ConfigHelper.isTickAsync()) {
 			tryReload();
 			tryDebug();
@@ -285,14 +285,7 @@ public class AsyncTickBehavior {
 		}
 		Minecraft mc = Minecraft.getInstance();
 		if (isTolerable(e) &&
-			(mc.level == null || mc.player == null)) {
-			LOGGER.warn("Exception while executing tick tasks.", e);
-			return;
-		}
-		StringWriter out = new StringWriter();
-		t.printStackTrace(new PrintWriter(out));
-		if (out.toString().contains("asyncparticles_animateTick")) {
-			Diagnostic.errorDuringAsyncAnimateTick(e);
+			(mc.level == null || mc.player == null || mc.cameraEntity == null)) {
 			LOGGER.warn("Exception while executing tick tasks.", e);
 			return;
 		}

@@ -276,8 +276,7 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Tick {
-			TickMode animationTickMode = SUBTLE_EFFECTS_LOADED || POLYTONE_LOADED
-				|| REIGNOFNETHER_LOADED || IMMERSIVE_PORTALS_LOADED
+			TickMode animationTickMode = REIGNOFNETHER_LOADED || IMMERSIVE_PORTALS_LOADED
 				? TickMode.SYNCHRONOUSLY : TickMode.INTERRUPTIBLE;
 			TickMode particleTickMode = TickMode.INTERRUPTIBLE;
 			boolean gpuOnlyAsyncParticleTick = false;
@@ -292,8 +291,7 @@ public class AsyncParticlesConfig {
 			}
 
 			private void flat() {
-				tick$animationTickMode = SUBTLE_EFFECTS_LOADED || POLYTONE_LOADED
-					|| REIGNOFNETHER_LOADED || IMMERSIVE_PORTALS_LOADED
+				tick$animationTickMode = REIGNOFNETHER_LOADED || IMMERSIVE_PORTALS_LOADED
 					? TickMode.SYNCHRONOUSLY
 					: requireNonNullElse(animationTickMode, TickMode.INTERRUPTIBLE);
 				tick$particleTickMode = requireNonNullElse(particleTickMode, TickMode.INTERRUPTIBLE);

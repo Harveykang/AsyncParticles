@@ -36,6 +36,7 @@
     "compat.fabric.porting_lib_base.MixinMixinParticleEngine",
     "compat.fabric.sodium_extra.MixinParticleEngine",
     "compat.figura.MixinParticleEngine",
+    "compat.goop.MixinGoopParticle",
     "compat.immediatelyfast.MixinBatchableBufferSource",
     "compat.immersive_portals.MixinParticleEngine",
     "compat.iris_like.MixinDSAUnsupported",
@@ -124,7 +125,7 @@
     "core.tick.MixinWaterFluid",
     "core.weather.MixinLevelRenderer_TickRain",
     "core.weather.MixinLevelRenderer_WeatherCulling",
-    "compat.goop.MixinGoopParticle"
+    "core.off_thread_access.MixinLevelChunkSection"
   ],
   "injectors": {
     "defaultRequire": 1
