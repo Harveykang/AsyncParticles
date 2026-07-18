@@ -23,7 +23,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.Supplier;
@@ -35,8 +34,8 @@ public abstract class MixinClientLevel_AnimateTick extends Level {
 	}
 
 	@Unique
-	private static final ResourceLocation ANIMATE_TICK = GameUtil.id("animate_tick");
-
+	private static final ResourceLocation asyncparticles$ANIMATE_TICK =
+		GameUtil.id("animate_tick");
 	@WrapMethod(method = "animateTick")
 	public void asyncparticles_animateTick(int i, int j, int k, Operation<Void> original) {
 		if (!AsyncTickBehavior.INSTANCE.isShouldTickParticles() &&
@@ -47,7 +46,13 @@ public abstract class MixinClientLevel_AnimateTick extends Level {
 		if (!ConfigHelper.asyncAnimateTick()) {
 			original.call(i, j, k);
 		} else {
-			EndTickOperation.schedule(ANIMATE_TICK, () -> original.call(i, j, k));
+			EndTickOperation.schedule(asyncparticles$ANIMATE_TICK, () -> {
+				try {
+					original.call(i, j, k);
+				} catch (Exception e) {
+					Diagnostic.errorDuringAsyncAnimateTick(e);
+				}
+			});
 		}
 	}
 

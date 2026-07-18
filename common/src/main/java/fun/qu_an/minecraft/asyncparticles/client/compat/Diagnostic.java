@@ -87,8 +87,7 @@ public class Diagnostic {
 	}
 
 	private static void sendChat(Supplier<MutableComponent> component) {
-		ThreadUtil.enqueueClientTask(() -> {
-			Minecraft.getInstance().gui.getChat().addMessage(component.get().withStyle(ChatFormatting.DARK_RED));
-		});
+		Minecraft.getInstance().execute(() -> Minecraft.getInstance().gui.getChat()
+			.addMessage(component.get().withStyle(ChatFormatting.DARK_RED)));
 	}
 }
