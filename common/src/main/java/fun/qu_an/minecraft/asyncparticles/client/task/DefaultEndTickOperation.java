@@ -1,19 +1,26 @@
 package fun.qu_an.minecraft.asyncparticles.client.task;
 
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
+import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.minecraft.resources.ResourceLocation;
 
-import static fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil.toThrowDirectly;
+import java.util.function.Consumer;
 
 public final class DefaultEndTickOperation implements EndTickOperation {
 	private final Runnable task;
 	private final ResourceLocation id;
 	private final boolean parallel;
+	private final Consumer<Exception> exceptionHandler;
 
 	public DefaultEndTickOperation(ResourceLocation id, boolean parallel, Runnable task) {
+		this(id, parallel, task, ExceptionUtil::toThrowDirectly);
+	}
+
+	public DefaultEndTickOperation(ResourceLocation id, boolean parallel, Runnable task, Consumer<Exception> exceptionHandler) {
 		this.id = id;
 		this.parallel = parallel;
 		this.task = task;
+		this.exceptionHandler = exceptionHandler;
 	}
 
 	@Override
@@ -28,20 +35,14 @@ public final class DefaultEndTickOperation implements EndTickOperation {
 
 	@Override
 	public void run() {
-		try {
-			task.run();
-		} catch (Exception e) {
-			if (!AsyncTickBehavior.INSTANCE.isTolerable(e) || AsyncTickBehavior.INSTANCE.exceptionTracker.addException(getId(), e)) {
-				throw toThrowDirectly(e);
-			}
-		}
+		GameUtil.ensureLevelRunning(task, exceptionHandler);
 	}
 
 	@Override
 	public String toString() {
-		return "EndTickOperation{" +
-				"id=" + id +
-				", parallel=" + parallel +
-				'}';
+		return "DefaultEndTickOperation{" +
+			"id=" + id +
+			", parallel=" + parallel +
+			'}';
 	}
 }

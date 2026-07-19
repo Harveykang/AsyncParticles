@@ -2,6 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.weather;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import fun.qu_an.minecraft.asyncparticles.client.compat.Diagnostic;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.task.EndTickOperation;
@@ -20,7 +21,7 @@ public class MixinLevelRenderer_TickRain {
 	@WrapMethod(method = "tickRain")
 	private void wrapTickRain(Camera camera, Operation<Void> original) {
 		if (ConfigHelper.isTickWeatherAsync() && AsyncTickBehavior.INSTANCE.isShouldTickParticles()) {
-			EndTickOperation.schedule(asyncparticles$TICK_RAIN, false, () -> original.call(camera));
+			EndTickOperation.schedule(asyncparticles$TICK_RAIN, false, () -> original.call(camera), Diagnostic::errorDuringAsyncRainTick);
 		} else {
 			original.call(camera);
 		}

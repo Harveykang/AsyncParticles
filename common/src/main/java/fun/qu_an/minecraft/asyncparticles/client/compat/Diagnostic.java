@@ -21,6 +21,7 @@ public class Diagnostic {
 	private static volatile boolean illegalBlockEntityStorageAccess = false;
 	private static boolean temporaryMark_gpuOnlyAsyncParticleTick = false;
 	private static boolean temporaryMark_disableAnimationTick = false;
+	private static boolean temporaryMark_disableAsyncRainTick = false;
 
 	public static void illegalEntityStorageAccess() {
 		if (!illegalEntityStorageAccess) {
@@ -76,9 +77,10 @@ public class Diagnostic {
 				 otherwise this error will recur after restarting the game.
 			You may need to turn off 'Async Animation Tick'""", e);
 		sendChat(() -> Component.literal("[AsyncParticles] ").append(
-			Component.translatable("chat.asyncparticles.warn.error_during_animate_tick",
+			Component.translatable("chat.asyncparticles.warn.error_during_async",
 				e.toString(),
-				Component.translatable("config.asyncparticles.tick.animationTickMode"))
+				Component.translatable("config.asyncparticles.tick.animationTickMode"),
+				"animateTick")
 		));
 	}
 
@@ -89,5 +91,25 @@ public class Diagnostic {
 	private static void sendChat(Supplier<MutableComponent> component) {
 		Minecraft.getInstance().execute(() -> Minecraft.getInstance().gui.getChat()
 			.addMessage(component.get().withStyle(ChatFormatting.DARK_RED)));
+	}
+
+	public static void errorDuringAsyncRainTick(Exception e) {
+		temporaryMark_disableAsyncRainTick = true;
+		LOGGER.error("""
+			[AsyncParticles] Error during rain tick.
+			This is likely caused by an incompatible injection into the rain tick method.
+				Temporarily disabled 'Particle Rain' internally. You may also want to turn it on manually,\
+				 otherwise this error will recur after restarting the game.
+			You may need to turn off 'Particle Rain'""", e);
+		sendChat(() -> Component.literal("[AsyncParticles] ").append(
+			Component.translatable("chat.asyncparticles.warn.error_during_async",
+				e.toString(),
+				Component.translatable("config.asyncparticles.tick.tickWeatherAsync"),
+				"tickRain")
+		));
+	}
+
+	public static boolean isTemporaryDisableAsyncRainTick() {
+		return temporaryMark_disableAsyncRainTick;
 	}
 }

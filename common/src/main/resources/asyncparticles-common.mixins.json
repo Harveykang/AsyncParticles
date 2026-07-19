@@ -54,7 +54,6 @@
     "conditional.Mixin_ReplaceRandom",
     "conditional.MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_Off",
     "conditional.MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_On",
-    "conditional.MixinLegacyRandomSource",
     "conditional.MixinLevelChunk_SafeBlockEntityMap_Off",
     "conditional.MixinLevelChunk_SafeBlockEntityMap_On",
     "conditional.MixinParticleEngine_SplitTick",
@@ -70,6 +69,7 @@
     "core.off_thread_access.MixinClientLevel",
     "core.off_thread_access.MixinEntityGetter",
     "core.off_thread_access.MixinLevel",
+    "core.off_thread_access.MixinLevelChunkSection",
     "core.off_thread_access.MixinLevelRenderer",
     "core.off_thread_access.MixinSoundEngine",
     "core.particle.MixinDustColorTransitionParticle",
@@ -94,7 +94,7 @@
     "core.weather.MixinLevelRenderer_TickRain",
     "core.weather.MixinLevelRenderer_WeatherCulling",
     "compat.goop.MixinPuddleParticle",
-    "core.off_thread_access.MixinLevelChunkSection"
+    "core.off_thread_access.MixinLegacyRandomSource"
   ],
   "injectors": {
     "defaultRequire": 1

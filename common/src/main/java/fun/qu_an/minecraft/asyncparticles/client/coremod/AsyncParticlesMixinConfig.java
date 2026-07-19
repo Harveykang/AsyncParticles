@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
-import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.LOGGER;
 
 public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", AsyncParticlesClient.MOD_ID, AsyncParticlesClient.MOD_ID + "-mixin.properties");
@@ -34,7 +33,6 @@ public class AsyncParticlesMixinConfig {
 	private static MixinConfigObj toSaveConfig;
 
 	static {
-		LOGGER.debug("AsyncParticlesMixinConfig initialized.");
 		try {
 			load();
 		} catch (Throwable e) {
@@ -70,7 +68,11 @@ public class AsyncParticlesMixinConfig {
 			throw new RuntimeException("I forgot to update the upgrade method.");
 		}
 		return switch (ver) {
-			case 2 -> configObj;
+			case 2 -> {
+				configObj.safeLegacyRandomSource = true;
+				yield configObj;
+			}
+			case 3 -> configObj;
 			default -> new MixinConfigObj();
 		};
 	}
@@ -106,7 +108,7 @@ public class AsyncParticlesMixinConfig {
 		private boolean safeClassInstanceMultiMap = (IRONS_SPELLBOOKS_LOADED && IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
 													MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED;
 		private boolean safeBlockEntityMap = false;
-		private boolean safeLegacyRandomSource = false;
+		private boolean safeLegacyRandomSource = true;
 		private Set<String> particle$noCulling = new LinkedHashSet<>();
 
 		{
