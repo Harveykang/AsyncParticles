@@ -37,4 +37,12 @@ public final class DefaultEndTickOperation implements EndTickOperation {
 	public void run() {
 		GameUtil.ensureLevelRunning(task, exceptionHandler);
 	}
+
+	@Override
+	public String toString() {
+		return "DefaultEndTickOperation{" +
+			"id=" + id +
+			", parallel=" + parallel +
+			'}';
+	}
 }

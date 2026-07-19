@@ -26,4 +26,12 @@ public final class DefaultEndTickEvent implements EndTickEvent {
 	public boolean isParallel() {
 		return parallel;
 	}
+
+	@Override
+	public String toString() {
+		return "DefaultEndTickEvent{" +
+			"priority=" + priority +
+			", parallel=" + parallel +
+			'}' + task;
+	}
 }
