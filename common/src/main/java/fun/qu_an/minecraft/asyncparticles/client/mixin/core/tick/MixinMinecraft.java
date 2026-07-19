@@ -8,7 +8,6 @@ import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,6 +24,8 @@ public class MixinMinecraft {
 	public ParticleEngine particleEngine;
 	@Unique
 	private boolean asyncparticles$sorted = false;
+	@Unique
+	private boolean asyncparticles$alreadyReset = false;
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
 	private void preTick(boolean bl, CallbackInfo ci, @Local(ordinal = 0) int i, @Local(ordinal = 1) int j) {
@@ -36,11 +37,25 @@ public class MixinMinecraft {
 		AsyncTickBehavior.INSTANCE.postTick(j, Math.min(10, i));
 	}
 
-	@Inject(method = "setLevel", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, ordinal = 0,
-		target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;"))
+	@Inject(method = {"setLevel", "clearLevel()V"}, at = @At("HEAD"))
 	private void onSetLevel(CallbackInfo ci) {
 		AsyncTickBehavior.INSTANCE.reset();
 		AsyncRenderBehavior.INSTANCE.reset();
+		asyncparticles$alreadyReset = true;
+	}
+
+	@Inject(method = "updateScreenAndTick", at = @At("HEAD"))
+	private void onUpdateScreenAndTick(CallbackInfo ci) {
+		if (!asyncparticles$alreadyReset) {
+			AsyncTickBehavior.INSTANCE.reset();
+			AsyncRenderBehavior.INSTANCE.reset();
+			asyncparticles$alreadyReset = true;
+		}
+	}
+
+	@Inject(method = {"setLevel", "clearLevel()V"}, at = @At("RETURN"))
+	private void onSetLevelReturn(CallbackInfo ci) {
+		asyncparticles$alreadyReset = false;
 	}
 
 	@Inject(method = "setLevel", at = @At(value = "INVOKE", shift = At.Shift.AFTER,

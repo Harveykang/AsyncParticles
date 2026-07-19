@@ -17,7 +17,7 @@ import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMi
 
 public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", AsyncParticlesClient.MOD_ID, AsyncParticlesClient.MOD_ID + "-mixin.properties");
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 	static String COMMENTS = """
 		safeBlockEntityMap: Boolean. Make 'LevelChunk#blockEntities' thread-safe.
 		safeClassInstanceMultiMap: Boolean. Make 'ClassInstanceMultiMap' thread-safe.
@@ -65,11 +65,15 @@ public class AsyncParticlesMixinConfig {
 
 	@Contract
 	private static MixinConfigObj upgrade(int ver, MixinConfigObj configObj) {
-		if (VERSION != 1) {
+		if (VERSION != 2) {
 			throw new RuntimeException("I forgot to update the upgrade method.");
 		}
 		return switch (ver) {
-			case 1 -> configObj;
+			case 1 -> {
+				configObj.safeLegacyRandomSource = true;
+				yield configObj;
+			}
+			case 2 -> configObj;
 			default -> new MixinConfigObj();
 		};
 	}
@@ -105,7 +109,7 @@ public class AsyncParticlesMixinConfig {
 		private boolean safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED
 			|| COSYCRITTERS_LOADED;
 		private boolean safeBlockEntityMap = false;
-		private boolean safeLegacyRandomSource = false;
+		private boolean safeLegacyRandomSource = true;
 		private Set<String> particle$noCulling = new LinkedHashSet<>();
 
 		{

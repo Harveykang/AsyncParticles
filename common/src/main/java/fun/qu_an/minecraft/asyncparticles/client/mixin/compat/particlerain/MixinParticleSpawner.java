@@ -25,7 +25,7 @@ public class MixinParticleSpawner {
 
 	@WrapMethod(method = "tick")
 	private static void wrapTick(ClientLevel level, Vec3 cameraPos, Operation<Void> original) {
-		EndTickOperation.schedule(asyncparticles$PARTICLE_RAIN$TICK, () -> original.call(level, cameraPos));
+		EndTickOperation.schedule(asyncparticles$PARTICLE_RAIN$TICK, false, () -> original.call(level, cameraPos));
 	}
 
 	@WrapWithCondition(method = "tickBlockFX", at = @At(value = "INVOKE",

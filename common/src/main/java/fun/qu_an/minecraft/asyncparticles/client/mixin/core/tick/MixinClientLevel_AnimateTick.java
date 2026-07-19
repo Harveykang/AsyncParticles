@@ -37,6 +37,7 @@ public abstract class MixinClientLevel_AnimateTick extends Level {
 	@Unique
 	private static final ResourceLocation asyncparticles$ANIMATE_TICK =
 		GameUtil.id("animate_tick");
+
 	@WrapMethod(method = "animateTick")
 	public void asyncparticles_animateTick(int i, int j, int k, Operation<Void> original) {
 		if (!AsyncTickBehavior.INSTANCE.isShouldTickParticles() &&
@@ -47,13 +48,7 @@ public abstract class MixinClientLevel_AnimateTick extends Level {
 		if (!ConfigHelper.asyncAnimateTick()) {
 			original.call(i, j, k);
 		} else {
-			EndTickOperation.schedule(asyncparticles$ANIMATE_TICK, () -> {
-				try {
-					original.call(i, j, k);
-				} catch (Exception e) {
-					Diagnostic.errorDuringAsyncAnimateTick(e);
-				}
-			});
+			EndTickOperation.schedule(asyncparticles$ANIMATE_TICK, false, () -> original.call(i, j, k), Diagnostic::errorDuringAsyncAnimateTick);
 		}
 	}
 

@@ -113,7 +113,7 @@ public class ConfigHelper {
 	}
 
 	public static boolean isTickWeatherAsync() {
-		return tick$tickWeatherAsync;
+		return tick$tickWeatherAsync && !Diagnostic.isTemporaryDisableAsyncRainTick();
 	}
 
 	public static boolean isDeferredTextureTick() {
