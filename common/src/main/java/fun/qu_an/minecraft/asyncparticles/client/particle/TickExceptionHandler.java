@@ -52,6 +52,10 @@ public class TickExceptionHandler {
 		if (!ThreadUtil.isOnParticleTickerThread() || !(t instanceof Exception e)) {
 			throw constructCrashReport(particle, t);
 		}
+		LevelBundle levelBundle = AsyncTickBehavior.getInstance().getLevelBundle();
+		if (levelBundle == null || levelBundle.isLevelReset()) {
+			return true;
+		}
 		boolean tolerable = isTolerable(e);
 		Class<? extends Particle> particleClass = ((ParticleAddon) particle).asyncparticles$getRealClass();
 		if (tolerable && !exceptionTracker.addException(particleClass, e)) {

@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.task;
 
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
-import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 
 public final class DefaultEndTickEvent implements EndTickEvent {
 	private final Runnable task;
@@ -16,7 +16,7 @@ public final class DefaultEndTickEvent implements EndTickEvent {
 
 	@Override
 	public void run() {
-		GameUtil.ensureLevelRunning(task, ExceptionUtil::toThrowDirectly);
+		AsyncTickBehavior.getInstance().ensureLevelRunning(task, ExceptionUtil::toThrowDirectly);
 	}
 
 	public int getPriority() {

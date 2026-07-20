@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.task;
 
+import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
-import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Consumer;
@@ -35,7 +35,7 @@ public final class DefaultEndTickOperation implements EndTickOperation {
 
 	@Override
 	public void run() {
-		GameUtil.ensureLevelRunning(task, exceptionHandler);
+		AsyncTickBehavior.getInstance().ensureLevelRunning(task, exceptionHandler);
 	}
 
 	@Override

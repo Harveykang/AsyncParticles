@@ -65,6 +65,7 @@ public class AsyncTickBehavior {
 	public final ForkJoinPool executor;
 	private final AtomicLong timeUsageNano = new AtomicLong(0L);
 	private boolean particlePhase;
+	private volatile LevelBundle levelBundle;
 
 	{
 		AtomicInteger workerCount = new AtomicInteger(1);
@@ -81,6 +82,17 @@ public class AsyncTickBehavior {
 
 	public static AsyncTickBehavior getInstance() {
 		return INSTANCE;
+	}
+
+	public void ensureLevelRunning(Runnable r, Consumer<Exception> exceptionHandler) {
+		try {
+			r.run();
+		} catch (Exception e) {
+			LevelBundle levelBundle = getLevelBundle();
+			if (levelBundle != null && !levelBundle.isLevelReset()) {
+				exceptionHandler.accept(e);
+			}
+		}
 	}
 
 	public void addTickInParallel(ParticleRenderType particleRenderType) {
@@ -247,9 +259,7 @@ public class AsyncTickBehavior {
 					parallelEndTickOperations.clear();
 				}
 			} else {
-				tickTasks.addTask(() -> timeUsageNano.setRelease(System.nanoTime()));
 				tickTasks.groupTasks(false);
-
 				List<EndTickOperation> sequencedEndTickOperations = new ReferenceArrayList<>(this.sequencedEndTickOperations);
 				this.sequencedEndTickOperations.clear();
 				tickTasks.addTask(() -> {
@@ -276,15 +286,20 @@ public class AsyncTickBehavior {
 
 				if (!this.particleOperations.isEmpty()) {
 					List<Runnable> particleOperations = new ReferenceArrayList<>(this.particleOperations);
+					this.particleOperations.clear();
 					tickTasks.addTasks(particleOperations);
 					tickTasks.groupTasks(true);
-					this.particleOperations.clear();
 				}
 
-				tickTasks.addTask(() -> timeUsageNano.setRelease(System.nanoTime() - timeUsageNano.getAcquire()));
-				tickTasks.submitAll(e -> {
-					Minecraft mc1 = Minecraft.getInstance();
-					if (level == mc1.level && player == mc1.player && cameraEntity == mc1.cameraEntity) {
+				tickTasks.submitAll(() -> {
+					timeUsageNano.setRelease(System.nanoTime());
+					setLevelBundle(new LevelBundle(level, player, cameraEntity));
+				}, () -> {
+					setLevelBundle(null);
+					timeUsageNano.setRelease(System.nanoTime() - timeUsageNano.getAcquire());
+				}, e -> {
+					LevelBundle levelBundle = getLevelBundle();
+					if (levelBundle != null && !levelBundle.isLevelReset()) {
 						throw ExceptionUtil.toThrowDirectly(e);
 					}
 					// else level reset
@@ -583,6 +598,14 @@ public class AsyncTickBehavior {
 			return false;
 		}
 		throw new IllegalStateException("ParticleEngine.tick() called outside the particle phase unexpectedly.");
+	}
+
+	public LevelBundle getLevelBundle() {
+		return levelBundle;
+	}
+
+	public void setLevelBundle(LevelBundle levelBundle) {
+		this.levelBundle = levelBundle;
 	}
 
 	public static class AsyncTickerThread extends AsyncParticleWorkerThread {

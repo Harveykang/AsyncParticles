@@ -4,24 +4,19 @@ import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import net.minecraft.ReportedException;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.lighting.LayerLightEventListener;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-import java.lang.invoke.VarHandle;
 import java.util.Queue;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static java.lang.Math.abs;
@@ -159,27 +154,5 @@ public class GameUtil {
 			}
 		}
 		return false;
-	}
-
-	public static void ensureLevelRunning(Runnable r, Consumer<Exception> exceptionHandler) {
-		Minecraft mc = Minecraft.getInstance();
-		Entity prevCamE = mc.cameraEntity;
-		ClientLevel prevLevel = mc.level;
-		LocalPlayer prevPlayer = mc.player;
-		if (prevCamE == null || prevLevel == null || prevPlayer == null) {
-			return;
-		}
-		try {
-			r.run();
-		} catch (Exception e) {
-			VarHandle.loadLoadFence();
-			if (prevCamE != mc.cameraEntity
-				|| prevLevel != mc.level
-				|| prevPlayer != mc.player) {
-				// level reset
-				return;
-			}
-			exceptionHandler.accept(e);
-		}
 	}
 }
