@@ -22,6 +22,7 @@ public class Diagnostic {
 	private static boolean temporaryMark_gpuOnlyAsyncParticleTick = false;
 	private static boolean temporaryMark_disableAnimationTick = false;
 	private static boolean temporaryMark_disableAsyncRainTick = false;
+	private static boolean temporaryMark_disableAsyncParticleTick = false;
 
 	public static void illegalEntityStorageAccess() {
 		if (!illegalEntityStorageAccess) {
@@ -46,7 +47,7 @@ public class Diagnostic {
 		}
 	}
 
-	public static void unexpectedRenderErrorOnMainThread(Exception e) {
+	public static void errorParticleRenderOnMainThread(Exception e) {
 		temporaryMark_gpuOnlyAsyncParticleTick = true;
 		LOGGER.error("""
 				[AsyncParticles] Unexpected error while rendering particles on the main thread.
@@ -56,7 +57,7 @@ public class Diagnostic {
 				It is highly recommended to report this error to {} to help the author identify and fix potential issues.""",
 			AsyncParticlesClient.ISSUE_URL, e);
 		sendChat(() -> Component.literal("[AsyncParticles] ").append(
-			Component.translatable("chat.asyncparticles.warn.temporary_mark_gpuOnlyAsyncParticleTick",
+			Component.translatable("chat.asyncparticles.warn.error_during_main_thread_particle_rendering",
 				e.toString(),
 				Component.translatable("config.asyncparticles.tick.gpuOnlyAsyncParticleTick"),
 				Component.literal("GitHub Issue")
@@ -64,11 +65,52 @@ public class Diagnostic {
 					.withStyle(ChatFormatting.UNDERLINE))));
 	}
 
+	public static void errorAsyncParticleTick(Exception e) {
+		temporaryMark_gpuOnlyAsyncParticleTick = true;
+		LOGGER.error("""
+				[AsyncParticles] Unexpected error while ticking particles asynchronously.
+				This is likely caused by a race condition between the particle tick and render methods.
+				Temporarily enabled 'gpuOnlyAsyncParticleTick' internally. You may also want to turn it on manually,\
+				 otherwise this error will recur after restarting the game.
+				It is highly recommended to report this error to {} to help the author identify and fix potential issues.""",
+			AsyncParticlesClient.ISSUE_URL, e);
+		sendChat(() -> Component.literal("[AsyncParticles] ").append(
+			Component.translatable("chat.asyncparticles.warn.error_during_async_particle_tick",
+				e.toString(),
+				Component.translatable("config.asyncparticles.tick.gpuOnlyAsyncParticleTick"),
+				Component.literal("GitHub Issue")
+					.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncParticlesClient.ISSUE_URL)))
+					.withStyle(ChatFormatting.UNDERLINE))));
+	}
+
+
 	public static boolean isTemporaryGpuOnlyAsyncParticleTick() {
 		return temporaryMark_gpuOnlyAsyncParticleTick;
 	}
 
-	public static void errorDuringAsyncAnimateTick(Exception e) {
+	public static void errorAsyncGpuParticleTick(Exception e) {
+		temporaryMark_disableAsyncParticleTick = true;
+		LOGGER.error("""
+				[AsyncParticles] Unexpected error while ticking GPU particles asynchronously.
+				The cause is currently unknown.
+				Temporarily disabled 'Async Particle Tick' internally. You may also want to turn it off manually,\
+				 otherwise this error will recur after restarting the game.
+				It is highly recommended to report this error to {} to help the author identify and fix potential issues.""",
+			AsyncParticlesClient.ISSUE_URL, e);
+		sendChat(() -> Component.literal("[AsyncParticles] ").append(
+			Component.translatable("chat.asyncparticles.warn.error_during_async_gpu_particle_tick",
+				e.toString(),
+				Component.translatable("config.asyncparticles.tick.particleTickMode"),
+				Component.literal("GitHub Issue")
+					.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncParticlesClient.ISSUE_URL)))
+					.withStyle(ChatFormatting.UNDERLINE))));
+	}
+
+	public static boolean isTemporaryDisableAsyncParticleTick() {
+		return temporaryMark_disableAsyncParticleTick;
+	}
+
+	public static void errorAsyncAnimateTick(Exception e) {
 		temporaryMark_disableAnimationTick = true;
 		LOGGER.error("""
 			[AsyncParticles] Error during animateTick.
@@ -77,7 +119,7 @@ public class Diagnostic {
 				 otherwise this error will recur after restarting the game.
 			You may need to turn off 'Async Animation Tick'""", e);
 		sendChat(() -> Component.literal("[AsyncParticles] ").append(
-			Component.translatable("chat.asyncparticles.warn.error_during_async",
+			Component.translatable("chat.asyncparticles.warn.error_during_async_incompatible_injection",
 				e.toString(),
 				Component.translatable("config.asyncparticles.tick.animationTickMode"),
 				"animateTick")
@@ -93,7 +135,7 @@ public class Diagnostic {
 			.addMessage(component.get().withStyle(ChatFormatting.DARK_RED)));
 	}
 
-	public static void errorDuringAsyncRainTick(Exception e) {
+	public static void errorAsyncRainTick(Exception e) {
 		temporaryMark_disableAsyncRainTick = true;
 		LOGGER.error("""
 			[AsyncParticles] Error during rain tick.
@@ -102,7 +144,7 @@ public class Diagnostic {
 				 otherwise this error will recur after restarting the game.
 			You may need to turn off 'Particle Rain'""", e);
 		sendChat(() -> Component.literal("[AsyncParticles] ").append(
-			Component.translatable("chat.asyncparticles.warn.error_during_async",
+			Component.translatable("chat.asyncparticles.warn.error_during_async_incompatible_injection",
 				e.toString(),
 				Component.translatable("config.asyncparticles.tick.tickWeatherAsync"),
 				"tickRain")

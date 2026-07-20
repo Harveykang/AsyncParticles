@@ -2,12 +2,9 @@ package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -16,14 +13,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.DataLayer;
-import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import net.minecraft.world.level.lighting.LayerLightEventListener;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.lang.invoke.VarHandle;
-import java.lang.ref.WeakReference;
-import java.util.Queue;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -54,13 +48,6 @@ public class GameUtil {
 
 	public static double manhattanLength(Vec3 vec3) {
 		return abs(vec3.x) + abs(vec3.y) + abs(vec3.z);
-	}
-
-	public static Queue<Particle> newParticleQueue() {
-		return IterationSafeEvictingQueue.newInstance(
-			16,
-			ConfigHelper.getParticleLimit(),
-			AsyncTickBehavior.INSTANCE::onEvicted);
 	}
 
 	public static int getLightColorFromNeighbor(ClientLevel level, BlockPos pos) {

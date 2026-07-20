@@ -12,7 +12,7 @@ public class VertexHelper {
 				LogUtils.getLogger().warn("Negative alpha value {} detected. This may cause unexpected behavior. You can ignore it if nothing is broken.", alpha, new IllegalStateException(""));
 				warnedNegativeAlpha = true;
 			}
-			if ((AsyncRenderBehavior.INSTANCE.isParticlePhase() && ThreadUtil.isOnRenderThread()) ||
+			if ((AsyncRenderBehavior.getInstance().isParticlePhase() && ThreadUtil.isOnRenderThread()) ||
 				ThreadUtil.isOnParticleRendererThread()) {
 				alpha = 0f;
 			}

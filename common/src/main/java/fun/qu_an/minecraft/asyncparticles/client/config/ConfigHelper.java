@@ -36,7 +36,7 @@ public class ConfigHelper {
 	}
 
 	public static boolean isTickAsync() {
-		return tick$particleTickMode != TickMode.SYNCHRONOUSLY;
+		return tick$particleTickMode != TickMode.SYNCHRONOUSLY && !Diagnostic.isTemporaryDisableAsyncParticleTick();
 	}
 
 	public static boolean isGpuOnlyAsyncParticleTick() {
@@ -44,7 +44,9 @@ public class ConfigHelper {
 	}
 
 	public static boolean forceDoneParticleTick() {
-		return tick$particleTickMode == TickMode.FORCE_COMPLETE;
+		return tick$particleTickMode == TickMode.FORCE_COMPLETE
+//			&& !Diagnostic.isTemporaryDisableAsyncParticleTick() // unnecessary
+			;
 	}
 
 	public static boolean fixParticleLightOnVsShips() {

@@ -40,7 +40,7 @@ public abstract class MixinClientLevel_AnimateTick extends Level {
 
 	@WrapMethod(method = "animateTick")
 	public void asyncparticles_animateTick(int i, int j, int k, Operation<Void> original) {
-		if (!AsyncTickBehavior.INSTANCE.isShouldTickParticles() &&
+		if (!AsyncTickBehavior.getInstance().isShouldTickParticles() &&
 			ConfigHelper.isTickAsync()) {
 			// don't tick animate if the game is lagging
 			return;
@@ -48,13 +48,13 @@ public abstract class MixinClientLevel_AnimateTick extends Level {
 		if (!ConfigHelper.asyncAnimateTick()) {
 			original.call(i, j, k);
 		} else {
-			EndTickOperation.schedule(asyncparticles$ANIMATE_TICK, false, () -> original.call(i, j, k), Diagnostic::errorDuringAsyncAnimateTick);
+			EndTickOperation.schedule(asyncparticles$ANIMATE_TICK, false, () -> original.call(i, j, k), Diagnostic::errorAsyncAnimateTick);
 		}
 	}
 
 	@Inject(method = "animateTick", at = @At(value = "CONSTANT", args = "intValue=16"), cancellable = true)
 	public void onAnimateTick(int i, int j, int k, CallbackInfo ci) {
-		if (AsyncTickBehavior.INSTANCE.isCancelled() && !ConfigHelper.forceDoneBlockAnimateTick()) {
+		if (AsyncTickBehavior.getInstance().isCancelled() && !ConfigHelper.forceDoneBlockAnimateTick()) {
 			ci.cancel();
 		}
 	}

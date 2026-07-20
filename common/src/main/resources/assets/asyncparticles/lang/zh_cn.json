@@ -118,6 +118,8 @@
   "gui.asyncparticles.revert": "还原",
   "chat.asyncparticles.warn.get_block_entity_off_main_thread": "检测到正从非主线程获取方块实体（BlockEntity），请查看 latest.log！\n你可能需要启用“%s”，强烈建议向作者反馈该问题以获取更准确的建议。",
   "chat.asyncparticles.warn.get_entities_off_main_thread": "检测到正从其他线程获取实体（Entity），请查看 latest.log！\n你可能需要启用“%s”，强烈建议向作者反馈该问题以获取更准确的建议。",
-  "chat.asyncparticles.warn.temporary_mark_gpuOnlyAsyncParticleTick": "在主线程渲染粒子时发生意外错误：%s\n这可能是粒子的 tick 和 render 方法之间的竞态条件导致的。\n已在内部临时启用“%s”。建议手动开启此选项，否则游戏重启后该错误会再次出现。\n强烈建议将此错误报告到 %s，以获取更准确的建议，这有助于作者定位并修复潜在问题。",
-  "chat.asyncparticles.warn.error_during_async": "执行%2$s出现错误：%1$s\n这很可能是因为其他模组注入 %3$s 的方法不兼容所致。\n已在内部临时禁用“%2$s”。建议手动禁用此选项，否则游戏重启后该错误会再次出现。"
+  "chat.asyncparticles.warn.error_during_main_thread_particle_rendering": "在主线程渲染粒子时发生意外错误：%s\n这可能是粒子的 tick 和 render 方法之间的竞态条件导致的。\n已在内部临时启用“%s”。建议手动开启此选项，否则游戏重启后该错误会再次出现。\n强烈建议将此错误报告到 %s，以获取更准确的建议，这有助于作者定位并修复潜在问题。",
+  "chat.asyncparticles.warn.error_during_async_particle_tick": "在执行异步的粒子 Tick 时发生意外错误：%s\n这可能是粒子的 tick 和 render 方法之间的竞态条件导致的。\n已在内部临时启用“%s”。建议手动开启此选项，否则游戏重启后该错误会再次出现。\n强烈建议将此错误报告到 %s，以获取更准确的建议，这有助于作者定位并修复潜在问题。",
+  "chat.asyncparticles.warn.error_during_async_gpu_particle_tick": "在执行异步的 GPU 粒子 Tick 时发生意外错误：%s\n原因未知，已在内部临时禁用“%s”。\n请将此错误报告到 %s，这有助于作者定位并修复问题。",
+  "chat.asyncparticles.warn.error_during_async_incompatible_injection": "执行“%2$s”时发生意外错误：%1$s\n这很可能是因为其他模组注入 %3$s 的方法不兼容所致。\n已在内部临时禁用“%2$s”。建议手动禁用此选项，否则游戏重启后该错误会再次出现。"
 }

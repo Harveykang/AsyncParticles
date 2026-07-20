@@ -20,8 +20,8 @@ public class MixinLevelRenderer_TickRain {
 
 	@WrapMethod(method = "tickRain")
 	private void wrapTickRain(Camera camera, Operation<Void> original) {
-		if (ConfigHelper.isTickWeatherAsync() && AsyncTickBehavior.INSTANCE.isShouldTickParticles()) {
-			EndTickOperation.schedule(asyncparticles$TICK_RAIN, false, () -> original.call(camera), Diagnostic::errorDuringAsyncRainTick);
+		if (ConfigHelper.isTickWeatherAsync() && AsyncTickBehavior.getInstance().isShouldTickParticles()) {
+			EndTickOperation.schedule(asyncparticles$TICK_RAIN, false, () -> original.call(camera), Diagnostic::errorAsyncRainTick);
 		} else {
 			original.call(camera);
 		}

@@ -4,16 +4,17 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.compat.Diagnostic;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
-import fun.qu_an.minecraft.asyncparticles.client.util.*;
+import fun.qu_an.minecraft.asyncparticles.client.util.AsyncParticleWorkerThread;
+import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
+import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
+import fun.qu_an.minecraft.asyncparticles.client.util.TryAndStoreFakeBufferBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -22,11 +23,12 @@ import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
 import net.irisshaders.iris.fantastic.PhasedParticleEngine;
 import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
 import net.irisshaders.iris.shaderpack.properties.ParticleRenderingSettings;
-import net.minecraft.*;
+import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.Mth;
@@ -50,10 +52,10 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRendering
 // TODO: Organize this shit
 @Environment(EnvType.CLIENT)
 public abstract class AsyncRenderBehavior {
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
 	public static final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
-	public static final AsyncRenderBehavior INSTANCE = newInstance();
+	private static final AsyncRenderBehavior INSTANCE = newInstance();
 
 	@ExpectPlatform
 	private static AsyncRenderBehavior newInstance() {
@@ -81,10 +83,10 @@ public abstract class AsyncRenderBehavior {
 	private Consumer<String> debugConsumer;
 	private CompletableFuture<Void> asyncTask;
 	private int asyncTasksSize;
-	private final ExceptionTracker<Class<? extends Particle>> exceptionTracker = new ExceptionTracker<>(
-		() -> 5000,
-		ConfigHelper::getRenderFailurePerSecondThreshold
-	);
+
+	public static AsyncRenderBehavior getInstance() {
+		return INSTANCE;
+	}
 
 	/* Renderer */
 
@@ -114,9 +116,8 @@ public abstract class AsyncRenderBehavior {
 			if (bTesselator.shouldSync) {
 				continue;
 			}
-			asyncTasks.add(CompletableFuture.runAsync(() -> renderParticles(f, camera, queue, particleRenderType, bTesselator.begin()),
-					executor)
-				.exceptionally(this::renderAsyncExceptionally));
+			asyncTasks.add(CompletableFuture.runAsync(() -> renderParticles(f, camera, queue, particleRenderType, bTesselator.begin()), executor)
+				.exceptionally(RenderExceptionHandler.getInstance()::renderAsyncExceptionally));
 		}
 		int size = asyncTasksSize = asyncTasks.size();
 		asyncTask = CompletableFuture.allOf(asyncTasks.toArray(new CompletableFuture[size]));
@@ -167,40 +168,9 @@ public abstract class AsyncRenderBehavior {
 			try {
 				particle.render(bufferBuilder, camera, f3);
 			} catch (Throwable t) {
-				onRenderingParticleException(particleRenderType, particle, t);
+				RenderExceptionHandler.getInstance().onRenderOffMainThreadExceptionally(particleRenderType, particle, t);
 			}
 		}
-	}
-
-	private void onRenderingParticleException(ParticleRenderType particleRenderType, Particle particle, Throwable t) {
-		boolean tolerable = AsyncTickBehavior.INSTANCE.isTolerable(t);
-		Class<? extends Particle> particleClass = ((ParticleAddon) particle).asyncparticles$getRealClass();
-		if (tolerable && !exceptionTracker.addException(particleClass, t)) {
-			return;
-		}
-		((ParticleAddon) particle).asyncparticles$setRenderSync();
-		if (!shouldSync(particleClass)) {
-			if (!tolerable) {
-				LOGGER.warn("Exception while rendering particle {}, marking as sync", particle, t);
-			} else {
-				LOGGER.warn("Exception {} thrown while rendering particle {} exceeds the threshold, please contact the author: {}",
-					t.getClass().getName(),
-					particle,
-					AsyncParticlesClient.ISSUE_URL,
-					t);
-			}
-			markAsSync(particleClass);
-		}
-		recordSync(particleRenderType, particle);
-	}
-
-	private Void renderAsyncExceptionally(Throwable e) {
-		Minecraft mc = Minecraft.getInstance();
-		if (mc.level != null && mc.player != null && mc.getCameraEntity() != null) {
-			ReportedException reportedException = GameUtil.getReportedException(e);
-			throw ExceptionUtil.toThrowDirectly(reportedException == null ? e : reportedException);
-		}
-		return null;
 	}
 
 	public void endAll(float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
@@ -254,18 +224,6 @@ public abstract class AsyncRenderBehavior {
 //			throw new IllegalStateException("Can only wait for async tasks around translucent");
 //		}
 		waitForAsyncTasks();
-	}
-
-	public ReportedException constructCrashReport(Particle particle, ParticleRenderType particleRenderType, Throwable t) {
-		AsyncTickBehavior.INSTANCE.debugLater(LOGGER::info);
-		AsyncTickBehavior.INSTANCE.tryDebug();
-		debugLater(LOGGER::info);
-		tryDebug();
-		CrashReport crashReport = CrashReport.forThrowable(t, "Rendering Particle");
-		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
-		crashReportCategory.setDetail("Particle", particle::toString);
-		crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
-		return new ReportedException(crashReport);
 	}
 
 	/* BufferBuilder */
@@ -442,15 +400,6 @@ public abstract class AsyncRenderBehavior {
 
 	public void setFrustum(@NotNull Frustum frustum) {
 		this.frustum = frustum;
-	}
-
-	public boolean onRenderOnMainThreadExceptionally(Throwable t, Particle particle, ParticleRenderType prt) {
-		if (!(t instanceof Exception e) || !ConfigHelper.isTickAsync() || ConfigHelper.isGpuOnlyAsyncParticleTick()) {
-			throw constructCrashReport(particle, prt, t);
-		} else {
-			Diagnostic.unexpectedRenderErrorOnMainThread(e);
-		}
-		return true;
 	}
 
 	public static class AsyncRendererThread extends AsyncParticleWorkerThread {

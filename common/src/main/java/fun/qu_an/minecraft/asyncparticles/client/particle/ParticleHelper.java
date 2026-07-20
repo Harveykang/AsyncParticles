@@ -17,7 +17,7 @@ public class ParticleHelper {
 		return IterationSafeEvictingQueue.newInstance(
 			16,
 			ConfigHelper.getParticleLimit(),
-			AsyncTickBehavior.INSTANCE::onEvicted);
+			AsyncTickBehavior.getInstance()::onEvicted);
 	}
 
 	public static void doFirstRefresh(Particle particle) {

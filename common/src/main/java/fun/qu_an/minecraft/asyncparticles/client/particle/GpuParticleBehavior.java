@@ -196,7 +196,7 @@ public class GpuParticleBehavior {
 	}
 
 	public Frustum getFrustum() {
-		return AsyncRenderBehavior.INSTANCE.getFrustum();
+		return AsyncRenderBehavior.getInstance().getFrustum();
 	}
 
 	public void beginFrame() {

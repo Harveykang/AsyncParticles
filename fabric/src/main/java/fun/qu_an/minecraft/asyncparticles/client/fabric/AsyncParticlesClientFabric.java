@@ -61,10 +61,10 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 					.then(literal("debug")
 						.executes(context -> {
 							FabricClientCommandSource source = context.getSource();
-							AsyncTickBehavior.INSTANCE.debugLater(s -> source.sendFeedback(Component.literal(s)
+							AsyncTickBehavior.getInstance().debugLater(s -> source.sendFeedback(Component.literal(s)
 								.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
 									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
-							AsyncRenderBehavior.INSTANCE.debugLater(s -> source.sendFeedback(Component.literal(s)
+							AsyncRenderBehavior.getInstance().debugLater(s -> source.sendFeedback(Component.literal(s)
 								.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
 									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
 							return 1;
@@ -72,7 +72,7 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 					.then(literal("dump")
 						.executes(context -> {
 							FabricClientCommandSource source = context.getSource();
-							AsyncTickBehavior.INSTANCE.dumpParticles();
+							AsyncTickBehavior.getInstance().dumpParticles();
 							source.sendFeedback(Component.literal("Particles have been dumped to log."));
 							return 1;
 						}))
@@ -140,7 +140,7 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 								source.sendFeedback(Component.literal("Failed to reload config"));
 								return 1;
 							}
-							AsyncTickBehavior.INSTANCE.reloadLater();
+							AsyncTickBehavior.getInstance().reloadLater();
 							source.sendFeedback(Component.literal("AsyncParticles config reloaded"));
 							return 1;
 						})));

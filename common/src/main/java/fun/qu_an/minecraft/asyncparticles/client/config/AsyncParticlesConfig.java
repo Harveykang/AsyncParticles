@@ -114,7 +114,7 @@ public class AsyncParticlesConfig {
 						Minecraft.getInstance().setScreen(current);
 						return;
 					} finally {
-						AsyncTickBehavior.INSTANCE.reloadLater();
+						AsyncTickBehavior.getInstance().reloadLater();
 					}
 					current.message = msg.append("\n").append(
 						Component.translatable("gui.asyncparticles.reload-successfully")
@@ -150,7 +150,7 @@ public class AsyncParticlesConfig {
 						Minecraft.getInstance().setScreen(current);
 						return;
 					} finally {
-						AsyncTickBehavior.INSTANCE.reloadLater();
+						AsyncTickBehavior.getInstance().reloadLater();
 					}
 					current.message = msg.append("\n").append(
 						Component.translatable("gui.asyncparticles.reset-successfully")

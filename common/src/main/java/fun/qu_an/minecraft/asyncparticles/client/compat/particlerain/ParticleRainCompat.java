@@ -16,7 +16,7 @@ public class ParticleRainCompat {
 	public static final AtomicInteger particleCount = new AtomicInteger();
 
 	public static void init() {
-		AsyncTickBehavior.INSTANCE.addTickInParallel(BlendedParticleRenderType.INSTANCE);
+		AsyncTickBehavior.getInstance().addTickInParallel(BlendedParticleRenderType.INSTANCE);
 	}
 
 	public static void onCreateCollision(ClientLevel level, Vec3 position, Vec3 contactPointMotion) {
