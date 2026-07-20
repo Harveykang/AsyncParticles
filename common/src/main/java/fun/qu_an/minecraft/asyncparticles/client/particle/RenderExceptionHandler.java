@@ -53,7 +53,7 @@ public class RenderExceptionHandler {
 	public Void renderAsyncExceptionally(Throwable e) {
 		AsyncRenderBehavior.LOGGER.error("Error rendering particle", e);
 		Minecraft mc1 = Minecraft.getInstance();
-		if (mc1.level != null && mc1.player != null) {
+		if (mc1.level != null && mc1.player != null && mc1.cameraEntity != null) {
 			throw ExceptionUtil.toThrowDirectly(e);
 		}
 		return null;
