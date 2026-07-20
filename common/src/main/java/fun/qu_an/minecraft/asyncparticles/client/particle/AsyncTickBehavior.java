@@ -111,7 +111,7 @@ public class AsyncTickBehavior {
 		if (!ConfigHelper.isTickAsync()) {
 			return;
 		}
-		RenderExceptionHandler.getInstance().resetCancelled();
+		TickExceptionHandler.getInstance().resetCancelled();
 		// assert i < to;
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
 		profiler.push("async_particles");
@@ -282,7 +282,7 @@ public class AsyncTickBehavior {
 				}
 
 				tickTasks.addTask(() -> timeUsageNano.setRelease(System.nanoTime() - timeUsageNano.getAcquire()));
-				tickTasks.submitAll(TickExceptionHandler.getInstance()::resetCancelled, e -> {
+				tickTasks.submitAll(e -> {
 					Minecraft mc1 = Minecraft.getInstance();
 					if (level == mc1.level && player == mc1.player && cameraEntity == mc1.cameraEntity) {
 						throw ExceptionUtil.toThrowDirectly(e);

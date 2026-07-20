@@ -13,16 +13,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class RenderExceptionHandler {
 	private static final RenderExceptionHandler INSTANCE = new RenderExceptionHandler();
 	private final ExceptionTracker<Class<? extends Particle>> exceptionTracker = new ExceptionTracker<>(
 		() -> 5000,
 		ConfigHelper::getRenderFailurePerSecondThreshold
 	);
-	private final AtomicBoolean cancelled = new AtomicBoolean(false);
-	private final Object cancelledLock = new Object();
 
 	public static RenderExceptionHandler getInstance() {
 		return INSTANCE;
@@ -75,21 +71,18 @@ public class RenderExceptionHandler {
 		if (!(t instanceof Exception e)) {
 			throw constructCrashReport(particle, prt, t);
 		}
-		if (!cancelled.getAcquire()) { // idempotency
-			synchronized (cancelledLock) {
-				if (!cancelled.getAcquire()) {
+		TickExceptionHandler tickExceptionHandler = TickExceptionHandler.getInstance();
+		if (!tickExceptionHandler.cancelled.getAcquire()) { // idempotency
+			synchronized (tickExceptionHandler.cancelledLock) {
+				if (!tickExceptionHandler.cancelled.getAcquire()) {
 					if (!ConfigHelper.isTickAsync() || ConfigHelper.isGpuOnlyAsyncParticleTick()) {
 						throw constructCrashReport(particle, prt, t);
 					}
-					cancelled.setRelease(true);
+					tickExceptionHandler.cancelled.setRelease(true);
 					Diagnostic.errorParticleRenderOnMainThread(e);
 				}
 			}
 		}
 		return true;
-	}
-
-	public void resetCancelled() {
-		cancelled.setRelease(false);
 	}
 }
