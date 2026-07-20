@@ -22,8 +22,8 @@ import static fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil.toThr
 
 public class TickExceptionHandler {
 	private static final TickExceptionHandler INSTANCE = new TickExceptionHandler();
-	private final AtomicBoolean cancelled = new AtomicBoolean(false);
-	private final Object cancelledLock = new Object();
+	final AtomicBoolean cancelled = new AtomicBoolean(false);
+	final Object cancelledLock = new Object();
 	private final ExceptionTracker<Object> exceptionTracker = new ExceptionTracker<>(
 		() -> 5000,
 		ConfigHelper::getTickFailurePerSecondThreshold
