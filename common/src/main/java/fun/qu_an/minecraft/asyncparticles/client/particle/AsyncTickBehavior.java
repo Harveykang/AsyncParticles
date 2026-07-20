@@ -18,9 +18,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -194,21 +197,31 @@ public class AsyncTickBehavior {
 	 */
 	public void postTick(int i, int to) {
 		Minecraft mc = Minecraft.getInstance();
-		boolean levelRunning = mc.level != null && mc.player != null && mc.cameraEntity != null && !mc.isPaused();
+		ClientLevel level = mc.level;
+		LocalPlayer player = mc.player;
+		Entity cameraEntity = mc.cameraEntity;
+		boolean levelRunning = level != null && player != null && cameraEntity != null && !mc.isPaused();
 		if (!ConfigHelper.isTickAsync()) {
 			tryReload();
 			tryDebug();
-			if (levelRunning) {
+			if (!levelRunning) {
+				if (!sequencedEndTickOperations.isEmpty()) {
+					sequencedEndTickOperations.clear();
+				}
+				if (!parallelEndTickOperations.isEmpty()) {
+					parallelEndTickOperations.clear();
+				}
+			} else {
 				sequencedEndTickEvents.forEach(Runnable::run);
 				parallelEndTickEvents.forEach(Runnable::run);
-			}
-			if (!sequencedEndTickOperations.isEmpty()) {
-				sequencedEndTickOperations.forEach(Runnable::run);
-				sequencedEndTickOperations.clear();
-			}
-			if (!parallelEndTickOperations.isEmpty()) {
-				parallelEndTickOperations.forEach(Runnable::run);
-				parallelEndTickOperations.clear();
+				if (!sequencedEndTickOperations.isEmpty()) {
+					sequencedEndTickOperations.forEach(Runnable::run);
+					sequencedEndTickOperations.clear();
+				}
+				if (!parallelEndTickOperations.isEmpty()) {
+					parallelEndTickOperations.forEach(Runnable::run);
+					parallelEndTickOperations.clear();
+				}
 			}
 			return;
 		}
@@ -230,48 +243,57 @@ public class AsyncTickBehavior {
 			tryReload();
 			tryDebug();
 
-			tickTasks.addTask(() -> timeUsageNano.setRelease(System.nanoTime()));
-			tickTasks.groupTasks(false);
+			if (!levelRunning) {
+				if (!sequencedEndTickOperations.isEmpty()) {
+					sequencedEndTickOperations.clear();
+				}
+				if (!parallelEndTickOperations.isEmpty()) {
+					parallelEndTickOperations.clear();
+				}
+			} else {
+				tickTasks.addTask(() -> timeUsageNano.setRelease(System.nanoTime()));
+				tickTasks.groupTasks(false);
 
-			List<EndTickOperation> sequencedEndTickOperations = new ReferenceArrayList<>(this.sequencedEndTickOperations);
-			this.sequencedEndTickOperations.clear();
-			tickTasks.addTask(() -> {
-				// 每 tick 结束时都要执行的固定事件
-				if (levelRunning) {
+				List<EndTickOperation> sequencedEndTickOperations = new ReferenceArrayList<>(this.sequencedEndTickOperations);
+				this.sequencedEndTickOperations.clear();
+				tickTasks.addTask(() -> {
+					// 每 tick 结束时都要执行的固定事件
 					if (!this.sequencedEndTickEvents.isEmpty()) {
 						for (Runnable r : this.sequencedEndTickEvents) {
 							r.run();
 						}
 					}
-				}
-				if (!sequencedEndTickOperations.isEmpty()) {
-					for (EndTickOperation o : sequencedEndTickOperations) {
-						o.run();
+					if (!sequencedEndTickOperations.isEmpty()) {
+						for (EndTickOperation o : sequencedEndTickOperations) {
+							o.run();
+						}
 					}
-				}
-			});
-			if (!this.parallelEndTickEvents.isEmpty()) {
-				if (levelRunning) {
+				});
+				if (!this.parallelEndTickEvents.isEmpty()) {
 					tickTasks.addTasks(this.parallelEndTickEvents);
 				}
-			}
-			if (!parallelEndTickOperations.isEmpty()) {
-				tickTasks.addTasks(parallelEndTickOperations);
-				parallelEndTickOperations.clear();
-			}
-			tickTasks.groupTasks(true);
+				if (!parallelEndTickOperations.isEmpty()) {
+					tickTasks.addTasks(parallelEndTickOperations);
+					parallelEndTickOperations.clear();
+				}
+				tickTasks.groupTasks(true);
 
-			if (!this.particleOperations.isEmpty()) {
-				if (levelRunning) {
+				if (!this.particleOperations.isEmpty()) {
 					List<Runnable> particleOperations = new ReferenceArrayList<>(this.particleOperations);
 					tickTasks.addTasks(particleOperations);
 					tickTasks.groupTasks(true);
+					this.particleOperations.clear();
 				}
-				this.particleOperations.clear();
-			}
 
-			tickTasks.addTask(() -> timeUsageNano.setRelease(System.nanoTime() - timeUsageNano.getAcquire()));
-			tickTasks.submitAll();
+				tickTasks.addTask(() -> timeUsageNano.setRelease(System.nanoTime() - timeUsageNano.getAcquire()));
+				tickTasks.submitAll(e -> {
+					Minecraft mc1 = Minecraft.getInstance();
+					if (level == mc1.level && player == mc1.player && cameraEntity == mc1.cameraEntity) {
+						throw ExceptionUtil.toThrowDirectly(e);
+					}
+					// else level reset
+				});
+			}
 		}
 		profiler.pop();
 	}

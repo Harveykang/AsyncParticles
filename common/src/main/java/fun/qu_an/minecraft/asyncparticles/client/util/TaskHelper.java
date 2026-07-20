@@ -43,7 +43,7 @@ public final class TaskHelper {
 		futures.add(executor.submit(task));
 	}
 
-	public void submitAll() {
+	public void submitAll(Consumer<Exception> exceptionHandler) {
 		if (!tasks.isEmpty()) {
 			groupTasks(false);
 		}
@@ -52,7 +52,14 @@ public final class TaskHelper {
 		}
 
 		if (groups.size() == 1) {
-			ForkJoinTask<?> task = executor.submit(groups.remove(0));
+			Group group = groups.remove(0);
+			ForkJoinTask<?> task = executor.submit(() -> {
+				try {
+					group.run();
+				} catch (Exception e) {
+					exceptionHandler.accept(e);
+				}
+			});
 			futures.add(task);
 			return;
 		}
@@ -65,11 +72,15 @@ public final class TaskHelper {
 				try {
 					group.run();
 				} catch (Exception e) {
-					throw ExceptionUtil.toThrowDirectly(e);
+					exceptionHandler.accept(e);
 				}
 			}
 		});
 		futures.add(compoundFuture);
+	}
+
+	public void submitAll() {
+		submitAll(ExceptionUtil::toThrowDirectly);
 	}
 
 	public void waitForCompletion() {
