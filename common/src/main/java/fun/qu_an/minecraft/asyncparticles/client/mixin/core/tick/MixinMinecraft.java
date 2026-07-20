@@ -29,26 +29,26 @@ public class MixinMinecraft {
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
 	private void preTick(boolean bl, CallbackInfo ci, @Local(ordinal = 0) int i, @Local(ordinal = 1) int j) {
-		AsyncTickBehavior.INSTANCE.preTick(j, Math.min(10, i));
+		AsyncTickBehavior.getInstance().preTick(j, Math.min(10, i));
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/Minecraft;tick()V"))
 	private void postTick(boolean bl, CallbackInfo ci, @Local(ordinal = 0) int i, @Local(ordinal = 1) int j) {
-		AsyncTickBehavior.INSTANCE.postTick(j, Math.min(10, i));
+		AsyncTickBehavior.getInstance().postTick(j, Math.min(10, i));
 	}
 
 	@Inject(method = {"setLevel", "clearLevel()V"}, at = @At("HEAD"))
 	private void onSetLevel(CallbackInfo ci) {
-		AsyncTickBehavior.INSTANCE.reset();
-		AsyncRenderBehavior.INSTANCE.reset();
+		AsyncTickBehavior.getInstance().reset();
+		AsyncRenderBehavior.getInstance().reset();
 		asyncparticles$alreadyReset = true;
 	}
 
 	@Inject(method = "updateScreenAndTick", at = @At("HEAD"))
 	private void onUpdateScreenAndTick(CallbackInfo ci) {
 		if (!asyncparticles$alreadyReset) {
-			AsyncTickBehavior.INSTANCE.reset();
-			AsyncRenderBehavior.INSTANCE.reset();
+			AsyncTickBehavior.getInstance().reset();
+			AsyncRenderBehavior.getInstance().reset();
 			asyncparticles$alreadyReset = true;
 		}
 	}
@@ -71,7 +71,7 @@ public class MixinMinecraft {
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;tick()V"))
 	private void redirectParticleEngineTick(ParticleEngine instance) {
 		if (ConfigHelper.isTickAsync()) {
-			AsyncTickBehavior.INSTANCE.tickSyncParticles();
+			AsyncTickBehavior.getInstance().tickSyncParticles();
 		} else {
 			instance.tick();
 		}

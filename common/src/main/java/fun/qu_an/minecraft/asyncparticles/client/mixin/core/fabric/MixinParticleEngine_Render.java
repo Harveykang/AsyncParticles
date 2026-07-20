@@ -11,6 +11,7 @@ import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.particle.GpuParticleBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.particle.RenderExceptionHandler;
 import fun.qu_an.minecraft.asyncparticles.client.particle.render.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import net.minecraft.client.Camera;
@@ -62,12 +63,12 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 		// Remove duplicated render types, (e.g. Hex Casting mod's bug)
 		Set<ParticleRenderType> renderTypes = new LinkedHashSet<>((int) (RENDER_ORDER.size() * 1.34) + 1);
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderBehavior.INSTANCE.getVertexFormatPair(type, textureManager) != AsyncRenderBehavior.INSTANCE.EMPTY_FORMAT) {
+			if (AsyncRenderBehavior.getInstance().getVertexFormatPair(type, textureManager) != AsyncRenderBehavior.getInstance().EMPTY_FORMAT) {
 				renderTypes.add(type);
 			}
 		}
 		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderBehavior.INSTANCE.getVertexFormatPair(type, textureManager) == AsyncRenderBehavior.INSTANCE.EMPTY_FORMAT) {
+			if (AsyncRenderBehavior.getInstance().getVertexFormatPair(type, textureManager) == AsyncRenderBehavior.getInstance().EMPTY_FORMAT) {
 				renderTypes.add(type);
 			}
 		}
@@ -81,10 +82,10 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 	@Overwrite
 	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f) {
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-		boolean renderAsync = AsyncRenderBehavior.INSTANCE.isRenderAsync();
+		boolean renderAsync = AsyncRenderBehavior.getInstance().isRenderAsync();
 		if (renderAsync) {
 			profiler.push("wait_for_async_tasks");
-			AsyncRenderBehavior.INSTANCE.tryWaitingForAsyncTasks();
+			AsyncRenderBehavior.getInstance().tryWaitingForAsyncTasks();
 			profiler.pop();
 		}
 
@@ -100,9 +101,9 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 
 		GpuParticleBehavior.INSTANCE.compute(camera, f);
 
-		Frustum frustum = AsyncRenderBehavior.INSTANCE.getFrustum();
+		Frustum frustum = AsyncRenderBehavior.getInstance().getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
-		boolean irisEarlyOpaquePhase = AsyncRenderBehavior.INSTANCE.isIrisEarlyOpaquePhase();
+		boolean irisEarlyOpaquePhase = AsyncRenderBehavior.getInstance().isIrisEarlyOpaquePhase();
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			// FABRIC skips NO_RENDER
 			//				if (particleRenderType == ParticleRenderType.NO_RENDER) {
@@ -136,7 +137,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 				tesselator = FakeTesselator.INSTANCE;
 				realCullMode = null;
 				bufferBuilder = FakeBufferBuilder.INSTANCE;
-			} else if ((bufferBuilder = AsyncRenderBehavior.INSTANCE.beginBufferBuilder(particleRenderType, textureManager)) ==
+			} else if ((bufferBuilder = AsyncRenderBehavior.getInstance().beginBufferBuilder(particleRenderType, textureManager)) ==
 				FakeBufferBuilder.INSTANCE) {
 				realCullMode = particleCullingMode;
 				// if irisEarlyOpaquePhase, we render custom particles in AsyncRenderer.irisCustom()
@@ -150,7 +151,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 				toBegin = bufferBuilder = tesselator.getBuilder();
 			} else {
 				realCullMode = ParticleCullingMode.DISABLED;
-				syncParticles = AsyncRenderBehavior.INSTANCE.getSync(particleRenderType);
+				syncParticles = AsyncRenderBehavior.getInstance().getSync(particleRenderType);
 				tesselator = CustomTesselator.of(bufferBuilder, b -> BufferUploader.drawWithShader(b.end()));
 				toBegin = FakeBufferBuilder.INSTANCE;
 			}
@@ -190,7 +191,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 					try {
 						particle.render(bufferBuilder, camera, f3);
 					} catch (Throwable t) {
-						if (AsyncRenderBehavior.INSTANCE.onRenderOnMainThreadExceptionally(t, particle, particleRenderType)) {
+						if (RenderExceptionHandler.getInstance().onRenderOnMainThreadExceptionally(t, particle, particleRenderType)) {
 							break;
 						}
 					}

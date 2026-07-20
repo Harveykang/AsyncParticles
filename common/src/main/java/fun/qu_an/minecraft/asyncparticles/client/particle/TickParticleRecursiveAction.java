@@ -44,7 +44,7 @@ public class TickParticleRecursiveAction extends RecursiveAction {
 			boolean forceDone = ConfigHelper.forceDoneParticleTick();
 			ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 			spliterator.forEachRemaining(particle -> {
-				if (AsyncTickBehavior.INSTANCE.isCancelled() && !forceDone) {
+				if (AsyncTickBehavior.getInstance().isCancelled() && !forceDone) {
 					return;
 				}
 				if (!particle.isAlive()) {
@@ -56,7 +56,7 @@ public class TickParticleRecursiveAction extends RecursiveAction {
 					// Skip the first tick after enqueued that the particle is added to the queue.
 					shouldTick = isGpu;
 				} else if (particleAddon.asyncparticles$isTickSync()) {
-					AsyncTickBehavior.INSTANCE.recordSync(particle);
+					AsyncTickBehavior.getInstance().recordSync(particle);
 					return;
 				} else {
 					shouldTick = true;
@@ -65,7 +65,9 @@ public class TickParticleRecursiveAction extends RecursiveAction {
 					try {
 						particleEngine.tickParticle(particle);
 					} catch (Throwable t) {
-						AsyncTickBehavior.INSTANCE.onTickingParticleException(particle, t);
+						if (TickExceptionHandler.getInstance().onTickingParticleException(particle, t)) {
+							return;
+						}
 					}
 					particleAddon.asyncparticles$setTicked();
 				}

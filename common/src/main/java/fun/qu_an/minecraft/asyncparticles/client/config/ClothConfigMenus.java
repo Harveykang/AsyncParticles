@@ -338,7 +338,7 @@ class ClothConfigMenus {
 						current -> Minecraft.getInstance().setScreen(prevScreen)));
 				});
 			}
-			AsyncTickBehavior.INSTANCE.reloadLater();
+			AsyncTickBehavior.getInstance().reloadLater();
 		});
 
 		return builder;

@@ -83,6 +83,48 @@ public final class TaskHelper {
 		submitAll(ExceptionUtil::toThrowDirectly);
 	}
 
+	public void submitAll(Runnable whenCompleted, Consumer<Exception> exceptionHandler) {
+		if (!tasks.isEmpty()) {
+			groupTasks(false);
+		}
+		if (groups.isEmpty()) {
+			return;
+		}
+
+		if (groups.size() == 1) {
+			Group group = groups.remove(0);
+			ForkJoinTask<?> task = executor.submit(() -> {
+				try {
+					group.run();
+				} catch (Exception e) {
+					exceptionHandler.accept(e);
+				} finally {
+					whenCompleted.run();
+				}
+			});
+			futures.add(task);
+			return;
+		}
+
+		List<Runnable> groupsSnapshot = new ReferenceArrayList<>(groups);
+		groups.clear();
+
+		ForkJoinTask<?> compoundFuture = executor.submit(() -> {
+			try {
+				for (Runnable group : groupsSnapshot) {
+					try {
+						group.run();
+					} catch (Exception e) {
+						exceptionHandler.accept(e);
+					}
+				}
+			} finally {
+				whenCompleted.run();
+			}
+		});
+		futures.add(compoundFuture);
+	}
+
 	public void waitForCompletion() {
 		waitForCompletion(exceptionHandler);
 	}

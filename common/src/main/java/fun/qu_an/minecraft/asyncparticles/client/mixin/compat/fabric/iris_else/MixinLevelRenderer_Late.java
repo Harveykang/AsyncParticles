@@ -31,8 +31,8 @@ public abstract class MixinLevelRenderer_Late {
 										 @Share(namespace = AsyncParticlesClient.MOD_ID, value = "internalRenderingMode")
 										 LocalIntRef irm) {
 		switch (irm.get()) {
-			case SYNC -> AsyncRenderBehavior.INSTANCE.endAll(poseStack, partialTick, camera, lightTexture, false);
-			case COMPATIBILITY_ASYNC -> AsyncRenderBehavior.INSTANCE.endAll(poseStack, partialTick, camera, lightTexture, true);
+			case SYNC -> AsyncRenderBehavior.getInstance().endAll(poseStack, partialTick, camera, lightTexture, false);
+			case COMPATIBILITY_ASYNC -> AsyncRenderBehavior.getInstance().endAll(poseStack, partialTick, camera, lightTexture, true);
 		}
 	}
 }

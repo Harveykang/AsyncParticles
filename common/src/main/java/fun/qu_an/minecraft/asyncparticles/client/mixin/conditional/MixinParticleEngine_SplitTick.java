@@ -35,16 +35,16 @@ public abstract class MixinParticleEngine_SplitTick {
 	                                     Queue<?> queue,
 	                                     CallbackInfo ci,
 	                                     @Local IParticleRenderer renderer) {
-		AsyncTickBehavior.INSTANCE.particleOperations.add(() -> {
+		AsyncTickBehavior.getInstance().particleOperations.add(() -> {
 			GpuParticleBehavior.GPU_PARTICLE_PHASE.set(true);
 			if (ConfigHelper.isTickAsync() &&
-				AsyncTickBehavior.INSTANCE.canTickInParallel(particleRenderType)) {
+				AsyncTickBehavior.getInstance().canTickInParallel(particleRenderType)) {
 				asyncparticles$splitTickParticleList((Queue) queue);
 			} else {
 				tickParticleList((Queue) queue);
 			}
 			GpuParticleBehavior.GPU_PARTICLE_PHASE.set(false);
-			AsyncTickBehavior.INSTANCE.doRemoveIf((Queue) queue);
+			AsyncTickBehavior.getInstance().doRemoveIf((Queue) queue);
 			renderer.tick(GpuParticleBehavior.INSTANCE.getCameraPos(), (Queue) queue);
 		});
 	}
@@ -66,9 +66,9 @@ public abstract class MixinParticleEngine_SplitTick {
 	private void redirectScheduleTick(ParticleRenderType particleRenderType,
 	                                  Queue<?> queue,
 	                                  CallbackInfo ci) {
-		AsyncTickBehavior.INSTANCE.particleOperations.add(() -> {
+		AsyncTickBehavior.getInstance().particleOperations.add(() -> {
 			if (ConfigHelper.isTickAsync() &&
-				AsyncTickBehavior.INSTANCE.canTickInParallel(particleRenderType)) {
+				AsyncTickBehavior.getInstance().canTickInParallel(particleRenderType)) {
 				asyncparticles$splitTickParticleList((Queue) queue);
 			} else {
 				tickParticleList((Queue) queue);

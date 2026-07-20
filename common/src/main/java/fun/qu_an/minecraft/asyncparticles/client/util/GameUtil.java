@@ -15,13 +15,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.DataLayer;
-import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import net.minecraft.world.level.lighting.LayerLightEventListener;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.lang.invoke.VarHandle;
-import java.lang.ref.WeakReference;
 import java.util.Queue;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -59,7 +57,7 @@ public class GameUtil {
 		return IterationSafeEvictingQueue.newInstance(
 			16,
 			ConfigHelper.getParticleLimit(),
-			AsyncTickBehavior.INSTANCE::onEvicted);
+			AsyncTickBehavior.getInstance()::onEvicted);
 	}
 
 	public static int getLightColorFromNeighbor(ClientLevel level, BlockPos pos) {

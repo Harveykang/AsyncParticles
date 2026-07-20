@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.task;
 
 import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Consumer;
@@ -14,7 +13,7 @@ public interface EndTickOperation extends Runnable {
 	 * @apiNote Execution is not guaranteed.
 	 */
 	static void schedule(EndTickOperation task) {
-		AsyncTickBehavior.INSTANCE.scheduleOperation(task);
+		AsyncTickBehavior.getInstance().scheduleOperation(task);
 	}
 
 	/**

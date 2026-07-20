@@ -8,21 +8,21 @@ public interface EndTickEvent extends Runnable {
 	 * Equivalent to {@link EndTickEvent#register(boolean false, Runnable)}
 	 */
 	static void register(EndTickEvent task) {
-		AsyncTickBehavior.INSTANCE.registerEvent(task);
+		AsyncTickBehavior.getInstance().registerEvent(task);
 	}
 
 	/**
 	 * Equivalent to {@link EndTickEvent#register(boolean false, MinecraftConsumer)}
 	 */
 	static void register(MinecraftConsumer task) {
-		AsyncTickBehavior.INSTANCE.registerEvent(() -> task.accept(Minecraft.getInstance()));
+		AsyncTickBehavior.getInstance().registerEvent(() -> task.accept(Minecraft.getInstance()));
 	}
 
 	/**
 	 * Equivalent to {@link EndTickEvent#register(boolean false, ClientLevelConsumer)}
 	 */
 	static void register(ClientLevelConsumer task) {
-		AsyncTickBehavior.INSTANCE.registerEvent(() -> task.accept(Minecraft.getInstance().level));
+		AsyncTickBehavior.getInstance().registerEvent(() -> task.accept(Minecraft.getInstance().level));
 	}
 
 	static void register(boolean parallel, Runnable task) {

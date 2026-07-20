@@ -13,18 +13,15 @@ import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
-import org.joml.Quaternionf;
 import org.lwjgl.opengl.GL30C;
 import org.spongepowered.asm.mixin.Unique;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
 
 public class GpuParticleBehavior {
 	public static final String RENDER_METHOD = Mappings.getRenderMethod();
@@ -179,7 +176,7 @@ public class GpuParticleBehavior {
 	}
 
 	public Frustum getFrustum() {
-		return AsyncRenderBehavior.INSTANCE.getFrustum();
+		return AsyncRenderBehavior.getInstance().getFrustum();
 	}
 
 	public void beginFrame() {

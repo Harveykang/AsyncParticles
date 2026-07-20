@@ -33,7 +33,7 @@ public abstract class MixinLevelRenderer_Late {
 									  @Share(namespace = AsyncParticlesClient.MOD_ID, value = "internalRenderingMode")
 									  LocalIntRef irm) {
 		if (irm.get() != DELAYED_ASYNC){
-			AsyncRenderBehavior.INSTANCE.irisCustom(poseStack, partialTick, camera, lightTexture);
+			AsyncRenderBehavior.getInstance().irisCustom(poseStack, partialTick, camera, lightTexture);
 		}
 	}
 
@@ -51,11 +51,11 @@ public abstract class MixinLevelRenderer_Late {
 										  @Share(namespace = AsyncParticlesClient.MOD_ID, value = "internalRenderingMode")
 										  LocalIntRef irm) {
 		switch (irm.get()) {
-			case BEFORE_SYNC -> AsyncRenderBehavior.INSTANCE.endAll(poseStack, partialTick, camera, lightTexture, false);
-			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.INSTANCE.irisOpaque(poseStack, partialTick, camera, lightTexture, false);
+			case BEFORE_SYNC -> AsyncRenderBehavior.getInstance().endAll(poseStack, partialTick, camera, lightTexture, false);
+			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.getInstance().irisOpaque(poseStack, partialTick, camera, lightTexture, false);
 			case MIXED_ASYNC, COMPATIBILITY_ASYNC ->
-				AsyncRenderBehavior.INSTANCE.irisOpaque(poseStack, partialTick, camera, lightTexture, true);
-			case BEFORE_ASYNC -> AsyncRenderBehavior.INSTANCE.endAll(poseStack, partialTick, camera, lightTexture, true);
+				AsyncRenderBehavior.getInstance().irisOpaque(poseStack, partialTick, camera, lightTexture, true);
+			case BEFORE_ASYNC -> AsyncRenderBehavior.getInstance().endAll(poseStack, partialTick, camera, lightTexture, true);
 		}
 	}
 
@@ -72,9 +72,9 @@ public abstract class MixinLevelRenderer_Late {
 										 LocalIntRef irm) {
 
 		switch (irm.get()) {
-			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.INSTANCE.irisTranslucent(poseStack, partialTick, camera, lightTexture, false);
+			case MIXED_SYNC, SYNC -> AsyncRenderBehavior.getInstance().irisTranslucent(poseStack, partialTick, camera, lightTexture, false);
 			case MIXED_ASYNC, COMPATIBILITY_ASYNC ->
-				AsyncRenderBehavior.INSTANCE.irisTranslucent(poseStack, partialTick, camera, lightTexture, true);
+				AsyncRenderBehavior.getInstance().irisTranslucent(poseStack, partialTick, camera, lightTexture, true);
 		}
 	}
 }

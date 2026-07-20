@@ -79,10 +79,10 @@ public final class AsyncParticlesClientForge {
 			.then(literal("debug")
 				.executes(context -> {
 					CommandSourceStack source = context.getSource();
-					AsyncTickBehavior.INSTANCE.debugLater(s -> source.sendSystemMessage(Component.literal(s)
+					AsyncTickBehavior.getInstance().debugLater(s -> source.sendSystemMessage(Component.literal(s)
 						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
 							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
-					AsyncRenderBehavior.INSTANCE.debugLater(s -> source.sendSystemMessage(Component.literal(s)
+					AsyncRenderBehavior.getInstance().debugLater(s -> source.sendSystemMessage(Component.literal(s)
 						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
 							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
 					return 1;
@@ -90,7 +90,7 @@ public final class AsyncParticlesClientForge {
 			.then(literal("dump")
 				.executes(context -> {
 					CommandSourceStack source = context.getSource();
-					AsyncTickBehavior.INSTANCE.dumpParticles();
+					AsyncTickBehavior.getInstance().dumpParticles();
 					source.sendSystemMessage(Component.literal("Particles have been dumped to log."));
 					return 1;
 				}))
@@ -159,7 +159,7 @@ public final class AsyncParticlesClientForge {
 							.append(e.getMessage()));
 						return 1;
 					}
-					AsyncTickBehavior.INSTANCE.reloadLater();
+					AsyncTickBehavior.getInstance().reloadLater();
 					source.sendSystemMessage(Component.literal("AsyncParticles config reloaded"));
 					return 1;
 				})));
