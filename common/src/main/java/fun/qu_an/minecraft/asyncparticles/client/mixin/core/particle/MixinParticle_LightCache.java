@@ -20,10 +20,6 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 	@Shadow public double z;
 	@Unique
 	private byte asyncparticles$lightCache = INITIAL_LIGHT_CACHE;
-	@Shadow
-	public int getLightColor(float partialTick) {
-		throw new AssertionError();
-	}
 
 	@Override
 	public void asyncparticles$refresh() {
