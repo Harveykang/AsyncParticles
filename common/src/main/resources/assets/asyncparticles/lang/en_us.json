@@ -1,4 +1,5 @@
 {
+  "config.asyncparticles.deprecated": "Deprecated.",
   "config.asyncparticles.not-implemented": "Not implemented yet.",
   "config.asyncparticles.category.particle": "Particle",
   "config.asyncparticles.particle.particleLimit": "Particle Limit",

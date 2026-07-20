@@ -184,11 +184,15 @@ class ClothConfigMenus {
 		ConfigCategory renderingCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.rendering"));
 		renderingCategory
 			.addEntry(entryBuilder
-				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.particleRenderingMode"),
+				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.particleRenderingMode")
+						.withStyle(ChatFormatting.STRIKETHROUGH),
 					RenderingMode.class, rendering$particleRenderingMode)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
 				.setDefaultValue(defaultConfig.rendering.particleRenderingMode)
-				.setTooltip(Component.translatable("config.asyncparticles.rendering.particleRenderingMode.tooltip"))
+				.setTooltip(
+					Component.translatable("config.asyncparticles.rendering.particleRenderingMode.tooltip"),
+					Component.translatable("config.asyncparticles.deprecated")
+						.withStyle(ChatFormatting.YELLOW))
 				.setSaveConsumer(newValue -> rendering$particleRenderingMode = newValue)
 				.build())
 			.addEntry(entryBuilder

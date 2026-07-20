@@ -1,4 +1,5 @@
 {
+  "config.asyncparticles.deprecated": "已弃用。",
   "config.asyncparticles.not-implemented": "尚未实现。",
   "config.asyncparticles.category.particle": "粒子效果",
   "config.asyncparticles.particle.particleLimit": "粒子上限",
