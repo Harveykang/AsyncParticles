@@ -46,6 +46,7 @@ public class TickExceptionHandler {
 	}
 
 	/**
+	 * This runs on particle tick or main thread when particle task is exceptionally thrown
 	 * @return Should break the tick loop
 	 */
 	public boolean onTickingParticleException(Particle particle, Throwable t) {
@@ -93,6 +94,9 @@ public class TickExceptionHandler {
 		return true;
 	}
 
+	/**
+	 * This runs on main thread when the entire tick task is exceptionally thrown
+	 */
 	public void tickExceptionally(Throwable t) {
 		if (!(t instanceof Exception e)) {
 			throw toThrowDirectly(t);

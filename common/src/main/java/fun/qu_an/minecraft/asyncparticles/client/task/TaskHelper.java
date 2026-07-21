@@ -16,11 +16,9 @@ public final class TaskHelper {
 	private final List<Group> groups = new ReferenceArrayList<>();
 	private final List<Runnable> tasks = new ReferenceArrayList<>();
 	private final List<ForkJoinTask<?>> futures = new ReferenceArrayList<>();
-	private final Consumer<Exception> exceptionHandler;
 
-	public TaskHelper(ForkJoinPool executor, Consumer<Exception> exceptionHandler) {
+	public TaskHelper(ForkJoinPool executor) {
 		this.executor = executor;
-		this.exceptionHandler = exceptionHandler;
 	}
 
 	public void addTask(@NotNull Runnable task) {
@@ -40,6 +38,9 @@ public final class TaskHelper {
 		groups.add(parallel ? new ParallelGroup(taskSnapshot) : new SequentialGroup(taskSnapshot));
 	}
 
+	/**
+	 * @param exceptionHandler Provides a handler for exceptions thrown by this group
+	 */
 	public void groupTasks(boolean parallel, Consumer<Exception> exceptionHandler) {
 		if (tasks.isEmpty()) {
 			return;
@@ -53,6 +54,9 @@ public final class TaskHelper {
 		futures.add(executor.submit(task));
 	}
 
+	/**
+	 * @param exceptionHandler Provides a handler for exceptions thrown by any group
+	 */
 	public void submitAll(Consumer<Exception> exceptionHandler) {
 		if (!tasks.isEmpty()) {
 			groupTasks(false);
@@ -93,6 +97,9 @@ public final class TaskHelper {
 		submitAll(ExceptionUtil::toThrowDirectly);
 	}
 
+	/**
+	 * @param exceptionHandler Provides a handler for exceptions thrown by any group
+	 */
 	public void submitAll(Runnable whenStarted, Runnable whenCompleted, Consumer<Exception> exceptionHandler) {
 		if (!tasks.isEmpty()) {
 			groupTasks(false);
@@ -137,10 +144,6 @@ public final class TaskHelper {
 			}
 		});
 		futures.add(compoundFuture);
-	}
-
-	public void waitForCompletion() {
-		waitForCompletion(exceptionHandler);
 	}
 
 	public void waitForCompletion(Consumer<Exception> exceptionHandler) {
