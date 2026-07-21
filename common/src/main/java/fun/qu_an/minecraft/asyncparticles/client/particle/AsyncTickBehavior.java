@@ -78,8 +78,8 @@ public class AsyncTickBehavior {
 		}, Util::onThreadException, true);
 	}
 
-	private final TaskHelper cleanupTasks = new TaskHelper(executor, ExceptionUtil::toThrowDirectly);
-	private final TaskHelper tickTasks = new TaskHelper(executor, TickExceptionHandler.getInstance()::tickExceptionally);
+	private final TaskHelper cleanupTasks = new TaskHelper(executor);
+	private final TaskHelper tickTasks = new TaskHelper(executor);
 
 	public static AsyncTickBehavior getInstance() {
 		return INSTANCE;
@@ -141,7 +141,7 @@ public class AsyncTickBehavior {
 			if (tickTasks.isRunning()) {
 				cancelled.setOpaque(true);
 				debug_cancelled = false;
-				tickTasks.waitForCompletion();
+				tickTasks.waitForCompletion(TickExceptionHandler.getInstance()::tickExceptionally);
 				cancelled.setOpaque(false);
 			}
 			shouldTickParticles = i == to - 1 && levelRunning;
@@ -326,7 +326,7 @@ public class AsyncTickBehavior {
 
 	public void waitForCleanUp() {
 		if (cleanupTasks.isRunning()) {
-			cleanupTasks.waitForCompletion();
+			cleanupTasks.waitForCompletion(ExceptionUtil::toThrowDirectly);
 		}
 	}
 
@@ -531,7 +531,7 @@ public class AsyncTickBehavior {
 		}
 		if (tickTasks.isRunning()) {
 			cancelled.setOpaque(true);
-			tickTasks.waitForCompletion();
+			tickTasks.waitForCompletion(TickExceptionHandler.getInstance()::tickExceptionally);
 		}
 		cancelled.setOpaque(false);
 		timeUsageNano.set(0L);
