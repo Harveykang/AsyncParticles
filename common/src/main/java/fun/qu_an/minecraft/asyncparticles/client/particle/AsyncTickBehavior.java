@@ -85,11 +85,14 @@ public class AsyncTickBehavior {
 	}
 
 	public void ensureLevelRunning(Runnable r, Consumer<Exception> exceptionHandler) {
+		LevelBundle levelBundle = getLevelBundle();
+		if (levelBundle == null || levelBundle.isLevelReset()) {
+			return;
+		}
 		try {
 			r.run();
 		} catch (Exception e) {
-			LevelBundle levelBundle = getLevelBundle();
-			if (levelBundle != null && !levelBundle.isLevelReset()) {
+			if (!levelBundle.isLevelReset()) {
 				exceptionHandler.accept(e);
 			}
 		}
