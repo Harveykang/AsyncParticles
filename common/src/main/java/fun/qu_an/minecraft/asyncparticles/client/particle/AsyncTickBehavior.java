@@ -10,6 +10,7 @@ import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.task.EndTickEvent;
 import fun.qu_an.minecraft.asyncparticles.client.task.EndTickOperation;
+import fun.qu_an.minecraft.asyncparticles.client.task.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;

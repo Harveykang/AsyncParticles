@@ -227,10 +227,13 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> rendering$cullWeathers = newValue)
 				.build())
 			.addEntry(entryBuilder
-				.startIntField(Component.translatable("config.asyncparticles.rendering.failPerSecLimit"),
+				.startIntField(Component.translatable("config.asyncparticles.rendering.failPerSecLimit")
+						.withStyle(ChatFormatting.STRIKETHROUGH),
 					rendering$failPerSecLimit)
 				.setDefaultValue(defaultConfig.rendering.failPerSecLimit)
-				.setTooltip(Component.translatable("config.asyncparticles.rendering.failPerSecLimit.tooltip"))
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.failPerSecLimit.tooltip"),
+					Component.translatable("config.asyncparticles.deprecated")
+						.withStyle(ChatFormatting.YELLOW))
 				.setSaveConsumer(newValue -> rendering$failPerSecLimit = newValue)
 				.setMin(0)
 				.setMax(256)
@@ -249,10 +252,13 @@ class ClothConfigMenus {
 				.setRequirement(() -> false)
 				.build())
 			.addEntry(entryBuilder
-				.startStrList(Component.translatable("config.asyncparticles.rendering.syncParticleClasses"),
+				.startStrList(Component.translatable("config.asyncparticles.rendering.syncParticleClasses")
+						.withStyle(ChatFormatting.STRIKETHROUGH),
 					new ArrayList<>(rendering$syncParticleClasses))
 				.setDefaultValue(new ArrayList<>(defaultConfig.rendering.syncParticleClasses))
-				.setTooltip(Component.translatable("config.asyncparticles.rendering.syncParticleClasses.tooltip"))
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.syncParticleClasses.tooltip"),
+					Component.translatable("config.asyncparticles.deprecated")
+						.withStyle(ChatFormatting.YELLOW))
 				.setSaveConsumer(newValue -> rendering$syncParticleClasses = new LinkedHashSet<>(newValue))
 				.build());
 		// endregion

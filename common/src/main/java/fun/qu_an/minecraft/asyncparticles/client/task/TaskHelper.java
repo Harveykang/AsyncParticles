@@ -1,5 +1,6 @@
-package fun.qu_an.minecraft.asyncparticles.client.util;
+package fun.qu_an.minecraft.asyncparticles.client.task;
 
+import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import org.jetbrains.annotations.NotNull;
 
@@ -103,11 +104,13 @@ public final class TaskHelper {
 		if (groups.size() == 1) {
 			Group group = groups.remove(0);
 			ForkJoinTask<?> task = executor.submit(() -> {
-				whenStarted.run();
 				try {
-					group.run();
-				} catch (Exception e) {
-					exceptionHandler.accept(e);
+					whenStarted.run();
+					try {
+						group.run();
+					} catch (Exception e) {
+						exceptionHandler.accept(e);
+					}
 				} finally {
 					whenCompleted.run();
 				}
