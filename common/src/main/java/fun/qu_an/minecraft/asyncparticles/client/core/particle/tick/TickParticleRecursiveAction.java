@@ -1,18 +1,13 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
 
-import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
-import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.util.Utils;
 import it.unimi.dsi.fastutil.HashCommon;
-import net.minecraft.ReportedException;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleGroup;
-import net.minecraft.client.particle.SingleQuadParticle;
 
-import java.util.Queue;
 import java.util.Spliterator;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveAction;
@@ -31,16 +26,8 @@ public class TickParticleRecursiveAction<T extends Particle> extends RecursiveAc
 		this.isGpu = isGpu;
 	}
 
-	public static <T extends Particle> void execute(ParticleGroup<?> group, Spliterator<T> spliterator) {
-		Queue<SingleQuadParticle> gpuQueue;
-		if (!(group instanceof GpuParticleGroup gpuGroup)
-			|| (gpuQueue = gpuGroup.asyncparticles$getGpuParticles()).isEmpty()) {
-			new TickParticleRecursiveAction<>(group, spliterator, 0, false).compute();
-		} else {
-			ForkJoinTask<Void> fork = new TickParticleRecursiveAction<>(group, spliterator, 0, false).fork();
-			new TickParticleRecursiveAction<>(group, gpuQueue.spliterator(), 0, true).compute();
-			fork.join();
-		}
+	public static <T extends Particle> void execute(ParticleGroup<?> group, Spliterator<T> spliterator, boolean isGpu) {
+		new TickParticleRecursiveAction<>(group, spliterator, 0, isGpu).compute();
 	}
 
 	@Override
@@ -52,7 +39,6 @@ public class TickParticleRecursiveAction<T extends Particle> extends RecursiveAc
 			left.join();
 			right.join();
 		} else {
-			boolean enableLightCache = ConfigHelper.particleLightCache();
 			spliterator.forEachRemaining(particle -> {
 				if (!particle.isAlive()) {
 					// This is to be compatible with e.g. Figura mod
@@ -61,36 +47,23 @@ public class TickParticleRecursiveAction<T extends Particle> extends RecursiveAc
 					return;
 				}
 				ParticleAddon particleAddon = (ParticleAddon) particle;
-				boolean shouldTick;
-				boolean shouldRefresh;
-				if (particleAddon.asyncparticles$isTicked()) {
-					// Skip the first tick after the particle is added to the queue.
-					// GPU particles don't skip the first tick, but skip the first refresh.
-					// skip the first refresh will fix black destruction gpu particles.
-					shouldTick = isGpu;
-					shouldRefresh = !isGpu && enableLightCache;
-				} else if (((ParticleAddon) particle).asyncparticles$isTickSync()) {
-//				assert this instanceof AsyncTickableParticleGroup;
-					((AsyncTickableParticleGroup) group).asyncparticles$recordSync(particle);
-					return;
-				} else {
-					shouldTick = true;
-					shouldRefresh = enableLightCache;
-				}
+				boolean isSyncParticle = ((ParticleGroupAddition) group).asyncparticles$isSyncParticle(particle);
+				// Skip the first tick after the particle is added to the queue.
+				// GPU particles don't skip the first tick, but skip the first refresh.
+				// skip the first refresh will fix black destruction gpu particles.
+				boolean shouldTick = !isSyncParticle && (!particleAddon.asyncparticles$isTicked() || isGpu);
 				if (shouldTick) {
 					try {
 						group.tickParticle(particle);
 					} catch (Throwable t) {
-						ReportedException re = AsyncTickBehavior.getInstance().onTickParticleException(particle, t);
-						if (re != null) {
-							throw re;
+						if (AsyncTickBehavior.getInstance().getExceptionHandler().onTickParticleException(particle, t)) {
+							return;
 						}
 					}
 					particleAddon.asyncparticles$setTicked();
 				}
-				LightCachedParticleAddon lightCachedParticle = (LightCachedParticleAddon) particle;
-				if (shouldRefresh && lightCachedParticle.asyncparticles$isEnabledLightCache()) {
-					lightCachedParticle.asyncparticles$refresh();
+				if (!isSyncParticle) {
+					((LightCachedParticleAddon) particle).asyncparticles$tickLightCache();
 				}
 			});
 		}

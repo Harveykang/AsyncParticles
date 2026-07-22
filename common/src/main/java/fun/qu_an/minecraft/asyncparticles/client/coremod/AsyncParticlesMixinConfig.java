@@ -104,7 +104,7 @@ public class AsyncParticlesMixinConfig {
 		private int version = 0;
 		private boolean safeClassInstanceMultiMap = MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED;
 		private boolean safeBlockEntityMap = false;
-		private boolean safeLegacyRandomSource = false;
+		private boolean safeLegacyRandomSource = true;
 
 		private Set<String> particle$noLightCache = new LinkedHashSet<>();
 

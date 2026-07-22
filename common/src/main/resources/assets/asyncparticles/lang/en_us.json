@@ -16,6 +16,8 @@
   "config.asyncparticles.tick.animationTickMode.tooltip": "Choose how animations are ticked.\n.'Synchronously' means no optimization.",
   "config.asyncparticles.tick.particleAsyncMode": "Async Particle Tick",
   "config.asyncparticles.tick.particleAsyncMode.tooltip": "Selects how particles are ticked asynchronously.\n'Sequenced' tick the entire queue asynchronously without splitting.\n'Split' partitions the particle queue and ticks each partition asynchronously in parallel,\nbut may conflict with other mods.\n'Disable' doesn't support 'GPU Particle Acceleration'",
+  "config.asyncparticles.tick.gpuOnlyAsyncParticleTick": "GPU Only Async Particle Tick",
+  "config.asyncparticles.tick.gpuOnlyAsyncParticleTick.tooltip": "If enabled, only GPU particles will be ticked asynchronously.\nOnly takes effect when 'Async Particle Tick' is enabled.",
   "config.asyncparticles.tick.tickWeatherAsync": "Async Weather Tick",
   "config.asyncparticles.tick.tickWeatherAsync.tooltip": "Enable asynchronous weather ticking.",
   "config.asyncparticles.tick.deferredTextureTick": "Deferred Texture Tick",
@@ -114,5 +116,10 @@
   "gui.asyncparticles.reset": "Reset Config",
   "gui.asyncparticles.failed-to-reset": "Failed to reset: %s",
   "gui.asyncparticles.reset-successfully": "Reset successfully!",
-  "gui.asyncparticles.revert": "Revert"
+  "gui.asyncparticles.revert": "Revert",
+  "chat.asyncparticles.warn.get_block_entity_off_main_thread": "Block entity accessed off the main thread! Check latest.log for details.\nYou may need to enable '%s'. Reporting this issue to the author is strongly recommended for more accurate advice.",
+  "chat.asyncparticles.warn.get_entities_off_main_thread": "Entity accessed off the main thread! Check latest.log for details.\nYou may need to enable '%s'. Reporting this issue to the author is strongly recommended for more accurate advice.",
+  "chat.asyncparticles.warn.error_during_async_particle_tick": "Unexpected error while ticking particles asynchronously: %s\nThis is likely caused by a race condition between the particle tick and render methods.\n'%s' has been temporarily enabled internally. You should also turn it on manually, otherwise this error will recur after restarting the game.\nIt is highly recommended to report this error to %s for more accurate advice and to help the author identify and fix potential issues.",
+  "chat.asyncparticles.warn.error_during_async_gpu_particle_tick": "Unexpected error while ticking GPU particles asynchronously: %s\nThe cause is currently unknown.\n'%s' has been temporarily disabled internally.\nPlease report this error to %s to help the author identify and fix the issue.",
+  "chat.asyncparticles.warn.error_during_async_incompatible_injection": "Unexpected error during '%2$s': %1$s.\nThis is likely caused by an incompatible injection into the %3$s method.\n'%2$s' has been temporarily disabled internally. You should also turn it off manually, otherwise this error will recur after restarting the game."
 }

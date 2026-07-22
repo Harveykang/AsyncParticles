@@ -40,9 +40,7 @@ public class MixinMinecraft {
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;tick()V"))
 	private void redirectParticleEngineTick(ParticleEngine instance) {
-		if (ConfigHelper.isAsyncTickParticle()) {
-			((ParticleEngineAddon) instance).asyncparticle$tickSyncParticles();
-		} else {
+		if (!ConfigHelper.isAsyncTickParticle()) {
 			instance.tick();
 		}
 	}

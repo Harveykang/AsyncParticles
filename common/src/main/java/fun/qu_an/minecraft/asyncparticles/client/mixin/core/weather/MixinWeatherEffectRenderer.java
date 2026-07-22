@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.weather;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.Diagnostic;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -20,7 +21,8 @@ public class MixinWeatherEffectRenderer {
 	                          int weatherRadius,
 	                          Operation<Void> original) {
 		if (ConfigHelper.isTickWeatherAsync()) {
-			AsyncTickBehavior.getInstance().getTickTaskManager().addTask(() -> original.call(level, camera, ticks, particleStatus, weatherRadius));
+			AsyncTickBehavior.getInstance().addTaskEnsureLevelRunning(
+				() -> original.call(level, camera, ticks, particleStatus, weatherRadius), Diagnostic::errorAsyncRainTick);
 		} else {
 			original.call(level, camera, ticks, particleStatus, weatherRadius);
 		}

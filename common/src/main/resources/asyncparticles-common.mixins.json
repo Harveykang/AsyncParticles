@@ -11,6 +11,7 @@
     "compat.a_good_place.AccessorBlocksParticlesManager",
     "compat.a_good_place.MixinBlocksParticlesManager",
     "compat.a_good_place.MixinPlacingBlockParticle",
+    "compat.beryl.MixinRenderingPipeline",
     "compat.cloth_config.AbstractConfigEntryAccessor",
     "compat.cloth_config.AbstractConfigListEntryAccessor",
     "compat.cloth_config.AccessorBaseListEntry",
@@ -27,9 +28,10 @@
     "compat.vulkanmod.MixinRenderer",
     "conditional.Mixin_ReplaceRandom",
     "conditional.MixinAsyncTick_AsyncTickableParticleGroup",
-    "conditional.MixinClassInstanceMultiMap",
-    "conditional.MixinLegacyRandomSource",
-    "conditional.MixinLevelChunk_BlockEntityMap",
+    "conditional.MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_Off",
+    "conditional.MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_On",
+    "conditional.MixinLevelChunk_SafeBlockEntityMap_Off",
+    "conditional.MixinLevelChunk_SafeBlockEntityMap_On",
     "conditional.MixinParticles_LightCacheNoRefresh",
     "conditional.MixinParticles_LockProvider",
     "conditional.MixinParticles_LockRequired_Extract",
@@ -69,12 +71,12 @@
     "off_thread_access.MixinLevel",
     "off_thread_access.MixinLevelRenderer",
     "off_thread_access.MixinSoundEngine",
-    "off_thread_access.MixinSoundManager"
+    "off_thread_access.MixinSoundManager",
+    "off_thread_access.MixinLegacyRandomSource"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
-    "compat.beryl.MixinRenderingPipeline"
   ]
 }

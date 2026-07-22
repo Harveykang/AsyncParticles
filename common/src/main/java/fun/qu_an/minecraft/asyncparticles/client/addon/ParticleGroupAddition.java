@@ -1,7 +1,9 @@
 package fun.qu_an.minecraft.asyncparticles.client.addon;
 
+import net.minecraft.client.particle.Particle;
+
 public interface ParticleGroupAddition {
-	default void asyncparticles$asyncTickParticles() {
+	default void asyncparticles$tickParticles(boolean isGpu) {
 		throw new AssertionError("Must be implemented!");
 	}
 
@@ -9,11 +11,15 @@ public interface ParticleGroupAddition {
 		throw new AssertionError("Must be implemented!");
 	}
 
-	default void asyncparticles$tickSyncParticles() {
+	default void asyncparticles$onClearParticles() {
 		throw new AssertionError("Must be implemented!");
 	}
 
-	default void asyncparticles$doEvictAll() {
-		throw new AssertionError("Must be implemented!");
+	default boolean asyncparticles$canTickAsync() {
+		return false;
+	}
+
+	default boolean asyncparticles$isSyncParticle(Particle particle) {
+		return false;
 	}
 }

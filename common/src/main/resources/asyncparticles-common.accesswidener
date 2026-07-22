@@ -25,6 +25,7 @@ accessible field net/minecraft/client/particle/ParticleEngine particlesToAdd Lja
 accessible method net/minecraft/client/particle/ParticleGroup tickParticle (Lnet/minecraft/client/particle/Particle;)V
 accessible field net/minecraft/client/particle/ParticleEngine trackingEmitters Ljava/util/Queue;
 accessible field net/minecraft/client/particle/ParticleGroup particles Ljava/util/Queue;
+accessible class net/minecraft/client/particle/FireworkParticles$SparkParticle
 
 accessible field com/mojang/blaze3d/buffers/GpuBuffer size J
 transitive-mutable field com/mojang/blaze3d/buffers/GpuBuffer size J

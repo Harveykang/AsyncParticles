@@ -99,6 +99,13 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> newConfig.tick.particleAsyncMode = newValue)
 				.build())
 			.addEntry(entryBuilder
+				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.gpuOnlyAsyncParticleTick"),
+					globalConfig.tick.gpuOnlyAsyncParticleTick)
+				.setDefaultValue(defaultConfig.tick.gpuOnlyAsyncParticleTick)
+				.setTooltip(Component.translatable("config.asyncparticles.tick.gpuOnlyAsyncParticleTick.tooltip"))
+				.setSaveConsumer(newValue -> newConfig.tick.gpuOnlyAsyncParticleTick = newValue)
+				.build())
+			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.tickWeatherAsync"),
 					globalConfig.tick.tickWeatherAsync)
 				.setDefaultValue(defaultConfig.tick.tickWeatherAsync)
@@ -275,8 +282,9 @@ class ClothConfigMenus {
 			.setSaveConsumer(newValue -> newConfig.create.tickRainBlockingRange = newValue)
 			.setRequirement(() -> ModListHelper.CREATE_LOADED)
 			.build());
+		// endregion
 
-		// Mixin
+		// region Mixin
 		ConfigEntryBuilder mixinEntryBuilder = builder.entryBuilder();
 		mixinEntryBuilder.setResetButtonKey(Component.translatable("gui.asyncparticles.revert"));
 		ClothConfigMixinMenus.addModCompatCategory(entryBuilder, mixinEntryBuilder, vsEntries, createEntries);
@@ -295,6 +303,17 @@ class ClothConfigMenus {
 
 		ConfigCategory mixinCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mixin"));
 		Runnable mixinSaveRunnable = ClothConfigMixinMenus.buildCategory(mixinCategory, entryBuilder, mixinEntryBuilder);
+		// endregion
+
+		// region Dev
+		if (ModListHelper.DEV_ENV) {
+			builder.getOrCreateCategory(Component.literal("Dev"))
+				.addEntry(entryBuilder
+					.startBooleanToggle(Component.literal("Sync All Particles"), AsyncParticlesConfig.dev$syncAllParticles)
+					.setDefaultValue(false)
+					.setSaveConsumer(newValue -> AsyncParticlesConfig.dev$syncAllParticles = newValue)
+					.build());
+		}
 		// endregion
 
 		builder.setSavingRunnable(() -> {

@@ -54,9 +54,9 @@ dependencies {
 //
 //    /* Performance */
     if (false) {
-        localRuntime "maven.modrinth:sodium:mc26.1.2-0.8.12-fabric"
-        localRuntime 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+fabric'
-        localRuntime 'maven.modrinth:iris:1.10.9+26.1-fabric'
+        localRuntime "maven.modrinth:sodium:mc26.1.2-0.9.1-fabric"
+        localRuntime 'maven.modrinth:sodium-extra:mc26.1.2-0.9.3+fabric'
+        localRuntime 'maven.modrinth:iris:1.11.2+26.1-fabric'
         localRuntime "org.antlr:antlr4-runtime:4.13.1"
         localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
         localRuntime "org.anarres:jcpp:1.4.14"

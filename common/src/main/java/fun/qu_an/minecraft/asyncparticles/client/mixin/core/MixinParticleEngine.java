@@ -23,7 +23,7 @@ public class MixinParticleEngine {
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void clearParticles(CallbackInfo ci) {
 		// Guarantee: call remove for each particle when clearing particles.
-		particles.values().forEach(g -> ((ParticleGroupAddition) g).asyncparticles$doEvictAll());
+		particles.values().forEach(g -> ((ParticleGroupAddition) g).asyncparticles$onClearParticles());
 		ParticleHelper.onClearParticles();
 	}
 }

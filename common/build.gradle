@@ -22,9 +22,9 @@ dependencies {
 //    compileOnly "maven.modrinth:fzzy-config:0.7.6+26.1"
 //
 //    /* Performance */
-    compileOnly "maven.modrinth:sodium:mc26.1.2-0.8.12-fabric"
-    compileOnly 'maven.modrinth:iris:1.10.9+26.1-fabric'
-    compileOnly 'maven.modrinth:sodium-extra:mc26.1.1-0.8.7+fabric'
+    compileOnly "maven.modrinth:sodium:mc26.1.2-0.9.1-fabric"
+    compileOnly 'maven.modrinth:iris:1.11.2+26.1-fabric'
+    compileOnly 'maven.modrinth:sodium-extra:mc26.1.2-0.9.3+fabric'
 //    compileOnly 'maven.modrinth:moreculling:kWU8mVq5' // 1.5.0-beta.2
     /* Vulkan Mod */
     compileOnly "maven.modrinth:vulkanmod:0.6.8+26.1.2"

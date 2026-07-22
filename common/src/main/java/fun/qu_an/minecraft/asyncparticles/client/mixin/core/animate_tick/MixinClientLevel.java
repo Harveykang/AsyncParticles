@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.AnimateTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.Diagnostic;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -34,7 +35,8 @@ public abstract class MixinClientLevel extends Level {
 			return;
 		}
 		if (ConfigHelper.isAsyncAnimateTick()) {
-			AsyncTickBehavior.getInstance().getTickTaskManager().addTask(() -> original.call(xt, yt, zt));
+			AsyncTickBehavior.getInstance().addTaskEnsureLevelRunning(
+				() -> original.call(xt, yt, zt), Diagnostic::errorAsyncAnimateTick);
 		} else {
 			original.call(xt, yt, zt);
 		}

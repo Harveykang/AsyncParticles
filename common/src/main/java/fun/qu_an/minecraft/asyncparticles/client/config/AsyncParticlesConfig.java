@@ -51,6 +51,7 @@ public class AsyncParticlesConfig {
 	public static boolean particle$cullUnderwaterParticleType;
 	public static boolean tick$asyncAnimateTick;
 	public static ParticleAsyncMode tick$particleAsyncMode;
+	public static boolean tick$gpuOnlyAsyncParticleTick;
 	public static boolean tick$tickWeatherAsync;
 	public static boolean tick$deferredTextureTick;
 	public static int tick$failPerSecLimit;
@@ -60,13 +61,13 @@ public class AsyncParticlesConfig {
 	public static RenderingMode rendering$particleRenderingMode;
 	public static boolean rendering$gpuAcceleration;
 	public static boolean rendering$appendNewParticlesToRenderer;
-	public static int rendering$failPerSecLimit;
 //	public static FailBehavior rendering$failBehavior;
 //	public static Set<String> rendering$syncParticleClasses = new LinkedHashSet<>();
 	public static RainEffect valkyrienSkies$rainEffect;
 	public static boolean valkyrienSkies$fixParticleLights;
 	public static RainEffect create$rainEffect;
 	public static int create$tickRainBlockingRange;
+	public static boolean dev$syncAllParticles = false;
 
 	static {
 		LOGGER.debug("AsyncParticlesConfig initialized.");
@@ -281,7 +282,8 @@ public class AsyncParticlesConfig {
 		static class Tick {
 			boolean animationTickMode = true;
 			ParticleAsyncMode particleAsyncMode = ParticleAsyncMode.SEQUENTIAL;
-			boolean tickWeatherAsync = true;
+			public boolean gpuOnlyAsyncParticleTick;
+			boolean tickWeatherAsync = !ModListHelper.PHYSICSMOD_LOADED;
 			boolean deferredTextureTick = !ModListHelper.AXIOM_LOADED;
 			int failPerSecLimit = 5;
 			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
@@ -293,7 +295,8 @@ public class AsyncParticlesConfig {
 			private void flat() {
 				tick$asyncAnimateTick = animationTickMode;
 				tick$particleAsyncMode = requireNonNullElse(particleAsyncMode, ParticleAsyncMode.SEQUENTIAL);
-				tick$tickWeatherAsync = tickWeatherAsync;
+				tick$gpuOnlyAsyncParticleTick = gpuOnlyAsyncParticleTick;
+				tick$tickWeatherAsync = tickWeatherAsync && !ModListHelper.PHYSICSMOD_LOADED;
 				tick$deferredTextureTick = deferredTextureTick && !ModListHelper.AXIOM_LOADED;
 				tick$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 //				tick$failBehavior = requireNonNullElse(failBehavior, FailBehavior.RAISE_CRASH);
@@ -304,6 +307,7 @@ public class AsyncParticlesConfig {
 			private void fold() {
 				animationTickMode = tick$asyncAnimateTick;
 				particleAsyncMode = tick$particleAsyncMode;
+				gpuOnlyAsyncParticleTick = tick$gpuOnlyAsyncParticleTick;
 				tickWeatherAsync = tick$tickWeatherAsync;
 				deferredTextureTick = tick$deferredTextureTick;
 				failPerSecLimit = tick$failPerSecLimit;
@@ -317,7 +321,6 @@ public class AsyncParticlesConfig {
 			RenderingMode particleRenderingMode = RenderingMode.SYNCHRONOUSLY;
 			boolean gpuAcceleration = BackendCaps.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
-			int failPerSecLimit = 20;
 //			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
 //			Set<String> syncParticleClasses = new LinkedHashSet<>();
 //			{
@@ -337,7 +340,6 @@ public class AsyncParticlesConfig {
 				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
 				rendering$gpuAcceleration = gpuAcceleration && BackendCaps.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
-				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 //				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
 //				rendering$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
 			}
@@ -346,7 +348,6 @@ public class AsyncParticlesConfig {
 				particleRenderingMode = rendering$particleRenderingMode;
 				gpuAcceleration = rendering$gpuAcceleration;
 				appendNewParticlesToRenderer = rendering$appendNewParticlesToRenderer;
-				failPerSecLimit = rendering$failPerSecLimit;
 //				failBehavior = rendering$failBehavior;
 //				syncParticleClasses = new LinkedHashSet<>(rendering$syncParticleClasses);
 			}

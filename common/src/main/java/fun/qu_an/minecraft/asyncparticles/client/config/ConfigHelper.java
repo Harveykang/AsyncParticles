@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
+import fun.qu_an.minecraft.asyncparticles.client.core.Diagnostic;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -7,7 +9,7 @@ import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesCon
 
 public class ConfigHelper {
 	public static boolean isAsyncAnimateTick() {
-		return tick$asyncAnimateTick;
+		return tick$asyncAnimateTick && !Diagnostic.isTemporaryDisableAnimationTick();
 	}
 
 	public static boolean forceDoneBlockAnimateTick() {
@@ -23,7 +25,7 @@ public class ConfigHelper {
 	}
 
 	public static boolean isAsyncTickParticle() {
-		return tick$particleAsyncMode != ParticleAsyncMode.DISABLE;
+		return tick$particleAsyncMode != ParticleAsyncMode.DISABLE && !Diagnostic.isTemporaryDisableAsyncParticleTick();
 	}
 
 	public static boolean isSplitParticleTick() {
@@ -32,10 +34,6 @@ public class ConfigHelper {
 
 	public static int getParticleLimit() {
 		return particle$particleLimit;
-	}
-
-	public static int getRenderFailurePerSecondThreshold() {
-		return rendering$failPerSecLimit;
 	}
 
 	public static int getTickFailurePerSecondThreshold() {
@@ -51,7 +49,7 @@ public class ConfigHelper {
 	}
 
 	public static boolean isTickWeatherAsync() {
-		return tick$tickWeatherAsync;
+		return tick$tickWeatherAsync && !Diagnostic.isTemporaryDisableAsyncRainTick();
 	}
 
 	public static boolean isDeferredTextureTick() {
@@ -73,7 +71,7 @@ public class ConfigHelper {
 	}
 
 	public static boolean isGpuParticles() {
-		return rendering$gpuAcceleration && isAsyncTickParticle();
+		return rendering$gpuAcceleration;
 	}
 
 	public static boolean isParallelQueueRemoval() {
@@ -86,5 +84,13 @@ public class ConfigHelper {
 
 	public static boolean isAppendNewParticlesToRenderer() {
 		return rendering$appendNewParticlesToRenderer;
+	}
+
+	public static boolean isGpuOnlyAsyncParticleTick() {
+		return tick$gpuOnlyAsyncParticleTick || Diagnostic.isTemporaryGpuOnlyAsyncParticleTick();
+	}
+
+	public static boolean isSyncAllParticles() {
+		return dev$syncAllParticles;
 	}
 }

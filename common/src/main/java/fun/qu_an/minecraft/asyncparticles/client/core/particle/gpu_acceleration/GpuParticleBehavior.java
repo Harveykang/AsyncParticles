@@ -10,6 +10,7 @@ import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
@@ -23,7 +24,7 @@ import org.spongepowered.asm.mixin.Unique;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GpuParticleBehavior {
 	public static final String RENDER_METHOD = Mappings.getRenderMethod();
@@ -58,8 +59,10 @@ public class GpuParticleBehavior {
 		}
 	}
 
-	private final Reference2BooleanOpenHashMap<Class<? extends SingleQuadParticle>> CAN_RENDER_FAST_CACHE =
+	private final Reference2BooleanMap<Class<? extends SingleQuadParticle>> CAN_RENDER_FAST_CACHE =
 		new Reference2BooleanOpenHashMap<>();
+	private final Map<Class<? extends SingleQuadParticle>, Boolean> CAN_RENDER_FAST_CACHE_OFF_THREAD =
+		new ConcurrentHashMap<>();
 	private Vec3 perTickCameraPos = Vec3.ZERO;
 	private int particleLimit = AsyncParticlesConfig.MIN_PARTICLE_LIMIT;
 
@@ -85,47 +88,56 @@ public class GpuParticleBehavior {
 //		return prevCameraPos;
 //	}
 
-	/**
-	 * Code adapted from <a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/src/main/java/me/jellysquid/mods/sodium/mixin/features/render/particle/ParticleManagerMixin.java#L180">wahfl2/sodium-fabric</a>
-	 * <p>
-	 * License: <a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/README.md#-license">README.md#-license</a> and <a/><a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/COPYING.LESSER">LGPL-3.0</a>
-	 */
+	public boolean canRenderFast(Particle particle) {
+		return particle instanceof SingleQuadParticle sqp && canRenderFast(sqp);
+	}
+
 	@Unique
 	public boolean canRenderFast(SingleQuadParticle sqp) {
 		if (sqp.getFacingCameraMode() != SingleQuadParticle.FacingCameraMode.LOOKAT_XYZ) {
 			return false;
 		}
-		return CAN_RENDER_FAST_CACHE.computeIfAbsent(sqp.getClass(), (Predicate<Class<? extends SingleQuadParticle>>)
-			k -> {
-				try {
-					if (AsyncTickBehavior.getInstance().shouldSync(k)) {
-						return false;
-					}
-					Class<?> renderMethodDeclaringClass = k.getMethod(RENDER_METHOD,
-						QuadParticleRenderState.class,
-						Camera.class,
-						float.class).getDeclaringClass();
-					Class<?> renderRotatedQuadMethod1DeclaringClass = findDeclaringClass(k,
-						RENDER_ROTATED_QUAD_METHOD_1,
-						QuadParticleRenderState.class,
-						Camera.class,
-						Quaternionf.class,
-						float.class);
-					Class<?> renderRotatedQuadMethod2DeclaringClass = findDeclaringClass(k,
-						RENDER_ROTATED_QUAD_METHOD_2,
-						QuadParticleRenderState.class,
-						Quaternionf.class,
-						float.class,
-						float.class,
-						float.class,
-						float.class);
-					return GPU_PARTICLE_CLASSES.contains(renderMethodDeclaringClass)
-						&& GPU_PARTICLE_CLASSES.contains(renderRotatedQuadMethod1DeclaringClass)
-						&& GPU_PARTICLE_CLASSES.contains(renderRotatedQuadMethod2DeclaringClass);
-				} catch (NoSuchMethodException e) {
-					return false;
-				}
-			});
+		if (ThreadUtil.isOnMainThread()) {
+			return CAN_RENDER_FAST_CACHE.computeIfAbsent(sqp.getClass(), this::canRenderFast0);
+		}
+		return CAN_RENDER_FAST_CACHE_OFF_THREAD.computeIfAbsent(sqp.getClass(), k1 -> {
+			boolean b1 = canRenderFast0(k1);
+			ThreadUtil.enqueueClientTask(() -> CAN_RENDER_FAST_CACHE.put(k1, b1));
+			return b1;
+		});
+	}
+
+	/**
+	 * Code adapted from <a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/src/main/java/me/jellysquid/mods/sodium/mixin/features/render/particle/ParticleManagerMixin.java#L180">wahfl2/sodium-fabric</a>
+	 * <p>
+	 * License: <a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/README.md#-license">README.md#-license</a> and <a/><a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/COPYING.LESSER">LGPL-3.0</a>
+	 */
+	private boolean canRenderFast0(Class<? extends SingleQuadParticle> k) {
+		try {
+			Class<?> renderMethodDeclaringClass = k.getMethod(RENDER_METHOD,
+				QuadParticleRenderState.class,
+				Camera.class,
+				float.class).getDeclaringClass();
+			Class<?> renderRotatedQuadMethod1DeclaringClass = findDeclaringClass(k,
+				RENDER_ROTATED_QUAD_METHOD_1,
+				QuadParticleRenderState.class,
+				Camera.class,
+				Quaternionf.class,
+				float.class);
+			Class<?> renderRotatedQuadMethod2DeclaringClass = findDeclaringClass(k,
+				RENDER_ROTATED_QUAD_METHOD_2,
+				QuadParticleRenderState.class,
+				Quaternionf.class,
+				float.class,
+				float.class,
+				float.class,
+				float.class);
+			return GPU_PARTICLE_CLASSES.contains(renderMethodDeclaringClass)
+				&& GPU_PARTICLE_CLASSES.contains(renderRotatedQuadMethod1DeclaringClass)
+				&& GPU_PARTICLE_CLASSES.contains(renderRotatedQuadMethod2DeclaringClass);
+		} catch (NoSuchMethodException e) {
+			return false;
+		}
 	}
 
 	private static Class<?> findDeclaringClass(Class<?> clazz,
@@ -242,7 +254,6 @@ public class GpuParticleBehavior {
 		if (ConfigHelper.isAppendNewParticlesToRenderer()) {
 			getOrCreateRenderer().append(getPerTickCameraPos(), particle);
 		}
-		((LightCachedParticleAddon) particle).asyncparticles$disableLightCache();
 	}
 
 //	public Frustum getFrustum() {

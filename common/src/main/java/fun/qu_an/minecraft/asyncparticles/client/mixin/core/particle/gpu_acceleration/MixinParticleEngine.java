@@ -6,6 +6,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
@@ -51,10 +52,28 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		}
 		GpuParticleBehavior.getInstance().flushBufferAndSwap();
 		int sum = 0;
+		boolean asyncTickParticle = ConfigHelper.isAsyncTickParticle();
+		TaskHelper taskHelper = AsyncTickBehavior.getInstance().getTickTaskManager();
 		for (ParticleGroup<?> group : particles.values()) {
 			if (group instanceof GpuParticleGroup gpuGroup) {
-				sum += gpuGroup.asyncparticles$getGpuParticles().size();
+				int size = gpuGroup.asyncparticles$getGpuParticles().size();
+				if (size == 0) {
+					continue;
+				}
+				sum += size;
+				if (!asyncTickParticle) {
+					gpuGroup.asyncparticles$tickParticles(true);
+					gpuGroup.asyncparticles$removeDeadGpuParticles();
+				} else if (gpuGroup.asyncparticles$canTickAsync()) {
+					gpuGroup.asyncparticles$tickSyncParticles(true);
+					taskHelper.addTask(() -> gpuGroup.asyncparticles$tickParticles(true));
+				} else {
+					gpuGroup.asyncparticles$tickParticles(true);
+				}
 			}
+		}
+		if (asyncTickParticle) {
+			taskHelper.groupTasks(true);
 		}
 		GpuParticleBehavior.getInstance().setUpNextTickRendering(sum);
 		IParticleRenderer renderer = GpuParticleBehavior.getInstance().getOrCreateRenderer();
