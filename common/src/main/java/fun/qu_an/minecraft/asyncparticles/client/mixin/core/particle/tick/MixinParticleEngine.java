@@ -2,11 +2,12 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
+import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickParticleGroupBehavior;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.ParticleLimit;
 import net.minecraft.util.profiling.Profiler;
@@ -16,6 +17,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 @Mixin(ParticleEngine.class)
 public abstract class MixinParticleEngine implements ParticleEngineAddon {
@@ -50,15 +52,16 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		// Keep local var table as they were
 		Particle particle;
 		boolean tickAsync = ConfigHelper.isAsyncTickParticle();
-		if (tickAsync) {
+		if (tickAsync && !ConfigHelper.isGpuOnlyAsyncParticleTick()) {
 			TaskHelper taskHelper = AsyncTickBehavior.getInstance().getTickTaskManager();
 			asyncparticles$forEach(this.particles, (renderType, group) -> {
 				if (group.isEmpty()) {
 					return;
 				}
 				Profiler.get().push(renderType.name());
-				if (AsyncTickParticleGroupBehavior.canTickAsync(group)) {
-					taskHelper.addTask(((AsyncTickableParticleGroup) group)::asyncparticles$asyncTickParticles);
+				if (((ParticleGroupAddition) group).asyncparticles$canTickAsync()) {
+					((AsyncTickableParticleGroup) group).asyncparticles$tickSyncParticles(false);
+					taskHelper.addTask(() -> ((ParticleGroupAddition) group).asyncparticles$tickParticles(false));
 				} else {
 					group.tickParticles();
 				}
@@ -87,8 +90,15 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			//noinspection ForLoopReplaceableByForEach
 			for (Iterator<Particle> iterator = particlesToAdd.iterator(); iterator.hasNext(); ) {
 				particle = iterator.next();
-				if (!this.particles.computeIfAbsent(particle.getGroup(), this::createParticleGroup).add(particle)) {
+				ParticleGroup<?> group = this.particles.computeIfAbsent(particle.getGroup(), this::createParticleGroup);
+				if (!group.add(particle)) {
 					particle.getParticleLimit().ifPresent(options -> this.updateCount(options, -1));
+					if (((ParticleGroupAddition) group).asyncparticles$canTickAsync()
+//						&& ConfigHelper.isAsyncTickParticle() // tested in asyncparticles$canTickAsync()
+						&& AsyncTickBehavior.getInstance().shouldSync(particle.getClass())) {
+						// add to sync queue only if async tick enabled, gpu only disabled, and particle class is sync
+						((AsyncTickableParticleGroup) group).asyncparticles$addSync(particle);
+					}
 				}
 			}
 			particlesToAdd.clear();
@@ -96,12 +106,12 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	}
 
 	@Unique
-	private <K, V> void asyncparticles$forEach(Map<K, V> i, BiConsumer<K, V> f) {
+	private static <K, V> void asyncparticles$forEach(Map<K, V> i, BiConsumer<K, V> f) {
 		i.forEach(f);
 	}
 
-	@Override
-	public void asyncparticle$tickSyncParticles() {
-		particles.values().forEach(AsyncTickParticleGroupBehavior::tickSyncParticles);
+	@Unique
+	private static <E> void asyncparticles$forEach(Iterable<E> i, Consumer<E> f) {
+		i.forEach(f);
 	}
 }

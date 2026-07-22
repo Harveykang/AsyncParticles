@@ -16,6 +16,12 @@ import org.spongepowered.asm.mixin.Pseudo;
 }) // Will be replaced with the actual targets
 public abstract class MixinParticles_LightCacheNoRefresh implements LightCachedParticleAddon {
 	@Override
+	public boolean asyncparticles$isStaticLight() {
+		return true;
+	}
+
+	@Override
 	public void asyncparticles$refresh() {
+		asyncparticles$setLight(asyncparticles$invoke_getLightCoords(0f));
 	}
 }

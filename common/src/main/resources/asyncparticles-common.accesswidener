@@ -16,6 +16,7 @@ transitive-mutable field net/minecraft/client/particle/ParticleGroup particles L
 accessible class net/minecraft/client/renderer/feature/QuadParticleFeatureRenderer$PreparedGroup
 accessible field net/minecraft/client/renderer/culling/Frustum intersection Lorg/joml/FrustumIntersection;
 accessible field net/minecraft/client/particle/ParticleGroup particles Ljava/util/Queue;
+accessible class net/minecraft/client/particle/FireworkParticles$SparkParticle
 
 # Blaze3D
 accessible class com/mojang/blaze3d/pipeline/RenderPipeline

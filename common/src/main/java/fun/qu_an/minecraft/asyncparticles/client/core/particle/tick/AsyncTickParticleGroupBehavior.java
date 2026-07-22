@@ -22,9 +22,11 @@ public class AsyncTickParticleGroupBehavior {
 	}
 
 	public static boolean canTickAsync(ParticleGroup<?> particleGroup) {
-		return particleGroup instanceof AsyncTickableParticleGroup
-			&& CAN_TICK_PARTICLES_ASYNC.computeIfAbsent(particleGroup.getClass(), (Predicate<Class<? extends ParticleGroup>>)
+		return CAN_TICK_PARTICLES_ASYNC.computeIfAbsent(particleGroup.getClass(), (Predicate<Class<? extends ParticleGroup>>)
 			k -> {
+				if (!(AsyncTickableParticleGroup.class.isAssignableFrom(k))) {
+					return false;
+				}
 				try {
 					Class<?> declaringClass = k.getMethod(TICK_PARTICLES_METHOD).getDeclaringClass();
 					return ASYNC_TICKABLE_PARTICLE_GROUP_CLASSES.contains(declaringClass);
@@ -32,11 +34,5 @@ public class AsyncTickParticleGroupBehavior {
 					return false;
 				}
 			});
-	}
-
-	public static void tickSyncParticles(ParticleGroup<?> g) {
-		if (canTickAsync(g)) {
-			((AsyncTickableParticleGroup) g).asyncparticles$tickSyncParticles();
-		}
 	}
 }

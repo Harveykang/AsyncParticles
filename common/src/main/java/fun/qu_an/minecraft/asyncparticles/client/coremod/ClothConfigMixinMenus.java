@@ -158,11 +158,8 @@ public class ClothConfigMixinMenus {
 				oldConfig.isSafeLegacyRandomSource())
 			.setDefaultValue(defaultConfig.isSafeLegacyRandomSource())
 			.setSaveConsumer(newConfig::setSafeLegacyRandomSource)
-			.setTooltip(
-				Component.translatable("text.cloth-config.restart_required")
-					.withStyle(ChatFormatting.DARK_RED),
-				Component.translatable("config.asyncparticles.mixin.particle.safeLegacyRandomSource.tooltip"))
-			.requireRestart()
+			.setTooltip(Component.translatable("config.asyncparticles.mixin.particle.safeLegacyRandomSource.tooltip"))
+//			.requireRestart()
 			.build());
 		return () -> {
 			try {

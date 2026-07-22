@@ -1,34 +1,34 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
 
-import com.mojang.blaze3d.systems.GpuDevice;
-import com.mojang.blaze3d.systems.RenderSystem;
-import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
-import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionTracker;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
-import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
-import net.minecraft.world.level.chunk.MissingPaletteEntryException;
+import net.minecraft.world.entity.Entity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -42,6 +42,8 @@ public class AsyncTickBehavior {
 	private final ForkJoinPool EXECUTOR;
 	private Consumer<String> debugConsumer;
 	private boolean particlePhase;
+	private final AtomicLong timeUsageNano = new AtomicLong(0L);
+	private volatile LevelBundle levelBundle;
 
 	{
 		AtomicInteger workerCount = new AtomicInteger(1);
@@ -53,23 +55,34 @@ public class AsyncTickBehavior {
 		}, Util::onThreadException, true);
 	}
 
-	private final TaskHelper tickTaskHelper = new TaskHelper(EXECUTOR, e -> {
-		throw new RuntimeException(e);
-	});
-	private final TaskHelper cleanupTaskHelper = new TaskHelper(EXECUTOR, e -> {
-		throw new RuntimeException(e);
-	});
+	private final TaskHelper tickTaskHelper = new TaskHelper(EXECUTOR);
+	private final TaskHelper cleanupTaskHelper = new TaskHelper(EXECUTOR);
+	private final TickExceptionHandler exceptionHandler = new TickExceptionHandler(this);
 	private boolean reloadLater;
 	private boolean isTailTick;
 
-	private final ExceptionTracker<Object> EXCEPTION_TRACKER = new ExceptionTracker<>(
-		() -> 5000,
-		ConfigHelper::getTickFailurePerSecondThreshold
-	);
 	private final Set<Class<?>> syncParticleTypes = new ReferenceOpenHashSet<>();
 
 	public static AsyncTickBehavior getInstance() {
 		return INSTANCE;
+	}
+
+	public void ensureLevelRunning(Runnable r, Consumer<Exception> exceptionHandler) {
+		LevelBundle levelBundle = getLevelBundle();
+		if (levelBundle == null || levelBundle.isLevelReset()) {
+			return;
+		}
+		try {
+			r.run();
+		} catch (Exception e) {
+			if (!levelBundle.isLevelReset()) {
+				exceptionHandler.accept(e);
+			}
+		}
+	}
+
+	public void addTaskEnsureLevelRunning(Runnable r, Consumer<Exception> exceptionHandler) {
+		getTickTaskManager().addTask(() -> ensureLevelRunning(r, exceptionHandler));
 	}
 
 	public boolean shouldRemove(Particle particle) {
@@ -77,9 +90,6 @@ public class AsyncTickBehavior {
 			return true;
 		}
 		ParticleAddon particleAddon = (ParticleAddon) particle;
-		if (particleAddon.asyncparticles$isTickSync()) {
-			return false;
-		}
 		if (ConfigHelper.isAsyncTickParticle() && particleAddon.asyncparticles$isTicked()) {
 			particleAddon.asyncparticles$resetTicked();
 			return false;
@@ -91,75 +101,9 @@ public class AsyncTickBehavior {
 		return false;
 	}
 
-	public boolean isTolerable(@NotNull Throwable e) {
-		if (!(e instanceof Exception)) {
-			return false;
-		}
-		Throwable rootCause = ExceptionUtil.getRootCause(e);
-		return rootCause instanceof MissingPaletteEntryException
-			|| rootCause instanceof NullPointerException
-			|| rootCause instanceof IndexOutOfBoundsException
-			|| rootCause instanceof ArrayIndexOutOfBoundsException
-			|| (rootCause instanceof ConcurrentModificationException && ConfigHelper.suppressCME());
-	}
-
-	public ReportedException onTickParticleException(Particle particle, Throwable t) {
-		if (ThreadUtil.isOnMainThread()) {
-			return constructCrashReport(particle, t);
-		}
-		boolean tolerable = isTolerable(t);
-		Class<? extends Particle> particleClass = ((ParticleAddon) particle).asyncparticles$getRealClass();
-		if (tolerable && !EXCEPTION_TRACKER.addException(particleClass, t)) {
-			return null;
-		}
-//		if (ConfigHelper.markSyncIfTickFailed()) {
-//			((ParticleAddon) particle).asyncparticles$setTickSync();
-//			if (!shouldSync(particleClass)) {
-//				if (!tolerable) {
-//					LOGGER.warn("Exception while ticking particle {}, marking as sync", particle, t);
-//				} else {
-//					LOGGER.warn("Exception {} thrown while ticking particle {} exceeds the threshold, please contact the author: {}",
-//						t.getClass().getName(),
-//						particle,
-//						AsyncParticlesClient.ISSUE_URI,
-//						t);
-//				}
-//				markAsSync(particleClass);
-//			}
-//			recordSync(particle);
-//		} else
-		if (tolerable) {
-			return constructCrashReport(particle, new RuntimeException(
-				"Exception %s thrown while ticking particle %s, exceeds the threshold, please contact the author: %s"
-					.formatted(
-						t.getClass().getName(),
-						particle,
-						AsyncParticlesClient.ISSUE_URI),
-				t));
-		} else {
-			return constructCrashReport(particle, t);
-		}
-	}
-
-	public ReportedException constructCrashReport(Particle particle, Throwable t) {
-		while (t instanceof CompletionException || t instanceof ExecutionException) {
-			t = t.getCause();
-		}
-		if (t instanceof ReportedException re) {
-			return re;
-		}
-		debugLater(LOGGER::info);
-		tryDebug();
-		CrashReport crashReport = CrashReport.forThrowable(t, "Ticking Particle");
-		CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being ticked");
-		crashReportCategory.setDetail("Particle", particle::toString);
-		crashReportCategory.setDetail("Particle Type", particle.getGroup()::toString);
-		return new ReportedException(crashReport);
-	}
-
 	public void preTick(boolean isHeadTick, boolean isTailTick) {
 		if (isHeadTick) {
-			tickTaskHelper.waitForCompletion();
+			tickTaskHelper.waitForCompletion(exceptionHandler::tickExceptionally);
 		}
 		this.isTailTick = isTailTick;
 		if (!ConfigHelper.isAsyncTickParticle()) {
@@ -188,10 +132,16 @@ public class AsyncTickBehavior {
 	}
 
 	public void doEmittersRemoveIf(Queue<? extends TrackingEmitter> queue) {
+		if (queue.isEmpty()) {
+			return;
+		}
 		doRemoveIf(queue, p -> !p.isAlive());
 	}
 
 	public void doParticlesRemoveIf(Queue<? extends Particle> particles) {
+		if (particles.isEmpty()) {
+			return;
+		}
 		ParticleEngine engine = Minecraft.getInstance().particleEngine;
 		doRemoveIf(particles, p -> {
 			boolean b = shouldRemove(p);
@@ -215,32 +165,47 @@ public class AsyncTickBehavior {
 	}
 
 	public void postTick() {
-		cleanupTaskHelper.waitForCompletion();
+		cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
 		Minecraft mc = Minecraft.getInstance();
-		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
+		ClientLevel level = mc.level;
+		LocalPlayer player = mc.player;
+		Entity cameraEntity = mc.getCameraEntity();
+		boolean levelRunning = level != null && player != null && cameraEntity != null && !mc.isPaused();
 		if (!ConfigHelper.isAsyncTickParticle()) {
 			tryReload();
 			tryDebug();
 			if (levelRunning) {
 				tickTaskHelper.runAllTasks();
+			} else {
+				tickTaskHelper.disposeTasks();
+				mc.particleEngine.particlesToAdd.clear();
 			}
 			return;
 		}
-		if (!levelRunning) {
-			return;
-		}
-		if (!isTailTick) {
+		if (!levelRunning || !isTailTick) {
 			tickTaskHelper.disposeTasks();
 			mc.particleEngine.particlesToAdd.clear();
-		} else {
-			tickTaskHelper.groupTasks(false);
-			particlePhase = true;
-			mc.particleEngine.tick();
-			particlePhase = false;
-			tryReload();
-			tryDebug();
-			tickTaskHelper.submitAll();
+			return;
 		}
+		tickTaskHelper.groupTasks(false);
+		particlePhase = true;
+		mc.particleEngine.tick();
+		particlePhase = false;
+		tryReload();
+		tryDebug();
+		tickTaskHelper.submitAll(() -> {
+			timeUsageNano.setRelease(System.nanoTime());
+			levelBundle = new LevelBundle(level, player, cameraEntity);
+		}, () -> {
+			levelBundle = null;
+			timeUsageNano.setRelease(System.nanoTime() - timeUsageNano.getAcquire());
+		}, e -> {
+			LevelBundle levelBundle = getLevelBundle();
+			if (levelBundle != null && !levelBundle.isLevelReset()) {
+				throw ExceptionUtil.toThrowDirectly(e);
+			}
+			// else level reset
+		});
 	}
 
 	public void reloadLater() {
@@ -259,9 +224,13 @@ public class AsyncTickBehavior {
 	}
 
 	public void reset() {
-		tickTaskHelper.waitForCompletion();
+		if (tickTaskHelper.isRunning()) {
+			tickTaskHelper.waitForCompletion(exceptionHandler::tickExceptionally);
+		}
 		tickTaskHelper.disposeTasks();
-		cleanupTaskHelper.waitForCompletion();
+		if (cleanupTaskHelper.isRunning()) {
+			cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
+		}
 		cleanupTaskHelper.disposeTasks();
 		syncParticleTypes.clear();
 		syncParticleTypes.addAll(ConfigHelper.getSyncParticleClassesTick());
@@ -271,20 +240,22 @@ public class AsyncTickBehavior {
 		debugConsumer = consumer;
 	}
 
-	private void tryDebug() {
+	void tryDebug() {
 		if (debugConsumer == null) {
 			return;
 		}
 		debugConsumer.accept(String.format("""
 			[AsyncParticles Debug]
-			Particle task count: %d,
-			Particle limit: %d,
-			Particles groups (render order, size):
+			last tick duration: %.3f ms,
+			particle task count: %d,
+			particle limit: %d,
+			particles groups (render order, size):
 			%s,
-			Particles to add size: %d
-			Sync particle types: %s,
+			particles to add size: %d
+			sync particle types: %s,
 			Backend: %s"""
 			.formatted(
+				ConfigHelper.isAsyncTickParticle() ? timeUsageNano.getAcquire() / 1000000d : Double.NaN,
 				tickTaskHelper.taskCount(),
 				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
@@ -307,6 +278,9 @@ public class AsyncTickBehavior {
 	}
 
 	public boolean shouldSync(Class<?> aClass) {
+		if (ModListHelper.DEV_ENV && ConfigHelper.isSyncAllParticles()) {
+			return true;
+		}
 		return syncParticleTypes.contains(aClass);
 	}
 
@@ -353,5 +327,13 @@ public class AsyncTickBehavior {
 				}
 			}
 		}
+	}
+
+	public LevelBundle getLevelBundle() {
+		return levelBundle;
+	}
+
+	public TickExceptionHandler getExceptionHandler() {
+		return exceptionHandler;
 	}
 }

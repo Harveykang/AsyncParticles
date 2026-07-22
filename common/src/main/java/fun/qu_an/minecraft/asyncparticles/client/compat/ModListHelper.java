@@ -1,12 +1,11 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
-
 import static fun.qu_an.minecraft.asyncparticles.client.Platform.PLATFORM;
 
 public class ModListHelper {
-	public static final boolean IS_FORGE = isForge();
-	public static final boolean IS_CLIENT = isClient();
+	public static final boolean IS_FORGE = PLATFORM.isForge();
+	public static final boolean IS_CLIENT = PLATFORM.isClient();
+	public static final boolean DEV_ENV = PLATFORM.isDevelopmentEnvironment();
 	public static final boolean FABRIC_API_LOADED = isModLoaded("fabric-api") || isModLoaded("fabric_api");
 	public static final boolean CONNECTORMOD_LOADED = isModLoaded("connectormod");
 	/* Valkyrien Skies */
@@ -131,10 +130,6 @@ public class ModListHelper {
 
 	public static boolean isFabricModLoaded(String modId) {
 		return PLATFORM.isFabricModLoaded(modId);
-	}
-
-	public static boolean isDevelopmentEnvironment() {
-		return PLATFORM.isDevelopmentEnvironment();
 	}
 
 	public static boolean classExists(String className) {

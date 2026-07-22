@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 public class MixinFireworkParticles {
-	@Mixin(targets = "net.minecraft.client.particle.FireworkParticles.SparkParticle")
+	@Mixin(FireworkParticles.SparkParticle.class)
 	public static abstract class SparkParticle extends SingleQuadParticle implements GpuParticleAddon {
 		@Shadow
 		private boolean twinkle;

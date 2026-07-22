@@ -1,15 +1,20 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.gpu_acceleration;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.util.ARGB;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(SingleQuadParticle.class)
-public abstract class MixinSingleQuadParticle extends Particle implements GpuParticleAddon {
+public abstract class MixinSingleQuadParticle extends Particle implements GpuParticleAddon, ParticleAddon {
+	@Unique
+	private boolean asyncparticles$isGpuLightGot = false;
+
 	protected MixinSingleQuadParticle(ClientLevel level, double x, double y, double z) {
 		super(level, x, y, z);
 	}
@@ -77,7 +82,13 @@ public abstract class MixinSingleQuadParticle extends Particle implements GpuPar
 		return getV1();
 	}
 
-	public int asyncparticles$getLightCoords(float deltaPartialTick) {
+	@Override
+	public int asyncparticles$getGpuLightCoords(float deltaPartialTick) {
+		if (!asyncparticles$isGpuLightGot) {
+			// A workaround for level light update latency
+			asyncparticles$isGpuLightGot = true;
+			return asyncparticles$getCachedLight();
+		}
 		return getLightCoords(deltaPartialTick);
 	}
 

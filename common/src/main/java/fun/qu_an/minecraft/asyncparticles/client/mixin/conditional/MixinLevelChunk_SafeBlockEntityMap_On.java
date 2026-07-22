@@ -2,11 +2,9 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.*;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
@@ -22,12 +20,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Mixin(value = LevelChunk.class, priority = 1500)
-public abstract class MixinLevelChunk_BlockEntityMap extends ChunkAccess {
+public abstract class MixinLevelChunk_SafeBlockEntityMap_On extends ChunkAccess {
 	@Shadow
 	@Final
 	Level level;
 
-	public MixinLevelChunk_BlockEntityMap(ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, PalettedContainerFactory palettedContainerFactory, long l, @Nullable LevelChunkSection[] levelChunkSections, @Nullable BlendingData blendingData) {
+	public MixinLevelChunk_SafeBlockEntityMap_On(ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, PalettedContainerFactory palettedContainerFactory, long l, @Nullable LevelChunkSection[] levelChunkSections, @Nullable BlendingData blendingData) {
 		super(chunkPos, upgradeData, levelHeightAccessor, palettedContainerFactory, l, levelChunkSections, blendingData);
 	}
 

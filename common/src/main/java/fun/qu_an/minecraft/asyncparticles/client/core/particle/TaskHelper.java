@@ -16,11 +16,9 @@ public final class TaskHelper {
 	private final List<Group> groups = new ReferenceArrayList<>();
 	private final List<Runnable> tasks = new ReferenceArrayList<>();
 	private final List<ForkJoinTask<?>> futures = new ReferenceArrayList<>();
-	private final Consumer<Exception> exceptionHandler;
 
-	public TaskHelper(ForkJoinPool executor, Consumer<Exception> exceptionHandler) {
+	public TaskHelper(ForkJoinPool executor) {
 		this.executor = executor;
-		this.exceptionHandler = exceptionHandler;
 	}
 
 	public void addTask(@NotNull Runnable task) {
@@ -40,11 +38,26 @@ public final class TaskHelper {
 		groups.add(parallel ? new ParallelGroup(taskSnapshot) : new SequentialGroup(taskSnapshot));
 	}
 
+	/**
+	 * @param exceptionHandler Provides a handler for exceptions thrown by this group
+	 */
+	public void groupTasks(boolean parallel, Consumer<Exception> exceptionHandler) {
+		if (tasks.isEmpty()) {
+			return;
+		}
+		List<Runnable> taskSnapshot = new ReferenceArrayList<>(this.tasks);
+		this.tasks.clear();
+		groups.add(parallel ? new ParallelGroup(taskSnapshot, exceptionHandler) : new SequentialGroup(taskSnapshot, exceptionHandler));
+	}
+
 	public void submitImmediately(@NotNull Runnable task) {
 		futures.add(executor.submit(task));
 	}
 
-	public void submitAll() {
+	/**
+	 * @param exceptionHandler Provides a handler for exceptions thrown by any group
+	 */
+	public void submitAll(Consumer<Exception> exceptionHandler) {
 		if (!tasks.isEmpty()) {
 			groupTasks(false);
 		}
@@ -53,7 +66,14 @@ public final class TaskHelper {
 		}
 
 		if (groups.size() == 1) {
-			ForkJoinTask<?> task = executor.submit(groups.remove(0));
+			Group group = groups.remove(0);
+			ForkJoinTask<?> task = executor.submit(() -> {
+				try {
+					group.run();
+				} catch (Exception e) {
+					exceptionHandler.accept(e);
+				}
+			});
 			futures.add(task);
 			return;
 		}
@@ -66,15 +86,64 @@ public final class TaskHelper {
 				try {
 					group.run();
 				} catch (Exception e) {
-					throw ExceptionUtil.toThrowDirectly(e);
+					exceptionHandler.accept(e);
 				}
 			}
 		});
 		futures.add(compoundFuture);
 	}
 
-	public void waitForCompletion() {
-		waitForCompletion(exceptionHandler);
+	public void submitAll() {
+		submitAll(ExceptionUtil::toThrowDirectly);
+	}
+
+	/**
+	 * @param exceptionHandler Provides a handler for exceptions thrown by any group
+	 */
+	public void submitAll(Runnable whenStarted, Runnable whenCompleted, Consumer<Exception> exceptionHandler) {
+		if (!tasks.isEmpty()) {
+			groupTasks(false);
+		}
+		if (groups.isEmpty()) {
+			return;
+		}
+
+		if (groups.size() == 1) {
+			Group group = groups.remove(0);
+			ForkJoinTask<?> task = executor.submit(() -> {
+				try {
+					whenStarted.run();
+					try {
+						group.run();
+					} catch (Exception e) {
+						exceptionHandler.accept(e);
+					}
+				} finally {
+					whenCompleted.run();
+				}
+			});
+			futures.add(task);
+			return;
+		}
+
+		List<Runnable> groupsSnapshot = new ReferenceArrayList<>(groups);
+		groups.clear();
+
+		ForkJoinTask<?> compoundFuture = executor.submit(() -> {
+			try {
+				whenStarted.run();
+				for (Runnable group : groupsSnapshot) {
+					try {
+						group.run();
+					} catch (Exception e) {
+						exceptionHandler.accept(e);
+					}
+				}
+			} finally {
+				whenCompleted.run();
+			}
+		});
+		futures.add(compoundFuture);
 	}
 
 	public void waitForCompletion(Consumer<Exception> exceptionHandler) {
@@ -121,14 +190,24 @@ public final class TaskHelper {
 
 	private static sealed abstract class Group implements Runnable permits ParallelGroup, SequentialGroup {
 		protected final List<Runnable> tasks;
+		protected final Consumer<Exception> exceptionHandler;
 
 		private Group(List<Runnable> tasks) {
+			this(tasks, ExceptionUtil::toThrowDirectly);
+		}
+
+		public Group(List<Runnable> tasks, Consumer<Exception> exceptionHandler) {
 			this.tasks = tasks;
+			this.exceptionHandler = exceptionHandler;
 		}
 
 		protected void runAll() {
 			for (Runnable task : tasks) {
-				task.run();
+				try {
+					task.run();
+				} catch (Exception e) {
+					exceptionHandler.accept(e);
+				}
 			}
 		}
 	}
@@ -136,6 +215,10 @@ public final class TaskHelper {
 	private final class ParallelGroup extends Group implements Runnable {
 		public ParallelGroup(List<Runnable> tasks) {
 			super(tasks);
+		}
+
+		public ParallelGroup(List<Runnable> tasks, Consumer<Exception> exceptionHandler) {
+			super(tasks, exceptionHandler);
 		}
 
 		@Override
@@ -157,6 +240,10 @@ public final class TaskHelper {
 	private static final class SequentialGroup extends Group implements Runnable {
 		private SequentialGroup(List<Runnable> tasks) {
 			super(tasks);
+		}
+
+		public SequentialGroup(List<Runnable> tasks, Consumer<Exception> exceptionHandler) {
+			super(tasks, exceptionHandler);
 		}
 
 		@Override

@@ -12,15 +12,9 @@ public interface ParticleAddon {
 
 	boolean asyncparticles$isTicked();
 
-	void asyncparticles$setRenderSync();
+	void asyncparticles$setGpuLightGot();
 
-	boolean asyncparticles$isRenderSync();
-
-	void asyncparticles$setTickSync();
-
-	boolean asyncparticles$isTickSync();
-
-	boolean asyncparticles$isVisibleOnScreen();
+	boolean asyncparticles$isFirstGpuLightGet();
 
 	Class<? extends Particle> asyncparticles$getRealClass();
 

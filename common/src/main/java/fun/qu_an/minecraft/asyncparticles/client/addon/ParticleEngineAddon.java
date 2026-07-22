@@ -8,8 +8,4 @@ public interface ParticleEngineAddon {
 	default void asyncparticle$addRenderType(ParticleRenderType particleRenderType) {
 		throw new AssertionError("Must be implemented!");
 	}
-
-	default void asyncparticle$tickSyncParticles() {
-		throw new AssertionError("Must be implemented!");
-	}
 }
