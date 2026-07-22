@@ -553,8 +553,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				null);
 		}
 
-		sourceSlots[renderSrcIdx].lastSubmitIndex = commandEncoder.currentSubmitIndex;
-		submitSlots[renderSubmitIdx].lastSubmitIndex = commandEncoder.currentSubmitIndex;
+		source.lastSubmitIndex = commandEncoder.currentSubmitIndex;
+		submit.lastSubmitIndex = commandEncoder.currentSubmitIndex;
 	}
 
 	@Override
