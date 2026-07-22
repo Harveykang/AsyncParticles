@@ -8,9 +8,11 @@ import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collector;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.*;
@@ -40,43 +42,32 @@ public class ClothConfigMixinMenus {
 			.setDefaultValue(defaultConfig.isSafeClassInstanceMultiMap())
 			.setSaveConsumer(newConfig::setSafeClassInstanceMultiMap)
 			.setTooltipSupplier(() -> {
-				if ((!IRONS_SPELLBOOKS_LOADED ||
-					!IRONS_SPELLBOOKS_LESS_THAN_3_13_0) &&
-					!MAKE_BUBBLES_POP_LOADED &&
-					!COSYCRITTERS_LOADED) {
+				if ((IRONS_SPELLBOOKS_LOADED &&
+					IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
+					MAKE_BUBBLES_POP_LOADED ||
+					COSYCRITTERS_LOADED ||
+					IMMERSIVE_PORTALS_LOADED) {
+					return limitedTooltip(
+						Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip"),
+						IRONS_SPELLBOOKS_LOADED ? "Irons Spellbooks" : null,
+						MAKE_BUBBLES_POP_LOADED ? "Make Bubbles Pop" : null,
+						COSYCRITTERS_LOADED ? "CosyCritters" : null,
+						IMMERSIVE_PORTALS_LOADED ? "Immersive Portals" : null
+					);
+				} else {
 					return Optional.of(new Component[]{
 						Component.translatable("text.cloth-config.restart_required")
 							.withStyle(ChatFormatting.DARK_RED),
 						Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip")
 					});
-				} else {
-					ArrayList<Component> list = new ArrayList<>();
-
-					list.add(Component.translatable("text.cloth-config.restart_required")
-						.withStyle(ChatFormatting.DARK_RED));
-					list.add(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip")
-						.withStyle(ChatFormatting.STRIKETHROUGH));
-					if (IRONS_SPELLBOOKS_LOADED &&
-						IRONS_SPELLBOOKS_LESS_THAN_3_13_0) {
-						list.add(Component.translatable("config.asyncparticles.limited", "Iron's Spells 'n Spellbooks")
-							.withStyle(ChatFormatting.DARK_RED));
-					}
-					if (MAKE_BUBBLES_POP_LOADED) {
-						list.add(Component.translatable("config.asyncparticles.limited", "Make Bubbles Pop")
-							.withStyle(ChatFormatting.DARK_RED));
-					}
-					if (COSYCRITTERS_LOADED) {
-						list.add(Component.translatable("config.asyncparticles.limited", "Cosy Critters")
-							.withStyle(ChatFormatting.DARK_RED));
-					}
-					return Optional.of(list.toArray(new Component[0]));
 				}
 			})
 			.requireRestart()
 			.setRequirement(() -> (!IRONS_SPELLBOOKS_LOADED ||
 				!IRONS_SPELLBOOKS_LESS_THAN_3_13_0) &&
 				!MAKE_BUBBLES_POP_LOADED &&
-				!COSYCRITTERS_LOADED)
+				!COSYCRITTERS_LOADED &&
+				!IMMERSIVE_PORTALS_LOADED)
 			.build());
 		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap"),
@@ -232,5 +223,18 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
 			.build()));
+	}
+
+	private static Optional<Component[]> limitedTooltip(MutableComponent description, Object... modNames) {
+		Component modNamesStr = Arrays.stream(modNames)
+			.filter(Objects::nonNull)
+			.map(modName -> modName instanceof Component ? (Component) modName : Component.literal(String.valueOf(modName)))
+			.collect(Collector.of(Component::empty, MutableComponent::append, (a, b) -> a.append(", ").append(b)));
+
+		return Optional.of(new MutableComponent[]{
+			description.withStyle(ChatFormatting.STRIKETHROUGH),
+			Component.translatable("config.asyncparticles.limited", modNamesStr)
+				.withStyle(ChatFormatting.YELLOW)
+		});
 	}
 }
