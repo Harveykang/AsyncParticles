@@ -96,6 +96,7 @@ class ClothConfigMenus {
 				.setTooltipSupplier(() -> {
 					if (REIGNOFNETHER_LOADED || IMMERSIVE_PORTALS_LOADED) {
 						return incompatibilityTooltip(
+							Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip"),
 							REIGNOFNETHER_LOADED ? "Reign of Nether" : null,
 							IMMERSIVE_PORTALS_LOADED ? "Immersive Portals" : null);
 					} else {
@@ -134,7 +135,9 @@ class ClothConfigMenus {
 				.setDefaultValue(defaultConfig.tick.deferredTextureTick)
 				.setTooltipSupplier(() -> {
 					if (ModListHelper.AXIOM_LOADED) {
-						return incompatibilityTooltip("Axiom");
+						return incompatibilityTooltip(
+							Component.translatable("config.asyncparticles.tick.deferredTextureTick.tooltip"),
+							"Axiom");
 					} else {
 						return Optional.of(new MutableComponent[]{
 							Component.translatable("config.asyncparticles.tick.deferredTextureTick.tooltip")
@@ -354,15 +357,14 @@ class ClothConfigMenus {
 		return builder;
 	}
 
-	private static Optional<Component[]> incompatibilityTooltip(Object... modNames) {
+	private static Optional<Component[]> incompatibilityTooltip(MutableComponent description, Object... modNames) {
 		Component modNamesStr = Arrays.stream(modNames)
 			.filter(Objects::nonNull)
 			.map(modName -> modName instanceof Component ? (Component) modName : Component.literal(String.valueOf(modName)))
 			.collect(Collector.of(Component::empty, MutableComponent::append, (a, b) -> a.append(", ").append(b)));
 
 		return Optional.of(new MutableComponent[]{
-			Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip")
-				.withStyle(ChatFormatting.STRIKETHROUGH),
+			description.withStyle(ChatFormatting.STRIKETHROUGH),
 			Component.translatable("config.asyncparticles.incompatibility", modNamesStr)
 				.withStyle(ChatFormatting.YELLOW)
 		});
