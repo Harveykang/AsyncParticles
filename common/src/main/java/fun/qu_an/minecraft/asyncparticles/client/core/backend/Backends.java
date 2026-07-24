@@ -42,67 +42,82 @@ public class Backends {
 			boolean GL_ARB_direct_state_access = enabledExtensions.contains("GL_ARB_direct_state_access");
 			boolean GL_ARB_vertex_attrib_binding = enabledExtensions.contains("GL_ARB_vertex_attrib_binding");
 
-			if (GL_ES) {
-				gl = new GlCommands.GL_ES(
-					GL_ARB_direct_state_access,
-					GL_ARB_vertex_attrib_binding);
-			} else {
-				gl = new GlCommands.GL(
-					GL_ARB_direct_state_access,
-					GL_ARB_vertex_attrib_binding
-				);
-			}
-			if (glCapabilities.OpenGL45) {
-				glTf = new GlCommands.TransformFeedback.GL45();
-			} else if (glCapabilities.OpenGL40) {
-				glTf = new GlCommands.TransformFeedback.GL40();
-			} else if (glCapabilities.GL_ARB_transform_feedback2) {
-				glTf = new GlCommands.TransformFeedback.ARB2();
-			} else if (glCapabilities.OpenGL30) {
-				glTf = new GlCommands.TransformFeedback.GL30();
-			} else {
-				glTf = new GlCommands.TransformFeedback.Unsupported(); // impossible
-			}
-			if (GL_ES) {
-				glCs = new GlCommands.ComputeShader.Unsupported();
-			} else if (glCapabilities.OpenGL43) {
-				glCs = new GlCommands.ComputeShader.GL43();
-			} else if (glCapabilities.GL_ARB_compute_shader &&
-				glCapabilities.GL_ARB_shader_storage_buffer_object &&
-				glCapabilities.GL_ARB_shader_atomic_counters) {
-				glCs = new GlCommands.ComputeShader.ARB();
-			} else {
-				glCs = new GlCommands.ComputeShader.Unsupported();
-			}
+			gl = getGl(GL_ES, GL_ARB_direct_state_access, GL_ARB_vertex_attrib_binding);
+			glTf = getGlTf(glCapabilities);
+			glCs = getGlCs(GL_ES, glCapabilities);
 			vk = new VkCommands.Unsupported();
 			backend = GL_ES ? Backend.OPENGL_ES : Backend.OPENGL;
 		} else if (backendName.toLowerCase(Locale.ROOT).contains("vulkan")) {
+			gl = new GlCommands.Unsupported();
 			glTf = new GlCommands.TransformFeedback.Unsupported();
 			glCs = new GlCommands.ComputeShader.Unsupported();
-
-			// check device capabilities via Vulkan API directly
-			VkDevice vkDevice = ((VulkanDevice) device.backend).vkDevice();
-			boolean isVk13;
-			try (MemoryStack s = MemStackUtil.stackPush()) {
-				VkPhysicalDeviceProperties props = VkPhysicalDeviceProperties.calloc(s);
-				VK10.vkGetPhysicalDeviceProperties(vkDevice.getPhysicalDevice(), props);
-				isVk13 = props.apiVersion() >= VK13.VK_API_VERSION_1_3;
-			}
-			boolean pushDescriptor;
-			boolean synchronization2;
-			if (isVk13) {
-				pushDescriptor = true;
-				synchronization2 = true;
-			} else {
-				pushDescriptor = VK10.vkGetDeviceProcAddr(vkDevice, "vkCmdPushDescriptorSetKHR") != 0L;
-				synchronization2 = VK10.vkGetDeviceProcAddr(vkDevice, "vkCmdPipelineBarrier2KHR") != 0L;
-			}
-			vk = new VkCommands.Vk(pushDescriptor, synchronization2);
-			gl = new GlCommands.Unsupported();
+			vk = getVkCaps(device);
 			backend = Backend.VULKAN;
 		} else {
 			throw new ExceptionInInitializerError("Unsupported backend: " + backendName);
 		}
+	}
+
+	private static GlCommands getGl(boolean GL_ES, boolean GL_ARB_direct_state_access, boolean GL_ARB_vertex_attrib_binding) {
+		if (GL_ES) {
+			return new GlCommands.GL_ES(
+				GL_ARB_direct_state_access,
+				GL_ARB_vertex_attrib_binding);
+		} else {
+			return new GlCommands.GL(
+				GL_ARB_direct_state_access,
+				GL_ARB_vertex_attrib_binding
+			);
+		}
+	}
+
+	private static GlCommands.TransformFeedback getGlTf(GLCapabilities glCapabilities) {
+		if (glCapabilities.OpenGL45) {
+			return new GlCommands.TransformFeedback.GL45();
+		} else if (glCapabilities.OpenGL40) {
+			return new GlCommands.TransformFeedback.GL40();
+		} else if (glCapabilities.GL_ARB_transform_feedback2) {
+			return new GlCommands.TransformFeedback.ARB2();
+		} else if (glCapabilities.OpenGL30) {
+			return new GlCommands.TransformFeedback.GL30();
+		} else {
+			return new GlCommands.TransformFeedback.Unsupported(); // impossible
+		}
+	}
+
+	private static GlCommands.ComputeShader getGlCs(boolean GL_ES, GLCapabilities glCapabilities) {
+		if (GL_ES) {
+			return new GlCommands.ComputeShader.Unsupported();
+		} else if (glCapabilities.OpenGL43) {
+			return new GlCommands.ComputeShader.GL43();
+		} else if (glCapabilities.GL_ARB_compute_shader &&
+			glCapabilities.GL_ARB_shader_storage_buffer_object &&
+			glCapabilities.GL_ARB_shader_atomic_counters) {
+			return new GlCommands.ComputeShader.ARB();
+		} else {
+			return new GlCommands.ComputeShader.Unsupported();
+		}
+	}
+
+	private static VkCommands getVkCaps(GpuDevice device) {
+		// check device capabilities via Vulkan API directly
+		VkDevice vkDevice = ((VulkanDevice) device.backend).vkDevice();
+		boolean isVk13;
+		try (MemoryStack s = MemStackUtil.stackPush()) {
+			VkPhysicalDeviceProperties props = VkPhysicalDeviceProperties.calloc(s);
+			VK10.vkGetPhysicalDeviceProperties(vkDevice.getPhysicalDevice(), props);
+			isVk13 = props.apiVersion() >= VK13.VK_API_VERSION_1_3;
+		}
+		boolean pushDescriptor;
+		boolean synchronization2;
+		if (isVk13) {
+			pushDescriptor = true;
+			synchronization2 = true;
+		} else {
+			pushDescriptor = VK10.vkGetDeviceProcAddr(vkDevice, "vkCmdPushDescriptorSetKHR") != 0L;
+			synchronization2 = VK10.vkGetDeviceProcAddr(vkDevice, "vkCmdPipelineBarrier2KHR") != 0L;
+		}
+		return new VkCommands.Vk(pushDescriptor, synchronization2);
 	}
 
 	public static void init() {
