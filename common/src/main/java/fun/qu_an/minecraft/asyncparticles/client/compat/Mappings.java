@@ -16,8 +16,4 @@ public class Mappings {
 	public static String getRenderRotatedQuadMethod2() {
 		return "extractRotatedQuad";
 	}
-
-	public static String getFireworkSparkClass() {
-		return "net.minecraft.client.particle.FireworkParticles$SparkParticle";
-	}
 }
