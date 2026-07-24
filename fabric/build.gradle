@@ -158,5 +158,7 @@ runClient {
             }
         }
     }
-    args += '--vulkanValidation'
+    if (vk_debug == 'true') {
+        args += '--vulkanValidation'
+    }
 }
