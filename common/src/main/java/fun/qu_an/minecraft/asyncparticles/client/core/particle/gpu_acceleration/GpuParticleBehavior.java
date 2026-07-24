@@ -40,18 +40,13 @@ public class GpuParticleBehavior {
 	private int limitMultiplier = 1;
 
 	{
-		try {
-			//noinspection unchecked
-			GPU_PARTICLE_CLASSES = new ReferenceArrayList<>(List.of(
-				SingleQuadParticle.class,
-				FlyTowardsPositionParticle.class,
-				FireworkParticles.OverlayParticle.class,
-				(Class<? extends Particle>) Class.forName(Mappings.getFireworkSparkClass()),
-				DustColorTransitionParticle.class
-			));
-		} catch (ClassNotFoundException e) {
-			throw new ExceptionInInitializerError(e);
-		}
+		GPU_PARTICLE_CLASSES = new ReferenceArrayList<>(List.of(
+			SingleQuadParticle.class,
+			FlyTowardsPositionParticle.class,
+			FireworkParticles.OverlayParticle.class,
+			FireworkParticles.SparkParticle.class,
+			DustColorTransitionParticle.class
+		));
 	}
 
 	private final Reference2BooleanMap<Class<? extends SingleQuadParticle>> CAN_RENDER_FAST_CACHE =
