@@ -1,5 +1,5 @@
-#version 150
-#extension GL_ARB_explicit_attrib_location : enable
+#version 330
+
 //.add("oPosition", VertexFormatElement.POSITION)
 //		.add("Position", VertexFormatElement.POSITION)
 //		.add("Sizes", VertexFormatElement.UV0)
@@ -9,15 +9,15 @@
 //		.add("Color", VertexFormatElement.COLOR)
 //		.add("Light", VertexFormatElement.UV2)
 //		.add("Rolls", VertexFormatElement.UV0)
-layout(location = 0) in vec3 oPosition;
-layout(location = 1) in vec3 Position;
-layout(location = 2) in vec2 Sizes;
-layout(location = 3) in vec2 UVMin;
-layout(location = 4) in vec2 UVMax;
-layout(location = 5) in vec4 oColor;
-layout(location = 6) in vec4 Color;
-layout(location = 7) in ivec2 Light;
-layout(location = 8) in vec2 Rolls;
+in vec3 oPosition;
+in vec3 Position;
+in vec2 Sizes;
+in vec2 UVMin;
+in vec2 UVMax;
+in vec4 oColor;
+in vec4 Color;
+in ivec2 Light;
+in vec2 Rolls;
 
 //#if defined(GL_ARB_uniform_buffer_object) || __VERSION__ >= 140
 //layout(std140) uniform FrameInfo {

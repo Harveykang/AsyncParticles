@@ -7,7 +7,7 @@ import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
-import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticlePipelines;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ComputeResult;
@@ -21,7 +21,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.opengl.GL11C;
-import org.lwjgl.opengl.GL14C;
 import org.lwjgl.opengl.GL15C;
 import org.lwjgl.opengl.GL30C;
 import org.lwjgl.system.MemoryStack;
@@ -93,11 +92,11 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		((GlBuffer) targetMoj).handle = target.vbo;
 		GlBuffer.MEMORY_POOL.malloc(target.vbo, target.getSize());
 
-		tf = BackendCaps.glTfSupport.genTransformFeedback();
+		tf = Backends.glTf.genTransformFeedback();
 		if (tf > 0) {
-			BackendCaps.glTfSupport.glBindTransformFeedback(tf);
-			BackendCaps.glTfSupport.glBindTransformFeedbackBuffer(target.vbo);
-			BackendCaps.glTfSupport.glBindTransformFeedback(0);
+			Backends.glTf.glBindTransformFeedback(tf);
+			Backends.glTf.glBindTransformFeedbackBuffer(target.vbo);
+			Backends.glTf.glBindTransformFeedback(0);
 		}
 
 		resize(Math.max(particleLimit, AsyncParticlesConfig.MIN_PARTICLE_LIMIT));
@@ -425,7 +424,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		ThreadUtil.assertOnMainThread();
 
 		if (tf > 0) {
-			BackendCaps.glTfSupport.glBindTransformFeedback(tf);
+			Backends.glTf.glBindTransformFeedback(tf);
 		}
 		int usingIdx = renderSrcIdx;
 		if (usingIdx < 0) {
@@ -443,31 +442,32 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 
 		sources[usingIdx].bind();
 		if (tf <= 0) {
-			BackendCaps.glTfSupport.glBindTransformFeedbackBuffer(target.vbo);
+			Backends.glTf.glBindTransformFeedbackBuffer(target.vbo);
 		}
 		int needSize = 4 * (tickCount[usingIdx] + appendCount) * GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
-		BackendCaps.glTfSupport.glBindTransformFeedbackBufferRange(tf,
+		Backends.glTf.glBindTransformFeedbackBufferRange(tf,
 			0,
 			target.vbo,
 			0L,
 			needSize);
 
 		GL11C.glEnable(GL30C.GL_RASTERIZER_DISCARD);
-		BackendCaps.glTfSupport.glBeginTransformFeedback(GL11C.GL_POINTS);
+		Backends.glTf.glBeginTransformFeedback(GL11C.GL_POINTS);
 
 		if (computeResult == null) {
 			buildDrawStuffs(layerBatches[usingIdx]);
 		}
-		GL14C.glMultiDrawArrays(GL11C.GL_POINTS, multiDrawFirst, multiDrawCount);
 
-		BackendCaps.glTfSupport.glEndTransformFeedback();
+		Backends.gl.glMultiDrawArrays(GL11C.GL_POINTS, multiDrawFirst, multiDrawCount);
+
+		Backends.glTf.glEndTransformFeedback();
 		GL11C.glDisable(GL30C.GL_RASTERIZER_DISCARD);
 		ParticleVertexBuffer.unbind();
 
 		if (tf > 0) {
-			BackendCaps.glTfSupport.glBindTransformFeedback(0);
+			Backends.glTf.glBindTransformFeedback(0);
 		} else {
-			BackendCaps.glTfSupport.glBindTransformFeedbackBuffer(0);
+			Backends.glTf.glBindTransformFeedbackBuffer(0);
 		}
 		GL30C.glUseProgram(prevProgram);
 
@@ -556,7 +556,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		}
 		targetMoj.close();
 		target.delete(true, false);
-		BackendCaps.glTfSupport.deleteTransformFeedback(tf);
+		Backends.glTf.deleteTransformFeedback(tf);
 	}
 
 	@Override

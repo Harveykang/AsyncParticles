@@ -93,4 +93,8 @@ public class ConfigHelper {
 	public static boolean isSyncAllParticles() {
 		return dev$syncAllParticles;
 	}
+
+	public static boolean mobileCompatMultiDraw() {
+		return mobile$multiDrawWorkaround;
+	}
 }

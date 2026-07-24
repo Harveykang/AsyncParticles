@@ -5,7 +5,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
@@ -271,7 +271,7 @@ public class AsyncTickBehavior {
 					})),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
 				syncParticleTypes.stream().map(Class::getName).toList(),
-				BackendCaps.debugInfo()
+				Backends.debugInfo()
 			)));
 
 		debugConsumer = null;

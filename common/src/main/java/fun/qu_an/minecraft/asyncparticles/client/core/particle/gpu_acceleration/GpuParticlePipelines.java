@@ -7,7 +7,7 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
-import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.ParticleVertexBuffer;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
@@ -76,7 +76,7 @@ public class GpuParticlePipelines {
 
 	public static void glBindAttr(VertexFormat format, ParticleVertexBuffer buffer) {
 		buffer.bind();
-		if (BackendCaps.GL_ARB_vertex_attrib_binding) {
+		if (Backends.gl.vertexAttribBinding()) {
 			int attribLocation = 0;
 			for (VertexFormatElement element : format.getElements()) {
 				GlStateManager._enableVertexAttribArray(attribLocation);
