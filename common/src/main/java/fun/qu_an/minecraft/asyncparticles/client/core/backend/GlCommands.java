@@ -1,20 +1,98 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.backend;
 
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import org.lwjgl.opengl.*;
 
-public interface GLCaps {
-	interface CsSupport {
-		boolean isComputeShaderSupported();
+public abstract class GlCommands {
+	private final boolean directStateAccess;
+	private final boolean vertexAttribBinding;
+	public GlCommands(boolean directStateAccess, boolean vertexAttribBinding) {
+		this.directStateAccess = directStateAccess;
+		this.vertexAttribBinding = vertexAttribBinding;
+	}
 
-		void glBindShaderStorageBuffer(int ssbo);
+	public boolean isSupported() {
+		return true;
+	}
 
-		void glBindShaderStorageBufferBase(int bindingPoint, int ssbo);
+	public abstract void glMultiDrawArrays(int mode, int[] first, int[] count);
 
-		void glShaderStorageBufferData(int size, int usage);
+	public boolean directStateAccess() {
+		return directStateAccess;
+	}
 
-		class Unsupported implements CsSupport {
+	public boolean vertexAttribBinding() {
+		return vertexAttribBinding;
+	}
+
+	@Override
+	public String toString() {
+		return "GLCommands." + this.getClass().getSimpleName() + "{" +
+			"directStateAccess=" + directStateAccess +
+			", vertexAttribBinding=" + vertexAttribBinding +
+			'}';
+	}
+
+	public static class GL_ES extends GlCommands {
+		public GL_ES(boolean directStateAccess, boolean vertexAttribBinding) {
+			super(directStateAccess, vertexAttribBinding);
+		}
+
+		@Override
+		public void glMultiDrawArrays(int mode, int[] first, int[] count) {
+			if (ConfigHelper.mobileCompatMultiDraw()) {
+				for (int i = 0; i < first.length; i++) {
+					GL11C.glDrawArrays(mode, first[i], count[i]);
+				}
+			} else {
+				GL14C.glMultiDrawArrays(mode, first, count);
+			}
+		}
+	}
+
+	public static class GL extends GlCommands {
+		public GL(boolean directStateAccess, boolean vertexAttribBinding) {
+			super(directStateAccess, vertexAttribBinding);
+		}
+
+		@Override
+		public void glMultiDrawArrays(int mode, int[] first, int[] count) {
+			GL14C.glMultiDrawArrays(mode, first, count);
+		}
+	}
+
+	public static class Unsupported extends GlCommands {
+		public Unsupported() {
+			super(false, false);
+		}
+
+		@Override
+		public boolean isSupported() {
+			return false;
+		}
+
+		@Override
+		public void glMultiDrawArrays(int mode, int[] first, int[] count) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	public abstract static class ComputeShader {
+		public abstract boolean isSupported();
+
+		public abstract void glBindShaderStorageBuffer(int ssbo);
+
+		public abstract void glBindShaderStorageBufferBase(int bindingPoint, int ssbo);
+
+		public abstract void glShaderStorageBufferData(int size, int usage);
+
+		public String toString() {
+			return "ComputeShader." + this.getClass().getSimpleName();
+		}
+
+		public static class Unsupported extends ComputeShader {
 			@Override
-			public boolean isComputeShaderSupported() {
+			public boolean isSupported() {
 				return false;
 			}
 
@@ -34,9 +112,9 @@ public interface GLCaps {
 			}
 		}
 
-		class ARB implements CsSupport {
+		public static class ARB extends ComputeShader {
 			@Override
-			public boolean isComputeShaderSupported() {
+			public boolean isSupported() {
 				return true;
 			}
 
@@ -56,45 +134,49 @@ public interface GLCaps {
 			}
 		}
 
-		class GL_43 extends ARB {
+		public static class GL43 extends ARB {
 		}
 	}
 
-	interface TfSupport {
-		boolean isTfObjectSupported();
+	public abstract static class TransformFeedback {
+		public abstract boolean isTfObjectSupported();
 
-		boolean isTfSupported();
+		public abstract boolean isSupported();
 
-		int genTransformFeedback();
+		public abstract int genTransformFeedback();
 
-		void deleteTransformFeedback(int tf);
+		public abstract void deleteTransformFeedback(int tf);
 
-		void glBindTransformFeedback(int tf);
+		public abstract void glBindTransformFeedback(int tf);
 
-		void glBindTransformFeedbackBuffer(int vbo);
+		public abstract void glBindTransformFeedbackBuffer(int vbo);
 
-		void glBindTransformFeedbackBufferBase(int tf, int index, int vbo);
+		public abstract void glBindTransformFeedbackBufferBase(int tf, int index, int vbo);
 
-		void glBindTransformFeedbackBufferRange(int tf, int index, int vbo, long offset, long size);
+		public abstract void glBindTransformFeedbackBufferRange(int tf, int index, int vbo, long offset, long size);
 
-		void glBeginTransformFeedback(int primitiveMode);
+		public abstract void glBeginTransformFeedback(int primitiveMode);
 
-		void glEndTransformFeedback();
+		public abstract void glEndTransformFeedback();
 
-		void glPauseTransformFeedback();
+		public abstract void glPauseTransformFeedback();
 
-		void glResumeTransformFeedback(int primitiveMode);
+		public abstract void glResumeTransformFeedback(int primitiveMode);
 
-		void glTransformFeedbackVaryings(int tshProg, String[] varyings, int glInterleavedAttribs);
+		public abstract void glTransformFeedbackVaryings(int tshProg, String[] varyings, int glInterleavedAttribs);
 
-		class Unsupported implements TfSupport {
+		public String toString() {
+			return "TransformFeedback." + this.getClass().getSimpleName();
+		}
+
+		public static class Unsupported extends TransformFeedback {
 			@Override
 			public boolean isTfObjectSupported() {
 				return false;
 			}
 
 			@Override
-			public boolean isTfSupported() {
+			public boolean isSupported() {
 				return false;
 			}
 
@@ -154,14 +236,14 @@ public interface GLCaps {
 			}
 		}
 
-		class GL_30 implements TfSupport {
+		public static class GL30 extends TransformFeedback {
 			@Override
 			public boolean isTfObjectSupported() {
 				return false;
 			}
 
 			@Override
-			public boolean isTfSupported() {
+			public boolean isSupported() {
 				return true;
 			}
 
@@ -185,7 +267,7 @@ public interface GLCaps {
 
 			@Override
 			public void glBindTransformFeedbackBufferBase(int tf, int index, int vbo) {
-				if (BackendCaps.GL_ARB_direct_state_access) {
+				if (Backends.gl.directStateAccess()) {
 					ARBDirectStateAccess.glTransformFeedbackBufferBase(tf, index, vbo);
 				} else {
 					GL30C.glBindBufferBase(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, vbo);
@@ -194,7 +276,7 @@ public interface GLCaps {
 
 			@Override
 			public void glBindTransformFeedbackBufferRange(int tf, int index, int vbo, long offset, long size) {
-				if (BackendCaps.GL_ARB_direct_state_access){
+				if (Backends.gl.directStateAccess()) {
 					ARBDirectStateAccess.glTransformFeedbackBufferRange(tf, index, vbo, offset, size);
 				} else {
 					GL30C.glBindBufferRange(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, vbo, offset, size);
@@ -227,7 +309,7 @@ public interface GLCaps {
 			}
 		}
 
-		class ARB_2 extends GL_30 {
+		public static class ARB2 extends GL30 {
 			@Override
 			public boolean isTfObjectSupported() {
 				return true;
@@ -259,10 +341,10 @@ public interface GLCaps {
 			}
 		}
 
-		class ARB_3 extends ARB_2 {
+		public static class ARB3 extends ARB2 {
 		}
 
-		class GL_40 extends GL_30 {
+		public static class GL40 extends GL30 {
 			@Override
 			public boolean isTfObjectSupported() {
 				return true;
@@ -294,7 +376,7 @@ public interface GLCaps {
 			}
 		}
 
-		class GL_45 extends GL_40 {
+		public static class GL45 extends GL40 {
 			@Override
 			public void glBindTransformFeedbackBufferBase(int tf, int index, int vbo) {
 				GL45C.glTransformFeedbackBufferBase(tf, index, vbo);

@@ -150,7 +150,7 @@ import java.util.jar.JarOutputStream
 import java.util.zip.ZipFile
 
 def mergedJarName = "${rootProject.archives_name}-${rootProject.mod_version}" +
-        (rootProject.snapshot == 'true' ? '-SNAPSHOT.' + Long.toHexString(new Random().nextLong(0x10000000L, 0xFFFFFFFFL)) : '') +
+        (rootProject.snapshot == 'true' ? '-SNAPSHOT.' + new Date().format('yyyyMMddHHmmss') : '') +
         "+${rootProject.minecraft_version}.jar"
 
 tasks.register('mergeJars') {

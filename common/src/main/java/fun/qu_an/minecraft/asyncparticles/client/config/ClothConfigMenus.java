@@ -1,7 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
-import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backend;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.ClothConfigMixinMenus;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
@@ -13,8 +14,10 @@ import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -187,7 +190,7 @@ class ClothConfigMenus {
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.gpuAcceleration.tooltip"))
 				// todo add gpu acceleration requirement
 				.setSaveConsumer(newValue -> newConfig.rendering.gpuAcceleration = newValue)
-				.setRequirement(BackendCaps::supportsGpuAcceleration)
+				.setRequirement(Backends::supportsGpuAcceleration)
 				.build())
 			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.appendNewParticlesToRenderer"),
@@ -305,15 +308,30 @@ class ClothConfigMenus {
 		Runnable mixinSaveRunnable = ClothConfigMixinMenus.buildCategory(mixinCategory, entryBuilder, mixinEntryBuilder);
 		// endregion
 
-		// region Dev
-		if (ModListHelper.DEV_ENV) {
-			builder.getOrCreateCategory(Component.literal("Dev"))
+		// region Mobile
+		if (Backends.backend == Backend.OPENGL_ES) {
+			builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mobile"))
 				.addEntry(entryBuilder
-					.startBooleanToggle(Component.literal("Sync All Particles"), AsyncParticlesConfig.dev$syncAllParticles)
-					.setDefaultValue(false)
-					.setSaveConsumer(newValue -> AsyncParticlesConfig.dev$syncAllParticles = newValue)
+					.startBooleanToggle(Component.translatable("config.asyncparticles.mobile.multiDrawWorkaround"), globalConfig.mobile.multiDrawWorkaround)
+					.setTooltip(Component.translatable("config.asyncparticles.mobile.multiDrawWorkaround.tooltip"))
+					.setDefaultValue(defaultConfig.mobile.multiDrawWorkaround)
+					.setSaveConsumer(newValue -> newConfig.mobile.multiDrawWorkaround = newValue)
 					.build());
 		}
+		// endregion
+
+		// region Dev
+		builder.getOrCreateCategory(Component.literal("Dev"))
+			.addEntry(entryBuilder
+				.startBooleanToggle(Component.literal("Debug Sync Particle Classes"), AsyncParticlesConfig.dev$syncAllParticles)
+				.setTooltip(Component.literal("Never enable it unless requested by the developer."))
+				.setDefaultValue(false)
+				.setSaveConsumer(newValue -> AsyncParticlesConfig.dev$syncAllParticles = newValue)
+				.build())
+			.addEntry(entryBuilder.startTextDescription(Component.literal(Backends.debugInfo())
+					.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(Backends.debugInfo()))))
+				.setTooltip(Component.literal("Click the text to copy to clipboard."))
+				.build());
 		// endregion
 
 		builder.setSavingRunnable(() -> {

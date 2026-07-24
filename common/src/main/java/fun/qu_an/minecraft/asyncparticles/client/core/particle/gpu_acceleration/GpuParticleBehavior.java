@@ -1,13 +1,11 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
-import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.GlTfParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan.VkCompParticleRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
@@ -205,11 +203,11 @@ public class GpuParticleBehavior {
 	}
 
 	public IParticleRenderer createRenderer() {
-		if (BackendCaps.isVk()) {
+		if (Backends.isVk()) {
 			return new VkCompParticleRenderer(ConfigHelper.getParticleLimit());
 		}
-		if (BackendCaps.isGl()) {
-			if (BackendCaps.glTfSupport.isTfSupported()) {
+		if (Backends.isGl()) {
+			if (Backends.glTf.isSupported()) {
 				return new GlTfParticleRenderer(ConfigHelper.getParticleLimit());
 			}
 		}

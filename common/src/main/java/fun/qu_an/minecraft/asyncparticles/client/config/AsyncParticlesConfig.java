@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.ChatFormatting;
@@ -67,6 +67,7 @@ public class AsyncParticlesConfig {
 	public static boolean valkyrienSkies$fixParticleLights;
 	public static RainEffect create$rainEffect;
 	public static int create$tickRainBlockingRange;
+	public static boolean mobile$multiDrawWorkaround;
 	public static boolean dev$syncAllParticles = false;
 
 	static {
@@ -235,6 +236,7 @@ public class AsyncParticlesConfig {
 		Rendering rendering = new Rendering();
 		ValkyrienSkies valkyrienSkies = new ValkyrienSkies();
 		Create create = new Create();
+		Mobile mobile = new Mobile();
 
 		void flat() {
 			particle.flat();
@@ -242,6 +244,7 @@ public class AsyncParticlesConfig {
 			rendering.flat();
 			valkyrienSkies.flat();
 			create.flat();
+			mobile.flat();
 		}
 
 		void fold() {
@@ -250,6 +253,7 @@ public class AsyncParticlesConfig {
 			rendering.fold();
 			valkyrienSkies.fold();
 			create.fold();
+			mobile.fold();
 		}
 
 		static class Particle {
@@ -319,7 +323,7 @@ public class AsyncParticlesConfig {
 
 		static class Rendering {
 			RenderingMode particleRenderingMode = RenderingMode.SYNCHRONOUSLY;
-			boolean gpuAcceleration = BackendCaps.supportsGpuAcceleration();
+			boolean gpuAcceleration = Backends.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
 //			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
 //			Set<String> syncParticleClasses = new LinkedHashSet<>();
@@ -338,7 +342,7 @@ public class AsyncParticlesConfig {
 
 			private void flat() {
 				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
-				rendering$gpuAcceleration = gpuAcceleration && BackendCaps.supportsGpuAcceleration();
+				rendering$gpuAcceleration = gpuAcceleration && Backends.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
 //				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
 //				rendering$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
@@ -380,6 +384,18 @@ public class AsyncParticlesConfig {
 			private void fold() {
 				rainEffect = create$rainEffect;
 				tickRainBlockingRange = create$tickRainBlockingRange;
+			}
+		}
+
+		static class Mobile {
+			boolean multiDrawWorkaround = true;
+
+			private void flat() {
+				mobile$multiDrawWorkaround = multiDrawWorkaround;
+			}
+
+			private void fold() {
+				multiDrawWorkaround = mobile$multiDrawWorkaround;
 			}
 		}
 	}

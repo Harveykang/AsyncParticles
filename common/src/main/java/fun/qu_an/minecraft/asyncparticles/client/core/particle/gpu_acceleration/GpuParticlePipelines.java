@@ -7,9 +7,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
-import fun.qu_an.minecraft.asyncparticles.client.compat.beryl.BerylCompat;
-import fun.qu_an.minecraft.asyncparticles.client.core.backend.BackendCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.beryl.BerylCompat;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.ParticleVertexBuffer;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
@@ -90,7 +90,7 @@ public class GpuParticlePipelines {
 
 	public static void glBindAttr(VertexFormat format, ParticleVertexBuffer buffer) {
 		buffer.bind();
-		if (BackendCaps.GL_ARB_vertex_attrib_binding) {
+		if (Backends.gl.vertexAttribBinding()) {
 			List<VertexFormatElement> elements = format.getElements();
 			for (int i = 0, offset = 0; i < elements.size(); i++) {
 				VertexFormatElement element = elements.get(i);

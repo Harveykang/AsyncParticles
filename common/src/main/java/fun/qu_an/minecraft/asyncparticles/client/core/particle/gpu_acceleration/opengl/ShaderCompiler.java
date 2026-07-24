@@ -11,7 +11,8 @@ import java.util.function.IntConsumer;
 
 public class ShaderCompiler {
 	public static int createShaderProgram(int type, String resource) {
-		return createShaderProgram(type, resource, _ -> {});
+		return createShaderProgram(type, resource, _ -> {
+		});
 	}
 
 	public static int createShaderProgram(int type, String resource, IntConsumer beforeLink) {
@@ -21,7 +22,7 @@ public class ShaderCompiler {
 			.getResourceAsStream(resource)) {
 			source = IOUtils.toString(Objects.requireNonNull(is), StandardCharsets.UTF_8);
 		} catch (Exception e) {
-			throw new RuntimeException("Failed to load shader '" + resource + "'", e);
+			throw new IllegalStateException("Failed to load shader '" + resource + "'", e);
 		}
 
 		int shaderId = GL20C.glCreateShader(type);
@@ -32,7 +33,7 @@ public class ShaderCompiler {
 		if (compileStatus == GlConst.GL_FALSE) {
 			String log = GL20C.glGetShaderInfoLog(shaderId);
 			GL20C.glDeleteShader(shaderId);
-			throw new RuntimeException("Compile error: " + log);
+			throw new IllegalStateException("Compile error: " + log);
 		}
 
 		programId = GL20C.glCreateProgram();
@@ -44,7 +45,7 @@ public class ShaderCompiler {
 		int linkStatus = GL20C.glGetProgrami(programId, GlConst.GL_LINK_STATUS);
 		if (linkStatus == GlConst.GL_FALSE) {
 			String log = GL20C.glGetProgramInfoLog(programId, 1024);
-			throw new RuntimeException("Link error: " + log);
+			throw new IllegalStateException("Link error: " + log);
 		}
 		return programId;
 	}
