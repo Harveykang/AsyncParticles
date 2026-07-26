@@ -147,7 +147,6 @@ public class AsyncParticlesMixinConfig {
 
 		{
 			asyncTickableParticleGroups.add("games.enchanted.eg_particle_interactions.common.particle.render.group.CustomGeometryParticleGroup");
-			asyncTickableParticleGroups.add("net.mehvahdjukaar.polytone.content.particle.custom.render.ModelParticleRenderGroup");
 		}
 
 //		private Set<String> create$contraptionNoParticleCollision = new LinkedHashSet<>();
