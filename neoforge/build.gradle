@@ -2,13 +2,18 @@ plugins {
     id 'com.github.johnrengelman.shadow'
 }
 
+loom {
+    accessWidenerPath = project(":common").loom.accessWidenerPath
+
+    mixin {
+        useLegacyMixinAp = true
+        defaultRefmapName = "asyncparticles-neoforge-refmap.json"
+    }
+}
+
 architectury {
     platformSetupLoomIde()
     neoForge()
-}
-
-loom {
-    accessWidenerPath = project(":common").loom.accessWidenerPath
 }
 
 configurations {
@@ -22,7 +27,7 @@ configurations {
 
     // Files in this configuration will be bundled into your mod using the Shadow plugin.
     // Don't use the `shadow` configuration from the plugin itself as it's meant for excluding files.
-    shadowCommon {
+    shadowBundle {
         canBeResolved = true
         canBeConsumed = false
     }
@@ -48,17 +53,17 @@ dependencies {
 
     /* APIs */
 //    localRuntime 'maven.modrinth:architectury-api:17.0.8+neoforge'
-    localRuntime "me.shedaniel.cloth:cloth-config-neoforge:26.1.154"
+    localRuntime "me.shedaniel.cloth:cloth-config-neoforge:21.11.153"
 //    localRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
 //
 //    /* Performance */
-    localRuntime "maven.modrinth:spark:1.10.172-neoforge"
-//    compileOnly 'maven.modrinth:sodium:mc26.1.2-0.9.1-neoforge'
-    localRuntime 'maven.modrinth:sodium:mc26.1.2-0.9.1-neoforge'
-    localRuntime 'maven.modrinth:sodium-extra:mc26.1.2-0.9.3+neoforge'
+    localRuntime "maven.modrinth:spark:1.10.170-neoforge"
+//    compileOnly 'maven.modrinth:sodium:mc1.21.11-0.8.13-neoforge'
+    localRuntime 'maven.modrinth:sodium:mc1.21.11-0.8.13-neoforge'
+    localRuntime 'maven.modrinth:sodium-extra:mc1.21.11-0.9.3+neoforge'
 //
-//    compileOnly "maven.modrinth:iris:1.11.2+26.1-neoforge"
-    localRuntime "maven.modrinth:iris:1.11.2+26.1-neoforge"
+//    compileOnly "maven.modrinth:iris:1.10.7+1.21.11-neoforge"
+    localRuntime "maven.modrinth:iris:1.10.7+1.21.11-neoforge"
 //    localRuntime 'maven.modrinth:scalablelux:0.1.0+beta.2+neoforge.1a07a27'
     localRuntime "org.antlr:antlr4-runtime:4.13.1"
     localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
@@ -116,46 +121,15 @@ processResources {
     filesMatching('META-INF/neoforge.mods.toml') {
         expand version: project.version
     }
-
-    from(project(':common').sourceSets.main.resources.srcDirs) {
-        include 'asyncparticles-common.mixins.json'
-    }
-    filesMatching('asyncparticles-common.mixins.json') {
-        filter { line ->
-            line.replaceAll(/.*"refmap".*/, '')
-        }
-    }
-
-    // Generate NeoForge access transformer from common access widener
-    doFirst {
-        def awFile = loom.accessWidenerPath.get().asFile
-        def at
-        awFile.withReader('UTF-8') { reader ->
-            at = Aw2At.toAccessTransformSet(reader)
-        }
-        def atDir = layout.buildDirectory.dir('generated/resources/main/META-INF/').get().asFile
-        atDir.mkdirs()
-        def atFile = new File(atDir, 'accesstransformer.cfg')
-        if (!atFile.exists()) {
-            atFile.createNewFile()
-        }
-        new LfWriter(atFile.newWriter('UTF-8')).withCloseable { writer ->
-            AccessTransformFormats.FML.write(writer, at)
-        }
-    }
-    from { layout.buildDirectory.dir('generated/resources/main').get().asFile }
-}
-
-jar {
-    archiveClassifier = "raw"
 }
 
 shadowJar {
-    dependsOn(jar)
-    mainSpec.sourcePaths.clear()       // Remove default source set inclusion
-    from(zipTree(jar.archiveFile))     // Unpack jar output (preserves Loom modifications)
+    configurations = [project.configurations.shadowBundle]
+    archiveClassifier = 'dev-shadow'
+}
 
-    configurations = [project.configurations.shadowCommon]
-    archiveClassifier = null           // shadowJar becomes the main artifact
-    from rootProject.file("LICENSE.md")
+remapJar {
+    inputFile.set shadowJar.archiveFile
+    injectAccessWidener = true
+    atAccessWideners.add(project(":common").loom.accessWidenerPath.get().asFile.name)
 }
