@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
-import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
+import net.minecraft.client.renderer.state.QuadParticleRenderState;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
@@ -31,7 +31,7 @@ public class MixinQuadParticleRenderState {
 		name = "render"
 	)
 	@ModifyExpressionValue(method = "@MixinSquared:Handler", expect = 2, at = @At(value = "FIELD",
-		target = "Lnet/minecraft/client/renderer/state/level/QuadParticleRenderState;TEMP_QUAT:Lorg/joml/Quaternionf;",
+		target = "Lnet/minecraft/client/renderer/state/QuadParticleRenderState;TEMP_QUAT:Lorg/joml/Quaternionf;",
 		opcode = Opcodes.GETSTATIC))
 	private static Quaternionf modifyTempQuat(Quaternionf original) {
 		return asyncparticles$TEMP_QUAT.getSafe(original);
@@ -43,7 +43,7 @@ public class MixinQuadParticleRenderState {
 		name = "sodium$emitVertices"
 	)
 	@ModifyExpressionValue(method = "@MixinSquared:Handler", at = @At(value = "FIELD",
-		target = "Lnet/minecraft/client/renderer/state/level/QuadParticleRenderState;TEMP_VECTOR:Lorg/joml/Vector3f;",
+		target = "Lnet/minecraft/client/renderer/state/QuadParticleRenderState;TEMP_VECTOR:Lorg/joml/Vector3f;",
 		opcode = Opcodes.GETSTATIC))
 	private static Vector3f modifyTempVec(Vector3f original) {
 		return asyncparticles$TEMP_VEC.getSafe(original);

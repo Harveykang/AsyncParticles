@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(ElderGuardianParticleGroup.class)
 public class MixinElderGuardianParticleGroup$ElderGuardianParticleRenderState {
-	@ModifyArg(method = "lambda$extractRenderState$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ElderGuardianParticleGroup$ElderGuardianParticleRenderState;fromParticle(Lnet/minecraft/client/particle/ElderGuardianParticle;Lnet/minecraft/client/Camera;F)Lnet/minecraft/client/particle/ElderGuardianParticleGroup$ElderGuardianParticleRenderState;"))
+	@ModifyArg(method = {"method_74275", "lambda$extractRenderState$0"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ElderGuardianParticleGroup$ElderGuardianParticleRenderState;fromParticle(Lnet/minecraft/client/particle/ElderGuardianParticle;Lnet/minecraft/client/Camera;F)Lnet/minecraft/client/particle/ElderGuardianParticleGroup$ElderGuardianParticleRenderState;"))
 	private static float modifyParticleRecord(float partialTickTime,
 	                                          @Local(argsOnly = true, ordinal = 0)
 											  ElderGuardianParticle particle) {

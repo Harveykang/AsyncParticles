@@ -59,7 +59,7 @@ public class ParticleHelper {
 			// We just use the light cache slot for gpu, but never really enable it.
 			int lightColor;
 			try {
-				lightColor = addon.asyncparticles$invoke_getLightCoords(0f);
+				lightColor = addon.asyncparticles$invoke_getLightColor(0f);
 			} catch (MissingPaletteEntryException ignore) {
 				lightColor = 0;
 			}

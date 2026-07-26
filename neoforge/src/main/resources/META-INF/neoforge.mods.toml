@@ -15,14 +15,14 @@ logoFile = "assets/asyncparticles/icon.png"
 [[dependencies.asyncparticles]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.11.42,)"
+versionRange = "[21.11,)"
 ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.asyncparticles]]
 modId = "minecraft"
 type = "required"
-versionRange = "[26.1,26.2)"
+versionRange = "[1.21.11]"
 ordering = "NONE"
 side = "CLIENT"
 

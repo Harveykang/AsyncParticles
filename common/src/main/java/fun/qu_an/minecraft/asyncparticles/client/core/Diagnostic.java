@@ -26,7 +26,7 @@ public class Diagnostic {
 
 	private static void sendChat(Supplier<MutableComponent> component) {
 		Minecraft.getInstance().execute(() -> Minecraft.getInstance().gui.getChat()
-			.addClientSystemMessage(component.get().withStyle(ChatFormatting.DARK_RED)));
+			.addMessage(component.get().withStyle(ChatFormatting.DARK_RED)));
 	}
 
 	public static void illegalEntityStorageAccess() {

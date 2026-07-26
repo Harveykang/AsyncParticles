@@ -16,7 +16,7 @@ import java.util.List;
 
 @Mixin(GraphicsPipeline.class)
 public class MixinGraphicsPipeline {
-	@Inject(method = "getAttributeDescriptions", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "getAttributeDescriptions", remap = false, at = @At("HEAD"), cancellable = true)
 	private static void getAttributeDescriptions(VertexFormat vertexFormat, CallbackInfoReturnable<VkVertexInputAttributeDescription.Buffer> cir) {
 		if (vertexFormat != GpuParticlePipelines.IDENTITY_PARTICLE) {
 			return;
@@ -64,7 +64,7 @@ public class MixinGraphicsPipeline {
 				case UBYTE:
 					switch (count) {
 						case 4:
-							if (formatElement.normalized()) {
+							if (false) {
 								posDescription.format(37);
 							} else {
 								posDescription.format(41);
@@ -79,7 +79,7 @@ public class MixinGraphicsPipeline {
 				case BYTE:
 					switch (count) {
 						case 3:
-							if (formatElement.normalized()) {
+							if (false) {
 								posDescription.format(38);
 							} else {
 								posDescription.format(42);
@@ -89,7 +89,7 @@ public class MixinGraphicsPipeline {
 							offset += 4;
 							break label62;
 						case 4:
-							if (formatElement.normalized()) {
+							if (false) {
 								posDescription.format(38);
 							} else {
 								posDescription.format(42);

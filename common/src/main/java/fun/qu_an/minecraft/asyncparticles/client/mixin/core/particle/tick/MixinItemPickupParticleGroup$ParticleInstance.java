@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(ItemPickupParticleGroup.class)
 public class MixinItemPickupParticleGroup$ParticleInstance {
-	@ModifyArg(method = "lambda$extractRenderState$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ItemPickupParticleGroup$ParticleInstance;fromParticle(Lnet/minecraft/client/particle/ItemPickupParticle;Lnet/minecraft/client/Camera;F)Lnet/minecraft/client/particle/ItemPickupParticleGroup$ParticleInstance;"))
+	@ModifyArg(method = {"method_74278", "lambda$extractRenderState$0"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ItemPickupParticleGroup$ParticleInstance;fromParticle(Lnet/minecraft/client/particle/ItemPickupParticle;Lnet/minecraft/client/Camera;F)Lnet/minecraft/client/particle/ItemPickupParticleGroup$ParticleInstance;"))
 	private static float modifyParticleRecord(float partialTickTime,
 	                                          @Local(argsOnly = true, ordinal = 0)
 											  ItemPickupParticle particle) {

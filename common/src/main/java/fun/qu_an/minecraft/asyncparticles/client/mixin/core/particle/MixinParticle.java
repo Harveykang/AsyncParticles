@@ -23,7 +23,7 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	protected ClientLevel level;
 
 	@Shadow
-	protected abstract int getLightCoords(float a);
+	protected abstract int getLightColor(float a);
 
 	@Unique
 	private volatile boolean asyncparticles$ticked = true; // always true at first tick
@@ -61,9 +61,9 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 	}
 
 	@Override
-	public int asyncparticles$invoke_getLightCoords(float partialTickTime) {
+	public int asyncparticles$invoke_getLightColor(float partialTickTime) {
 		try {
-			return getLightCoords(partialTickTime);
+			return getLightColor(partialTickTime);
 		} catch (MissingPaletteEntryException ignore) {
 			// chunk not loaded yet maybe, ignore
 			return 0;

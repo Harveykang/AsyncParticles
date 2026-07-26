@@ -89,7 +89,7 @@ public abstract class MixinSingleQuadParticle extends Particle implements GpuPar
 			asyncparticles$isGpuLightGot = true;
 			return asyncparticles$getCachedLight();
 		}
-		return getLightCoords(partialTickTime);
+		return getLightColor(partialTickTime);
 	}
 
 	public double asyncparticles$getXo() {

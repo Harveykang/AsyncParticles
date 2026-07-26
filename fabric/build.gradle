@@ -35,24 +35,22 @@ configurations {
 dependencies {
     include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.3.3")))
 
-    implementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
-    implementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
+    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 
-    common(project(path: ':common')) { transitive false }
-//    shadowCommon(project(path: ':common', configuration: 'transformProductionFabric'))
-//    common(project(path: ':common_legacy_mod_compat')) { transitive false }
-//    shadowCommon project(path: ':common_legacy_mod_compat', configuration: 'transformProductionFabric')
+    common(project(path: ':common', configuration: 'namedElements')) { transitive false }
+    shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 
     /* APIs */
-    compileOnly 'maven.modrinth:modmenu:17.0.1-beta.1'
+    modCompileOnly 'maven.modrinth:modmenu:17.0.1-beta.1'
 //    localRuntime 'maven.modrinth:architectury-api:17.0.6+fabric'
-    localRuntime("me.shedaniel.cloth:cloth-config-fabric:21.11.153") {
+    modLocalRuntime("me.shedaniel.cloth:cloth-config-fabric:21.11.153") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 //    localRuntime("io.wispforest:owo-lib:0.12.21+1.21.6") {
 //        exclude(group: "net.fabricmc.fabric-api")
 //    }
-    localRuntime 'maven.modrinth:modmenu:17.0.1-beta.1'
+    modLocalRuntime 'maven.modrinth:modmenu:17.0.1-beta.1'
 //    localRuntime 'maven.modrinth:fabric-permissions-api:0.6.1'
 //    localRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
 
@@ -72,23 +70,23 @@ dependencies {
     // ============ Runtime ==============
 
 //    /* Performance */
-    if (false) {
-        localRuntime "maven.modrinth:sodium:mc1.21.11-0.8.13-fabric"
-        localRuntime 'maven.modrinth:sodium-extra:mc1.21.11-0.9.3+fabric'
-        localRuntime 'maven.modrinth:iris:1.10.7+1.21.11-fabric'
+    if (true) {
+        modLocalRuntime "maven.modrinth:sodium:mc1.21.11-0.8.7-fabric"
+        modLocalRuntime 'maven.modrinth:sodium-extra:mc1.21.11-0.8.3+fabric'
+        modLocalRuntime 'maven.modrinth:iris:1.10.7+1.21.11-fabric'
         localRuntime "org.antlr:antlr4-runtime:4.13.1"
         localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
         localRuntime "org.anarres:jcpp:1.4.14"
     }
 //    localRuntime 'maven.modrinth:scalablelux:0.1.6+fabric.c25518a'
-    localRuntime 'maven.modrinth:spark:1.10.170-fabric'
+    modLocalRuntime 'maven.modrinth:spark:1.10.170-fabric'
 //    compileOnly 'maven.modrinth:moreculling:kWU8mVq5' // 1.4.0-beta.1
 ////    localRuntime 'maven.modrinth:moreculling:ESxkwc6w' // 1.4.0-beta.1
 //
 //    /* Particle Rain/Pretty Rain */
 //    compileOnly "maven.modrinth:particle-rain:v4-beta.5+1.21.11-fabric"
 ////    localRuntime "maven.modrinth:particle-rain:3.3.6"
-    localRuntime("dev.isxander:yet-another-config-lib:3.8.2+1.21.11-fabric") {
+    modLocalRuntime("dev.isxander:yet-another-config-lib:3.8.2+1.21.11-fabric") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 //
@@ -107,32 +105,32 @@ dependencies {
 ////    localRuntime "maven.modrinth:particular:1.1.1+1.21.4" // TODO: this is a 1.21.4 version
 
     /* Particle Rain */
-    localRuntime "maven.modrinth:particle-rain:v4-beta.10+1.21.11-fabric"
+    modLocalRuntime "maven.modrinth:particle-rain:v4-beta.10+1.21.11-fabric"
 
     /* A Good Place */
-    localRuntime "maven.modrinth:a-good-place:1.21.11-1.3.2"
+    modLocalRuntime "maven.modrinth:a-good-place:1.21.11-1.3.2"
 
     /* Cosy Critters */
-    localRuntime "maven.modrinth:cosy-critters:v0.3.3+1.21.11-fabric"
+    modLocalRuntime "maven.modrinth:cosy-critters:v0.3.3+1.21.11-fabric"
 
     /* Particle Interactions */
 //    localRuntime "maven.modrinth:particle-interactions:0.9.5+26.1-fabric"
 
 //    /* Particle Core */
-    localRuntime "maven.modrinth:particle-core:0.3.2+1.21.11"
-    localRuntime("me.fzzyhmstrs:fzzy_config:0.7.6+1.21.11") {
+    modLocalRuntime "maven.modrinth:particle-core:0.3.2+1.21.11"
+    modLocalRuntime("me.fzzyhmstrs:fzzy_config:0.7.6+1.21.11") {
         exclude(group: "net.fabricmc.fabric-api")
         exclude(group: "com.terraformersmc")
     }
-    localRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
-    localRuntime("net.fabricmc:fabric-language-kotlin:1.13.12+kotlin.2.4.0") {
+    modLocalRuntime("me.fallenbreath:conditional-mixin-fabric:0.6.4")
+    modLocalRuntime("net.fabricmc:fabric-language-kotlin:1.13.12+kotlin.2.4.0") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
     /* Vulkan Mod */
-    if (true) {
-        localRuntime "maven.modrinth:vulkanmod:0.6.8+1.21.11"
-        localRuntime "maven.modrinth:beryl:0.2.1-alpha"
+    if (false) {
+        modLocalRuntime "maven.modrinth:vulkanmod:0.6.8+1.21.11"
+        modLocalRuntime "maven.modrinth:beryl:0.2.1-alpha"
         localRuntime("org.lwjgl:lwjgl-vulkan:3.3.3")
         localRuntime("org.lwjgl:lwjgl-vma:3.3.3")
         localRuntime("org.lwjgl:lwjgl-vma:3.3.3:natives-windows")

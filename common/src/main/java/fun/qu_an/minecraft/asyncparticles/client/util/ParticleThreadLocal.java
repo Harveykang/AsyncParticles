@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
+import org.jspecify.annotations.NonNull;
+
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -18,8 +20,12 @@ public sealed class ParticleThreadLocal<T> permits ParticleThreadLocal.SuppliedP
 	}
 
 	public ParticleThreadLocal() {
+		this(createThreadComparator());
+	}
+
+	private static @NonNull BooleanSupplier createThreadComparator() {
 		Thread initThread = Thread.currentThread();
-		this(() -> initThread == Thread.currentThread());
+		return () -> initThread == Thread.currentThread();
 	}
 
 	public ParticleThreadLocal(BooleanSupplier isMainThread) {

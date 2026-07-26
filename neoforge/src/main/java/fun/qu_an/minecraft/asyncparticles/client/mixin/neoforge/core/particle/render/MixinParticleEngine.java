@@ -15,7 +15,7 @@ import java.util.List;
 @Mixin(ParticleEngine.class)
 public class MixinParticleEngine implements ParticleEngineAddon {
 	@Mutable
-	@Shadow
+	@Shadow(remap = false)
 	@Final
 	private List<ParticleRenderType> particleRenderOrder;
 

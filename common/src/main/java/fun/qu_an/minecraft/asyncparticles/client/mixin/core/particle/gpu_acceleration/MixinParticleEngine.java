@@ -91,7 +91,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 					continue;
 				}
 				for (SingleQuadParticle sqp : gpuParticles) {
-					particles.computeIfAbsent(sqp.getLayer(), _ -> new ReferenceArrayList<>(size)).add(sqp);
+					particles.computeIfAbsent(sqp.getLayer(), a -> new ReferenceArrayList<>(size)).add(sqp);
 				}
 			}
 			renderer.tick(GpuParticleBehavior.getInstance().getPerTickCameraPos(), particles);

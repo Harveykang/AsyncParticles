@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 
-@Mixin(Renderer.class)
+@Mixin(value = Renderer.class, remap = false)
 public class MixinRenderer implements RendererAddon {
 	@Shadow
 	private ArrayList<Long> inFlightFences;

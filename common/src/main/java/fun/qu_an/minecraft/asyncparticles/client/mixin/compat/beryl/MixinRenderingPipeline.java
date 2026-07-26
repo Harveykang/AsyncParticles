@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(RenderingPipeline.class)
+@Mixin(value = RenderingPipeline.class, remap = false)
 public class MixinRenderingPipeline {
 	@Inject(method = "setupParticleShader", at = @At("HEAD"))
 	private static void onSetupParticleShader(CallbackInfo ci) {

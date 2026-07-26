@@ -18,7 +18,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.state.level.ParticleGroupRenderState;
+import net.minecraft.client.renderer.state.ParticleGroupRenderState;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

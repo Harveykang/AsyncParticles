@@ -9,6 +9,7 @@ import java.util.Set;
 public class ParticleCoreEarlyCompat {
 	/**
 	 * These mixins conflict with us
+	 *
 	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleManagerFrustumMixin
 	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleManagerRotationMixin
 	 * @see me.fzzyhmstrs.particle_core.mixins.WorldRendererFrustumMixin
@@ -39,6 +40,7 @@ public class ParticleCoreEarlyCompat {
 	}
 
 	public static boolean shouldDisable(String mixinClassName) {
-		return "me.fzzyhmstrs.particle_core.mixins.ParticleGroupBrightnessTickMixin".equals(mixinClassName);
+		return "me.fzzyhmstrs.particle_core.mixins.ParticleRendererBrightnessTickMixin".equals(mixinClassName)
+			|| "me.fzzyhmstrs.particle_core.mixins.ParticleRendererFrustumMixin".equals(mixinClassName);
 	}
 }

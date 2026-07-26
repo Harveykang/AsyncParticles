@@ -21,11 +21,10 @@ import org.lwjgl.opengl.ARBVertexAttribBinding;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.BooleanSupplier;
 
 public class GpuParticlePipelines {
-	public static final VertexFormatElement IDENTITY_COLOR = new VertexFormatElement(1, 0, VertexFormatElement.Type.FLOAT, false, 4);
-	public static final VertexFormatElement IDENTITY_UV2 = new VertexFormatElement(4, 0, VertexFormatElement.Type.INT, false, 2);
+	public static final VertexFormatElement IDENTITY_COLOR = new VertexFormatElement(1, 0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.GENERIC, 4);
+	public static final VertexFormatElement IDENTITY_UV2 = new VertexFormatElement(4, 0, VertexFormatElement.Type.INT, VertexFormatElement.Usage.UV, 2);
 	public static final VertexFormat RAW_PARTICLE = VertexFormat.builder()
 		.add("oPosition", VertexFormatElement.POSITION)
 		.add("Position", VertexFormatElement.POSITION)
@@ -54,7 +53,7 @@ public class GpuParticlePipelines {
 
 	private static final Map<RenderPipeline, RenderPipeline> pipelines = new Reference2ReferenceOpenHashMap<>();
 
-	public static RenderPipeline of(RenderPipeline original, BooleanSupplier translucentSupplier) {
+	public static RenderPipeline of(RenderPipeline original, boolean translucent) {
 		if (original.getVertexFormat() != DefaultVertexFormat.PARTICLE) {
 			throw new IllegalArgumentException("Invalid vertex format");
 		}
@@ -66,19 +65,25 @@ public class GpuParticlePipelines {
 				original1.getShaderDefines(),
 				original1.getSamplers(),
 				original1.getUniforms(),
-				original1.getColorTargetState(),
-				original1.getDepthStencilState(),
+				original1.getBlendFunction(),
+				original1.getDepthTestFunction(),
 				original1.getPolygonMode(),
 				original1.isCull(),
+				original1.isWriteColor(),
+				original1.isWriteAlpha(),
+				original1.isWriteDepth(),
+				original1.getColorLogic(),
 				IDENTITY_PARTICLE,
 				original1.getVertexFormatMode(),
+				original1.getDepthBiasScaleFactor(),
+				original1.getDepthBiasConstant(),
 				original1.getSortKey());
 			if (ModListHelper.IRIS_LOADED) {
 				IrisApi.getInstance().assignPipeline(pipeline,
-					translucentSupplier.getAsBoolean() ? IrisProgram.PARTICLES_TRANSLUCENT : IrisProgram.PARTICLES);
+					translucent ? IrisProgram.PARTICLES_TRANSLUCENT : IrisProgram.PARTICLES);
 			}
 			if (ModListHelper.VULKAN_MOD_LOADED) {
-				VkGpuDevice device = (VkGpuDevice) RenderSystem.getDevice().backend;
+				VkGpuDevice device = (VkGpuDevice) RenderSystem.getDevice();
 				device.precompilePipeline(pipeline, null);
 				if (ModListHelper.BERYL_LOADED) {
 					BerylCompat.linkParticleShaderPipeline(IDENTITY_PARTICLE, pipeline);
@@ -95,10 +100,18 @@ public class GpuParticlePipelines {
 			for (int i = 0, offset = 0; i < elements.size(); i++) {
 				VertexFormatElement element = elements.get(i);
 				GlStateManager._enableVertexAttribArray(i);
-				if (!element.normalized() && element.type() != VertexFormatElement.Type.FLOAT) {
-					ARBVertexAttribBinding.glVertexAttribIFormat(i, element.count(), GlConst.toGl(element.type()), offset);
-				} else {
-					ARBVertexAttribBinding.glVertexAttribFormat(i, element.count(), GlConst.toGl(element.type()), element.normalized(), offset);
+				switch (element.usage()) {
+					case POSITION, GENERIC, UV -> {
+						if (element.type() == VertexFormatElement.Type.FLOAT) {
+							ARBVertexAttribBinding.glVertexAttribFormat(
+								i, element.count(), GlConst.toGl(element.type()), false, offset);
+						} else {
+							ARBVertexAttribBinding.glVertexAttribIFormat(
+								i, element.count(), GlConst.toGl(element.type()), offset);
+						}
+					}
+					case NORMAL, COLOR -> ARBVertexAttribBinding.glVertexAttribFormat(
+						i, element.count(), GlConst.toGl(element.type()), true, offset);
 				}
 				ARBVertexAttribBinding.glVertexAttribBinding(i, 0);
 				offset += element.byteSize();
@@ -111,10 +124,18 @@ public class GpuParticlePipelines {
 				VertexFormatElement element = elements.get(i);
 				GlStateManager._enableVertexAttribArray(i);
 
-				if (!element.normalized() && element.type() != VertexFormatElement.Type.FLOAT) {
-					GlStateManager._vertexAttribIPointer(i, element.count(), GlConst.toGl(element.type()), vertexSize, offset);
-				} else {
-					GlStateManager._vertexAttribPointer(i, element.count(), GlConst.toGl(element.type()), element.normalized(), vertexSize, offset);
+				switch (element.usage()) {
+					case POSITION, GENERIC, UV -> {
+						if (element.type() == VertexFormatElement.Type.FLOAT) {
+							GlStateManager._vertexAttribPointer(
+								i, element.count(), GlConst.toGl(element.type()), false, i, offset);
+						} else {
+							GlStateManager._vertexAttribIPointer(
+								i, element.count(), GlConst.toGl(element.type()), i, offset);
+						}
+					}
+					case NORMAL, COLOR -> GlStateManager._vertexAttribPointer(
+						i, element.count(), GlConst.toGl(element.type()), true, i, offset);
 				}
 				offset += element.byteSize();
 			}

@@ -34,5 +34,5 @@ public interface LightCachedParticleAddon {
 
 	boolean asyncparticles$isEnabledLightCache();
 
-	int asyncparticles$invoke_getLightCoords(float partialTickTime);
+	int asyncparticles$invoke_getLightColor(float partialTickTime);
 }

@@ -1,6 +1,6 @@
 plugins {
-    id 'dev.architectury.loom' version '1.17-SNAPSHOT' apply false
-    id 'architectury-plugin' version '3.5-SNAPSHOT'
+    id 'dev.architectury.loom' version '1.13-SNAPSHOT' apply false
+    id 'architectury-plugin' version '3.4-SNAPSHOT'
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
     id "io.github.pacifistmc.forgix" version "1.2.9"
 }
@@ -12,10 +12,28 @@ architectury {
 allprojects {
     group = rootProject.maven_group
     version = rootProject.mod_version
+
+    forgix {
+        group = rootProject.group
+        mergedJarName = rootProject.archives_name + '-' + rootProject.mod_version +
+                (rootProject.snapshot == 'true' ?
+                        '-SNAPSHOT.' + Long.toHexString(new Random().nextLong(0x10000000L, 0xFFFFFFFFL)) :
+                        '') +
+                '+' + rootProject.minecraft_version + '.jar'
+        neoforge {
+            jarLocation = "build/libs/${rootProject.archives_name}-neoforge-${rootProject.mod_version}.jar"
+//            println(jarLocation)
+        }
+        fabric {
+            jarLocation = "build/libs/${rootProject.archives_name}-fabric-${rootProject.mod_version}.jar"
+//            println(jarLocation)
+        }
+        outputDir = "build/libs"
+    }
 }
 
 subprojects {
-    apply plugin: 'dev.architectury.loom-no-remap'
+    apply plugin: 'dev.architectury.loom'
     apply plugin: 'architectury-plugin'
     apply plugin: 'maven-publish'
 

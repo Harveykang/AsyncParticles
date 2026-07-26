@@ -22,6 +22,6 @@ public abstract class MixinParticles_LightCacheNoRefresh implements LightCachedP
 
 	@Override
 	public void asyncparticles$refresh() {
-		asyncparticles$setLight(asyncparticles$invoke_getLightCoords(0f));
+		asyncparticles$setLight(asyncparticles$invoke_getLightColor(0f));
 	}
 }

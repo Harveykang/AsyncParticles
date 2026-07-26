@@ -28,7 +28,7 @@ public abstract class MixinParticle implements LightCachedParticleAddon {
 	@Unique
 	private byte asyncparticles$lightCache = INITIAL_LIGHT_CACHE;
 
-	@WrapMethod(method = "getLightCoords", order = 15000)
+	@WrapMethod(method = "getLightColor", order = 15000)
 	private int wrapGetLightColor(float partialTick, Operation<Integer> original) {
 		if (asyncparticles$isEnabledLightCache()) {
 			return asyncparticles$getCachedLight();
@@ -50,7 +50,7 @@ public abstract class MixinParticle implements LightCachedParticleAddon {
 		BlockPos blockPos = GameUtil.SHARED_POS.get().set(x, y, z);
 		int light;
 		try {
-			light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightCoords(level, blockPos) : 0;
+			light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
 		} catch (MissingPaletteEntryException ignore) {
 			// chunk not loaded yet maybe, ignore
 			light = 0;

@@ -276,7 +276,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		Map<SingleQuadParticle.Layer, List<SingleQuadParticle>> layerMap = new Reference2ReferenceOpenHashMap<>();
 		for (int i = 0, pendingSize = Math.min(particleLimit, pending.size()); i < pendingSize; i++) {
 			SingleQuadParticle p = pending.get(i);
-			layerMap.computeIfAbsent(p.getLayer(), _ -> new ReferenceArrayList<>(appendCount / 2)).add(p);
+			layerMap.computeIfAbsent(p.getLayer(), ignored -> new ReferenceArrayList<>(appendCount / 2)).add(p);
 		}
 
 		int baseCount = 0;

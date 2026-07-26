@@ -9,13 +9,14 @@ import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.feature.ParticleFeatureRenderer;
-import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
+import net.minecraft.client.renderer.state.QuadParticleRenderState;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public class GpuParticleGroupRenderer implements SubmitNodeCollector.ParticleGroupRenderer {
 	private static final GpuParticleGroupRenderer instance = new GpuParticleGroupRenderer();
@@ -32,13 +33,7 @@ public class GpuParticleGroupRenderer implements SubmitNodeCollector.ParticleGro
 	}
 
 	@Override
-	public boolean isEmpty() {
-		return false;
-	}
-
-	@Override
-	public QuadParticleRenderState.PreparedBuffers prepare(
-		ParticleFeatureRenderer.@NonNull ParticleBufferCache buffer, boolean translucent) {
+	public QuadParticleRenderState.@Nullable PreparedBuffers prepare(ParticleFeatureRenderer.ParticleBufferCache cache) {
 		if (!ConfigHelper.isGpuParticles()) {
 			return null;
 		}
@@ -49,30 +44,23 @@ public class GpuParticleGroupRenderer implements SubmitNodeCollector.ParticleGro
 		}
 
 		this.result = result;
-		this.translucent = translucent;
 
 		this.dynamicTransforms = RenderSystem.getDynamicUniforms()
 			.writeTransform(RenderSystem.getModelViewMatrix(), new Vector4f(1.0F, 1.0F, 1.0F, 1.0F), new Vector3f(), new Matrix4f());
 
 		RenderSystem.AutoStorageIndexBuffer indexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
-		int indexCount = 0;
-		for (ComputeResult.ParticleSlice slice : result.slices()) {
-			if (slice.count() > indexCount) {
-				indexCount = slice.count();
-			}
-		}
-		indexCount *= 6;
-		this.indexBuffer = indexBuffer.getBuffer(indexCount);
+		this.indexBuffer = indexBuffer.getBuffer(result.maxIndexCount());
 		this.indexType = indexBuffer.type();
 
 		return emptyBuffers;
 	}
 
 	@Override
-	public void render(QuadParticleRenderState.@NonNull PreparedBuffers buffers,
-	                   ParticleFeatureRenderer.@NonNull ParticleBufferCache bufferCache,
-	                   @NonNull RenderPass renderPass,
-	                   @NonNull TextureManager textureManager) {
+	public void render(QuadParticleRenderState.PreparedBuffers preparedBuffers,
+	                   ParticleFeatureRenderer.ParticleBufferCache cache,
+	                   RenderPass renderPass,
+	                   TextureManager textureManager,
+	                   boolean translucent) {
 		renderPass.setVertexBuffer(0, result.buffer());
 		renderPass.setUniform("DynamicTransforms", dynamicTransforms);
 		renderPass.setIndexBuffer(indexBuffer, indexType);
@@ -81,7 +69,7 @@ public class GpuParticleGroupRenderer implements SubmitNodeCollector.ParticleGro
 			if (translucent != layer.translucent()) {
 				continue;
 			}
-			renderPass.setPipeline(GpuParticlePipelines.of(layer.pipeline(), () -> translucent));
+			renderPass.setPipeline(GpuParticlePipelines.of(layer.pipeline(), translucent));
 			AbstractTexture texture = textureManager.getTexture(layer.textureAtlasLocation());
 			renderPass.bindTexture("Sampler0", texture.getTextureView(), texture.getSampler());
 

@@ -11,7 +11,7 @@ import java.util.function.IntConsumer;
 
 public class ShaderCompiler {
 	public static int createShaderProgram(int type, String resource) {
-		return createShaderProgram(type, resource, _ -> {
+		return createShaderProgram(type, resource, ignored -> {
 		});
 	}
 

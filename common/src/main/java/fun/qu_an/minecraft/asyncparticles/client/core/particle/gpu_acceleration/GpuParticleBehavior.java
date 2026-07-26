@@ -14,7 +14,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
+import net.minecraft.client.renderer.state.QuadParticleRenderState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Quaternionf;
@@ -194,7 +194,7 @@ public class GpuParticleBehavior {
 		if (renderType == ParticleRenderType.SINGLE_QUADS) {
 			return GPU_SINGLE_QUADS;
 		}
-		return renderTypes.computeIfAbsent(renderType, _ -> new ParticleRenderType("gpu_" + renderType.name()));
+		return renderTypes.computeIfAbsent(renderType, ignored -> new ParticleRenderType("gpu_" + renderType.name()));
 	}
 
 	public IParticleRenderer createRenderer() {

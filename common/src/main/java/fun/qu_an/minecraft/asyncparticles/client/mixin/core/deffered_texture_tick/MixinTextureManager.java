@@ -54,6 +54,6 @@ public class MixinTextureManager {
 	) {
 		asyncparticles$deferredTickEnabled = false;
 		return original.call(currentReload, taskExecutor, preparationBarrier, reloadExecutor)
-			.whenCompleteAsync((_, _) -> asyncparticles$deferredTickEnabled = true, reloadExecutor);
+			.whenCompleteAsync((a, b) -> asyncparticles$deferredTickEnabled = true, reloadExecutor);
 	}
 }

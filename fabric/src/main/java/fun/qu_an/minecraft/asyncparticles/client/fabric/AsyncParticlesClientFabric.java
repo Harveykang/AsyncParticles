@@ -24,8 +24,8 @@ import net.minecraft.network.chat.Style;
 import java.util.concurrent.CompletableFuture;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public final class AsyncParticlesClientFabric implements ClientModInitializer {
 	private static CompletableFuture<Suggestions> suggestModId(CommandContext<FabricClientCommandSource> context, SuggestionsBuilder builder) {
