@@ -81,6 +81,10 @@ public class MixinClassAdjusterApplication {
 		return generatedMixinPrefix + mixinClassName.replace("/", "$_").replace(".", "$_");
 	}
 
+	public String getOriginalMixin(String generatedName) {
+		return generatedToOriginalMixins.get(generatedName);
+	}
+
 	public boolean shouldApplyMixin(String targetClassName, String generatedMixinClassName) {
 		String mixinClassName = generatedToOriginalMixins.get(generatedMixinClassName);
 		if (mixinClassName == null) {

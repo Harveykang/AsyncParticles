@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AdjusterParticlesAsyncTickableGroup implements MixinClassAdjuster {
-	private static final String CLASS_NAME = "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinAsyncTick_AsyncTickableParticleGroup";
+	public static final String CLASS_NAME = "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinAsyncTick_AsyncTickableParticleGroup";
 	@Override
 	public String getMixinClassName() {
 		return CLASS_NAME;

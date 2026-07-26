@@ -12,6 +12,7 @@ import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.MixinMemberCancellerRegistrar;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.logging.ILogger;
+import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
@@ -29,6 +30,8 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		if (!IS_CLIENT) {
 			return;
 		}
+		Mixins.registerErrorHandlerClass(AsyncParticlesMixinErrorHandler.class.getName());
+
 		ExtensionRegistrar.register(new ExtensionMemberCancelApplication());
 
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesNoLightCache());
