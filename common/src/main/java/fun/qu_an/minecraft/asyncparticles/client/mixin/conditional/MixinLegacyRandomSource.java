@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
+package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 
 import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinConfigHelper;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;

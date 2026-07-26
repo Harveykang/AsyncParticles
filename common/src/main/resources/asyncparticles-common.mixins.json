@@ -70,7 +70,7 @@
     "off_thread_access.MixinLevelExtractor",
     "off_thread_access.MixinSoundEngine",
     "off_thread_access.MixinSoundManager",
-    "off_thread_access.MixinLegacyRandomSource"
+    "conditional.MixinLegacyRandomSource"
   ],
   "injectors": {
     "defaultRequire": 1

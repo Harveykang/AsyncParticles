@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.ASYNC_LOADED;
 
 public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 	static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles:plugin");
@@ -76,6 +77,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_Off" -> !MixinConfigHelper.isSafeClassInstanceMultiMap();
 				case "MixinLevelChunk_SafeBlockEntityMap_On" -> MixinConfigHelper.isSafeBlockEntityMap();
 				case "MixinLevelChunk_SafeBlockEntityMap_Off" -> !MixinConfigHelper.isSafeBlockEntityMap();
+				case "MixinLegacyRandomSource" -> !ASYNC_LOADED;
 				default -> true;
 			};
 			case "fabric" -> switch (split[1]) {

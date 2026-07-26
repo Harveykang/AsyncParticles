@@ -45,15 +45,8 @@ public class MixinQuadParticleFeatureRenderer {
 			return;
 		}
 		resultRef.set(result);
-		int indexCount = 0;
-		for (ComputeResult.ParticleSlice slice : result.slices()) {
-			if (slice.count() > indexCount) {
-				indexCount = slice.count();
-			}
-		}
-		indexCount *= 6;
 		RenderSystem.AutoStorageIndexBuffer indexBuffer = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS);
-		indexBufferRef.set(indexBuffer.getBuffer(indexCount));
+		indexBufferRef.set(indexBuffer.getBuffer(result.maxIndexCount()));
 		indexTypeRef.set(indexBuffer.type());
 	}
 
