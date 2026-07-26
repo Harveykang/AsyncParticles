@@ -44,7 +44,9 @@ public class Diagnostic {
 	@Unique
 	public static void illegalBlockEntityStorageAccess() {
 		if (ThreadUtil.isOnParticleThread() && !illegalBlockEntityStorageAccess) {
-			LogUtils.getLogger().warn("[AsyncParticles] Block entity storage accessed off the main thread!\nConsider enabling 'safeBlockEntityMap'.", new IllegalStateException(""));
+			LOGGER.error("""
+				[AsyncParticles] Block entity storage accessed off the main thread!
+				Consider enabling 'safeBlockEntityMap'.""", new IllegalStateException(""));
 			sendChat(() -> Component.literal("[AsyncParticles] ").append(
 				Component.translatable("chat.asyncparticles.warn.get_block_entity_off_main_thread",
 					Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap"))));
