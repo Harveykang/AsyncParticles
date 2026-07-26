@@ -102,6 +102,8 @@ public class ModListHelper {
 	public static final boolean AXIOM_LOADED = isModLoaded("axiom");
 	/* CosyCritters */
 	public static final boolean COSYCRITTERS_LOADED = isModLoaded("cosycritters");
+	/* Async */
+	public static final boolean ASYNC_LOADED = isModLoaded("async");
 
 	public static boolean isModLoaded(String modId) {
 		return PLATFORM.isModLoaded(modId);

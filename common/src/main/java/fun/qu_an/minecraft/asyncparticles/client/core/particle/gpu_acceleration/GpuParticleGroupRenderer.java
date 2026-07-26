@@ -55,14 +55,7 @@ public class GpuParticleGroupRenderer implements SubmitNodeCollector.ParticleGro
 			.writeTransform(RenderSystem.getModelViewMatrix(), new Vector4f(1.0F, 1.0F, 1.0F, 1.0F), new Vector3f(), new Matrix4f());
 
 		RenderSystem.AutoStorageIndexBuffer indexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
-		int indexCount = 0;
-		for (ComputeResult.ParticleSlice slice : result.slices()) {
-			if (slice.count() > indexCount) {
-				indexCount = slice.count();
-			}
-		}
-		indexCount *= 6;
-		this.indexBuffer = indexBuffer.getBuffer(indexCount);
+		this.indexBuffer = indexBuffer.getBuffer(result.maxIndexCount());
 		this.indexType = indexBuffer.type();
 
 		return emptyBuffers;

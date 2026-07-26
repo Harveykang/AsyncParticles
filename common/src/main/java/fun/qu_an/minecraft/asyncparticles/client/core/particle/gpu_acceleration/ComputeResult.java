@@ -3,10 +3,16 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import net.minecraft.client.particle.SingleQuadParticle;
 
-public record ComputeResult(GpuBuffer buffer, int totalCount, ParticleSlice[] slices,
+public record ComputeResult(GpuBuffer buffer, int totalCount, ParticleSlice[] slices, int maxCount,
                             GpuBuffer indirectBuffer, int layerCount, int indirectCommandStride) {
 	public static ComputeResult of(GpuBuffer buffer, int totalCount, ParticleSlice[] slices) {
-		return new ComputeResult(buffer, totalCount, slices, null, 0, 0);
+		int maxCount = 0;
+		for (ParticleSlice slice : slices) {
+			if (slice.count() > maxCount) {
+				maxCount = slice.count();
+			}
+		}
+		return new ComputeResult(buffer, totalCount, slices, maxCount, null, 0, 0);
 	}
 
 	public static ComputeResult ofIndirect(GpuBuffer buffer, int totalCount, ParticleSlice[] slices,
@@ -16,7 +22,13 @@ public record ComputeResult(GpuBuffer buffer, int totalCount, ParticleSlice[] sl
 
 	public static ComputeResult ofIndirect(GpuBuffer buffer, int totalCount, ParticleSlice[] slices,
 	                                       GpuBuffer indirectBuffer, int layerCount, int indirectCommandStride) {
-		return new ComputeResult(buffer, totalCount, slices, indirectBuffer, layerCount, indirectCommandStride);
+		int maxCount = 0;
+		for (ParticleSlice slice : slices) {
+			if (slice.count() > maxCount) {
+				maxCount = slice.count();
+			}
+		}
+		return new ComputeResult(buffer, totalCount, slices, maxCount, indirectBuffer, layerCount, indirectCommandStride);
 	}
 
 	public int totalVertexCount() {
@@ -29,6 +41,10 @@ public record ComputeResult(GpuBuffer buffer, int totalCount, ParticleSlice[] sl
 
 	public boolean isIndirect() {
 		return indirectBuffer != null;
+	}
+
+	public int maxIndexCount() {
+		return maxCount * 6;
 	}
 
 	public record ParticleSlice(SingleQuadParticle.Layer layer, int baseCount, int count) {
