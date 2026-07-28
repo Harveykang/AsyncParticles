@@ -496,7 +496,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 			GlBuffer.MEMORY_POOl.malloc(target.vbo, newSize);
 		}
 
-		if (tf > 0) {
+		if (tf != 0) {
 			// Attach the whole target buffer once. Transform feedback object state is persistent,
 			// so there is no need to re-bind a buffer range every frame.
 			Backends.glTf.glBindTransformFeedback(tf);
