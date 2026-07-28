@@ -31,7 +31,7 @@ public class MixinLevelRenderer {
 
 	@Inject(method = "renderLevel", at = @At("HEAD"))
 	private void renderLevelHead(GraphicsResourceAllocator resourceAllocator, DeltaTracker deltaTracker, boolean renderOutline, CameraRenderState cameraState, Matrix4fc modelViewMatrix, GpuBufferSlice terrainFog, Vector4f fogColor, boolean shouldRenderSky, ChunkSectionsToRender chunkSectionsToRender, CallbackInfo ci) {
-		if (ConfigHelper.isGpuParticles()) {
+		if (ConfigHelper.isGpuParticles() && ConfigHelper.getComputeExecutionStage() == ComputeExecutionStage.LEVEL_RENDERING) {
 			GpuParticleBehavior.getInstance().compute();
 		}
 	}
