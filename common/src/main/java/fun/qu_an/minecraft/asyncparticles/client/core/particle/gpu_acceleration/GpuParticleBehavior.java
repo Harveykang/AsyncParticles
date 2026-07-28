@@ -250,6 +250,7 @@ public class GpuParticleBehavior {
 	public void close() {
 		if (renderer != null) {
 			renderer.close();
+			renderer = null;
 		}
 	}
 }

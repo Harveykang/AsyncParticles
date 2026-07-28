@@ -28,6 +28,7 @@
     "conditional.MixinAsyncTick_AsyncTickableParticleGroup",
     "conditional.MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_Off",
     "conditional.MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_On",
+    "conditional.MixinLegacyRandomSource",
     "conditional.MixinLevelChunk_SafeBlockEntityMap_Off",
     "conditional.MixinLevelChunk_SafeBlockEntityMap_On",
     "conditional.MixinParticles_LightCacheNoRefresh",
@@ -46,6 +47,7 @@
     "core.particle.gpu_acceleration.MixinFireworkParticles$SparkParticle",
     "core.particle.gpu_acceleration.MixinFlyTowardsPositionParticle",
     "core.particle.gpu_acceleration.MixinLevelExtractor",
+    "core.particle.gpu_acceleration.MixinLevelRenderer",
     "core.particle.gpu_acceleration.MixinMinecraft",
     "core.particle.gpu_acceleration.MixinParticleEngine",
     "core.particle.gpu_acceleration.MixinParticleGroup",
@@ -69,8 +71,7 @@
     "off_thread_access.MixinLevel",
     "off_thread_access.MixinLevelExtractor",
     "off_thread_access.MixinSoundEngine",
-    "off_thread_access.MixinSoundManager",
-    "conditional.MixinLegacyRandomSource"
+    "off_thread_access.MixinSoundManager"
   ],
   "injectors": {
     "defaultRequire": 1

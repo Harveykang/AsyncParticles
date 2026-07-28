@@ -110,8 +110,7 @@ public class Diagnostic {
 				[AsyncParticles] Error during animateTick.
 				This is likely caused by an incompatible injection into the animateTick method.
 					Temporarily disabled 'Async Animation Tick' internally. You may also want to turn it on manually,\
-					 otherwise this error will recur after restarting the game.
-				You may need to turn off 'Async Animation Tick'""", e);
+					 otherwise this error will recur after restarting the game.""", e);
 			sendChat(() -> Component.literal("[AsyncParticles] ").append(
 				Component.translatable("chat.asyncparticles.warn.error_during_async_incompatible_injection",
 					e.toString(),
@@ -132,8 +131,7 @@ public class Diagnostic {
 				[AsyncParticles] Error during rain tick.
 				This is likely caused by an incompatible injection into the rain tick method.
 					Temporarily disabled 'Particle Rain' internally. You may also want to turn it on manually,\
-					 otherwise this error will recur after restarting the game.
-				You may need to turn off 'Particle Rain'""", e);
+					 otherwise this error will recur after restarting the game.""", e);
 			sendChat(() -> Component.literal("[AsyncParticles] ").append(
 				Component.translatable("chat.asyncparticles.warn.error_during_async_incompatible_injection",
 					e.toString(),

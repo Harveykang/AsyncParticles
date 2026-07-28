@@ -90,11 +90,11 @@ public class ConfigHelper {
 		return tick$gpuOnlyAsyncParticleTick || Diagnostic.isTemporaryGpuOnlyAsyncParticleTick();
 	}
 
-	public static boolean isSyncAllParticles() {
-		return dev$syncAllParticles;
-	}
-
 	public static boolean mobileCompatMultiDraw() {
 		return mobile$multiDrawWorkaround;
+	}
+
+	public static ComputeExecutionStage getComputeExecutionStage() {
+		return rendering$computeExecutionStage;
 	}
 }

@@ -61,6 +61,7 @@ public class AsyncParticlesConfig {
 	public static RenderingMode rendering$particleRenderingMode;
 	public static boolean rendering$gpuAcceleration;
 	public static boolean rendering$appendNewParticlesToRenderer;
+	public static ComputeExecutionStage rendering$computeExecutionStage;
 //	public static FailBehavior rendering$failBehavior;
 //	public static Set<String> rendering$syncParticleClasses = new LinkedHashSet<>();
 	public static RainEffect valkyrienSkies$rainEffect;
@@ -68,7 +69,6 @@ public class AsyncParticlesConfig {
 	public static RainEffect create$rainEffect;
 	public static int create$tickRainBlockingRange;
 	public static boolean mobile$multiDrawWorkaround;
-	public static boolean dev$syncAllParticles = false;
 
 	static {
 		LOGGER.debug("AsyncParticlesConfig initialized.");
@@ -325,6 +325,7 @@ public class AsyncParticlesConfig {
 			RenderingMode particleRenderingMode = RenderingMode.SYNCHRONOUSLY;
 			boolean gpuAcceleration = Backends.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
+			ComputeExecutionStage computeExecutionStage = ComputeExecutionStage.LEVEL_RENDERING;
 //			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
 //			Set<String> syncParticleClasses = new LinkedHashSet<>();
 //			{
@@ -344,6 +345,7 @@ public class AsyncParticlesConfig {
 				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
 				rendering$gpuAcceleration = gpuAcceleration && Backends.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
+				rendering$computeExecutionStage = requireNonNullElse(computeExecutionStage, ComputeExecutionStage.LEVEL_RENDERING);
 //				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
 //				rendering$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
 			}
@@ -352,6 +354,7 @@ public class AsyncParticlesConfig {
 				particleRenderingMode = rendering$particleRenderingMode;
 				gpuAcceleration = rendering$gpuAcceleration;
 				appendNewParticlesToRenderer = rendering$appendNewParticlesToRenderer;
+				computeExecutionStage = rendering$computeExecutionStage;
 //				failBehavior = rendering$failBehavior;
 //				syncParticleClasses = new LinkedHashSet<>(rendering$syncParticleClasses);
 			}

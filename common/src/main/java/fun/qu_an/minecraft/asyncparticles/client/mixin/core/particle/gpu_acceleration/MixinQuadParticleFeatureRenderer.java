@@ -2,13 +2,13 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.gpu_accele
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
-import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.blaze3d.IndexType;
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
+import fun.qu_an.minecraft.asyncparticles.client.config.ComputeExecutionStage;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ComputeResult;
@@ -19,7 +19,6 @@ import net.minecraft.client.renderer.feature.QuadParticleFeatureRenderer;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -39,6 +38,9 @@ public class MixinQuadParticleFeatureRenderer {
 	                                @Share("indexType") LocalRef<IndexType> indexTypeRef) {
 		if (!ConfigHelper.isGpuParticles()) {
 			return;
+		}
+		if (ConfigHelper.getComputeExecutionStage() == ComputeExecutionStage.PARTICLE_RENDERING) {
+			GpuParticleBehavior.getInstance().compute();
 		}
 		ComputeResult result = GpuParticleBehavior.getInstance().ensureComputeReady();
 		if (result == null) {

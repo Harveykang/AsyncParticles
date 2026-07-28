@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vulkan.VulkanDevice;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.system.MemoryStack;
@@ -18,7 +19,7 @@ import java.util.Set;
 
 public class Backends {
 	public static final GlCommands gl;
-	public static final GlCommands.TransformFeedback glTf;
+	public static GlCommands.TransformFeedback glTf;
 	public static final GlCommands.ComputeShader glCs;
 	public static final VkCommands vk;
 	public static final Backend backend;
@@ -36,7 +37,7 @@ public class Backends {
 				|| (glRenderer != null && glRenderer.toLowerCase(Locale.ROOT).contains("opengl es"))
 				|| (driverInfo.toLowerCase(Locale.ROOT).contains("opengl es"))
 				|| (deviceName.toLowerCase(Locale.ROOT).contains("opengl es"));
-			GLCapabilities glCapabilities = org.lwjgl.opengl.GL.getCapabilities();
+			GLCapabilities glCapabilities = GL.getCapabilities();
 
 			Set<String> enabledExtensions = deviceInfo.underlyingExtensions();
 			boolean GL_ARB_direct_state_access = enabledExtensions.contains("GL_ARB_direct_state_access");
@@ -71,7 +72,7 @@ public class Backends {
 		}
 	}
 
-	private static GlCommands.TransformFeedback getGlTf(GLCapabilities glCapabilities) {
+	public static GlCommands.TransformFeedback getGlTf(GLCapabilities glCapabilities) {
 		if (glCapabilities.OpenGL45) {
 			return new GlCommands.TransformFeedback.GL45();
 		} else if (glCapabilities.OpenGL40) {
@@ -143,14 +144,16 @@ public class Backends {
 
 	public static String debugInfo() {
 		GpuDevice device = RenderSystem.getDevice();
-		return backend.name() + "{\n" + (Backends.isGl()
+		return backend.name()
+			+ "{\n"
+			+ (Backends.isGl()
 			? "[\n"
-			  + gl + ",\n"
-			  + glTf + ",\n"
-			  + glCs
-			  + "\n]"
-			: vk) +
-			"\n},\n"
+			+ gl + ",\n"
+			+ glTf + ",\n"
+			+ glCs
+			+ "\n]"
+			: vk)
+			+ "\n},\n"
 			+ device.getDeviceInfo();
 	}
 }
