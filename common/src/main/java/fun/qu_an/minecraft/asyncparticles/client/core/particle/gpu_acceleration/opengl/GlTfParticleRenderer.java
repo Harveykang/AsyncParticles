@@ -85,11 +85,6 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		GlBuffer.MEMORY_POOl.malloc(target.vbo, target.getSize());
 
 		tf = Backends.glTf.genTransformFeedback();
-		if (tf > 0) {
-			Backends.glTf.glBindTransformFeedback(tf);
-			Backends.glTf.glBindTransformFeedbackBuffer(target.vbo);
-			Backends.glTf.glBindTransformFeedback(0);
-		}
 
 		resize(Math.max(particleLimit, AsyncParticlesConfig.MIN_PARTICLE_LIMIT));
 	}
@@ -389,14 +384,11 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 			throw new IllegalStateException("Should skip rendering during this tick!");
 		}
 		ThreadUtil.assertOnMainThread();
-
-		if (tf > 0) {
-			Backends.glTf.glBindTransformFeedback(tf);
-		}
 		int usingIdx = renderSrcIdx;
 		if (usingIdx < 0) {
 			throw new IllegalStateException("No published source slot for GPU particle rendering");
 		}
+
 		int prevProgram = glGetInteger(GL_CURRENT_PROGRAM);
 		ParticleTransformFeedbackShader.INSTANCE.use();
 		ParticleTransformFeedbackShader.INSTANCE.setup(
@@ -408,15 +400,17 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 			(float) (camPositions[usingIdx].z - camera.position().z));
 
 		sources[usingIdx].bind();
-		if (tf <= 0) {
+		if (tf != 0) {
+			Backends.glTf.glBindTransformFeedback(tf);
+		} else {
+			int needSize = 4 * (tickCount[usingIdx] + appendCount) * GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
 			Backends.glTf.glBindTransformFeedbackBuffer(target.vbo);
+			Backends.glTf.glBindTransformFeedbackBufferRange(tf,
+				0,
+				target.vbo,
+				0L,
+				needSize);
 		}
-		int needSize = 4 * (tickCount[usingIdx] + appendCount) * GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
-		Backends.glTf.glBindTransformFeedbackBufferRange(tf,
-			0,
-			target.vbo,
-			0L,
-			needSize);
 
 		GL11C.glEnable(GL30C.GL_RASTERIZER_DISCARD);
 		Backends.glTf.glBeginTransformFeedback(GL11C.GL_POINTS);
@@ -431,7 +425,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		GL11C.glDisable(GL30C.GL_RASTERIZER_DISCARD);
 		ParticleVertexBuffer.unbind();
 
-		if (tf > 0) {
+		if (tf != 0) {
 			Backends.glTf.glBindTransformFeedback(0);
 		} else {
 			Backends.glTf.glBindTransformFeedbackBuffer(0);
@@ -500,6 +494,14 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 			int newSize = target.getSize();
 			targetMoj.size = newSize;
 			GlBuffer.MEMORY_POOl.malloc(target.vbo, newSize);
+		}
+
+		if (tf > 0) {
+			// Attach the whole target buffer once. Transform feedback object state is persistent,
+			// so there is no need to re-bind a buffer range every frame.
+			Backends.glTf.glBindTransformFeedback(tf);
+			Backends.glTf.glBindTransformFeedbackBufferBase(tf, 0, target.vbo);
+			Backends.glTf.glBindTransformFeedback(0);
 		}
 	}
 

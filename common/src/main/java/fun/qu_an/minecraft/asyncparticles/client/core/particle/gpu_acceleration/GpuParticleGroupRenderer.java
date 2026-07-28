@@ -5,6 +5,7 @@ import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import fun.qu_an.minecraft.asyncparticles.client.config.ComputeExecutionStage;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -21,6 +22,7 @@ public class GpuParticleGroupRenderer implements SubmitNodeCollector.ParticleGro
 	private static final GpuParticleGroupRenderer instance = new GpuParticleGroupRenderer();
 	private final QuadParticleRenderState.PreparedBuffers emptyBuffers =
 		new QuadParticleRenderState.PreparedBuffers(0, null, null);
+	private final RenderSystem.AutoStorageIndexBuffer quadIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
 	private boolean translucent;
 	private ComputeResult result;
 	private GpuBufferSlice dynamicTransforms;
@@ -42,7 +44,9 @@ public class GpuParticleGroupRenderer implements SubmitNodeCollector.ParticleGro
 		if (!ConfigHelper.isGpuParticles()) {
 			return null;
 		}
-
+		if (ConfigHelper.getComputeExecutionStage() == ComputeExecutionStage.PARTICLE_RENDERING) {
+			GpuParticleBehavior.getInstance().compute();
+		}
 		ComputeResult result = GpuParticleBehavior.getInstance().ensureComputeReady();
 		if (result == null) {
 			return null;
@@ -54,9 +58,8 @@ public class GpuParticleGroupRenderer implements SubmitNodeCollector.ParticleGro
 		this.dynamicTransforms = RenderSystem.getDynamicUniforms()
 			.writeTransform(RenderSystem.getModelViewMatrix(), new Vector4f(1.0F, 1.0F, 1.0F, 1.0F), new Vector3f(), new Matrix4f());
 
-		RenderSystem.AutoStorageIndexBuffer indexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
-		this.indexBuffer = indexBuffer.getBuffer(result.maxIndexCount());
-		this.indexType = indexBuffer.type();
+		this.indexBuffer = quadIndexBuffer.getBuffer(result.maxIndexCount());
+		this.indexType = quadIndexBuffer.type();
 
 		return emptyBuffers;
 	}

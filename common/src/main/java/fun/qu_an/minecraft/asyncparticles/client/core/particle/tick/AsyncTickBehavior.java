@@ -5,6 +5,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.DevRuntimeDebug;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
@@ -271,10 +272,7 @@ public class AsyncTickBehavior {
 	}
 
 	public boolean shouldSync(Class<?> aClass) {
-		if (ModListHelper.DEV_ENV && ConfigHelper.isSyncAllParticles()) {
-			return true;
-		}
-		return syncParticleTypes.contains(aClass);
+		return syncParticleTypes.contains(aClass) || DevRuntimeDebug.isSyncAllParticles();
 	}
 
 	public boolean isTailTick() {

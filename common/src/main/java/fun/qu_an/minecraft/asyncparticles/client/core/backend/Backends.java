@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import net.vulkanmod.vulkan.Vulkan;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.system.MemoryStack;
@@ -17,7 +18,7 @@ import java.util.Locale;
 
 public class Backends {
 	public static final GlCommands gl;
-	public static final GlCommands.TransformFeedback glTf;
+	public static GlCommands.TransformFeedback glTf;
 	public static final GlCommands.ComputeShader glCs;
 	public static final VkCommands vk;
 	public static final Backend backend;
@@ -28,11 +29,11 @@ public class Backends {
 		if (backendName.toLowerCase(Locale.ROOT).contains("opengl")) {
 			String glVersion = GL11C.glGetString(GL11C.GL_VERSION);
 			String glRenderer = GL11C.glGetString(GL11C.GL_RENDERER);
-			String driverInfo = device.getVendor();
+			String vendor = device.getVendor();
 			boolean GL_ES = (glVersion != null && glVersion.toLowerCase(Locale.ROOT).contains("opengl es"))
 				|| (glRenderer != null && glRenderer.toLowerCase(Locale.ROOT).contains("opengl es"))
-				|| (driverInfo.toLowerCase(Locale.ROOT).contains("opengl es"));
-			GLCapabilities glCapabilities = org.lwjgl.opengl.GL.getCapabilities();
+				|| (vendor.toLowerCase(Locale.ROOT).contains("opengl es"));
+			GLCapabilities glCapabilities = GL.getCapabilities();
 
 			List<String> enabledExtensions = device.getEnabledExtensions();
 			boolean GL_ARB_direct_state_access = enabledExtensions.contains("GL_ARB_direct_state_access");
@@ -67,7 +68,7 @@ public class Backends {
 		}
 	}
 
-	private static GlCommands.TransformFeedback getGlTf(GLCapabilities glCapabilities) {
+	public static GlCommands.TransformFeedback getGlTf(GLCapabilities glCapabilities) {
 		if (glCapabilities.OpenGL45) {
 			return new GlCommands.TransformFeedback.GL45();
 		} else if (glCapabilities.OpenGL40) {
@@ -115,6 +116,7 @@ public class Backends {
 		}
 		return new VkCommands.Vk(pushDescriptor, synchronization2);
 	}
+
 	public static void init() {
 	}
 
@@ -138,14 +140,16 @@ public class Backends {
 
 	public static String debugInfo() {
 		GpuDevice device = RenderSystem.getDevice();
-		return backend.name() + "{\n" + (Backends.isGl()
+		return backend.name()
+			+ "{\n"
+			+ (Backends.isGl()
 			? "[\n"
-			  + gl + ",\n"
-			  + glTf + ",\n"
-			  + glCs
-			  + "\n]"
-			: vk) +
-			"\n},\n"
+			+ gl + ",\n"
+			+ glTf + ",\n"
+			+ glCs
+			+ "\n]"
+			: vk)
+			+ "\n},\n"
 			+ device.getEnabledExtensions();
 	}
 }
