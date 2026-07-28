@@ -50,7 +50,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public String getRefMapperConfig() {
-		return null; // see neoforge/build.gradle:processResources:filesMatching('asyncparticles-common.mixins.json')
+		return IS_FORGE ? null : "fabric-asyncparticles-common-refmap.json";
 	}
 
 	//	private static final int L = "fun.qu_an.minecraft.asyncparticles.client.mixin.".length();
@@ -76,6 +76,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_Off" -> !MixinConfigHelper.isSafeClassInstanceMultiMap();
 				case "MixinLevelChunk_SafeBlockEntityMap_On" -> MixinConfigHelper.isSafeBlockEntityMap();
 				case "MixinLevelChunk_SafeBlockEntityMap_Off" -> !MixinConfigHelper.isSafeBlockEntityMap();
+				case "MixinLegacyRandomSource" -> !ASYNC_LOADED;
 				default -> true;
 			};
 			case "fabric" -> switch (split[1]) {

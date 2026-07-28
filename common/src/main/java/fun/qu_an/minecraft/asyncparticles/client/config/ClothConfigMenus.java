@@ -198,6 +198,14 @@ class ClothConfigMenus {
 				.setDefaultValue(defaultConfig.rendering.appendNewParticlesToRenderer)
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.appendNewParticlesToRenderer.tooltip"))
 				.setSaveConsumer(newValue -> newConfig.rendering.appendNewParticlesToRenderer = newValue)
+				.build())
+			.addEntry(entryBuilder
+				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.computeExecutionStage"),
+					ComputeExecutionStage.class, globalConfig.rendering.computeExecutionStage)
+				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
+				.setDefaultValue(defaultConfig.rendering.computeExecutionStage)
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.computeExecutionStage.tooltip"))
+				.setSaveConsumer(newValue -> newConfig.rendering.computeExecutionStage = newValue)
 				.build());
 //			.addEntry(entryBuilder
 //				.startSelector(Component.translatable("config.asyncparticles.rendering.particleCulling"),
@@ -323,10 +331,17 @@ class ClothConfigMenus {
 		// region Dev
 		builder.getOrCreateCategory(Component.literal("Dev"))
 			.addEntry(entryBuilder
-				.startBooleanToggle(Component.literal("Debug Sync Particle Classes"), AsyncParticlesConfig.dev$syncAllParticles)
-				.setTooltip(Component.literal("Never enable it unless requested by the developer."))
+				.startBooleanToggle(Component.literal("Debug Sync Particle Classes"), DevRuntimeDebug.syncAllParticles)
+				.setTooltip(Component.literal("Never change it unless requested by the developer."))
 				.setDefaultValue(false)
-				.setSaveConsumer(newValue -> AsyncParticlesConfig.dev$syncAllParticles = newValue)
+				.setSaveConsumer(newValue -> DevRuntimeDebug.syncAllParticles = newValue)
+				.build())
+			.addEntry(entryBuilder
+				.startEnumSelector(Component.literal("GL TransformFeedback Command"),
+					DevRuntimeDebug.TransformFeedbackGlCommand.class, DevRuntimeDebug.transformFeedbackGlCommand)
+				.setTooltip(Component.literal("Never change it unless requested by the developer."))
+				.setDefaultValue(DevRuntimeDebug.TransformFeedbackGlCommand.AUTO)
+				.setSaveConsumer(newValue -> DevRuntimeDebug.transformFeedbackGlCommand = newValue)
 				.build())
 			.addEntry(entryBuilder.startTextDescription(Component.literal(Backends.debugInfo())
 					.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(Backends.debugInfo()))))
@@ -339,6 +354,7 @@ class ClothConfigMenus {
 				newConfig.flat();
 				AsyncParticlesConfig.save();
 				mixinSaveRunnable.run();
+				DevRuntimeDebug.apply();
 			} catch (Exception e) {
 				AsyncParticlesConfig.LOGGER.error("Failed to save config", e);
 				Minecraft mc = Minecraft.getInstance();

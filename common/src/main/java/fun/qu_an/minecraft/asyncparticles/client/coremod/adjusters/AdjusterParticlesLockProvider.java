@@ -20,6 +20,6 @@ public class AdjusterParticlesLockProvider implements MixinClassAdjuster {
 
 	@Override
 	public String getRefMapperConfig() {
-		return null;
+		return MixinUtil.getRefMapperName(CLASS_NAME,"asyncparticles-common-refmap.json");
 	}
 }
