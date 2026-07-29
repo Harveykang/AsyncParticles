@@ -266,9 +266,17 @@ public class ParticleRenderer implements IParticleRenderer {
 			multiDrawIndex[0] = overflow;
 			multiDrawCount[0] = this.particleLimit - overflow;
 			multiDrawCount[1] = overflow;
-			GL14C.glMultiDrawArrays(GL11C.GL_POINTS,
-				multiDrawIndex,
-				multiDrawCount);
+			if (!GLCaps.GLonES) {
+				GL14C.glMultiDrawArrays(GL11C.GL_POINTS,
+					multiDrawIndex,
+					multiDrawCount);
+			} else {
+				for (int i = 0; i < multiDrawCount.length; i++) {
+					GL11C.glDrawArrays(GL11C.GL_POINTS,
+						multiDrawIndex[i],
+						multiDrawCount[i]);
+				}
+			}
 		}
 		GLCaps.tfSupport.glEndTransformFeedback();
 //		debugReadback(Math.min(particleCount[renderSrcIdx], 16));

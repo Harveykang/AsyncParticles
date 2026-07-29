@@ -324,7 +324,9 @@ public abstract class AsyncRenderBehavior {
 				iris particle mode: %s
 				glCapabilities: TransformFeedback: %s,
 				                ExplicitAttribLocation: %s,
-				                ComputeShader: %s""" // TODO
+				                DirectStateAccess: %s,
+				                ComputeShader: %s,
+				                Backend: %s""" // TODO
 				.formatted(asyncTasksSize,
 					BTESSELATORS.entrySet()
 						.stream()
@@ -356,7 +358,9 @@ public abstract class AsyncRenderBehavior {
 													 .orElse("UNSET") : "DISABLED",
 					GLCaps.tfSupport.getClass().getSimpleName(),
 					GLCaps.supportsExplicitAttribLocation,
-					GLCaps.csSupport.getClass().getSimpleName()));
+					GLCaps.supportsDirectStateAccess,
+					GLCaps.csSupport.getClass().getSimpleName(),
+					GLCaps.GLonES ? "GL on GLES" : "GL"));
 			debugConsumer = null;
 		}
 	}
