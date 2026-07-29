@@ -404,7 +404,6 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 			Backends.glTf.glBindTransformFeedback(tf);
 		} else {
 			int needSize = 4 * (tickCount[usingIdx] + appendCount) * GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
-			Backends.glTf.glBindTransformFeedbackBuffer(target.vbo);
 			Backends.glTf.glBindTransformFeedbackBufferRange(0,
 				0,
 				target.vbo,
@@ -427,8 +426,6 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 
 		if (tf != 0) {
 			Backends.glTf.glBindTransformFeedback(0);
-		} else {
-			Backends.glTf.glBindTransformFeedbackBuffer(0);
 		}
 		GL30C.glUseProgram(prevProgram);
 
