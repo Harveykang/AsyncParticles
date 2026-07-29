@@ -18,7 +18,7 @@ import java.util.Locale;
 import java.util.Set;
 
 public class Backends {
-	public static final GlCommands gl;
+	public static GlCommands gl;
 	public static GlCommands.TransformFeedback glTf;
 	public static final GlCommands.ComputeShader glCs;
 	public static final VkCommands vk;
@@ -59,9 +59,9 @@ public class Backends {
 		}
 	}
 
-	private static GlCommands getGl(boolean GL_ES, boolean GL_ARB_direct_state_access, boolean GL_ARB_vertex_attrib_binding) {
+	public static GlCommands getGl(boolean GL_ES, boolean GL_ARB_direct_state_access, boolean GL_ARB_vertex_attrib_binding) {
 		if (GL_ES) {
-			return new GlCommands.GL_ES(
+			return new GlCommands.GLonES(
 				GL_ARB_direct_state_access,
 				GL_ARB_vertex_attrib_binding);
 		} else {
@@ -75,8 +75,6 @@ public class Backends {
 	public static GlCommands.TransformFeedback getGlTf(GLCapabilities glCapabilities) {
 		if (glCapabilities.OpenGL45) {
 			return new GlCommands.TransformFeedback.GL45();
-		} else if (glCapabilities.OpenGL40) {
-			return new GlCommands.TransformFeedback.GL40();
 		} else if (glCapabilities.GL_ARB_transform_feedback2) {
 			return new GlCommands.TransformFeedback.ARB2();
 		} else if (glCapabilities.OpenGL30) {

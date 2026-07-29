@@ -1,11 +1,15 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.backend;
 
+import com.mojang.blaze3d.opengl.GlStateManager;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import org.lwjgl.opengl.*;
+
+import java.nio.ByteBuffer;
 
 public abstract class GlCommands {
 	private final boolean directStateAccess;
 	private final boolean vertexAttribBinding;
+
 	public GlCommands(boolean directStateAccess, boolean vertexAttribBinding) {
 		this.directStateAccess = directStateAccess;
 		this.vertexAttribBinding = vertexAttribBinding;
@@ -16,6 +20,8 @@ public abstract class GlCommands {
 	}
 
 	public abstract void glMultiDrawArrays(int mode, int[] first, int[] count);
+
+	public abstract void glCopyBufferSubData(int read, int write, long readOff, long writeOff, long size);
 
 	public boolean directStateAccess() {
 		return directStateAccess;
@@ -33,8 +39,20 @@ public abstract class GlCommands {
 			'}';
 	}
 
-	public static class GL_ES extends GlCommands {
-		public GL_ES(boolean directStateAccess, boolean vertexAttribBinding) {
+	public abstract void glBufferData(int buffer, long size, int usage);
+
+	public abstract int glGenBuffers();
+
+	public abstract int glGenVertexArrays();
+
+	public abstract ByteBuffer glMapBufferRange(int buffer, int offset, int length, int access, ByteBuffer oldBuffer);
+
+	public abstract void glFlushMappedBufferRange(int buffer, int offset, int length);
+
+	public abstract void glUnmapBuffer(int buffer);
+
+	public static class GLonES extends GlCommands {
+		public GLonES(boolean directStateAccess, boolean vertexAttribBinding) {
 			super(directStateAccess, vertexAttribBinding);
 		}
 
@@ -48,6 +66,54 @@ public abstract class GlCommands {
 				GL14C.glMultiDrawArrays(mode, first, count);
 			}
 		}
+
+		@Override
+		public void glCopyBufferSubData(int read, int write, long readOff, long writeOff, long size) {
+			GL15C.glBindBuffer(GL31C.GL_COPY_READ_BUFFER, read);
+			GL15C.glBindBuffer(GL31C.GL_COPY_WRITE_BUFFER, write);
+			GL31C.glCopyBufferSubData(GL31C.GL_COPY_READ_BUFFER, GL31C.GL_COPY_WRITE_BUFFER, readOff, writeOff, size);
+			GL15C.glBindBuffer(GL31C.GL_COPY_READ_BUFFER, 0);
+			GL15C.glBindBuffer(GL31C.GL_COPY_WRITE_BUFFER, 0);
+		}
+
+		@Override
+		public void glBufferData(int buffer, long size, int usage) {
+			GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, buffer);
+			GL15C.glBufferData(GL15C.GL_ARRAY_BUFFER, size, usage);
+			GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+		}
+
+		@Override
+		public int glGenBuffers() {
+			return GL15C.glGenBuffers();
+		}
+
+		@Override
+		public int glGenVertexArrays() {
+			return GL30C.glGenVertexArrays();
+		}
+
+		@Override
+		public ByteBuffer glMapBufferRange(int buffer, int offset, int length, int access, ByteBuffer oldBuffer) {
+			GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, buffer);
+			ByteBuffer byteBuffer = GL30C.glMapBufferRange(GL15C.GL_ARRAY_BUFFER, offset, length, access, oldBuffer);
+			GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+			return byteBuffer;
+		}
+
+		@Override
+		public void glFlushMappedBufferRange(int buffer, int offset, int length) {
+			GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, buffer);
+			GL30C.glFlushMappedBufferRange(GL15C.GL_ARRAY_BUFFER, 0, length);
+			GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+		}
+
+		@Override
+		public void glUnmapBuffer(int buffer) {
+			GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, buffer);
+			GL15C.glUnmapBuffer(GL15C.GL_ARRAY_BUFFER);
+			GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+		}
 	}
 
 	public static class GL extends GlCommands {
@@ -58,6 +124,74 @@ public abstract class GlCommands {
 		@Override
 		public void glMultiDrawArrays(int mode, int[] first, int[] count) {
 			GL14C.glMultiDrawArrays(mode, first, count);
+		}
+
+		@Override
+		public void glCopyBufferSubData(int read, int write, long readOff, long writeOff, long size) {
+			if (directStateAccess()) {
+				ARBDirectStateAccess.glCopyNamedBufferSubData(read, write, readOff, writeOff, size);
+			} else {
+				GL15C.glBindBuffer(GL31C.GL_COPY_READ_BUFFER, read);
+				GL15C.glBindBuffer(GL31C.GL_COPY_WRITE_BUFFER, write);
+				GL31C.glCopyBufferSubData(GL31C.GL_COPY_READ_BUFFER, GL31C.GL_COPY_WRITE_BUFFER, readOff, writeOff, size);
+				GL15C.glBindBuffer(GL31C.GL_COPY_READ_BUFFER, 0);
+				GL15C.glBindBuffer(GL31C.GL_COPY_WRITE_BUFFER, 0);
+			}
+		}
+
+		@Override
+		public void glBufferData(int buffer, long size, int usage) {
+			if (directStateAccess()) {
+				ARBDirectStateAccess.glNamedBufferData(buffer, size, usage);
+			} else {
+				GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, buffer);
+				GL15C.glBufferData(GL15C.GL_ARRAY_BUFFER, size, usage);
+				GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+			}
+		}
+
+		@Override
+		public int glGenBuffers() {
+			return directStateAccess() ? ARBDirectStateAccess.glCreateBuffers() : GL15C.glGenBuffers();
+		}
+
+		@Override
+		public int glGenVertexArrays() {
+			return directStateAccess() ? ARBDirectStateAccess.glCreateVertexArrays() : GL30C.glGenVertexArrays();
+		}
+
+		@Override
+		public ByteBuffer glMapBufferRange(int buffer, int offset, int length, int access, ByteBuffer oldBuffer) {
+			if (directStateAccess()) {
+				return ARBDirectStateAccess.glMapNamedBufferRange(buffer, offset, length, access, oldBuffer);
+			} else {
+				GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, buffer);
+				ByteBuffer byteBuffer = GL30C.glMapBufferRange(GL15C.GL_ARRAY_BUFFER, offset, length, access, oldBuffer);
+				GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+				return byteBuffer;
+			}
+		}
+
+		@Override
+		public void glFlushMappedBufferRange(int buffer, int offset, int length) {
+			if (directStateAccess()) {
+				ARBDirectStateAccess.glFlushMappedNamedBufferRange(buffer, offset, length);
+			} else {
+				GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, buffer);
+				GL30C.glFlushMappedBufferRange(GL15C.GL_ARRAY_BUFFER, offset, length);
+				GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+			}
+		}
+
+		@Override
+		public void glUnmapBuffer(int buffer) {
+			if (directStateAccess()) {
+				ARBDirectStateAccess.glUnmapNamedBuffer(buffer);
+			} else {
+				GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, buffer);
+				GL15C.glUnmapBuffer(GL15C.GL_ARRAY_BUFFER);
+				GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+			}
 		}
 	}
 
@@ -73,6 +207,41 @@ public abstract class GlCommands {
 
 		@Override
 		public void glMultiDrawArrays(int mode, int[] first, int[] count) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void glCopyBufferSubData(int read, int write, long read1, long write1, long size) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void glBufferData(int buffer, long size, int usage) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int glGenBuffers() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int glGenVertexArrays() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public ByteBuffer glMapBufferRange(int buffer, int offset, int length, int access, ByteBuffer oldBuffer) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void glFlushMappedBufferRange(int buffer, int offset, int length) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void glUnmapBuffer(int buffer) {
 			throw new UnsupportedOperationException();
 		}
 	}
@@ -149,11 +318,11 @@ public abstract class GlCommands {
 
 		public abstract void glBindTransformFeedback(int tf);
 
-		public abstract void glBindTransformFeedbackBuffer(int vbo);
+		public abstract void glBindTransformFeedbackBuffer(int buffer);
 
-		public abstract void glBindTransformFeedbackBufferBase(int tf, int index, int vbo);
+		public abstract void glBindTransformFeedbackBufferBase(int tf, int index, int buffer);
 
-		public abstract void glBindTransformFeedbackBufferRange(int tf, int index, int vbo, long offset, long size);
+		public abstract void glBindTransformFeedbackBufferRange(int tf, int index, int buffer, long offset, long size);
 
 		public abstract void glBeginTransformFeedback(int primitiveMode);
 
@@ -196,17 +365,17 @@ public abstract class GlCommands {
 			}
 
 			@Override
-			public void glBindTransformFeedbackBuffer(int vbo) {
+			public void glBindTransformFeedbackBuffer(int buffer) {
 				throw new UnsupportedOperationException();
 			}
 
 			@Override
-			public void glBindTransformFeedbackBufferBase(int tf, int index, int vbo) {
+			public void glBindTransformFeedbackBufferBase(int tf, int index, int buffer) {
 				throw new UnsupportedOperationException();
 			}
 
 			@Override
-			public void glBindTransformFeedbackBufferRange(int tf, int index, int vbo, long offset, long size) {
+			public void glBindTransformFeedbackBufferRange(int tf, int index, int buffer, long offset, long size) {
 				throw new UnsupportedOperationException();
 			}
 
@@ -261,26 +430,18 @@ public abstract class GlCommands {
 			}
 
 			@Override
-			public void glBindTransformFeedbackBuffer(int vbo) {
-				GL30C.glBindBuffer(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, vbo);
+			public void glBindTransformFeedbackBuffer(int buffer) {
+				GL30C.glBindBuffer(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, buffer);
 			}
 
 			@Override
-			public void glBindTransformFeedbackBufferBase(int tf, int index, int vbo) {
-				if (Backends.gl.directStateAccess()) {
-					ARBDirectStateAccess.glTransformFeedbackBufferBase(tf, index, vbo);
-				} else {
-					GL30C.glBindBufferBase(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, vbo);
-				}
+			public void glBindTransformFeedbackBufferBase(int tf, int index, int buffer) {
+				GL30C.glBindBufferBase(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, buffer);
 			}
 
 			@Override
-			public void glBindTransformFeedbackBufferRange(int tf, int index, int vbo, long offset, long size) {
-				if (Backends.gl.directStateAccess()) {
-					ARBDirectStateAccess.glTransformFeedbackBufferRange(tf, index, vbo, offset, size);
-				} else {
-					GL30C.glBindBufferRange(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, vbo, offset, size);
-				}
+			public void glBindTransformFeedbackBufferRange(int tf, int index, int buffer, long offset, long size) {
+				GL30C.glBindBufferRange(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, buffer, offset, size);
 			}
 
 			@Override
@@ -317,12 +478,44 @@ public abstract class GlCommands {
 
 			@Override
 			public int genTransformFeedback() {
-				return ARBTransformFeedback2.glGenTransformFeedbacks();
+				return Backends.gl.directStateAccess() ? ARBDirectStateAccess.glCreateTransformFeedbacks() : ARBTransformFeedback2.glGenTransformFeedbacks();
 			}
 
 			@Override
 			public void deleteTransformFeedback(int tf) {
 				ARBTransformFeedback2.glDeleteTransformFeedbacks(tf);
+			}
+
+			@Override
+			public void glBindTransformFeedbackBufferBase(int tf, int index, int buffer) {
+				if (Backends.gl.directStateAccess()) {
+					ARBDirectStateAccess.glTransformFeedbackBufferBase(tf, index, buffer);
+				} else {
+					int binding = GL11C.glGetInteger(ARBTransformFeedback2.GL_TRANSFORM_FEEDBACK_BINDING);
+					if (binding == tf) {
+						GL30C.glBindBufferBase(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, buffer);
+					} else {
+						glBindTransformFeedback(tf);
+						GL30C.glBindBufferBase(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, buffer);
+						glBindTransformFeedback(binding);
+					}
+				}
+			}
+
+			@Override
+			public void glBindTransformFeedbackBufferRange(int tf, int index, int buffer, long offset, long size) {
+				if (Backends.gl.directStateAccess()) {
+					ARBDirectStateAccess.glTransformFeedbackBufferRange(tf, index, buffer, offset, size);
+				} else {
+					int binding = GL11C.glGetInteger(ARBTransformFeedback2.GL_TRANSFORM_FEEDBACK_BINDING);
+					if (binding == tf) {
+						GL30C.glBindBufferRange(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, buffer, offset, size);
+					} else {
+						glBindTransformFeedback(tf);
+						GL30C.glBindBufferRange(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, buffer, offset, size);
+						glBindTransformFeedback(binding);
+					}
+				}
 			}
 
 			@Override
@@ -341,50 +534,20 @@ public abstract class GlCommands {
 			}
 		}
 
-		public static class ARB3 extends ARB2 {
-		}
-
-		public static class GL40 extends GL30 {
-			@Override
-			public boolean isTfObjectSupported() {
-				return true;
-			}
-
+		public static class GL45 extends ARB2 {
 			@Override
 			public int genTransformFeedback() {
-				return GL40C.glGenTransformFeedbacks();
+				return GL45C.glCreateTransformFeedbacks();
 			}
 
 			@Override
-			public void deleteTransformFeedback(int tf) {
-				GL40C.glDeleteTransformFeedbacks(tf);
+			public void glBindTransformFeedbackBufferBase(int tf, int index, int buffer) {
+				GL45C.glTransformFeedbackBufferBase(tf, index, buffer);
 			}
 
 			@Override
-			public void glBindTransformFeedback(int tf) {
-				GL40C.glBindTransformFeedback(GL40C.GL_TRANSFORM_FEEDBACK, tf);
-			}
-
-			@Override
-			public void glPauseTransformFeedback() {
-				GL40C.glPauseTransformFeedback();
-			}
-
-			@Override
-			public void glResumeTransformFeedback(int primitiveMode) {
-				GL40C.glResumeTransformFeedback();
-			}
-		}
-
-		public static class GL45 extends GL40 {
-			@Override
-			public void glBindTransformFeedbackBufferBase(int tf, int index, int vbo) {
-				GL45C.glTransformFeedbackBufferBase(tf, index, vbo);
-			}
-
-			@Override
-			public void glBindTransformFeedbackBufferRange(int tf, int index, int vbo, long offset, long size) {
-				GL45C.glTransformFeedbackBufferRange(tf, index, vbo, offset, size);
+			public void glBindTransformFeedbackBufferRange(int tf, int index, int buffer, long offset, long size) {
+				GL45C.glTransformFeedbackBufferRange(tf, index, buffer, offset, size);
 			}
 		}
 	}
