@@ -384,6 +384,15 @@ public class AsyncTickBehavior {
 		}
 	}
 
+	public void onClearParticle(Particle particle) {
+		try {
+			if (particle.isAlive()) {
+				particle.remove();
+			}
+		} catch (Exception ignored) {
+		}
+	}
+
 	/* Debug/Reload */
 
 	public void tryDebug() {
