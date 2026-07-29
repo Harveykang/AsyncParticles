@@ -60,11 +60,7 @@ public class ParticleRenderer implements IParticleRenderer {
 		ParticleVertexBuffer.unbind();
 
 		tf = GLCaps.tfSupport.genTransformFeedback();
-		if (tf > 0) {
-			GLCaps.tfSupport.glBindTransformFeedback(tf);
-			GLCaps.tfSupport.glBindTransformFeedbackBuffer(target.vbo);
-			GLCaps.tfSupport.glBindTransformFeedback(0);
-		}
+
 		resize(particleLimit); // this.particleLimit = particleLimit;
 	}
 
@@ -224,9 +220,7 @@ public class ParticleRenderer implements IParticleRenderer {
 		}
 		RenderSystem.assertOnRenderThread();
 		BufferUploader.invalidate();
-		if (tf > 0) {
-			GLCaps.tfSupport.glBindTransformFeedback(tf);
-		}
+
 		Vector3f cameraLeftVector = camera.getLeftVector();
 		Vector3f cameraUpVector = camera.getUpVector();
 		Vec3 camPos = camera.getPosition();
@@ -253,15 +247,15 @@ public class ParticleRenderer implements IParticleRenderer {
 		}
 		sources[renderSrcIdx].bind();
 
-		if (tf <= 0) {
-			GLCaps.tfSupport.glBindTransformFeedbackBuffer(target.vbo);
+		if (tf != 0) {
+			GLCaps.tfSupport.glBindTransformFeedback(tf);
+		} else {
+			GLCaps.tfSupport.glBindTransformFeedbackBufferRange(0,
+				0,
+				target.vbo,
+				0L,
+				needSize);
 		}
-		GLCaps.tfSupport.glBindTransformFeedbackBufferRange(tf,
-			0,
-			target.vbo,
-			0L,
-			needSize);
-
 		GL11C.glEnable(GL30C.GL_RASTERIZER_DISCARD);
 
 		GLCaps.tfSupport.glBeginTransformFeedback(GL11C.GL_POINTS);
@@ -283,10 +277,8 @@ public class ParticleRenderer implements IParticleRenderer {
 
 		ParticleVertexBuffer.unbind();
 
-		if (tf > 0) {
+		if (tf != 0) {
 			GLCaps.tfSupport.glBindTransformFeedback(0);
-		} else {
-			GLCaps.tfSupport.glBindTransformFeedbackBuffer(0);
 		}
 
 		computed = true;
@@ -427,6 +419,7 @@ public class ParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void resize(int particleLimit) {
+		this.particleLimit = particleLimit;
 		int rawSize = particleLimit * ParticleVertexFormats.RAW_PARTICLE_BYTES;
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			if (rawSize != sources[i].getSize()) {
@@ -437,6 +430,13 @@ public class ParticleRenderer implements IParticleRenderer {
 		if (proceedSize != target.getSize()) {
 			target.resize0(proceedSize);
 		}
-		this.particleLimit = particleLimit;
+
+		if (tf != 0) {
+			// Attach the whole target buffer once. Transform feedback object state is persistent,
+			// so there is no need to re-bind a buffer range every frame.
+			GLCaps.tfSupport.glBindTransformFeedback(tf);
+			GLCaps.tfSupport.glBindTransformFeedbackBufferBase(tf, 0, target.vbo);
+			GLCaps.tfSupport.glBindTransformFeedback(0);
+		}
 	}
 }

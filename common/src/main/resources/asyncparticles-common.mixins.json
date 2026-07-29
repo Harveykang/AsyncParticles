@@ -94,7 +94,7 @@
     "core.weather.MixinLevelRenderer_TickRain",
     "core.weather.MixinLevelRenderer_WeatherCulling",
     "compat.goop.MixinPuddleParticle",
-    "core.off_thread_access.MixinLegacyRandomSource"
+    "conditional.MixinLegacyRandomSource"
   ],
   "injectors": {
     "defaultRequire": 1
