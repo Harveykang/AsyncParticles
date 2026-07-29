@@ -2,11 +2,14 @@ package fun.qu_an.minecraft.asyncparticles.client.compat;
 
 import org.lwjgl.opengl.*;
 
+import java.util.Locale;
+
 public class GLCaps {
 	public static final boolean supportsExplicitAttribLocation;
 	public static final boolean supportsDirectStateAccess;
 	public static final TfSupport tfSupport;
 	public static final CsSupport csSupport;
+	public static final boolean GLonES;
 
 	static {
 		GLCapabilities glCaps = GL.getCapabilities();
@@ -14,6 +17,12 @@ public class GLCaps {
 			glCaps.GL_ARB_explicit_attrib_location; // FIXME fix this!!!
 		supportsDirectStateAccess = glCaps.OpenGL45 ||
 			glCaps.GL_ARB_direct_state_access;
+		String glVersion = GL11C.glGetString(GL11C.GL_VERSION);
+		String glRenderer = GL11C.glGetString(GL11C.GL_RENDERER);
+		String glVendor = GL11C.glGetString(GL11C.GL_VENDOR);
+		GLonES = (glVersion != null && glVersion.toLowerCase(Locale.ROOT).contains("opengl es"))
+			|| (glRenderer != null && glRenderer.toLowerCase(Locale.ROOT).contains("opengl es"))
+			|| (glVendor != null && glVendor.toLowerCase(Locale.ROOT).contains("opengl es"));
 		if (glCaps.OpenGL45) {
 			tfSupport = new TfSupport.GL_45();
 		} else if (glCaps.OpenGL40) {
