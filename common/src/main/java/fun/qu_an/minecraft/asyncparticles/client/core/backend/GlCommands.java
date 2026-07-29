@@ -104,7 +104,7 @@ public abstract class GlCommands {
 		@Override
 		public void glFlushMappedBufferRange(int buffer, int offset, int length) {
 			GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, buffer);
-			GL30C.glFlushMappedBufferRange(GL15C.GL_ARRAY_BUFFER, 0, length);
+			GL30C.glFlushMappedBufferRange(GL15C.GL_ARRAY_BUFFER, offset, length);
 			GL15C.glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
 		}
 

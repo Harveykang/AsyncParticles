@@ -528,7 +528,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public Collection<SingleQuadParticle.Layer> getComputeLayers() {
-		List<LayerBatch> batches = layerBatches[renderSrcIdx];
+		List<LayerBatch> batches = renderSrcIdx >= 0 ? layerBatches[renderSrcIdx] : List.of();
 		List<SingleQuadParticle.Layer> result = new ArrayList<>(batches.size());
 		for (LayerBatch batch : batches) {
 			result.add(batch.layer);
