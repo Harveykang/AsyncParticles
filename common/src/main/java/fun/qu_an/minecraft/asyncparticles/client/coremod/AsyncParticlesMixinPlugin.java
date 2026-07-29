@@ -22,7 +22,7 @@ import java.util.Set;
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 
 public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
-	static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles:plugin");
+	public static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles:plugin");
 
 	@Override
 	public void onLoad(String mixinPackage) {
