@@ -38,7 +38,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 	private final ParticleVertexBuffer[] sources = new ParticleVertexBuffer[SOURCE_SLOT_COUNT];
 	private ByteBuffer mappedBuffer;
 	private int processingSrcIdx = 0;
-	private int renderSrcIdx = 0;
+	private int renderSrcIdx = -1;
 	private int particleLimit;
 
 	// tick: ordered layer batches
@@ -479,18 +479,41 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void resize(int particleLimit) {
+		int oldRawSize = 2 * this.particleLimit * GpuParticlePipelines.RAW_PARTICLE.getVertexSize();
+		this.particleLimit = particleLimit;
 		int rawSize = 2 * particleLimit * GpuParticlePipelines.RAW_PARTICLE.getVertexSize();
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
-			if (sources[i].getSize() != rawSize) {
-				sources[i].resize0(rawSize);
+			ParticleVertexBuffer source = sources[i];
+			if (source.isMapped()) {
+				source.unmap();
+			}
+			if (source.getSize() == rawSize) {
+				continue;
+			}
+			if (i == renderSrcIdx) {
+				// The slot being rendered this tick still feeds the next compute();
+				// migrate its contents through a staging buffer
+				long halfBytes = (long) Math.min(oldRawSize, rawSize) / 2;
+				int staging = Backends.gl.glGenBuffers();
+				Backends.gl.glBufferData(staging, oldRawSize, GL15C.GL_STREAM_COPY);
+				try {
+					Backends.gl.glCopyBufferSubData(source.vbo, staging, 0L, 0L, oldRawSize);
+					source.resize(rawSize);
+					Backends.gl.glCopyBufferSubData(staging, source.vbo, 0L, 0L, halfBytes);
+					Backends.gl.glCopyBufferSubData(staging, source.vbo, (long) oldRawSize / 2, (long) rawSize / 2, halfBytes);
+				} finally {
+					GL15C.glDeleteBuffers(staging);
+				}
+			} else {
+				source.resize(rawSize);
 			}
 		}
-		this.particleLimit = particleLimit;
+		this.mappedBuffer = null;
 
 		int proceedSize = 2 * 4 * particleLimit * GpuParticlePipelines.IDENTITY_PARTICLE.getVertexSize();
 		if (proceedSize != target.getSize()) {
 			GlBuffer.MEMORY_POOl.free(target.vbo);
-			target.resize0(proceedSize);
+			target.resize(proceedSize);
 			int newSize = target.getSize();
 			targetMoj.size = newSize;
 			GlBuffer.MEMORY_POOl.malloc(target.vbo, newSize);
@@ -499,9 +522,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		if (tf != 0) {
 			// Attach the whole target buffer once. Transform feedback object state is persistent,
 			// so there is no need to re-bind a buffer range every frame.
-			Backends.glTf.glBindTransformFeedback(tf);
 			Backends.glTf.glBindTransformFeedbackBufferBase(tf, 0, target.vbo);
-			Backends.glTf.glBindTransformFeedback(0);
 		}
 	}
 
