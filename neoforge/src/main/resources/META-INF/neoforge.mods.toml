@@ -22,14 +22,7 @@ side = "CLIENT"
 [[dependencies.asyncparticles]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21.1]"
-ordering = "NONE"
-side = "CLIENT"
-
-[[dependencies.asyncparticles]]
-modId = "particle_core"
-type = "incompatible"
-versionRange = "[]"
+versionRange = "[1.21,1.21.1]"
 ordering = "NONE"
 side = "CLIENT"
 

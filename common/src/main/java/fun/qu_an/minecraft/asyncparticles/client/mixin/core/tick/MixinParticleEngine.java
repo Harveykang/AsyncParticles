@@ -315,12 +315,12 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void onClearParticles(CallbackInfo ci) {
-		particlesToAdd.forEach(AsyncTickBehavior.getInstance()::onEvicted);
+		particlesToAdd.forEach(AsyncTickBehavior.getInstance()::onClearParticle);
 		particlesToAdd = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT, ConfigHelper.getParticleLimit(), AsyncTickBehavior.getInstance()::onEvicted);
-		trackingEmitters.forEach(AsyncTickBehavior.getInstance()::onEvicted);
+		trackingEmitters.forEach(AsyncTickBehavior.getInstance()::onClearParticle);
 		trackingEmitters = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT / 4, ConfigHelper.getParticleLimit(), AsyncTickBehavior.getInstance()::onEvicted);
-		particles.values().forEach(queue -> queue.forEach(AsyncTickBehavior.getInstance()::onEvicted));
-		GpuParticleBehavior.INSTANCE.gpuParticles.values().forEach(queue -> queue.forEach(AsyncTickBehavior.getInstance()::onEvicted));
+		particles.values().forEach(queue -> queue.forEach(AsyncTickBehavior.getInstance()::onClearParticle));
+		GpuParticleBehavior.INSTANCE.gpuParticles.values().forEach(queue -> queue.forEach(AsyncTickBehavior.getInstance()::onClearParticle));
 		GpuParticleBehavior.INSTANCE.gpuParticles.clear();
 		AsyncTickBehavior.getInstance().onParticleEngineClear();
 	}

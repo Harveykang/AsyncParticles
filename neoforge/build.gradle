@@ -180,7 +180,7 @@ dependencies {
     modLocalRuntime("dev.eriksonn.aeronautics:aeronautics-neoforge-$minecraft_version:1.2.1") { transitive = false }
 
     modCompileOnly "maven.modrinth:create-propulsion-simulated:H13U56dc" // 1.1.5
-    modLocalRuntime "maven.modrinth:create-propulsion-simulated:H13U56dc"
+//    modLocalRuntime "maven.modrinth:create-propulsion-simulated:H13U56dc"
 
 //    modLocalRuntime "maven.modrinth:particle-interactions:0.4.1"
 }
