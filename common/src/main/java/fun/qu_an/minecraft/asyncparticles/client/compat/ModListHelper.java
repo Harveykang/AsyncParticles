@@ -132,6 +132,8 @@ public class ModListHelper {
 	public static final boolean POLYTONE_LOADED = isModLoaded("polytone");
 	/* Goop */
 	public static final boolean GOOP_LOADED = isModLoaded("goop");
+	/* Async */
+	public static final boolean ASYNC_LOADED = isModLoaded("async");
 
 	@ExpectPlatform
 	private static boolean isForge() {
