@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import net.minecraft.world.phys.AABB;
 
 public interface Platform {
@@ -42,4 +43,6 @@ public interface Platform {
 	boolean isDevelopmentEnvironment();
 
 	AABB infinityAABB();
+
+	Mappings.IMappings getMappings();
 }

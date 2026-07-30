@@ -1,12 +1,16 @@
 package fun.qu_an.minecraft.asyncparticles.client.fabric;
 
 import fun.qu_an.minecraft.asyncparticles.client.Platform;
+import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
+import fun.qu_an.minecraft.asyncparticles.client.compat.fabric.MappingsImpl;
 import fun.qu_an.minecraft.asyncparticles.client.compat.fabric.ModListHelperImpl;
 import fun.qu_an.minecraft.asyncparticles.client.core.fabric.GameUtilImpl;
 import net.minecraft.world.phys.AABB;
 
 @SuppressWarnings("unused")
 public class FabricPlatform implements Platform {
+	private static final MappingsImpl mappings = new MappingsImpl();
+
 	public boolean isForge() {
 		return false;
 	}
@@ -44,5 +48,10 @@ public class FabricPlatform implements Platform {
 	@Override
 	public AABB infinityAABB() {
 		return GameUtilImpl.infinityAABB();
+	}
+
+	@Override
+	public Mappings.IMappings getMappings() {
+		return mappings;
 	}
 }

@@ -1,12 +1,15 @@
 package fun.qu_an.minecraft.asyncparticles.client.neoforge;
 
 import fun.qu_an.minecraft.asyncparticles.client.Platform;
+import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
+import fun.qu_an.minecraft.asyncparticles.client.compat.neoforge.MappingsImpl;
 import fun.qu_an.minecraft.asyncparticles.client.compat.neoforge.ModListHelperImpl;
 import fun.qu_an.minecraft.asyncparticles.client.core.neoforge.GameUtilImpl;
 import net.minecraft.world.phys.AABB;
 
 @SuppressWarnings("unused")
 public class NeoForgePlatform implements Platform {
+	private static final Mappings.IMappings mappings = new MappingsImpl();
 	public boolean isForge() {
 		return true;
 	}
@@ -44,5 +47,10 @@ public class NeoForgePlatform implements Platform {
 	@Override
 	public AABB infinityAABB() {
 		return GameUtilImpl.infinityAABB();
+	}
+
+	@Override
+	public Mappings.IMappings getMappings() {
+		return mappings;
 	}
 }
