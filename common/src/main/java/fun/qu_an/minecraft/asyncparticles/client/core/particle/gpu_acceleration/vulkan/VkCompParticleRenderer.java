@@ -195,6 +195,9 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	/* command resources */
 
 	private void createCommandResources() {
+		if (descriptorPool != VK10.VK_NULL_HANDLE) {
+			destroyDescriptorResources();
+		}
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			VkDescriptorPoolSize.Buffer ps = VkDescriptorPoolSize.calloc(1, stack);
 			ps.get(0).type(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER).descriptorCount(DESCRIPTOR_SET_LAYOUT_SIZE * submitSlots.length);
@@ -216,6 +219,11 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				submitSlots[i].descriptorSet = pds2.get(i);
 			}
 		}
+	}
+
+	private void destroyDescriptorResources() {
+		VK10.vkDestroyDescriptorPool(device, descriptorPool, null);
+		descriptorPool = VK10.VK_NULL_HANDLE;
 	}
 
 	@Override
@@ -274,7 +282,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		long bufferAddress = MemoryUtil.memAddress(mappedBuffer) + offset;
 
 		Map<SingleQuadParticle.Layer, List<SingleQuadParticle>> layerMap = new Reference2ReferenceOpenHashMap<>();
-		for (int i = 0, pendingSize = Math.min(particleLimit, pending.size()); i < pendingSize; i++) {
+		for (int i = 0, pendingSize = Math.min(particleLimit, appendCount); i < pendingSize; i++) {
 			SingleQuadParticle p = pending.get(i);
 			layerMap.computeIfAbsent(p.getLayer(), ignored -> new ReferenceArrayList<>(appendCount / 2)).add(p);
 		}
@@ -589,12 +597,20 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	@Override
 	public void resize(int particleLimit) {
 		waitForAllSubmissions();
+		int oldLimit = this.particleLimit;
 		this.particleLimit = particleLimit;
-		for (SourceSlot sourceSlot : sourceSlots) {
-			sourceSlot.destroy();
-		}
+
 		int raw = 2 * particleLimit * RAW_PARTICLE.getVertexSize();
-		createSourceBuffers(raw);
+		for (int i = 0; i < sourceSlots.length; i++) {
+			// The slot being rendered this tick still feeds the next compute();
+			// migrate its contents. Others are fully rewritten by the next tick().
+			if (i == renderSrcIdx) {
+				sourceSlots[i].recreateBufferPreservingContents(raw, oldLimit, particleLimit);
+			} else {
+				sourceSlots[i].destroy();
+				sourceSlots[i].createBuffer(raw);
+			}
+		}
 
 		for (SubmitSlot submitSlot : submitSlots) {
 			submitSlot.destroy();
@@ -633,7 +649,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	}
 
 	private void resetSubmitSlots() {
-		if (submitSlots.length == Renderer.getFramesNum()){
+		if (submitSlots.length == Renderer.getFramesNum()) {
 			for (SubmitSlot slot : submitSlots) {
 				slot.clearPrepared();
 			}
@@ -663,7 +679,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		VK10.vkDestroyPipeline(device, pipeline, null);
 		VK10.vkDestroyPipelineLayout(device, pipelineLayout, null);
 		VK10.vkDestroyDescriptorSetLayout(device, descriptorSetLayout, null);
-		VK10.vkDestroyDescriptorPool(device, descriptorPool, null);
+		destroyDescriptorResources();
 	}
 
 	private final class SourceSlot {
@@ -715,6 +731,28 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			VK10.vkFreeMemory(device, srcMem, null);
 			srcMem = VK10.VK_NULL_HANDLE;
 			mapped = null;
+		}
+
+		private void recreateBufferPreservingContents(int newSize, int oldLimit, int newLimit) {
+			long oldBuf = srcBuf;
+			long oldMem = srcMem;
+			ByteBuffer oldMapped = mapped;
+
+			createBuffer(newSize);
+
+			int vertexSize = RAW_PARTICLE.getVertexSize();
+			long regionBytes = (long) Math.min(oldLimit, newLimit) * vertexSize;
+			long newAddress = MemoryUtil.memAddress(mapped);
+			long oldAddress = MemoryUtil.memAddress(oldMapped);
+			MemoryUtil.memCopy(oldAddress, newAddress, regionBytes);
+			MemoryUtil.memCopy(
+				oldAddress + (long) oldLimit * vertexSize,
+				newAddress + (long) newLimit * vertexSize,
+				regionBytes);
+
+			VK10.vkUnmapMemory(device, oldMem);
+			VK10.vkDestroyBuffer(device, oldBuf, null);
+			VK10.vkFreeMemory(device, oldMem, null);
 		}
 
 		private void buildLayout() {

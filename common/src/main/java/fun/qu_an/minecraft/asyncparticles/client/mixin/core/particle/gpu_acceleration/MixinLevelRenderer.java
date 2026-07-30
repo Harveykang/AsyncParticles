@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.gpu_acceleration;
 
-import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import fun.qu_an.minecraft.asyncparticles.client.config.ComputeExecutionStage;
@@ -39,7 +38,7 @@ public class MixinLevelRenderer {
 	}
 
 	@Inject(method = "renderLevel", at = @At(value = "CONSTANT", args = "stringValue=setupFrameGraph"))
-	private void onRenderLevel(CallbackInfo ci, @Local(ordinal = 0) float f) {
+	private void onRenderLevel(CallbackInfo ci) {
 		if (ConfigHelper.isGpuParticles() && ConfigHelper.getComputeExecutionStage() == ComputeExecutionStage.LEVEL_RENDERING) {
 			GpuParticleBehavior.getInstance().compute();
 		}

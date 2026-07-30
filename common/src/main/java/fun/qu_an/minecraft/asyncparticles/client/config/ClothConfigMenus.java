@@ -18,6 +18,7 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.util.TriState;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -342,6 +343,13 @@ class ClothConfigMenus {
 				.setTooltip(Component.literal("Never change it unless requested by the developer."))
 				.setDefaultValue(DevRuntimeDebug.TransformFeedbackGlCommand.AUTO)
 				.setSaveConsumer(newValue -> DevRuntimeDebug.transformFeedbackGlCommand = newValue)
+				.build())
+			.addEntry(entryBuilder
+				.startEnumSelector(Component.literal("GL Direct State Access"),
+					TriState.class, DevRuntimeDebug.directStateAccess)
+				.setTooltip(Component.literal("Never change it unless requested by the developer."))
+				.setDefaultValue(TriState.DEFAULT)
+				.setSaveConsumer(newValue -> DevRuntimeDebug.directStateAccess = newValue)
 				.build())
 			.addEntry(entryBuilder.startTextDescription(Component.literal(Backends.debugInfo())
 					.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(Backends.debugInfo()))))
