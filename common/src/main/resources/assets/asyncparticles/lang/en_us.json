@@ -110,6 +110,7 @@
   "config.asyncparticles.enum.ComputeExecutionStage.LEVEL_RENDERING": "Level Rendering",
   "config.asyncparticles.enum.ComputeExecutionStage.PARTICLE_RENDERING": "Particle Rendering",
   "config.asyncparticles.incompatibility": "Incompatible with %s mod.",
+  "config.asyncparticles.incompatibility.backend": "Incompatible backend: %s.",
   "config.asyncparticles.limited": "Limited by %s mod.",
   "gui.asyncparticles.reset-confirmation": "Do you want to reset all configurations?",
   "gui.asyncparticles": "Async Particles",

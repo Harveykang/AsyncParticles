@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backend;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
@@ -188,8 +189,18 @@ class ClothConfigMenus {
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.gpuAcceleration"),
 					globalConfig.rendering.gpuAcceleration)
 				.setDefaultValue(defaultConfig.rendering.gpuAcceleration)
-				.setTooltip(Component.translatable("config.asyncparticles.rendering.gpuAcceleration.tooltip"))
-				// todo add gpu acceleration requirement
+				.setTooltipSupplier(() -> {
+					if (Backends.supportsGpuAcceleration()) {
+						return Optional.of(new MutableComponent[]{Component.translatable("config.asyncparticles.rendering.gpuAcceleration.tooltip")});
+					} else {
+						return Optional.of(new MutableComponent[]{
+							Component.translatable("config.asyncparticles.rendering.gpuAcceleration.tooltip")
+								.withStyle(ChatFormatting.STRIKETHROUGH),
+							Component.translatable("config.asyncparticles.incompatibility.backend", RenderSystem.getDevice().getDeviceInfo().backendName())
+								.withStyle(ChatFormatting.YELLOW)
+						});
+					}
+				})
 				.setSaveConsumer(newValue -> newConfig.rendering.gpuAcceleration = newValue)
 				.setRequirement(Backends::supportsGpuAcceleration)
 				.build())
@@ -318,7 +329,7 @@ class ClothConfigMenus {
 		// endregion
 
 		// region Mobile
-		if (Backends.backend == Backend.OPENGL_ES) {
+		if (Backends.backend == Backend.OPENGL_ON_ES) {
 			builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mobile"))
 				.addEntry(entryBuilder
 					.startBooleanToggle(Component.translatable("config.asyncparticles.mobile.multiDrawWorkaround"), globalConfig.mobile.multiDrawWorkaround)

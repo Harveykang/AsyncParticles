@@ -8,7 +8,6 @@ import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.
 import net.minecraft.util.TriState;
 import org.lwjgl.opengl.GL;
 
-import java.util.List;
 import java.util.Set;
 
 public class DevRuntimeDebug {
@@ -35,12 +34,12 @@ public class DevRuntimeDebug {
 					case GL45 -> new GlCommands.TransformFeedback.GL45();
 				};
 				Backends.gl = switch (directStateAccess) {
-					case TRUE -> Backends.getGl(Backends.backend == Backend.OPENGL_ES, true, Backends.gl.vertexAttribBinding());
-					case FALSE -> Backends.getGl(Backends.backend == Backend.OPENGL_ES, false, Backends.gl.vertexAttribBinding());
+					case TRUE -> Backends.getGl(Backends.backend == Backend.OPENGL_ON_ES, true, Backends.gl.vertexAttribBinding());
+					case FALSE -> Backends.getGl(Backends.backend == Backend.OPENGL_ON_ES, false, Backends.gl.vertexAttribBinding());
 					case DEFAULT -> {
 						Set<String> enabledExtensions = RenderSystem.getDevice().getDeviceInfo().underlyingExtensions();
 						boolean GL_ARB_direct_state_access = enabledExtensions.contains("GL_ARB_direct_state_access");
-						yield Backends.getGl(Backends.backend == Backend.OPENGL_ES, GL_ARB_direct_state_access, Backends.gl.vertexAttribBinding());
+						yield Backends.getGl(Backends.backend == Backend.OPENGL_ON_ES, GL_ARB_direct_state_access, Backends.gl.vertexAttribBinding());
 					}
 				};
 				GpuParticleBehavior.getInstance().close();
