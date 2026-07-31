@@ -1,12 +1,13 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
-import com.mojang.blaze3d.GpuFormat;
-import com.mojang.blaze3d.opengl.GlConst;
-import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.pipeline.ColorTargetState;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
+import com.mojang.renderpearl.api.vertex.VertexFormatElement;
+import com.mojang.renderpearl.backend.opengl.GlConst;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.ParticleVertexBuffer;
@@ -35,8 +36,6 @@ public class GpuParticlePipelines {
 		.addAttribute("Light", UV2_FORMAT)
 		.addAttribute("Rolls", UV0_FORMAT)
 		.build();
-	public static final int[] multiDrawFirst = {0, 0};
-	public static final int[] multiDrawCount = {0, 0};
 	public static final VertexFormat IDENTITY_PARTICLE = VertexFormat.builder(0)
 		.addAttribute("Position", POSITION_FORMAT) // 3 floats
 		.addAttribute("UV0", UV0_FORMAT) // 2 floats
@@ -51,24 +50,24 @@ public class GpuParticlePipelines {
 			throw new IllegalArgumentException("Invalid vertex format");
 		}
 		return pipelines.computeIfAbsent(original, original1 -> {
-			VertexFormat[] vertexFormats = original1.getVertexFormatBindings().clone();
+			VertexFormat[] vertexFormats = original1.getVertexFormatBindings().toArray(VertexFormat[]::new);
 			vertexFormats[0] = IDENTITY_PARTICLE;
 			RenderPipeline pipeline = new RenderPipeline(
 				original1.getLocation(),
-				original1.getVertexShader(),
-				original1.getFragmentShader(),
+				original1.getShaders(),
 				original1.getShaderDefines(),
 				original1.getBindGroupLayouts(),
-				original1.getColorTargetStates(),
+				original1.getColorTargetStates().toArray(ColorTargetState[]::new),
 				original1.getDepthStencilState(),
 				original1.getPolygonMode(),
 				original1.isCull(),
 				vertexFormats,
 				original1.getPrimitiveTopology(),
+				original1.pushConstantSize(),
 				original1.getSortKey());
 			if (ModListHelper.IRIS_LOADED) {
-				IrisApi.getInstance().assignPipeline(pipeline,
-					translucent ? IrisProgram.PARTICLES_TRANSLUCENT : IrisProgram.PARTICLES);
+//				IrisApi.getInstance().assignPipeline(pipeline,
+//					translucent ? IrisProgram.PARTICLES_TRANSLUCENT : IrisProgram.PARTICLES);
 			}
 			return pipeline;
 		});

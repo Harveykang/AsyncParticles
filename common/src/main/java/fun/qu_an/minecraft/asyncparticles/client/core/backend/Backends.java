@@ -1,9 +1,10 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.backend;
 
-import com.mojang.blaze3d.systems.DeviceInfo;
-import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vulkan.VulkanDevice;
+import com.mojang.renderpearl.api.device.DeviceInfo;
+import com.mojang.renderpearl.api.device.GpuDevice;
+import com.mojang.renderpearl.backend.vulkan.VulkanDevice;
+import com.mojang.renderpearl.frontend.FrontendGpuDevice;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11C;
@@ -104,7 +105,7 @@ public class Backends {
 
 	private static VkCommands getVkCaps(GpuDevice device) {
 		// check device capabilities via Vulkan API directly
-		VkDevice vkDevice = ((VulkanDevice) device.backend).vkDevice();
+		VkDevice vkDevice = ((VulkanDevice) ((FrontendGpuDevice) device).backend).vkDevice();
 		boolean isVk13;
 		try (MemoryStack s = MemStackUtil.stackPush()) {
 			VkPhysicalDeviceProperties props = VkPhysicalDeviceProperties.calloc(s);

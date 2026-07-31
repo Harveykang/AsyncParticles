@@ -1,9 +1,12 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vulkan.*;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.backend.vulkan.VulkanCommandEncoder;
+import com.mojang.renderpearl.backend.vulkan.VulkanDevice;
+import com.mojang.renderpearl.backend.vulkan.VulkanGpuBuffer;
+import com.mojang.renderpearl.frontend.FrontendGpuDevice;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ComputeResult;
@@ -67,7 +70,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	public VkCompParticleRenderer(int particleLimit) {
 		this.particleLimit = particleLimit;
-		vkBackend = (VulkanDevice) RenderSystem.getDevice().backend;
+		vkBackend = (VulkanDevice) ((FrontendGpuDevice) RenderSystem.getDevice()).backend;
 		device = vkBackend.vkDevice();
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			sourceSlots[i] = new SourceSlot();

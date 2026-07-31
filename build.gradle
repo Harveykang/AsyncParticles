@@ -167,10 +167,14 @@ tasks.register('mergeJars') {
         Set<String> seen = []
 
         def jarFiles = [
-                file("common/build/libs/${rootProject.archives_name}-common-${rootProject.mod_version}-raw.jar"),
-                file("fabric/build/libs/${rootProject.archives_name}-fabric-${rootProject.mod_version}-raw.jar"),
-                file("neoforge/build/libs/${rootProject.archives_name}-neoforge-${rootProject.mod_version}-raw.jar")
+                file("common/build/libs/${rootProject.archives_name}-common-${rootProject.mod_version}-raw.jar")
         ]
+        if (project.enabled_platforms.contains('fabric')) {
+            jarFiles.add file("fabric/build/libs/${rootProject.archives_name}-fabric-${rootProject.mod_version}-raw.jar")
+        }
+        if (project.enabled_platforms.contains('neoforge')) {
+            jarFiles.add file("neoforge/build/libs/${rootProject.archives_name}-neoforge-${rootProject.mod_version}-raw.jar")
+        }
 
         new JarOutputStream(new FileOutputStream(out)).withCloseable { jos ->
             jarFiles.each { jarFile ->

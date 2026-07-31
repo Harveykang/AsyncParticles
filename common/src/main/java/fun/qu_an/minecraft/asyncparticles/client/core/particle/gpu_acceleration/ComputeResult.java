@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import net.minecraft.client.particle.SingleQuadParticle;
 
 public record ComputeResult(GpuBuffer buffer, int totalCount, ParticleSlice[] slices, int maxCount,

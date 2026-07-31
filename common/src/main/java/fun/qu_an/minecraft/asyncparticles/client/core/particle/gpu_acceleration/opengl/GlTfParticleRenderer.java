@@ -1,10 +1,12 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.opengl.GlBuffer;
-import com.mojang.blaze3d.opengl.GlCommandEncoder;
-import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.backend.common.BaseGpuBuffer;
+import com.mojang.renderpearl.backend.opengl.GlBuffer;
+import com.mojang.renderpearl.backend.opengl.GlCommandEncoder;
+import com.mojang.renderpearl.backend.opengl.GlDevice;
+import com.mojang.renderpearl.frontend.FrontendGpuDevice;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
@@ -58,7 +60,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 	private final Vec3[] camPositions = new Vec3[SOURCE_SLOT_COUNT];
 
 	private final ParticleVertexBuffer target;
-	private final GpuBuffer targetMoj;
+	private final BaseGpuBuffer targetMoj;
 	private final int tf;
 	private int[] multiDrawFirst;
 	private int[] multiDrawCount;
@@ -69,7 +71,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 	private final long[] lastGraphicsSubmitIndex = new long[SOURCE_SLOT_COUNT];
 
 	public GlTfParticleRenderer(int particleLimit) {
-		glDevice = ((GlDevice) RenderSystem.getDevice().backend);
+		glDevice = ((GlDevice) ((FrontendGpuDevice) RenderSystem.getDevice()).backend);
 
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			sources[i] = new ParticleVertexBuffer(GL15C.GL_DYNAMIC_DRAW);
@@ -80,7 +82,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		}
 
 		target = new ParticleVertexBuffer(-1, GL15C.GL_STREAM_COPY);
-		targetMoj = RenderSystem.getDevice().createBuffer(
+		targetMoj = (BaseGpuBuffer) RenderSystem.getDevice().createBuffer(
 			() -> "GPU_PARTICLE_BUFFER",
 			GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_HINT_CLIENT_STORAGE,
 			1L // minimal; resized in resize()

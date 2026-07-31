@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl;
 
-import com.mojang.blaze3d.opengl.GlConst;
+import com.mojang.renderpearl.backend.opengl.GlConst;
 import org.apache.commons.io.IOUtils;
 import org.lwjgl.opengl.GL20C;
 

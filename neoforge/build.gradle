@@ -157,5 +157,5 @@ shadowJar {
 
     configurations = [project.configurations.shadowCommon]
     archiveClassifier = null           // shadowJar becomes the main artifact
-    from rootProject.file("LICENSE.md")
+    from rootProject.file("LICENSE")
 }

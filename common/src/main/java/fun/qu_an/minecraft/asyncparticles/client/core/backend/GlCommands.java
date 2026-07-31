@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.backend;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import org.lwjgl.opengl.*;
 
