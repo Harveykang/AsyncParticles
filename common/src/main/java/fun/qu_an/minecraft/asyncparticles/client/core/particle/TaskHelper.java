@@ -58,9 +58,7 @@ public final class TaskHelper {
 	 * @param exceptionHandler Provides a handler for exceptions thrown by any group
 	 */
 	public void submitAll(Consumer<Exception> exceptionHandler) {
-		if (!tasks.isEmpty()) {
-			groupTasks(false);
-		}
+		groupTasks(false);
 		if (groups.isEmpty()) {
 			return;
 		}

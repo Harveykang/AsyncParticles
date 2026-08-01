@@ -38,8 +38,9 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		}
 		GpuParticleBehavior.getInstance().flushBufferAndSwap();
 		int sum = 0;
-		boolean asyncTickParticle = ConfigHelper.isAsyncTickParticle();
-		TaskHelper taskHelper = AsyncTickBehavior.getInstance().getTickTaskManager();
+		AsyncTickBehavior tickBehavior = AsyncTickBehavior.getInstance();
+		boolean tickAsync = ConfigHelper.isAsyncTickParticle() && tickBehavior.isParticlePhase();
+		TaskHelper taskHelper = tickBehavior.getTickTaskManager();
 		for (ParticleGroup<?> group : particles.values()) {
 			if (group instanceof GpuParticleGroup gpuGroup) {
 				int size = gpuGroup.asyncparticles$getGpuParticles().size();
@@ -47,7 +48,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 					continue;
 				}
 				sum += size;
-				if (!asyncTickParticle) {
+				if (!tickAsync) {
 					gpuGroup.asyncparticles$tickParticles(true);
 					gpuGroup.asyncparticles$removeDeadGpuParticles();
 				} else if (gpuGroup.asyncparticles$canTickAsync()) {
@@ -58,13 +59,13 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				}
 			}
 		}
-		if (asyncTickParticle) {
+		if (tickAsync) {
 			taskHelper.groupTasks(true);
 		}
 		GpuParticleBehavior.getInstance().setUpNextTickRendering(sum);
 		IParticleRenderer renderer = GpuParticleBehavior.getInstance().getOrCreateRenderer();
 		renderer.prepareBuffer();
-		AsyncTickBehavior.getInstance().getTickTaskManager().addTask(() -> {
+		tickBehavior.getTickTaskManager().addTask(() -> {
 			int size = Math.max(8, ConfigHelper.getParticleLimit() >> 1);
 			Map<SingleQuadParticle.Layer, List<SingleQuadParticle>> particles = new Reference2ReferenceOpenHashMap<>();
 			for (Map.Entry<ParticleRenderType, ParticleGroup<?>> entry : this.particles.entrySet()) {
