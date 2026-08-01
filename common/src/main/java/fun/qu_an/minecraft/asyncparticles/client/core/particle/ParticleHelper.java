@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
@@ -11,9 +12,7 @@ import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBeh
 import fun.qu_an.minecraft.asyncparticles.client.util.BusyWaitEvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 
@@ -46,6 +45,9 @@ public class ParticleHelper {
 		GpuParticleBehavior.getInstance().onClearParticles();
 		if (ModListHelper.A_GOOD_PLACE_LOADED) {
 			AGoodPlaceCompat.onParticleEngineClear();
+		}
+		if (ModListHelper.PARTICLERAIN_LOADED) {
+			ParticleRainCompat.onParticleEngineClear();
 		}
 	}
 

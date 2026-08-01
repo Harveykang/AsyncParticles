@@ -16,7 +16,10 @@ public interface ParticleAddon {
 
 	boolean asyncparticles$isFirstGpuLightGet();
 
-	Class<? extends Particle> asyncparticles$getRealClass();
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	default <T extends Particle> Class<T> asyncparticles$getRealClass() {
+		return (Class) this.getClass();
+	}
 
 	byte getTickFlag();
 }

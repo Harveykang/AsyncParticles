@@ -6,6 +6,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.DevRuntimeDebug;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
@@ -115,7 +116,7 @@ public class AsyncTickBehavior {
 			return;
 		}
 		if (cleanupTaskHelper.isRunning()) {
-			throw new IllegalStateException("cleanupFuture is not null!");
+			throw new IllegalStateException("cleanup task is running!");
 		}
 		Collection<ParticleGroup<?>> groups = mc.particleEngine.particles.values();
 		for (ParticleGroup<?> group : groups) {
@@ -123,10 +124,10 @@ public class AsyncTickBehavior {
 				cleanupTaskHelper.addTask(((ParticleGroupAddition) group)::asyncparticles$removeDeadParticles);
 			}
 		}
-		cleanupTaskHelper.addTask(() -> {
-			Queue<TrackingEmitter> trackingEmitters = Minecraft.getInstance().particleEngine.trackingEmitters;
-			doEmittersRemoveIf(trackingEmitters);
-		});
+		Queue<TrackingEmitter> trackingEmitters = Minecraft.getInstance().particleEngine.trackingEmitters;
+		if (!trackingEmitters.isEmpty()) {
+			cleanupTaskHelper.addTask(() -> doEmittersRemoveIf(trackingEmitters));
+		}
 		cleanupTaskHelper.groupTasks(true);
 		cleanupTaskHelper.submitAll();
 	}
@@ -171,28 +172,22 @@ public class AsyncTickBehavior {
 		LocalPlayer player = mc.player;
 		Entity cameraEntity = mc.getCameraEntity();
 		boolean levelRunning = level != null && player != null && cameraEntity != null && !mc.isPaused();
-		if (!ConfigHelper.isAsyncTickParticle()) {
-			tryReload();
-			tryDebug();
-			if (levelRunning) {
-				tickTaskHelper.runAllTasks();
-			} else {
-				tickTaskHelper.disposeTasks();
-				mc.particleEngine.particlesToAdd.clear();
+		if (!levelRunning || !isTailTick()) {
+			tickTaskHelper.disposeTasks();
+			Queue<Particle> particlesToAdd = mc.particleEngine.particlesToAdd;
+			if (!particlesToAdd.isEmpty()) {
+				particlesToAdd.clear();
 			}
 			return;
 		}
-		if (!levelRunning || !isTailTick) {
-			tickTaskHelper.disposeTasks();
-			mc.particleEngine.particlesToAdd.clear();
-			return;
-		}
-		tickTaskHelper.groupTasks(false);
-		particlePhase = true;
-		mc.particleEngine.tick();
-		particlePhase = false;
 		tryReload();
 		tryDebug();
+		tickTaskHelper.groupTasks(false);
+		if (ConfigHelper.isAsyncTickParticle()) {
+			particlePhase = true;
+			mc.particleEngine.tick();
+			particlePhase = false;
+		}
 		tickTaskHelper.submitAll(() -> {
 			timeUsageNano.setRelease(System.nanoTime());
 			levelBundle = new LevelBundle(level, player, cameraEntity);
@@ -297,15 +292,8 @@ public class AsyncTickBehavior {
 		return cleanupTaskHelper;
 	}
 
-	private boolean isParticlePhase() {
+	public boolean isParticlePhase() {
 		return particlePhase;
-	}
-
-	public boolean shouldTickParticleEngine() {
-		if (isParticlePhase() || !ConfigHelper.isAsyncTickParticle()) {
-			return true;
-		}
-		throw new IllegalStateException("ParticleEngine.tick() called outside the particle phase unexpectedly.");
 	}
 
 	public void dumpParticles() {

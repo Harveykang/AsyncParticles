@@ -54,12 +54,6 @@ public abstract class MixinParticle implements ParticleAddon, LightCachedParticl
 		return asyncparticles$enableLightCache;
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	@Override
-	public Class<? extends Particle> asyncparticles$getRealClass() {
-		return (Class) this.getClass();
-	}
-
 	@Override
 	public int asyncparticles$invoke_getLightCoords(float partialTickTime) {
 		try {
