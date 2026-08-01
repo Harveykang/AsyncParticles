@@ -42,8 +42,8 @@ repositories {
 
 dependencies {
     // MixinSquared's annotationProcessor MUST be registered BEFORE Mixin's one.
-    compileOnly(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:0.3.7-beta.1"))
-    implementation(include("com.github.bawnorton.mixinsquared:mixinsquared-neoforge:0.3.7-beta.1"))
+    compileOnly(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:0.3.7-beta.3"))
+    implementation(include("com.github.bawnorton.mixinsquared:mixinsquared-neoforge:0.3.7-beta.3"))
 
     neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }

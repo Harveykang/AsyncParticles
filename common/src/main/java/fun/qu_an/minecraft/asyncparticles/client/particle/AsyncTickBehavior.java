@@ -240,14 +240,13 @@ public class AsyncTickBehavior {
 		// assert i < to;
 		ProfilerFiller profiler = mc.getProfiler();
 		profiler.push("async_particles");
+		waitForCleanUp();
 		if (levelRunning) {
 			profiler.push("particle_tick");
 			if (i == to - 1) {
 				particlePhase = true;
 				mc.particleEngine.tick();
 				particlePhase = false;
-			} else {
-				waitForCleanUp();
 			}
 			profiler.pop();
 		}

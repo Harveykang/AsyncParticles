@@ -82,22 +82,13 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		if (!AsyncTickBehavior.getInstance().shouldTickParticleEngine()) {
 			return;
 		}
-		if (!trackingEmitters.isEmpty()) {
-			AsyncTickBehavior.getInstance().particleOperations.add(this::asyncparticles$tickEmitters);
-		}
-
 		// Keep local variable tables as they were
 		Particle particle;
 
 		boolean tickAsync = ConfigHelper.isTickAsync();
-		if (tickAsync) {
-			AsyncTickBehavior.getInstance().waitForCleanUp();
-			if (ConfigHelper.isGpuOnlyAsyncParticleTick()) {
-				this.particles.forEach((particleRenderType, queue) -> {
-					this.level.getProfiler().push(particleRenderType.toString());
-					this.tickParticleList(queue);
-					this.level.getProfiler().pop();
-				});
+		if (tickAsync && !ConfigHelper.isGpuOnlyAsyncParticleTick()) {
+			if (!trackingEmitters.isEmpty()) {
+				AsyncTickBehavior.getInstance().particleOperations.add(this::asyncparticles$tickEmitters);
 			}
 		} else {
 			// forEach is an inject point (eg. ParticleCore)
@@ -106,6 +97,14 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				this.tickParticleList(queue);
 				this.level.getProfiler().pop();
 			});
+			if (!this.trackingEmitters.isEmpty()) {
+				for (TrackingEmitter trackingEmitter : this.trackingEmitters) {
+					trackingEmitter.tick();
+				}
+				if (!tickAsync) {
+					AsyncTickBehavior.getInstance().doEmittersRemoveIf(this.trackingEmitters);
+				}
+			}
 			if (!AsyncTickBehavior.getInstance().particleOperations.isEmpty()) {
 				AsyncTickBehavior.getInstance().particleOperations.forEach(Runnable::run);
 				AsyncTickBehavior.getInstance().particleOperations.clear();
