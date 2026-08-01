@@ -113,9 +113,9 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 
 	@Override
 	public void asyncparticles$onClearParticles() {
-		particles.forEach(ParticleHelper::onEvict);
+		particles.forEach(ParticleHelper::onClearParticle);
 		if (this instanceof GpuParticleGroup gpuGroup) {
-			gpuGroup.asyncparticles$getGpuParticles().forEach(ParticleHelper::onEvict);
+			gpuGroup.asyncparticles$getGpuParticles().forEach(ParticleHelper::onClearParticle);
 		}
 	}
 }

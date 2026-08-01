@@ -64,7 +64,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 			List<String> l = mixin.getTargetClasses();
 			List<String> targetClassNames = new ArrayList<>(l.size());
 			for (String s : l) {
-				String string = s.replaceAll("/", ".");
+				String string = s.replace("/", ".");
 				targetClassNames.add(string);
 			}
 
