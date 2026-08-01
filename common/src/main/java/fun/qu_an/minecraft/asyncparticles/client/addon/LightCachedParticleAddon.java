@@ -16,7 +16,9 @@ public interface LightCachedParticleAddon {
 
 	void asyncparticles$setLight(int light);
 
-	boolean asyncparticles$isStaticLight();
+	default boolean asyncparticles$isStaticLight() {
+		return false;
+	}
 
 	void asyncparticles$refresh();
 
@@ -28,9 +30,9 @@ public interface LightCachedParticleAddon {
 
 	int asyncparticles$getCachedLight();
 
-	void asyncparticles$enableLightCache();
-
-	void asyncparticles$disableLightCache();
+	void asyncparticles$enableLightCache(boolean enable);
 
 	boolean asyncparticles$isEnabledLightCache();
+
+	int asyncparticles$invoke_getLightColor(float partialTickTime);
 }

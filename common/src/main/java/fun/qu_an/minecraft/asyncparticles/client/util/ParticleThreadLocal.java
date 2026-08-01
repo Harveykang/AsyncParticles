@@ -1,16 +1,35 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 public sealed class ParticleThreadLocal<T> permits ParticleThreadLocal.SuppliedParticleThreadLocal {
 	public final int index;
 	protected ThreadLocal<T> fallback;
+	protected BooleanSupplier isMainThread;
+	protected T mainValue;
 
 	public static <S> ParticleThreadLocal<S> withInitial(Supplier<? extends S> supplier) {
 		return new SuppliedParticleThreadLocal<>(supplier);
 	}
 
+	public static <S> ParticleThreadLocal<S> withInitial(BooleanSupplier isMainThread, Supplier<? extends S> supplier) {
+		return new SuppliedParticleThreadLocal<>(isMainThread, supplier);
+	}
+
 	public ParticleThreadLocal() {
+		this(createThreadComparator());
+	}
+
+	private static @NotNull BooleanSupplier createThreadComparator() {
+		Thread initThread = Thread.currentThread();
+		return () -> initThread == Thread.currentThread();
+	}
+
+	public ParticleThreadLocal(BooleanSupplier isMainThread) {
+		this.isMainThread = isMainThread;
 		this.index = AsyncParticleWorkerThread.nextThreadLocalIndex();
 	}
 
@@ -25,32 +44,48 @@ public sealed class ParticleThreadLocal<T> permits ParticleThreadLocal.SuppliedP
 		return (T) wt.getThreadLocalValue(index);
 	}
 
+	protected T getMain() {
+		return mainValue;
+	}
+
+	protected void setMain(T value) {
+		mainValue = value;
+	}
+
 	public T getSafe(T orElse) {
 		Thread thread = Thread.currentThread();
-		if (!(thread instanceof AsyncParticleWorkerThread)) {
+		if (isMainThread.getAsBoolean()) {
+			return getMain();
+		} else if (thread instanceof AsyncParticleWorkerThread) {
+			return getUnsafe();
+		} else {
 			return orElse;
 		}
-		return getUnsafe();
 	}
 
 	public T getSafe(Supplier<T> orElse) {
 		Thread thread = Thread.currentThread();
-		if (!(thread instanceof AsyncParticleWorkerThread)) {
+		if (isMainThread.getAsBoolean()) {
+			return getMain();
+		} else if (thread instanceof AsyncParticleWorkerThread) {
+			return getUnsafe();
+		} else {
 			return orElse.get();
 		}
-		return getUnsafe();
 	}
 
 	public T get() {
 		Thread thread = Thread.currentThread();
-		if (thread instanceof AsyncParticleWorkerThread) {
+		if (isMainThread.getAsBoolean()) {
+			return getMain();
+		} else if (thread instanceof AsyncParticleWorkerThread) {
 			return getUnsafe();
 		} else {
 			return getFallback().get();
 		}
 	}
 
-	private ThreadLocal<T> getFallback() {
+	protected ThreadLocal<T> getFallback() {
 		ThreadLocal<T> fallback = this.fallback;
 		if (fallback == null) {
 			synchronized (this) {
@@ -69,7 +104,9 @@ public sealed class ParticleThreadLocal<T> permits ParticleThreadLocal.SuppliedP
 
 	public void set(T value) {
 		Thread thread = Thread.currentThread();
-		if (thread instanceof AsyncParticleWorkerThread wt) {
+		if (isMainThread.getAsBoolean()) {
+			setMain(value);
+		} else if (thread instanceof AsyncParticleWorkerThread wt) {
 			setUnsafe(value);
 		} else {
 			getFallback().set(value);
@@ -78,7 +115,9 @@ public sealed class ParticleThreadLocal<T> permits ParticleThreadLocal.SuppliedP
 
 	public void remove() {
 		Thread thread = Thread.currentThread();
-		if (thread instanceof AsyncParticleWorkerThread wt) {
+		if (isMainThread.getAsBoolean()) {
+			setMain(null);
+		} else if (thread instanceof AsyncParticleWorkerThread wt) {
 			setUnsafe(null);
 		} else {
 			getFallback().remove();
@@ -90,6 +129,12 @@ public sealed class ParticleThreadLocal<T> permits ParticleThreadLocal.SuppliedP
 		private final Supplier<? extends S> supplier;
 
 		private SuppliedParticleThreadLocal(Supplier<? extends S> supplier) {
+			super();
+			this.supplier = supplier;
+		}
+
+		private SuppliedParticleThreadLocal(BooleanSupplier isMainThread, Supplier<? extends S> supplier) {
+			super(isMainThread);
 			this.supplier = supplier;
 		}
 
@@ -109,6 +154,25 @@ public sealed class ParticleThreadLocal<T> permits ParticleThreadLocal.SuppliedP
 				return value1;
 			}
 			return value == NULL_VALUE ? null : value;
+		}
+
+		protected S getMain() {
+			if (mainValue == null) {
+				return mainValue = supplier.get();
+			} else if (mainValue == NULL_VALUE) {
+				return null;
+			} else {
+				return mainValue;
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		protected void setMain(S value) {
+			if (value == null) {
+				mainValue = (S) NULL_VALUE;
+			} else {
+				mainValue = value;
+			}
 		}
 
 		@Override

@@ -113,4 +113,7 @@ dependencies {
 
     /* Goop */
     modCompileOnly "maven.modrinth:goop:0.4.3-1.21.1"
+
+    /* Aether */
+    modCompileOnly "maven.modrinth:aether:1.21.1-1.5.11-fabric"
 }

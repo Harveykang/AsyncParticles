@@ -1,0 +1,408 @@
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.render;
+
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import dev.architectury.injectables.annotations.ExpectPlatform;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
+import fun.qu_an.minecraft.asyncparticles.client.util.BindingTesselator;
+import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
+import fun.qu_an.minecraft.asyncparticles.client.util.TryAndStoreFakeBufferBuilder;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.irisshaders.iris.Iris;
+import net.irisshaders.iris.fantastic.ParticleRenderingPhase;
+import net.irisshaders.iris.fantastic.PhasedParticleEngine;
+import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
+import net.irisshaders.iris.shaderpack.properties.ParticleRenderingSettings;
+import net.minecraft.Util;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.*;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.util.Mth;
+import net.minecraft.util.profiling.ProfilerFiller;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4f;
+
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinWorkerThread;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import static fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode.*;
+
+// TODO: Organize this shit
+@Environment(EnvType.CLIENT)
+public abstract class AsyncRenderBehavior {
+	static final Logger LOGGER = LogManager.getLogger();
+	public static final String THREAD_PREFIX = "AsyncParticleRenderer";
+	public static final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
+	private static final AsyncRenderBehavior INSTANCE = newInstance();
+
+	@ExpectPlatform
+	private static AsyncRenderBehavior newInstance() {
+		throw new AssertionError();
+	}
+
+	private final Set<Class<?>> syncParticleTypes = Collections.newSetFromMap(new IdentityHashMap<>());
+	public boolean renderAsync = false;
+	public boolean particlePhase = false;
+
+	public final ForkJoinPool executor;
+
+	{
+		AtomicInteger workerCount = new AtomicInteger(1);
+		executor = new ForkJoinPool(THREADS, (forkJoinPool) -> {
+			ForkJoinWorkerThread forkJoinWorkerThread = new AsyncRendererThread(forkJoinPool);
+			forkJoinWorkerThread.setName(THREAD_PREFIX + "-" + workerCount.getAndIncrement());
+			forkJoinWorkerThread.setDaemon(true);
+			return forkJoinWorkerThread;
+		}, Util::onThreadException, true);
+	}
+
+	@NotNull
+	private Frustum frustum = new Frustum(new Matrix4f(), new Matrix4f());
+	private Consumer<String> debugConsumer;
+	private CompletableFuture<Void> asyncTask;
+	private int asyncTasksSize;
+
+	public static AsyncRenderBehavior getInstance() {
+		return INSTANCE;
+	}
+
+	/* Renderer */
+
+	public void start(float f, Camera camera, int irm) {
+		tryDebug();
+		if (InternalRenderingMode.isSync(irm)) {
+			return;
+		}
+		Minecraft mc = Minecraft.getInstance();
+		ProfilerFiller profiler = mc.getProfiler();
+		profiler.popPush("particles");
+		clearSync();
+		profiler.push("render_async");
+		ParticleEngine particleEngine = mc.particleEngine;
+		TextureManager textureManager = particleEngine.textureManager;
+		ObjectArrayList<CompletableFuture<Void>> asyncTasks = new ObjectArrayList<>(asyncTasksSize);
+		for (ParticleRenderType particleRenderType
+			: ModListHelper.IS_FORGE ? particleEngine.particles.keySet() : ParticleEngine.RENDER_ORDER) {
+			if (particleRenderType == ParticleRenderType.NO_RENDER) {
+				continue;
+			}
+			Queue<Particle> queue = particleEngine.particles.get(particleRenderType);
+			if (queue == null || queue.isEmpty()) {
+				continue;
+			}
+			BindingTesselator bTesselator = getBTesselator(particleRenderType, textureManager);
+			if (bTesselator.shouldSync) {
+				continue;
+			}
+			asyncTasks.add(CompletableFuture.runAsync(() -> renderParticles(f, camera, queue, particleRenderType, bTesselator.begin()), executor)
+				.exceptionally(RenderExceptionHandler.getInstance()::renderAsyncExceptionally));
+		}
+		int size = asyncTasksSize = asyncTasks.size();
+		asyncTask = CompletableFuture.allOf(asyncTasks.toArray(new CompletableFuture[size]));
+		profiler.pop();
+	}
+
+	private void renderParticles(float f,
+	                             Camera camera,
+	                             Queue<Particle> particles,
+	                             ParticleRenderType particleRenderType,
+	                             BufferBuilder bufferBuilder) {
+		Frustum frustum = AsyncRenderBehavior.INSTANCE.getFrustum();
+		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
+		float f2 = f + 1f;
+		for (Particle particle : particles) {
+			if (!particle.isAlive()) {
+				continue;
+			}
+			float f3;
+			ParticleAddon particleAddon = (ParticleAddon) particle;
+			switch (particleCullingMode) {
+				case AABB -> {
+					f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+					if (particleAddon.asyncparticles$shouldCull() &&
+						!FrustumUtil.isVisible(frustum, particleAddon.getRenderBoundingBox(f3))) {
+						continue;
+					}
+				}
+				case SPHERE -> {
+					if (particleAddon.asyncparticles$shouldCull() && !FrustumUtil.isVisible(frustum, particle)) {
+						continue;
+					}
+					f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+				}
+				case ASYNC_AABB, ASYNC_SPHERE -> {
+					if (particleAddon.asyncparticles$shouldCull() &&
+						!particleAddon.asyncparticles$isVisibleOnScreen()) {
+						continue;
+					}
+					f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+				}
+				default -> f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
+			}
+			if (particleAddon.asyncparticles$isRenderSync()) {
+				recordSync(particleRenderType, particle);
+				continue;
+			}
+			try {
+				particle.render(bufferBuilder, camera, f3);
+			} catch (Throwable t) {
+				RenderExceptionHandler.getInstance().onRenderOffMainThreadExceptionally(particleRenderType, particle, t);
+			}
+		}
+	}
+
+	public void endAll(float f, Camera camera, LightTexture lightTexture, boolean isAsync) {
+//		if (!SimplePropertiesConfig.isRenderAsync()) { // Tested outside.
+//			return;
+//		}
+//		if (isMixedParticleRendering()) { // Tested outside.
+//			return;
+//		}
+		Minecraft mc = Minecraft.getInstance();
+		mc.getProfiler().popPush("particles");
+
+
+		onTranslucent(mc);
+
+		ParticleEngine particleEngine = mc.particleEngine;
+
+		if (ModListHelper.FABRIC_IRIS_LOADED) {
+			((PhasedParticleEngine) particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.EVERYTHING);
+		}
+		renderAsync = isAsync;
+		particlePhase = true;
+		particleEngine.render(lightTexture, camera, f);
+		renderAsync = false;
+		particlePhase = false;
+
+		postTranslucent(mc);
+	}
+
+	public abstract void endOpaque(LightTexture lightTexture, Camera camera, float f, boolean isAsync);
+
+	public abstract void endTranslucent(LightTexture lightTexture, Camera camera, float f, boolean isAsync);
+
+	public boolean isRenderAsync() {
+		return renderAsync;
+	}
+
+	public boolean isParticlePhase() {
+		return particlePhase;
+	}
+
+	private void waitForAsyncTasks() {
+		if (asyncTask != null) {
+			asyncTask.join();
+			asyncTask = null;
+		}
+	}
+
+	public void tryWaitingForAsyncTasks() {
+//		if (ConfigHelper.isRenderAsync() && stage != Stage.RENDERABLE) {
+//			throw new IllegalStateException("Can only wait for async tasks around translucent");
+//		}
+		waitForAsyncTasks();
+	}
+
+	/* BufferBuilder */
+
+	private final Map<ParticleRenderType, BindingTesselator> BTESSELATORS = new ConcurrentHashMap<>();
+
+	private void resetBTesselators() {
+		BTESSELATORS.values().forEach(BindingTesselator::clear);
+	}
+
+	private void closeBTesselators() {
+		for (Iterator<BindingTesselator> iterator = BTESSELATORS.values().iterator(); iterator.hasNext(); ) {
+			iterator.next().close();
+			iterator.remove();
+		}
+	}
+
+	public BindingTesselator getBTesselator(ParticleRenderType particleRenderType, TextureManager textureManager) {
+		return BTESSELATORS.computeIfAbsent(particleRenderType, k -> computeBTesselator(k, textureManager));
+	}
+
+	private @NotNull BindingTesselator computeBTesselator(ParticleRenderType particleRenderType, TextureManager textureManager) {
+//		if (particleRenderType == ParticleRenderType.CUSTOM) { // special case
+//			return BindingTesselator.EMPTY;
+//		}
+
+		TryAndStoreFakeBufferBuilder fakeBufferBuilder = new TryAndStoreFakeBufferBuilder();
+
+		BufferBuilder builder = particleRenderType.begin(fakeBufferBuilder, textureManager);
+
+		RenderSystem.disableBlend();
+		RenderSystem.depthMask(true);
+		RenderSystem.enableDepthTest();
+		RenderSystem.enableCull();
+		RenderSystem.defaultBlendFunc();
+
+		if (builder == null) {
+			return BindingTesselator.EMPTY;
+		}
+
+		VertexFormat.Mode mode = fakeBufferBuilder.getMode();
+		VertexFormat format = fakeBufferBuilder.getFormat();
+		if (mode == null || format == null) {
+			return BindingTesselator.EMPTY;
+		}
+
+		return new BindingTesselator(256, mode, format, particleRenderType == ParticleRenderType.CUSTOM); // minimal size
+	}
+
+	/* Sync Rendering */
+
+	private final Map<ParticleRenderType, Set<Particle>> SYNC_PARTICLES = Collections.synchronizedMap(new IdentityHashMap<>());
+
+	public void markAsSync(Class<? extends Particle> aClass) {
+		synchronized (syncParticleTypes) {
+			syncParticleTypes.add(aClass);
+		}
+	}
+
+	public boolean shouldSync(Class<?> aClass) {
+		return syncParticleTypes.contains(aClass);
+	}
+
+	public void recordSync(ParticleRenderType particleRenderType, Particle particle) {
+		Set<Particle> particles = SYNC_PARTICLES.computeIfAbsent(particleRenderType,
+			k -> Collections.newSetFromMap(new IdentityHashMap<>()));
+		synchronized (particles) {
+			particles.add(particle);
+		}
+	}
+
+	public Set<Particle> getSync(ParticleRenderType particleRenderType) {
+		Set<Particle> set = SYNC_PARTICLES.get(particleRenderType);
+		return set == null ? Collections.emptySet() : set;
+	}
+
+	private void clearSync() {
+		SYNC_PARTICLES.clear();
+	}
+
+	/* Debug */
+
+	public void debugLater(Consumer<String> consumer) {
+		debugConsumer = consumer;
+	}
+
+	public void tryDebug() {
+		if (debugConsumer != null) {
+			debugConsumer.accept("""
+				[Debug AsyncRenderer]
+				async queue size: %d,
+				buffer capacity: %s,
+				render order: %s,
+				sync particle count: %d,
+				sync particle types: %s,
+				sync particle render types: %s,
+				particle mode: %s,
+				iris particle mode: %s
+				glCapabilities: TransformFeedback: %s,
+				                ExplicitAttribLocation: %s,
+				                DirectStateAccess: %s,
+				                ComputeShader: %s,
+				                Backend: %s""" // TODO
+				.formatted(asyncTasksSize,
+					BTESSELATORS.entrySet()
+						.stream()
+						.filter(e -> !e.getValue().shouldSync)
+						.collect(Collectors.toMap(
+							Map.Entry::getKey,
+							e -> e.getValue().buffer.capacity)),
+					ModListHelper.IS_FORGE
+						? Minecraft.getInstance().particleEngine.particles.keySet()
+						: ParticleEngine.RENDER_ORDER,
+					SYNC_PARTICLES.values().stream().mapToInt(Set::size).sum(),
+					syncParticleTypes.stream().map(Class::getName).toList(),
+					BTESSELATORS.entrySet().stream()
+						.filter(e -> e.getValue().shouldSync)
+						.map(Map.Entry::getKey).toList(),
+					switch (InternalRenderingMode.getMode()) {
+						case SYNC -> "SYNC";
+						case DELAYED_ASYNC -> "DELAYED_ASYNC";
+						case BEFORE_SYNC -> "BEFORE_SYNC";
+						case COMPATIBILITY_ASYNC -> "COMPATIBILITY_ASYNC";
+						case MIXED_SYNC -> "MIXED_SYNC";
+						case BEFORE_ASYNC -> "BEFORE_ASYNC";
+						case MIXED_ASYNC -> "MIXED_ASYNC";
+						default -> "UNKNOWN";
+					},
+					ModListHelper.IRIS_LIKE_LOADED ? Iris.getPipelineManager().getPipeline()
+													 .map(WorldRenderingPipeline::getParticleRenderingSettings)
+													 .map(ParticleRenderingSettings::name)
+													 .orElse("UNSET") : "DISABLED",
+					GLCaps.tfSupport.getClass().getSimpleName(),
+					GLCaps.supportsExplicitAttribLocation,
+					GLCaps.supportsDirectStateAccess,
+					GLCaps.csSupport.getClass().getSimpleName(),
+					GLCaps.GLonES ? "GL on GLES" : "GL"));
+			debugConsumer = null;
+		}
+	}
+
+	/* Destroy */
+
+	public void reset() {
+		renderAsync = false;
+		particlePhase = false;
+		try {
+			waitForAsyncTasks();
+		} catch (Exception e) {
+			LOGGER.warn("Error waiting for particle task while resetting async renderer", e);
+		}
+		closeBTesselators();
+		clearSync();
+		syncParticleTypes.clear();
+		syncParticleTypes.add(ItemPickupParticle.class);
+		syncParticleTypes.add(MobAppearanceParticle.class);
+		syncParticleTypes.addAll(ConfigHelper.getRenderSyncParticleClasses());
+	}
+
+	public void onTranslucent(Minecraft mc) {
+		if (mc.levelRenderer.transparencyChain != null) {
+			RenderTarget particlesTarget = mc.levelRenderer.getParticlesTarget();
+			particlesTarget.clear(Minecraft.ON_OSX);
+			particlesTarget.copyDepthFrom(mc.getMainRenderTarget());
+			RenderStateShard.PARTICLES_TARGET.setupRenderState();
+		}
+	}
+
+	public void postTranslucent(Minecraft mc) {
+		if (mc.levelRenderer.transparencyChain != null) {
+			RenderStateShard.PARTICLES_TARGET.clearRenderState();
+		}
+	}
+
+	public @NotNull Frustum getFrustum() {
+		return frustum;
+	}
+
+	public void setFrustum(@NotNull Frustum frustum) {
+		this.frustum = frustum;
+	}
+
+}

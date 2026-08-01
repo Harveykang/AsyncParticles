@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import com.mojang.logging.LogUtils;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.render.AsyncRenderBehavior;
 
 public class VertexHelper {
 	private static boolean warnedNegativeAlpha = false;

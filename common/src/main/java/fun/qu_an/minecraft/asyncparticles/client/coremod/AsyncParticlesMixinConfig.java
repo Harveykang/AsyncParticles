@@ -104,7 +104,6 @@ public class AsyncParticlesMixinConfig {
 
 	static class MixinConfigObj {
 		private int version = 0;
-		private boolean particle$splitTick = false;
 		private boolean safeClassInstanceMultiMap = (IRONS_SPELLBOOKS_LOADED && IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
 													MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED;
 		private boolean safeBlockEntityMap = false;
@@ -158,7 +157,6 @@ public class AsyncParticlesMixinConfig {
 
 		private void fold() {
 			assertNotGlobal();
-			particle$splitTick = toSaveConfig.particle$splitTick;
 			safeClassInstanceMultiMap = toSaveConfig.safeClassInstanceMultiMap;
 			safeBlockEntityMap = toSaveConfig.safeBlockEntityMap;
 			safeLegacyRandomSource = toSaveConfig.safeLegacyRandomSource;
@@ -177,7 +175,6 @@ public class AsyncParticlesMixinConfig {
 			} catch (NumberFormatException ignored) {
 			}
 			MixinConfigObj defaultConfig = new MixinConfigObj();
-			particle$splitTick = getBoolean(properties, "particle$splitTick", defaultConfig.particle$splitTick);
 			safeClassInstanceMultiMap = (IRONS_SPELLBOOKS_LOADED && IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
 										MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED ||
 										getBoolean(properties, "safeClassInstanceMultiMap", defaultConfig.safeClassInstanceMultiMap);
@@ -197,7 +194,6 @@ public class AsyncParticlesMixinConfig {
 
 		private void write(Properties properties) {
 			properties.setProperty("version", Integer.toString(version));
-			properties.setProperty("particle$splitTick", Boolean.toString(particle$splitTick));
 			properties.setProperty("safeClassInstanceMultiMap", Boolean.toString(safeClassInstanceMultiMap));
 			properties.setProperty("safeBlockEntityMap", Boolean.toString(safeBlockEntityMap));
 			properties.setProperty("safeLegacyRandomSource", Boolean.toString(safeLegacyRandomSource));
@@ -329,15 +325,6 @@ public class AsyncParticlesMixinConfig {
 		void setContraptionNoParticleCollision(Collection<String> contraptionNoParticleCollision) {
 			assertNotGlobal();
 			this.create$contraptionNoParticleCollision = new LinkedHashSet<>(contraptionNoParticleCollision);
-		}
-
-		public boolean isParticleSplitTick() {
-			return particle$splitTick;
-		}
-
-		void setParticleSplitTick(boolean splitTick) {
-			assertNotGlobal();
-			this.particle$splitTick = splitTick;
 		}
 	}
 }

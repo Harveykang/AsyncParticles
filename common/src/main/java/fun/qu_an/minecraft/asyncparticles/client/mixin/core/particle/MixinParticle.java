@@ -3,8 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.render.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -22,12 +21,7 @@ public abstract class MixinParticle implements ParticleAddon, GpuParticleAddon, 
 	private static final int RENDER_FLAG_ENABLE_CULL = 2;
 	@Unique
 	private static final int RENDER_FLAG_SHOULD_CULL = 4;
-	@Unique
-	private static final int TICK_FLAG_SYNC = 1;
-	@Unique
-	private static final int TICK_FLAG_ENABLE_LIGHT_CACHE = 2;
-	@Unique
-	private static final int TICK_GPU_LIGHT_GOT = 4;
+
 	@Shadow
 	public abstract void remove();
 
@@ -45,14 +39,11 @@ public abstract class MixinParticle implements ParticleAddon, GpuParticleAddon, 
 	@Unique
 	private byte asyncparticles$renderFlag = RENDER_FLAG_ENABLE_CULL;
 	@Unique
-	private byte asyncparticles$tickFlag;
+	private boolean asyncparticles$enableLightCache = false;
 
 	@Inject(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V", at = @At("RETURN"))
 	protected void onInit(CallbackInfo ci) {
 		Class<?> aClass = asyncparticles$getRealClass();
-		if (AsyncTickBehavior.getInstance().shouldSync(aClass)) {
-			asyncparticles$setTickSync();
-		}
 		if (AsyncRenderBehavior.getInstance().shouldSync(aClass)) {
 			asyncparticles$setRenderSync();
 		}
@@ -93,37 +84,12 @@ public abstract class MixinParticle implements ParticleAddon, GpuParticleAddon, 
 	}
 
 	@Override
-	public void asyncparticles$setGpuLightGot() {
-		asyncparticles$tickFlag |= TICK_GPU_LIGHT_GOT;
-	}
-
-	@Override
-	public boolean asyncparticles$isFirstGpuLightGet() {
-		return (asyncparticles$tickFlag & TICK_GPU_LIGHT_GOT) == 0;
-	}
-
-	@Override
-	public void asyncparticles$setTickSync() {
-		asyncparticles$tickFlag |= TICK_FLAG_SYNC;
-	}
-
-	@Override
-	public boolean asyncparticles$isTickSync() {
-		return (asyncparticles$tickFlag & TICK_FLAG_SYNC) != 0;
-	}
-
-	@Override
-	public void asyncparticles$enableLightCache() {
-		asyncparticles$tickFlag |= TICK_FLAG_ENABLE_LIGHT_CACHE;
-	}
-
-	@Override
-	public void asyncparticles$disableLightCache() {
-		asyncparticles$tickFlag &= ~TICK_FLAG_ENABLE_LIGHT_CACHE;
+	public void asyncparticles$enableLightCache(boolean b) {
+		asyncparticles$enableLightCache = b;
 	}
 
 	public boolean asyncparticles$isEnabledLightCache() {
-		return (asyncparticles$tickFlag & TICK_FLAG_ENABLE_LIGHT_CACHE) != 0;
+		return asyncparticles$enableLightCache;
 	}
 
 	public boolean asyncparticles$shouldCull() {

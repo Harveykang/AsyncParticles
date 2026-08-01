@@ -42,8 +42,4 @@ public class MixinConfigHelper {
 	public static Collection<String> getContraptionNoParticleCollision() {
 		return CONFIG.getContraptionNoParticleCollision().stream().filter(ModListHelper::classExists).toList();
 	}
-
-	public static boolean isParticleSplitTick() {
-		return CONFIG.isParticleSplitTick();
-	}
 }

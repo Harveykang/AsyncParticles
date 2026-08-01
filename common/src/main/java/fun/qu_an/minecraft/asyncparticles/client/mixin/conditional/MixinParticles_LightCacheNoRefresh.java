@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 
-import fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.MixinParticle_LightCache;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.light_cache.MixinParticle_LightCache;
 import net.minecraft.client.particle.*;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import org.spongepowered.asm.mixin.Mixin;

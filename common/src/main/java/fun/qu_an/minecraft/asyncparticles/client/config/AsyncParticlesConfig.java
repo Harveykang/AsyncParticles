@@ -6,7 +6,7 @@ import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -49,8 +49,8 @@ public class AsyncParticlesConfig {
 	public static boolean particle$parallelQueueEviction;
 	public static boolean particle$particleLightCache;
 	public static boolean particle$cullUnderwaterParticleType;
-	public static TickMode tick$animationTickMode;
-	public static TickMode tick$particleTickMode;
+	public static boolean tick$animationTickMode;
+	public static ParticleTickMode tick$particleTickMode;
 	public static boolean tick$gpuOnlyAsyncParticleTick;
 	public static boolean tick$tickWeatherAsync;
 	public static boolean tick$deferredTextureTick;
@@ -61,6 +61,7 @@ public class AsyncParticlesConfig {
 	public static RenderingMode rendering$particleRenderingMode;
 	public static boolean rendering$gpuAcceleration;
 	public static boolean rendering$appendNewParticlesToRenderer;
+	public static ComputeExecutionStage rendering$computeExecutionStage;
 	public static ParticleCullingMode rendering$particleCulling;
 	public static boolean rendering$cullWeathers;
 	public static int rendering$failPerSecLimit;
@@ -71,6 +72,7 @@ public class AsyncParticlesConfig {
 	public static boolean sable$fixParticleLights;
 	public static RainEffect create$rainEffect;
 	public static int create$tickRainBlockingRange;
+	public static boolean mobile$multiDrawWorkaround;
 
 	static {
 		LOGGER.debug("AsyncParticlesConfig initialized.");
@@ -225,6 +227,12 @@ public class AsyncParticlesConfig {
 		}
 	}
 
+	static ConfigObj getCurrentConfig() {
+		ConfigObj configObj = new ConfigObj();
+		configObj.fold();
+		return configObj;
+	}
+
 	static class ConfigObj {
 		int version = 0; // 0 means no version, will reset to default values.
 		Particle particle = new Particle();
@@ -234,7 +242,7 @@ public class AsyncParticlesConfig {
 		Sable sable = new Sable();
 		Create create = new Create();
 
-		private void flat() {
+		void flat() {
 			particle.flat();
 			tick.flat();
 			rendering.flat();
@@ -280,9 +288,8 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Tick {
-			TickMode animationTickMode = REIGNOFNETHER_LOADED || IMMERSIVE_PORTALS_LOADED
-				? TickMode.SYNCHRONOUSLY : TickMode.INTERRUPTIBLE;
-			TickMode particleTickMode = TickMode.INTERRUPTIBLE;
+			boolean animationTickMode = !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED;
+			ParticleTickMode particleTickMode = ParticleTickMode.SEQUENTIAL;
 			boolean gpuOnlyAsyncParticleTick = false;
 			boolean tickWeatherAsync = !PHYSICSMOD_LOADED;
 			boolean deferredTextureTick = !AXIOM_LOADED;
@@ -295,10 +302,8 @@ public class AsyncParticlesConfig {
 			}
 
 			private void flat() {
-				tick$animationTickMode = REIGNOFNETHER_LOADED || IMMERSIVE_PORTALS_LOADED
-					? TickMode.SYNCHRONOUSLY
-					: requireNonNullElse(animationTickMode, TickMode.INTERRUPTIBLE);
-				tick$particleTickMode = requireNonNullElse(particleTickMode, TickMode.INTERRUPTIBLE);
+				tick$animationTickMode = !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED && animationTickMode;
+				tick$particleTickMode = requireNonNullElse(particleTickMode, ParticleTickMode.SEQUENTIAL);
 				tick$gpuOnlyAsyncParticleTick = gpuOnlyAsyncParticleTick;
 				tick$tickWeatherAsync = tickWeatherAsync && !PHYSICSMOD_LOADED;
 				tick$deferredTextureTick = deferredTextureTick && !AXIOM_LOADED;
@@ -326,6 +331,7 @@ public class AsyncParticlesConfig {
 			RenderingMode particleRenderingMode = RenderingMode.SYNCHRONOUSLY;
 			boolean gpuAcceleration = GLCaps.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
+			ComputeExecutionStage computeExecutionStage = ComputeExecutionStage.LEVEL_RENDERING;
 			boolean cullWeathers = true;
 			int failPerSecLimit = 20;
 			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
@@ -349,6 +355,7 @@ public class AsyncParticlesConfig {
 				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
 				rendering$gpuAcceleration = gpuAcceleration && GLCaps.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
+				rendering$computeExecutionStage = requireNonNullElse(computeExecutionStage, ComputeExecutionStage.LEVEL_RENDERING);
 				rendering$cullWeathers = cullWeathers;
 				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
@@ -360,6 +367,7 @@ public class AsyncParticlesConfig {
 				particleRenderingMode = rendering$particleRenderingMode;
 				gpuAcceleration = rendering$gpuAcceleration;
 				appendNewParticlesToRenderer = rendering$appendNewParticlesToRenderer;
+				computeExecutionStage = rendering$computeExecutionStage;
 				cullWeathers = rendering$cullWeathers;
 				failPerSecLimit = rendering$failPerSecLimit;
 				failBehavior = rendering$failBehavior;

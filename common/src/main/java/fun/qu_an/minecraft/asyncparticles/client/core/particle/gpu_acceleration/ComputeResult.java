@@ -1,0 +1,69 @@
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
+
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.ParticleVertexBuffer;
+import net.minecraft.client.particle.ParticleRenderType;
+
+import java.util.Map;
+
+public record ComputeResult(ParticleVertexBuffer buffer, int totalCount, Map<ParticleRenderType, ParticleSlice> slices, int maxCount,
+                            ParticleVertexBuffer indirectBuffer, int layerCount, int indirectCommandStride) {
+	public static ComputeResult of(ParticleVertexBuffer buffer, int totalCount, Map<ParticleRenderType, ParticleSlice> slices) {
+		int maxCount = 0;
+		for (ParticleSlice slice : slices.values()) {
+			if (slice.count() > maxCount) {
+				maxCount = slice.count();
+			}
+		}
+		return new ComputeResult(buffer, totalCount, slices, maxCount, null, 0, 0);
+	}
+
+	public static ComputeResult ofIndirect(ParticleVertexBuffer buffer, int totalCount, Map<ParticleRenderType, ParticleSlice> slices,
+	                                       ParticleVertexBuffer indirectBuffer, int layerCount) {
+		return ofIndirect(buffer, totalCount, slices, indirectBuffer, layerCount, 20);
+	}
+
+	public static ComputeResult ofIndirect(ParticleVertexBuffer buffer, int totalCount, Map<ParticleRenderType, ParticleSlice> slices,
+	                                       ParticleVertexBuffer indirectBuffer, int layerCount, int indirectCommandStride) {
+		int maxCount = 0;
+		for (ParticleSlice slice : slices.values()) {
+			if (slice.count() > maxCount) {
+				maxCount = slice.count();
+			}
+		}
+		return new ComputeResult(buffer, totalCount, slices, maxCount, indirectBuffer, layerCount, indirectCommandStride);
+	}
+
+	public int totalVertexCount() {
+		return totalCount * 4;
+	}
+
+	public int totalIndexCount() {
+		return totalCount * 6;
+	}
+
+	public boolean isIndirect() {
+		return indirectBuffer != null;
+	}
+
+	public int maxIndexCount() {
+		return maxCount * 6;
+	}
+
+	public record ParticleSlice(ParticleRenderType layer, int baseCount, int count) {
+		public int vertexOffset() {
+			return baseCount * 4;
+		}
+
+		public int vertexCount() {
+			return count * 4;
+		}
+
+		public int indexCount() {
+			return count * 6;
+		}
+
+		public int indexOffset() {
+			return baseCount * 6;
+		}
+	}
+}

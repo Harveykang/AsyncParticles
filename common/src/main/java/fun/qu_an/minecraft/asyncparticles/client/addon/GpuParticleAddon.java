@@ -28,7 +28,7 @@ public interface GpuParticleAddon extends LightCachedParticleAddon {
 
 	float asyncparticles$getV1();
 
-	int asyncparticles$getLightCoords(float partialTickTime);
+	int asyncparticles$getGpuLightCoords(float partialTickTime);
 
 	double asyncparticles$getXo();
 

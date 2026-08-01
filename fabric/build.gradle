@@ -136,8 +136,8 @@ dependencies {
 //    modLocalRuntime "maven.modrinth:physicsmod:W6xWq9WM" // 3.0.23
 
     /* Subtle Effects */
-    localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"
-    modLocalRuntime "maven.modrinth:subtle-effects:1.14.3"
+//    localRuntime "net.peanuuutz.tomlkt:tomlkt:0.3.7"
+//    modLocalRuntime "maven.modrinth:subtle-effects:1.14.3"
 
     /* What Are They Up To */
 //    modCompileOnly "maven.modrinth:what-are-they-up-to:1.21.0-1.2.7"

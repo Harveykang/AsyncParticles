@@ -20,14 +20,4 @@ public class MixinParticleEngine {
 			ci.cancel();
 		}
 	}
-
-//	@Dynamic
-//	@Inject(method = {
-//		"tick"},
-//		at = @At("HEAD"), cancellable = true)
-//	private void onTick(CallbackInfo ci) {
-//		if (PortalRendering.isRendering()) {
-//			ci.cancel();
-//		}
-//	}
 }

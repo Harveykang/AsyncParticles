@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.Diagnostic;
+import fun.qu_an.minecraft.asyncparticles.client.core.Diagnostic;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.TrackedWriteMap;
 import net.minecraft.core.BlockPos;

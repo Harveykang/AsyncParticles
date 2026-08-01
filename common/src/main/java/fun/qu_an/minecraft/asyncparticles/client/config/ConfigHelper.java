@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.Diagnostic;
+import fun.qu_an.minecraft.asyncparticles.client.core.Diagnostic;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
@@ -14,17 +14,8 @@ public class ConfigHelper {
 		AsyncParticlesConfig.load();
 	}
 
-	public static boolean asyncAnimateTick() {
-		return tick$animationTickMode != TickMode.SYNCHRONOUSLY && !Diagnostic.isTemporaryDisableAnimationTick();
-	}
-
-	public static boolean forceDoneBlockAnimateTick() {
-		return tick$animationTickMode == TickMode.FORCE_COMPLETE && !Diagnostic.isTemporaryDisableAnimationTick();
-	}
-
-	public static boolean markSyncIfTickFailed() {
-//		TODO: return AsyncParticlesConfig.tick$failBehavior == FailBehavior.MARK_AS_SYNC;
-		return false;
+	public static boolean isAsyncAnimateTick() {
+		return tick$animationTickMode && !Diagnostic.isTemporaryDisableAnimationTick();
 	}
 
 	public static boolean particleLightCache() {
@@ -35,18 +26,16 @@ public class ConfigHelper {
 		return tick$suppressCME;
 	}
 
-	public static boolean isTickAsync() {
-		return tick$particleTickMode != TickMode.SYNCHRONOUSLY && !Diagnostic.isTemporaryDisableAsyncParticleTick();
+	public static boolean isAsyncParticleTick() {
+		return tick$particleTickMode != ParticleTickMode.DISABLE && !Diagnostic.isTemporaryDisableAsyncParticleTick();
+	}
+
+	public static boolean isSplitParticleTick() {
+		return tick$particleTickMode == ParticleTickMode.SPLIT;
 	}
 
 	public static boolean isGpuOnlyAsyncParticleTick() {
 		return tick$gpuOnlyAsyncParticleTick || Diagnostic.isTemporaryGpuOnlyAsyncParticleTick();
-	}
-
-	public static boolean forceDoneParticleTick() {
-		return tick$particleTickMode == TickMode.FORCE_COMPLETE
-//			&& !Diagnostic.isTemporaryDisableAsyncParticleTick() // unnecessary
-			;
 	}
 
 	public static boolean fixParticleLightOnVsShips() {
@@ -140,7 +129,7 @@ public class ConfigHelper {
 			.toList();
 	}
 
-	public static List<? extends Class<?>> getTickSyncParticleClasses() {
+	public static List<? extends Class<?>> getSyncParticleClassesTick() {
 		return tick$syncParticleClasses
 			.stream()
 			.map(className -> {
@@ -176,5 +165,13 @@ public class ConfigHelper {
 
 	public static ParticleCullingMode getGpuParticleCullingMode() {
 		return ParticleCullingMode.DISABLED;
+	}
+
+	public static boolean mobileCompatMultiDraw() {
+		return mobile$multiDrawWorkaround;
+	}
+
+	public static ComputeExecutionStage getComputeExecutionStage() {
+		return rendering$computeExecutionStage;
 	}
 }

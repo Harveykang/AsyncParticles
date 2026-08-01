@@ -5,27 +5,22 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
-import fun.qu_an.minecraft.asyncparticles.client.task.EndTickOperation;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import pigcart.particlerain.ParticleSpawner;
 
 @Mixin(ParticleSpawner.class)
 public class MixinParticleSpawner {
-	@Unique
-	private static final ResourceLocation asyncparticles$PARTICLE_RAIN$TICK =
-		ResourceLocation.fromNamespaceAndPath("particlerain", "tick");
-
 	@WrapMethod(method = "tick")
 	private static void wrapTick(ClientLevel level, Vec3 cameraPos, Operation<Void> original) {
-		EndTickOperation.schedule(asyncparticles$PARTICLE_RAIN$TICK, false, () -> original.call(level, cameraPos));
+		AsyncTickBehavior.getInstance().addTaskEnsureLevelRunning(() -> original.call(level, cameraPos), ExceptionUtil::toThrowDirectly);
 	}
 
 	@WrapWithCondition(method = "tickBlockFX", at = @At(value = "INVOKE",
