@@ -22,7 +22,7 @@ public class MixinMinecraft {
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V", shift = At.Shift.AFTER))
-	private void onPostTick(boolean advanceGameTime, CallbackInfo ci, @Local(ordinal = 0) int ticksToDo, @Local(ordinal = 1) int i) {
+	private void onPostTick(boolean advanceGameTime, CallbackInfo ci) {
 		AsyncTickBehavior.getInstance().postTick();
 	}
 
@@ -30,12 +30,6 @@ public class MixinMinecraft {
 		target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;"))
 	private void onSetLevel(CallbackInfo ci) {
 		AsyncTickBehavior.getInstance().reset();
-	}
-
-	@Inject(method = "setLevel", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
-		target = "Lnet/minecraft/client/Minecraft;updateLevelInEngines(Lnet/minecraft/client/multiplayer/ClientLevel;)V"))
-	private void afterSetLevel(CallbackInfo ci) {
-		GpuParticleBehavior.getInstance().initRendering();
 	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;tick()V"))

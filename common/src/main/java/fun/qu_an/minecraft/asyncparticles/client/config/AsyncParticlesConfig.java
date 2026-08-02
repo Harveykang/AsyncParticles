@@ -45,6 +45,7 @@ public class AsyncParticlesConfig {
 	static final Logger LOGGER = LogUtils.getLogger();
 	public static int particle$particleLimit;
 	public static boolean particle$removeIfMissedTick;
+	public static ParticleCleanupStrategy particle$cleanupStrategy;
 	public static boolean particle$parallelQueueRemoval;
 	public static boolean particle$parallelQueueEviction;
 	public static boolean particle$particleLightCache;
@@ -259,6 +260,7 @@ public class AsyncParticlesConfig {
 		static class Particle {
 			int particleLimit = DEFAULT_PARTICLE_LIMIT;
 			boolean removeIfMissedTick = false;
+			ParticleCleanupStrategy cleanupStrategy = ParticleCleanupStrategy.PARALLEL_WITH_TICK;
 			boolean parallelQueueRemoval = true;
 			boolean parallelQueueEviction = true;
 			boolean particleLightCache = true;
@@ -267,6 +269,7 @@ public class AsyncParticlesConfig {
 			private void flat() {
 				particle$particleLimit = Mth.clamp(particleLimit, MIN_PARTICLE_LIMIT, MAX_PARTICLE_LIMIT);
 				particle$removeIfMissedTick = removeIfMissedTick;
+				particle$cleanupStrategy = requireNonNullElse(cleanupStrategy, ParticleCleanupStrategy.PARALLEL_WITH_TICK);
 				particle$parallelQueueRemoval = parallelQueueRemoval;
 				particle$parallelQueueEviction = parallelQueueEviction;
 				particle$particleLightCache = particleLightCache;
@@ -276,6 +279,7 @@ public class AsyncParticlesConfig {
 			private void fold() {
 				particleLimit = particle$particleLimit;
 				removeIfMissedTick = particle$removeIfMissedTick;
+				cleanupStrategy = particle$cleanupStrategy;
 				parallelQueueRemoval = particle$parallelQueueRemoval;
 				parallelQueueEviction = particle$parallelQueueEviction;
 				particleLightCache = particle$particleLightCache;
