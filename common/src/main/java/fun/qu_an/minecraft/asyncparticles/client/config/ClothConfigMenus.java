@@ -58,6 +58,14 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> newConfig.particle.removeIfMissedTick = newValue)
 				.build())
 			.addEntry(entryBuilder
+				.startEnumSelector(Component.translatable("config.asyncparticles.particle.cleanupStrategy"),
+					ParticleCleanupStrategy.class, globalConfig.particle.cleanupStrategy)
+				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
+				.setDefaultValue(defaultConfig.particle.cleanupStrategy)
+				.setTooltip(Component.translatable("config.asyncparticles.particle.cleanupStrategy.tooltip"))
+				.setSaveConsumer(newValue -> newConfig.particle.cleanupStrategy = newValue)
+				.build())
+			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.parallelQueueRemoval"),
 					globalConfig.particle.parallelQueueRemoval)
 				.setDefaultValue(defaultConfig.particle.parallelQueueRemoval)

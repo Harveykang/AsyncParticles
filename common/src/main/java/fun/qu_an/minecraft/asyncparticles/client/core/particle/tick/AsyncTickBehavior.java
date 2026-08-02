@@ -5,6 +5,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.DevRuntimeDebug;
+import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCleanupStrategy;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
@@ -115,21 +116,28 @@ public class AsyncTickBehavior {
 		if (!levelRunning) {
 			return;
 		}
-		if (cleanupTaskHelper.isRunning()) {
-			throw new IllegalStateException("cleanup task is running!");
+		if (ConfigHelper.getParticleCleanupStrategy() == ParticleCleanupStrategy.PARALLEL_WITH_TICK) {
+			if (cleanupTaskHelper.isRunning()) {
+				cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
+			}
+			prepareCleanupTasks(cleanupTaskHelper);
+			cleanupTaskHelper.submitAll();
 		}
+	}
+
+	public void prepareCleanupTasks(TaskHelper taskHelper) {
+		Minecraft mc = Minecraft.getInstance();
 		Collection<ParticleGroup<?>> groups = mc.particleEngine.particles.values();
 		for (ParticleGroup<?> group : groups) {
 			if (!groups.isEmpty()) {
-				cleanupTaskHelper.addTask(((ParticleGroupAddition) group)::asyncparticles$removeDeadParticles);
+				taskHelper.addTask(((ParticleGroupAddition) group)::asyncparticles$removeDeadParticles);
 			}
 		}
-		Queue<TrackingEmitter> trackingEmitters = Minecraft.getInstance().particleEngine.trackingEmitters;
+		Queue<TrackingEmitter> trackingEmitters = mc.particleEngine.trackingEmitters;
 		if (!trackingEmitters.isEmpty()) {
-			cleanupTaskHelper.addTask(() -> doEmittersRemoveIf(trackingEmitters));
+			taskHelper.addTask(() -> doEmittersRemoveIf(trackingEmitters));
 		}
-		cleanupTaskHelper.groupTasks(true);
-		cleanupTaskHelper.submitAll();
+		taskHelper.groupTasks(true);
 	}
 
 	public void doEmittersRemoveIf(Queue<? extends TrackingEmitter> queue) {
@@ -159,14 +167,16 @@ public class AsyncTickBehavior {
 				.parallelRemoveIf(shouldRemove,
 					ConfigHelper.isParallelQueueEviction(),
 					AsyncTickBehavior.THREADS,
-					tickTaskHelper.executor());
+					EXECUTOR);
 		} else {
 			particles.removeIf(shouldRemove);
 		}
 	}
 
 	public void postTick() {
-		cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
+		if (cleanupTaskHelper.isRunning()) {
+			cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
+		}
 		Minecraft mc = Minecraft.getInstance();
 		ClientLevel level = mc.level;
 		LocalPlayer player = mc.player;
@@ -183,10 +193,31 @@ public class AsyncTickBehavior {
 		tryReload();
 		tryDebug();
 		tickTaskHelper.groupTasks(false);
+		ParticleCleanupStrategy cleanupStrategy = ConfigHelper.getParticleCleanupStrategy();
 		if (ConfigHelper.isAsyncTickParticle()) {
+			if (cleanupStrategy == ParticleCleanupStrategy.BLOCK_MAIN_THREAD) {
+				prepareCleanupTasks(cleanupTaskHelper);
+				cleanupTaskHelper.submitAll();
+				cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
+			} else if (cleanupStrategy == ParticleCleanupStrategy.MAIN_THREAD) {
+				Collection<ParticleGroup<?>> groups = mc.particleEngine.particles.values();
+				for (ParticleGroup<?> group : groups) {
+					if (!groups.isEmpty()) {
+						((ParticleGroupAddition) group).asyncparticles$removeDeadParticles();
+					}
+				}
+				Queue<TrackingEmitter> trackingEmitters = mc.particleEngine.trackingEmitters;
+				if (!trackingEmitters.isEmpty()) {
+					doEmittersRemoveIf(trackingEmitters);
+				}
+			}
 			particlePhase = true;
 			mc.particleEngine.tick();
 			particlePhase = false;
+		}
+		if (cleanupStrategy == ParticleCleanupStrategy.AFTER_ASYNC_TICK) {
+			tickTaskHelper.groupTasks(false);
+			prepareCleanupTasks(tickTaskHelper);
 		}
 		tickTaskHelper.submitAll(() -> {
 			timeUsageNano.setRelease(System.nanoTime());

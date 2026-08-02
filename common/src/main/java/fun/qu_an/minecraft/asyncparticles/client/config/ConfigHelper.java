@@ -97,4 +97,8 @@ public class ConfigHelper {
 	public static ComputeExecutionStage getComputeExecutionStage() {
 		return rendering$computeExecutionStage;
 	}
+
+	public static ParticleCleanupStrategy getParticleCleanupStrategy() {
+		return particle$cleanupStrategy;
+	}
 }

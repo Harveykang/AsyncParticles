@@ -32,7 +32,7 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 	@Final
 	protected Queue<Particle> particles;
 	@Unique
-	private boolean asyncparticles$shouldRemoveInParallel;
+	private volatile boolean asyncparticles$shouldRemoveAdditionally;
 
 	@Shadow
 	public abstract void tickParticle(Particle particle);
@@ -58,7 +58,7 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 
 	@Inject(method = "tickParticles", at = @At("HEAD"))
 	public void injectTickParticlesHead(CallbackInfo ci) {
-		this.asyncparticles$shouldRemoveInParallel = false;
+		this.asyncparticles$shouldRemoveAdditionally = false;
 	}
 
 	@Inject(method = "tickParticles", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/particle/ParticleGroup;tickParticle(Lnet/minecraft/client/particle/Particle;)V"))
@@ -69,7 +69,7 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 	@Override
 	public void asyncparticles$tickParticles(boolean isGpu) {
 		if (!isGpu) {
-			this.asyncparticles$shouldRemoveInParallel = true;
+			this.asyncparticles$shouldRemoveAdditionally = true;
 		}
 		if (isEmpty()) {
 			return;
@@ -125,7 +125,7 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 
 	@Override
 	public void asyncparticles$removeDeadParticles() {
-		if (asyncparticles$shouldRemoveInParallel) {
+		if (asyncparticles$shouldRemoveAdditionally) {
 			AsyncTickBehavior.getInstance().doParticlesRemoveIf(particles);
 		}
 		if (this instanceof GpuParticleGroup gpuParticleGroup) {
