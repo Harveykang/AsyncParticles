@@ -21,6 +21,8 @@ import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import oshi.SystemInfo;
+import oshi.hardware.CentralProcessor;
 
 import java.util.Collection;
 import java.util.Map;
@@ -37,7 +39,21 @@ import java.util.stream.Collectors;
 
 public class AsyncTickBehavior {
 	static final Logger LOGGER = LogManager.getLogger();
-	public static final int THREADS = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 6);
+	public static final int THREADS;
+
+	static {
+		CentralProcessor cpu = new SystemInfo().getHardware().getProcessor();
+		int logical = Math.min(Runtime.getRuntime().availableProcessors(), cpu.getLogicalProcessorCount());
+		int physical = Math.min(cpu.getPhysicalProcessorCount(), logical);
+		if (physical <= 2) {
+			THREADS = 1;
+		} else if (logical > physical) {
+			THREADS = Mth.clamp(logical - Math.max(logical / physical, 2), 2, 6);
+		} else {
+			THREADS = Mth.clamp(logical - 1, 2, 6);
+		}
+	}
+
 	public static final String THREAD_PREFIX = "AsyncParticleTickWorker";
 	private static final AsyncTickBehavior INSTANCE = new AsyncTickBehavior();
 
