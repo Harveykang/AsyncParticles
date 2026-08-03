@@ -12,16 +12,6 @@ public class AsyncParticlesMixinCanceller implements MixinCanceller {
 		if (mixinClassName.startsWith("net.caffeinemc.mods.lithium.mixin.collections.entity_by_type")) {
 			return MixinConfigHelper.isSafeClassInstanceMultiMap();
 		}
-		if (ParticleCoreEarlyCompat.shouldDisable(mixinClassName)) {
-			return true;
-		}
-		return switch (mixinClassName) {
-			case "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer",
-				 "net.irisshaders.iris.mixin.fabric.MixinLevelRenderer",
-				 // rain/snow culling
-				 "ca.fxco.moreculling.mixin.WeatherEffectRenderer_rainMixin"
-				-> true;
-			default -> false;
-		};
+		return ParticleCoreEarlyCompat.shouldDisable(mixinClassName);
 	}
 }
