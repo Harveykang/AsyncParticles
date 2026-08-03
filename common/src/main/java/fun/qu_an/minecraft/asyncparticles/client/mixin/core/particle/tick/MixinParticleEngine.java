@@ -2,6 +2,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -71,12 +72,12 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		}
 		if (!this.trackingEmitters.isEmpty()) {
 			for (TrackingEmitter trackingEmitter : this.trackingEmitters) {
-				trackingEmitter.tick(); // TODO can be async-lized safely?
+				trackingEmitter.tick();
 				// clear in AsyncTickBehavior
 			}
-		}
-		if (!tickAsync) {
-			tickBehavior.doEmittersRemoveIf(trackingEmitters);
+			if (!tickAsync) {
+				tickBehavior.doEmittersRemoveIf(trackingEmitters);
+			}
 		}
 
 		if (!particlesToAdd.isEmpty()) {
@@ -94,7 +95,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				});
 				if (((ParticleGroupAddition) group).asyncparticles$canTickAsync()
 //					&& ConfigHelper.isAsyncTickParticle() // tested in asyncparticles$canTickAsync()
-					&& AsyncTickBehavior.getInstance().shouldSync(particle.getClass())) {
+					&& tickBehavior.shouldSync(((ParticleAddon) particle).asyncparticles$getRealClass())) {
 					// add to sync queue only if async tick enabled, gpu only disabled, and particle class is sync
 					((AsyncTickableParticleGroup) group).asyncparticles$addSync(particle);
 				}

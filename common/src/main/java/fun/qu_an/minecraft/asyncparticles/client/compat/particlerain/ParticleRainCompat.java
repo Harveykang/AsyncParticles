@@ -4,4 +4,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ParticleRainCompat {
 	public static final AtomicInteger particleCount = new AtomicInteger();
+
+	public static void onParticleEngineClear() {
+		particleCount.set(0);
+	}
 }

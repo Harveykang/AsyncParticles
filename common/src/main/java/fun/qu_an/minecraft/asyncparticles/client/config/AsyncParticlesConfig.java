@@ -35,7 +35,7 @@ public class AsyncParticlesConfig {
 	public static final int MIN_PARTICLE_LIMIT = 1024;
 	public static final int DEFAULT_PARTICLE_LIMIT = 16384;
 	public static final int MAX_PARTICLE_LIMIT = 262144;
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 	public static final Path CONFIG_FILE = Path.of("config", AsyncParticlesClient.MOD_ID, AsyncParticlesClient.MOD_ID + ".json");
 	static final Gson GSON = new GsonBuilder()
 		.setLenient()
@@ -45,6 +45,7 @@ public class AsyncParticlesConfig {
 	static final Logger LOGGER = LogUtils.getLogger();
 	public static int particle$particleLimit;
 	public static boolean particle$removeIfMissedTick;
+	public static ParticleCleanupStrategy particle$cleanupStrategy;
 	public static boolean particle$parallelQueueRemoval;
 	public static boolean particle$parallelQueueEviction;
 	public static boolean particle$particleLightCache;
@@ -195,11 +196,16 @@ public class AsyncParticlesConfig {
 
 	@Contract
 	private static ConfigObj upgrade(int ver, ConfigObj configObj) {
-		if (VERSION != 1) {
+		if (VERSION != 2) {
 			throw new RuntimeException("I forgot to update the upgrade method.");
 		}
 		return switch (ver) {
-			case 1 -> configObj;
+			case 2 -> configObj;
+			case 1 -> {
+				configObj.particle.parallelQueueEviction = false;
+				configObj.particle.parallelQueueRemoval = false;
+				yield configObj;
+			}
 			default -> new ConfigObj();
 		};
 	}
@@ -259,14 +265,16 @@ public class AsyncParticlesConfig {
 		static class Particle {
 			int particleLimit = DEFAULT_PARTICLE_LIMIT;
 			boolean removeIfMissedTick = false;
-			boolean parallelQueueRemoval = true;
-			boolean parallelQueueEviction = true;
+			ParticleCleanupStrategy cleanupStrategy = ParticleCleanupStrategy.PARALLEL_WITH_TICK;
+			boolean parallelQueueRemoval = false;
+			boolean parallelQueueEviction = false;
 			boolean particleLightCache = true;
 			boolean cullUnderwaterParticleType = true;
 
 			private void flat() {
 				particle$particleLimit = Mth.clamp(particleLimit, MIN_PARTICLE_LIMIT, MAX_PARTICLE_LIMIT);
 				particle$removeIfMissedTick = removeIfMissedTick;
+				particle$cleanupStrategy = requireNonNullElse(cleanupStrategy, ParticleCleanupStrategy.PARALLEL_WITH_TICK);
 				particle$parallelQueueRemoval = parallelQueueRemoval;
 				particle$parallelQueueEviction = parallelQueueEviction;
 				particle$particleLightCache = particleLightCache;
@@ -276,6 +284,7 @@ public class AsyncParticlesConfig {
 			private void fold() {
 				particleLimit = particle$particleLimit;
 				removeIfMissedTick = particle$removeIfMissedTick;
+				cleanupStrategy = particle$cleanupStrategy;
 				parallelQueueRemoval = particle$parallelQueueRemoval;
 				parallelQueueEviction = particle$parallelQueueEviction;
 				particleLightCache = particle$particleLightCache;

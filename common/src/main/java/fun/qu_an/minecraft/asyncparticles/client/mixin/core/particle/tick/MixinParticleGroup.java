@@ -17,10 +17,8 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Iterator;
 import java.util.Queue;
 
 @Mixin(ParticleGroup.class)
@@ -30,7 +28,7 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 	@Final
 	protected Queue<? extends Particle> particles;
 	@Unique
-	private volatile boolean asyncparticles$shouldRemoveInParallel;
+	private volatile boolean asyncparticles$shouldRemoveAdditionally;
 
 	@Shadow
 	protected abstract void tickParticle(Particle particle);
@@ -52,7 +50,7 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 
 	@Inject(method = "tickParticles", at = @At("HEAD"))
 	public void injectTickParticlesHead(CallbackInfo ci) {
-		this.asyncparticles$shouldRemoveInParallel = false;
+		this.asyncparticles$shouldRemoveAdditionally = false;
 	}
 
 	@Inject(method = "tickParticles", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/particle/ParticleGroup;tickParticle(Lnet/minecraft/client/particle/Particle;)V"))
@@ -63,7 +61,7 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 	@Override
 	public void asyncparticles$tickParticles(boolean isGpu) {
 		if (!isGpu) {
-			this.asyncparticles$shouldRemoveInParallel = true;
+			this.asyncparticles$shouldRemoveAdditionally = true;
 		}
 		if (isEmpty()) {
 			return;
@@ -103,7 +101,7 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 
 	@Override
 	public void asyncparticles$removeDeadParticles() {
-		if (asyncparticles$shouldRemoveInParallel) {
+		if (asyncparticles$shouldRemoveAdditionally) {
 			AsyncTickBehavior.getInstance().doParticlesRemoveIf(particles);
 		}
 		if (this instanceof GpuParticleGroup gpuParticleGroup) {
@@ -113,9 +111,9 @@ public abstract class MixinParticleGroup implements ParticleGroupAddition {
 
 	@Override
 	public void asyncparticles$onClearParticles() {
-		particles.forEach(ParticleHelper::onEvict);
+		particles.forEach(ParticleHelper::onClearParticle);
 		if (this instanceof GpuParticleGroup gpuGroup) {
-			gpuGroup.asyncparticles$getGpuParticles().forEach(ParticleHelper::onEvict);
+			gpuGroup.asyncparticles$getGpuParticles().forEach(ParticleHelper::onClearParticle);
 		}
 	}
 }

@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
@@ -80,13 +81,14 @@ public class GpuParticleBehavior {
 		return particle instanceof SingleQuadParticle sqp && canRenderFast(sqp);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Unique
 	public boolean canRenderFast(SingleQuadParticle sqp) {
 		if (sqp.getFacingCameraMode() != SingleQuadParticle.FacingCameraMode.LOOKAT_XYZ) {
 			return false;
 		}
 		if (ThreadUtil.isOnMainThread()) {
-			return CAN_RENDER_FAST_CACHE.computeIfAbsent(sqp.getClass(), this::canRenderFast0);
+			return CAN_RENDER_FAST_CACHE.computeIfAbsent(((ParticleAddon) sqp).asyncparticles$getRealClass(), this::canRenderFast0);
 		}
 		return CAN_RENDER_FAST_CACHE_OFF_THREAD.computeIfAbsent(sqp.getClass(), k1 -> {
 			boolean b1 = canRenderFast0(k1);
