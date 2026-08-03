@@ -90,7 +90,6 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				ParticleGroup<?> group = this.particles.computeIfAbsent(particle.getGroup(), type -> {
 					ParticleGroup<?> particleGroup = createParticleGroup(type);
 					if (asyncAll && ((ParticleGroupAddition) particleGroup).asyncparticles$canTickAsync()) {
-						((AsyncTickableParticleGroup) particleGroup).asyncparticles$tickSyncParticles(false);
 						AsyncTickBehavior.getInstance().getTickTaskManager()
 							.addTask(() -> ((ParticleGroupAddition) particleGroup).asyncparticles$tickParticles(false));
 					}

@@ -35,7 +35,7 @@ public class AsyncParticlesConfig {
 	public static final int MIN_PARTICLE_LIMIT = 1024;
 	public static final int DEFAULT_PARTICLE_LIMIT = 16384;
 	public static final int MAX_PARTICLE_LIMIT = 262144;
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 	public static final Path CONFIG_FILE = Path.of("config", AsyncParticlesClient.MOD_ID, AsyncParticlesClient.MOD_ID + ".json");
 	static final Gson GSON = new GsonBuilder()
 		.setLenient()
@@ -196,11 +196,15 @@ public class AsyncParticlesConfig {
 
 	@Contract
 	private static ConfigObj upgrade(int ver, ConfigObj configObj) {
-		if (VERSION != 1) {
+		if (VERSION != 2) {
 			throw new RuntimeException("I forgot to update the upgrade method.");
 		}
 		return switch (ver) {
-			case 1 -> configObj;
+			case 2 -> configObj;
+			case 1 -> {
+				configObj.particle.parallelQueueRemoval = false;
+				yield configObj;
+			}
 			default -> new ConfigObj();
 		};
 	}
@@ -261,7 +265,7 @@ public class AsyncParticlesConfig {
 			int particleLimit = DEFAULT_PARTICLE_LIMIT;
 			boolean removeIfMissedTick = false;
 			ParticleCleanupStrategy cleanupStrategy = ParticleCleanupStrategy.PARALLEL_WITH_TICK;
-			boolean parallelQueueRemoval = true;
+			boolean parallelQueueRemoval = false;
 //			boolean parallelQueueEviction = true;
 			boolean particleLightCache = true;
 			boolean cullUnderwaterParticleType = true;
