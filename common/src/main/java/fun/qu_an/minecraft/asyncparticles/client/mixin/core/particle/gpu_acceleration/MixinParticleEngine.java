@@ -39,7 +39,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		GpuParticleBehavior.getInstance().flushBufferAndSwap();
 		int sum = 0;
 		AsyncTickBehavior tickBehavior = AsyncTickBehavior.getInstance();
-		boolean tickAsync = ConfigHelper.isAsyncTickParticle() && tickBehavior.isParticlePhase();
+		boolean tickAsync = ConfigHelper.isAsyncParticleTick() && tickBehavior.isParticlePhase();
 		TaskHelper taskHelper = tickBehavior.getTickTaskManager();
 		for (ParticleGroup<?> group : particles.values()) {
 			if (group instanceof GpuParticleGroup gpuGroup) {

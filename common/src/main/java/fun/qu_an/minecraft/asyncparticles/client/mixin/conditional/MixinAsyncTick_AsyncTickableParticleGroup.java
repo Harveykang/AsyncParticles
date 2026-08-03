@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 public abstract class MixinAsyncTick_AsyncTickableParticleGroup extends MixinParticleGroup implements AsyncTickableParticleGroup {
 	@SuppressWarnings("ConstantValue")
 	@Unique
-	private final boolean asyncparticles$canTickAsync = ConfigHelper.isAsyncTickParticle()
+	private final boolean asyncparticles$canTickAsync = ConfigHelper.isAsyncParticleTick()
 		&& AsyncTickParticleGroupBehavior.canTickAsync((ParticleGroup<?>) (Object) this);
 	@Unique
 	private ReferenceSet<Particle> asyncparticles$syncParticles;

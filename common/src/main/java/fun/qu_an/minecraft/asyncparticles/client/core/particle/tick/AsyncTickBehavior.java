@@ -92,7 +92,7 @@ public class AsyncTickBehavior {
 			return true;
 		}
 		ParticleAddon particleAddon = (ParticleAddon) particle;
-		if (ConfigHelper.isAsyncTickParticle() && particleAddon.asyncparticles$isTicked()) {
+		if (ConfigHelper.isAsyncParticleTick() && particleAddon.asyncparticles$isTicked()) {
 			particleAddon.asyncparticles$resetTicked();
 			return false;
 		}
@@ -108,7 +108,7 @@ public class AsyncTickBehavior {
 			tickTaskHelper.waitForCompletion(exceptionHandler::tickExceptionally);
 		}
 		this.isTailTick = isTailTick;
-		if (!ConfigHelper.isAsyncTickParticle()) {
+		if (!ConfigHelper.isAsyncParticleTick()) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -194,7 +194,7 @@ public class AsyncTickBehavior {
 		tryDebug();
 		tickTaskHelper.groupTasks(false);
 		ParticleCleanupStrategy cleanupStrategy = ConfigHelper.getParticleCleanupStrategy();
-		if (ConfigHelper.isAsyncTickParticle()) {
+		if (ConfigHelper.isAsyncParticleTick()) {
 			if (cleanupStrategy == ParticleCleanupStrategy.BLOCK_MAIN_THREAD) {
 				prepareCleanupTasks(cleanupTaskHelper);
 				cleanupTaskHelper.submitAll();
@@ -281,7 +281,7 @@ public class AsyncTickBehavior {
 			sync particle types: %s,
 			Backend: %s"""
 			.formatted(
-				ConfigHelper.isAsyncTickParticle() ? timeUsageNano.getAcquire() / 1000000d : Double.NaN,
+				ConfigHelper.isAsyncParticleTick() ? timeUsageNano.getAcquire() / 1000000d : Double.NaN,
 				tickTaskHelper.taskCount(),
 				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
