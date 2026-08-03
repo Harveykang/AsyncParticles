@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
@@ -22,7 +21,7 @@ public class MixinMinecraft {
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V", shift = At.Shift.AFTER))
-	private void onPostTick(boolean advanceGameTime, CallbackInfo ci, @Local(ordinal = 0) int ticksToDo, @Local(ordinal = 1) int i) {
+	private void onPostTick(boolean advanceGameTime, CallbackInfo ci) {
 		AsyncTickBehavior.getInstance().postTick();
 	}
 
@@ -32,15 +31,9 @@ public class MixinMinecraft {
 		AsyncTickBehavior.getInstance().reset();
 	}
 
-	@Inject(method = "setLevel", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
-		target = "Lnet/minecraft/client/Minecraft;updateLevelInEngines(Lnet/minecraft/client/multiplayer/ClientLevel;)V"))
-	private void afterSetLevel(CallbackInfo ci) {
-		GpuParticleBehavior.getInstance().initRendering();
-	}
-
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;tick()V"))
 	private void redirectParticleEngineTick(ParticleEngine instance) {
-		if (!ConfigHelper.isAsyncTickParticle()) {
+		if (!ConfigHelper.isAsyncParticleTick()) {
 			instance.tick();
 		}
 	}

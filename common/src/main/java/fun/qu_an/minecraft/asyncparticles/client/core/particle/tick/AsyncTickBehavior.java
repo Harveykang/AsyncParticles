@@ -3,7 +3,6 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.DevRuntimeDebug;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
@@ -91,7 +90,7 @@ public class AsyncTickBehavior {
 			return true;
 		}
 		ParticleAddon particleAddon = (ParticleAddon) particle;
-		if (ConfigHelper.isAsyncTickParticle() && particleAddon.asyncparticles$isTicked()) {
+		if (ConfigHelper.isAsyncParticleTick() && particleAddon.asyncparticles$isTicked()) {
 			particleAddon.asyncparticles$resetTicked();
 			return false;
 		}
@@ -107,7 +106,7 @@ public class AsyncTickBehavior {
 			tickTaskHelper.waitForCompletion(exceptionHandler::tickExceptionally);
 		}
 		this.isTailTick = isTailTick;
-		if (!ConfigHelper.isAsyncTickParticle()) {
+		if (!ConfigHelper.isAsyncParticleTick()) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
@@ -165,7 +164,7 @@ public class AsyncTickBehavior {
 		LocalPlayer player = mc.player;
 		Entity cameraEntity = mc.getCameraEntity();
 		boolean levelRunning = level != null && player != null && cameraEntity != null && !mc.isPaused();
-		if (!ConfigHelper.isAsyncTickParticle()) {
+		if (!ConfigHelper.isAsyncParticleTick()) {
 			tryReload();
 			tryDebug();
 			if (levelRunning) {
@@ -249,7 +248,7 @@ public class AsyncTickBehavior {
 			sync particle types: %s,
 			Backend: %s"""
 			.formatted(
-				ConfigHelper.isAsyncTickParticle() ? timeUsageNano.getAcquire() / 1000000d : Double.NaN,
+				ConfigHelper.isAsyncParticleTick() ? timeUsageNano.getAcquire() / 1000000d : Double.NaN,
 				tickTaskHelper.taskCount(),
 				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()
@@ -291,15 +290,8 @@ public class AsyncTickBehavior {
 		return cleanupTaskHelper;
 	}
 
-	private boolean isParticlePhase() {
+	public boolean isParticlePhase() {
 		return particlePhase;
-	}
-
-	public boolean shouldTickParticleEngine() {
-		if (isParticlePhase() || !ConfigHelper.isAsyncTickParticle()) {
-			return true;
-		}
-		throw new IllegalStateException("ParticleEngine.tick() called outside the particle phase unexpectedly.");
 	}
 
 	public void dumpParticles() {

@@ -2,7 +2,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGroup;
-import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -41,15 +40,13 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	 */
 	@Overwrite
 	public void tick() {
-		if (!AsyncTickBehavior.getInstance().shouldTickParticleEngine()) {
-			return;
-		}
-
 		// Keep local var table as they were
 		Particle particle;
-		boolean tickAsync = ConfigHelper.isAsyncTickParticle();
-		if (tickAsync && !ConfigHelper.isGpuOnlyAsyncParticleTick()) {
-			TaskHelper taskHelper = AsyncTickBehavior.getInstance().getTickTaskManager();
+		AsyncTickBehavior tickBehavior = AsyncTickBehavior.getInstance();
+		boolean tickAsync = ConfigHelper.isAsyncParticleTick() && tickBehavior.isParticlePhase();
+		boolean asyncAll = tickAsync && !ConfigHelper.isGpuOnlyAsyncParticleTick();
+		if (asyncAll) {
+			TaskHelper taskHelper = tickBehavior.getTickTaskManager();
 			asyncparticles$forEach(this.particles, (renderType, group) -> {
 				if (group.isEmpty()) {
 					return;
@@ -79,7 +76,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			}
 		}
 		if (!tickAsync) {
-			AsyncTickBehavior.getInstance().doEmittersRemoveIf(trackingEmitters);
+			tickBehavior.doEmittersRemoveIf(trackingEmitters);
 		}
 
 		if (!particlesToAdd.isEmpty()) {
@@ -87,8 +84,14 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			//noinspection ForLoopReplaceableByForEach
 			for (Iterator<Particle> iterator = particlesToAdd.iterator(); iterator.hasNext(); ) {
 				particle = iterator.next();
-				ParticleRenderType renderType = particle.getGroup();
-				ParticleGroup<?> group = this.particles.computeIfAbsent(renderType, this::createParticleGroup);
+				ParticleGroup<?> group = this.particles.computeIfAbsent(particle.getGroup(), type -> {
+					ParticleGroup<?> particleGroup = createParticleGroup(type);
+					if (asyncAll && ((ParticleGroupAddition) particleGroup).asyncparticles$canTickAsync()) {
+						AsyncTickBehavior.getInstance().getTickTaskManager()
+							.addTask(() -> ((ParticleGroupAddition) particleGroup).asyncparticles$tickParticles(false));
+					}
+					return particleGroup;
+				});
 				if (((ParticleGroupAddition) group).asyncparticles$canTickAsync()
 //					&& ConfigHelper.isAsyncTickParticle() // tested in asyncparticles$canTickAsync()
 					&& AsyncTickBehavior.getInstance().shouldSync(particle.getClass())) {

@@ -14,4 +14,10 @@ public class MixinMinecraft {
 	private void close(CallbackInfo ci) {
 		GpuParticleBehavior.getInstance().close();
 	}
+
+	@Inject(method = "setLevel", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
+		target = "Lnet/minecraft/client/Minecraft;updateLevelInEngines(Lnet/minecraft/client/multiplayer/ClientLevel;)V"))
+	private void afterSetLevel(CallbackInfo ci) {
+		GpuParticleBehavior.getInstance().initRendering();
+	}
 }

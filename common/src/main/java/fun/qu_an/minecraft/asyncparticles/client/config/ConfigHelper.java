@@ -24,7 +24,7 @@ public class ConfigHelper {
 		return tick$suppressCME;
 	}
 
-	public static boolean isAsyncTickParticle() {
+	public static boolean isAsyncParticleTick() {
 		return tick$particleAsyncMode != ParticleAsyncMode.DISABLE && !Diagnostic.isTemporaryDisableAsyncParticleTick();
 	}
 

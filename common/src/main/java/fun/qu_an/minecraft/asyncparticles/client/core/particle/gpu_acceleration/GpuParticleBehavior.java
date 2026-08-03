@@ -29,7 +29,6 @@ public class GpuParticleBehavior {
 	public static final String RENDER_ROTATED_QUAD_METHOD_1 = Mappings.getRenderRotatedQuadMethod1();
 	public static final String RENDER_ROTATED_QUAD_METHOD_2 = Mappings.getRenderRotatedQuadMethod2();
 	private static final GpuParticleBehavior INSTANCE = new GpuParticleBehavior();
-	private static final ParticleRenderType GPU_SINGLE_QUADS = new ParticleRenderType("gpu_single_quads");
 	public IParticleRenderer renderer;
 	/**
 	 * Code adapted from <a href="https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16/src/main/java/me/jellysquid/mods/sodium/mixin/features/render/particle/ParticleManagerMixin.java#L51">wahfl2/sodium-fabric</a>
@@ -38,8 +37,7 @@ public class GpuParticleBehavior {
 	 */
 	private final List<Class<? extends Particle>> GPU_PARTICLE_CLASSES;
 	private float partialTick;
-//	private Frustum frustum = new Frustum(new Matrix4f(), new Matrix4f());
-	private final Map<ParticleRenderType, ParticleRenderType> renderTypes = new Object2ObjectArrayMap<>();
+//	private Frustum frustum = new Frustum(new Matrix4f(), new Matrix4f())
 	private int limitMultiplier = 1;
 
 	{
@@ -58,9 +56,6 @@ public class GpuParticleBehavior {
 		new ConcurrentHashMap<>();
 	private Vec3 perTickCameraPos = Vec3.ZERO;
 	private int particleLimit = AsyncParticlesConfig.MIN_PARTICLE_LIMIT;
-
-	public static void init() {
-	}
 
 	public static GpuParticleBehavior getInstance() {
 		return INSTANCE;
@@ -188,13 +183,6 @@ public class GpuParticleBehavior {
 		if (renderer != null) {
 			renderer.beginFrame(deltaPartialTick);
 		}
-	}
-
-	public ParticleRenderType ofRenderType(ParticleRenderType renderType) {
-		if (renderType == ParticleRenderType.SINGLE_QUADS) {
-			return GPU_SINGLE_QUADS;
-		}
-		return renderTypes.computeIfAbsent(renderType, ignored -> new ParticleRenderType("gpu_" + renderType.name()));
 	}
 
 	public IParticleRenderer createRenderer() {

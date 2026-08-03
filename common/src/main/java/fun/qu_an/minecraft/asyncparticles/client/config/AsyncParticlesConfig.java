@@ -290,7 +290,6 @@ public class AsyncParticlesConfig {
 			boolean tickWeatherAsync = !ModListHelper.PHYSICSMOD_LOADED;
 			boolean deferredTextureTick = !ModListHelper.AXIOM_LOADED;
 			int failPerSecLimit = 5;
-			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
 			boolean suppressCME = false;
 			Set<String> syncParticleClasses = new LinkedHashSet<>();
 			{
