@@ -124,20 +124,19 @@ public class AsyncTickBehavior {
 			tickTaskHelper.waitForCompletion(exceptionHandler::tickExceptionally);
 		}
 		this.isTailTick = isTailTick;
-		if (!ConfigHelper.isAsyncParticleTick()) {
-			return;
-		}
-		Minecraft mc = Minecraft.getInstance();
-		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
-		if (!levelRunning) {
-			return;
-		}
-		if (ConfigHelper.getParticleCleanupStrategy() == ParticleCleanupStrategy.PARALLEL_WITH_TICK) {
-			if (cleanupTaskHelper.isRunning()) {
-				cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
+		if (ConfigHelper.isAsyncParticleTick()) {
+			Minecraft mc = Minecraft.getInstance();
+			boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
+			if (!levelRunning) {
+				return;
 			}
-			prepareCleanupTasks(cleanupTaskHelper);
-			cleanupTaskHelper.submitAll();
+			if (ConfigHelper.getParticleCleanupStrategy() == ParticleCleanupStrategy.PARALLEL_WITH_TICK) {
+				if (cleanupTaskHelper.isRunning()) {
+					cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
+				}
+				prepareCleanupTasks(cleanupTaskHelper);
+				cleanupTaskHelper.submitAll();
+			}
 		}
 	}
 
@@ -224,10 +223,10 @@ public class AsyncTickBehavior {
 			particlePhase = true;
 			mc.particleEngine.tick();
 			particlePhase = false;
-		}
-		if (cleanupStrategy == ParticleCleanupStrategy.AFTER_ASYNC_TICK) {
-			tickTaskHelper.groupTasks(false);
-			prepareCleanupTasks(tickTaskHelper);
+			if (cleanupStrategy == ParticleCleanupStrategy.AFTER_ASYNC_TICK) {
+				tickTaskHelper.groupTasks(false);
+				prepareCleanupTasks(tickTaskHelper);
+			}
 		}
 		tickTaskHelper.submitAll(() -> {
 			timeUsageNano.setRelease(System.nanoTime());
