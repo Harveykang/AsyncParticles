@@ -41,7 +41,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		// Keep local var table as they were
 		Particle particle;
 		AsyncTickBehavior tickBehavior = AsyncTickBehavior.getInstance();
-		boolean tickAsync = ConfigHelper.isAsyncTickParticle() && tickBehavior.isParticlePhase();
+		boolean tickAsync = ConfigHelper.isAsyncParticleTick() && tickBehavior.isParticlePhase();
 		boolean asyncAll = tickAsync && !ConfigHelper.isGpuOnlyAsyncParticleTick();
 		if (asyncAll) {
 			TaskHelper taskHelper = tickBehavior.getTickTaskManager();
