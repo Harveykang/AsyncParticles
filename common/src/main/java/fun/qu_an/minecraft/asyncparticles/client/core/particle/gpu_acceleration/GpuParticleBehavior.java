@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
@@ -83,7 +84,7 @@ public class GpuParticleBehavior {
 			return false;
 		}
 		if (ThreadUtil.isOnRenderThread()) {
-			return CAN_RENDER_FAST_CACHE.computeIfAbsent(tsp.getClass(), this::canRenderFast0);
+			return CAN_RENDER_FAST_CACHE.computeIfAbsent(((ParticleAddon) tsp).asyncparticles$getRealClass(), this::canRenderFast0);
 		}
 		return CAN_RENDER_FAST_CACHE_OFF_THREAD.computeIfAbsent(tsp.getClass(), k1 -> {
 			boolean b1 = canRenderFast0(k1);

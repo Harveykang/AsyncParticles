@@ -1,27 +1,17 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
-import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals.ImmersivePortalsCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particle_core.ParticleCoreCompat;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.ParticleVertexBuffer;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TextureSheetParticle;
-import net.minecraft.client.particle.TextureSheetParticle;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.opengl.GL11C;
 
 import java.io.Closeable;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 
 public interface IParticleRenderer extends Closeable {
 	static boolean shouldRenderParticle(GpuParticleAddon gpuParticle, Vec3 camPos) {

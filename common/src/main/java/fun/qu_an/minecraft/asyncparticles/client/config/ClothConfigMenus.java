@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backend;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.ClothConfigMixinMenus;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
@@ -59,6 +59,14 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> newConfig.particle.removeIfMissedTick = newValue)
 				.build())
 			.addEntry(entryBuilder
+				.startEnumSelector(Component.translatable("config.asyncparticles.particle.cleanupStrategy"),
+					ParticleCleanupStrategy.class, globalConfig.particle.cleanupStrategy)
+				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
+				.setDefaultValue(defaultConfig.particle.cleanupStrategy)
+				.setTooltip(Component.translatable("config.asyncparticles.particle.cleanupStrategy.tooltip"))
+				.setSaveConsumer(newValue -> newConfig.particle.cleanupStrategy = newValue)
+				.build())
+			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.parallelQueueRemoval"),
 					globalConfig.particle.parallelQueueRemoval)
 				.setDefaultValue(defaultConfig.particle.parallelQueueRemoval)
@@ -112,12 +120,12 @@ class ClothConfigMenus {
 				.setRequirement(() -> !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED)
 				.build())
 			.addEntry(entryBuilder
-				.startEnumSelector(Component.translatable("config.asyncparticles.tick.particleTickMode"),
-					ParticleTickMode.class, globalConfig.tick.particleTickMode)
+				.startEnumSelector(Component.translatable("config.asyncparticles.tick.particleAsyncMode"),
+					ParticleAsyncMode.class, globalConfig.tick.particleAsyncMode)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
-				.setDefaultValue(defaultConfig.tick.particleTickMode)
-				.setTooltip(Component.translatable("config.asyncparticles.tick.particleTickMode.tooltip"))
-				.setSaveConsumer(newValue -> newConfig.tick.particleTickMode = newValue)
+				.setDefaultValue(defaultConfig.tick.particleAsyncMode)
+				.setTooltip(Component.translatable("config.asyncparticles.tick.particleAsyncMode.tooltip"))
+				.setSaveConsumer(newValue -> newConfig.tick.particleAsyncMode = newValue)
 				.build())
 			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.gpuOnlyAsyncParticleTick"),
@@ -208,9 +216,8 @@ class ClothConfigMenus {
 					globalConfig.rendering.gpuAcceleration)
 				.setDefaultValue(defaultConfig.rendering.gpuAcceleration)
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.gpuAcceleration.tooltip"))
-				// todo add gpu acceleration requirement
 				.setSaveConsumer(newValue -> newConfig.rendering.gpuAcceleration = newValue)
-				.setRequirement(GLCaps::supportsGpuAcceleration)
+				.setRequirement(Backends::supportsGpuAcceleration)
 				.build())
 			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.appendNewParticlesToRenderer"),
@@ -271,8 +278,6 @@ class ClothConfigMenus {
 				.build());
 		// endregion
 		// region Compat Category
-		ConfigEntryBuilder mixinEntryBuilder = builder.entryBuilder();
-		mixinEntryBuilder.setResetButtonKey(Component.translatable("gui.asyncparticles.revert"));
 
 		@SuppressWarnings("rawtypes")
 		List<AbstractConfigListEntry> vsEntries = new ArrayList<>();
@@ -327,6 +332,8 @@ class ClothConfigMenus {
 		// endregion
 
 		// region Mixin
+		ConfigEntryBuilder mixinEntryBuilder = builder.entryBuilder();
+		mixinEntryBuilder.setResetButtonKey(Component.translatable("gui.asyncparticles.revert"));
 		ClothConfigMixinMenus.addModCompatCategory(entryBuilder, mixinEntryBuilder, vsEntries, sableEntries, createEntries);
 
 		ConfigCategory modCompatCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mod-compat"));
@@ -349,6 +356,18 @@ class ClothConfigMenus {
 
 		ConfigCategory mixinCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mixin"));
 		Runnable mixinSaveRunnable = ClothConfigMixinMenus.buildCategory(mixinCategory, entryBuilder, mixinEntryBuilder);
+		// endregion
+
+		// region Mobile
+		if (Backends.backend == Backend.OPENGL_ES) {
+			builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mobile"))
+				.addEntry(entryBuilder
+					.startBooleanToggle(Component.translatable("config.asyncparticles.mobile.multiDrawWorkaround"), globalConfig.mobile.multiDrawWorkaround)
+					.setTooltip(Component.translatable("config.asyncparticles.mobile.multiDrawWorkaround.tooltip"))
+					.setDefaultValue(defaultConfig.mobile.multiDrawWorkaround)
+					.setSaveConsumer(newValue -> newConfig.mobile.multiDrawWorkaround = newValue)
+					.build());
+		}
 		// endregion
 
 		// region Dev

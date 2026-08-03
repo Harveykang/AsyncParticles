@@ -1,7 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster;
 
-import com.bawnorton.mixinsquared.adjuster.tools.AdjustableAnnotationNode;
-import com.bawnorton.mixinsquared.adjuster.tools.type.RemappableAnnotationNode;
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.reflection.FieldReference;
 import org.objectweb.asm.ClassWriter;
@@ -83,6 +81,10 @@ public class MixinClassAdjusterApplication {
 		return generatedMixinPrefix + mixinClassName.replace("/", "$_").replace(".", "$_");
 	}
 
+	public String getOriginalMixin(String generatedName) {
+		return generatedToOriginalMixins.get(generatedName);
+	}
+
 	public boolean shouldApplyMixin(String targetClassName, String generatedMixinClassName) {
 		String mixinClassName = generatedToOriginalMixins.get(generatedMixinClassName);
 		if (mixinClassName == null) {
@@ -97,7 +99,7 @@ public class MixinClassAdjusterApplication {
 		// FIXME: this is unsafe
 		List<IMixinConfig> pendingConfigs = MixinTransformerExtension.tryAs(activeTransformer)
 			.map(MixinTransformerExtension::getPendingConfigs)
-			.orElseThrow(() -> new UnsupportedOperationException("Unsupported mixin transformer: " + activeTransformer.getClass()));
+			.orElseThrow(() -> new MixinError("Unsupported mixin transformer: " + activeTransformer.getClass()));
 		// Find our mixin config
 		IMixinConfig mixinConfig = null;
 		String pluginClass = mixinSquaredPlugin.getClass().getName();

@@ -120,10 +120,4 @@ public abstract class MixinParticle implements ParticleAddon, GpuParticleAddon, 
 			asyncparticles$renderFlag &= ~RENDER_FLAG_SHOULD_CULL;
 		}
 	}
-
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	@Override
-	public Class<? extends Particle> asyncparticles$getRealClass() {
-		return (Class) this.getClass();
-	}
 }

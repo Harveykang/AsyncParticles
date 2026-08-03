@@ -7,7 +7,6 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
-import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.render.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
@@ -135,7 +134,7 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 						.executes(context -> {
 							FabricClientCommandSource source = context.getSource();
 							try {
-								ConfigHelper.load();
+								AsyncParticlesConfig.load();
 							} catch (Exception e) {
 								source.sendFeedback(Component.literal("Failed to reload config"));
 								return 1;

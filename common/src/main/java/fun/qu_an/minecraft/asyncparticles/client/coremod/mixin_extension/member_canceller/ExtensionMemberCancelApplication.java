@@ -64,7 +64,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 			List<String> l = mixin.getTargetClasses();
 			List<String> targetClassNames = new ArrayList<>(l.size());
 			for (String s : l) {
-				String string = s.replaceAll("/", ".");
+				String string = s.replace("/", ".");
 				targetClassNames.add(string);
 			}
 
@@ -116,7 +116,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 						continue;
 					}
 					List<String> methodValue = opt.get();
-					// Copy to ensure the type is ArrayList (not Arrays$ArrayList).
+					// Copy to ensure the indexType is ArrayList (not Arrays$ArrayList).
 					targetMethodDescs = new ArrayList<>(methodValue);
 					break VisibleAnnotations;
 				}

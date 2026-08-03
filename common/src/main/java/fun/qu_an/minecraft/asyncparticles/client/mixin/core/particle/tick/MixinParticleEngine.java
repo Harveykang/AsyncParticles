@@ -96,9 +96,9 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				trackingEmitter.tick(); // TODO can be async-lized safely?
 				// clear in AsyncTickBehavior
 			}
-		}
-		if (!tickAsync) {
-			tickBehavior.doEmittersRemoveIf(trackingEmitters);
+			if (!tickAsync) {
+				tickBehavior.doEmittersRemoveIf(trackingEmitters);
+			}
 		}
 
 		if (!particlesToAdd.isEmpty()) {
@@ -109,8 +109,8 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				this.particles.computeIfAbsent(particle.getRenderType(), renderType -> {
 					Queue<Particle> queue1 = ParticleHelper.newParticleQueue();
 					if (asyncAll && !tickBehavior.shouldSyncRenderType(renderType.getClass())) {
-						AsyncTickBehavior.getInstance().getTickTaskManager().addTask(
-							() -> ParticleHelper.tickParticles(() -> tickParticleList(queue1), false));
+						AsyncTickBehavior.getInstance().getTickTaskManager()
+							.addTask(() -> ParticleHelper.tickParticles(() -> tickParticleList(queue1), false));
 					}
 					return queue1;
 				}).add(particle);
@@ -131,7 +131,6 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	 * @author
 	 * @reason
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Overwrite
 	private void tickParticleList(Collection<Particle> collection) {
 		if (collection.isEmpty()) {
@@ -153,18 +152,20 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			}
 			ParticleAddon particleAddon = (ParticleAddon) particle;
 			boolean isSyncParticle;
+			// Skip the first tick after the particle is added to the queue.
+			// GPU particles don't skip the first tick, but skip the first refresh.
+			// skip the first refresh will fix black destruction gpu particles.
+			boolean shouldTick;
 			if (!isAsync) {
 				isSyncParticle = false;
+				shouldTick = true;
 			} else {
 				if (syncParticles == null) {
 					syncParticles = isGpu ? tickBehavior.getSyncGpuParticles(particle.getRenderType()) : tickBehavior.getSyncParticles(particle.getRenderType());
 				}
 				isSyncParticle = syncParticles.contains(particle);
+				shouldTick = !isSyncParticle && (!particleAddon.asyncparticles$isTicked() || isGpu);
 			}
-			// Skip the first tick after the particle is added to the queue.
-			// GPU particles don't skip the first tick, but skip the first refresh.
-			// skip the first refresh will fix black destruction gpu particles.
-			boolean shouldTick = !isSyncParticle && (!particleAddon.asyncparticles$isTicked() || isGpu);
 			if (shouldTick) {
 				try {
 					tickParticle(particle);

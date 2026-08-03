@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.core;
 
-import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.ChatFormatting;
@@ -44,7 +43,9 @@ public class Diagnostic {
 	@Unique
 	public static void illegalBlockEntityStorageAccess() {
 		if (ThreadUtil.isOnParticleThread() && !illegalBlockEntityStorageAccess) {
-			LogUtils.getLogger().warn("[AsyncParticles] Block entity storage accessed off the main thread!\nConsider enabling 'safeBlockEntityMap'.", new IllegalStateException(""));
+			LOGGER.error("""
+				[AsyncParticles] Block entity storage accessed off the main thread!
+				Consider enabling 'safeBlockEntityMap'.""", new IllegalStateException(""));
 			sendChat(() -> Component.literal("[AsyncParticles] ").append(
 				Component.translatable("chat.asyncparticles.warn.get_block_entity_off_main_thread",
 					Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap"))));
@@ -110,7 +111,7 @@ public class Diagnostic {
 			sendChat(() -> Component.literal("[AsyncParticles] ").append(
 				Component.translatable("chat.asyncparticles.warn.error_during_async_gpu_particle_tick",
 					e.toString(),
-					Component.translatable("config.asyncparticles.tick.particleTickMode"),
+					Component.translatable("config.asyncparticles.tick.particleAsyncMode"),
 					Component.literal("GitHub Issue")
 						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncParticlesClient.ISSUE_URL)))
 						.withStyle(ChatFormatting.UNDERLINE))));
@@ -128,8 +129,7 @@ public class Diagnostic {
 				[AsyncParticles] Error during animateTick.
 				This is likely caused by an incompatible injection into the animateTick method.
 					Temporarily disabled 'Async Animation Tick' internally. You may also want to turn it on manually,\
-					 otherwise this error will recur after restarting the game.
-				You may need to turn off 'Async Animation Tick'""", e);
+					 otherwise this error will recur after restarting the game.""", e);
 			sendChat(() -> Component.literal("[AsyncParticles] ").append(
 				Component.translatable("chat.asyncparticles.warn.error_during_async_incompatible_injection",
 					e.toString(),
@@ -150,8 +150,7 @@ public class Diagnostic {
 				[AsyncParticles] Error during rain tick.
 				This is likely caused by an incompatible injection into the rain tick method.
 					Temporarily disabled 'Particle Rain' internally. You may also want to turn it on manually,\
-					 otherwise this error will recur after restarting the game.
-				You may need to turn off 'Particle Rain'""", e);
+					 otherwise this error will recur after restarting the game.""", e);
 			sendChat(() -> Component.literal("[AsyncParticles] ").append(
 				Component.translatable("chat.asyncparticles.warn.error_during_async_incompatible_injection",
 					e.toString(),

@@ -6,7 +6,6 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
 import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -320,12 +319,7 @@ public abstract class AsyncRenderBehavior {
 				sync particle types: %s,
 				sync particle render types: %s,
 				particle mode: %s,
-				iris particle mode: %s
-				glCapabilities: TransformFeedback: %s,
-				                ExplicitAttribLocation: %s,
-				                DirectStateAccess: %s,
-				                ComputeShader: %s,
-				                Backend: %s""" // TODO
+				iris particle mode: %s""" // TODO
 				.formatted(asyncTasksSize,
 					BTESSELATORS.entrySet()
 						.stream()
@@ -354,12 +348,7 @@ public abstract class AsyncRenderBehavior {
 					ModListHelper.IRIS_LIKE_LOADED ? Iris.getPipelineManager().getPipeline()
 													 .map(WorldRenderingPipeline::getParticleRenderingSettings)
 													 .map(ParticleRenderingSettings::name)
-													 .orElse("UNSET") : "DISABLED",
-					GLCaps.tfSupport.getClass().getSimpleName(),
-					GLCaps.supportsExplicitAttribLocation,
-					GLCaps.supportsDirectStateAccess,
-					GLCaps.csSupport.getClass().getSimpleName(),
-					GLCaps.GLonES ? "GL on GLES" : "GL"));
+													 .orElse("UNSET") : "DISABLED"));
 			debugConsumer = null;
 		}
 	}

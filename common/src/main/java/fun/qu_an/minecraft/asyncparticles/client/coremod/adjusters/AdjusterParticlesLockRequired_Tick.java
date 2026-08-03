@@ -6,11 +6,8 @@ import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_a
 
 import java.util.List;
 
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.IS_FORGE;
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.isDevelopmentEnvironment;
-
-public class AdjusterParticlesLockRequired implements MixinClassAdjuster {
-	private static final String CLASS_NAME = "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LockRequired";
+public class AdjusterParticlesLockRequired_Tick implements MixinClassAdjuster {
+	private static final String CLASS_NAME = "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LockRequired_Tick";
 	@Override
 	public String getMixinClassName() {
 		return CLASS_NAME;

@@ -6,16 +6,16 @@ import net.minecraft.network.chat.Component;
 
 import java.util.function.Supplier;
 
-public enum ParticleTickMode implements TranslatableEnum {
-	SEQUENTIAL(() -> Component.translatable("config.asyncparticles.enum.ParticleTickMode.SEQUENTIAL")
+public enum ParticleAsyncMode implements TranslatableEnum {
+	SEQUENTIAL(() -> Component.translatable("config.asyncparticles.enum.ParticleAsyncMode.SEQUENTIAL")
 		.withStyle(ChatFormatting.GREEN)),
-	SPLIT(() -> Component.translatable("config.asyncparticles.enum.ParticleTickMode.SPLIT")
+	SPLIT(() -> Component.translatable("config.asyncparticles.enum.ParticleAsyncMode.SPLIT")
 		.withStyle(ChatFormatting.YELLOW)),
-	DISABLE(() -> Component.translatable("config.asyncparticles.enum.ParticleTickMode.DISABLE")
+	DISABLE(() -> Component.translatable("config.asyncparticles.enum.ParticleAsyncMode.DISABLE")
 		.withStyle(ChatFormatting.RED));
 	private final Supplier<Component> componentSupplier;
 
-	ParticleTickMode(Supplier<Component> componentSupplier) {
+	ParticleAsyncMode(Supplier<Component> componentSupplier) {
 		this.componentSupplier = componentSupplier;
 	}
 

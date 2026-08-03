@@ -30,5 +30,8 @@ public interface ParticleAddon {
 
 	void asyncparticles$tickSphereCulling();
 
-	Class<? extends Particle> asyncparticles$getRealClass();
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	default <T extends Particle> Class<T> asyncparticles$getRealClass() {
+		return (Class) this.getClass();
+	}
 }

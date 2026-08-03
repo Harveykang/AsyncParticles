@@ -7,9 +7,6 @@ import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_a
 import java.util.ArrayList;
 import java.util.List;
 
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.IS_FORGE;
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.isDevelopmentEnvironment;
-
 public class AdjusterParticlesNoLightCache implements MixinClassAdjuster {
 	private static final String CLASS_NAME = "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LightCacheNoRefresh";
 	@Override

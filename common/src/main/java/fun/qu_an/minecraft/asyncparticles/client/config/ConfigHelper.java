@@ -10,10 +10,6 @@ import java.util.Set;
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
 
 public class ConfigHelper {
-	public static void load() throws Exception {
-		AsyncParticlesConfig.load();
-	}
-
 	public static boolean isAsyncAnimateTick() {
 		return tick$animationTickMode && !Diagnostic.isTemporaryDisableAnimationTick();
 	}
@@ -27,31 +23,11 @@ public class ConfigHelper {
 	}
 
 	public static boolean isAsyncParticleTick() {
-		return tick$particleTickMode != ParticleTickMode.DISABLE && !Diagnostic.isTemporaryDisableAsyncParticleTick();
+		return tick$particleAsyncMode != ParticleAsyncMode.DISABLE && !Diagnostic.isTemporaryDisableAsyncParticleTick();
 	}
 
 	public static boolean isSplitParticleTick() {
-		return tick$particleTickMode == ParticleTickMode.SPLIT;
-	}
-
-	public static boolean isGpuOnlyAsyncParticleTick() {
-		return tick$gpuOnlyAsyncParticleTick || Diagnostic.isTemporaryGpuOnlyAsyncParticleTick();
-	}
-
-	public static boolean fixParticleLightOnVsShips() {
-		return valkyrienSkies$fixParticleLights;
-	}
-
-	public static RainEffect getCreateRainEffect() {
-		return create$rainEffect;
-	}
-
-	public static int getTickRainBlockingRange() {
-		return create$tickRainBlockingRange;
-	}
-
-	public static RainEffect getVSRainEffect() {
-		return AsyncParticlesConfig.valkyrienSkies$rainEffect;
+		return tick$particleAsyncMode == ParticleAsyncMode.SPLIT;
 	}
 
 	public static int getParticleLimit() {
@@ -64,27 +40,6 @@ public class ConfigHelper {
 
 	public static int getTickFailurePerSecondThreshold() {
 		return tick$failPerSecLimit;
-	}
-
-	public static RenderingMode particleRenderingMode() {
-		return rendering$particleRenderingMode;
-	}
-
-	public static boolean isRenderAsync() {
-		return rendering$particleRenderingMode != RenderingMode.SYNCHRONOUSLY;
-	}
-
-	public static boolean isCompatibilityRendering() {
-		return rendering$particleRenderingMode == RenderingMode.COMPATIBILITY;
-	}
-
-	public static boolean isDelayedRendering() {
-		return rendering$particleRenderingMode == RenderingMode.DELAYED;
-	}
-
-	// TODO: implement weather particle config, which will not be spawn into physics structures
-	public static Set<ResourceLocation> getWeatherParticles() {
-		return Set.of();
 	}
 
 	public static boolean isCullUnderwaterParticleType() {
@@ -159,12 +114,8 @@ public class ConfigHelper {
 		return rendering$appendNewParticlesToRenderer;
 	}
 
-	public static boolean fixParticleLightOnSableSublevel() {
-		return sable$fixParticleLights;
-	}
-
-	public static ParticleCullingMode getGpuParticleCullingMode() {
-		return ParticleCullingMode.DISABLED;
+	public static boolean isGpuOnlyAsyncParticleTick() {
+		return tick$gpuOnlyAsyncParticleTick || Diagnostic.isTemporaryGpuOnlyAsyncParticleTick();
 	}
 
 	public static boolean mobileCompatMultiDraw() {
@@ -173,5 +124,29 @@ public class ConfigHelper {
 
 	public static ComputeExecutionStage getComputeExecutionStage() {
 		return rendering$computeExecutionStage;
+	}
+
+	public static ParticleCleanupStrategy getParticleCleanupStrategy() {
+		return particle$cleanupStrategy;
+	}
+
+	public static RainEffect getCreateRainEffect() {
+		return create$rainEffect;
+	}
+
+	public static int getTickRainBlockingRange() {
+		return create$tickRainBlockingRange;
+	}
+
+	public static RainEffect getVSRainEffect() {
+		return AsyncParticlesConfig.valkyrienSkies$rainEffect;
+	}
+
+	public static boolean fixParticleLightOnSableSublevel() {
+		return sable$fixParticleLights;
+	}
+
+	public static boolean fixParticleLightOnVsShips() {
+		return valkyrienSkies$fixParticleLights;
 	}
 }

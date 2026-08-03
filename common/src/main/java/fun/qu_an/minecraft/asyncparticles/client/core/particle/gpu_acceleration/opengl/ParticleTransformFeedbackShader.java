@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl;
 
 import com.mojang.blaze3d.platform.GlConst;
-import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL30C;
 
@@ -17,16 +17,33 @@ public class ParticleTransformFeedbackShader {
 	protected ParticleTransformFeedbackShader() {
 		programId = ShaderCompiler.createShaderProgram(
 			GlConst.GL_VERTEX_SHADER,
-			"/assets/asyncparticles/particle_gpu_acceleration/particle_tf.vert",
-			programId -> GLCaps.tfSupport.glTransformFeedbackVaryings(programId,
-				new String[]{
-					"Position_0", "UV0_0", "Color_0", "UV2_0",
-					"Position_1", "UV0_1", "Color_1", "UV2_1",
-					"Position_2", "UV0_2", "Color_2", "UV2_2",
-					"Position_3", "UV0_3", "Color_3", "UV2_3"
-				},
-				GL30C.GL_INTERLEAVED_ATTRIBS)
+			"/assets/asyncparticles/particle_gpu_acceleration/gl_particle_transformfeedback.vert",
+			programId -> {
+				// same as GpuParticlePipelines.RAW_PARTICLE
+				GL20C.glBindAttribLocation(programId, 0, "oPosition");
+				GL20C.glBindAttribLocation(programId, 1, "Position");
+				GL20C.glBindAttribLocation(programId, 2, "Sizes");
+				GL20C.glBindAttribLocation(programId, 3, "UVMin");
+				GL20C.glBindAttribLocation(programId, 4, "UVMax");
+				GL20C.glBindAttribLocation(programId, 5, "oColor");
+				GL20C.glBindAttribLocation(programId, 6, "Color");
+				GL20C.glBindAttribLocation(programId, 7, "Light");
+				GL20C.glBindAttribLocation(programId, 8, "Rolls");
+				Backends.glTf.glTransformFeedbackVaryings(programId,
+					new String[]{
+						"Position_0", "UV0_0", "Color_0", "UV2_0",
+						"Position_1", "UV0_1", "Color_1", "UV2_1",
+						"Position_2", "UV0_2", "Color_2", "UV2_2",
+						"Position_3", "UV0_3", "Color_3", "UV2_3"
+					},
+					GL30C.GL_INTERLEAVED_ATTRIBS);
+			}
 		);
+
+		int loc = GL20C.glGetAttribLocation(programId, "Rolls");
+		if (loc != 8) {
+			throw new IllegalStateException("Attrib binding failed: Rolls at " + loc);
+		}
 
 		// Uniforms
 		PartialTick = GL20C.glGetUniformLocation(programId, "PartialTick");

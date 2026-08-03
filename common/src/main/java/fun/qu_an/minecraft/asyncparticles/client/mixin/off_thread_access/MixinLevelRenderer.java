@@ -1,56 +1,68 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = LevelRenderer.class, priority = 1100)
+@Mixin(value = LevelRenderer.class, priority = 500)
 public abstract class MixinLevelRenderer {
-	@WrapMethod(method = "setSectionDirty(IIIZ)V")
-	public void setSectionDirty(int x, int y, int z, boolean reRenderOnMainThread, Operation<Void> original) {
+	@Shadow
+	protected abstract void setSectionDirty(int i, int j, int k, boolean bl);
+
+	@Shadow
+	protected abstract void setBlockDirty(BlockPos arg, boolean bl);
+
+	@Shadow
+	public abstract void setBlocksDirty(int l, int m, int n, int o, int p, int q);
+
+	@Shadow
+	public abstract void setSectionDirtyWithNeighbors(int l, int m, int n);
+
+	@Shadow
+	public abstract void destroyBlockProgress(int i, BlockPos arg, int j);
+
+	@Inject(method = "setSectionDirty(IIIZ)V", at = @At("HEAD"), cancellable = true)
+	public void setSectionDirty(int i, int j, int k, boolean bl, CallbackInfo ci) {
 		if (ThreadUtil.isOnParticleThread()) {
-			ThreadUtil.enqueueClientTask(() -> original.call(x, y, z, reRenderOnMainThread));
-		} else {
-			original.call(x, y, z, reRenderOnMainThread);
+			ci.cancel();
+			ThreadUtil.enqueueClientTask(() -> this.setSectionDirty(i, j, k, bl));
 		}
 	}
 
-	@WrapMethod(method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Z)V")
-	public void setBlockDirty(BlockPos pos, boolean reRenderOnMainThread, Operation<Void> original) {
+	@Inject(method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Z)V", at = @At("HEAD"), cancellable = true)
+	public void setBlockDirty(BlockPos blockPos, boolean bl, CallbackInfo ci) {
 		if (ThreadUtil.isOnParticleThread()) {
-			ThreadUtil.enqueueClientTask(() -> original.call(pos, reRenderOnMainThread));
-		} else {
-			original.call(pos, reRenderOnMainThread);
+			ci.cancel();
+			ThreadUtil.enqueueClientTask(() -> this.setBlockDirty(blockPos, bl));
 		}
 	}
 
-	@WrapMethod(method = "setBlocksDirty")
-	public void setBlocksDirty(int minX, int minY, int minZ, int maxX, int maxY, int maxZ, Operation<Void> original) {
+	@Inject(method = "setBlocksDirty", at = @At("HEAD"), cancellable = true)
+	public void setBlocksDirty(int i, int j, int k, int l, int m, int n, CallbackInfo ci) {
 		if (ThreadUtil.isOnParticleThread()) {
-			ThreadUtil.enqueueClientTask(() -> original.call(minX, minY, minZ, maxX, maxY, maxZ));
-		} else {
-			original.call(minX, minY, minZ, maxX, maxY, maxZ);
+			ci.cancel();
+			ThreadUtil.enqueueClientTask(() -> this.setBlocksDirty(i, j, k, l, m, n));
 		}
 	}
 
-	@WrapMethod(method = "setSectionDirtyWithNeighbors")
-	public void setSectionDirtyWithNeighbors(int sectionX, int sectionY, int sectionZ, Operation<Void> original) {
+	@Inject(method = "setSectionDirtyWithNeighbors", at = @At("HEAD"), cancellable = true)
+	public void setSectionDirtyWithNeighbors(int i, int j, int k, CallbackInfo ci) {
 		if (ThreadUtil.isOnParticleThread()) {
-			ThreadUtil.enqueueClientTask(() -> original.call(sectionX, sectionY, sectionZ));
-		} else {
-			original.call(sectionX, sectionY, sectionZ);
+			ci.cancel();
+			ThreadUtil.enqueueClientTask(() -> this.setSectionDirtyWithNeighbors(i, j, k));
 		}
 	}
 
-	@WrapMethod(method = "destroyBlockProgress")
-	public void destroyBlockProgress(int breakerId, BlockPos pos, int progress, Operation<Void> original) {
+	@Inject(method = "destroyBlockProgress", at = @At("HEAD"), cancellable = true)
+	public void destroyBlockProgress(int i, BlockPos blockPos, int j, CallbackInfo ci) {
 		if (ThreadUtil.isOnParticleThread()) {
-			ThreadUtil.enqueueClientTask(() -> original.call(breakerId, pos, progress));
-		} else {
-			original.call(breakerId, pos, progress);
+			ci.cancel();
+			ThreadUtil.enqueueClientTask(() -> this.destroyBlockProgress(i, blockPos, j));
 		}
 	}
 }

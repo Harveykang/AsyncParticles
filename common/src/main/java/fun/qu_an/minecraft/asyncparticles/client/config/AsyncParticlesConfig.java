@@ -5,7 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -35,7 +36,7 @@ public class AsyncParticlesConfig {
 	public static final int MIN_PARTICLE_LIMIT = 1024;
 	public static final int DEFAULT_PARTICLE_LIMIT = 16384;
 	public static final int MAX_PARTICLE_LIMIT = 262144;
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 	public static final Path CONFIG_FILE = Path.of("config", AsyncParticlesClient.MOD_ID, AsyncParticlesClient.MOD_ID + ".json");
 	static final Gson GSON = new GsonBuilder()
 		.setLenient()
@@ -45,12 +46,13 @@ public class AsyncParticlesConfig {
 	static final Logger LOGGER = LogUtils.getLogger();
 	public static int particle$particleLimit;
 	public static boolean particle$removeIfMissedTick;
+	public static ParticleCleanupStrategy particle$cleanupStrategy;
 	public static boolean particle$parallelQueueRemoval;
 	public static boolean particle$parallelQueueEviction;
 	public static boolean particle$particleLightCache;
 	public static boolean particle$cullUnderwaterParticleType;
 	public static boolean tick$animationTickMode;
-	public static ParticleTickMode tick$particleTickMode;
+	public static ParticleAsyncMode tick$particleAsyncMode;
 	public static boolean tick$gpuOnlyAsyncParticleTick;
 	public static boolean tick$tickWeatherAsync;
 	public static boolean tick$deferredTextureTick;
@@ -199,11 +201,16 @@ public class AsyncParticlesConfig {
 
 	@Contract
 	private static ConfigObj upgrade(int ver, ConfigObj configObj) {
-		if (VERSION != 1) {
+		if (VERSION != 2) {
 			throw new RuntimeException("I forgot to update the upgrade method.");
 		}
 		return switch (ver) {
-			case 1 -> configObj;
+			case 2 -> configObj;
+			case 1 -> {
+				configObj.particle.parallelQueueEviction = false;
+				configObj.particle.parallelQueueRemoval = false;
+				yield configObj;
+			}
 			default -> new ConfigObj();
 		};
 	}
@@ -241,6 +248,7 @@ public class AsyncParticlesConfig {
 		ValkyrienSkies valkyrienSkies = new ValkyrienSkies();
 		Sable sable = new Sable();
 		Create create = new Create();
+		Mobile mobile = new Mobile();
 
 		void flat() {
 			particle.flat();
@@ -249,28 +257,32 @@ public class AsyncParticlesConfig {
 			valkyrienSkies.flat();
 			sable.flat();
 			create.flat();
+			mobile.flat();
 		}
 
-		private void fold() {
+		void fold() {
 			particle.fold();
 			tick.fold();
 			rendering.fold();
 			valkyrienSkies.fold();
 			sable.fold();
 			create.fold();
+			mobile.fold();
 		}
 
 		static class Particle {
 			int particleLimit = DEFAULT_PARTICLE_LIMIT;
 			boolean removeIfMissedTick = false;
-			boolean parallelQueueRemoval = true;
-			boolean parallelQueueEviction = true;
+			ParticleCleanupStrategy cleanupStrategy = ParticleCleanupStrategy.PARALLEL_WITH_TICK;
+			boolean parallelQueueRemoval = false;
+			boolean parallelQueueEviction = false;
 			boolean particleLightCache = true;
 			boolean cullUnderwaterParticleType = true;
 
 			private void flat() {
 				particle$particleLimit = Mth.clamp(particleLimit, MIN_PARTICLE_LIMIT, MAX_PARTICLE_LIMIT);
 				particle$removeIfMissedTick = removeIfMissedTick;
+				particle$cleanupStrategy = requireNonNullElse(cleanupStrategy, ParticleCleanupStrategy.PARALLEL_WITH_TICK);
 				particle$parallelQueueRemoval = parallelQueueRemoval;
 				particle$parallelQueueEviction = parallelQueueEviction;
 				particle$particleLightCache = particleLightCache;
@@ -280,6 +292,7 @@ public class AsyncParticlesConfig {
 			private void fold() {
 				particleLimit = particle$particleLimit;
 				removeIfMissedTick = particle$removeIfMissedTick;
+				cleanupStrategy = particle$cleanupStrategy;
 				parallelQueueRemoval = particle$parallelQueueRemoval;
 				parallelQueueEviction = particle$parallelQueueEviction;
 				particleLightCache = particle$particleLightCache;
@@ -289,7 +302,7 @@ public class AsyncParticlesConfig {
 
 		static class Tick {
 			boolean animationTickMode = !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED;
-			ParticleTickMode particleTickMode = ParticleTickMode.SEQUENTIAL;
+			ParticleAsyncMode particleAsyncMode = ParticleAsyncMode.SEQUENTIAL;
 			boolean gpuOnlyAsyncParticleTick = false;
 			boolean tickWeatherAsync = !PHYSICSMOD_LOADED;
 			boolean deferredTextureTick = !AXIOM_LOADED;
@@ -303,7 +316,7 @@ public class AsyncParticlesConfig {
 
 			private void flat() {
 				tick$animationTickMode = !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED && animationTickMode;
-				tick$particleTickMode = requireNonNullElse(particleTickMode, ParticleTickMode.SEQUENTIAL);
+				tick$particleAsyncMode = requireNonNullElse(particleAsyncMode, ParticleAsyncMode.SEQUENTIAL);
 				tick$gpuOnlyAsyncParticleTick = gpuOnlyAsyncParticleTick;
 				tick$tickWeatherAsync = tickWeatherAsync && !PHYSICSMOD_LOADED;
 				tick$deferredTextureTick = deferredTextureTick && !AXIOM_LOADED;
@@ -315,7 +328,7 @@ public class AsyncParticlesConfig {
 
 			private void fold() {
 				animationTickMode = tick$animationTickMode;
-				particleTickMode = tick$particleTickMode;
+				particleAsyncMode = tick$particleAsyncMode;
 				gpuOnlyAsyncParticleTick = tick$gpuOnlyAsyncParticleTick;
 				tickWeatherAsync = tick$tickWeatherAsync;
 				deferredTextureTick = tick$deferredTextureTick;
@@ -329,7 +342,7 @@ public class AsyncParticlesConfig {
 		static class Rendering {
 			ParticleCullingMode particleCulling = ParticleCullingMode.SPHERE;
 			RenderingMode particleRenderingMode = RenderingMode.SYNCHRONOUSLY;
-			boolean gpuAcceleration = GLCaps.supportsGpuAcceleration();
+			boolean gpuAcceleration = Backends.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
 			ComputeExecutionStage computeExecutionStage = ComputeExecutionStage.LEVEL_RENDERING;
 			boolean cullWeathers = true;
@@ -353,7 +366,7 @@ public class AsyncParticlesConfig {
 			private void flat() {
 				rendering$particleCulling = requireNonNullElse(particleCulling, ParticleCullingMode.SPHERE);
 				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
-				rendering$gpuAcceleration = gpuAcceleration && GLCaps.supportsGpuAcceleration();
+				rendering$gpuAcceleration = gpuAcceleration && Backends.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
 				rendering$computeExecutionStage = requireNonNullElse(computeExecutionStage, ComputeExecutionStage.LEVEL_RENDERING);
 				rendering$cullWeathers = cullWeathers;
@@ -414,6 +427,18 @@ public class AsyncParticlesConfig {
 			private void fold() {
 				rainEffect = create$rainEffect;
 				tickRainBlockingRange = create$tickRainBlockingRange;
+			}
+		}
+
+		static class Mobile {
+			boolean multiDrawWorkaround = true;
+
+			private void flat() {
+				mobile$multiDrawWorkaround = multiDrawWorkaround;
+			}
+
+			private void fold() {
+				multiDrawWorkaround = mobile$multiDrawWorkaround;
 			}
 		}
 	}

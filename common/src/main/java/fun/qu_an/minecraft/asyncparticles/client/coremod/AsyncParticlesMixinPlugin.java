@@ -34,7 +34,8 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesNoCulling());
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesNoLightCache());
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockProvider());
-		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired());
+		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired_Tick());
+		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired_Extract());
 		MixinClassAdjusterRegistrar.register(new AdjusterReplaceRandom());
 		MixinMemberCancellerRegistrar.register(new AsyncParticlesMixinMemberCanceller());
 		MixinCancellerRegistrar.register(new AsyncParticlesMixinCanceller());

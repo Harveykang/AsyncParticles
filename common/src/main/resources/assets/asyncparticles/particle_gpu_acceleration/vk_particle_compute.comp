@@ -1,0 +1,127 @@
+#version 450
+layout(local_size_x = 64) in;
+
+// === SSBO bindings ===
+// Binding 0: source buffer (RAW_PARTICLE, 17 ints per particle)
+layout(std430, binding = 0) readonly buffer SourceBuf { int src_data[]; };
+
+// Binding 1: target buffer (IDENTITY_PARTICLE, 44 ints per particle = 4 vertices * 11 ints)
+layout(std430, binding = 1) writeonly buffer TargetBuf { int dst_data[]; };
+
+// Binding 2: one record per workgroup: srcBase, dstBase, count
+layout(std430, binding = 2) readonly buffer GroupTableBuf { int group_data[]; };
+
+// === Push constants (matches Java: 10 floats = 40 bytes) ===
+layout(push_constant) uniform PushConstants {
+    float uPartialTick;
+    float uCameraLeft_x, uCameraLeft_y, uCameraLeft_z;
+    float uCameraUp_x, uCameraUp_y, uCameraUp_z;
+    float uPartialCameraPos_x, uPartialCameraPos_y, uPartialCameraPos_z;
+} pc;
+
+// === Source layout: RAW_PARTICLE (68 bytes = 17 ints per particle) ===
+#define SRC_STRIDE 17u
+#define SRC_OFF_OPOS 0u
+#define SRC_OFF_POS  3u
+#define SRC_OFF_SIZES 6u
+#define SRC_OFF_OUV0 8u
+#define SRC_OFF_UV0 10u
+#define SRC_OFF_OCOLOR 12u
+#define SRC_OFF_COLOR 13u
+#define SRC_OFF_LIGHT 14u
+#define SRC_OFF_ROLLS 15u
+
+// === Target layout: IDENTITY_PARTICLE (44 bytes = 11 ints per vertex) ===
+#define DST_VERTEX_STRIDE 11u
+#define DST_OFF_POS 0u
+#define DST_OFF_UV0 3u
+#define DST_OFF_COLOR 5u
+#define DST_OFF_UV2 9u
+
+#define GROUP_RECORD_STRIDE 3u
+#define GROUP_OFF_SRC_BASE 0u
+#define GROUP_OFF_DST_BASE 1u
+#define GROUP_OFF_COUNT 2u
+
+vec4 unpackColor(int packed) {
+    return vec4(
+        float((packed       ) & 0xFF) / 255.0,
+        float((packed >>   8) & 0xFF) / 255.0,
+        float((packed >>  16) & 0xFF) / 255.0,
+        float((packed >>  24) & 0xFF) / 255.0
+    );
+}
+
+ivec2 unpackLight(int packed) {
+    return ivec2(
+        int(packed << 16) >> 16,
+        packed >> 16
+    );
+}
+
+void writeVertex(uint dstBase, vec3 pos, vec2 uv, vec4 col, ivec2 light) {
+    dst_data[dstBase + DST_OFF_POS + 0] = floatBitsToInt(pos.x);
+    dst_data[dstBase + DST_OFF_POS + 1] = floatBitsToInt(pos.y);
+    dst_data[dstBase + DST_OFF_POS + 2] = floatBitsToInt(pos.z);
+    dst_data[dstBase + DST_OFF_UV0 + 0] = floatBitsToInt(uv.x);
+    dst_data[dstBase + DST_OFF_UV0 + 1] = floatBitsToInt(uv.y);
+    dst_data[dstBase + DST_OFF_COLOR + 0] = floatBitsToInt(col.r);
+    dst_data[dstBase + DST_OFF_COLOR + 1] = floatBitsToInt(col.g);
+    dst_data[dstBase + DST_OFF_COLOR + 2] = floatBitsToInt(col.b);
+    dst_data[dstBase + DST_OFF_COLOR + 3] = floatBitsToInt(col.a);
+    dst_data[dstBase + DST_OFF_UV2 + 0] = light.x;
+    dst_data[dstBase + DST_OFF_UV2 + 1] = light.y;
+}
+
+void main() {
+    uint groupBase = gl_WorkGroupID.x * GROUP_RECORD_STRIDE;
+    uint count = uint(group_data[groupBase + GROUP_OFF_COUNT]);
+    uint localIdx = gl_LocalInvocationID.x;
+    if (localIdx >= count) {
+        return;
+    }
+
+    uint srcIdx = uint(group_data[groupBase + GROUP_OFF_SRC_BASE]) + localIdx;
+    uint srcBase = srcIdx * SRC_STRIDE;
+
+    vec3 oPos  = vec3(uintBitsToFloat(src_data[srcBase + SRC_OFF_OPOS + 0]),
+                      uintBitsToFloat(src_data[srcBase + SRC_OFF_OPOS + 1]),
+                      uintBitsToFloat(src_data[srcBase + SRC_OFF_OPOS + 2]));
+    vec3 pos   = vec3(uintBitsToFloat(src_data[srcBase + SRC_OFF_POS + 0]),
+                      uintBitsToFloat(src_data[srcBase + SRC_OFF_POS + 1]),
+                      uintBitsToFloat(src_data[srcBase + SRC_OFF_POS + 2]));
+    vec2 sizes = vec2(uintBitsToFloat(src_data[srcBase + SRC_OFF_SIZES + 0]),
+                      uintBitsToFloat(src_data[srcBase + SRC_OFF_SIZES + 1]));
+    vec2 uvMin = vec2(uintBitsToFloat(src_data[srcBase + SRC_OFF_OUV0 + 0]),
+                      uintBitsToFloat(src_data[srcBase + SRC_OFF_OUV0 + 1]));
+    vec2 uvMax = vec2(uintBitsToFloat(src_data[srcBase + SRC_OFF_UV0 + 0]),
+                      uintBitsToFloat(src_data[srcBase + SRC_OFF_UV0 + 1]));
+    vec4 oCol  = unpackColor(src_data[srcBase + SRC_OFF_OCOLOR]);
+    vec4 col   = unpackColor(src_data[srcBase + SRC_OFF_COLOR]);
+    ivec2 light = unpackLight(src_data[srcBase + SRC_OFF_LIGHT]);
+    vec2 rolls = vec2(uintBitsToFloat(src_data[srcBase + SRC_OFF_ROLLS + 0]),
+                      uintBitsToFloat(src_data[srcBase + SRC_OFF_ROLLS + 1]));
+
+    // --- identical math to gl_particle_transformfeedback.vert ---
+    vec3 p = mix(oPos, pos, pc.uPartialTick) + vec3(pc.uPartialCameraPos_x, pc.uPartialCameraPos_y, pc.uPartialCameraPos_z);
+    float nroll = mix(rolls.x, rolls.y, pc.uPartialTick);
+    float size = mix(sizes.x, sizes.y, pc.uPartialTick);
+    vec4 color = mix(oCol, col, pc.uPartialTick);
+
+    float ss = sin(nroll) * size;
+    float cs = cos(nroll) * size;
+    float a = cs - ss;
+    float b = cs + ss;
+    vec3 c = a * vec3(pc.uCameraLeft_x, pc.uCameraLeft_y, pc.uCameraLeft_z) + b * vec3(pc.uCameraUp_x, pc.uCameraUp_y, pc.uCameraUp_z);
+    vec3 d = b * vec3(pc.uCameraLeft_x, pc.uCameraLeft_y, pc.uCameraLeft_z) - a * vec3(pc.uCameraUp_x, pc.uCameraUp_y, pc.uCameraUp_z);
+
+    // --- write 4 vertices ---
+    uint dstParticleBase = uint(group_data[groupBase + GROUP_OFF_DST_BASE]);
+    uint outIdx = dstParticleBase + localIdx;
+    uint dstBase = outIdx * 4u * DST_VERTEX_STRIDE;
+
+    writeVertex(dstBase +  0u, p - c, uvMax,                  color, light);
+    writeVertex(dstBase + 11u, p - d, vec2(uvMax.x, uvMin.y), color, light);
+    writeVertex(dstBase + 22u, p + c, uvMin,                  color, light);
+    writeVertex(dstBase + 33u, p + d, vec2(uvMin.x, uvMax.y), color, light);
+}

@@ -88,6 +88,17 @@ public class ParticleHelper {
 		}
 	}
 
+	public static void onEvictIgnoreExceptions(Particle particle) {
+		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
+		particle.getParticleGroup().ifPresent(limit -> particleEngine.updateCount(limit, -1));
+		try {
+			if (particle.isAlive()) {
+				particle.remove();
+			}
+		} catch (Exception ignored) {
+		}
+	}
+
 	public static void tickParticles(Runnable tickRunnable, boolean isGpu) {
 		GPU_PARTICLE_PHASE.set(isGpu);
 		tickRunnable.run();

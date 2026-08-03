@@ -102,7 +102,7 @@ dependencies {
     /* Immersive Portals */
     modCompileOnly "maven.modrinth:immersiveportals:v6.0.6-mc1.21.1"
 
-    modCompileOnly("foundry.veil:veil-fabric-${project.minecraft_version}:4.1.1") {
+    compileOnly("foundry.veil:veil-fabric-${project.minecraft_version}:4.1.1") {
         exclude group: "maven.modrinth"
         exclude group: "me.fallenbreath"
         exclude(group: "net.fabricmc.fabric-api")

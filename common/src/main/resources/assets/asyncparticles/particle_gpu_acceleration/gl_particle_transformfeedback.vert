@@ -1,14 +1,23 @@
 #version 150
-#extension GL_ARB_explicit_attrib_location : enable
 
-layout(location = 0) in vec3 oPosition;
-layout(location = 1) in vec3 Position;
-layout(location = 2) in vec2 Sizes;
-layout(location = 3) in vec4 UVMinMax;
-layout(location = 4) in vec4 oColor;
-layout(location = 5) in vec4 Color;
-layout(location = 6) in ivec2 Light;
-layout(location = 7) in vec2 Rolls;
+//.add("oPosition", VertexFormatElement.POSITION)
+//		.add("Position", VertexFormatElement.POSITION)
+//		.add("Sizes", VertexFormatElement.UV0)
+//		.add("oUV0", VertexFormatElement.UV0)
+//		.add("UV0", VertexFormatElement.UV0)
+//		.add("oColor", VertexFormatElement.COLOR)
+//		.add("Color", VertexFormatElement.COLOR)
+//		.add("Light", VertexFormatElement.UV2)
+//		.add("Rolls", VertexFormatElement.UV0)
+in vec3 oPosition;
+in vec3 Position;
+in vec2 Sizes;
+in vec2 UVMin;
+in vec2 UVMax;
+in vec4 oColor;
+in vec4 Color;
+in ivec2 Light;
+in vec2 Rolls;
 
 //#if defined(GL_ARB_uniform_buffer_object) || __VERSION__ >= 140
 //layout(std140) uniform FrameInfo {
@@ -64,22 +73,22 @@ void main() {
     vec3 d = b * CameraLeft - a * CameraUp;// (left - up) * size
 
     Position_0 = pos - c;// left bottom
-    UV0_0 = vec2(UVMinMax.z, UVMinMax.w);
+    UV0_0 = UVMax; // maxU, maxV
     Color_0 = color;
     UV2_0 = Light;
 
     Position_1 = pos - d;// left top
-    UV0_1 = vec2(UVMinMax.z, UVMinMax.y);
+    UV0_1 = vec2(UVMax.x, UVMin.y); // maxU, minV
     Color_1 = color;
     UV2_1 = Light;
 
     Position_2 = pos + c;// right top
-    UV0_2 = vec2(UVMinMax.x, UVMinMax.y);
+    UV0_2 = UVMin; // minU, minV
     Color_2 = color;
     UV2_2 = Light;
 
     Position_3 = pos + d;// right bottom
-    UV0_3 = vec2(UVMinMax.x, UVMinMax.w);
+    UV0_3 = vec2(UVMin.x, UVMax.y); // minU, maxV
     Color_3 = color;
     UV2_3 = Light;
 }

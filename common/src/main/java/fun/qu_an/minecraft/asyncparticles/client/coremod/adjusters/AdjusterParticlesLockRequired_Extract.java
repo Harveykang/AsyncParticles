@@ -4,11 +4,10 @@ import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinUtil;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.MixinClassAdjuster;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class AdjusterReplaceRandom implements MixinClassAdjuster {
-	private static final String CLASS_NAME = "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.Mixin_ReplaceRandom";
+public class AdjusterParticlesLockRequired_Extract implements MixinClassAdjuster {
+	private static final String CLASS_NAME = "fun.qu_an.minecraft.asyncparticles.client.mixin.conditional.MixinParticles_LockRequired_Extract";
 	@Override
 	public String getMixinClassName() {
 		return CLASS_NAME;
@@ -16,9 +15,7 @@ public class AdjusterReplaceRandom implements MixinClassAdjuster {
 
 	@Override
 	public List<String> getTargets(List<String> originalTargets) {
-		ArrayList<String> list = new ArrayList<>(originalTargets);
-		list.addAll(MixinConfigHelper.getReplaceRandom());
-		return list;
+		return List.copyOf(MixinConfigHelper.getLockRequired());
 	}
 
 	@Override

@@ -240,13 +240,13 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 	}
 
 	private class anIterator implements Iterator<E> {
-		private final Object[] a = queue;
-		private final int mask = a.length - 1;
-		private final int head = Math.min(mask, IterationSafeEvictingQueue.this.head);
-		private int tail = Math.min(a.length, IterationSafeEvictingQueue.this.size) + head;
-		private int cursor = head;
-		private Object curr;
-		private Object next;
+		protected final Object[] a = queue;
+		protected final int mask = a.length - 1;
+		protected final int head = Math.min(mask, IterationSafeEvictingQueue.this.head);
+		protected int tail = Math.min(a.length, IterationSafeEvictingQueue.this.size) + head;
+		protected int cursor = head;
+		protected Object curr;
+		protected Object next;
 
 		@Override
 		public boolean hasNext() {
