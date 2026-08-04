@@ -310,6 +310,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			}
 			IterationSafeEvictingQueue.this.removeIndex(a, i, tail);
 			tail--;
+			cursor--;
 			curr = null;
 		}
 	}

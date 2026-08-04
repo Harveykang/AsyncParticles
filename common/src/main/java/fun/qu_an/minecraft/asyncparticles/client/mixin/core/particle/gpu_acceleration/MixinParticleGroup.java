@@ -19,7 +19,7 @@ public abstract class MixinParticleGroup {
 	@WrapOperation(method = "isEmpty", at = @At(value = "INVOKE", target = "Ljava/util/Queue;isEmpty()Z"))
 	private boolean wrapIsEmpty(Queue<?> instance, Operation<Boolean> original) {
 		boolean call = original.call(instance);
-		if (!(this instanceof GpuParticleGroup gpuParticleGroup)) {
+		if (!ConfigHelper.isGpuParticles() || !(this instanceof GpuParticleGroup gpuParticleGroup)) {
 			return call;
 		}
 		return gpuParticleGroup.asyncparticles$getGpuParticles().isEmpty() && call;
@@ -48,7 +48,7 @@ public abstract class MixinParticleGroup {
 	@WrapMethod(method = "size")
 	private int wrapSize(Operation<Integer> original) {
 		int call = original.call();
-		if (!(this instanceof GpuParticleGroup gpuParticleGroup)) {
+		if (!ConfigHelper.isGpuParticles() || !(this instanceof GpuParticleGroup gpuParticleGroup)) {
 			return call;
 		}
 		return gpuParticleGroup.asyncparticles$getGpuParticles().size() + call;
