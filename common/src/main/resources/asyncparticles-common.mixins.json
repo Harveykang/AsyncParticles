@@ -17,11 +17,11 @@
     "compat.cloth_config.AccessorBaseListEntry",
     "compat.cloth_config.AccessorSubCategoryListEntry",
     "compat.cosycritters.MixinBirdParticle",
+    "compat.iris.MixinParticlesRenderState",
     "compat.modernui.MixinRenderSystem",
     "compat.particlerain.MixinParticleRain",
     "compat.particlerain.MixinParticleSpawner",
     "compat.particlerain.MixinWeatherParticle",
-    "compat.sodium.MixinQuadParticleRenderState",
     "compat.sodium_extra.MixinFireworkParticles$Starter",
     "compat.sodium_extra.MixinParticleEngine",
     "compat.vulkanmod.MixinGraphicsPipeline",
@@ -30,6 +30,7 @@
     "conditional.MixinAsyncTick_AsyncTickableParticleGroup",
     "conditional.MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_Off",
     "conditional.MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_On",
+    "conditional.MixinLegacyRandomSource",
     "conditional.MixinLevelChunk_SafeBlockEntityMap_Off",
     "conditional.MixinLevelChunk_SafeBlockEntityMap_On",
     "conditional.MixinParticles_LightCacheNoRefresh",
@@ -71,8 +72,7 @@
     "off_thread_access.MixinLevel",
     "off_thread_access.MixinLevelRenderer",
     "off_thread_access.MixinSoundEngine",
-    "off_thread_access.MixinSoundManager",
-    "conditional.MixinLegacyRandomSource"
+    "off_thread_access.MixinSoundManager"
   ],
   "injectors": {
     "defaultRequire": 1
