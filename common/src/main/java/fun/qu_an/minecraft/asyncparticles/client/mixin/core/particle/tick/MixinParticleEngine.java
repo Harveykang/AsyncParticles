@@ -7,6 +7,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.TickParticleRecursiveAction;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
@@ -114,8 +115,14 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 					}
 					return queue1;
 				}).add(particle);
-				if (tickBehavior.shouldSync(((ParticleAddon) particle).asyncparticles$getRealClass())) {
-					tickBehavior.getSyncParticles(particle.getRenderType()).add(particle);
+				if (tickAsync
+//					&& ConfigHelper.isAsyncTickParticle() // tested in asyncparticles$canTickAsync()
+					&& tickBehavior.shouldSync(((ParticleAddon) particle).asyncparticles$getRealClass())) {
+					if (GpuParticleBehavior.getInstance().canRenderFast(particle)) {
+						tickBehavior.getSyncGpuParticles(particle.getRenderType()).add(particle);
+					} else if (asyncAll) {
+						tickBehavior.getSyncParticles(particle.getRenderType()).add(particle);
+					}
 				}
 			}
 			particlesToAdd.clear();

@@ -19,14 +19,12 @@
     "compat.neoforge.create.MixinParticle",
     "compat.neoforge.create.MixinParticle_LightCache",
     "compat.neoforge.create.MixinParticle_LightCache_Late",
-    "compat.neoforge.epicfight.MixinCustomModelParticle",
     "compat.neoforge.sable_create.MixinParticle_LightCache",
     "compat.neoforge.simple_weather.MixinRainParticle",
     "compat.neoforge.simple_weather.MixinSimpleWeather$NeoBus",
     "compat.neoforge.simple_weather_create.MixinSimpleWeather$NeoBus",
     "compat.neoforge.weather2.MixinEntityRotFX",
     "compat.neoforge.weather2_create.MixinEntityRotFX",
-    "neoforge.core.particle.render.MixinLevelRenderer",
     "neoforge.core.particle.render.MixinParticleEngine_Render"
   ],
   "injectors": {

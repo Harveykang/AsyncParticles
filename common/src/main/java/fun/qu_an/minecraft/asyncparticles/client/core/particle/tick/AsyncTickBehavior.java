@@ -306,7 +306,7 @@ public class AsyncTickBehavior {
 			sync particle types: %s,
 			Backend: %s"""
 			.formatted(
-				ConfigHelper.isAsyncParticleTick() ? timeUsageNano.getAcquire() / 1000000d : Double.NaN,
+				timeUsageNano.getAcquire() / 1000000d,
 				tickTaskHelper.taskCount(),
 				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()

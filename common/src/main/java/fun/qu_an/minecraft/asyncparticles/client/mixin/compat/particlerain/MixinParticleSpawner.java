@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -20,7 +21,13 @@ import pigcart.particlerain.ParticleSpawner;
 public class MixinParticleSpawner {
 	@WrapMethod(method = "tick")
 	private static void wrapTick(ClientLevel level, Vec3 cameraPos, Operation<Void> original) {
-		AsyncTickBehavior.getInstance().addTaskEnsureLevelRunning(() -> original.call(level, cameraPos), ExceptionUtil::toThrowDirectly);
+		if (ConfigHelper.isTickWeatherAsync()
+			&& AsyncTickBehavior.getInstance().isTailTick()) {
+			AsyncTickBehavior.getInstance().addTaskEnsureLevelRunning(
+				() -> original.call(level, cameraPos), ExceptionUtil::toThrowDirectly);
+		} else {
+			original.call(level, cameraPos);
+		}
 	}
 
 	@WrapWithCondition(method = "tickBlockFX", at = @At(value = "INVOKE",

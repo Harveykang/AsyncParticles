@@ -8,6 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.GlTfParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.gpu_acceleration.MixinFireworkParticles;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import it.unimi.dsi.fastutil.objects.*;
@@ -231,7 +232,7 @@ public class GpuParticleBehavior {
 
 	public void onAddGpu(TextureSheetParticle particle) {
 //		assert ConfigHelper.isGpuParticles();
-		if (ConfigHelper.isAppendNewParticlesToRenderer()) {
+		if (ConfigHelper.isAppendNewParticlesToRenderer() && AsyncTickBehavior.getInstance().isTailTick()) {
 			getOrCreateRenderer().append(getPerTickCameraPos(), particle);
 		}
 	}
