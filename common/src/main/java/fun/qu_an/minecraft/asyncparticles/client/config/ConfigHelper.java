@@ -40,10 +40,6 @@ public class ConfigHelper {
 		return particle$cullUnderwaterParticleType;
 	}
 
-	public static boolean isRemoveIfMissedTick() {
-		return particle$removeIfMissedTick;
-	}
-
 	public static boolean isTickWeatherAsync() {
 		return tick$tickWeatherAsync && !Diagnostic.isTemporaryDisableAsyncRainTick();
 	}
