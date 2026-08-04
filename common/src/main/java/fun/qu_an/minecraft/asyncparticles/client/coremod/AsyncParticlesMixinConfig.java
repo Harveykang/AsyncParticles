@@ -34,7 +34,6 @@ public class AsyncParticlesMixinConfig {
 	private static MixinConfigObj toSaveConfig;
 
 	static {
-		LOGGER.debug("AsyncParticlesMixinConfig initialized.");
 		try {
 			load();
 		} catch (Throwable e) {

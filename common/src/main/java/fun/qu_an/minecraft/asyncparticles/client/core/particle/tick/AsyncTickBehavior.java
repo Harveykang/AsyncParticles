@@ -115,10 +115,6 @@ public class AsyncTickBehavior {
 		return ConfigHelper.isRemoveIfMissedTick();
 	}
 
-	public boolean isCancelled() {
-		return false;
-	}
-
 	public void preTick(boolean isHeadTick, boolean isTailTick) {
 		if (isHeadTick) {
 			tickTaskHelper.waitForCompletion(exceptionHandler::tickExceptionally);
@@ -202,8 +198,8 @@ public class AsyncTickBehavior {
 		tryReload();
 		tryDebug();
 		tickTaskHelper.groupTasks(false);
-		ParticleCleanupStrategy cleanupStrategy = ConfigHelper.getParticleCleanupStrategy();
 		if (ConfigHelper.isAsyncParticleTick()) {
+			ParticleCleanupStrategy cleanupStrategy = ConfigHelper.getParticleCleanupStrategy();
 			if (cleanupStrategy == ParticleCleanupStrategy.BLOCK_MAIN_THREAD) {
 				prepareCleanupTasks(cleanupTaskHelper);
 				cleanupTaskHelper.submitAll();

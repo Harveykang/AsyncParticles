@@ -12,10 +12,6 @@ public class ConfigHelper {
 		return tick$asyncAnimateTick && !Diagnostic.isTemporaryDisableAnimationTick();
 	}
 
-	public static boolean forceDoneBlockAnimateTick() {
-		return tick$asyncAnimateTick;
-	}
-
 	public static boolean particleLightCache() {
 		return particle$particleLightCache;
 	}

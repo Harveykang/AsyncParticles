@@ -47,13 +47,4 @@ public abstract class MixinClientLevel extends Level {
 		AnimateTickBehavior.CULL_UNDERWATER_PARTICLE_TYPE.set(!ConfigHelper.isCullUnderwaterParticleType() ||
 			cameraEntity.level().getFluidState(cameraEntity.blockPosition()).is(FluidTags.WATER));
 	}
-
-	@Inject(method = "animateTick", at = @At(value = "INVOKE", ordinal = 0,
-		target = "Lnet/minecraft/client/multiplayer/ClientLevel;doAnimateTick(IIIILnet/minecraft/util/RandomSource;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/core/BlockPos$MutableBlockPos;)V"),
-		cancellable = true)
-	public void onAnimateTick(CallbackInfo ci) {
-		if (AsyncTickBehavior.getInstance().isCancelled() && !ConfigHelper.forceDoneBlockAnimateTick()) {
-			ci.cancel();
-		}
-	}
 }
