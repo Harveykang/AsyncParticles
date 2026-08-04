@@ -80,6 +80,9 @@ dependencies {
 
     /* Particle Interactions */
 //    modCompileOnly "maven.modrinth:particle-interactions:0.9.5+26.1-fabric"
+
+    /* Particle Tweaks */
+    compileOnly "maven.modrinth:particle-tweaks:3.0.1-mc1.21.11"
 }
 
 tasks.register('compileSpirv', Exec) {

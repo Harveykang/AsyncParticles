@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle;
 
-import com.google.common.collect.EvictingQueue;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
@@ -21,6 +20,7 @@ import java.util.Queue;
 
 public class ParticleHelper {
 	public static final ParticleThreadLocal<Integer> DESTRUCTION_LIGHT_CACHE = new ParticleThreadLocal<>(RenderSystem::isOnRenderThread);
+	public static final ParticleThreadLocal<Boolean> CULL_UNDERWATER_PARTICLE_TYPE = ParticleThreadLocal.withInitial(RenderSystem::isOnRenderThread, () -> false);
 
 	public static Queue<SingleQuadParticle> newParticleQueue() {
 		return newParticleQueue(16);

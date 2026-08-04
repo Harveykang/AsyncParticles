@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.gpu_accele
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -92,7 +93,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 					continue;
 				}
 				for (SingleQuadParticle sqp : gpuParticles) {
-					particles.computeIfAbsent(sqp.getLayer(), a -> new ReferenceArrayList<>(size)).add(sqp);
+					particles.computeIfAbsent(((GpuParticleAddon) sqp).asyncparticles$getLayer(), a -> new ReferenceArrayList<>(size)).add(sqp);
 				}
 			}
 			renderer.tick(GpuParticleBehavior.getInstance().getPerTickCameraPos(), particles);

@@ -104,6 +104,8 @@ public class ModListHelper {
 	public static final boolean COSYCRITTERS_LOADED = isModLoaded("cosycritters");
 	/* Async */
 	public static final boolean ASYNC_LOADED = isModLoaded("async");
+	/* Particle Tweaks */
+	public static final boolean PARTICLE_TWEAKS_LOADED = isModLoaded("particletweaks");
 
 	public static boolean isModLoaded(String modId) {
 		return PLATFORM.isModLoaded(modId);

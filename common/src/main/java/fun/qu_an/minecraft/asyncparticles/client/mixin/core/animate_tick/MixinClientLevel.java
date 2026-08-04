@@ -3,8 +3,8 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.animate_tick;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.AnimateTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.Diagnostic;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -44,7 +44,7 @@ public abstract class MixinClientLevel extends Level {
 		if (cameraEntity == null) {
 			return;
 		}
-		AnimateTickBehavior.CULL_UNDERWATER_PARTICLE_TYPE.set(!ConfigHelper.isCullUnderwaterParticleType() ||
+		ParticleHelper.CULL_UNDERWATER_PARTICLE_TYPE.set(!ConfigHelper.isCullUnderwaterParticleType() ||
 			cameraEntity.level().getFluidState(cameraEntity.blockPosition()).is(FluidTags.WATER));
 	}
 }

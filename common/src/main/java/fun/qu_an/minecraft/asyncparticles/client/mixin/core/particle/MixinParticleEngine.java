@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.TrackedParticleCountsMap;
@@ -42,5 +43,12 @@ public class MixinParticleEngine implements ParticleEngineAddon {
 		trackedParticleCounts = new TrackedParticleCountsMap();
 		particlesToAdd = BusyWaitEvictingQueue.newInstance(1024, ConfigHelper.getParticleLimit(), ParticleHelper::onEvict);
 		trackingEmitters = BusyWaitEvictingQueue.newInstance(256, ConfigHelper.getParticleLimit(), ParticleHelper::onEvict);
+	}
+
+	@Inject(method = "clearParticles", at = @At("HEAD"))
+	public void clearParticles(CallbackInfo ci) {
+		// Guarantee: call remove for each particle when clearing particles.
+		particles.values().forEach(g -> ((ParticleGroupAddition) g).asyncparticles$onClearParticles());
+		ParticleHelper.onClearParticles();
 	}
 }

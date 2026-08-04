@@ -127,6 +127,9 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
+    /* Particle Tweaks */
+//    localRuntime "maven.modrinth:frozenlib:qegZSYpO" // 2.3-mc1.21.11
+//    localRuntime "maven.modrinth:particle-tweaks:3.0.1-mc1.21.11"
     /* Vulkan Mod */
     if (false) {
         modLocalRuntime "maven.modrinth:vulkanmod:0.6.8+1.21.11"

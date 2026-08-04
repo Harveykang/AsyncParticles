@@ -52,6 +52,9 @@ public abstract class MixinSingleQuadParticle extends Particle implements GpuPar
 	@Shadow
 	public float rCol;
 
+	@Shadow
+	public abstract SingleQuadParticle.Layer getLayer();
+
 	@Override
 	public void asyncparticles$postTick(long address) {
 		// no-op
@@ -62,22 +65,27 @@ public abstract class MixinSingleQuadParticle extends Particle implements GpuPar
 		return true;
 	}
 
+	@Override
 	public float asyncparticles$getQuadSize(float partialTickTime) {
 		return getQuadSize(partialTickTime);
 	}
 
+	@Override
 	public float asyncparticles$getU0() {
 		return getU0();
 	}
 
+	@Override
 	public float asyncparticles$getV0() {
 		return getV0();
 	}
 
+	@Override
 	public float asyncparticles$getU1() {
 		return getU1();
 	}
 
+	@Override
 	public float asyncparticles$getV1() {
 		return getV1();
 	}
@@ -92,38 +100,47 @@ public abstract class MixinSingleQuadParticle extends Particle implements GpuPar
 		return getLightColor(partialTickTime);
 	}
 
+	@Override
 	public double asyncparticles$getXo() {
 		return xo;
 	}
 
+	@Override
 	public double asyncparticles$getYo() {
 		return yo;
 	}
 
+	@Override
 	public double asyncparticles$getZo() {
 		return zo;
 	}
 
+	@Override
 	public double asyncparticles$getX() {
 		return x;
 	}
 
+	@Override
 	public double asyncparticles$getY() {
 		return y;
 	}
 
+	@Override
 	public double asyncparticles$getZ() {
 		return z;
 	}
 
+	@Override
 	public float asyncparticles$getORoll() {
 		return oRoll;
 	}
 
+	@Override
 	public float asyncparticles$getRoll() {
 		return roll;
 	}
 
+	@Override
 	public int asyncparticles$getOColor() {
 		return ARGB.color( // ABGR
 			(int) (alpha * 255.0f),
@@ -132,7 +149,13 @@ public abstract class MixinSingleQuadParticle extends Particle implements GpuPar
 			(int) (rCol * 255.0f));
 	}
 
+	@Override
 	public int asyncparticles$getColor(int oColor) {
 		return oColor;
+	}
+
+	@Override
+	public SingleQuadParticle.Layer asyncparticles$getLayer() {
+		return getLayer();
 	}
 }
