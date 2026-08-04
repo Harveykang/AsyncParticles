@@ -26,10 +26,6 @@ public interface ParticleAddon {
 
 	boolean asyncparticles$isVisibleOnScreen();
 
-	void asyncparticles$tickAABBCulling();
-
-	void asyncparticles$tickSphereCulling();
-
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	default <T extends Particle> Class<T> asyncparticles$getRealClass() {
 		return (Class) this.getClass();

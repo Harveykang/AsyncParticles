@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.ChatFormatting;
@@ -45,7 +44,6 @@ public class AsyncParticlesConfig {
 		.create();
 	static final Logger LOGGER = LogUtils.getLogger();
 	public static int particle$particleLimit;
-	public static boolean particle$removeIfMissedTick;
 	public static ParticleCleanupStrategy particle$cleanupStrategy;
 	public static boolean particle$parallelQueueRemoval;
 	public static boolean particle$parallelQueueEviction;
@@ -60,15 +58,11 @@ public class AsyncParticlesConfig {
 	public static FailBehavior tick$failBehavior;
 	public static boolean tick$suppressCME;
 	public static Set<String> tick$syncParticleClasses = new LinkedHashSet<>();
-	public static RenderingMode rendering$particleRenderingMode;
 	public static boolean rendering$gpuAcceleration;
 	public static boolean rendering$appendNewParticlesToRenderer;
 	public static ComputeExecutionStage rendering$computeExecutionStage;
 	public static ParticleCullingMode rendering$particleCulling;
 	public static boolean rendering$cullWeathers;
-	public static int rendering$failPerSecLimit;
-	public static FailBehavior rendering$failBehavior;
-	public static Set<String> rendering$syncParticleClasses = new LinkedHashSet<>();
 	public static RainEffect valkyrienSkies$rainEffect;
 	public static boolean valkyrienSkies$fixParticleLights;
 	public static boolean sable$fixParticleLights;
@@ -272,7 +266,6 @@ public class AsyncParticlesConfig {
 
 		static class Particle {
 			int particleLimit = DEFAULT_PARTICLE_LIMIT;
-			boolean removeIfMissedTick = false;
 			ParticleCleanupStrategy cleanupStrategy = ParticleCleanupStrategy.PARALLEL_WITH_TICK;
 			boolean parallelQueueRemoval = false;
 			boolean parallelQueueEviction = false;
@@ -281,7 +274,6 @@ public class AsyncParticlesConfig {
 
 			private void flat() {
 				particle$particleLimit = Mth.clamp(particleLimit, MIN_PARTICLE_LIMIT, MAX_PARTICLE_LIMIT);
-				particle$removeIfMissedTick = removeIfMissedTick;
 				particle$cleanupStrategy = requireNonNullElse(cleanupStrategy, ParticleCleanupStrategy.PARALLEL_WITH_TICK);
 				particle$parallelQueueRemoval = parallelQueueRemoval;
 				particle$parallelQueueEviction = parallelQueueEviction;
@@ -291,7 +283,6 @@ public class AsyncParticlesConfig {
 
 			private void fold() {
 				particleLimit = particle$particleLimit;
-				removeIfMissedTick = particle$removeIfMissedTick;
 				cleanupStrategy = particle$cleanupStrategy;
 				parallelQueueRemoval = particle$parallelQueueRemoval;
 				parallelQueueEviction = particle$parallelQueueEviction;
@@ -341,50 +332,25 @@ public class AsyncParticlesConfig {
 
 		static class Rendering {
 			ParticleCullingMode particleCulling = ParticleCullingMode.SPHERE;
-			RenderingMode particleRenderingMode = RenderingMode.SYNCHRONOUSLY;
 			boolean gpuAcceleration = Backends.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
 			ComputeExecutionStage computeExecutionStage = ComputeExecutionStage.LEVEL_RENDERING;
 			boolean cullWeathers = true;
-			int failPerSecLimit = 20;
-			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
-			Set<String> syncParticleClasses = new LinkedHashSet<>();
-
-			{
-				syncParticleClasses.add("com.lootbeams.VFXParticle");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleCasting");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleGhost");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleGraveSoul");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleMagicCircle");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleMarker");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleRounding");
-				syncParticleClasses.add("concerrox.effective.particle.SplashParticle");
-				syncParticleClasses.add("org.ladysnake.effective.particle.SplashParticle");
-				syncParticleClasses.add("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
-			}
 
 			private void flat() {
 				rendering$particleCulling = requireNonNullElse(particleCulling, ParticleCullingMode.SPHERE);
-				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
 				rendering$gpuAcceleration = gpuAcceleration && Backends.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
 				rendering$computeExecutionStage = requireNonNullElse(computeExecutionStage, ComputeExecutionStage.LEVEL_RENDERING);
 				rendering$cullWeathers = cullWeathers;
-				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
-				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
-				rendering$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
 			}
 
 			private void fold() {
 				particleCulling = rendering$particleCulling;
-				particleRenderingMode = rendering$particleRenderingMode;
 				gpuAcceleration = rendering$gpuAcceleration;
 				appendNewParticlesToRenderer = rendering$appendNewParticlesToRenderer;
 				computeExecutionStage = rendering$computeExecutionStage;
 				cullWeathers = rendering$cullWeathers;
-				failPerSecLimit = rendering$failPerSecLimit;
-				failBehavior = rendering$failBehavior;
-				syncParticleClasses = new LinkedHashSet<>(rendering$syncParticleClasses);
 			}
 		}
 

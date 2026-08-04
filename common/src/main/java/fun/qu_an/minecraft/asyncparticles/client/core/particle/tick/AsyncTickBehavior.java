@@ -113,12 +113,7 @@ public class AsyncTickBehavior {
 		ParticleAddon particleAddon = (ParticleAddon) particle;
 		if (ConfigHelper.isAsyncParticleTick() && particleAddon.asyncparticles$isTicked()) {
 			particleAddon.asyncparticles$resetTicked();
-			return false;
 		}
-		return ConfigHelper.isRemoveIfMissedTick();
-	}
-
-	public boolean isCancelled() {
 		return false;
 	}
 

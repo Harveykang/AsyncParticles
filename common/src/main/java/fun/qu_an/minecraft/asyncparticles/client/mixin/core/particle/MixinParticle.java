@@ -3,7 +3,6 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.render.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -40,14 +39,6 @@ public abstract class MixinParticle implements ParticleAddon, GpuParticleAddon, 
 	private byte asyncparticles$renderFlag = RENDER_FLAG_ENABLE_CULL;
 	@Unique
 	private boolean asyncparticles$enableLightCache = false;
-
-	@Inject(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;DDD)V", at = @At("RETURN"))
-	protected void onInit(CallbackInfo ci) {
-		Class<?> aClass = asyncparticles$getRealClass();
-		if (AsyncRenderBehavior.getInstance().shouldSync(aClass)) {
-			asyncparticles$setRenderSync();
-		}
-	}
 
 	@Shadow
 	protected double xd;
@@ -102,22 +93,5 @@ public abstract class MixinParticle implements ParticleAddon, GpuParticleAddon, 
 
 	public boolean asyncparticles$isVisibleOnScreen() {
 		return (asyncparticles$renderFlag & RENDER_FLAG_SHOULD_CULL) != 0;
-	}
-
-	public void asyncparticles$tickAABBCulling() {
-		AABB aabb = getRenderBoundingBox(0f).expandTowards(xd, yd, zd);
-		if (FrustumUtil.isVisible(AsyncRenderBehavior.getInstance().getFrustum(), aabb)) {
-			asyncparticles$renderFlag |= RENDER_FLAG_SHOULD_CULL;
-		} else {
-			asyncparticles$renderFlag &= ~RENDER_FLAG_SHOULD_CULL;
-		}
-	}
-
-	public void asyncparticles$tickSphereCulling() {
-		if (FrustumUtil.isVisible(AsyncRenderBehavior.getInstance().getFrustum(), (Particle) (Object) this)) {
-			asyncparticles$renderFlag |= RENDER_FLAG_SHOULD_CULL;
-		} else {
-			asyncparticles$renderFlag &= ~RENDER_FLAG_SHOULD_CULL;
-		}
 	}
 }

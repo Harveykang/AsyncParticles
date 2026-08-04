@@ -12,10 +12,8 @@ import fun.qu_an.minecraft.asyncparticles.client.config.ComputeExecutionStage;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ComputeResult;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.render.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.render.RenderExceptionHandler;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.util.*;
 import net.minecraft.client.Camera;
@@ -41,7 +39,7 @@ import java.util.function.Predicate;
 
 // TODO: 分为两个 Mixin
 @Mixin(value = ParticleEngine.class, priority = 500)
-public class MixinParticleEngine_Render implements ParticleEngineAddon {
+public abstract class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Shadow
 	public Map<ParticleRenderType, Queue<Particle>> particles;
 
@@ -60,27 +58,6 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 	public void asyncparticle$addRenderType(ParticleRenderType particleRenderType) {
 	}
 
-	@Override
-	public void asyncparticle$sortRenderOrder() {
-		// make custom types render after non-customs
-		// Remove duplicated render types, (e.g. Hex Casting mod's bug)
-		Map<ParticleRenderType, Queue<Particle>> particles = new LinkedHashMap<>((int) (RENDER_ORDER.size() * 1.34) + 1);
-		for (ParticleRenderType type : RENDER_ORDER) {
-			if (!AsyncRenderBehavior.getInstance().getBTesselator(type, textureManager).shouldSync) {
-				particles.put(type, ParticleHelper.newParticleQueue());
-			}
-		}
-		for (ParticleRenderType type : RENDER_ORDER) {
-			if (AsyncRenderBehavior.getInstance().getBTesselator(type, textureManager).shouldSync) {
-				particles.put(type, ParticleHelper.newParticleQueue());
-			}
-		}
-
-		RENDER_ORDER = ImmutableList.copyOf(particles.keySet());
-		particles.putAll(this.particles);
-		this.particles = particles;
-	}
-
 	/**
 	 * @author
 	 * @reason
@@ -88,12 +65,6 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 	@Overwrite(remap = false)
 	public void render(LightTexture lightTexture, Camera camera, float f, @Nullable Frustum ignored, Predicate<ParticleRenderType> renderTypePredicate) {
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-		boolean renderAsync = AsyncRenderBehavior.getInstance().isRenderAsync();
-		if (renderAsync) {
-			profiler.push("wait_for_async_tasks");
-			AsyncRenderBehavior.getInstance().tryWaitingForAsyncTasks();
-			profiler.pop();
-		}
 
 		profiler.push("prepare");
 		lightTexture.turnOnLightLayer();
@@ -114,7 +85,7 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			}
 		}
 
-		Frustum frustum = AsyncRenderBehavior.getInstance().getFrustum();
+		Frustum frustum = asyncparticle$getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
 		Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = GpuParticleBehavior.getInstance().gpuParticles;
 		for (ParticleRenderType particleRenderType : CombinedIterable.ofIdentitySet(gpuParticles.keySet(), particles.keySet())) {
@@ -124,13 +95,12 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 			}
 			Queue<Particle> queue = particles.get(particleRenderType);
 			Queue<TextureSheetParticle> gpuQueue = gpuParticles.get(particleRenderType);
-			boolean hasGpu = gpuQueue != null && !gpuQueue.isEmpty();
+			boolean hasGpu = computeResult != null && gpuQueue != null && !gpuQueue.isEmpty();
 			boolean hasCpu = queue != null && !queue.isEmpty();
 			if (!hasCpu && !hasGpu) {
 				continue;
 			}
 			profiler.push("render_particles");
-			BindingTesselator tesselator = AsyncRenderBehavior.getInstance().getBTesselator(particleRenderType, textureManager);
 			Collection<? extends Particle> syncParticles;
 			ParticleCullingMode realCullMode;
 			Tesselator toBegin;
@@ -138,18 +108,10 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 				syncParticles = null;
 				toBegin = FakeTesselator.INSTANCE;
 				realCullMode = null;
-			} else if (AsyncRenderBehavior.getInstance().getBTesselator(particleRenderType, textureManager).shouldSync) {
+			} else { // With this check we behave like vanilla if this method is called from other mod.
 				realCullMode = particleCullingMode;
 				syncParticles = queue;
 				toBegin = Tesselator.getInstance();
-			} else if (!renderAsync) { // With this check we behave like vanilla if this method is called from other mod.
-				realCullMode = particleCullingMode;
-				syncParticles = queue;
-				toBegin = Tesselator.getInstance();
-			} else {
-				realCullMode = ParticleCullingMode.DISABLED;
-				syncParticles = AsyncRenderBehavior.getInstance().getSync(particleRenderType);
-				toBegin = tesselator;
 			}
 			// why ParticleRenderType#end() removed?...
 			RenderSystem.enableCull();
@@ -185,22 +147,9 @@ public class MixinParticleEngine_Render implements ParticleEngineAddon {
 							}
 							f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
 						}
-						case ASYNC_AABB, ASYNC_SPHERE -> {
-							if (particleAddon.asyncparticles$shouldCull() &&
-								!particleAddon.asyncparticles$isVisibleOnScreen()) {
-								continue;
-							}
-							f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
-						}
 						default -> f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
 					}
-					try {
-						particle.render(bufferBuilder, camera, f3);
-					} catch (Throwable t) {
-						if (RenderExceptionHandler.getInstance().onRenderOnMainThreadExceptionally(t, particle, particleRenderType)) {
-							break;
-						}
-					}
+					particle.render(bufferBuilder, camera, f3);
 				}
 			}
 			profiler.popPush("build_buffer");

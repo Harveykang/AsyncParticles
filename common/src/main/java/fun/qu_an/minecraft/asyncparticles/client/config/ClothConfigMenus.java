@@ -52,13 +52,6 @@ class ClothConfigMenus {
 				.setMax(MAX_PARTICLE_LIMIT)
 				.build())
 			.addEntry(entryBuilder
-				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.removeIfMissedTick"),
-					globalConfig.particle.removeIfMissedTick)
-				.setDefaultValue(defaultConfig.particle.removeIfMissedTick)
-				.setTooltip(Component.translatable("config.asyncparticles.particle.removeIfMissedTick.tooltip"))
-				.setSaveConsumer(newValue -> newConfig.particle.removeIfMissedTick = newValue)
-				.build())
-			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.particle.cleanupStrategy"),
 					ParticleCleanupStrategy.class, globalConfig.particle.cleanupStrategy)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
@@ -200,18 +193,6 @@ class ClothConfigMenus {
 		ConfigCategory renderingCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.rendering"));
 		renderingCategory
 			.addEntry(entryBuilder
-				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.particleRenderingMode")
-						.withStyle(ChatFormatting.STRIKETHROUGH),
-					RenderingMode.class, globalConfig.rendering.particleRenderingMode)
-				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
-				.setDefaultValue(defaultConfig.rendering.particleRenderingMode)
-				.setTooltip(
-					Component.translatable("config.asyncparticles.rendering.particleRenderingMode.tooltip"),
-					Component.translatable("config.asyncparticles.deprecated")
-						.withStyle(ChatFormatting.YELLOW))
-				.setSaveConsumer(newValue -> newConfig.rendering.particleRenderingMode = newValue)
-				.build())
-			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.gpuAcceleration"),
 					globalConfig.rendering.gpuAcceleration)
 				.setDefaultValue(defaultConfig.rendering.gpuAcceleration)
@@ -235,46 +216,19 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> newConfig.rendering.particleCulling = newValue)
 				.build())
 			.addEntry(entryBuilder
+				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.computeExecutionStage"),
+					ComputeExecutionStage.class, globalConfig.rendering.computeExecutionStage)
+				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
+				.setDefaultValue(defaultConfig.rendering.computeExecutionStage)
+				.setTooltip(Component.translatable("config.asyncparticles.rendering.computeExecutionStage.tooltip"))
+				.setSaveConsumer(newValue -> newConfig.rendering.computeExecutionStage = newValue)
+				.build())
+			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.cullWeathers"),
 					globalConfig.rendering.cullWeathers)
 				.setDefaultValue(defaultConfig.rendering.cullWeathers)
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.cullWeathers.tooltip"))
 				.setSaveConsumer(newValue -> newConfig.rendering.cullWeathers = newValue)
-				.build())
-			.addEntry(entryBuilder
-				.startIntField(Component.translatable("config.asyncparticles.rendering.failPerSecLimit")
-						.withStyle(ChatFormatting.STRIKETHROUGH),
-					globalConfig.rendering.failPerSecLimit)
-				.setDefaultValue(defaultConfig.rendering.failPerSecLimit)
-				.setTooltip(Component.translatable("config.asyncparticles.rendering.failPerSecLimit.tooltip"),
-					Component.translatable("config.asyncparticles.deprecated")
-						.withStyle(ChatFormatting.YELLOW))
-				.setSaveConsumer(newValue -> newConfig.rendering.failPerSecLimit = newValue)
-				.setMin(0)
-				.setMax(256)
-				.build())
-			.addEntry(entryBuilder
-				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.failBehavior"),
-					FailBehavior.class, globalConfig.rendering.failBehavior)
-				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
-				.setDefaultValue(defaultConfig.rendering.failBehavior)
-				.setTooltip(
-					Component.translatable("config.asyncparticles.rendering.failBehavior.tooltip")
-						.withStyle(ChatFormatting.STRIKETHROUGH),
-					Component.translatable("config.asyncparticles.not-implemented")
-						.withStyle(ChatFormatting.DARK_RED))
-				.setSaveConsumer(newValue -> newConfig.rendering.failBehavior = newValue)
-				.setRequirement(() -> false)
-				.build())
-			.addEntry(entryBuilder
-				.startStrList(Component.translatable("config.asyncparticles.rendering.syncParticleClasses")
-						.withStyle(ChatFormatting.STRIKETHROUGH),
-					new ArrayList<>(globalConfig.rendering.syncParticleClasses))
-				.setDefaultValue(new ArrayList<>(defaultConfig.rendering.syncParticleClasses))
-				.setTooltip(Component.translatable("config.asyncparticles.rendering.syncParticleClasses.tooltip"),
-					Component.translatable("config.asyncparticles.deprecated")
-						.withStyle(ChatFormatting.YELLOW))
-				.setSaveConsumer(newValue -> newConfig.rendering.syncParticleClasses = new LinkedHashSet<>(newValue))
 				.build());
 		// endregion
 		// region Compat Category

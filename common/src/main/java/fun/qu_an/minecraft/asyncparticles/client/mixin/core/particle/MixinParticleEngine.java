@@ -42,10 +42,6 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	@Inject(method = "add", at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
 	public void onAdd(Particle particle, CallbackInfo ci) {
 		ParticleHelper.doFirstRefresh(particle);
-		switch (ConfigHelper.getParticleCullingMode()) {
-			case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
-			case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
-		}
 	}
 
 	@Inject(method = "clearParticles", at = @At("HEAD"))

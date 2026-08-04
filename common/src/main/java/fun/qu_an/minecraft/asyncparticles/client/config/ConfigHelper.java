@@ -1,11 +1,9 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
 import fun.qu_an.minecraft.asyncparticles.client.core.Diagnostic;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig.*;
 
@@ -34,24 +32,12 @@ public class ConfigHelper {
 		return particle$particleLimit;
 	}
 
-	public static int getRenderFailurePerSecondThreshold() {
-		return rendering$failPerSecLimit;
-	}
-
 	public static int getTickFailurePerSecondThreshold() {
 		return tick$failPerSecLimit;
 	}
 
 	public static boolean isCullUnderwaterParticleType() {
 		return particle$cullUnderwaterParticleType;
-	}
-
-	public static boolean isRemoveIfMissedTick() {
-		return particle$removeIfMissedTick;
-	}
-
-	public static RenderingMode getParticleRenderingMode() {
-		return rendering$particleRenderingMode;
 	}
 
 	public static boolean isCullWeathers() {
@@ -68,20 +54,6 @@ public class ConfigHelper {
 
 	public static ParticleCullingMode getParticleCullingMode() {
 		return rendering$particleCulling;
-	}
-
-	public static List<? extends Class<?>> getRenderSyncParticleClasses() {
-		return rendering$syncParticleClasses
-			.stream()
-			.map(className -> {
-				try {
-					return Class.forName(className);
-				} catch (ClassNotFoundException e) {
-					return null;
-				}
-			})
-			.filter(Objects::nonNull)
-			.toList();
 	}
 
 	public static List<? extends Class<?>> getSyncParticleClassesTick() {

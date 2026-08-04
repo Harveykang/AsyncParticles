@@ -8,7 +8,6 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.render.AsyncRenderBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.Minecraft;
@@ -72,9 +71,6 @@ public final class AsyncParticlesClientNeoForge {
 				.executes(context -> {
 					CommandSourceStack source = context.getSource();
 					AsyncTickBehavior.getInstance().debugLater(s -> source.sendSystemMessage(Component.literal(s)
-						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
-							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
-					AsyncRenderBehavior.getInstance().debugLater(s -> source.sendSystemMessage(Component.literal(s)
 						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
 							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
 					return 1;
