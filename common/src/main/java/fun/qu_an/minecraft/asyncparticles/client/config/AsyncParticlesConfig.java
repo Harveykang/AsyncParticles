@@ -263,7 +263,6 @@ public class AsyncParticlesConfig {
 
 		static class Particle {
 			int particleLimit = DEFAULT_PARTICLE_LIMIT;
-			boolean removeIfMissedTick = false;
 			ParticleCleanupStrategy cleanupStrategy = ParticleCleanupStrategy.PARALLEL_WITH_TICK;
 			boolean parallelQueueRemoval = false;
 			boolean parallelQueueEviction = false;

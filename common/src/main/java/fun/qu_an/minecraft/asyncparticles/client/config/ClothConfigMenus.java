@@ -20,10 +20,10 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.TriState;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collector;
+
+import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 
 // No more NoClassDefFoundError
 class ClothConfigMenus {
@@ -48,13 +48,6 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> newConfig.particle.particleLimit = newValue)
 				.setMin(AsyncParticlesConfig.MIN_PARTICLE_LIMIT)
 				.setMax(AsyncParticlesConfig.MAX_PARTICLE_LIMIT)
-				.build())
-			.addEntry(entryBuilder
-				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.removeIfMissedTick"),
-					globalConfig.particle.removeIfMissedTick)
-				.setDefaultValue(defaultConfig.particle.removeIfMissedTick)
-				.setTooltip(Component.translatable("config.asyncparticles.particle.removeIfMissedTick.tooltip"))
-				.setSaveConsumer(newValue -> newConfig.particle.removeIfMissedTick = newValue)
 				.build())
 			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.particle.cleanupStrategy"),
@@ -129,13 +122,8 @@ class ClothConfigMenus {
 					globalConfig.tick.deferredTextureTick)
 				.setDefaultValue(defaultConfig.tick.deferredTextureTick)
 				.setTooltipSupplier(() -> {
-					if (ModListHelper.AXIOM_LOADED) {
-						return Optional.of(new MutableComponent[]{
-							Component.translatable("config.asyncparticles.tick.deferredTextureTick.tooltip")
-								.withStyle(ChatFormatting.STRIKETHROUGH),
-							Component.translatable("config.asyncparticles.incompatibility", "Axiom")
-								.withStyle(ChatFormatting.YELLOW)
-						});
+					if (AXIOM_LOADED) {
+						return incompatibilityTooltip(Component.translatable("config.asyncparticles.tick.deferredTextureTick.tooltip"), "Axiom");
 					} else {
 						return Optional.of(new MutableComponent[]{
 							Component.translatable("config.asyncparticles.tick.deferredTextureTick.tooltip")
@@ -143,7 +131,7 @@ class ClothConfigMenus {
 					}
 				})
 				.setSaveConsumer(newValue -> newConfig.tick.deferredTextureTick = newValue)
-				.setRequirement(() -> !ModListHelper.AXIOM_LOADED)
+				.setRequirement(() -> !AXIOM_LOADED)
 				.build())
 			.addEntry(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.tick.failPerSecLimit"),
@@ -272,7 +260,7 @@ class ClothConfigMenus {
 			.setDefaultValue(defaultConfig.valkyrienSkies.rainEffect)
 			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect.tooltip"))
 			.setSaveConsumer(newValue -> newConfig.valkyrienSkies.rainEffect = newValue)
-			.setRequirement(() -> ModListHelper.VS_LOADED)
+			.setRequirement(() -> VS_LOADED)
 			.build());
 		vsEntries.add(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.fixParticleLights"),
@@ -280,7 +268,7 @@ class ClothConfigMenus {
 			.setDefaultValue(defaultConfig.valkyrienSkies.fixParticleLights)
 			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.fixParticleLights.tooltip"))
 			.setSaveConsumer(newValue -> newConfig.valkyrienSkies.fixParticleLights = newValue)
-			.setRequirement(() -> ModListHelper.VS_LOADED)
+			.setRequirement(() -> VS_LOADED)
 			.build());
 
 		@SuppressWarnings("rawtypes")
@@ -292,7 +280,7 @@ class ClothConfigMenus {
 			.setDefaultValue(defaultConfig.create.rainEffect)
 			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect.tooltip"))
 			.setSaveConsumer(newValue -> newConfig.create.rainEffect = newValue)
-			.setRequirement(() -> ModListHelper.CREATE_LOADED)
+			.setRequirement(() -> CREATE_LOADED)
 			.build());
 		createEntries.add(entryBuilder
 			.startIntField(Component.translatable("config.asyncparticles.mod-compat.create.tickRainBlockingRange"),
@@ -300,7 +288,7 @@ class ClothConfigMenus {
 			.setDefaultValue(defaultConfig.create.tickRainBlockingRange)
 			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.create.tickRainBlockingRange.tooltip"))
 			.setSaveConsumer(newValue -> newConfig.create.tickRainBlockingRange = newValue)
-			.setRequirement(() -> ModListHelper.CREATE_LOADED)
+			.setRequirement(() -> CREATE_LOADED)
 			.build());
 		// endregion
 
@@ -391,5 +379,18 @@ class ClothConfigMenus {
 		});
 
 		return builder;
+	}
+
+	private static Optional<Component[]> incompatibilityTooltip(MutableComponent description, Object... modNames) {
+		Component modNamesStr = Arrays.stream(modNames)
+			.filter(Objects::nonNull)
+			.map(modName -> modName instanceof Component ? (Component) modName : Component.literal(String.valueOf(modName)))
+			.collect(Collector.of(Component::empty, MutableComponent::append, (a, b) -> a.append(", ").append(b)));
+
+		return Optional.of(new MutableComponent[]{
+			description.withStyle(ChatFormatting.STRIKETHROUGH),
+			Component.translatable("config.asyncparticles.incompatibility", modNamesStr)
+				.withStyle(ChatFormatting.YELLOW)
+		});
 	}
 }
