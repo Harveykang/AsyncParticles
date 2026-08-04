@@ -3,8 +3,8 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.animate_tick;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.AnimateTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.Diagnostic;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -29,12 +29,8 @@ public abstract class MixinClientLevel extends Level {
 
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int xt, int yt, int zt, Operation<Void> original) {
-		if (!AsyncTickBehavior.getInstance().isTailTick() &&
-			ConfigHelper.isAsyncParticleTick()) {
-			// don't tick animate if the game is lagging
-			return;
-		}
-		if (ConfigHelper.isAsyncAnimateTick()) {
+		if (ConfigHelper.isAsyncAnimateTick()
+			&& AsyncTickBehavior.getInstance().isTailTick()) {
 			AsyncTickBehavior.getInstance().addTaskEnsureLevelRunning(
 				() -> original.call(xt, yt, zt), Diagnostic::errorAsyncAnimateTick);
 		} else {
@@ -48,7 +44,7 @@ public abstract class MixinClientLevel extends Level {
 		if (cameraEntity == null) {
 			return;
 		}
-		AnimateTickBehavior.CULL_UNDERWATER_PARTICLE_TYPE.set(!ConfigHelper.isCullUnderwaterParticleType() ||
+		ParticleHelper.CULL_UNDERWATER_PARTICLE_TYPE.set(!ConfigHelper.isCullUnderwaterParticleType() ||
 			cameraEntity.level().getFluidState(cameraEntity.blockPosition()).is(FluidTags.WATER));
 	}
 

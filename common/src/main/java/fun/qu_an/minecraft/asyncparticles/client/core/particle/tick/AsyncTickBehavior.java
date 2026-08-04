@@ -203,8 +203,8 @@ public class AsyncTickBehavior {
 		tryReload();
 		tryDebug();
 		tickTaskHelper.groupTasks(false);
-		ParticleCleanupStrategy cleanupStrategy = ConfigHelper.getParticleCleanupStrategy();
 		if (ConfigHelper.isAsyncParticleTick()) {
+			ParticleCleanupStrategy cleanupStrategy = ConfigHelper.getParticleCleanupStrategy();
 			if (cleanupStrategy == ParticleCleanupStrategy.BLOCK_MAIN_THREAD) {
 				prepareCleanupTasks(cleanupTaskHelper);
 				cleanupTaskHelper.submitAll();

@@ -21,6 +21,7 @@
     "compat.particlerain.MixinParticleRain",
     "compat.particlerain.MixinParticleSpawner",
     "compat.particlerain.MixinWeatherParticle",
+    "compat.particletweaks.MixinMixinSingleQuadParticle",
     "compat.sodium.MixinQuadParticleRenderState",
     "compat.sodium_extra.MixinFireworkParticles$Starter",
     "compat.sodium_extra.MixinParticleEngine",
@@ -30,13 +31,13 @@
     "conditional.MixinAsyncTick_AsyncTickableParticleGroup",
     "conditional.MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_Off",
     "conditional.MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_On",
+    "conditional.MixinLegacyRandomSource",
     "conditional.MixinLevelChunk_SafeBlockEntityMap_Off",
     "conditional.MixinLevelChunk_SafeBlockEntityMap_On",
     "conditional.MixinParticles_LightCacheNoRefresh",
     "conditional.MixinParticles_LockProvider",
     "conditional.MixinParticles_LockRequired_Extract",
     "conditional.MixinParticles_LockRequired_Tick",
-    "core.MixinParticleEngine",
     "core.MixinRenderSystem",
     "core.animate_tick.MixinClientLevel",
     "core.animate_tick.MixinWaterFluid",
@@ -71,8 +72,7 @@
     "off_thread_access.MixinLevel",
     "off_thread_access.MixinLevelRenderer",
     "off_thread_access.MixinSoundEngine",
-    "off_thread_access.MixinSoundManager",
-    "conditional.MixinLegacyRandomSource"
+    "off_thread_access.MixinSoundManager"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -102,6 +102,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "immediatelyfast" -> IMMEDIATELY_FAST_LOADED;
 				case "figura" -> FIGURA_LOADED;
 				case "cosycritters" -> COSYCRITTERS_LOADED;
+				case "particletweaks" -> PARTICLE_TWEAKS_LOADED;
 				default -> throw new IllegalStateException("Unknown compat mixin: " + mixinClassName);
 			};
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
