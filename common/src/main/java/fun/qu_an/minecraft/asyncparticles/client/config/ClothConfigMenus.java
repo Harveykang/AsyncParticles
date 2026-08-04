@@ -48,13 +48,6 @@ class ClothConfigMenus {
 				.setMax(AsyncParticlesConfig.MAX_PARTICLE_LIMIT)
 				.build())
 			.addEntry(entryBuilder
-				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.removeIfMissedTick"),
-					globalConfig.particle.removeIfMissedTick)
-				.setDefaultValue(defaultConfig.particle.removeIfMissedTick)
-				.setTooltip(Component.translatable("config.asyncparticles.particle.removeIfMissedTick.tooltip"))
-				.setSaveConsumer(newValue -> newConfig.particle.removeIfMissedTick = newValue)
-				.build())
-			.addEntry(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.particle.cleanupStrategy"),
 					ParticleCleanupStrategy.class, globalConfig.particle.cleanupStrategy)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())

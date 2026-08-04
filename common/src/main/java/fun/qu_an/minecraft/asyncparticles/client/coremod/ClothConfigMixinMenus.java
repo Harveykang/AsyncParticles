@@ -8,9 +8,11 @@ import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collector;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.COSYCRITTERS_LOADED;
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.MAKE_BUBBLES_POP_LOADED;
@@ -31,33 +33,20 @@ public class ClothConfigMixinMenus {
 			.setDefaultValue(defaultConfig.isSafeClassInstanceMultiMap())
 			.setSaveConsumer(newConfig::setSafeClassInstanceMultiMap)
 			.setTooltipSupplier(() -> {
-				if (!MAKE_BUBBLES_POP_LOADED
-					&& !COSYCRITTERS_LOADED) {
+				if (MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED) {
+					return limitedTooltip(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip"),
+						MAKE_BUBBLES_POP_LOADED ? "Make Bubbles Pop" : null,
+						COSYCRITTERS_LOADED ? "CosyCritters" : null);
+				} else {
 					return Optional.of(new Component[]{
 						Component.translatable("text.cloth-config.restart_required")
 							.withStyle(ChatFormatting.DARK_RED),
 						Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip")
 					});
-				} else {
-					ArrayList<Component> list = new ArrayList<>();
-
-					list.add(Component.translatable("text.cloth-config.restart_required")
-						.withStyle(ChatFormatting.DARK_RED));
-					list.add(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip"));
-					if (MAKE_BUBBLES_POP_LOADED) {
-						list.add(Component.translatable("config.asyncparticles.limited", "Make Bubbles Pop")
-							.withStyle(ChatFormatting.DARK_RED));
-					}
-					if (COSYCRITTERS_LOADED) {
-						list.add(Component.translatable("config.asyncparticles.limited", "Cosy Critters")
-							.withStyle(ChatFormatting.DARK_RED));
-					}
-					return Optional.of(list.toArray(new Component[0]));
 				}
 			})
 			.requireRestart()
-			.setRequirement(() -> !MAKE_BUBBLES_POP_LOADED
-				&& !COSYCRITTERS_LOADED)
+			.setRequirement(() -> !MAKE_BUBBLES_POP_LOADED && !COSYCRITTERS_LOADED)
 			.build());
 		mixinCategory.addEntry(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap"),
@@ -211,5 +200,18 @@ public class ClothConfigMixinMenus {
 //				Component.translatable("config.asyncparticles.mixin.tooltip"))
 //			.requireRestart()
 //			.build()));
+	}
+
+	private static Optional<Component[]> limitedTooltip(MutableComponent description, Object... modNames) {
+		Component modNamesStr = Arrays.stream(modNames)
+			.filter(Objects::nonNull)
+			.map(modName -> modName instanceof Component ? (Component) modName : Component.literal(String.valueOf(modName)))
+			.collect(Collector.of(Component::empty, MutableComponent::append, (a, b) -> a.append(", ").append(b)));
+
+		return Optional.of(new MutableComponent[]{
+			description.withStyle(ChatFormatting.STRIKETHROUGH),
+			Component.translatable("config.asyncparticles.limited", modNamesStr)
+				.withStyle(ChatFormatting.YELLOW)
+		});
 	}
 }
