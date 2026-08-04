@@ -298,7 +298,6 @@ public class AsyncParticlesConfig {
 			boolean tickWeatherAsync = !ModListHelper.PHYSICSMOD_LOADED;
 			boolean deferredTextureTick = !ModListHelper.AXIOM_LOADED;
 			int failPerSecLimit = 5;
-//			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
 			boolean suppressCME = false;
 			Set<String> syncParticleClasses = new LinkedHashSet<>();
 			{
@@ -311,7 +310,6 @@ public class AsyncParticlesConfig {
 				tick$tickWeatherAsync = tickWeatherAsync && !ModListHelper.PHYSICSMOD_LOADED;
 				tick$deferredTextureTick = deferredTextureTick && !ModListHelper.AXIOM_LOADED;
 				tick$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
-//				tick$failBehavior = requireNonNullElse(failBehavior, FailBehavior.RAISE_CRASH);
 				tick$suppressCME = suppressCME;
 				tick$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
 			}
@@ -323,7 +321,6 @@ public class AsyncParticlesConfig {
 				tickWeatherAsync = tick$tickWeatherAsync;
 				deferredTextureTick = tick$deferredTextureTick;
 				failPerSecLimit = tick$failPerSecLimit;
-//				failBehavior = tick$failBehavior;
 				suppressCME = tick$suppressCME;
 				syncParticleClasses = new LinkedHashSet<>(tick$syncParticleClasses);
 			}
@@ -334,28 +331,12 @@ public class AsyncParticlesConfig {
 			boolean gpuAcceleration = Backends.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
 			ComputeExecutionStage computeExecutionStage = ComputeExecutionStage.LEVEL_RENDERING;
-//			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
-//			Set<String> syncParticleClasses = new LinkedHashSet<>();
-//			{
-//				syncParticleClasses.add("com.lootbeams.VFXParticle");
-//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleCasting");
-//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleGhost");
-//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleGraveSoul");
-//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleMagicCircle");
-//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleMarker");
-//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleRounding");
-//				syncParticleClasses.add("concerrox.effective.particle.SplashParticle");
-//				syncParticleClasses.add("org.ladysnake.effective.particle.SplashParticle");
-//				syncParticleClasses.add("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
-//			}
 
 			private void flat() {
 				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
 				rendering$gpuAcceleration = gpuAcceleration && Backends.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
 				rendering$computeExecutionStage = requireNonNullElse(computeExecutionStage, ComputeExecutionStage.LEVEL_RENDERING);
-//				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
-//				rendering$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
 			}
 
 			private void fold() {
@@ -363,8 +344,6 @@ public class AsyncParticlesConfig {
 				gpuAcceleration = rendering$gpuAcceleration;
 				appendNewParticlesToRenderer = rendering$appendNewParticlesToRenderer;
 				computeExecutionStage = rendering$computeExecutionStage;
-//				failBehavior = rendering$failBehavior;
-//				syncParticleClasses = new LinkedHashSet<>(rendering$syncParticleClasses);
 			}
 		}
 

@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.deffered_texture_ti
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -22,7 +23,8 @@ public class MixinTextureManager {
 
 	@WrapMethod(method = "tick")
 	public void wrapTick(Operation<Void> original) {
-		if (ConfigHelper.isDeferredTextureTick()) {
+		if (ConfigHelper.isDeferredTextureTick()
+			&& AsyncTickBehavior.getInstance().isTailTick()) {
 			ThreadUtil.enqueueClientTask(() -> {
 				if (asyncparticles$deferredTickEnabled) {
 					original.call();

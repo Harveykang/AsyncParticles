@@ -105,6 +105,8 @@ public class ModListHelper {
 	public static final boolean PARTICLE_INTERACTIONS_LOADED = isModLoaded("eg_particle_interactions");
 	/* Async */
 	public static final boolean ASYNC_LOADED = isModLoaded("async");
+	/* Particle Tweaks */
+	public static final boolean PARTICLE_TWEAKS_LOADED = isModLoaded("particletweaks");
 
 	private static boolean isForge() {
 		return PLATFORM.isForge();

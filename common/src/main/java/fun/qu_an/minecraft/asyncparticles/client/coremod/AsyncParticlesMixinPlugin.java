@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Set;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
-import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.ASYNC_LOADED;
 
 public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 	public static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles:plugin");
@@ -109,6 +108,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "figura" -> FIGURA_LOADED;
 				case "cosycritters" -> COSYCRITTERS_LOADED;
 				case "particle_interactions" -> PARTICLE_INTERACTIONS_LOADED;
+				case "particletweaks" -> PARTICLE_TWEAKS_LOADED;
 				default -> throw new IllegalStateException("Unknown compat mixin: " + mixinClassName);
 			};
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
