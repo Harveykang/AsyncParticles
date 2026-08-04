@@ -110,12 +110,7 @@ public class AsyncTickBehavior {
 		ParticleAddon particleAddon = (ParticleAddon) particle;
 		if (ConfigHelper.isAsyncParticleTick() && particleAddon.asyncparticles$isTicked()) {
 			particleAddon.asyncparticles$resetTicked();
-			return false;
 		}
-		return ConfigHelper.isRemoveIfMissedTick();
-	}
-
-	public boolean isCancelled() {
 		return false;
 	}
 
@@ -291,7 +286,7 @@ public class AsyncTickBehavior {
 			sync particle types: %s,
 			Backend: %s"""
 			.formatted(
-				ConfigHelper.isAsyncParticleTick() ? timeUsageNano.getAcquire() / 1000000d : Double.NaN,
+				timeUsageNano.getAcquire() / 1000000d,
 				tickTaskHelper.taskCount(),
 				ConfigHelper.getParticleLimit(),
 				Minecraft.getInstance().particleEngine.particles.entrySet()

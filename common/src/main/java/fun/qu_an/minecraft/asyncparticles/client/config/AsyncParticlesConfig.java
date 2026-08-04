@@ -44,7 +44,6 @@ public class AsyncParticlesConfig {
 		.create();
 	static final Logger LOGGER = LogUtils.getLogger();
 	public static int particle$particleLimit;
-	public static boolean particle$removeIfMissedTick;
 	public static ParticleCleanupStrategy particle$cleanupStrategy;
 	public static boolean particle$parallelQueueRemoval;
 	public static boolean particle$parallelQueueEviction;
@@ -273,7 +272,6 @@ public class AsyncParticlesConfig {
 
 			private void flat() {
 				particle$particleLimit = Mth.clamp(particleLimit, MIN_PARTICLE_LIMIT, MAX_PARTICLE_LIMIT);
-				particle$removeIfMissedTick = removeIfMissedTick;
 				particle$cleanupStrategy = requireNonNullElse(cleanupStrategy, ParticleCleanupStrategy.PARALLEL_WITH_TICK);
 				particle$parallelQueueRemoval = parallelQueueRemoval;
 				particle$parallelQueueEviction = parallelQueueEviction;
@@ -283,7 +281,6 @@ public class AsyncParticlesConfig {
 
 			private void fold() {
 				particleLimit = particle$particleLimit;
-				removeIfMissedTick = particle$removeIfMissedTick;
 				cleanupStrategy = particle$cleanupStrategy;
 				parallelQueueRemoval = particle$parallelQueueRemoval;
 				parallelQueueEviction = particle$parallelQueueEviction;

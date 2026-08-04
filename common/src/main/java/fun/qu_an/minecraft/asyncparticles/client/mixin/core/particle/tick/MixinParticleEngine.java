@@ -4,6 +4,7 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick;
 import fun.qu_an.minecraft.asyncparticles.client.addon.*;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.client.particle.*;
 import net.minecraft.util.profiling.Profiler;
@@ -90,11 +91,16 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 					}
 					return particleGroup;
 				});
-				if (((ParticleGroupAddition) group).asyncparticles$canTickAsync()
+				// add to sync queue only if async tick enabled, gpu only disabled, and particle class is sync
+				if (tickAsync
+					&& ((ParticleGroupAddition) group).asyncparticles$canTickAsync()
 //					&& ConfigHelper.isAsyncTickParticle() // tested in asyncparticles$canTickAsync()
 					&& tickBehavior.shouldSync(((ParticleAddon) particle).asyncparticles$getRealClass())) {
-					// add to sync queue only if async tick enabled, gpu only disabled, and particle class is sync
-					((AsyncTickableParticleGroup) group).asyncparticles$addSync(particle);
+					if (GpuParticleBehavior.getInstance().canRenderFast(particle)) {
+						((AsyncTickableParticleGroup) group).asyncparticles$addSyncGpuParticle(particle);
+					} else if (asyncAll) {
+						((AsyncTickableParticleGroup) group).asyncparticles$addSyncParticle(particle);
+					}
 				}
 				group.add(particle);
 			}

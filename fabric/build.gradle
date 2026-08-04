@@ -132,7 +132,7 @@ dependencies {
 
     /* Particle Tweaks */
     localRuntime "maven.modrinth:frozenlib:JjJtEhgO" // 2.4.4-mc26.1
-    localRuntime "maven.modrinth:particle-tweaks:3.0.1-mc26.1"
+//    localRuntime "maven.modrinth:particle-tweaks:3.0.1-mc26.1"
 
     /* Vulkan Mod */
     if (false) {
