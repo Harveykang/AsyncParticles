@@ -100,10 +100,10 @@ public abstract class MixinTextureSheetParticle extends SingleQuadParticle imple
 
 	public int asyncparticles$getOColor() {
 		return FastColor.ABGR32.color( // ABGR
-			(int) (alpha * 255.0f),
-			(int) (bCol * 255.0f),
-			(int) (gCol * 255.0f),
-			(int) (rCol * 255.0f));
+			(int) (alpha * 255.0f) & 255,
+			(int) (bCol * 255.0f) & 255,
+			(int) (gCol * 255.0f) & 255,
+			(int) (rCol * 255.0f) & 255);
 	}
 
 	public int asyncparticles$getColor(int oColor) {
