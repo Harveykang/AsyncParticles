@@ -86,10 +86,12 @@
     "off_thread_access.MixinClientChunkCache",
     "off_thread_access.MixinClientLevel",
     "off_thread_access.MixinEntityGetter",
+    "off_thread_access.MixinGlStateManager",
     "off_thread_access.MixinLevel",
     "off_thread_access.MixinLevelChunkSection",
     "off_thread_access.MixinLevelRenderer",
-    "off_thread_access.MixinSoundEngine"
+    "off_thread_access.MixinSoundEngine",
+    "off_thread_access.MixinTextureUtil"
   ],
   "injectors": {
     "defaultRequire": 1
