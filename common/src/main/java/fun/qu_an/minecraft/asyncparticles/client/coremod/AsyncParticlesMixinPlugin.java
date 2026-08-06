@@ -104,6 +104,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "immersive_portals" -> IMMERSIVE_PORTALS_LOADED;
 				case "cosycritters" -> COSYCRITTERS_LOADED;
 				case "goop" -> GOOP_LOADED;
+				case "vulkanmod" -> VULKAN_MOD_LOADED;
 				default -> throw new IllegalArgumentException("Unknown compat mixin: " + mixinClassName);
 			};
 			case "fabric" -> switch (split[1]) {
@@ -111,7 +112,6 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "compat" -> !IS_FORGE && switch (split[2]) {
 					case "create" -> FABRIC_CREATE_LOADED;
 					case "effective" -> FABRIC_EFFECTIVE_LOADED;
-					case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
 					case "iris" -> FABRIC_IRIS_LOADED;
 					case "iris_else" -> !FABRIC_IRIS_LOADED;
 					case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;

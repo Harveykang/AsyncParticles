@@ -116,4 +116,28 @@ dependencies {
 
     /* Aether */
     modCompileOnly "maven.modrinth:aether:1.21.1-1.5.11-fabric"
+    modCompileOnly "maven.modrinth:cumulus:1.21.1-2.0.8-fabric"
+
+    /* Vulkan Mod */
+    modCompileOnly "maven.modrinth:vulkanmod:0.6.7+1.21.1"
+    modCompileOnly "maven.modrinth:beryl:ctik2Mfd" // 0.2.0
+    modCompileOnly "org.lwjgl:lwjgl-vma:3.3.3"
+    modCompileOnly "org.lwjgl:lwjgl-vulkan:3.3.3"
+}
+
+tasks.register('compileSpirv', Exec) {
+    def shaderSrc = file('src/main/resources/assets/asyncparticles/particle_gpu_acceleration/vk_particle_compute.comp')
+    def spvOutDir = layout.buildDirectory.dir('resources/main/assets/asyncparticles/particle_gpu_acceleration/').get().asFile
+    inputs.file shaderSrc
+
+    def dest = new File(spvOutDir, 'vk_particle_compute.spv')
+    dest.delete()
+    outputs.file dest
+    commandLine rootProject.glsl_validator,
+            '-V', '-S', 'comp', '--target-env', 'vulkan1.0',
+            shaderSrc.absolutePath, '-o', dest.absolutePath
+}
+
+processResources {
+    dependsOn compileSpirv
 }

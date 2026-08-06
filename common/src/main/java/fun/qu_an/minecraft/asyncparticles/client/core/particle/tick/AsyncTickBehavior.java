@@ -196,52 +196,55 @@ public class AsyncTickBehavior {
 		LocalPlayer player = mc.player;
 		Entity cameraEntity = mc.getCameraEntity();
 		boolean levelRunning = level != null && player != null && cameraEntity != null && !mc.isPaused();
+		tryReload();
 		if (!levelRunning || !isTailTick()) {
-			tickTaskHelper.disposeTasks();
 			Queue<Particle> particlesToAdd = mc.particleEngine.particlesToAdd;
 			if (!particlesToAdd.isEmpty()) {
 				particlesToAdd.forEach(ParticleHelper::onEvictIgnoreExceptions);
 				particlesToAdd.clear();
 			}
-			return;
-		}
-		tryReload();
-		tryDebug();
-		tickTaskHelper.groupTasks(false);
-		if (ConfigHelper.isAsyncParticleTick()) {
-			ParticleCleanupStrategy cleanupStrategy = ConfigHelper.getParticleCleanupStrategy();
-			if (cleanupStrategy == ParticleCleanupStrategy.BLOCK_MAIN_THREAD) {
-				prepareCleanupTasks(cleanupTaskHelper);
-				cleanupTaskHelper.submitAll();
-				cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
-			} else if (cleanupStrategy == ParticleCleanupStrategy.MAIN_THREAD) {
-				if (!ConfigHelper.isGpuOnlyAsyncParticleTick()) {
-					Collection<Queue<Particle>> queues = mc.particleEngine.particles.values();
-					for (Queue<Particle> queue : queues) {
-						if (!queues.isEmpty()) {
-							doParticlesRemoveIf(queue);
-						}
-					}
-				}
-				if (ConfigHelper.isGpuParticles()) {
-					Collection<Queue<TextureSheetParticle>> gpuQueues = GpuParticleBehavior.getInstance().gpuParticles.values();
-					for (Queue<TextureSheetParticle> queue : gpuQueues) {
-						if (!gpuQueues.isEmpty()) {
-							doParticlesRemoveIf(queue);
-						}
-					}
-				}
-				Queue<TrackingEmitter> trackingEmitters = mc.particleEngine.trackingEmitters;
-				if (!trackingEmitters.isEmpty()) {
-					doEmittersRemoveIf(trackingEmitters);
-				}
+			if (!mc.isPaused()) {
+				tickTaskHelper.disposeTasks();
+				return;
 			}
-			particlePhase = true;
-			mc.particleEngine.tick();
-			particlePhase = false;
-			if (cleanupStrategy == ParticleCleanupStrategy.AFTER_ASYNC_TICK) {
-				tickTaskHelper.groupTasks(false);
-				prepareCleanupTasks(tickTaskHelper);
+		} else {
+			tryDebug();
+			tickTaskHelper.groupTasks(false);
+			if (ConfigHelper.isAsyncParticleTick()) {
+				ParticleCleanupStrategy cleanupStrategy = ConfigHelper.getParticleCleanupStrategy();
+				if (cleanupStrategy == ParticleCleanupStrategy.BLOCK_MAIN_THREAD) {
+					prepareCleanupTasks(cleanupTaskHelper);
+					cleanupTaskHelper.submitAll();
+					cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
+				} else if (cleanupStrategy == ParticleCleanupStrategy.MAIN_THREAD) {
+					if (!ConfigHelper.isGpuOnlyAsyncParticleTick()) {
+						Collection<Queue<Particle>> queues = mc.particleEngine.particles.values();
+						for (Queue<Particle> queue : queues) {
+							if (!queues.isEmpty()) {
+								doParticlesRemoveIf(queue);
+							}
+						}
+					}
+					if (ConfigHelper.isGpuParticles()) {
+						Collection<Queue<TextureSheetParticle>> gpuQueues = GpuParticleBehavior.getInstance().gpuParticles.values();
+						for (Queue<TextureSheetParticle> queue : gpuQueues) {
+							if (!gpuQueues.isEmpty()) {
+								doParticlesRemoveIf(queue);
+							}
+						}
+					}
+					Queue<TrackingEmitter> trackingEmitters = mc.particleEngine.trackingEmitters;
+					if (!trackingEmitters.isEmpty()) {
+						doEmittersRemoveIf(trackingEmitters);
+					}
+				}
+				particlePhase = true;
+				mc.particleEngine.tick();
+				particlePhase = false;
+				if (cleanupStrategy == ParticleCleanupStrategy.AFTER_ASYNC_TICK) {
+					tickTaskHelper.groupTasks(false);
+					prepareCleanupTasks(tickTaskHelper);
+				}
 			}
 		}
 		tickTaskHelper.submitAll(() -> {

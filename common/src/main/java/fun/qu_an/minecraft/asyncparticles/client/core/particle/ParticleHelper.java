@@ -99,8 +99,8 @@ public class ParticleHelper {
 		}
 	}
 
-	public static void tickParticles(Runnable tickRunnable, boolean isGpu) {
-		GPU_PARTICLE_PHASE.set(isGpu);
+	public static void tickGpuParticles(Runnable tickRunnable) {
+		GPU_PARTICLE_PHASE.set(true);
 		tickRunnable.run();
 		GPU_PARTICLE_PHASE.set(false);
 	}

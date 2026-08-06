@@ -32,12 +32,12 @@ public class DevRuntimeDebug {
 				};
 				Backends.gl = switch (directStateAccess) {
 					case TRUE ->
-						Backends.getGl(Backends.backend == Backend.OPENGL_ES, true, Backends.gl.vertexAttribBinding());
+						Backends.getGl(Backends.backend == Backend.OPENGL_ON_ES, true, Backends.gl.vertexAttribBinding());
 					case FALSE ->
-						Backends.getGl(Backends.backend == Backend.OPENGL_ES, false, Backends.gl.vertexAttribBinding());
+						Backends.getGl(Backends.backend == Backend.OPENGL_ON_ES, false, Backends.gl.vertexAttribBinding());
 					case DEFAULT -> {
 						GLCapabilities glCapabilities = GL.getCapabilities();
-						yield Backends.getGl(Backends.backend == Backend.OPENGL_ES, glCapabilities.GL_ARB_direct_state_access, Backends.gl.vertexAttribBinding());
+						yield Backends.getGl(Backends.backend == Backend.OPENGL_ON_ES, glCapabilities.GL_ARB_direct_state_access, Backends.gl.vertexAttribBinding());
 					}
 				};
 				GpuParticleBehavior.getInstance().close();

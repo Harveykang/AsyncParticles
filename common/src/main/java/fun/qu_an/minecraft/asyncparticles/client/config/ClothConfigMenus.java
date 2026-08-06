@@ -313,7 +313,7 @@ class ClothConfigMenus {
 		// endregion
 
 		// region Mobile
-		if (Backends.backend == Backend.OPENGL_ES) {
+		if (Backends.backend == Backend.OPENGL_ON_ES) {
 			builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mobile"))
 				.addEntry(entryBuilder
 					.startBooleanToggle(Component.translatable("config.asyncparticles.mobile.multiDrawWorkaround"), globalConfig.mobile.multiDrawWorkaround)

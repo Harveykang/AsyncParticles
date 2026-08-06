@@ -76,8 +76,8 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				ProfilerFiller profiler = this.level.getProfiler();
 				profiler.push(renderType.toString());
 				if (!tickBehavior.shouldSyncRenderType(renderType.getClass())) {
-					ParticleHelper.tickParticles(() -> tickParticleList(tickBehavior.getSyncParticles(renderType)), false);
-					taskHelper.addTask(() -> ParticleHelper.tickParticles(() -> tickParticleList(queue), false));
+					tickParticleList(tickBehavior.getSyncParticles(renderType));
+					taskHelper.addTask(() -> tickParticleList(queue));
 				} else {
 					tickParticleList(queue);
 				}
@@ -111,7 +111,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 					Queue<Particle> queue1 = ParticleHelper.newParticleQueue();
 					if (asyncAll && !tickBehavior.shouldSyncRenderType(renderType.getClass())) {
 						AsyncTickBehavior.getInstance().getTickTaskManager()
-							.addTask(() -> ParticleHelper.tickParticles(() -> tickParticleList(queue1), false));
+							.addTask(() -> tickParticleList(queue1));
 					}
 					return queue1;
 				}).add(particle);

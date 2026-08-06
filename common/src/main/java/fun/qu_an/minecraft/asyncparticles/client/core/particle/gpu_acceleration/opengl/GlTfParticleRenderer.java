@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl;
 
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -10,13 +9,13 @@ import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ComputeResult;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.LayerBatch;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ParticleVertexFormats;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -454,7 +453,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		ShaderInstance shader = RenderSystem.getShader();
 		Objects.requireNonNull(shader);
 
-		prepareShader(shader);
+		IParticleRenderer.prepareShader(shader);
 
 		shader.apply();
 
@@ -475,68 +474,6 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		shader.clear();
 
 		ParticleVertexBuffer.unbind();
-	}
-
-	private void prepareShader(ShaderInstance shader) {
-		for (int i = 0; i < 12; ++i) {
-			int j = RenderSystem.getShaderTexture(i);
-			shader.setSampler("Sampler" + i, j);
-		}
-
-		if (shader.MODEL_VIEW_MATRIX != null) {
-			shader.MODEL_VIEW_MATRIX.set(RenderSystem.getModelViewMatrix());
-		}
-
-		if (shader.PROJECTION_MATRIX != null) {
-			shader.PROJECTION_MATRIX.set(RenderSystem.getProjectionMatrix());
-		}
-
-//		if (shader.INVERSE_VIEW_ROTATION_MATRIX != null) {
-//			shader.INVERSE_VIEW_ROTATION_MATRIX.set(RenderSystem.getInverseViewRotationMatrix());
-//		}
-
-		if (shader.COLOR_MODULATOR != null) {
-			shader.COLOR_MODULATOR.set(RenderSystem.getShaderColor());
-		}
-
-		if (shader.GLINT_ALPHA != null) {
-			shader.GLINT_ALPHA.set(RenderSystem.getShaderGlintAlpha());
-		}
-
-		if (shader.FOG_START != null) {
-			shader.FOG_START.set(RenderSystem.getShaderFogStart());
-		}
-
-		if (shader.FOG_END != null) {
-			shader.FOG_END.set(RenderSystem.getShaderFogEnd());
-		}
-
-		if (shader.FOG_COLOR != null) {
-			shader.FOG_COLOR.set(RenderSystem.getShaderFogColor());
-		}
-
-		if (shader.FOG_SHAPE != null) {
-			shader.FOG_SHAPE.set(RenderSystem.getShaderFogShape().getIndex());
-		}
-
-		if (shader.TEXTURE_MATRIX != null) {
-			shader.TEXTURE_MATRIX.set(RenderSystem.getTextureMatrix());
-		}
-
-		if (shader.GAME_TIME != null) {
-			shader.GAME_TIME.set(RenderSystem.getShaderGameTime());
-		}
-
-		if (shader.SCREEN_SIZE != null) {
-			Window window = Minecraft.getInstance().getWindow();
-			shader.SCREEN_SIZE.set((float) window.getWidth(), (float) window.getHeight());
-		}
-
-//		if (shader.LINE_WIDTH != null && (this.mode == VertexFormat.Mode.LINES || this.mode == VertexFormat.Mode.LINE_STRIP)) {
-//			shader.LINE_WIDTH.set(RenderSystem.getShaderLineWidth());
-//		}
-
-		RenderSystem.setupShaderLights(shader);
 	}
 
 	private void buildDrawStuffs(List<LayerBatch> layerBatch) {
@@ -562,7 +499,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		}
 		multiDrawFirst = first.toIntArray();
 		multiDrawCount = count.toIntArray();
-		computeResult = ComputeResult.of(target, baseCount, slices);
+		computeResult = ComputeResult.of(baseCount, slices);
 	}
 
 	@Override

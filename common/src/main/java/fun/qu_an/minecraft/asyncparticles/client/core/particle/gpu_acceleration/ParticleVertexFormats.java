@@ -1,6 +1,8 @@
-package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
 import com.mojang.blaze3d.vertex.VertexFormatElement;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.ParticleVertexFormat;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.ParticleVertexFormatElement;
 
 public class ParticleVertexFormats {
 	public static final int RAW_PARTICLE_BYTES = 68; // GPU_PARTICLE.getVertexSize();

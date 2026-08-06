@@ -69,12 +69,32 @@ dependencies {
 
     /* Performance */
 //    modLocalRuntime "maven.modrinth:sodium:mc1.21.1-0.8.12-alpha.3-fabric"
-    modLocalRuntime "maven.modrinth:sodium:mc1.21.1-0.6.13-fabric"
-    modLocalRuntime "maven.modrinth:sodium-extra:mc1.21.1-0.6.0+fabric"
-    modLocalRuntime 'maven.modrinth:iris:1.8.8+1.21.1-fabric'
-    localRuntime "org.antlr:antlr4-runtime:4.13.1"
-    localRuntime "io.github.douira:glsl-transformer:2.0.1"
-    localRuntime "org.anarres:jcpp:1.4.14"
+    if (false) {
+        modLocalRuntime "maven.modrinth:sodium:mc1.21.1-0.6.13-fabric"
+        modLocalRuntime "maven.modrinth:sodium-extra:mc1.21.1-0.6.0+fabric"
+        modLocalRuntime 'maven.modrinth:iris:1.8.8+1.21.1-fabric'
+        localRuntime "org.antlr:antlr4-runtime:4.13.1"
+        localRuntime "io.github.douira:glsl-transformer:2.0.1"
+        localRuntime "org.anarres:jcpp:1.4.14"
+    } else {
+        /* Vulkan Mod */
+        modLocalRuntime "maven.modrinth:vulkanmod:0.6.7+1.21.1"
+        modLocalRuntime "maven.modrinth:beryl:ctik2Mfd" // 0.2.0
+        localRuntime("org.lwjgl:lwjgl-vulkan:3.3.3")
+        localRuntime("org.lwjgl:lwjgl-vma:3.3.3")
+        localRuntime("org.lwjgl:lwjgl-vma:3.3.3:natives-windows")
+//    localRuntime("org.lwjgl:lwjgl-vma:3.3.3:natives-linux")
+//    localRuntime("org.lwjgl:lwjgl-vma:3.3.3:natives-macos")
+//    localRuntime("org.lwjgl:lwjgl-vma:3.3.3:natives-macos-arm64")
+        localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3")
+        localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3:natives-windows")
+//    localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3:natives-linux")
+//    localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3:natives-macos")
+//    localRuntime("org.lwjgl:lwjgl-shaderc:3.3.3:natives-macos-arm64")
+//    localRuntime("org.lwjgl:lwjgl-vulkan:3.3.3:natives-macos")
+//    localRuntime("org.lwjgl:lwjgl-vulkan:3.3.3:natives-macos-arm64")
+    }
+
     modLocalRuntime 'maven.modrinth:scalablelux:0.1.0+fabric.26c6e72'
     modLocalRuntime 'maven.modrinth:spark:1.10.109-fabric'
 
@@ -173,4 +193,8 @@ runClient {
             }
         }
     }
+    if (vk_debug == 'true') {
+        environment 'VK_INSTANCE_LAYERS', 'VK_LAYER_KHRONOS_validation'
+    }
+    environment 'VK_LAYER_PATH', vk_layer_path
 }

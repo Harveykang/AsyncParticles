@@ -1,8 +1,16 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.backend;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
+import net.vulkanmod.vulkan.Vulkan;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GLCapabilities;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.vulkan.VK10;
+import org.lwjgl.vulkan.VK13;
+import org.lwjgl.vulkan.VkDevice;
+import org.lwjgl.vulkan.VkPhysicalDeviceProperties;
 
 import java.util.Locale;
 
@@ -10,11 +18,11 @@ public class Backends {
 	public static GlCommands gl;
 	public static GlCommands.TransformFeedback glTf;
 	public static final GlCommands.ComputeShader glCs;
-//	public static final VkCommands vk;
+	public static final VkCommands vk;
 	public static final Backend backend;
 
 	static {
-		String backendName = "OpenGL";
+		String backendName = ModListHelper.VULKAN_MOD_LOADED ? "Vulkan" : "OpenGL"; // TODO
 		if (backendName.toLowerCase(Locale.ROOT).contains("opengl")) {
 			String glVersion = GL11C.glGetString(GL11C.GL_VERSION);
 			String glRenderer = GL11C.glGetString(GL11C.GL_RENDERER);
@@ -30,13 +38,13 @@ public class Backends {
 			gl = getGl(GL_ES, GL_ARB_direct_state_access, GL_ARB_vertex_attrib_binding);
 			glTf = getGlTf(glCapabilities);
 			glCs = getGlCs(GL_ES, glCapabilities);
-//			vk = new VkCommands.Unsupported();
-			backend = GL_ES ? Backend.OPENGL_ES : Backend.OPENGL;
+			vk = new VkCommands.Unsupported();
+			backend = GL_ES ? Backend.OPENGL_ON_ES : Backend.OPENGL;
 		} else if (backendName.toLowerCase(Locale.ROOT).contains("vulkan")) {
 			gl = new GlCommands.Unsupported();
 			glTf = new GlCommands.TransformFeedback.Unsupported();
 			glCs = new GlCommands.ComputeShader.Unsupported();
-//			vk = getVkCaps();
+			vk = getVkCaps();
 			backend = Backend.VULKAN;
 		} else {
 			throw new ExceptionInInitializerError("Unsupported backend: " + backendName);
@@ -82,26 +90,26 @@ public class Backends {
 		}
 	}
 
-//	private static VkCommands getVkCaps() {
-//		// check device capabilities via Vulkan API directly
-//		VkDevice vkDevice = Vulkan.getVkDevice();
-//		boolean isVk13;
-//		try (MemoryStack s = MemStackUtil.stackPush()) {
-//			VkPhysicalDeviceProperties props = VkPhysicalDeviceProperties.calloc(s);
-//			VK10.vkGetPhysicalDeviceProperties(vkDevice.getPhysicalDevice(), props);
-//			isVk13 = props.apiVersion() >= VK13.VK_API_VERSION_1_3;
-//		}
-//		boolean pushDescriptor;
-//		boolean synchronization2;
-//		if (isVk13) {
-//			pushDescriptor = true;
-//			synchronization2 = true;
-//		} else {
-//			pushDescriptor = VK10.vkGetDeviceProcAddr(vkDevice, "vkCmdPushDescriptorSetKHR") != 0L;
-//			synchronization2 = VK10.vkGetDeviceProcAddr(vkDevice, "vkCmdPipelineBarrier2KHR") != 0L;
-//		}
-//		return new VkCommands.Vk(pushDescriptor, synchronization2);
-//	}
+	private static VkCommands getVkCaps() {
+		// check device capabilities via Vulkan API directly
+		VkDevice vkDevice = Vulkan.getVkDevice();
+		boolean isVk13;
+		try (MemoryStack s = MemStackUtil.stackPush()) {
+			VkPhysicalDeviceProperties props = VkPhysicalDeviceProperties.calloc(s);
+			VK10.vkGetPhysicalDeviceProperties(vkDevice.getPhysicalDevice(), props);
+			isVk13 = props.apiVersion() >= VK13.VK_API_VERSION_1_3;
+		}
+		boolean pushDescriptor;
+		boolean synchronization2;
+		if (isVk13) {
+			pushDescriptor = true;
+			synchronization2 = true;
+		} else {
+			pushDescriptor = VK10.vkGetDeviceProcAddr(vkDevice, "vkCmdPushDescriptorSetKHR") != 0L;
+			synchronization2 = VK10.vkGetDeviceProcAddr(vkDevice, "vkCmdPipelineBarrier2KHR") != 0L;
+		}
+		return new VkCommands.Vk(pushDescriptor, synchronization2);
+	}
 
 	public static void init() {
 	}
@@ -110,14 +118,14 @@ public class Backends {
 		if (isGl()) {
 			return glTf.isSupported();
 		}
-//		if (isVk()) {
-//			return vk.pushDescriptor() && vk.synchronization2();
-//		}
+		if (isVk()) {
+			return vk.pushDescriptor() && vk.synchronization2();
+		}
 		return false;
 	}
 
 	public static boolean isGl() {
-		return backend == Backend.OPENGL || backend == Backend.OPENGL_ES;
+		return backend == Backend.OPENGL || backend == Backend.OPENGL_ON_ES;
 	}
 
 	public static boolean isVk() {

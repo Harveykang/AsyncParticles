@@ -5,7 +5,7 @@ layout(local_size_x = 64) in;
 // Binding 0: source buffer (RAW_PARTICLE, 17 ints per particle)
 layout(std430, binding = 0) readonly buffer SourceBuf { int src_data[]; };
 
-// Binding 1: target buffer (IDENTITY_PARTICLE, 44 ints per particle = 4 vertices * 11 ints)
+// Binding 1: target buffer (DefaultVertexFormat.PARTICLE, 28 bytes per vertex = 7 ints)
 layout(std430, binding = 1) writeonly buffer TargetBuf { int dst_data[]; };
 
 // Binding 2: one record per workgroup: srcBase, dstBase, count
@@ -31,12 +31,13 @@ layout(push_constant) uniform PushConstants {
 #define SRC_OFF_LIGHT 14u
 #define SRC_OFF_ROLLS 15u
 
-// === Target layout: IDENTITY_PARTICLE (44 bytes = 11 ints per vertex) ===
-#define DST_VERTEX_STRIDE 11u
+// === Target layout: DefaultVertexFormat.PARTICLE (28 bytes = 7 ints per vertex) ===
+// pos vec3f @0, uv0 vec2f @12, color ubyte4 packed @20, light 2xshort packed @24
+#define DST_VERTEX_STRIDE 7u
 #define DST_OFF_POS 0u
 #define DST_OFF_UV0 3u
 #define DST_OFF_COLOR 5u
-#define DST_OFF_UV2 9u
+#define DST_OFF_UV2 6u
 
 #define GROUP_RECORD_STRIDE 3u
 #define GROUP_OFF_SRC_BASE 0u
@@ -52,25 +53,22 @@ vec4 unpackColor(int packed) {
     );
 }
 
-ivec2 unpackLight(int packed) {
-    return ivec2(
-        int(packed << 16) >> 16,
-        packed >> 16
-    );
+uint packColor(vec4 col) {
+    uint r = uint(clamp(col.r, 0.0, 1.0) * 255.0 + 0.5);
+    uint g = uint(clamp(col.g, 0.0, 1.0) * 255.0 + 0.5);
+    uint b = uint(clamp(col.b, 0.0, 1.0) * 255.0 + 0.5);
+    uint a = uint(clamp(col.a, 0.0, 1.0) * 255.0 + 0.5);
+    return r | (g << 8u) | (b << 16u) | (a << 24u);
 }
 
-void writeVertex(uint dstBase, vec3 pos, vec2 uv, vec4 col, ivec2 light) {
+void writeVertex(uint dstBase, vec3 pos, vec2 uv, vec4 col, int packedLight) {
     dst_data[dstBase + DST_OFF_POS + 0] = floatBitsToInt(pos.x);
     dst_data[dstBase + DST_OFF_POS + 1] = floatBitsToInt(pos.y);
     dst_data[dstBase + DST_OFF_POS + 2] = floatBitsToInt(pos.z);
     dst_data[dstBase + DST_OFF_UV0 + 0] = floatBitsToInt(uv.x);
     dst_data[dstBase + DST_OFF_UV0 + 1] = floatBitsToInt(uv.y);
-    dst_data[dstBase + DST_OFF_COLOR + 0] = floatBitsToInt(col.r);
-    dst_data[dstBase + DST_OFF_COLOR + 1] = floatBitsToInt(col.g);
-    dst_data[dstBase + DST_OFF_COLOR + 2] = floatBitsToInt(col.b);
-    dst_data[dstBase + DST_OFF_COLOR + 3] = floatBitsToInt(col.a);
-    dst_data[dstBase + DST_OFF_UV2 + 0] = light.x;
-    dst_data[dstBase + DST_OFF_UV2 + 1] = light.y;
+    dst_data[dstBase + DST_OFF_COLOR + 0] = int(packColor(col));
+    dst_data[dstBase + DST_OFF_UV2 + 0] = packedLight;
 }
 
 void main() {
@@ -98,7 +96,7 @@ void main() {
                       uintBitsToFloat(src_data[srcBase + SRC_OFF_UV0 + 1]));
     vec4 oCol  = unpackColor(src_data[srcBase + SRC_OFF_OCOLOR]);
     vec4 col   = unpackColor(src_data[srcBase + SRC_OFF_COLOR]);
-    ivec2 light = unpackLight(src_data[srcBase + SRC_OFF_LIGHT]);
+    int packedLight = src_data[srcBase + SRC_OFF_LIGHT];
     vec2 rolls = vec2(uintBitsToFloat(src_data[srcBase + SRC_OFF_ROLLS + 0]),
                       uintBitsToFloat(src_data[srcBase + SRC_OFF_ROLLS + 1]));
 
@@ -120,8 +118,8 @@ void main() {
     uint outIdx = dstParticleBase + localIdx;
     uint dstBase = outIdx * 4u * DST_VERTEX_STRIDE;
 
-    writeVertex(dstBase +  0u, p - c, uvMax,                  color, light);
-    writeVertex(dstBase + 11u, p - d, vec2(uvMax.x, uvMin.y), color, light);
-    writeVertex(dstBase + 22u, p + c, uvMin,                  color, light);
-    writeVertex(dstBase + 33u, p + d, vec2(uvMin.x, uvMax.y), color, light);
+    writeVertex(dstBase +  0u, p - c, uvMax,                  color, packedLight);
+    writeVertex(dstBase +  7u, p - d, vec2(uvMax.x, uvMin.y), color, packedLight);
+    writeVertex(dstBase + 14u, p + c, uvMin,                  color, packedLight);
+    writeVertex(dstBase + 21u, p + d, vec2(uvMin.x, uvMax.y), color, packedLight);
 }
