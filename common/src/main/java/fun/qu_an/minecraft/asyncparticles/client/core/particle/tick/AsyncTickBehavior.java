@@ -225,10 +225,6 @@ public class AsyncTickBehavior {
 			particlePhase = true;
 			mc.particleEngine.tick();
 			particlePhase = false;
-			if (cleanupStrategy == ParticleCleanupStrategy.AFTER_ASYNC_TICK) {
-				tickTaskHelper.groupTasks(false);
-				prepareCleanupTasks(tickTaskHelper);
-			}
 		}
 		tickTaskHelper.submitAll(() -> {
 			timeUsageNano.setRelease(System.nanoTime());

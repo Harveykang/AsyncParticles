@@ -112,7 +112,6 @@
   "config.asyncparticles.enum.ComputeExecutionStage.LEVEL_RENDERING": "Level Rendering",
   "config.asyncparticles.enum.ComputeExecutionStage.PARTICLE_RENDERING": "Particle Rendering",
   "config.asyncparticles.enum.ParticleCleanupStrategy.PARALLEL_WITH_TICK": "Parallel with Tick",
-  "config.asyncparticles.enum.ParticleCleanupStrategy.AFTER_ASYNC_TICK":"After Async Tick",
   "config.asyncparticles.enum.ParticleCleanupStrategy.BLOCK_MAIN_THREAD": "Block Main Thread",
   "config.asyncparticles.enum.ParticleCleanupStrategy.MAIN_THREAD":"Main Thread",
   "config.asyncparticles.incompatibility": "Incompatible with %s mod.",

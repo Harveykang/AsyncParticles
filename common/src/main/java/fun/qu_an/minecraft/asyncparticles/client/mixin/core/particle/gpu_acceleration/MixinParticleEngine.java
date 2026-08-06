@@ -37,8 +37,11 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		if (!ConfigHelper.isGpuParticles()) {
 			return;
 		}
-		int sum = 0;
 		AsyncTickBehavior tickBehavior = AsyncTickBehavior.getInstance();
+		if (tickBehavior.isTailTick()) {
+			GpuParticleBehavior.getInstance().flushBufferAndSwap();
+		}
+		int sum = 0;
 		boolean tickAsync = ConfigHelper.isAsyncParticleTick() && tickBehavior.isParticlePhase();
 		TaskHelper taskHelper = tickBehavior.getTickTaskManager();
 		for (ParticleGroup<?> group : particles.values()) {
@@ -66,7 +69,6 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			return;
 		}
 		GpuParticleBehavior gpuParticleBehavior = GpuParticleBehavior.getInstance();
-		gpuParticleBehavior.flushBufferAndSwap();
 		gpuParticleBehavior.setUpNextTickRendering(sum);
 		IParticleRenderer renderer = gpuParticleBehavior.getOrCreateRenderer();
 		renderer.prepareBuffer();
