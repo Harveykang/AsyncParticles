@@ -116,7 +116,6 @@
   "config.asyncparticles.enum.ComputeExecutionStage.LEVEL_RENDERING": "世界渲染",
   "config.asyncparticles.enum.ComputeExecutionStage.PARTICLE_RENDERING": "粒子渲染",
   "config.asyncparticles.enum.ParticleCleanupStrategy.PARALLEL_WITH_TICK": "与 Tick 并行",
-  "config.asyncparticles.enum.ParticleCleanupStrategy.AFTER_ASYNC_TICK":"异步 Tick 之后",
   "config.asyncparticles.enum.ParticleCleanupStrategy.BLOCK_MAIN_THREAD": "阻塞主线程",
   "config.asyncparticles.enum.ParticleCleanupStrategy.MAIN_THREAD":"在主线程",
   "config.asyncparticles.incompatibility": "与 %s 模组不兼容。",
