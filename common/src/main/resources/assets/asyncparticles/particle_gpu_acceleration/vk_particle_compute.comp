@@ -46,18 +46,18 @@ layout(push_constant) uniform PushConstants {
 
 vec4 unpackColor(int packed) {
     return vec4(
-        float((packed       ) & 0xFF) / 255.0,
-        float((packed >>   8) & 0xFF) / 255.0,
-        float((packed >>  16) & 0xFF) / 255.0,
-        float((packed >>  24) & 0xFF) / 255.0
+        float((packed       ) & 0xFF),
+        float((packed >>   8) & 0xFF),
+        float((packed >>  16) & 0xFF),
+        float((packed >>  24) & 0xFF)
     );
 }
 
 uint packColor(vec4 col) {
-    uint r = uint(clamp(col.r, 0.0, 1.0) * 255.0 + 0.5);
-    uint g = uint(clamp(col.g, 0.0, 1.0) * 255.0 + 0.5);
-    uint b = uint(clamp(col.b, 0.0, 1.0) * 255.0 + 0.5);
-    uint a = uint(clamp(col.a, 0.0, 1.0) * 255.0 + 0.5);
+    uint r = uint(col.r + 0.5);
+    uint g = uint(col.g + 0.5);
+    uint b = uint(col.b + 0.5);
+    uint a = uint(col.a + 0.5);
     return r | (g << 8u) | (b << 16u) | (a << 24u);
 }
 
