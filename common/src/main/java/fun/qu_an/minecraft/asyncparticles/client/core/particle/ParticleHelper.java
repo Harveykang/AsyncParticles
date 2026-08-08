@@ -20,6 +20,7 @@ import java.util.Queue;
 
 public class ParticleHelper {
 	public static final ParticleThreadLocal<Integer> DESTRUCTION_LIGHT_CACHE = new ParticleThreadLocal<>(RenderSystem::isOnRenderThread);
+	public static final ParticleThreadLocal<Boolean> CULL_UNDERWATER_PARTICLE_TYPE = ParticleThreadLocal.withInitial(RenderSystem::isOnRenderThread, () -> false);
 
 	public static <T extends Particle> Queue<T> newParticleQueue() {
 		return newParticleQueue(16);

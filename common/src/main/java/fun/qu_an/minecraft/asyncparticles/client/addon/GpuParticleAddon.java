@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.addon;
 
+import net.minecraft.client.particle.SingleQuadParticle;
+
 public interface GpuParticleAddon extends LightCachedParticleAddon {
 	int oCOLOR_OFFSET = 48;
 	int oCOLOR_RED_OFFSET = oCOLOR_OFFSET;
@@ -49,4 +51,6 @@ public interface GpuParticleAddon extends LightCachedParticleAddon {
 	int asyncparticles$getOColor();
 
 	int asyncparticles$getColor(int oColor);
+
+	SingleQuadParticle.Layer asyncparticles$getLayer();
 }

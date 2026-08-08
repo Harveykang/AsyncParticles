@@ -41,4 +41,9 @@ public class MixinParticleEngine implements ParticleEngineAddon {
 		particlesToAdd = ParticleHelper.newBusyWaitParticleQueue(1024);
 		trackingEmitters = ParticleHelper.newBusyWaitParticleQueue(256);
 	}
+
+	@Inject(method = "clearParticles", at = @At("HEAD"))
+	public void clearParticles(CallbackInfo ci) {
+		ParticleHelper.onClearParticles();
+	}
 }

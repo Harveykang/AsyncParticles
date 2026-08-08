@@ -1,6 +1,7 @@
 
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.gpu_acceleration;
 
+import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleGroup;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -36,10 +37,12 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		if (!ConfigHelper.isGpuParticles()) {
 			return;
 		}
-		GpuParticleBehavior.getInstance().flushBufferAndSwap();
-		int sum = 0;
 		AsyncTickBehavior tickBehavior = AsyncTickBehavior.getInstance();
-		boolean tickAsync = ConfigHelper.isAsyncTickParticle() && tickBehavior.isParticlePhase();
+		if (tickBehavior.isTailTick()) {
+			GpuParticleBehavior.getInstance().flushBufferAndSwap();
+		}
+		int sum = 0;
+		boolean tickAsync = ConfigHelper.isAsyncParticleTick() && tickBehavior.isParticlePhase();
 		TaskHelper taskHelper = tickBehavior.getTickTaskManager();
 		for (ParticleGroup<?> group : particles.values()) {
 			if (group instanceof GpuParticleGroup gpuGroup) {
@@ -62,10 +65,14 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		if (tickAsync) {
 			taskHelper.groupTasks(true);
 		}
-		GpuParticleBehavior.getInstance().setUpNextTickRendering(sum);
-		IParticleRenderer renderer = GpuParticleBehavior.getInstance().getOrCreateRenderer();
+		if (!tickBehavior.isTailTick()) {
+			return;
+		}
+		GpuParticleBehavior gpuParticleBehavior = GpuParticleBehavior.getInstance();
+		gpuParticleBehavior.setUpNextTickRendering(sum);
+		IParticleRenderer renderer = gpuParticleBehavior.getOrCreateRenderer();
 		renderer.prepareBuffer();
-		tickBehavior.getTickTaskManager().addTask(() -> {
+		taskHelper.addTask(() -> {
 			int size = Math.max(8, ConfigHelper.getParticleLimit() >> 1);
 			Map<SingleQuadParticle.Layer, List<SingleQuadParticle>> particles = new Reference2ReferenceOpenHashMap<>();
 			for (Map.Entry<ParticleRenderType, ParticleGroup<?>> entry : this.particles.entrySet()) {
@@ -78,7 +85,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 					continue;
 				}
 				for (SingleQuadParticle sqp : gpuParticles) {
-					particles.computeIfAbsent(sqp.getLayer(), _ -> new ReferenceArrayList<>(size)).add(sqp);
+					particles.computeIfAbsent(((GpuParticleAddon) sqp).asyncparticles$getLayer(), _ -> new ReferenceArrayList<>(size)).add(sqp);
 				}
 			}
 			renderer.tick(GpuParticleBehavior.getInstance().getPerTickCameraPos(), particles);

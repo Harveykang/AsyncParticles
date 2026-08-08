@@ -4,9 +4,8 @@ import net.minecraft.client.particle.Particle;
 
 public interface AsyncTickableParticleGroup extends ParticleGroupAddition {
 	/**
-	 * invoke condition: ConfigHelper.isAsyncTickParticle() && !ConfigHelper.isGpuOnlyAsyncParticleTick()
+	 * invoke condition: ConfigHelper.isAsyncTickParticle() && (isGpu || !ConfigHelper.isGpuOnlyAsyncParticleTick())
 	 * && group instanceof AsyncTickableParticleGroup asyncGroup && asyncGroup.asyncparticles$canTickAsync()
-	 * which means this.tickParticles() is not called
 	 */
 	default void asyncparticles$tickSyncParticles(boolean isGpu) {
 		throw new AssertionError("Should be implemented");
@@ -15,9 +14,16 @@ public interface AsyncTickableParticleGroup extends ParticleGroupAddition {
 	/**
 	 * invoke condition: ConfigHelper.isAsyncTickParticle() && !ConfigHelper.isGpuOnlyAsyncParticleTick()
 	 * && group instanceof AsyncTickableParticleGroup asyncGroup && asyncGroup.asyncparticles$canTickAsync()
-	 * which means this.tickParticles() is not called
 	 */
-	default void asyncparticles$addSync(Particle particle) {
+	default void asyncparticles$addSyncParticle(Particle particle) {
+		throw new AssertionError("Should be implemented");
+	}
+
+	/**
+	 * invoke condition: ConfigHelper.isAsyncTickParticle()
+	 * && group instanceof AsyncTickableParticleGroup asyncGroup && asyncGroup.asyncparticles$canTickAsync()
+	 */
+	default void asyncparticles$addSyncGpuParticle(Particle particle) {
 		throw new AssertionError("Should be implemented");
 	}
 

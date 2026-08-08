@@ -12,10 +12,6 @@ public class ConfigHelper {
 		return tick$asyncAnimateTick && !Diagnostic.isTemporaryDisableAnimationTick();
 	}
 
-	public static boolean forceDoneBlockAnimateTick() {
-		return tick$asyncAnimateTick;
-	}
-
 	public static boolean particleLightCache() {
 		return particle$particleLightCache;
 	}
@@ -24,7 +20,7 @@ public class ConfigHelper {
 		return tick$suppressCME;
 	}
 
-	public static boolean isAsyncTickParticle() {
+	public static boolean isAsyncParticleTick() {
 		return tick$particleAsyncMode != ParticleAsyncMode.DISABLE && !Diagnostic.isTemporaryDisableAsyncParticleTick();
 	}
 
@@ -42,10 +38,6 @@ public class ConfigHelper {
 
 	public static boolean isCullUnderwaterParticleType() {
 		return particle$cullUnderwaterParticleType;
-	}
-
-	public static boolean isRemoveIfMissedTick() {
-		return particle$removeIfMissedTick;
 	}
 
 	public static boolean isTickWeatherAsync() {
@@ -96,5 +88,9 @@ public class ConfigHelper {
 
 	public static ComputeExecutionStage getComputeExecutionStage() {
 		return rendering$computeExecutionStage;
+	}
+
+	public static ParticleCleanupStrategy getParticleCleanupStrategy() {
+		return particle$cleanupStrategy;
 	}
 }

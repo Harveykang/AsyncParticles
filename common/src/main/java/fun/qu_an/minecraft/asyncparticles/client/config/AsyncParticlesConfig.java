@@ -35,7 +35,7 @@ public class AsyncParticlesConfig {
 	public static final int MIN_PARTICLE_LIMIT = 1024;
 	public static final int DEFAULT_PARTICLE_LIMIT = 16384;
 	public static final int MAX_PARTICLE_LIMIT = 262144;
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 	public static final Path CONFIG_FILE = Path.of("config", AsyncParticlesClient.MOD_ID, AsyncParticlesClient.MOD_ID + ".json");
 	static final Gson GSON = new GsonBuilder()
 		.setLenient()
@@ -44,7 +44,7 @@ public class AsyncParticlesConfig {
 		.create();
 	static final Logger LOGGER = LogUtils.getLogger();
 	public static int particle$particleLimit;
-	public static boolean particle$removeIfMissedTick;
+	public static ParticleCleanupStrategy particle$cleanupStrategy;
 	public static boolean particle$parallelQueueRemoval;
 //	public static boolean particle$parallelQueueEviction;
 	public static boolean particle$particleLightCache;
@@ -195,11 +195,15 @@ public class AsyncParticlesConfig {
 
 	@Contract
 	private static ConfigObj upgrade(int ver, ConfigObj configObj) {
-		if (VERSION != 1) {
+		if (VERSION != 2) {
 			throw new RuntimeException("I forgot to update the upgrade method.");
 		}
 		return switch (ver) {
-			case 1 -> configObj;
+			case 2 -> configObj;
+			case 1 -> {
+				configObj.particle.parallelQueueRemoval = false;
+				yield configObj;
+			}
 			default -> new ConfigObj();
 		};
 	}
@@ -258,15 +262,15 @@ public class AsyncParticlesConfig {
 
 		static class Particle {
 			int particleLimit = DEFAULT_PARTICLE_LIMIT;
-			boolean removeIfMissedTick = false;
-			boolean parallelQueueRemoval = true;
+			ParticleCleanupStrategy cleanupStrategy = ParticleCleanupStrategy.PARALLEL_WITH_TICK;
+			boolean parallelQueueRemoval = false;
 //			boolean parallelQueueEviction = true;
 			boolean particleLightCache = true;
 			boolean cullUnderwaterParticleType = true;
 
 			private void flat() {
 				particle$particleLimit = Mth.clamp(particleLimit, MIN_PARTICLE_LIMIT, MAX_PARTICLE_LIMIT);
-				particle$removeIfMissedTick = removeIfMissedTick;
+				particle$cleanupStrategy = requireNonNullElse(cleanupStrategy, ParticleCleanupStrategy.PARALLEL_WITH_TICK);
 				particle$parallelQueueRemoval = parallelQueueRemoval;
 //				particle$parallelQueueEviction = parallelQueueEviction;
 				particle$particleLightCache = particleLightCache;
@@ -275,7 +279,7 @@ public class AsyncParticlesConfig {
 
 			private void fold() {
 				particleLimit = particle$particleLimit;
-				removeIfMissedTick = particle$removeIfMissedTick;
+				cleanupStrategy = particle$cleanupStrategy;
 				parallelQueueRemoval = particle$parallelQueueRemoval;
 //				parallelQueueEviction = particle$parallelQueueEviction;
 				particleLightCache = particle$particleLightCache;
@@ -290,7 +294,6 @@ public class AsyncParticlesConfig {
 			boolean tickWeatherAsync = !ModListHelper.PHYSICSMOD_LOADED;
 			boolean deferredTextureTick = !ModListHelper.AXIOM_LOADED;
 			int failPerSecLimit = 5;
-//			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
 			boolean suppressCME = false;
 			Set<String> syncParticleClasses = new LinkedHashSet<>();
 			{
@@ -303,7 +306,6 @@ public class AsyncParticlesConfig {
 				tick$tickWeatherAsync = tickWeatherAsync && !ModListHelper.PHYSICSMOD_LOADED;
 				tick$deferredTextureTick = deferredTextureTick && !ModListHelper.AXIOM_LOADED;
 				tick$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
-//				tick$failBehavior = requireNonNullElse(failBehavior, FailBehavior.RAISE_CRASH);
 				tick$suppressCME = suppressCME;
 				tick$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
 			}
@@ -315,7 +317,6 @@ public class AsyncParticlesConfig {
 				tickWeatherAsync = tick$tickWeatherAsync;
 				deferredTextureTick = tick$deferredTextureTick;
 				failPerSecLimit = tick$failPerSecLimit;
-//				failBehavior = tick$failBehavior;
 				suppressCME = tick$suppressCME;
 				syncParticleClasses = new LinkedHashSet<>(tick$syncParticleClasses);
 			}
@@ -326,28 +327,12 @@ public class AsyncParticlesConfig {
 			boolean gpuAcceleration = Backends.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
 			ComputeExecutionStage computeExecutionStage = ComputeExecutionStage.LEVEL_RENDERING;
-//			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
-//			Set<String> syncParticleClasses = new LinkedHashSet<>();
-//			{
-//				syncParticleClasses.add("com.lootbeams.VFXParticle");
-//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleCasting");
-//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleGhost");
-//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleGraveSoul");
-//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleMagicCircle");
-//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleMarker");
-//				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleRounding");
-//				syncParticleClasses.add("concerrox.effective.particle.SplashParticle");
-//				syncParticleClasses.add("org.ladysnake.effective.particle.SplashParticle");
-//				syncParticleClasses.add("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
-//			}
 
 			private void flat() {
 				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
 				rendering$gpuAcceleration = gpuAcceleration && Backends.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
 				rendering$computeExecutionStage = requireNonNullElse(computeExecutionStage, ComputeExecutionStage.LEVEL_RENDERING);
-//				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
-//				rendering$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
 			}
 
 			private void fold() {
@@ -355,8 +340,6 @@ public class AsyncParticlesConfig {
 				gpuAcceleration = rendering$gpuAcceleration;
 				appendNewParticlesToRenderer = rendering$appendNewParticlesToRenderer;
 				computeExecutionStage = rendering$computeExecutionStage;
-//				failBehavior = rendering$failBehavior;
-//				syncParticleClasses = new LinkedHashSet<>(rendering$syncParticleClasses);
 			}
 		}
 

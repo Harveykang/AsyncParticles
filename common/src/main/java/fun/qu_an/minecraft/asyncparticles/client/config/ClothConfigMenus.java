@@ -21,10 +21,8 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.TriState;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collector;
 
 // No more NoClassDefFoundError
 class ClothConfigMenus {
@@ -51,11 +49,12 @@ class ClothConfigMenus {
 				.setMax(AsyncParticlesConfig.MAX_PARTICLE_LIMIT)
 				.build())
 			.addEntry(entryBuilder
-				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.removeIfMissedTick"),
-					globalConfig.particle.removeIfMissedTick)
-				.setDefaultValue(defaultConfig.particle.removeIfMissedTick)
-				.setTooltip(Component.translatable("config.asyncparticles.particle.removeIfMissedTick.tooltip"))
-				.setSaveConsumer(newValue -> newConfig.particle.removeIfMissedTick = newValue)
+				.startEnumSelector(Component.translatable("config.asyncparticles.particle.cleanupStrategy"),
+					ParticleCleanupStrategy.class, globalConfig.particle.cleanupStrategy)
+				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
+				.setDefaultValue(defaultConfig.particle.cleanupStrategy)
+				.setTooltip(Component.translatable("config.asyncparticles.particle.cleanupStrategy.tooltip"))
+				.setSaveConsumer(newValue -> newConfig.particle.cleanupStrategy = newValue)
 				.build())
 			.addEntry(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.parallelQueueRemoval"),
@@ -123,12 +122,9 @@ class ClothConfigMenus {
 				.setDefaultValue(defaultConfig.tick.deferredTextureTick)
 				.setTooltipSupplier(() -> {
 					if (ModListHelper.AXIOM_LOADED) {
-						return Optional.of(new MutableComponent[]{
-							Component.translatable("config.asyncparticles.tick.deferredTextureTick.tooltip")
-								.withStyle(ChatFormatting.STRIKETHROUGH),
-							Component.translatable("config.asyncparticles.incompatibility", "Axiom")
-								.withStyle(ChatFormatting.YELLOW)
-						});
+						return incompatibilityTooltip(
+							Component.translatable("config.asyncparticles.tick.deferredTextureTick.tooltip"),
+							"Axiom");
 					} else {
 						return Optional.of(new MutableComponent[]{
 							Component.translatable("config.asyncparticles.tick.deferredTextureTick.tooltip")
@@ -394,5 +390,18 @@ class ClothConfigMenus {
 		});
 
 		return builder;
+	}
+
+	private static Optional<Component[]> incompatibilityTooltip(MutableComponent description, Object... modNames) {
+		Component modNamesStr = Arrays.stream(modNames)
+			.filter(Objects::nonNull)
+			.map(modName -> modName instanceof Component ? (Component) modName : Component.literal(String.valueOf(modName)))
+			.collect(Collector.of(Component::empty, MutableComponent::append, (a, b) -> a.append(", ").append(b)));
+
+		return Optional.of(new MutableComponent[]{
+			description.withStyle(ChatFormatting.STRIKETHROUGH),
+			Component.translatable("config.asyncparticles.incompatibility", modNamesStr)
+				.withStyle(ChatFormatting.YELLOW)
+		});
 	}
 }

@@ -127,6 +127,10 @@ dependencies {
 
     /* Particle Interactions */
 //    localRuntime "maven.modrinth:particle-interactions:0.9.5+26.1-fabric"
+
+    /* Particle Tweaks */
+    localRuntime "maven.modrinth:frozenlib:Ak4sHFuc" // 2.5.3-mc26.2
+    localRuntime "maven.modrinth:particle-tweaks:3.0.2-mc26.2"
 }
 
 processResources {

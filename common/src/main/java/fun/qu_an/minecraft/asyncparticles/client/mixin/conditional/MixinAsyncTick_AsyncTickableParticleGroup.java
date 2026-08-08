@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 public abstract class MixinAsyncTick_AsyncTickableParticleGroup extends MixinParticleGroup implements AsyncTickableParticleGroup {
 	@SuppressWarnings("ConstantValue")
 	@Unique
-	private final boolean asyncparticles$canTickAsync = ConfigHelper.isAsyncTickParticle()
+	private final boolean asyncparticles$canTickAsync = ConfigHelper.isAsyncParticleTick()
 		&& AsyncTickParticleGroupBehavior.canTickAsync((ParticleGroup<?>) (Object) this);
 	@Unique
 	private ReferenceSet<Particle> asyncparticles$syncParticles;
@@ -69,18 +69,19 @@ public abstract class MixinAsyncTick_AsyncTickableParticleGroup extends MixinPar
 	}
 
 	@Override
-	public void asyncparticles$addSync(Particle particle) {
-		if (GpuParticleBehavior.getInstance().canRenderFast(particle)) {
-			if (asyncparticles$syncGpuParticles == null) {
-				asyncparticles$syncGpuParticles = new ReferenceOpenHashSet<>();
-			}
-			asyncparticles$syncGpuParticles.add(particle);
-		} else {
-			if (asyncparticles$syncParticles == null) {
-				asyncparticles$syncParticles = new ReferenceOpenHashSet<>();
-			}
-			asyncparticles$syncParticles.add(particle);
+	public void asyncparticles$addSyncParticle(Particle particle) {
+		if (asyncparticles$syncParticles == null) {
+			asyncparticles$syncParticles = new ReferenceOpenHashSet<>();
 		}
+		asyncparticles$syncParticles.add(particle);
+	}
+
+	@Override
+	public void asyncparticles$addSyncGpuParticle(Particle particle) {
+		if (asyncparticles$syncGpuParticles == null) {
+			asyncparticles$syncGpuParticles = new ReferenceOpenHashSet<>();
+		}
+		asyncparticles$syncGpuParticles.add(particle);
 	}
 
 	@Dynamic
