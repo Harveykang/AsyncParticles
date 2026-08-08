@@ -24,7 +24,8 @@ public class MixinTextureManager {
 	@WrapMethod(method = "tick")
 	public void wrapTick(Operation<Void> original) {
 		if (ConfigHelper.isDeferredTextureTick()
-			&& AsyncTickBehavior.getInstance().isTailTick()) {
+			&& AsyncTickBehavior.getInstance().isTailTick()
+			&& asyncparticles$deferredTickEnabled) {
 			ThreadUtil.enqueueClientTask(() -> {
 				if (asyncparticles$deferredTickEnabled) {
 					original.call();
