@@ -17,6 +17,7 @@ accessible class net/minecraft/client/renderer/feature/QuadParticleFeatureRender
 accessible field net/minecraft/client/renderer/culling/Frustum intersection Lorg/joml/FrustumIntersection;
 accessible field net/minecraft/client/particle/ParticleGroup particles Ljava/util/Queue;
 accessible class net/minecraft/client/particle/FireworkParticles$SparkParticle
+accessible method net/minecraft/client/gui/screens/Screen addRenderableWidget (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
 
 # Blaze3D
 accessible class com/mojang/blaze3d/pipeline/RenderPipeline
