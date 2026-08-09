@@ -1,10 +1,10 @@
-package fun.qu_an.minecraft.asyncparticles.client.coremod;
+package fun.qu_an.minecraft.asyncparticles.client.config;
 
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 
 import java.util.Collection;
 
-import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinConfig.CONFIG;
+import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesMixinConfig.CONFIG;
 
 public class MixinConfigHelper {
 	public static Collection<String> getNoCulling() {

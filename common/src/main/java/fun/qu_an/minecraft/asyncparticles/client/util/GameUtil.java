@@ -20,7 +20,7 @@ import static java.lang.Math.abs;
 import static org.joml.Math.max;
 
 public class GameUtil {
-	public static final ParticleThreadLocal<BlockPos.MutableBlockPos> SHARED_POS = ParticleThreadLocal.withInitial(BlockPos.MutableBlockPos::new);
+	public static final ParticleThreadLocal<BlockPos.MutableBlockPos> SHARED_POS = ParticleThreadLocal.withInitial(ThreadUtil::isOnMainThread, BlockPos.MutableBlockPos::new);
 
 	@ExpectPlatform
 	public static AABB infinityAABB() {

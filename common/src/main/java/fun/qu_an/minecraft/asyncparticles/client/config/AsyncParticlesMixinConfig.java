@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.coremod;
+package fun.qu_an.minecraft.asyncparticles.client.config;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import org.jetbrains.annotations.Contract;
@@ -98,11 +98,32 @@ public class AsyncParticlesMixinConfig {
 		}
 	}
 
-	static MixinConfigObj getToSaveConfig() {
-		return toSaveConfig;
+	static MixinConfigObj getCurrentConfig() {
+		MixinConfigObj configObj = new MixinConfigObj();
+		configObj.fold();
+		return configObj;
+	}
+
+	static MixinConfigObj getDefaultConfig() {
+		return new MixinConfigObj();
+	}
+
+	static MixinConfigObj getDefaultConfigExceptCollections() {
+		MixinConfigObj mixinConfigObj = new MixinConfigObj();
+		MixinConfigObj currentConfig = getCurrentConfig();
+		mixinConfigObj.particle$noCulling = currentConfig.particle$noCulling;
+		mixinConfigObj.particle$lockProvider = currentConfig.particle$lockProvider;
+		mixinConfigObj.particle$lockRequired = currentConfig.particle$lockRequired;
+		mixinConfigObj.particle$noLightCache = currentConfig.particle$noLightCache;
+		mixinConfigObj.replaceRandom = currentConfig.replaceRandom;
+		mixinConfigObj.create$contraptionNoParticleCollision = currentConfig.create$contraptionNoParticleCollision;
+		return mixinConfigObj;
 	}
 
 	static class MixinConfigObj {
+		private MixinConfigObj() {
+		}
+
 		private int version = 0;
 		private boolean safeClassInstanceMultiMap = (IRONS_SPELLBOOKS_LOADED && IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
 													MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED;
@@ -325,6 +346,20 @@ public class AsyncParticlesMixinConfig {
 		void setContraptionNoParticleCollision(Collection<String> contraptionNoParticleCollision) {
 			assertNotGlobal();
 			this.create$contraptionNoParticleCollision = new LinkedHashSet<>(contraptionNoParticleCollision);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (o == null || getClass() != o.getClass()) return false;
+			MixinConfigObj that = (MixinConfigObj) o;
+			return safeClassInstanceMultiMap == that.safeClassInstanceMultiMap
+				&& safeBlockEntityMap == that.safeBlockEntityMap
+				&& safeLegacyRandomSource == that.safeLegacyRandomSource;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(safeClassInstanceMultiMap, safeBlockEntityMap, safeLegacyRandomSource);
 		}
 	}
 }

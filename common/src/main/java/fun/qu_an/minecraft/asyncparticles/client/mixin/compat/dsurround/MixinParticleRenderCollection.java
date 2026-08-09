@@ -14,7 +14,7 @@ public class MixinParticleRenderCollection {
 	public void add(TextureSheetParticle particle, Operation<Void> original) {
 		if (this instanceof SpinLockProvider lockProvider) {
 			lockProvider.asyncparticles$getSpinLock().wrap(() -> original.call(particle));
-		} else if (ThreadUtil.isOnRenderThread()) {
+		} else if (ThreadUtil.isOnMainThread()) {
 			original.call(particle);
 		} else {
 			ThreadUtil.enqueueClientTask(() -> original.call(particle));

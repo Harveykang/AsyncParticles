@@ -15,6 +15,7 @@ import net.minecraft.client.particle.*;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -103,7 +104,15 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		gpuParticleBehavior.setUpNextTickRendering(sum);
 		IParticleRenderer renderer = gpuParticleBehavior.getOrCreateRenderer();
 		renderer.prepareBuffer();
-		tickBehavior.getTickTaskManager().addTask(
-			() -> renderer.tick(GpuParticleBehavior.getInstance().getPerTickCameraPos(), gpuParticles));
+		if (!tickAsync && ConfigHelper.isTickRendererOnMainThread()) {
+			asyncparticles$tickRenderer(renderer);
+		} else {
+			taskHelper.addTask(() -> asyncparticles$tickRenderer(renderer));
+		}
+	}
+
+	@Unique
+	private void asyncparticles$tickRenderer(IParticleRenderer renderer) {
+		renderer.tick(GpuParticleBehavior.getInstance().getPerTickCameraPos(), GpuParticleBehavior.getInstance().gpuParticles);
 	}
 }

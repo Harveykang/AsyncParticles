@@ -69,7 +69,7 @@ dependencies {
 
     /* Performance */
 //    modLocalRuntime "maven.modrinth:sodium:mc1.21.1-0.8.12-alpha.3-fabric"
-    if (false) {
+    if (rootProject.enable_vulkan == 'false') {
         modLocalRuntime "maven.modrinth:sodium:mc1.21.1-0.6.13-fabric"
         modLocalRuntime "maven.modrinth:sodium-extra:mc1.21.1-0.6.0+fabric"
         modLocalRuntime 'maven.modrinth:iris:1.8.8+1.21.1-fabric'

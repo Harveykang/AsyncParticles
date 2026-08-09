@@ -74,6 +74,7 @@ accessible field com/mojang/blaze3d/vertex/ByteBufferBuilder capacity I
 accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;
 accessible method net/minecraft/world/entity/Entity collideWithShapes (Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/List;)Lnet/minecraft/world/phys/Vec3;
 accessible class net/minecraft/client/particle/FireworkParticles$SparkParticle
+accessible method net/minecraft/client/gui/screens/Screen addRenderableWidget (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
 accessible field net/minecraft/client/renderer/texture/AbstractTexture mipmap Z
 
 # iris_like.MixinDSAUnsupported

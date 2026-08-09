@@ -87,7 +87,7 @@ public class GpuParticleBehavior {
 		if (tsp.getFacingCameraMode() != TextureSheetParticle.FacingCameraMode.LOOKAT_XYZ) {
 			return false;
 		}
-		if (ThreadUtil.isOnRenderThread()) {
+		if (ThreadUtil.isOnMainThread()) {
 			return CAN_RENDER_FAST_CACHE.computeIfAbsent(((ParticleAddon) tsp).asyncparticles$getRealClass(), this::canRenderFast0);
 		}
 		return CAN_RENDER_FAST_CACHE_OFF_THREAD.computeIfAbsent(tsp.getClass(), k1 -> {

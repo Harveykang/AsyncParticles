@@ -4,6 +4,7 @@ import com.bawnorton.mixinsquared.TargetHandler;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.particle.SingleQuadParticle;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
@@ -18,9 +19,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(value = SingleQuadParticle.class, priority = 1500)
 public class MixinSingleQuadParticle {
 	@Unique
-	private static final ParticleThreadLocal<Vector3f> asyncparticles$TEMP_LEFT = ParticleThreadLocal.withInitial(Vector3f::new);
+	private static final ParticleThreadLocal<Vector3f> asyncparticles$TEMP_LEFT = ParticleThreadLocal.withInitial(ThreadUtil::isOnMainThread, Vector3f::new);
 	@Unique
-	private static final ParticleThreadLocal<Vector3f> asyncparticles$TEMP_UP = ParticleThreadLocal.withInitial(Vector3f::new);
+	private static final ParticleThreadLocal<Vector3f> asyncparticles$TEMP_UP = ParticleThreadLocal.withInitial(ThreadUtil::isOnMainThread, Vector3f::new);
 
 	@Dynamic
 	@TargetHandler(
