@@ -97,7 +97,11 @@ public abstract class MixinSingleQuadParticle extends Particle implements GpuPar
 			asyncparticles$isGpuLightGot = true;
 			return asyncparticles$getCachedLight();
 		}
-		return getLightColor(partialTickTime);
+		try {
+			return getLightColor(partialTickTime);
+		} catch (Exception ignore) {
+			return 0;
+		}
 	}
 
 	@Override

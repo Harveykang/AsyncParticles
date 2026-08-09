@@ -4,7 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import org.lwjgl.system.MemoryStack;
 
 public class MemStackUtil {
-	private static final ParticleThreadLocal<MemoryStack> MEMORY_STACKS = ParticleThreadLocal.withInitial(RenderSystem::isOnRenderThread, MemoryStack::create);
+	private static final ParticleThreadLocal<MemoryStack> MEMORY_STACKS = ParticleThreadLocal.withInitial(ThreadUtil::isOnMainThread, MemoryStack::create);
 
 	@SuppressWarnings("resource")
 	public static MemoryStack stackPush() {

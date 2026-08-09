@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.Platform;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.ReportedException;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -17,7 +18,7 @@ import net.minecraft.world.phys.AABB;
 import static org.joml.Math.max;
 
 public class GameUtil {
-	public static final ParticleThreadLocal<BlockPos.MutableBlockPos> SHARED_POS = ParticleThreadLocal.withInitial(RenderSystem::isOnRenderThread, BlockPos.MutableBlockPos::new);
+	public static final ParticleThreadLocal<BlockPos.MutableBlockPos> SHARED_POS = ParticleThreadLocal.withInitial(ThreadUtil::isOnMainThread, BlockPos.MutableBlockPos::new);
 
 	public static AABB infinityAABB() {
 		return Platform.PLATFORM.infinityAABB();
