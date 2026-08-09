@@ -162,4 +162,20 @@ public abstract class MixinSingleQuadParticle extends Particle implements GpuPar
 	public SingleQuadParticle.Layer asyncparticles$getLayer() {
 		return getLayer();
 	}
+
+	public float asyncparticles$getAlpha() {
+		return alpha;
+	}
+
+	public float asyncparticles$getRed() {
+		return rCol;
+	}
+
+	public float asyncparticles$getGreen() {
+		return gCol;
+	}
+
+	public float asyncparticles$getBlue() {
+		return bCol;
+	}
 }
