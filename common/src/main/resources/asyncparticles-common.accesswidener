@@ -26,6 +26,7 @@ accessible method net/minecraft/client/particle/ParticleGroup tickParticle (Lnet
 accessible field net/minecraft/client/particle/ParticleEngine trackingEmitters Ljava/util/Queue;
 accessible field net/minecraft/client/particle/ParticleGroup particles Ljava/util/Queue;
 accessible class net/minecraft/client/particle/FireworkParticles$SparkParticle
+accessible method net/minecraft/client/gui/screens/Screen addRenderableWidget (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
 
 accessible field com/mojang/blaze3d/buffers/GpuBuffer size J
 transitive-mutable field com/mojang/blaze3d/buffers/GpuBuffer size J

@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.coremod;
+package fun.qu_an.minecraft.asyncparticles.client.config;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import org.jetbrains.annotations.Contract;
@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
-import static fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin.LOGGER;
 
 public class AsyncParticlesMixinConfig {
 	public static final Path MIXIN_CONFIG_FILE = Path.of("config", AsyncParticlesClient.MOD_ID, AsyncParticlesClient.MOD_ID + "-mixin.properties");
@@ -34,7 +33,6 @@ public class AsyncParticlesMixinConfig {
 	private static MixinConfigObj toSaveConfig;
 
 	static {
-		LOGGER.debug("AsyncParticlesMixinConfig initialized.");
 		try {
 			load();
 		} catch (Throwable e) {
@@ -100,11 +98,31 @@ public class AsyncParticlesMixinConfig {
 		}
 	}
 
-	static MixinConfigObj getToSaveConfig() {
-		return toSaveConfig;
+	static MixinConfigObj getCurrentConfig() {
+		MixinConfigObj configObj = new MixinConfigObj();
+		configObj.fold();
+		return configObj;
+	}
+
+	static MixinConfigObj getDefaultConfig() {
+		return new MixinConfigObj();
+	}
+
+	static MixinConfigObj getDefaultConfigExceptCollections() {
+		MixinConfigObj mixinConfigObj = new MixinConfigObj();
+		MixinConfigObj currentConfig = getCurrentConfig();
+		mixinConfigObj.asyncTickableParticleGroups = currentConfig.asyncTickableParticleGroups;
+		mixinConfigObj.particle$lockProvider = currentConfig.particle$lockProvider;
+		mixinConfigObj.particle$lockRequired = currentConfig.particle$lockRequired;
+		mixinConfigObj.particle$noLightCache = currentConfig.particle$noLightCache;
+		mixinConfigObj.replaceRandom = currentConfig.replaceRandom;
+		return mixinConfigObj;
 	}
 
 	static class MixinConfigObj {
+		private MixinConfigObj() {
+		}
+
 		private int version = 0;
 		private boolean safeClassInstanceMultiMap = MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED;
 		private boolean safeBlockEntityMap = false;
@@ -310,6 +328,20 @@ public class AsyncParticlesMixinConfig {
 		public void setAsyncTickableParticleGroups(Set<String> asyncTickableParticleGroups) {
 			assertNotGlobal();
 			this.asyncTickableParticleGroups = asyncTickableParticleGroups;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (o == null || getClass() != o.getClass()) return false;
+			MixinConfigObj that = (MixinConfigObj) o;
+			return safeClassInstanceMultiMap == that.safeClassInstanceMultiMap
+				&& safeBlockEntityMap == that.safeBlockEntityMap
+				&& safeLegacyRandomSource == that.safeLegacyRandomSource;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(safeClassInstanceMultiMap, safeBlockEntityMap, safeLegacyRandomSource);
 		}
 	}
 }

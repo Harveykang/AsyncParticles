@@ -94,6 +94,10 @@ public class ConfigHelper {
 		return rendering$computeExecutionStage;
 	}
 
+	public static boolean isTickRendererOnMainThread() {
+		return rendering$tickRendererOnMainThread;
+	}
+
 	public static ParticleCleanupStrategy getParticleCleanupStrategy() {
 		return particle$cleanupStrategy;
 	}

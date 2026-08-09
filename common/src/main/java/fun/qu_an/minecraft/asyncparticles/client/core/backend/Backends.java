@@ -43,7 +43,7 @@ public class Backends {
 			glTf = getGlTf(glCapabilities);
 			glCs = getGlCs(GL_ES, glCapabilities);
 			vk = new VkCommands.Unsupported();
-			backend = GL_ES ? Backend.OPENGL_ES : Backend.OPENGL;
+			backend = GL_ES ? Backend.OPENGL_ON_ES : Backend.OPENGL;
 		} else if (backendName.toLowerCase(Locale.ROOT).contains("vulkan")) {
 			gl = new GlCommands.Unsupported();
 			glTf = new GlCommands.TransformFeedback.Unsupported();
@@ -129,7 +129,7 @@ public class Backends {
 	}
 
 	public static boolean isGl() {
-		return backend == Backend.OPENGL || backend == Backend.OPENGL_ES;
+		return backend == Backend.OPENGL || backend == Backend.OPENGL_ON_ES;
 	}
 
 	public static boolean isVk() {

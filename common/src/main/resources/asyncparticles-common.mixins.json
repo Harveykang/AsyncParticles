@@ -14,6 +14,7 @@
     "compat.beryl.MixinRenderingPipeline",
     "compat.cloth_config.AbstractConfigEntryAccessor",
     "compat.cloth_config.AbstractConfigListEntryAccessor",
+    "compat.cloth_config.AccessorAbstractConfigScreen",
     "compat.cloth_config.AccessorBaseListEntry",
     "compat.cloth_config.AccessorSubCategoryListEntry",
     "compat.cosycritters.MixinBirdParticle",
@@ -70,6 +71,7 @@
     "off_thread_access.MixinClientLevel",
     "off_thread_access.MixinEntityGetter",
     "off_thread_access.MixinLevel",
+    "off_thread_access.MixinLevelChunkSection",
     "off_thread_access.MixinLevelRenderer",
     "off_thread_access.MixinSoundEngine",
     "off_thread_access.MixinSoundManager",
@@ -79,5 +81,9 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "compat.cloth_config.MixinAbstractListListEntry",
+    "compat.cloth_config.MixinBooleanListEntry",
+    "compat.cloth_config.MixinSelectionListEntry",
+    "compat.cloth_config.MixinTextFieldListEntry"
   ]
 }

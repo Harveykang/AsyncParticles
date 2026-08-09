@@ -17,6 +17,7 @@ import net.minecraft.client.particle.*;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -86,23 +87,30 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		gpuParticleBehavior.setUpNextTickRendering(sum);
 		IParticleRenderer renderer = gpuParticleBehavior.getOrCreateRenderer();
 		renderer.prepareBuffer();
-		taskHelper.addTask(() -> {
-			int size = Math.max(8, ConfigHelper.getParticleLimit() >> 1);
-			Map<SingleQuadParticle.Layer, List<SingleQuadParticle>> particles = new Reference2ReferenceOpenHashMap<>();
-			for (Map.Entry<ParticleRenderType, ParticleGroup<?>> entry : this.particles.entrySet()) {
-				ParticleGroup<?> particleGroup = entry.getValue();
-				if (!(particleGroup instanceof GpuParticleGroup gpuGroup)) {
-					continue;
-				}
-				Queue<SingleQuadParticle> gpuParticles = gpuGroup.asyncparticles$getGpuParticles();
-				if (gpuParticles.isEmpty()) {
-					continue;
-				}
-				for (SingleQuadParticle sqp : gpuParticles) {
-					particles.computeIfAbsent(((GpuParticleAddon) sqp).asyncparticles$getLayer(), _ -> new ReferenceArrayList<>(size)).add(sqp);
-				}
+		if (!tickAsync && ConfigHelper.isTickRendererOnMainThread()) {
+			asyncparticles$tickRenderer(renderer);
+		} else {
+			taskHelper.addTask(() -> asyncparticles$tickRenderer(renderer));
+		}
+	}
+
+	@Unique
+	private void asyncparticles$tickRenderer(IParticleRenderer renderer) {
+		int size = Math.max(8, ConfigHelper.getParticleLimit() >> 1);
+		Map<SingleQuadParticle.Layer, List<SingleQuadParticle>> particles = new Reference2ReferenceOpenHashMap<>();
+		for (Map.Entry<ParticleRenderType, ParticleGroup<?>> entry : this.particles.entrySet()) {
+			ParticleGroup<?> particleGroup = entry.getValue();
+			if (!(particleGroup instanceof GpuParticleGroup gpuGroup)) {
+				continue;
 			}
-			renderer.tick(GpuParticleBehavior.getInstance().getPerTickCameraPos(), particles);
-		});
+			Queue<SingleQuadParticle> gpuParticles = gpuGroup.asyncparticles$getGpuParticles();
+			if (gpuParticles.isEmpty()) {
+				continue;
+			}
+			for (SingleQuadParticle sqp : gpuParticles) {
+				particles.computeIfAbsent(((GpuParticleAddon) sqp).asyncparticles$getLayer(), a -> new ReferenceArrayList<>(size)).add(sqp);
+			}
+		}
+		renderer.tick(GpuParticleBehavior.getInstance().getPerTickCameraPos(), particles);
 	}
 }
