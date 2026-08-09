@@ -37,7 +37,6 @@ import static org.lwjgl.opengl.GL20C.GL_CURRENT_PROGRAM;
 
 public class GlTfParticleRenderer implements IParticleRenderer {
 	private static final int SOURCE_SLOT_COUNT = 3;
-	private static final long SOURCE_WAIT_TIMEOUT_NS = 5_000_000L;
 
 	private final ParticleVertexBuffer[] sources = new ParticleVertexBuffer[SOURCE_SLOT_COUNT];
 	private final GlDevice glDevice;
@@ -150,8 +149,8 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		if (submitIndex == -1L) {
 			return;
 		}
-		if (!((GlCommandEncoder) glDevice.createCommandEncoder()).awaitSubmit(submitIndex, SOURCE_WAIT_TIMEOUT_NS)) {
-			throw new IllegalStateException("Timeout waiting for GPU particle source slot submit: " + submitIndex);
+		if (!((GlCommandEncoder) glDevice.createCommandEncoder()).awaitSubmit(submitIndex, Long.MAX_VALUE)) {
+			throw new AssertionError();
 		}
 		lastGraphicsSubmitIndex[idx] = -1L;
 	}
