@@ -303,33 +303,33 @@ public class AsyncParticlesMixinConfig {
 			this.safeLegacyRandomSource = safeLegacyRandomSource;
 		}
 
-		public boolean isSafeLegacyRandomSource() {
+		boolean isSafeLegacyRandomSource() {
 			return safeLegacyRandomSource;
 		}
 
-		public boolean isSafeClassInstanceMultiMap() {
+		boolean isSafeClassInstanceMultiMap() {
 			return safeClassInstanceMultiMap;
 		}
 
-		public void setSafeClassInstanceMultiMap(boolean safeClassInstanceMultiMap) {
+		void setSafeClassInstanceMultiMap(boolean safeClassInstanceMultiMap) {
 			assertNotGlobal();
 			this.safeClassInstanceMultiMap = safeClassInstanceMultiMap;
 		}
 
-		public boolean isSafeBlockEntityMap() {
+		boolean isSafeBlockEntityMap() {
 			return safeBlockEntityMap;
 		}
 
-		public void setSafeBlockEntityMap(boolean safeBlockEntityMap) {
+		void setSafeBlockEntityMap(boolean safeBlockEntityMap) {
 			assertNotGlobal();
 			this.safeBlockEntityMap = safeBlockEntityMap;
 		}
 
-		public Collection<String> getAsyncTickableParticleGroups() {
+		Set<String> getAsyncTickableParticleGroups() {
 			return asyncTickableParticleGroups;
 		}
 
-		public void setAsyncTickableParticleGroups(Set<String> asyncTickableParticleGroups) {
+		void setAsyncTickableParticleGroups(Set<String> asyncTickableParticleGroups) {
 			assertNotGlobal();
 			this.asyncTickableParticleGroups = asyncTickableParticleGroups;
 		}

@@ -18,7 +18,9 @@ import net.minecraft.util.FormattedCharSequence;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public class CompatibilityTryItButton extends Button {
@@ -45,7 +47,7 @@ public class CompatibilityTryItButton extends Button {
 	public void onPress(InputWithModifiers inputWithModifiers) {
 		super.onPress(inputWithModifiers);
 
-		CompatibilityTryIt select = this.select;
+		CompatibilityTryIt select = getSelect(); // getSelect() will trigger a captured save
 		CompatibilityTryIt[] values = CompatibilityTryIt.values();
 		Minecraft mc = Minecraft.getInstance();
 		do {
@@ -53,7 +55,7 @@ public class CompatibilityTryItButton extends Button {
 		} while (select == CompatibilityTryIt.CUSTOM);
 		Screen parent = ((AccessorAbstractConfigScreen) owner).getParent();
 
-		Pair<ConfigObj, MixinConfigObj> pair = select.getConfig();
+		Pair<ConfigObj, MixinConfigObj> pair = select.getConfig(modified, mixinModified);
 		Screen screen = ClothConfigMenus.screen(parent,
 			new ClothConfigMenus.ConfigBundle(pair.first(),
 				AsyncParticlesConfig.getDefaultConfig(),
@@ -110,7 +112,7 @@ public class CompatibilityTryItButton extends Button {
 			if (compatibilityTryIt == CompatibilityTryIt.CUSTOM) {
 				continue;
 			}
-			if (compatibilityTryIt.getConfig().equals(Pair.of(modified, mixinModified))) {
+			if (compatibilityTryIt.getConfig(modified, mixinModified).equals(Pair.of(modified, mixinModified))) {
 				return compatibilityTryIt;
 			}
 		}
@@ -119,7 +121,7 @@ public class CompatibilityTryItButton extends Button {
 			if (compatibilityTryIt == CompatibilityTryIt.CUSTOM) {
 				continue;
 			}
-			if (compatibilityTryIt.getConfig().equals(Pair.of(modified, mixinModified))) {
+			if (compatibilityTryIt.getConfig(modified, mixinModified).equals(Pair.of(modified, mixinModified))) {
 				return compatibilityTryIt;
 			}
 		}
@@ -130,57 +132,69 @@ public class CompatibilityTryItButton extends Button {
 		CUSTOM(() -> Component.translatable("config.asyncparticles.enum.CompatibilityTryIt.CUSTOM"),
 			() -> Component.translatable("config.asyncparticles.enum.CompatibilityTryIt.CUSTOM.tooltip").withStyle(ChatFormatting.YELLOW)) {
 			@Override
-			Pair<ConfigObj, MixinConfigObj> getConfig() {
-				return Pair.of(AsyncParticlesConfig.getCurrentConfig(), AsyncParticlesMixinConfig.getCurrentConfig());
+			Pair<ConfigObj, MixinConfigObj> getConfig(ConfigObj modified, MixinConfigObj mixinModified) {
+				ConfigObj config = AsyncParticlesConfig.getCurrentConfig();
+				MixinConfigObj mixinConfig = AsyncParticlesMixinConfig.getCurrentConfig();
+				preserveCollections(modified, mixinModified, config, mixinConfig);
+				return Pair.of(config, mixinConfig);
 			}
 		},
 		DEFAULT(() -> Component.translatable("config.asyncparticles.enum.CompatibilityTryIt.DEFAULT"),
 			() -> Component.translatable("config.asyncparticles.enum.CompatibilityTryIt.DEFAULT.tooltip").withStyle(ChatFormatting.YELLOW)) {
 			@Override
-			Pair<ConfigObj, MixinConfigObj> getConfig() {
-				return Pair.of(AsyncParticlesConfig.getDefaultConfigExceptCollections(), AsyncParticlesMixinConfig.getDefaultConfigExceptCollections());
+			Pair<ConfigObj, MixinConfigObj> getConfig(ConfigObj modified, MixinConfigObj mixinModified) {
+				ConfigObj config = AsyncParticlesConfig.getDefaultConfigExceptCollections();
+				MixinConfigObj mixinConfig = AsyncParticlesMixinConfig.getDefaultConfigExceptCollections();
+				preserveCollections(modified, mixinModified, config, mixinConfig);
+				return Pair.of(config, mixinConfig);
 			}
 		},
 		PARTICLE_ASYNC_ONLY(() -> Component.translatable("config.asyncparticles.enum.CompatibilityTryIt.PARTICLE_ASYNC_ONLY"),
 			() -> Component.translatable("config.asyncparticles.enum.CompatibilityTryIt.PARTICLE_ASYNC_ONLY.tooltip")) {
 			@Override
-			Pair<ConfigObj, MixinConfigObj> getConfig() {
+			Pair<ConfigObj, MixinConfigObj> getConfig(ConfigObj modified, MixinConfigObj mixinModified) {
 				ConfigObj config = AsyncParticlesConfig.getDefaultConfigExceptCollections();
+				MixinConfigObj mixinConfig = AsyncParticlesMixinConfig.getDefaultConfigExceptCollections();
 				config.tick.animationTickMode = false;
 				config.tick.deferredTextureTick = false;
 				config.tick.tickWeatherAsync = false;
-				return Pair.of(config, AsyncParticlesMixinConfig.getDefaultConfigExceptCollections());
+				preserveCollections(modified, mixinModified, config, mixinConfig);
+				return Pair.of(config, mixinConfig);
 			}
 		},
 		THREAD_SAFE(() -> Component.translatable("config.asyncparticles.enum.CompatibilityTryIt.THREAD_SAFE"),
 			() -> Component.translatable("config.asyncparticles.enum.CompatibilityTryIt.THREAD_SAFE.tooltip")) {
 			@Override
-			Pair<ConfigObj, MixinConfigObj> getConfig() {
+			Pair<ConfigObj, MixinConfigObj> getConfig(ConfigObj modified, MixinConfigObj mixinModified) {
+				ConfigObj config = AsyncParticlesConfig.getDefaultConfigExceptCollections();
 				MixinConfigObj mixinConfig = AsyncParticlesMixinConfig.getDefaultConfigExceptCollections();
 				mixinConfig.setSafeClassInstanceMultiMap(true);
 				mixinConfig.setSafeBlockEntityMap(true);
-				return Pair.of(AsyncParticlesConfig.getDefaultConfigExceptCollections(), mixinConfig);
+				preserveCollections(modified, mixinModified, config, mixinConfig);
+				return Pair.of(config, mixinConfig);
 			}
 		},
 		PARTICLE_ASYNC_ONLY_AND_THREAD_SAFE(() -> Component.translatable("config.asyncparticles.enum.CompatibilityTryIt.PARTICLE_ASYNC_ONLY_AND_THREAD_SAFE"),
 			() -> Component.translatable("config.asyncparticles.enum.CompatibilityTryIt.PARTICLE_ASYNC_ONLY_AND_THREAD_SAFE.tooltip")) {
 			@Override
-			Pair<ConfigObj, MixinConfigObj> getConfig() {
+			Pair<ConfigObj, MixinConfigObj> getConfig(ConfigObj modified, MixinConfigObj mixinModified) {
 				ConfigObj config = AsyncParticlesConfig.getDefaultConfigExceptCollections();
+				MixinConfigObj mixinConfig = AsyncParticlesMixinConfig.getDefaultConfigExceptCollections();
 				config.tick.animationTickMode = false;
 				config.tick.deferredTextureTick = false;
 				config.tick.tickWeatherAsync = false;
-				MixinConfigObj mixinConfig = AsyncParticlesMixinConfig.getDefaultConfigExceptCollections();
 				mixinConfig.setSafeClassInstanceMultiMap(true);
 				mixinConfig.setSafeBlockEntityMap(true);
+				preserveCollections(modified, mixinModified, config, mixinConfig);
 				return Pair.of(config, mixinConfig);
 			}
 		},
 		MAIN_THREAD_EVERYTHING(() -> Component.translatable("config.asyncparticles.enum.CompatibilityTryIt.MAIN_THREAD_EVERYTHING"),
 			() -> Component.translatable("config.asyncparticles.enum.CompatibilityTryIt.MAIN_THREAD_EVERYTHING.tooltip")) {
 			@Override
-			Pair<ConfigObj, MixinConfigObj> getConfig() {
+			Pair<ConfigObj, MixinConfigObj> getConfig(ConfigObj modified, MixinConfigObj mixinModified) {
 				ConfigObj config = AsyncParticlesConfig.getDefaultConfigExceptCollections();
+				MixinConfigObj mixinConfig = AsyncParticlesMixinConfig.getDefaultConfigExceptCollections();
 				config.tick.animationTickMode = false;
 				config.tick.deferredTextureTick = false;
 				config.tick.tickWeatherAsync = false;
@@ -188,9 +202,20 @@ public class CompatibilityTryItButton extends Button {
 				config.particle.particleLightCache = false;
 				config.particle.cleanupStrategy = ParticleCleanupStrategy.MAIN_THREAD;
 				config.rendering.tickRendererOnMainThread = true;
-				return Pair.of(config, AsyncParticlesMixinConfig.getDefaultConfigExceptCollections());
+				preserveCollections(modified, mixinModified, config, mixinConfig);
+				return Pair.of(config, mixinConfig);
 			}
 		};
+
+		private static void preserveCollections(ConfigObj modified, MixinConfigObj mixinModified, ConfigObj config, MixinConfigObj mixinConfig) {
+			// preserve modified collections
+			config.tick.syncParticleClasses = modified.tick.syncParticleClasses;
+			mixinConfig.setAsyncTickableParticleGroups(mixinModified.getAsyncTickableParticleGroups());
+			mixinConfig.setLockProvider(mixinModified.getLockProvider());
+			mixinConfig.setLockRequired(mixinModified.getLockRequired());
+			mixinConfig.setReplaceRandom(mixinModified.getReplaceRandom());
+			mixinConfig.setNoLightCache(mixinModified.getNoLightCache());
+		}
 
 		private final Supplier<Component> componentSupplier;
 		private final Supplier<Component> tooltipSupplier;
@@ -205,7 +230,7 @@ public class CompatibilityTryItButton extends Button {
 			return componentSupplier.get();
 		}
 
-		abstract Pair<ConfigObj, MixinConfigObj> getConfig();
+		abstract Pair<ConfigObj, MixinConfigObj> getConfig(ConfigObj modified, MixinConfigObj mixinModified);
 
 		public Component getTooltipComponent() {
 			return tooltipSupplier.get();

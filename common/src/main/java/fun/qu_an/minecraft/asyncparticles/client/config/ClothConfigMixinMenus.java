@@ -5,6 +5,7 @@ import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleGroup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jspecify.annotations.Nullable;
@@ -16,6 +17,7 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.COS
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.MAKE_BUBBLES_POP_LOADED;
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesMixinConfig.MixinConfigObj;
 import static fun.qu_an.minecraft.asyncparticles.client.config.ClothConfigMenus.modifyOriginal;
+import static fun.qu_an.minecraft.asyncparticles.client.config.ClothConfigMenus.testClass;
 
 // No more NoClassDefFoundError
 public class ClothConfigMixinMenus {
@@ -62,12 +64,11 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap.tooltip"))
 			.requireRestart()
 			.build(), originalConfig.isSafeBlockEntityMap()));
-		List<String> lastAsyncTickableParticleGroups = List.copyOf(displayConfig.getAsyncTickableParticleGroups());
-		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
+		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.asyncTickableGroup"),
-				lastAsyncTickableParticleGroups)
-			.setDefaultValue(lastAsyncTickableParticleGroups)
-			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getAsyncTickableParticleGroups().contains(s)))
+				List.copyOf(displayConfig.getAsyncTickableParticleGroups()))
+			.setDefaultValue(List.copyOf(originalConfig.getAsyncTickableParticleGroups()))
+			.setCellErrorSupplier(s -> testClass(s, ParticleGroup.class, s1 -> defaultConfig.getAsyncTickableParticleGroups().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getAsyncTickableParticleGroups());
@@ -78,13 +79,12 @@ public class ClothConfigMixinMenus {
 					.withStyle(ChatFormatting.DARK_RED),
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
-			.build()));
-		List<String> lastNoLightCache = List.copyOf(displayConfig.getNoLightCache());
-		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
+			.build()), originalConfig.getAsyncTickableParticleGroups()));
+		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noLightCache"),
-				lastNoLightCache)
-			.setDefaultValue(lastNoLightCache)
-			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoLightCache().contains(s)))
+				List.copyOf(displayConfig.getNoLightCache()))
+			.setDefaultValue(List.copyOf(originalConfig.getNoLightCache()))
+			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getNoLightCache().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getNoLightCache());
@@ -95,12 +95,11 @@ public class ClothConfigMixinMenus {
 					.withStyle(ChatFormatting.DARK_RED),
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
-			.build()));
-		List<String> lastLockProvider = List.copyOf(displayConfig.getLockProvider());
-		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
-			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockProvider"), lastLockProvider)
-			.setDefaultValue(lastLockProvider)
-			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getLockProvider().contains(s)))
+			.build()), originalConfig.getNoLightCache()));
+		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockProvider"), List.copyOf(displayConfig.getLockProvider()))
+			.setDefaultValue(List.copyOf(originalConfig.getLockProvider()))
+			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getLockProvider().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getLockProvider());
@@ -111,12 +110,11 @@ public class ClothConfigMixinMenus {
 					.withStyle(ChatFormatting.DARK_RED),
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
-			.build()));
-		List<String> lastLockRequired = List.copyOf(displayConfig.getLockRequired());
-		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
-			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockRequired"), lastLockRequired)
-			.setDefaultValue(lastLockRequired)
-			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getLockRequired().contains(s)))
+			.build()), originalConfig.getLockProvider()));
+		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockRequired"), List.copyOf(displayConfig.getLockRequired()))
+			.setDefaultValue(List.copyOf(originalConfig.getLockRequired()))
+			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getLockRequired().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getLockRequired());
@@ -127,12 +125,11 @@ public class ClothConfigMixinMenus {
 					.withStyle(ChatFormatting.DARK_RED),
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
-			.build()));
-		List<String> lastReplaceRandom = List.copyOf(displayConfig.getReplaceRandom());
-		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
-			.startStrList(Component.translatable("config.asyncparticles.mixin.replaceRandom"), lastReplaceRandom)
-			.setDefaultValue(lastReplaceRandom)
-			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getReplaceRandom().contains(s)))
+			.build()), originalConfig.getLockRequired()));
+		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.replaceRandom"), List.copyOf(displayConfig.getReplaceRandom()))
+			.setDefaultValue(List.copyOf(originalConfig.getReplaceRandom()))
+			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getReplaceRandom().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getReplaceRandom());
@@ -144,7 +141,7 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.replaceRandom.tooltip"),
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
-			.build()));
+			.build()), originalConfig.getReplaceRandom()));
 		mixinCategory.addEntry(modifyOriginal(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.particle.safeLegacyRandomSource"),
 				displayConfig.isSafeLegacyRandomSource())
@@ -153,22 +150,6 @@ public class ClothConfigMixinMenus {
 			.setTooltip(Component.translatable("config.asyncparticles.mixin.particle.safeLegacyRandomSource.tooltip"))
 //			.requireRestart()
 			.build(), originalConfig.isSafeLegacyRandomSource()));
-	}
-
-	private static Optional<Component> testParticleClass(String s, boolean b) {
-		if (b) {
-			return Optional.empty();
-		}
-		Class<?> aClass;
-		try {
-			aClass = Class.forName(s);
-		} catch (ClassNotFoundException e) {
-			return Optional.of(Component.translatable("config.asyncparticles.mixin.particle.invalid-class"));
-		}
-		if (!Particle.class.isAssignableFrom(aClass)) {
-			return Optional.of(Component.translatable("config.asyncparticles.mixin.particle.invalid-class"));
-		}
-		return Optional.empty();
 	}
 
 	public static void addModCompatCategory(ConfigEntryBuilder entryBuilder,
