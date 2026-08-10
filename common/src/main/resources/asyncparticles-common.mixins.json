@@ -74,15 +74,15 @@
     "off_thread_access.MixinLevelChunkSection",
     "off_thread_access.MixinLevelRenderer",
     "off_thread_access.MixinSoundEngine",
-    "off_thread_access.MixinSoundManager"
+    "off_thread_access.MixinSoundManager",
+    "compat.cloth_config.MixinAbstractListListEntry",
+    "compat.cloth_config.MixinBooleanListEntry",
+    "compat.cloth_config.MixinSelectionListEntry",
+    "compat.cloth_config.MixinTextFieldListEntry"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
-    "compat.cloth_config.MixinAbstractListListEntry",
-    "compat.cloth_config.MixinBooleanListEntry",
-    "compat.cloth_config.MixinSelectionListEntry",
-    "compat.cloth_config.MixinTextFieldListEntry"
   ]
 }
