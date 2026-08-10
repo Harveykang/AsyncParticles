@@ -51,7 +51,11 @@ public class Backends {
 			vk = getVkCaps();
 			backend = Backend.VULKAN;
 		} else {
-			throw new ExceptionInInitializerError("Unsupported backend: " + backendName);
+			gl = new GlCommands.Unsupported();
+			glTf = new GlCommands.TransformFeedback.Unsupported();
+			glCs = new GlCommands.ComputeShader.Unsupported();
+			vk = new VkCommands.Unsupported();
+			backend = Backend.UNKNOWN;
 		}
 	}
 
