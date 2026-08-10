@@ -39,10 +39,9 @@ class ClothConfigMenus {
 	                     MixinConfigBundle mixinBundle,
 	                     int selectedCategoryIndex,
 	                     @Nullable CompatibilityTryIt compatibilityTryIt) {
-		AsyncParticlesConfig.ConfigObj oldConfig = bundle.oldConfig();
+		AsyncParticlesConfig.ConfigObj displayConfig = bundle.displayConfig();
 		AsyncParticlesConfig.ConfigObj defaultConfig = bundle.defaultConfig();
-		AsyncParticlesConfig.ConfigObj savingConfig = bundle.savingConfig();
-		AsyncParticlesConfig.ConfigObj unsavedConfig = bundle.unsavedConfig();
+		AsyncParticlesConfig.ConfigObj originalConfig = bundle.originalConfig();
 
 		ConfigBuilder builder = ConfigBuilder.create()
 			.setParentScreen(parent)
@@ -54,84 +53,84 @@ class ClothConfigMenus {
 		builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.particle"))
 			.addEntry(modifyOriginal(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.particle.particleLimit"),
-					oldConfig.particle.particleLimit)
+					displayConfig.particle.particleLimit)
 				.setDefaultValue(defaultConfig.particle.particleLimit)
 				.setTooltip(Component.translatable("config.asyncparticles.particle.particleLimit.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.particle.particleLimit = newValue)
+				.setSaveConsumer(newValue -> displayConfig.particle.particleLimit = newValue)
 				.setMin(AsyncParticlesConfig.MIN_PARTICLE_LIMIT)
 				.setMax(AsyncParticlesConfig.MAX_PARTICLE_LIMIT)
-				.build(), unsavedConfig.particle.particleLimit))
+				.build(), originalConfig.particle.particleLimit))
 			.addEntry(modifyOriginal(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.particle.cleanupStrategy"),
-					ParticleCleanupStrategy.class, oldConfig.particle.cleanupStrategy)
+					ParticleCleanupStrategy.class, displayConfig.particle.cleanupStrategy)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
 				.setDefaultValue(defaultConfig.particle.cleanupStrategy)
 				.setTooltip(Component.translatable("config.asyncparticles.particle.cleanupStrategy.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.particle.cleanupStrategy = newValue)
-				.build(), unsavedConfig.particle.cleanupStrategy))
+				.setSaveConsumer(newValue -> displayConfig.particle.cleanupStrategy = newValue)
+				.build(), originalConfig.particle.cleanupStrategy))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.parallelQueueRemoval"),
-					oldConfig.particle.parallelQueueRemoval)
+					displayConfig.particle.parallelQueueRemoval)
 				.setDefaultValue(defaultConfig.particle.parallelQueueRemoval)
 				.setTooltip(Component.translatable("config.asyncparticles.particle.parallelQueueRemoval.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.particle.parallelQueueRemoval = newValue)
-				.build(), unsavedConfig.particle.parallelQueueRemoval))
+				.setSaveConsumer(newValue -> displayConfig.particle.parallelQueueRemoval = newValue)
+				.build(), originalConfig.particle.parallelQueueRemoval))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.parallelQueueEviction"),
-					oldConfig.particle.parallelQueueEviction)
+					displayConfig.particle.parallelQueueEviction)
 				.setDefaultValue(defaultConfig.particle.parallelQueueEviction)
 				.setTooltip(Component.translatable("config.asyncparticles.particle.parallelQueueEviction.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.particle.parallelQueueEviction = newValue)
-				.build(), unsavedConfig.particle.parallelQueueEviction))
+				.setSaveConsumer(newValue -> displayConfig.particle.parallelQueueEviction = newValue)
+				.build(), originalConfig.particle.parallelQueueEviction))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.particleLightCache"),
-					oldConfig.particle.particleLightCache)
+					displayConfig.particle.particleLightCache)
 				.setDefaultValue(defaultConfig.particle.particleLightCache)
 				.setTooltip(Component.translatable("config.asyncparticles.particle.particleLightCache.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.particle.particleLightCache = newValue)
-				.build(), unsavedConfig.particle.particleLightCache))
+				.setSaveConsumer(newValue -> displayConfig.particle.particleLightCache = newValue)
+				.build(), originalConfig.particle.particleLightCache))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.cullUnderwaterParticleType"),
-					oldConfig.particle.cullUnderwaterParticleType)
+					displayConfig.particle.cullUnderwaterParticleType)
 				.setDefaultValue(defaultConfig.particle.cullUnderwaterParticleType)
 				.setTooltip(Component.translatable("config.asyncparticles.particle.cullUnderwaterParticleType.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.particle.cullUnderwaterParticleType = newValue)
-				.build(), unsavedConfig.particle.cullUnderwaterParticleType));
+				.setSaveConsumer(newValue -> displayConfig.particle.cullUnderwaterParticleType = newValue)
+				.build(), originalConfig.particle.cullUnderwaterParticleType));
 		// endregion
 		// region Tick Category
 		builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.tick"))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.animationTickMode"),
-					oldConfig.tick.animationTickMode)
+					displayConfig.tick.animationTickMode)
 				.setDefaultValue(defaultConfig.tick.animationTickMode)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.tick.animationTickMode = newValue)
-				.build(), unsavedConfig.tick.animationTickMode))
+				.setSaveConsumer(newValue -> displayConfig.tick.animationTickMode = newValue)
+				.build(), originalConfig.tick.animationTickMode))
 			.addEntry(modifyOriginal(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.tick.particleAsyncMode"),
-					ParticleAsyncMode.class, oldConfig.tick.particleAsyncMode)
+					ParticleAsyncMode.class, displayConfig.tick.particleAsyncMode)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
 				.setDefaultValue(defaultConfig.tick.particleAsyncMode)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.particleAsyncMode.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.tick.particleAsyncMode = newValue)
-				.build(), unsavedConfig.tick.particleAsyncMode))
+				.setSaveConsumer(newValue -> displayConfig.tick.particleAsyncMode = newValue)
+				.build(), originalConfig.tick.particleAsyncMode))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.gpuOnlyAsyncParticleTick"),
-					oldConfig.tick.gpuOnlyAsyncParticleTick)
+					displayConfig.tick.gpuOnlyAsyncParticleTick)
 				.setDefaultValue(defaultConfig.tick.gpuOnlyAsyncParticleTick)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.gpuOnlyAsyncParticleTick.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.tick.gpuOnlyAsyncParticleTick = newValue)
-				.build(), unsavedConfig.tick.gpuOnlyAsyncParticleTick))
+				.setSaveConsumer(newValue -> displayConfig.tick.gpuOnlyAsyncParticleTick = newValue)
+				.build(), originalConfig.tick.gpuOnlyAsyncParticleTick))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.tickWeatherAsync"),
-					oldConfig.tick.tickWeatherAsync)
+					displayConfig.tick.tickWeatherAsync)
 				.setDefaultValue(defaultConfig.tick.tickWeatherAsync)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.tickWeatherAsync.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.tick.tickWeatherAsync = newValue)
-				.build(), unsavedConfig.tick.tickWeatherAsync))
+				.setSaveConsumer(newValue -> displayConfig.tick.tickWeatherAsync = newValue)
+				.build(), originalConfig.tick.tickWeatherAsync))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.deferredTextureTick"),
-					oldConfig.tick.deferredTextureTick)
+					displayConfig.tick.deferredTextureTick)
 				.setDefaultValue(defaultConfig.tick.deferredTextureTick)
 				.setTooltipSupplier(() -> {
 					if (ModListHelper.AXIOM_LOADED) {
@@ -144,66 +143,66 @@ class ClothConfigMenus {
 						});
 					}
 				})
-				.setSaveConsumer(newValue -> savingConfig.tick.deferredTextureTick = newValue)
+				.setSaveConsumer(newValue -> displayConfig.tick.deferredTextureTick = newValue)
 				.setRequirement(() -> !ModListHelper.AXIOM_LOADED)
-				.build(), unsavedConfig.tick.deferredTextureTick))
+				.build(), originalConfig.tick.deferredTextureTick))
 			.addEntry(modifyOriginal(entryBuilder
 				.startIntField(Component.translatable("config.asyncparticles.tick.failPerSecLimit"),
-					oldConfig.tick.failPerSecLimit)
+					displayConfig.tick.failPerSecLimit)
 				.setDefaultValue(defaultConfig.tick.failPerSecLimit)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.failPerSecLimit.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.tick.failPerSecLimit = newValue)
+				.setSaveConsumer(newValue -> displayConfig.tick.failPerSecLimit = newValue)
 				.setMin(0)
 				.setMax(256)
-				.build(), unsavedConfig.tick.failPerSecLimit))
+				.build(), originalConfig.tick.failPerSecLimit))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.suppressCME"),
-					oldConfig.tick.suppressCME)
+					displayConfig.tick.suppressCME)
 				.setDefaultValue(defaultConfig.tick.suppressCME)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.suppressCME.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.tick.suppressCME = newValue)
-				.build(), unsavedConfig.tick.suppressCME))
+				.setSaveConsumer(newValue -> displayConfig.tick.suppressCME = newValue)
+				.build(), originalConfig.tick.suppressCME))
 			.addEntry(modifyOriginal(entryBuilder
 				.startStrList(Component.translatable("config.asyncparticles.tick.syncParticleClasses"),
-					new ArrayList<>(oldConfig.tick.syncParticleClasses))
+					new ArrayList<>(displayConfig.tick.syncParticleClasses))
 				.setDefaultValue(new ArrayList<>(defaultConfig.tick.syncParticleClasses))
 				.setTooltip(Component.translatable("config.asyncparticles.tick.syncParticleClasses.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.tick.syncParticleClasses = new LinkedHashSet<>(newValue))
-				.build(), unsavedConfig.tick.syncParticleClasses));
+				.setSaveConsumer(newValue -> displayConfig.tick.syncParticleClasses = new LinkedHashSet<>(newValue))
+				.build(), originalConfig.tick.syncParticleClasses));
 		// endregion
 		// region Rendering Category
 		builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.rendering"))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.gpuAcceleration"),
-					oldConfig.rendering.gpuAcceleration)
+					displayConfig.rendering.gpuAcceleration)
 				.setDefaultValue(defaultConfig.rendering.gpuAcceleration)
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.gpuAcceleration.tooltip"))
 				// todo add gpu acceleration requirement
-				.setSaveConsumer(newValue -> savingConfig.rendering.gpuAcceleration = newValue)
+				.setSaveConsumer(newValue -> displayConfig.rendering.gpuAcceleration = newValue)
 				.setRequirement(Backends::supportsGpuAcceleration)
-				.build(), unsavedConfig.rendering.gpuAcceleration))
+				.build(), originalConfig.rendering.gpuAcceleration))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.appendNewParticlesToRenderer"),
-					oldConfig.rendering.appendNewParticlesToRenderer)
+					displayConfig.rendering.appendNewParticlesToRenderer)
 				.setDefaultValue(defaultConfig.rendering.appendNewParticlesToRenderer)
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.appendNewParticlesToRenderer.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.rendering.appendNewParticlesToRenderer = newValue)
-				.build(), unsavedConfig.rendering.appendNewParticlesToRenderer))
+				.setSaveConsumer(newValue -> displayConfig.rendering.appendNewParticlesToRenderer = newValue)
+				.build(), originalConfig.rendering.appendNewParticlesToRenderer))
 			.addEntry(modifyOriginal(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.rendering.computeExecutionStage"),
-					ComputeExecutionStage.class, oldConfig.rendering.computeExecutionStage)
+					ComputeExecutionStage.class, displayConfig.rendering.computeExecutionStage)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
 				.setDefaultValue(defaultConfig.rendering.computeExecutionStage)
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.computeExecutionStage.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.rendering.computeExecutionStage = newValue)
-				.build(), unsavedConfig.rendering.computeExecutionStage))
+				.setSaveConsumer(newValue -> displayConfig.rendering.computeExecutionStage = newValue)
+				.build(), originalConfig.rendering.computeExecutionStage))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.tickRendererOnMainThread"),
-					oldConfig.rendering.tickRendererOnMainThread)
+					displayConfig.rendering.tickRendererOnMainThread)
 				.setDefaultValue(defaultConfig.rendering.tickRendererOnMainThread)
 				.setTooltip(Component.translatable("config.asyncparticles.rendering.tickRendererOnMainThread.tooltip"))
-				.setSaveConsumer(newValue -> savingConfig.rendering.tickRendererOnMainThread = newValue)
-				.build(), unsavedConfig.rendering.tickRendererOnMainThread));
+				.setSaveConsumer(newValue -> displayConfig.rendering.tickRendererOnMainThread = newValue)
+				.build(), originalConfig.rendering.tickRendererOnMainThread));
 		// endregion
 
 		// region Compat Category
@@ -211,41 +210,41 @@ class ClothConfigMenus {
 		List<AbstractConfigListEntry> vsEntries = new ArrayList<>();
 		vsEntries.add(modifyOriginal(entryBuilder
 			.startSelector(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect"),
-				RainEffect.values(), oldConfig.valkyrienSkies.rainEffect)
+				RainEffect.values(), displayConfig.valkyrienSkies.rainEffect)
 			.setNameProvider(RainEffect::getComponent)
 			.setDefaultValue(defaultConfig.valkyrienSkies.rainEffect)
 			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.rainEffect.tooltip"))
-			.setSaveConsumer(newValue -> savingConfig.valkyrienSkies.rainEffect = newValue)
+			.setSaveConsumer(newValue -> displayConfig.valkyrienSkies.rainEffect = newValue)
 			.setRequirement(() -> ModListHelper.VS_LOADED)
-			.build(), unsavedConfig.valkyrienSkies.rainEffect));
+			.build(), originalConfig.valkyrienSkies.rainEffect));
 		vsEntries.add(modifyOriginal(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.fixParticleLights"),
-				oldConfig.valkyrienSkies.fixParticleLights)
+				displayConfig.valkyrienSkies.fixParticleLights)
 			.setDefaultValue(defaultConfig.valkyrienSkies.fixParticleLights)
 			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.valkyrienskies.fixParticleLights.tooltip"))
-			.setSaveConsumer(newValue -> savingConfig.valkyrienSkies.fixParticleLights = newValue)
+			.setSaveConsumer(newValue -> displayConfig.valkyrienSkies.fixParticleLights = newValue)
 			.setRequirement(() -> ModListHelper.VS_LOADED)
-			.build(), unsavedConfig.valkyrienSkies.fixParticleLights));
+			.build(), originalConfig.valkyrienSkies.fixParticleLights));
 
 		@SuppressWarnings("rawtypes")
 		List<AbstractConfigListEntry> createEntries = new ArrayList<>();
 		createEntries.add(modifyOriginal(entryBuilder
 			.startEnumSelector(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect"),
-				RainEffect.class, oldConfig.create.rainEffect)
+				RainEffect.class, displayConfig.create.rainEffect)
 			.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
 			.setDefaultValue(defaultConfig.create.rainEffect)
 			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect.tooltip"))
-			.setSaveConsumer(newValue -> savingConfig.create.rainEffect = newValue)
+			.setSaveConsumer(newValue -> displayConfig.create.rainEffect = newValue)
 			.setRequirement(() -> ModListHelper.CREATE_LOADED)
-			.build(), unsavedConfig.create.rainEffect));
+			.build(), originalConfig.create.rainEffect));
 		createEntries.add(modifyOriginal(entryBuilder
 			.startIntField(Component.translatable("config.asyncparticles.mod-compat.create.tickRainBlockingRange"),
-				oldConfig.create.tickRainBlockingRange)
+				displayConfig.create.tickRainBlockingRange)
 			.setDefaultValue(defaultConfig.create.tickRainBlockingRange)
 			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.create.tickRainBlockingRange.tooltip"))
-			.setSaveConsumer(newValue -> savingConfig.create.tickRainBlockingRange = newValue)
+			.setSaveConsumer(newValue -> displayConfig.create.tickRainBlockingRange = newValue)
 			.setRequirement(() -> ModListHelper.CREATE_LOADED)
-			.build(), unsavedConfig.create.tickRainBlockingRange));
+			.build(), originalConfig.create.tickRainBlockingRange));
 		// endregion
 
 		// region Mixin
@@ -273,11 +272,11 @@ class ClothConfigMenus {
 		if (Backends.backend == Backend.OPENGL_ON_ES) {
 			builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mobile"))
 				.addEntry(modifyOriginal(entryBuilder
-					.startBooleanToggle(Component.translatable("config.asyncparticles.mobile.multiDrawWorkaround"), oldConfig.mobile.multiDrawWorkaround)
+					.startBooleanToggle(Component.translatable("config.asyncparticles.mobile.multiDrawWorkaround"), displayConfig.mobile.multiDrawWorkaround)
 					.setTooltip(Component.translatable("config.asyncparticles.mobile.multiDrawWorkaround.tooltip"))
 					.setDefaultValue(defaultConfig.mobile.multiDrawWorkaround)
-					.setSaveConsumer(newValue -> savingConfig.mobile.multiDrawWorkaround = newValue)
-					.build(), unsavedConfig.mobile.multiDrawWorkaround));
+					.setSaveConsumer(newValue -> displayConfig.mobile.multiDrawWorkaround = newValue)
+					.build(), originalConfig.mobile.multiDrawWorkaround));
 		}
 		// endregion
 
@@ -309,12 +308,12 @@ class ClothConfigMenus {
 				.build());
 		// endregion
 
-		AsyncParticlesMixinConfig.MixinConfigObj savingMixinConfig = mixinBundle.savingConfig();
+		AsyncParticlesMixinConfig.MixinConfigObj modifiedMixinConfig = mixinBundle.displayConfig();
 		builder.setSavingRunnable(() -> {
 			try {
-				savingConfig.flat();
+				displayConfig.flat();
 				AsyncParticlesConfig.save();
-				savingMixinConfig.flat();
+				modifiedMixinConfig.flat();
 				AsyncParticlesMixinConfig.save();
 				DevRuntimeDebug.apply();
 			} catch (Exception e) {
@@ -336,9 +335,8 @@ class ClothConfigMenus {
 			AsyncTickBehavior.getInstance().reloadLater();
 		});
 
-		AsyncParticlesMixinConfig.MixinConfigObj unsavedMixinConfig = mixinBundle.unsavedConfig();
 		builder.setAfterInitConsumer(screen -> screen.addRenderableWidget(
-			new CompatibilityTryItButton((AbstractConfigScreen) screen, unsavedConfig, savingConfig, unsavedMixinConfig, savingMixinConfig, compatibilityTryIt)));
+			new CompatibilityTryItButton((AbstractConfigScreen) screen, displayConfig, modifiedMixinConfig, compatibilityTryIt)));
 
 		Screen screen = builder.build();
 		((AbstractConfigScreen) screen).selectedCategoryIndex = selectedCategoryIndex;
@@ -373,17 +371,16 @@ class ClothConfigMenus {
 	}
 
 	record ConfigBundle(
-		AsyncParticlesConfig.ConfigObj oldConfig,
+		AsyncParticlesConfig.ConfigObj displayConfig,
 		AsyncParticlesConfig.ConfigObj defaultConfig,
-		AsyncParticlesConfig.ConfigObj savingConfig,
-		AsyncParticlesConfig.@Nullable ConfigObj unsavedConfig) {
+		AsyncParticlesConfig.@Nullable ConfigObj originalConfig) {
 		public static ConfigBundle create() {
-			return new ConfigBundle(AsyncParticlesConfig.getCurrentConfig(), AsyncParticlesConfig.getDefaultConfig(), AsyncParticlesConfig.getDefaultConfig(), null);
+			return new ConfigBundle(AsyncParticlesConfig.getCurrentConfig(), AsyncParticlesConfig.getDefaultConfig(), null);
 		}
 
 		@Override
-		public AsyncParticlesConfig.ConfigObj unsavedConfig() {
-			return unsavedConfig == null ? oldConfig : unsavedConfig;
+		public AsyncParticlesConfig.ConfigObj originalConfig() {
+			return originalConfig == null ? displayConfig : originalConfig;
 		}
 	}
 }

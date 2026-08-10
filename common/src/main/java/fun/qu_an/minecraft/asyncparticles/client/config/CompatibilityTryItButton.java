@@ -23,20 +23,17 @@ import java.util.function.Supplier;
 
 public class CompatibilityTryItButton extends Button {
 	private final AbstractConfigScreen owner;
-	private final ConfigObj saving;
-	private final ConfigObj unsaved;
-	private final MixinConfigObj mixinSaving;
-	private final MixinConfigObj mixinUnsaved;
+	private final ConfigObj modified;
+	private final MixinConfigObj mixinModified;
 	private CompatibilityTryIt select = CompatibilityTryIt.DEFAULT;
+	private boolean lastHoveredOrFocused;
 
-	CompatibilityTryItButton(AbstractConfigScreen screen, ConfigObj unsaved, ConfigObj saving, MixinConfigObj mixinUnsaved, MixinConfigObj mixinSaving, @Nullable CompatibilityTryIt select) {
+	CompatibilityTryItButton(AbstractConfigScreen screen, ConfigObj modified, MixinConfigObj mixinModified, @Nullable CompatibilityTryIt select) {
 		super(5, 12, 120, 20, Component.translatable("config.asyncparticles.enum.CompatibilityTryIt"), button -> {
 		}, DEFAULT_NARRATION);
 		this.owner = screen;
-		this.saving = saving; // Reference to the saving config object
-		this.unsaved = unsaved;
-		this.mixinSaving = mixinSaving;
-		this.mixinUnsaved = mixinUnsaved;
+		this.modified = modified; // Reference to the modified config object
+		this.mixinModified = mixinModified;
 		if (select != null) {
 			this.select = select;
 		} else {
@@ -60,13 +57,11 @@ public class CompatibilityTryItButton extends Button {
 		Screen screen = ClothConfigMenus.screen(parent,
 			new ClothConfigMenus.ConfigBundle(pair.first(),
 				AsyncParticlesConfig.getDefaultConfig(),
-				AsyncParticlesConfig.getDefaultConfig(),
-				this.unsaved),
+				AsyncParticlesConfig.getCurrentConfig()),
 			new ClothConfigMixinMenus.MixinConfigBundle(
 				pair.second(),
 				AsyncParticlesMixinConfig.getDefaultConfig(),
-				AsyncParticlesMixinConfig.getDefaultConfig(),
-				mixinUnsaved
+				AsyncParticlesMixinConfig.getCurrentConfig()
 			),
 			owner.selectedCategoryIndex,
 			select);
@@ -87,8 +82,13 @@ public class CompatibilityTryItButton extends Button {
 
 	private Component getComponent() {
 		if (!this.isHoveredOrFocused()) {
+			lastHoveredOrFocused = false;
 			return Component.translatable("config.asyncparticles.enum.CompatibilityTryIt");
 		} else {
+			if (!lastHoveredOrFocused) {
+				lastHoveredOrFocused = true;
+				select = getSelect();
+			}
 			CompatibilityTryIt select = this.select;
 			if (select == CompatibilityTryIt.CUSTOM) {
 				return CompatibilityTryIt.CUSTOM.getComponent();
@@ -110,7 +110,7 @@ public class CompatibilityTryItButton extends Button {
 			if (compatibilityTryIt == CompatibilityTryIt.CUSTOM) {
 				continue;
 			}
-			if (compatibilityTryIt.getConfig().equals(Pair.of(saving, mixinSaving))) {
+			if (compatibilityTryIt.getConfig().equals(Pair.of(modified, mixinModified))) {
 				return compatibilityTryIt;
 			}
 		}
@@ -119,7 +119,7 @@ public class CompatibilityTryItButton extends Button {
 			if (compatibilityTryIt == CompatibilityTryIt.CUSTOM) {
 				continue;
 			}
-			if (compatibilityTryIt.getConfig().equals(Pair.of(saving, mixinSaving))) {
+			if (compatibilityTryIt.getConfig().equals(Pair.of(modified, mixinModified))) {
 				return compatibilityTryIt;
 			}
 		}
