@@ -130,7 +130,7 @@ public class Diagnostic {
 			LOGGER.error("""
 				[AsyncParticles] Error during rain tick.
 				This is likely caused by an incompatible injection into the rain tick method.
-					Temporarily disabled 'Async Weather Tick' internally. You may also want to turn it on manually,\
+					Temporarily disabled 'Async Weather Tick' internally. You may also want to turn it off manually,\
 					 otherwise this error will recur after restarting the game.""", e);
 			sendChat(() -> Component.literal("[AsyncParticles] ").append(
 				Component.translatable("chat.asyncparticles.warn.error_during_async_incompatible_injection",
