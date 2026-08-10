@@ -16,6 +16,7 @@ import me.shedaniel.clothconfig2.gui.entries.AbstractListListEntry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -24,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collector;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
@@ -49,6 +51,8 @@ class ClothConfigMenus {
 			.setTitle(Component.translatable("gui.asyncparticles"))
 			.setTransparentBackground(true);
 		ConfigEntryBuilder entryBuilder = builder.entryBuilder();
+		ConfigEntryBuilder revertEntryBuilder = builder.entryBuilder()
+			.setResetButtonKey(Component.translatable("gui.asyncparticles.revert"));
 
 		// region Particle Category
 		builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.particle"))
@@ -176,12 +180,17 @@ class ClothConfigMenus {
 				.setTooltip(Component.translatable("config.asyncparticles.tick.suppressCME.tooltip"))
 				.setSaveConsumer(newValue -> displayConfig.tick.suppressCME = newValue)
 				.build(), originalConfig.tick.suppressCME))
-			.addEntry(modifyOriginal(entryBuilder
+			.addEntry(modifyOriginal(revertEntryBuilder
 				.startStrList(Component.translatable("config.asyncparticles.tick.syncParticleClasses"),
 					new ArrayList<>(displayConfig.tick.syncParticleClasses))
-				.setDefaultValue(new ArrayList<>(defaultConfig.tick.syncParticleClasses))
+				.setDefaultValue(new ArrayList<>(originalConfig.tick.syncParticleClasses))
 				.setTooltip(Component.translatable("config.asyncparticles.tick.syncParticleClasses.tooltip"))
-				.setSaveConsumer(newValue -> displayConfig.tick.syncParticleClasses = new LinkedHashSet<>(newValue))
+				.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.tick.syncParticleClasses.contains(s1)))
+				.setSaveConsumer(newValue -> {
+					LinkedHashSet<String> set = new LinkedHashSet<>(newValue);
+					set.addAll(defaultConfig.tick.syncParticleClasses);
+					displayConfig.tick.syncParticleClasses = set;
+				})
 				.build(), originalConfig.tick.syncParticleClasses));
 		// endregion
 		// region Rendering Category
@@ -280,9 +289,7 @@ class ClothConfigMenus {
 		// endregion
 
 		// region Mixin
-		ConfigEntryBuilder mixinEntryBuilder = builder.entryBuilder();
-		mixinEntryBuilder.setResetButtonKey(Component.translatable("gui.asyncparticles.revert"));
-		ClothConfigMixinMenus.addModCompatCategory(entryBuilder, mixinEntryBuilder, vsEntries, sableEntries, createEntries);
+		ClothConfigMixinMenus.addModCompatCategory(entryBuilder, revertEntryBuilder, mixinBundle, vsEntries, sableEntries, createEntries);
 
 		builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mod-compat"))
 			.addEntry(new SubCategoryListEntryFix(entryBuilder
@@ -302,7 +309,7 @@ class ClothConfigMenus {
 				.build()));
 
 		ConfigCategory mixinCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mixin"));
-		ClothConfigMixinMenus.buildCategory(mixinBundle, mixinCategory, entryBuilder, mixinEntryBuilder);
+		ClothConfigMixinMenus.buildCategory(mixinBundle, mixinCategory, entryBuilder, revertEntryBuilder);
 		// endregion
 
 		// region Mobile
@@ -345,12 +352,12 @@ class ClothConfigMenus {
 				.build());
 		// endregion
 
-		AsyncParticlesMixinConfig.MixinConfigObj modifiedMixinConfig = mixinBundle.displayConfig();
+		AsyncParticlesMixinConfig.MixinConfigObj displayMixinConfig = mixinBundle.displayConfig();
 		builder.setSavingRunnable(() -> {
 			try {
 				displayConfig.flat();
 				AsyncParticlesConfig.save();
-				modifiedMixinConfig.flat();
+				displayMixinConfig.flat();
 				AsyncParticlesMixinConfig.save();
 				DevRuntimeDebug.apply();
 			} catch (Exception e) {
@@ -373,7 +380,7 @@ class ClothConfigMenus {
 		});
 
 		builder.setAfterInitConsumer(screen -> screen.addRenderableWidget(
-			new CompatibilityTryItButton((AbstractConfigScreen) screen, displayConfig, modifiedMixinConfig, compatibilityTryIt)));
+			new CompatibilityTryItButton((AbstractConfigScreen) screen, displayConfig, displayMixinConfig, compatibilityTryIt)));
 
 		Screen screen = builder.build();
 		((AbstractConfigScreen) screen).selectedCategoryIndex = selectedCategoryIndex;
@@ -405,6 +412,22 @@ class ClothConfigMenus {
 			Component.translatable("config.asyncparticles.incompatibility", modNamesStr)
 				.withStyle(ChatFormatting.YELLOW)
 		});
+	}
+
+	public static Optional<Component> testClass(String s, Class<?> superClass, Predicate<String> extraTester) {
+		if (extraTester.test(s)) {
+			return Optional.empty();
+		}
+		Class<?> aClass;
+		try {
+			aClass = Class.forName(s);
+		} catch (ClassNotFoundException e) {
+			return Optional.of(Component.translatable("config.asyncparticles.mixin.particle.invalid-class"));
+		}
+		if (!superClass.isAssignableFrom(aClass)) {
+			return Optional.of(Component.translatable("config.asyncparticles.mixin.particle.invalid-class"));
+		}
+		return Optional.empty();
 	}
 
 	record ConfigBundle(

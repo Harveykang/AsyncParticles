@@ -15,13 +15,14 @@ import java.util.stream.Collector;
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesMixinConfig.MixinConfigObj;
 import static fun.qu_an.minecraft.asyncparticles.client.config.ClothConfigMenus.modifyOriginal;
+import static fun.qu_an.minecraft.asyncparticles.client.config.ClothConfigMenus.testClass;
 
 // No more NoClassDefFoundError
 public class ClothConfigMixinMenus {
 	static void buildCategory(@Nullable MixinConfigBundle bundle,
-	                              ConfigCategory mixinCategory,
-	                              ConfigEntryBuilder entryBuilder,
-	                              ConfigEntryBuilder revertEntryBuilder) {
+	                          ConfigCategory mixinCategory,
+	                          ConfigEntryBuilder entryBuilder,
+	                          ConfigEntryBuilder revertEntryBuilder) {
 		if (bundle == null) {
 			bundle = MixinConfigBundle.create();
 		}
@@ -73,11 +74,10 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap.tooltip"))
 			.requireRestart()
 			.build(), originalConfig.isSafeBlockEntityMap()));
-		List<String> lastNoCulling = List.copyOf(displayConfig.getNoCulling());
 		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noCulling"),
-				lastNoCulling)
-			.setDefaultValue(lastNoCulling)
+				List.copyOf(displayConfig.getNoCulling()))
+			.setDefaultValue(List.copyOf(originalConfig.getNoCulling()))
 			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoCulling().contains(s)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
@@ -90,11 +90,10 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
 			.build()));
-		List<String> lastNoLightCache = List.copyOf(displayConfig.getNoLightCache());
-		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
+		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noLightCache"),
-				lastNoLightCache)
-			.setDefaultValue(lastNoLightCache)
+				List.copyOf(displayConfig.getNoLightCache()))
+			.setDefaultValue(List.copyOf(originalConfig.getNoLightCache()))
 			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoLightCache().contains(s)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
@@ -106,12 +105,11 @@ public class ClothConfigMixinMenus {
 					.withStyle(ChatFormatting.DARK_RED),
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
-			.build()));
-		List<String> lastLockProvider = List.copyOf(displayConfig.getLockProvider());
-		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
-			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockProvider"), lastLockProvider)
-			.setDefaultValue(lastLockProvider)
-			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getLockProvider().contains(s)))
+			.build()), originalConfig.getNoLightCache()));
+		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockProvider"), List.copyOf(displayConfig.getLockProvider()))
+			.setDefaultValue(List.copyOf(originalConfig.getLockProvider()))
+			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getLockProvider().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getLockProvider());
@@ -122,12 +120,11 @@ public class ClothConfigMixinMenus {
 					.withStyle(ChatFormatting.DARK_RED),
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
-			.build()));
-		List<String> lastLockRequired = List.copyOf(displayConfig.getLockRequired());
-		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
-			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockRequired"), lastLockRequired)
-			.setDefaultValue(lastLockRequired)
-			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getLockRequired().contains(s)))
+			.build()), originalConfig.getLockProvider()));
+		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockRequired"), List.copyOf(displayConfig.getLockRequired()))
+			.setDefaultValue(List.copyOf(originalConfig.getLockRequired()))
+			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getLockRequired().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getLockRequired());
@@ -138,12 +135,11 @@ public class ClothConfigMixinMenus {
 					.withStyle(ChatFormatting.DARK_RED),
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
-			.build()));
-		List<String> lastReplaceRandom = List.copyOf(displayConfig.getReplaceRandom());
-		mixinCategory.addEntry(new StringListListEntryFixRestart(revertEntryBuilder
-			.startStrList(Component.translatable("config.asyncparticles.mixin.replaceRandom"), lastReplaceRandom)
-			.setDefaultValue(lastReplaceRandom)
-			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getReplaceRandom().contains(s)))
+			.build()), originalConfig.getLockRequired()));
+		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.replaceRandom"), List.copyOf(displayConfig.getReplaceRandom()))
+			.setDefaultValue(List.copyOf(originalConfig.getReplaceRandom()))
+			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getReplaceRandom().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getReplaceRandom());
@@ -155,7 +151,7 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.replaceRandom.tooltip"),
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
-			.build()));
+			.build()), originalConfig.getReplaceRandom()));
 		mixinCategory.addEntry(modifyOriginal(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.particle.safeLegacyRandomSource"),
 				displayConfig.isSafeLegacyRandomSource())
@@ -182,16 +178,17 @@ public class ClothConfigMixinMenus {
 		return Optional.empty();
 	}
 
-	public static void addModCompatCategory(ConfigEntryBuilder entryBuilder,
-	                                        ConfigEntryBuilder mixinEntryBuilder,
-	                                        @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> vsEntries,
-	                                        @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> sableEntries,
-	                                        @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> createEntries) {
+	static void addModCompatCategory(ConfigEntryBuilder entryBuilder,
+	                                 ConfigEntryBuilder mixinEntryBuilder,
+	                                 MixinConfigBundle mixinBundle,
+	                                 @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> vsEntries,
+	                                 @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> sableEntries,
+	                                 @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> createEntries) {
 		MixinConfigObj defaultConfig = AsyncParticlesMixinConfig.getDefaultConfig();
 		MixinConfigObj newConfig = AsyncParticlesMixinConfig.getDefaultConfig();
 		MixinConfigObj lastConfig = AsyncParticlesMixinConfig.getCurrentConfig();
 		List<String> contraptionNoParticleCollision = List.copyOf(lastConfig.getContraptionNoParticleCollision());
-		createEntries.add(new StringListListEntryFixRestart(mixinEntryBuilder
+		createEntries.add(modifyOriginal(new StringListListEntryFixRestart(mixinEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.create.contraptionsNoParticleCollision"), contraptionNoParticleCollision)
 			.setDefaultValue(contraptionNoParticleCollision)
 			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getContraptionNoParticleCollision().contains(s)))
@@ -206,7 +203,7 @@ public class ClothConfigMixinMenus {
 				Component.translatable("config.asyncparticles.mixin.create.contraptionsNoParticleCollision.tooltip"),
 				Component.translatable("config.asyncparticles.mixin.tooltip"))
 			.requireRestart()
-			.build()));
+			.build()), mixinBundle.originalConfig().getContraptionNoParticleCollision()));
 	}
 
 	private static Optional<Component[]> limitedTooltip(MutableComponent description, Object... modNames) {

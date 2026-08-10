@@ -319,24 +319,24 @@ public class AsyncParticlesMixinConfig {
 			this.safeLegacyRandomSource = safeLegacyRandomSource;
 		}
 
-		public boolean isSafeLegacyRandomSource() {
+		boolean isSafeLegacyRandomSource() {
 			return safeLegacyRandomSource;
 		}
 
-		public boolean isSafeClassInstanceMultiMap() {
+		boolean isSafeClassInstanceMultiMap() {
 			return safeClassInstanceMultiMap;
 		}
 
-		public void setSafeClassInstanceMultiMap(boolean safeClassInstanceMultiMap) {
+		void setSafeClassInstanceMultiMap(boolean safeClassInstanceMultiMap) {
 			assertNotGlobal();
 			this.safeClassInstanceMultiMap = safeClassInstanceMultiMap;
 		}
 
-		public boolean isSafeBlockEntityMap() {
+		boolean isSafeBlockEntityMap() {
 			return safeBlockEntityMap;
 		}
 
-		public void setSafeBlockEntityMap(boolean safeBlockEntityMap) {
+		void setSafeBlockEntityMap(boolean safeBlockEntityMap) {
 			assertNotGlobal();
 			this.safeBlockEntityMap = safeBlockEntityMap;
 		}
@@ -346,9 +346,9 @@ public class AsyncParticlesMixinConfig {
 			return Collections.unmodifiableSet(create$contraptionNoParticleCollision);
 		}
 
-		void setContraptionNoParticleCollision(Collection<String> contraptionNoParticleCollision) {
+		void setContraptionNoParticleCollision(Set<String> contraptionNoParticleCollision) {
 			assertNotGlobal();
-			this.create$contraptionNoParticleCollision = new LinkedHashSet<>(contraptionNoParticleCollision);
+			this.create$contraptionNoParticleCollision = contraptionNoParticleCollision;
 		}
 
 		@Override
