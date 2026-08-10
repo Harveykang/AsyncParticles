@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -55,15 +56,12 @@ public class AsyncParticlesConfig {
 	public static boolean tick$tickWeatherAsync;
 	public static boolean tick$deferredTextureTick;
 	public static int tick$failPerSecLimit;
-//	public static FailBehavior tick$failBehavior;
 	public static boolean tick$suppressCME;
 	public static Set<String> tick$syncParticleClasses = new LinkedHashSet<>();
-	public static RenderingMode rendering$particleRenderingMode;
 	public static boolean rendering$gpuAcceleration;
 	public static boolean rendering$appendNewParticlesToRenderer;
 	public static ComputeExecutionStage rendering$computeExecutionStage;
-//	public static FailBehavior rendering$failBehavior;
-//	public static Set<String> rendering$syncParticleClasses = new LinkedHashSet<>();
+	public static boolean rendering$tickRendererOnMainThread;
 	public static RainEffect valkyrienSkies$rainEffect;
 	public static boolean valkyrienSkies$fixParticleLights;
 	public static RainEffect create$rainEffect;
@@ -81,7 +79,7 @@ public class AsyncParticlesConfig {
 
 	public static Screen newConfigScreen(Screen parent) {
 		if (ModListHelper.CLOTH_CONFIG_LOADED) {
-			return ClothConfigMenus.screenBuilder(parent).build();
+			return ClothConfigMenus.screen(parent);
 		} else {
 			return fallBackScreen(parent);
 		}
@@ -233,7 +231,20 @@ public class AsyncParticlesConfig {
 		return configObj;
 	}
 
+	static ConfigObj getDefaultConfigExceptCollections() {
+		ConfigObj configObj = new ConfigObj();
+		configObj.tick.syncParticleClasses = getCurrentConfig().tick.syncParticleClasses;
+		return configObj;
+	}
+
+	static ConfigObj getDefaultConfig() {
+		return new ConfigObj();
+	}
+
 	static class ConfigObj {
+		private ConfigObj() {
+		}
+
 		int version = 0; // 0 means no version, will reset to default values.
 		Particle particle = new Particle();
 		Tick tick = new Tick();
@@ -260,7 +271,27 @@ public class AsyncParticlesConfig {
 			mobile.fold();
 		}
 
+		@Override
+		public boolean equals(Object o) {
+			if (o == null || getClass() != o.getClass()) return false;
+			ConfigObj configObj = (ConfigObj) o;
+			return Objects.equals(particle, configObj.particle)
+				&& Objects.equals(tick, configObj.tick)
+				&& Objects.equals(rendering, configObj.rendering)
+				&& Objects.equals(valkyrienSkies, configObj.valkyrienSkies)
+				&& Objects.equals(create, configObj.create)
+				&& Objects.equals(mobile, configObj.mobile);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(particle, tick, rendering, valkyrienSkies, create, mobile);
+		}
+
 		static class Particle {
+			private Particle() {
+			}
+
 			int particleLimit = DEFAULT_PARTICLE_LIMIT;
 			ParticleCleanupStrategy cleanupStrategy = ParticleCleanupStrategy.PARALLEL_WITH_TICK;
 			boolean parallelQueueRemoval = false;
@@ -285,17 +316,37 @@ public class AsyncParticlesConfig {
 				particleLightCache = particle$particleLightCache;
 				cullUnderwaterParticleType = particle$cullUnderwaterParticleType;
 			}
+
+			@Override
+			public boolean equals(Object o) {
+				if (o == null || getClass() != o.getClass()) return false;
+				Particle particle = (Particle) o;
+				return particleLimit == particle.particleLimit
+					&& parallelQueueRemoval == particle.parallelQueueRemoval
+					&& particleLightCache == particle.particleLightCache
+					&& cullUnderwaterParticleType == particle.cullUnderwaterParticleType
+					&& cleanupStrategy == particle.cleanupStrategy;
+			}
+
+			@Override
+			public int hashCode() {
+				return Objects.hash(particleLimit, cleanupStrategy, parallelQueueRemoval, particleLightCache, cullUnderwaterParticleType);
+			}
 		}
 
 		static class Tick {
+			private Tick() {
+			}
+
 			boolean animationTickMode = true;
 			ParticleAsyncMode particleAsyncMode = ParticleAsyncMode.SEQUENTIAL;
-			public boolean gpuOnlyAsyncParticleTick;
+			boolean gpuOnlyAsyncParticleTick = false;
 			boolean tickWeatherAsync = !ModListHelper.PHYSICSMOD_LOADED;
 			boolean deferredTextureTick = !ModListHelper.AXIOM_LOADED;
 			int failPerSecLimit = 5;
 			boolean suppressCME = false;
 			Set<String> syncParticleClasses = new LinkedHashSet<>();
+
 			{
 			}
 
@@ -320,30 +371,70 @@ public class AsyncParticlesConfig {
 				suppressCME = tick$suppressCME;
 				syncParticleClasses = new LinkedHashSet<>(tick$syncParticleClasses);
 			}
+
+			@Override
+			public boolean equals(Object o) {
+				if (o == null || getClass() != o.getClass()) return false;
+				Tick tick = (Tick) o;
+				return animationTickMode == tick.animationTickMode
+					&& gpuOnlyAsyncParticleTick == tick.gpuOnlyAsyncParticleTick
+					&& tickWeatherAsync == tick.tickWeatherAsync
+					&& deferredTextureTick == tick.deferredTextureTick
+					&& failPerSecLimit == tick.failPerSecLimit
+					&& suppressCME == tick.suppressCME
+					&& particleAsyncMode == tick.particleAsyncMode;
+			}
+
+			@Override
+			public int hashCode() {
+				return Objects.hash(animationTickMode, particleAsyncMode, gpuOnlyAsyncParticleTick, tickWeatherAsync, deferredTextureTick, failPerSecLimit, suppressCME);
+			}
 		}
 
 		static class Rendering {
-			RenderingMode particleRenderingMode = RenderingMode.SYNCHRONOUSLY;
+			private Rendering() {
+			}
+
 			boolean gpuAcceleration = Backends.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
 			ComputeExecutionStage computeExecutionStage = ComputeExecutionStage.LEVEL_RENDERING;
+			public boolean tickRendererOnMainThread = false;
 
 			private void flat() {
-				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
 				rendering$gpuAcceleration = gpuAcceleration && Backends.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
 				rendering$computeExecutionStage = requireNonNullElse(computeExecutionStage, ComputeExecutionStage.LEVEL_RENDERING);
+				rendering$tickRendererOnMainThread = tickRendererOnMainThread;
+
 			}
 
 			private void fold() {
-				particleRenderingMode = rendering$particleRenderingMode;
 				gpuAcceleration = rendering$gpuAcceleration;
 				appendNewParticlesToRenderer = rendering$appendNewParticlesToRenderer;
 				computeExecutionStage = rendering$computeExecutionStage;
+				tickRendererOnMainThread = rendering$tickRendererOnMainThread;
+			}
+
+			@Override
+			public boolean equals(Object o) {
+				if (o == null || getClass() != o.getClass()) return false;
+				Rendering rendering = (Rendering) o;
+				return gpuAcceleration == rendering.gpuAcceleration
+					&& appendNewParticlesToRenderer == rendering.appendNewParticlesToRenderer
+					&& computeExecutionStage == rendering.computeExecutionStage
+					&& tickRendererOnMainThread == rendering.tickRendererOnMainThread;
+			}
+
+			@Override
+			public int hashCode() {
+				return Objects.hash(gpuAcceleration, appendNewParticlesToRenderer, tickRendererOnMainThread, computeExecutionStage);
 			}
 		}
 
 		static class ValkyrienSkies {
+			private ValkyrienSkies() {
+			}
+
 			RainEffect rainEffect = RainEffect.STATIONARY;
 			boolean fixParticleLights = true;
 
@@ -356,9 +447,24 @@ public class AsyncParticlesConfig {
 				rainEffect = valkyrienSkies$rainEffect;
 				fixParticleLights = valkyrienSkies$fixParticleLights;
 			}
+
+			@Override
+			public boolean equals(Object o) {
+				if (o == null || getClass() != o.getClass()) return false;
+				ValkyrienSkies that = (ValkyrienSkies) o;
+				return fixParticleLights == that.fixParticleLights && rainEffect == that.rainEffect;
+			}
+
+			@Override
+			public int hashCode() {
+				return Objects.hash(rainEffect, fixParticleLights);
+			}
 		}
 
 		static class Create {
+			private Create() {
+			}
+
 			RainEffect rainEffect = RainEffect.ALWAYS;
 			int tickRainBlockingRange = ModListHelper.PARTICLERAIN_LOADED ? 32 : 16;
 
@@ -371,9 +477,24 @@ public class AsyncParticlesConfig {
 				rainEffect = create$rainEffect;
 				tickRainBlockingRange = create$tickRainBlockingRange;
 			}
+
+			@Override
+			public boolean equals(Object o) {
+				if (o == null || getClass() != o.getClass()) return false;
+				Create create = (Create) o;
+				return tickRainBlockingRange == create.tickRainBlockingRange && rainEffect == create.rainEffect;
+			}
+
+			@Override
+			public int hashCode() {
+				return Objects.hash(rainEffect, tickRainBlockingRange);
+			}
 		}
 
 		static class Mobile {
+			private Mobile() {
+			}
+
 			boolean multiDrawWorkaround = true;
 
 			private void flat() {
@@ -382,6 +503,18 @@ public class AsyncParticlesConfig {
 
 			private void fold() {
 				multiDrawWorkaround = mobile$multiDrawWorkaround;
+			}
+
+			@Override
+			public boolean equals(Object o) {
+				if (o == null || getClass() != o.getClass()) return false;
+				Mobile mobile = (Mobile) o;
+				return multiDrawWorkaround == mobile.multiDrawWorkaround;
+			}
+
+			@Override
+			public int hashCode() {
+				return Objects.hashCode(multiDrawWorkaround);
 			}
 		}
 	}

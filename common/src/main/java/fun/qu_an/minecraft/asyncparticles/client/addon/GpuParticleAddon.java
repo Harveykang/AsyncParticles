@@ -53,4 +53,12 @@ public interface GpuParticleAddon extends LightCachedParticleAddon {
 	int asyncparticles$getColor(int oColor);
 
 	SingleQuadParticle.Layer asyncparticles$getLayer();
+
+	float asyncparticles$getAlpha();
+
+	float asyncparticles$getRed();
+
+	float asyncparticles$getGreen();
+
+	float asyncparticles$getBlue();
 }

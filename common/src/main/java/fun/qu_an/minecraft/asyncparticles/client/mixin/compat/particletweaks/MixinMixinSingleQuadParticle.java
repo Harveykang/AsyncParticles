@@ -61,15 +61,15 @@ public abstract class MixinMixinSingleQuadParticle implements GpuParticleAddon {
 	)
 	@ModifyExpressionValue(method = "@MixinSquared:Handler", at = @At(value = "FIELD", opcode = Opcodes.GETFIELD,
 		target = "Lnet/minecraft/client/particle/SingleQuadParticle;alpha:F"))
-	public float wrapGetOColor(float original) {
+	public float wrapGetOColor(float alpha) {
 		if (asyncparticles$compatBroken) {
-			return original;
+			return alpha;
 		}
 		try {
-			return ParticleTweaksCompat.modifyOColor(this, original);
+			return ParticleTweaksCompat.modifyOColor(this, alpha);
 		} catch (Throwable t) {
 			asyncparticles$compatBroken = true;
-			return original;
+			return alpha;
 		}
 	}
 

@@ -56,25 +56,25 @@ public class ParticleTweaksCompat {
 		return call;
 	}
 
-	public static float modifyOColor(GpuParticleAddon particle, float original) {
+	public static float modifyOColor(GpuParticleAddon particle, float alpha) {
 		if (!(particle instanceof ParticleScaleInterface scaleInterface)) {
-			return original;
+			return alpha;
 		}
 		ParticleScaleHandler scaleHandler = scaleInterface.particleTweaks$getScaleHandler();
 		if (scaleHandler == null) {
-			return original;
+			return alpha;
 		}
 
 		ParticleScaler entrance = scaleHandler.entrance();
 		ParticleScaler exit = scaleHandler.exit();
 		if (entrance != null && entrance.isFade()) {
-			original *= entrance.getScale(0);
+			alpha *= entrance.getScale(0);
 		}
 		if (exit != null && exit.isFade()) {
-			original *= exit.getScale(0);
+			alpha *= exit.getScale(0);
 		}
 
-		return original;
+		return alpha;
 	}
 
 	public static int modifyColor(GpuParticleAddon particle, int original) {
@@ -86,16 +86,16 @@ public class ParticleTweaksCompat {
 			return original;
 		}
 
-		float alpha = original >> 24 & 0xFF;
+		float alpha = particle.asyncparticles$getAlpha();
 		ParticleScaler entrance = scaleHandler.entrance();
 		ParticleScaler exit = scaleHandler.exit();
 		if (entrance != null && entrance.isFade()) {
-			alpha *= entrance.getScale(0);
+			alpha *= entrance.getScale(1);
 		}
 		if (exit != null && exit.isFade()) {
-			alpha *= exit.getScale(0);
+			alpha *= exit.getScale(1);
 		}
 
-		return (((int) (alpha) & 0xFF) << 24) | (original & 0xFFFFFF);
+		return (int) (alpha * 255f) << 24 | (original & 0xFFFFFF);
 	}
 }
