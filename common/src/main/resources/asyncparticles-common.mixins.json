@@ -22,7 +22,6 @@
     "compat.goop.MixinPuddleParticle",
     "compat.immersive_portals.MixinParticleEngine",
     "compat.iris_like.MixinDSAUnsupported",
-    "compat.iris_like.MixinIris",
     "compat.modernui.MixinRenderSystem",
     "compat.particlerain.MixinParticleRain",
     "compat.particlerain.MixinParticleSpawner",
