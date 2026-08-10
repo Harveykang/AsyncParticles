@@ -97,7 +97,9 @@ public class AsyncParticlesMixinConfig {
 			properties.store(os, COMMENTS);
 		}
 		// Don't use methods otherwise throw exception
-		CONFIG.safeLegacyRandomSource = configObj.safeLegacyRandomSource;
+		if (CONFIG != null) {
+			CONFIG.safeLegacyRandomSource = configObj.safeLegacyRandomSource;
+		}
 	}
 
 	static MixinConfigObj getCurrentConfig() {
@@ -327,8 +329,7 @@ public class AsyncParticlesMixinConfig {
 
 		public void setSafeClassInstanceMultiMap(boolean safeClassInstanceMultiMap) {
 			assertNotGlobal();
-			this.safeClassInstanceMultiMap = IRONS_SPELLBOOKS_LOADED || MAKE_BUBBLES_POP_LOADED ||
-											 safeClassInstanceMultiMap;
+			this.safeClassInstanceMultiMap = safeClassInstanceMultiMap;
 		}
 
 		public boolean isSafeBlockEntityMap() {
