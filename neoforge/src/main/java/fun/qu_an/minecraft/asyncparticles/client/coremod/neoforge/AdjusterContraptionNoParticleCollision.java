@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.neoforge;
 
-import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.MixinConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinUtil;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.MixinClassAdjuster;
 
