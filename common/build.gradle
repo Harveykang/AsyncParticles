@@ -3,7 +3,7 @@ architectury {
 }
 
 loom {
-    accessWidenerPath = file('src/main/resources/asyncparticles-common.classtweaker')
+    accessWidenerPath = file('src/main/resources/asyncparticles-common.accesswidener')
 }
 
 dependencies {
