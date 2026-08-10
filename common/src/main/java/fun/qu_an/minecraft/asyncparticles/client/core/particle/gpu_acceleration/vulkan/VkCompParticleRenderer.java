@@ -507,6 +507,11 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		if (computed) {
 			return;
 		}
+		if (!Renderer.isRecording()) {
+			renderSrcIdx = -1;
+			computed = true;
+			return;
+		}
 		if (isShouldSkip()) {
 			throw new IllegalStateException("Should skip rendering during this tick!");
 		}
