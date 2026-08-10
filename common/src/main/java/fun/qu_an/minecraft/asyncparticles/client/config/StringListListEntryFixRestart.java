@@ -20,6 +20,7 @@ public class StringListListEntryFixRestart extends StringListListEntry {
 			toFix.isDeleteButtonEnabled(),
 			toFix.insertInFront());
 		this.requiresRestart = ((AbstractConfigListEntryAccessor) toFix).asyncparticles$isRequiresRestart();
+		this.cellErrorSupplier = toFix.getCellErrorSupplier();
 	}
 
 	@Override
