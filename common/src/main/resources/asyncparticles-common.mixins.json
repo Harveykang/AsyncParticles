@@ -72,7 +72,6 @@
     "off_thread_access.MixinLevel",
     "off_thread_access.MixinLevelExtractor",
     "off_thread_access.MixinLevelChunkSection",
-    "off_thread_access.MixinLevelRenderer",
     "off_thread_access.MixinSoundEngine",
     "off_thread_access.MixinSoundManager",
     "off_thread_access.MixinLevelChunkSection",

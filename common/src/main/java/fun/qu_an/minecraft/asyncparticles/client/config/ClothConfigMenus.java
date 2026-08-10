@@ -189,7 +189,7 @@ class ClothConfigMenus {
 						});
 					}
 				})
-				.setSaveConsumer(newValue -> newConfig.rendering.gpuAcceleration = newValue)
+				.setSaveConsumer(newValue -> displayConfig.rendering.gpuAcceleration = newValue)
 				.setRequirement(Backends::supportsGpuAcceleration)
 				.build(), originalConfig.rendering.gpuAcceleration))
 			.addEntry(modifyOriginal(entryBuilder

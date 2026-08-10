@@ -66,7 +66,7 @@ public class CompatibilityTryItButton extends Button {
 			owner.selectedCategoryIndex,
 			select);
 
-		mc.setScreen(screen);
+		mc.setScreenAndShow(screen);
 	}
 
 	@Override

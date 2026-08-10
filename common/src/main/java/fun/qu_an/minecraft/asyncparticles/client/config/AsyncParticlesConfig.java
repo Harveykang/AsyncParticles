@@ -323,7 +323,6 @@ public class AsyncParticlesConfig {
 				Particle particle = (Particle) o;
 				return particleLimit == particle.particleLimit
 					&& parallelQueueRemoval == particle.parallelQueueRemoval
-					&& parallelQueueEviction == particle.parallelQueueEviction
 					&& particleLightCache == particle.particleLightCache
 					&& cullUnderwaterParticleType == particle.cullUnderwaterParticleType
 					&& cleanupStrategy == particle.cleanupStrategy;
@@ -331,7 +330,7 @@ public class AsyncParticlesConfig {
 
 			@Override
 			public int hashCode() {
-				return Objects.hash(particleLimit, cleanupStrategy, parallelQueueRemoval, parallelQueueEviction, particleLightCache, cullUnderwaterParticleType);
+				return Objects.hash(particleLimit, cleanupStrategy, parallelQueueRemoval, particleLightCache, cullUnderwaterParticleType);
 			}
 		}
 
