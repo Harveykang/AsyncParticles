@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers;
 
 import com.bawnorton.mixinsquared.api.MixinCanceller;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particle_core.ParticleCoreEarlyCompat;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.MixinConfigHelper;
 
 import java.util.List;
 

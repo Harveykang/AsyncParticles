@@ -61,6 +61,7 @@ public class AsyncParticlesConfig {
 	public static boolean rendering$gpuAcceleration;
 	public static boolean rendering$appendNewParticlesToRenderer;
 	public static ComputeExecutionStage rendering$computeExecutionStage;
+	public static boolean rendering$tickRendererOnMainThread;
 	public static RainEffect valkyrienSkies$rainEffect;
 	public static boolean valkyrienSkies$fixParticleLights;
 	public static RainEffect create$rainEffect;
@@ -399,17 +400,21 @@ public class AsyncParticlesConfig {
 			boolean gpuAcceleration = Backends.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
 			ComputeExecutionStage computeExecutionStage = ComputeExecutionStage.LEVEL_RENDERING;
+			public boolean tickRendererOnMainThread = false;
 
 			private void flat() {
 				rendering$gpuAcceleration = gpuAcceleration && Backends.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
 				rendering$computeExecutionStage = requireNonNullElse(computeExecutionStage, ComputeExecutionStage.LEVEL_RENDERING);
+				rendering$tickRendererOnMainThread = tickRendererOnMainThread;
+
 			}
 
 			private void fold() {
 				gpuAcceleration = rendering$gpuAcceleration;
 				appendNewParticlesToRenderer = rendering$appendNewParticlesToRenderer;
 				computeExecutionStage = rendering$computeExecutionStage;
+				tickRendererOnMainThread = rendering$tickRendererOnMainThread;
 			}
 
 			@Override
@@ -418,12 +423,13 @@ public class AsyncParticlesConfig {
 				Rendering rendering = (Rendering) o;
 				return gpuAcceleration == rendering.gpuAcceleration
 					&& appendNewParticlesToRenderer == rendering.appendNewParticlesToRenderer
-					&& computeExecutionStage == rendering.computeExecutionStage;
+					&& computeExecutionStage == rendering.computeExecutionStage
+					&& tickRendererOnMainThread == rendering.tickRendererOnMainThread;
 			}
 
 			@Override
 			public int hashCode() {
-				return Objects.hash(gpuAcceleration, appendNewParticlesToRenderer, computeExecutionStage);
+				return Objects.hash(gpuAcceleration, appendNewParticlesToRenderer, tickRendererOnMainThread, computeExecutionStage);
 			}
 		}
 
