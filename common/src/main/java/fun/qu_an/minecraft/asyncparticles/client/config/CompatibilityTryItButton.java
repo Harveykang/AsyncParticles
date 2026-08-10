@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class CompatibilityTryItButton extends Button {
-	private final AbstractConfigScreen owner;
+	// can't remap owner.getFont() unless we use Screen class
+	private final Screen owner;
 	private final ConfigObj modified;
 	private final MixinConfigObj mixinModified;
 	private CompatibilityTryIt select = CompatibilityTryIt.DEFAULT;
@@ -62,7 +63,7 @@ public class CompatibilityTryItButton extends Button {
 				AsyncParticlesMixinConfig.getDefaultConfig(),
 				AsyncParticlesMixinConfig.getCurrentConfig()
 			),
-			owner.selectedCategoryIndex,
+			((AbstractConfigScreen) owner).selectedCategoryIndex,
 			select);
 
 		mc.setScreen(screen);
@@ -97,7 +98,7 @@ public class CompatibilityTryItButton extends Button {
 	}
 
 	private CompatibilityTryIt getSelect() {
-		for (Collection<AbstractConfigEntry<?>> entries : owner.getCategorizedEntries().values()) {
+		for (Collection<AbstractConfigEntry<?>> entries : ((AbstractConfigScreen) owner).getCategorizedEntries().values()) {
 			for (AbstractConfigEntry<?> entry : entries) {
 				entry.save();
 			}
