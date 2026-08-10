@@ -1,5 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.backend;
 
 public enum Backend {
-	OPENGL, OPENGL_ON_ES, VULKAN;
+	OPENGL, OPENGL_ON_ES, OPENGL_ES, VULKAN, UNKNOWN;
 }
