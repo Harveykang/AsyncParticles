@@ -96,6 +96,8 @@ public class AsyncParticlesMixinConfig {
 		try (OutputStream os = Files.newOutputStream(MIXIN_CONFIG_FILE)) {
 			properties.store(os, COMMENTS);
 		}
+		// Don't use methods otherwise throw exception
+		CONFIG.safeLegacyRandomSource = configObj.safeLegacyRandomSource;
 	}
 
 	static MixinConfigObj getCurrentConfig() {
