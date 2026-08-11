@@ -10,6 +10,7 @@ import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collector;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
@@ -78,7 +79,7 @@ public class ClothConfigMixinMenus {
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noCulling"),
 				List.copyOf(displayConfig.getNoCulling()))
 			.setDefaultValue(List.copyOf(originalConfig.getNoCulling()))
-			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoCulling().contains(s)))
+			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getNoCulling().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(displayConfig.getNoCulling());
@@ -94,7 +95,7 @@ public class ClothConfigMixinMenus {
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noLightCache"),
 				List.copyOf(displayConfig.getNoLightCache()))
 			.setDefaultValue(List.copyOf(originalConfig.getNoLightCache()))
-			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getNoLightCache().contains(s)))
+			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getNoLightCache().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getNoLightCache());
@@ -139,7 +140,6 @@ public class ClothConfigMixinMenus {
 		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.replaceRandom"), List.copyOf(displayConfig.getReplaceRandom()))
 			.setDefaultValue(List.copyOf(originalConfig.getReplaceRandom()))
-			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getReplaceRandom().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getReplaceRandom());
@@ -162,22 +162,6 @@ public class ClothConfigMixinMenus {
 			.build(), originalConfig.isSafeLegacyRandomSource()));
 	}
 
-	private static Optional<Component> testParticleClass(String s, boolean b) {
-		if (b) {
-			return Optional.empty();
-		}
-		Class<?> aClass;
-		try {
-			aClass = Class.forName(s);
-		} catch (ClassNotFoundException e) {
-			return Optional.of(Component.translatable("config.asyncparticles.mixin.particle.invalid-class"));
-		}
-		if (!Particle.class.isAssignableFrom(aClass)) {
-			return Optional.of(Component.translatable("config.asyncparticles.mixin.particle.invalid-class"));
-		}
-		return Optional.empty();
-	}
-
 	static void addModCompatCategory(ConfigEntryBuilder entryBuilder,
 	                                 ConfigEntryBuilder mixinEntryBuilder,
 	                                 MixinConfigBundle mixinBundle,
@@ -191,7 +175,7 @@ public class ClothConfigMixinMenus {
 		createEntries.add(modifyOriginal(new StringListListEntryFixRestart(mixinEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.create.contraptionsNoParticleCollision"), contraptionNoParticleCollision)
 			.setDefaultValue(contraptionNoParticleCollision)
-			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getContraptionNoParticleCollision().contains(s)))
+			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getContraptionNoParticleCollision().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getContraptionNoParticleCollision());
