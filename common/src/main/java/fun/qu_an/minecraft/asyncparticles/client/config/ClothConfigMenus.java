@@ -397,10 +397,10 @@ class ClothConfigMenus {
 		try {
 			aClass = Class.forName(s);
 		} catch (ClassNotFoundException e) {
-			return Optional.of(Component.translatable("config.asyncparticles.mixin.particle.invalid-class"));
+			return Optional.of(Component.translatable("config.asyncparticles.mixin.invalid-class", superClass));
 		}
 		if (!superClass.isAssignableFrom(aClass)) {
-			return Optional.of(Component.translatable("config.asyncparticles.mixin.particle.invalid-class"));
+			return Optional.of(Component.translatable("config.asyncparticles.mixin.invalid-class", superClass));
 		}
 		return Optional.empty();
 	}

@@ -129,7 +129,6 @@ public class ClothConfigMixinMenus {
 		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.replaceRandom"), List.copyOf(displayConfig.getReplaceRandom()))
 			.setDefaultValue(List.copyOf(originalConfig.getReplaceRandom()))
-			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getReplaceRandom().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getReplaceRandom());
