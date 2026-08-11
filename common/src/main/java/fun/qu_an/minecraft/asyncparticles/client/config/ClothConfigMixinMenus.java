@@ -4,19 +4,16 @@ import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collector;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesMixinConfig.MixinConfigObj;
 import static fun.qu_an.minecraft.asyncparticles.client.config.ClothConfigMenus.modifyOriginal;
-import static fun.qu_an.minecraft.asyncparticles.client.config.ClothConfigMenus.testClass;
 
 // No more NoClassDefFoundError
 public class ClothConfigMixinMenus {
@@ -79,7 +76,6 @@ public class ClothConfigMixinMenus {
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noCulling"),
 				List.copyOf(displayConfig.getNoCulling()))
 			.setDefaultValue(List.copyOf(originalConfig.getNoCulling()))
-			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getNoCulling().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(displayConfig.getNoCulling());
@@ -95,7 +91,6 @@ public class ClothConfigMixinMenus {
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noLightCache"),
 				List.copyOf(displayConfig.getNoLightCache()))
 			.setDefaultValue(List.copyOf(originalConfig.getNoLightCache()))
-			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getNoLightCache().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getNoLightCache());
@@ -110,7 +105,6 @@ public class ClothConfigMixinMenus {
 		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockProvider"), List.copyOf(displayConfig.getLockProvider()))
 			.setDefaultValue(List.copyOf(originalConfig.getLockProvider()))
-			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getLockProvider().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getLockProvider());
@@ -125,7 +119,6 @@ public class ClothConfigMixinMenus {
 		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockRequired"), List.copyOf(displayConfig.getLockRequired()))
 			.setDefaultValue(List.copyOf(originalConfig.getLockRequired()))
-			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getLockRequired().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getLockRequired());
@@ -175,7 +168,6 @@ public class ClothConfigMixinMenus {
 		createEntries.add(modifyOriginal(new StringListListEntryFixRestart(mixinEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.create.contraptionsNoParticleCollision"), contraptionNoParticleCollision)
 			.setDefaultValue(contraptionNoParticleCollision)
-			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getContraptionNoParticleCollision().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getContraptionNoParticleCollision());
