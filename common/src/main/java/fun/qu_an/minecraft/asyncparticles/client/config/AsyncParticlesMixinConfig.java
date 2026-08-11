@@ -128,12 +128,12 @@ public class AsyncParticlesMixinConfig {
 		private MixinConfigObj() {
 		}
 
-		private int version = 0;
-		private boolean safeClassInstanceMultiMap = (IRONS_SPELLBOOKS_LOADED && IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
+		int version = 0;
+		boolean safeClassInstanceMultiMap = (IRONS_SPELLBOOKS_LOADED && IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
 													MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED;
-		private boolean safeBlockEntityMap = false;
-		private boolean safeLegacyRandomSource = true;
-		private Set<String> particle$noCulling = new LinkedHashSet<>();
+		boolean safeBlockEntityMap = false;
+		boolean safeLegacyRandomSource = true;
+		Set<String> particle$noCulling = new LinkedHashSet<>();
 
 		{
 			particle$noCulling.add("com.lowdragmc.photon.client.gameobject.FXObject");
@@ -349,20 +349,6 @@ public class AsyncParticlesMixinConfig {
 		void setContraptionNoParticleCollision(Set<String> contraptionNoParticleCollision) {
 			assertNotGlobal();
 			this.create$contraptionNoParticleCollision = contraptionNoParticleCollision;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (o == null || getClass() != o.getClass()) return false;
-			MixinConfigObj that = (MixinConfigObj) o;
-			return safeClassInstanceMultiMap == that.safeClassInstanceMultiMap
-				&& safeBlockEntityMap == that.safeBlockEntityMap
-				&& safeLegacyRandomSource == that.safeLegacyRandomSource;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(safeClassInstanceMultiMap, safeBlockEntityMap, safeLegacyRandomSource);
 		}
 	}
 }

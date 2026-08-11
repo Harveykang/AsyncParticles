@@ -247,6 +247,9 @@ public class AsyncParticlesConfig {
 	}
 
 	static class ConfigObj {
+		private ConfigObj() {
+		}
+
 		int version = 0; // 0 means no version, will reset to default values.
 		Particle particle = new Particle();
 		Tick tick = new Tick();
@@ -274,18 +277,6 @@ public class AsyncParticlesConfig {
 			sable.fold();
 			create.fold();
 			mobile.fold();
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (o == null || getClass() != o.getClass()) return false;
-			ConfigObj configObj = (ConfigObj) o;
-			return Objects.equals(particle, configObj.particle)
-				&& Objects.equals(tick, configObj.tick)
-				&& Objects.equals(rendering, configObj.rendering)
-				&& Objects.equals(valkyrienSkies, configObj.valkyrienSkies)
-				&& Objects.equals(create, configObj.create)
-				&& Objects.equals(mobile, configObj.mobile);
 		}
 
 		@Override
@@ -321,26 +312,6 @@ public class AsyncParticlesConfig {
 				particleLightCache = particle$particleLightCache;
 				cullUnderwaterParticleType = particle$cullUnderwaterParticleType;
 			}
-
-			@Override
-			public boolean equals(Object o) {
-				if (o == null || getClass() != o.getClass()) return false;
-				Particle particle = (Particle) o;
-				return
-//					particleLimit == particle.particleLimit &&
-					parallelQueueRemoval == particle.parallelQueueRemoval
-						&& parallelQueueEviction == particle.parallelQueueEviction
-						&& particleLightCache == particle.particleLightCache
-						&& cullUnderwaterParticleType == particle.cullUnderwaterParticleType
-						&& cleanupStrategy == particle.cleanupStrategy;
-			}
-
-			@Override
-			public int hashCode() {
-				return Objects.hash(
-//					particleLimit,
-					cleanupStrategy, parallelQueueRemoval, parallelQueueEviction, particleLightCache, cullUnderwaterParticleType);
-			}
 		}
 
 		static class Tick {
@@ -356,9 +327,6 @@ public class AsyncParticlesConfig {
 			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
 			boolean suppressCME = false;
 			Set<String> syncParticleClasses = new LinkedHashSet<>();
-
-			{
-			}
 
 			private void flat() {
 				tick$animationTickMode = !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED && animationTickMode;
@@ -382,36 +350,6 @@ public class AsyncParticlesConfig {
 				failBehavior = tick$failBehavior;
 				suppressCME = tick$suppressCME;
 				syncParticleClasses = new LinkedHashSet<>(tick$syncParticleClasses);
-			}
-
-			@Override
-			public boolean equals(Object o) {
-				if (o == null || getClass() != o.getClass()) return false;
-				Tick tick = (Tick) o;
-				return animationTickMode == tick.animationTickMode
-					&& gpuOnlyAsyncParticleTick == tick.gpuOnlyAsyncParticleTick
-					&& tickWeatherAsync == tick.tickWeatherAsync
-					&& deferredTextureTick == tick.deferredTextureTick
-					&& failPerSecLimit == tick.failPerSecLimit
-					&& suppressCME == tick.suppressCME
-					&& particleAsyncMode == tick.particleAsyncMode
-					&& failBehavior == tick.failBehavior
-//					&& syncParticleClasses.equals(tick.syncParticleClasses)
-					;
-			}
-
-			@Override
-			public int hashCode() {
-				return Objects.hash(animationTickMode,
-					particleAsyncMode,
-					gpuOnlyAsyncParticleTick,
-					tickWeatherAsync,
-					deferredTextureTick,
-					failPerSecLimit,
-					failBehavior,
-					suppressCME
-//					, syncParticleClasses
-					);
 			}
 		}
 
@@ -443,23 +381,6 @@ public class AsyncParticlesConfig {
 				tickRendererOnMainThread = rendering$tickRendererOnMainThread;
 				cullWeathers = rendering$cullWeathers;
 			}
-
-			@Override
-			public boolean equals(Object o) {
-				if (o == null || getClass() != o.getClass()) return false;
-				Rendering rendering = (Rendering) o;
-				return gpuAcceleration == rendering.gpuAcceleration
-					&& appendNewParticlesToRenderer == rendering.appendNewParticlesToRenderer
-					&& computeExecutionStage == rendering.computeExecutionStage
-					&& tickRendererOnMainThread == rendering.tickRendererOnMainThread
-					&& cullWeathers == rendering.cullWeathers
-					&& particleCulling == rendering.particleCulling;
-			}
-
-			@Override
-			public int hashCode() {
-				return Objects.hash(particleCulling, gpuAcceleration, appendNewParticlesToRenderer, computeExecutionStage, tickRendererOnMainThread, cullWeathers);
-			}
 		}
 
 		static class ValkyrienSkies {
@@ -478,21 +399,12 @@ public class AsyncParticlesConfig {
 				rainEffect = valkyrienSkies$rainEffect;
 				fixParticleLights = valkyrienSkies$fixParticleLights;
 			}
-
-			@Override
-			public boolean equals(Object o) {
-				if (o == null || getClass() != o.getClass()) return false;
-				ValkyrienSkies that = (ValkyrienSkies) o;
-				return fixParticleLights == that.fixParticleLights && rainEffect == that.rainEffect;
-			}
-
-			@Override
-			public int hashCode() {
-				return Objects.hash(rainEffect, fixParticleLights);
-			}
 		}
 
 		static class Sable {
+			private Sable() {
+			}
+
 			boolean fixParticleLights = true;
 
 			private void flat() {
@@ -501,18 +413,6 @@ public class AsyncParticlesConfig {
 
 			private void fold() {
 				fixParticleLights = sable$fixParticleLights;
-			}
-
-			@Override
-			public boolean equals(Object o) {
-				if (o == null || getClass() != o.getClass()) return false;
-				Sable sable = (Sable) o;
-				return fixParticleLights == sable.fixParticleLights;
-			}
-
-			@Override
-			public int hashCode() {
-				return Objects.hashCode(fixParticleLights);
 			}
 		}
 
@@ -532,18 +432,6 @@ public class AsyncParticlesConfig {
 				rainEffect = create$rainEffect;
 				tickRainBlockingRange = create$tickRainBlockingRange;
 			}
-
-			@Override
-			public boolean equals(Object o) {
-				if (o == null || getClass() != o.getClass()) return false;
-				Create create = (Create) o;
-				return tickRainBlockingRange == create.tickRainBlockingRange && rainEffect == create.rainEffect;
-			}
-
-			@Override
-			public int hashCode() {
-				return Objects.hash(rainEffect, tickRainBlockingRange);
-			}
 		}
 
 		static class Mobile {
@@ -558,18 +446,6 @@ public class AsyncParticlesConfig {
 
 			private void fold() {
 				multiDrawWorkaround = mobile$multiDrawWorkaround;
-			}
-
-			@Override
-			public boolean equals(Object o) {
-				if (o == null || getClass() != o.getClass()) return false;
-				Mobile mobile = (Mobile) o;
-				return multiDrawWorkaround == mobile.multiDrawWorkaround;
-			}
-
-			@Override
-			public int hashCode() {
-				return Objects.hashCode(multiDrawWorkaround);
 			}
 		}
 	}
