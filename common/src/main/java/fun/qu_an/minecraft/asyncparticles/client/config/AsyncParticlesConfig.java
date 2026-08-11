@@ -272,18 +272,6 @@ public class AsyncParticlesConfig {
 		}
 
 		@Override
-		public boolean equals(Object o) {
-			if (o == null || getClass() != o.getClass()) return false;
-			ConfigObj configObj = (ConfigObj) o;
-			return Objects.equals(particle, configObj.particle)
-				&& Objects.equals(tick, configObj.tick)
-				&& Objects.equals(rendering, configObj.rendering)
-				&& Objects.equals(valkyrienSkies, configObj.valkyrienSkies)
-				&& Objects.equals(create, configObj.create)
-				&& Objects.equals(mobile, configObj.mobile);
-		}
-
-		@Override
 		public int hashCode() {
 			return Objects.hash(particle, tick, rendering, valkyrienSkies, create, mobile);
 		}
@@ -316,25 +304,6 @@ public class AsyncParticlesConfig {
 				particleLightCache = particle$particleLightCache;
 				cullUnderwaterParticleType = particle$cullUnderwaterParticleType;
 			}
-
-			@Override
-			public boolean equals(Object o) {
-				if (o == null || getClass() != o.getClass()) return false;
-				Particle particle = (Particle) o;
-				return
-//					particleLimit == particle.particleLimit &&
-					parallelQueueRemoval == particle.parallelQueueRemoval
-						&& particleLightCache == particle.particleLightCache
-						&& cullUnderwaterParticleType == particle.cullUnderwaterParticleType
-						&& cleanupStrategy == particle.cleanupStrategy;
-			}
-
-			@Override
-			public int hashCode() {
-				return Objects.hash(
-//					particleLimit,
-					cleanupStrategy, parallelQueueRemoval, particleLightCache, cullUnderwaterParticleType);
-			}
 		}
 
 		static class Tick {
@@ -349,9 +318,6 @@ public class AsyncParticlesConfig {
 			int failPerSecLimit = 5;
 			boolean suppressCME = false;
 			Set<String> syncParticleClasses = new LinkedHashSet<>();
-
-			{
-			}
 
 			private void flat() {
 				tick$asyncAnimateTick = animationTickMode;
@@ -373,34 +339,6 @@ public class AsyncParticlesConfig {
 				failPerSecLimit = tick$failPerSecLimit;
 				suppressCME = tick$suppressCME;
 				syncParticleClasses = new LinkedHashSet<>(tick$syncParticleClasses);
-			}
-
-			@Override
-			public boolean equals(Object o) {
-				if (o == null || getClass() != o.getClass()) return false;
-				Tick tick = (Tick) o;
-				return animationTickMode == tick.animationTickMode
-					&& gpuOnlyAsyncParticleTick == tick.gpuOnlyAsyncParticleTick
-					&& tickWeatherAsync == tick.tickWeatherAsync
-					&& deferredTextureTick == tick.deferredTextureTick
-					&& failPerSecLimit == tick.failPerSecLimit
-					&& suppressCME == tick.suppressCME
-					&& particleAsyncMode == tick.particleAsyncMode
-//					&& syncParticleClasses.equals(tick.syncParticleClasses)
-					;
-			}
-
-			@Override
-			public int hashCode() {
-				return Objects.hash(animationTickMode,
-					particleAsyncMode,
-					gpuOnlyAsyncParticleTick,
-					tickWeatherAsync,
-					deferredTextureTick,
-					failPerSecLimit,
-					suppressCME
-//					, syncParticleClasses
-				);
 			}
 		}
 
@@ -427,21 +365,6 @@ public class AsyncParticlesConfig {
 				computeExecutionStage = rendering$computeExecutionStage;
 				tickRendererOnMainThread = rendering$tickRendererOnMainThread;
 			}
-
-			@Override
-			public boolean equals(Object o) {
-				if (o == null || getClass() != o.getClass()) return false;
-				Rendering rendering = (Rendering) o;
-				return gpuAcceleration == rendering.gpuAcceleration
-					&& appendNewParticlesToRenderer == rendering.appendNewParticlesToRenderer
-					&& computeExecutionStage == rendering.computeExecutionStage
-					&& tickRendererOnMainThread == rendering.tickRendererOnMainThread;
-			}
-
-			@Override
-			public int hashCode() {
-				return Objects.hash(gpuAcceleration, appendNewParticlesToRenderer, tickRendererOnMainThread, computeExecutionStage);
-			}
 		}
 
 		static class ValkyrienSkies {
@@ -459,18 +382,6 @@ public class AsyncParticlesConfig {
 			private void fold() {
 				rainEffect = valkyrienSkies$rainEffect;
 				fixParticleLights = valkyrienSkies$fixParticleLights;
-			}
-
-			@Override
-			public boolean equals(Object o) {
-				if (o == null || getClass() != o.getClass()) return false;
-				ValkyrienSkies that = (ValkyrienSkies) o;
-				return fixParticleLights == that.fixParticleLights && rainEffect == that.rainEffect;
-			}
-
-			@Override
-			public int hashCode() {
-				return Objects.hash(rainEffect, fixParticleLights);
 			}
 		}
 
@@ -490,18 +401,6 @@ public class AsyncParticlesConfig {
 				rainEffect = create$rainEffect;
 				tickRainBlockingRange = create$tickRainBlockingRange;
 			}
-
-			@Override
-			public boolean equals(Object o) {
-				if (o == null || getClass() != o.getClass()) return false;
-				Create create = (Create) o;
-				return tickRainBlockingRange == create.tickRainBlockingRange && rainEffect == create.rainEffect;
-			}
-
-			@Override
-			public int hashCode() {
-				return Objects.hash(rainEffect, tickRainBlockingRange);
-			}
 		}
 
 		static class Mobile {
@@ -516,18 +415,6 @@ public class AsyncParticlesConfig {
 
 			private void fold() {
 				multiDrawWorkaround = mobile$multiDrawWorkaround;
-			}
-
-			@Override
-			public boolean equals(Object o) {
-				if (o == null || getClass() != o.getClass()) return false;
-				Mobile mobile = (Mobile) o;
-				return multiDrawWorkaround == mobile.multiDrawWorkaround;
-			}
-
-			@Override
-			public int hashCode() {
-				return Objects.hashCode(multiDrawWorkaround);
 			}
 		}
 	}
