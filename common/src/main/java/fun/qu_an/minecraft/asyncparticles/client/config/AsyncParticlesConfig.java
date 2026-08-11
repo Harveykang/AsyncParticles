@@ -322,17 +322,20 @@ public class AsyncParticlesConfig {
 			public boolean equals(Object o) {
 				if (o == null || getClass() != o.getClass()) return false;
 				Particle particle = (Particle) o;
-				return particleLimit == particle.particleLimit
-					&& parallelQueueRemoval == particle.parallelQueueRemoval
-					&& parallelQueueEviction == particle.parallelQueueEviction
-					&& particleLightCache == particle.particleLightCache
-					&& cullUnderwaterParticleType == particle.cullUnderwaterParticleType
-					&& cleanupStrategy == particle.cleanupStrategy;
+				return
+//					particleLimit == particle.particleLimit &&
+					parallelQueueRemoval == particle.parallelQueueRemoval
+						&& parallelQueueEviction == particle.parallelQueueEviction
+						&& particleLightCache == particle.particleLightCache
+						&& cullUnderwaterParticleType == particle.cullUnderwaterParticleType
+						&& cleanupStrategy == particle.cleanupStrategy;
 			}
 
 			@Override
 			public int hashCode() {
-				return Objects.hash(particleLimit, cleanupStrategy, parallelQueueRemoval, parallelQueueEviction, particleLightCache, cullUnderwaterParticleType);
+				return Objects.hash(
+//					particleLimit,
+					cleanupStrategy, parallelQueueRemoval, parallelQueueEviction, particleLightCache, cullUnderwaterParticleType);
 			}
 		}
 
@@ -384,12 +387,22 @@ public class AsyncParticlesConfig {
 					&& deferredTextureTick == tick.deferredTextureTick
 					&& failPerSecLimit == tick.failPerSecLimit
 					&& suppressCME == tick.suppressCME
-					&& particleAsyncMode == tick.particleAsyncMode;
+					&& particleAsyncMode == tick.particleAsyncMode
+//					&& syncParticleClasses.equals(tick.syncParticleClasses)
+					;
 			}
 
 			@Override
 			public int hashCode() {
-				return Objects.hash(animationTickMode, particleAsyncMode, gpuOnlyAsyncParticleTick, tickWeatherAsync, deferredTextureTick, failPerSecLimit, suppressCME);
+				return Objects.hash(animationTickMode,
+					particleAsyncMode,
+					gpuOnlyAsyncParticleTick,
+					tickWeatherAsync,
+					deferredTextureTick,
+					failPerSecLimit,
+					suppressCME
+//					, syncParticleClasses
+				);
 			}
 		}
 
