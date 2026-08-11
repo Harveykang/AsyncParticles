@@ -344,7 +344,7 @@ class ClothConfigMenus {
 		});
 
 		builder.setAfterInitConsumer(screen -> screen.addRenderableWidget(
-			new CompatibilityTryItButton((AbstractConfigScreen) screen, displayConfig, displayMixinConfig, compatibilityTryIt)));
+			new CompatibilityTryItButton(screen, displayConfig, displayMixinConfig, compatibilityTryIt)));
 
 		Screen screen = builder.build();
 		((AbstractConfigScreen) screen).selectedCategoryIndex = selectedCategoryIndex;

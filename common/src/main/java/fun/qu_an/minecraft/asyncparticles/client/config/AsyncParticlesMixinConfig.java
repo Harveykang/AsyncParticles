@@ -128,9 +128,9 @@ public class AsyncParticlesMixinConfig {
 		}
 
 		private int version = 0;
-		private boolean safeClassInstanceMultiMap = MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED;
-		private boolean safeBlockEntityMap = false;
-		private boolean safeLegacyRandomSource = true;
+		boolean safeClassInstanceMultiMap = MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED;
+		boolean safeBlockEntityMap = false;
+		boolean safeLegacyRandomSource = true;
 
 		private Set<String> particle$noLightCache = new LinkedHashSet<>();
 
@@ -332,20 +332,6 @@ public class AsyncParticlesMixinConfig {
 		void setAsyncTickableParticleGroups(Set<String> asyncTickableParticleGroups) {
 			assertNotGlobal();
 			this.asyncTickableParticleGroups = asyncTickableParticleGroups;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (o == null || getClass() != o.getClass()) return false;
-			MixinConfigObj that = (MixinConfigObj) o;
-			return safeClassInstanceMultiMap == that.safeClassInstanceMultiMap
-				&& safeBlockEntityMap == that.safeBlockEntityMap
-				&& safeLegacyRandomSource == that.safeLegacyRandomSource;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(safeClassInstanceMultiMap, safeBlockEntityMap, safeLegacyRandomSource);
 		}
 	}
 }
