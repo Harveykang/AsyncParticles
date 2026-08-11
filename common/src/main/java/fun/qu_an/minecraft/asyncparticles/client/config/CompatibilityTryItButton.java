@@ -109,7 +109,8 @@ public class CompatibilityTryItButton extends Button {
 			if (compatibilityTryIt == CompatibilityTryIt.CUSTOM) {
 				continue;
 			}
-			if (compatibilityTryIt.getConfig(modified, mixinModified).equals(Pair.of(modified, mixinModified))) {
+			Pair<ConfigObj, MixinConfigObj> pair = compatibilityTryIt.getConfig(modified, mixinModified);
+			if (isMatch(pair.left(), modified) && isMatch(pair.right(), mixinModified)) {
 				return compatibilityTryIt;
 			}
 		}
@@ -118,11 +119,78 @@ public class CompatibilityTryItButton extends Button {
 			if (compatibilityTryIt == CompatibilityTryIt.CUSTOM) {
 				continue;
 			}
-			if (compatibilityTryIt.getConfig(modified, mixinModified).equals(Pair.of(modified, mixinModified))) {
+			Pair<ConfigObj, MixinConfigObj> pair = compatibilityTryIt.getConfig(modified, mixinModified);
+			if (isMatch(pair.left(), modified) && isMatch(pair.right(), mixinModified)) {
 				return compatibilityTryIt;
 			}
 		}
 		return CompatibilityTryIt.CUSTOM;
+	}
+
+	private static boolean isMatch(MixinConfigObj o, MixinConfigObj mixinConfigObj) {
+		return o.safeClassInstanceMultiMap == mixinConfigObj.safeClassInstanceMultiMap
+			&& o.safeBlockEntityMap == mixinConfigObj.safeBlockEntityMap
+			&& o.safeLegacyRandomSource == mixinConfigObj.safeLegacyRandomSource;
+	}
+
+	private static boolean isMatch(ConfigObj o, ConfigObj configObj) {
+		return isMatch(o.particle, configObj.particle)
+			&& isMatch(o.tick, configObj.tick)
+			&& isMatch(o.rendering, configObj.rendering)
+			&& isMatch(o.valkyrienSkies, configObj.valkyrienSkies)
+			&& isMatch(o.create, configObj.create)
+			&& isMatch(o.mobile, configObj.mobile);
+	}
+
+	private static boolean isMatch(ConfigObj.Particle o, ConfigObj.Particle particle) {
+		return
+//					particleLimit == particle.particleLimit &&
+			o.parallelQueueRemoval == particle.parallelQueueRemoval
+				&& o.particleLightCache == particle.particleLightCache
+				&& o.cullUnderwaterParticleType == particle.cullUnderwaterParticleType
+				&& o.cleanupStrategy == particle.cleanupStrategy;
+	}
+
+	private static boolean isMatch(ConfigObj.Tick o, ConfigObj.Tick tick) {
+		return o.animationTickMode == tick.animationTickMode
+			&& o.gpuOnlyAsyncParticleTick == tick.gpuOnlyAsyncParticleTick
+			&& o.tickWeatherAsync == tick.tickWeatherAsync
+			&& o.deferredTextureTick == tick.deferredTextureTick
+			&& o.failPerSecLimit == tick.failPerSecLimit
+			&& o.suppressCME == tick.suppressCME
+			&& o.particleAsyncMode == tick.particleAsyncMode
+//					&& syncParticleClasses.equals(tick.syncParticleClasses)
+			;
+	}
+
+	private static boolean isMatch(ConfigObj.Rendering o, ConfigObj.Rendering rendering) {
+		return o.gpuAcceleration == rendering.gpuAcceleration
+			&& o.appendNewParticlesToRenderer == rendering.appendNewParticlesToRenderer
+			&& o.computeExecutionStage == rendering.computeExecutionStage
+			&& o.tickRendererOnMainThread == rendering.tickRendererOnMainThread;
+	}
+
+	private static boolean isMatch(ConfigObj.ValkyrienSkies o, ConfigObj.ValkyrienSkies valkyrienSkies) {
+		return true;
+	}
+
+	private static boolean isMatch(ConfigObj.Create o, ConfigObj.Create create) {
+		return true;
+	}
+
+	private static boolean isMatch(ConfigObj.Mobile o, ConfigObj.Mobile mobile) {
+		return o.multiDrawWorkaround == mobile.multiDrawWorkaround;
+	}
+
+	private static void preserve(ConfigObj modified, MixinConfigObj mixinModified, ConfigObj config, MixinConfigObj mixinConfig) {
+		// preserve modified collections
+		config.tick.syncParticleClasses = modified.tick.syncParticleClasses;
+		config.particle.particleLimit = modified.particle.particleLimit;
+		mixinConfig.setAsyncTickableParticleGroups(mixinModified.getAsyncTickableParticleGroups());
+		mixinConfig.setLockProvider(mixinModified.getLockProvider());
+		mixinConfig.setLockRequired(mixinModified.getLockRequired());
+		mixinConfig.setReplaceRandom(mixinModified.getReplaceRandom());
+		mixinConfig.setNoLightCache(mixinModified.getNoLightCache());
 	}
 
 	enum CompatibilityTryIt implements TranslatableEnum {
@@ -203,17 +271,6 @@ public class CompatibilityTryItButton extends Button {
 				return Pair.of(config, mixinConfig);
 			}
 		};
-
-		private static void preserve(ConfigObj modified, MixinConfigObj mixinModified, ConfigObj config, MixinConfigObj mixinConfig) {
-			// preserve modified collections
-			config.tick.syncParticleClasses = modified.tick.syncParticleClasses;
-			config.particle.particleLimit = modified.particle.particleLimit;
-			mixinConfig.setAsyncTickableParticleGroups(mixinModified.getAsyncTickableParticleGroups());
-			mixinConfig.setLockProvider(mixinModified.getLockProvider());
-			mixinConfig.setLockRequired(mixinModified.getLockRequired());
-			mixinConfig.setReplaceRandom(mixinModified.getReplaceRandom());
-			mixinConfig.setNoLightCache(mixinModified.getNoLightCache());
-		}
 
 		private final Supplier<Component> componentSupplier;
 		private final Supplier<Component> tooltipSupplier;
