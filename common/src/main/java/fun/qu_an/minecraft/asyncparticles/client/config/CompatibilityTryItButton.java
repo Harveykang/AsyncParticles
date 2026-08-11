@@ -16,10 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class CompatibilityTryItButton extends Button {
@@ -30,10 +27,10 @@ public class CompatibilityTryItButton extends Button {
 	private CompatibilityTryIt select = CompatibilityTryIt.DEFAULT;
 	private boolean lastHoveredOrFocused;
 
-	CompatibilityTryItButton(AbstractConfigScreen screen, ConfigObj modified, MixinConfigObj mixinModified, @Nullable CompatibilityTryIt select) {
-		super(5, 12, 120, 20, Component.translatable("config.asyncparticles.enum.CompatibilityTryIt"), button -> {
+	CompatibilityTryItButton(AbstractConfigScreen owner, ConfigObj modified, MixinConfigObj mixinModified, @Nullable CompatibilityTryIt select) {
+		super(owner.width - 5 - 120, 13, 120, 20, Component.translatable("config.asyncparticles.enum.CompatibilityTryIt"), button -> {
 		}, DEFAULT_NARRATION);
-		this.owner = screen;
+		this.owner = owner;
 		this.modified = modified; // Reference to the modified config object
 		this.mixinModified = mixinModified;
 		if (select != null) {
@@ -134,7 +131,7 @@ public class CompatibilityTryItButton extends Button {
 			Pair<ConfigObj, MixinConfigObj> getConfig(ConfigObj modified, MixinConfigObj mixinModified) {
 				ConfigObj config = AsyncParticlesConfig.getCurrentConfig();
 				MixinConfigObj mixinConfig = AsyncParticlesMixinConfig.getCurrentConfig();
-				preserveCollections(modified, mixinModified, config, mixinConfig);
+				preserve(modified, mixinModified, config, mixinConfig);
 				return Pair.of(config, mixinConfig);
 			}
 		},
@@ -144,7 +141,7 @@ public class CompatibilityTryItButton extends Button {
 			Pair<ConfigObj, MixinConfigObj> getConfig(ConfigObj modified, MixinConfigObj mixinModified) {
 				ConfigObj config = AsyncParticlesConfig.getDefaultConfigExceptCollections();
 				MixinConfigObj mixinConfig = AsyncParticlesMixinConfig.getDefaultConfigExceptCollections();
-				preserveCollections(modified, mixinModified, config, mixinConfig);
+				preserve(modified, mixinModified, config, mixinConfig);
 				return Pair.of(config, mixinConfig);
 			}
 		},
@@ -157,7 +154,7 @@ public class CompatibilityTryItButton extends Button {
 				config.tick.animationTickMode = false;
 				config.tick.deferredTextureTick = false;
 				config.tick.tickWeatherAsync = false;
-				preserveCollections(modified, mixinModified, config, mixinConfig);
+				preserve(modified, mixinModified, config, mixinConfig);
 				return Pair.of(config, mixinConfig);
 			}
 		},
@@ -169,7 +166,7 @@ public class CompatibilityTryItButton extends Button {
 				MixinConfigObj mixinConfig = AsyncParticlesMixinConfig.getDefaultConfigExceptCollections();
 				mixinConfig.setSafeClassInstanceMultiMap(true);
 				mixinConfig.setSafeBlockEntityMap(true);
-				preserveCollections(modified, mixinModified, config, mixinConfig);
+				preserve(modified, mixinModified, config, mixinConfig);
 				return Pair.of(config, mixinConfig);
 			}
 		},
@@ -184,7 +181,7 @@ public class CompatibilityTryItButton extends Button {
 				config.tick.tickWeatherAsync = false;
 				mixinConfig.setSafeClassInstanceMultiMap(true);
 				mixinConfig.setSafeBlockEntityMap(true);
-				preserveCollections(modified, mixinModified, config, mixinConfig);
+				preserve(modified, mixinModified, config, mixinConfig);
 				return Pair.of(config, mixinConfig);
 			}
 		},
@@ -201,14 +198,15 @@ public class CompatibilityTryItButton extends Button {
 				config.particle.particleLightCache = false;
 				config.particle.cleanupStrategy = ParticleCleanupStrategy.MAIN_THREAD;
 				config.rendering.tickRendererOnMainThread = true;
-				preserveCollections(modified, mixinModified, config, mixinConfig);
+				preserve(modified, mixinModified, config, mixinConfig);
 				return Pair.of(config, mixinConfig);
 			}
 		};
 
-		private static void preserveCollections(ConfigObj modified, MixinConfigObj mixinModified, ConfigObj config, MixinConfigObj mixinConfig) {
+		private static void preserve(ConfigObj modified, MixinConfigObj mixinModified, ConfigObj config, MixinConfigObj mixinConfig) {
 			// preserve modified collections
 			config.tick.syncParticleClasses = modified.tick.syncParticleClasses;
+			config.particle.particleLimit = modified.particle.particleLimit;
 			mixinConfig.setContraptionNoParticleCollision(mixinModified.getContraptionNoParticleCollision());
 			mixinConfig.setNoCulling(mixinModified.getNoCulling());
 			mixinConfig.setLockProvider(mixinModified.getLockProvider());
