@@ -186,6 +186,10 @@ public class CompatibilityTryItButton extends Button {
 		// preserve modified collections
 		config.tick.syncParticleClasses = modified.tick.syncParticleClasses;
 		config.particle.particleLimit = modified.particle.particleLimit;
+		config.valkyrienSkies.fixParticleLights = modified.valkyrienSkies.fixParticleLights;
+		config.valkyrienSkies.rainEffect = modified.valkyrienSkies.rainEffect;
+		config.create.rainEffect = modified.create.rainEffect;
+		config.create.tickRainBlockingRange = modified.create.tickRainBlockingRange;
 		mixinConfig.setAsyncTickableParticleGroups(mixinModified.getAsyncTickableParticleGroups());
 		mixinConfig.setLockProvider(mixinModified.getLockProvider());
 		mixinConfig.setLockRequired(mixinModified.getLockRequired());
