@@ -17,7 +17,6 @@ import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.COS
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.MAKE_BUBBLES_POP_LOADED;
 import static fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesMixinConfig.MixinConfigObj;
 import static fun.qu_an.minecraft.asyncparticles.client.config.ClothConfigMenus.modifyOriginal;
-import static fun.qu_an.minecraft.asyncparticles.client.config.ClothConfigMenus.testClass;
 
 // No more NoClassDefFoundError
 public class ClothConfigMixinMenus {
@@ -68,7 +67,6 @@ public class ClothConfigMixinMenus {
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.asyncTickableGroup"),
 				List.copyOf(displayConfig.getAsyncTickableParticleGroups()))
 			.setDefaultValue(List.copyOf(originalConfig.getAsyncTickableParticleGroups()))
-			.setCellErrorSupplier(s -> testClass(s, ParticleGroup.class, s1 -> defaultConfig.getAsyncTickableParticleGroups().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getAsyncTickableParticleGroups());
@@ -84,7 +82,6 @@ public class ClothConfigMixinMenus {
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noLightCache"),
 				List.copyOf(displayConfig.getNoLightCache()))
 			.setDefaultValue(List.copyOf(originalConfig.getNoLightCache()))
-			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getNoLightCache().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getNoLightCache());
@@ -99,7 +96,6 @@ public class ClothConfigMixinMenus {
 		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockProvider"), List.copyOf(displayConfig.getLockProvider()))
 			.setDefaultValue(List.copyOf(originalConfig.getLockProvider()))
-			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getLockProvider().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getLockProvider());
@@ -114,7 +110,6 @@ public class ClothConfigMixinMenus {
 		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertEntryBuilder
 			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockRequired"), List.copyOf(displayConfig.getLockRequired()))
 			.setDefaultValue(List.copyOf(originalConfig.getLockRequired()))
-			.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.getLockRequired().contains(s1)))
 			.setSaveConsumer(l -> {
 				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 				s.addAll(defaultConfig.getLockRequired());
@@ -162,7 +157,6 @@ public class ClothConfigMixinMenus {
 //		createEntries.add(new StringListListEntryFixRestart(mixinEntryBuilder
 //			.startStrList(Component.translatable("config.asyncparticles.mixin.create.contraptionsNoParticleCollision"), contraptionNoParticleCollision)
 //			.setDefaultValue(contraptionNoParticleCollision)
-//			.setCellErrorSupplier(s -> testParticleClass(s, defaultConfig.getContraptionNoParticleCollision().contains(s)))
 //			.setSaveConsumer(l -> {
 //				LinkedHashSet<String> s = new LinkedHashSet<>(l);
 //				s.addAll(defaultConfig.getContraptionNoParticleCollision());

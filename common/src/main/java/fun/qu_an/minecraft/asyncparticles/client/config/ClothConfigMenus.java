@@ -173,7 +173,6 @@ class ClothConfigMenus {
 					new ArrayList<>(displayConfig.tick.syncParticleClasses))
 				.setDefaultValue(new ArrayList<>(originalConfig.tick.syncParticleClasses))
 				.setTooltip(Component.translatable("config.asyncparticles.tick.syncParticleClasses.tooltip"))
-				.setCellErrorSupplier(s -> testClass(s, Particle.class, s1 -> defaultConfig.tick.syncParticleClasses.contains(s1)))
 				.setSaveConsumer(newValue -> {
 					LinkedHashSet<String> set = new LinkedHashSet<>(newValue);
 					set.addAll(defaultConfig.tick.syncParticleClasses);
@@ -387,22 +386,6 @@ class ClothConfigMenus {
 			Component.translatable("config.asyncparticles.incompatibility", modNamesStr)
 				.withStyle(ChatFormatting.YELLOW)
 		});
-	}
-
-	public static Optional<Component> testClass(String s, Class<?> superClass, Predicate<String> extraTester) {
-		if (extraTester.test(s)) {
-			return Optional.empty();
-		}
-		Class<?> aClass;
-		try {
-			aClass = Class.forName(s);
-		} catch (ClassNotFoundException e) {
-			return Optional.of(Component.translatable("config.asyncparticles.mixin.invalid-class", superClass));
-		}
-		if (!superClass.isAssignableFrom(aClass)) {
-			return Optional.of(Component.translatable("config.asyncparticles.mixin.invalid-class", superClass));
-		}
-		return Optional.empty();
 	}
 
 	record ConfigBundle(
