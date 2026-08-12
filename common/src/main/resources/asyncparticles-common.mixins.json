@@ -16,6 +16,10 @@
     "compat.cloth_config.AccessorAbstractConfigScreen",
     "compat.cloth_config.AccessorSubCategoryListEntry",
     "compat.cloth_config.BaseListEntryAccessor",
+    "compat.cloth_config.MixinAbstractListListEntry",
+    "compat.cloth_config.MixinBooleanListEntry",
+    "compat.cloth_config.MixinSelectionListEntry",
+    "compat.cloth_config.MixinTextFieldListEntry",
     "compat.cosycritters.MixinBirdParticle",
     "compat.dsurround.MixinParticleRenderCollection",
     "compat.figura.MixinParticleEngine",
@@ -36,6 +40,7 @@
     "compat.physicsmod.MixinWeatherParticle",
     "compat.physicsmod_create.MixinLevelRenderer",
     "compat.physicsmod_create.MixinWeatherParticle",
+    "compat.sable.MixinMixinClientLevel",
     "compat.sable.MixinParticle",
     "compat.sodium_0_6.MixinSingleQuadParticle",
     "compat.sodium_0_7.MixinSingleQuadParticle",
@@ -94,11 +99,7 @@
     "off_thread_access.MixinLevelChunkSection",
     "off_thread_access.MixinLevelRenderer",
     "off_thread_access.MixinSoundEngine",
-    "off_thread_access.MixinTextureUtil",
-    "compat.cloth_config.MixinAbstractListListEntry",
-    "compat.cloth_config.MixinBooleanListEntry",
-    "compat.cloth_config.MixinSelectionListEntry",
-    "compat.cloth_config.MixinTextFieldListEntry"
+    "off_thread_access.MixinTextureUtil"
   ],
   "injectors": {
     "defaultRequire": 1

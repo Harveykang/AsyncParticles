@@ -79,15 +79,15 @@ dependencies {
 //    localRuntime "org.anarres:jcpp:1.4.14"
 
     /* Sodium */
-    modCompileOnly "maven.modrinth:sodium:mc$minecraft_version-0.6.13-neoforge"
-    modCompileOnly "maven.modrinth:iris:1.8.12+$minecraft_version-neoforge"
+    modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.8.12-neoforge"
+    modCompileOnly "maven.modrinth:iris:1.8.14-beta.1+1.21.1-neoforge"
     modCompileOnly "maven.modrinth:flerovium:1.0.17"
 
     // Iris
-    localRuntime "maven.modrinth:iris:1.8.12+$minecraft_version-neoforge"
+    localRuntime "maven.modrinth:iris:1.8.14-beta.1+1.21.1-neoforge"
     // Sodium
-    localRuntime("maven.modrinth:sodium:mc$minecraft_version-0.6.13-neoforge")
-    modLocalRuntime("maven.modrinth:sodium-extra:mc$minecraft_version-0.6.0+neoforge")
+    localRuntime("maven.modrinth:sodium:mc1.21.1-0.8.12-neoforge")
+//    modLocalRuntime("maven.modrinth:sodium-extra:mc1.21.1-0.9.2+neoforge")
 
 //    localRuntime "org.antlr:antlr4-runtime:4.13.1"
 //    localRuntime "io.github.douira:glsl-transformer:2.0.1"
@@ -165,19 +165,19 @@ dependencies {
 
     /* Veil */
 //    modRuntimeOnly "maven.modrinth:veil:3.6.2"
-    api("foundry.veil:veil-neoforge-${project.minecraft_version}:4.0.0") {
-        exclude group: "maven.modrinth"
-        exclude group: "me.fallenbreath"
-    }
-    api "io.github.spair:imgui-java-binding:1.88.0"
-    api("io.github.spair:imgui-java-lwjgl3:1.88.0") {
-        exclude group: 'org.lwjgl'
-        exclude group: 'org.lwjgl.lwjgl'
-    }
-    modApi "dev.ryanhcode.sable:sable-neoforge-$minecraft_version:1.2.2"
-    modLocalRuntime("dev.simulated_team.simulated:simulated-neoforge-$minecraft_version:1.2.1") { transitive = false }
-    modLocalRuntime("dev.ryanhcode.offroad:offroad-neoforge-$minecraft_version:1.2.1") { transitive = false }
-    modLocalRuntime("dev.eriksonn.aeronautics:aeronautics-neoforge-$minecraft_version:1.2.1") { transitive = false }
+//    compileOnly("foundry.veil:veil-neoforge-${project.minecraft_version}:4.0.0") {
+//        exclude group: "maven.modrinth"
+//        exclude group: "me.fallenbreath"
+//    }
+//    compileOnly "io.github.spair:imgui-java-binding:1.88.0"
+//    compileOnly("io.github.spair:imgui-java-lwjgl3:1.88.0") {
+//        exclude group: 'org.lwjgl'
+//        exclude group: 'org.lwjgl.lwjgl'
+//    }
+    modCompileOnly "dev.ryanhcode.sable:sable-neoforge-$minecraft_version:1.2.2"
+//    modLocalRuntime("dev.simulated_team.simulated:simulated-neoforge-$minecraft_version:1.2.1") { transitive = false }
+//    modLocalRuntime("dev.ryanhcode.offroad:offroad-neoforge-$minecraft_version:1.2.1") { transitive = false }
+//    modLocalRuntime("dev.eriksonn.aeronautics:aeronautics-neoforge-$minecraft_version:1.2.1") { transitive = false }
 
     modCompileOnly "maven.modrinth:create-propulsion-simulated:H13U56dc" // 1.1.5
 //    modLocalRuntime "maven.modrinth:create-propulsion-simulated:H13U56dc"
