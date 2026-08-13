@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster;
 
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
-import com.bawnorton.mixinsquared.reflection.FieldReference;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AnnotationNode;
@@ -19,6 +18,7 @@ import org.spongepowered.asm.mixin.refmap.IReferenceMapper;
 import org.spongepowered.asm.mixin.refmap.ReferenceMapper;
 import org.spongepowered.asm.mixin.refmap.RemappingReferenceMapper;
 import org.spongepowered.asm.mixin.throwables.MixinError;
+import org.spongepowered.asm.mixin.transformer.Config;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
 import org.spongepowered.asm.mixin.transformer.ext.Extensions;
 import org.spongepowered.asm.service.IClassBytecodeProvider;
@@ -27,6 +27,7 @@ import org.spongepowered.asm.service.MixinService;
 import org.spongepowered.asm.util.Annotations;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -35,21 +36,9 @@ import java.util.*;
  * APIs may be removed or change frequently before pull requests are merged.
  */
 public class MixinClassAdjusterApplication {
+	static final String MIXINS_JSON = "asyncparticles.target-modifier.mixins.json";
 	static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles-class-adjuster");
 	private static MixinClassAdjusterApplication INSTANCE;
-	private static final FieldReference<String> pluginClassName;
-	private static final FieldReference<IMixinService> mixinService;
-
-	static {
-		try {
-			Class<?> mixinConfigClass = Class.forName("org.spongepowered.asm.mixin.transformer.MixinConfig");
-			pluginClassName = new FieldReference<>(mixinConfigClass, "pluginClassName");
-			mixinService = new FieldReference<>(mixinConfigClass, "service");
-		} catch (ClassNotFoundException e) {
-			throw new MixinError(e);
-		}
-	}
-
 	/**
 	 * key: original mixin class name, value: class adjuster
 	 */
@@ -94,30 +83,75 @@ public class MixinClassAdjusterApplication {
 	}
 
 	public List<String> apply() {
-		IMixinTransformer activeTransformer =
-			(IMixinTransformer) MixinEnvironment.getDefaultEnvironment().getActiveTransformer();
-		// FIXME: this is unsafe
-		List<IMixinConfig> pendingConfigs = MixinTransformerExtension.tryAs(activeTransformer)
-			.map(MixinTransformerExtension::getPendingConfigs)
-			.orElseThrow(() -> new MixinError("Unsupported mixin transformer: " + activeTransformer.getClass()));
-		// Find our mixin config
+		Config handle;
+		try {
+			Field f = Config.class.getDeclaredField("allConfigs");
+			f.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			Config handle1 = ((Map<String, Config>) f.get(null)).get(MIXINS_JSON);
+			handle = handle1;
+		} catch (Throwable e) {
+			handle = null;
+		}
+
 		IMixinConfig mixinConfig = null;
-		String pluginClass = mixinSquaredPlugin.getClass().getName();
-		for (IMixinConfig config : pendingConfigs) {
-			String aPlugin = pluginClassName.get(config);
-			if (pluginClass.equals(aPlugin)) {
-				mixinConfig = config;
-				break;
+		if (handle == null || (mixinConfig = handle.getConfig()) == null) {
+			Field pluginClassNameField;
+			try {
+				Class<?> mixinConfigClass = Class.forName("org.spongepowered.asm.mixin.transformer.MixinConfig");
+				pluginClassNameField = mixinConfigClass.getDeclaredField("pluginClassName");
+				pluginClassNameField.setAccessible(true);
+			} catch (Exception e) {
+				throw new MixinError(e);
+			}
+			Object activeTransformer = MixinEnvironment.getDefaultEnvironment().getActiveTransformer();
+			List<IMixinConfig> pendingConfigs = MixinTransformerExtension.getPendingConfigs(activeTransformer)
+				.orElseThrow(() -> new MixinError("Unsupported mixin transformer: " + activeTransformer.getClass()));
+			// Find our mixin config
+			String pluginClass = mixinSquaredPlugin.getClass().getName();
+			for (IMixinConfig config : pendingConfigs) {
+				String aPlugin;
+				try {
+					aPlugin = (String) pluginClassNameField.get(config);
+				} catch (Exception e) {
+					throw new MixinError(e);
+				}
+				if (pluginClass.equals(aPlugin)) {
+					mixinConfig = config;
+					break;
+				}
 			}
 		}
-		assert mixinConfig != null;
+
+		if (mixinConfig == null) {
+			throw new MixinError("Own mixin config not registered");
+		}
+
+		Field serviceField;
+		try {
+			Class<?> mixinConfigClass = Class.forName("org.spongepowered.asm.mixin.transformer.MixinConfig");
+			serviceField = mixinConfigClass.getDeclaredField("service");
+			serviceField.setAccessible(true);
+		} catch (Exception e) {
+			throw new MixinError(e);
+		}
+
 		// Exchange mixin service with our own wrapper so that we can modify target classes
-		IMixinService service = mixinService.get(mixinConfig);
+		IMixinService service;
+		try {
+			service = (IMixinService) serviceField.get(mixinConfig);
+		} catch (Exception e) {
+			throw new MixinError(e);
+		}
 		MixinServiceWrapper mixinServiceWrapper;
 		if (!(service instanceof MixinServiceWrapper)) {
 			LOGGER.info("Wrapping mixin service for {} so that we can modify target classes.", mixinConfig);
 			mixinServiceWrapper = new MixinServiceWrapper(service);
-			mixinService.set(mixinConfig, mixinServiceWrapper);
+			try {
+				serviceField.set(mixinConfig, mixinServiceWrapper);
+			} catch (Exception e) {
+				throw new MixinError(e);
+			}
 		} else {
 			mixinServiceWrapper = (MixinServiceWrapper) service;
 		}
@@ -152,8 +186,8 @@ public class MixinClassAdjusterApplication {
 	}
 
 	private void applyAdjuster(IClassBytecodeProvider bytecodeProvider,
-							   MixinClassAdjuster adjuster,
-							   Map<String, IReferenceMapper> mappersCache) {
+	                           MixinClassAdjuster adjuster,
+	                           Map<String, IReferenceMapper> mappersCache) {
 		String mixinClassName = adjuster.getMixinClassName();
 		// Get the original mixin class node
 		ClassNode cNode;
