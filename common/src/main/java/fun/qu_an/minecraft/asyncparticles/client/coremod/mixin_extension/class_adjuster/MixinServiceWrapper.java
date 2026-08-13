@@ -17,8 +17,9 @@ import java.util.Collection;
  * <a href="https://github.com/Harveykang/MixinSquared">https://github.com/Harveykang/MixinSquared</a><p>
  * APIs may be removed or change frequently before pull requests are merged.
  */
+@SuppressWarnings("ClassCanBeRecord")
 public class MixinServiceWrapper implements IMixinService, IClassBytecodeProvider {
-    private final IMixinService delegate;
+    public final IMixinService delegate;
 
     public MixinServiceWrapper(IMixinService delegate) {
         this.delegate = delegate;
