@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster;
 
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AnnotationNode;
@@ -36,7 +37,9 @@ import java.util.*;
  * APIs may be removed or change frequently before pull requests are merged.
  */
 public class MixinClassAdjusterApplication {
-	static final String MIXINS_JSON = "asyncparticles.target-modifier.mixins.json";
+	static final String MIXINS_JSON = ModListHelper.isDevelopmentEnvironment() ? "asyncparticles.target-modifier.mixins.json"
+		: ModListHelper.IS_FORGE ? "neoforge-asyncparticles.target-modifier.mixins"
+		: "fabric-asyncparticles.target-modifier.mixins.json";
 	static final ILogger LOGGER = MixinService.getService().getLogger("asyncparticles-class-adjuster");
 	private static MixinClassAdjusterApplication INSTANCE;
 	/**
