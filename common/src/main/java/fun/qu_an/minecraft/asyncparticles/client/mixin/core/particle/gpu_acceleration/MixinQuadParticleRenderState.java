@@ -20,7 +20,7 @@ public class MixinQuadParticleRenderState implements GpuQuadParticleRenderState 
 	@Expression("this.particleCount > 0")
 	@ModifyExpressionValue(method = "submit", at = @At("MIXINEXTRAS:EXPRESSION"))
 	private boolean submit(boolean original) {
-		return original || !asyncparticles$gpuParticleGroup.asyncparticles$getGpuParticles().isEmpty();
+		return original || (asyncparticles$gpuParticleGroup != null && !asyncparticles$gpuParticleGroup.asyncparticles$getGpuParticles().isEmpty());
 	}
 
 	@Override
