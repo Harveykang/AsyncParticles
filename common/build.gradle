@@ -115,5 +115,9 @@ dependencies {
     /* Cosy Critters */
     modCompileOnly "maven.modrinth:cosy-critters:v0.3.2+1.20.1-fabric"
 
+    /* Goop Reforged */
     modCompileOnly "maven.modrinth:goopreforged:1.20.1-1.1.1"
+
+    /* RuOK */
+    modCompileOnly "curse.maven:ruok-910904:7637299" // 1.7.4
 }
