@@ -11,10 +11,13 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 			case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin",
 			     "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin",
 			     "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
+			     "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin",
+			     "team.teampotato.ruok.mixin.minecraft.particle.ParticleManagerMixin",
 			     "net.diebuddies.mixins.weather.MixinParticleEngine",
 			     "qouteall.imm_ptl.core.mixin.client.particle.MixinParticleEngine",
 			     "foundry.veil.mixin.performance.client.PerformanceLevelRendererMixin",
-			     "me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin" -> true;
+			     "me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin"
+				-> true;
 			default -> false;
 		};
 	}
@@ -29,13 +32,18 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 				"addCustomRenderTypes".equals(mixinMethodName);
 			case "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin" ->
 				"skipGeneratingAABB".equals(mixinMethodName) || "FastFrustumCheck".equals(mixinMethodName);
-			case "net.diebuddies.mixins.weather.MixinParticleEngine" -> "tick".equals(mixinMethodName);
+			case "net.diebuddies.mixins.weather.MixinParticleEngine" ->
+				"tick".equals(mixinMethodName);
 			case "qouteall.imm_ptl.core.mixin.client.particle.MixinParticleEngine" ->
 				"onTickParticle".equals(mixinMethodName);
 			case "foundry.veil.mixin.performance.client.PerformanceLevelRendererMixin" ->
 				"clearParticlesColor".equals(mixinMethodName);
 			case "me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin" ->
 				"particle_core_synchronizeParticleAdds".equals(mixinMethodName);
+			case "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin" ->
+				"tick".equals(mixinMethodName);
+			case "team.teampotato.ruok.mixin.minecraft.particle.ParticleManagerMixin" ->
+				"tick".equals(mixinMethodName);
 			default -> false;
 		};
 	}

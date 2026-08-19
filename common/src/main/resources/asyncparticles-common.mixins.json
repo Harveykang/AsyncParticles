@@ -47,7 +47,6 @@
     "compat.sodium_extra.MixinParticleEngine",
     "compat.veil.MixinLightRenderer",
     "compat.vulkanmod.AccessorBuffer",
-    "compat.vulkanmod.AccessorDrawer",
     "compat.vulkanmod.MixinRenderer",
     "compat.watut.MixinCustomParticleEngine",
     "conditional.Mixin_ReplaceRandom",

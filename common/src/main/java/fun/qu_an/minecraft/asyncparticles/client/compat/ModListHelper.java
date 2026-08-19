@@ -138,6 +138,8 @@ public class ModListHelper {
 	public static final boolean GOOP_LOADED = isModLoaded("goop");
 	/* Async */
 	public static final boolean ASYNC_LOADED = isModLoaded("async");
+	/* Ruok */
+	public static final boolean RUOK_LOADED = isModLoaded("ruok");
 
 	@ExpectPlatform
 	private static boolean isForge() {

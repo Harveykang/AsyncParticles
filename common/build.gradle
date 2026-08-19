@@ -123,6 +123,9 @@ dependencies {
     modCompileOnly "maven.modrinth:beryl:ctik2Mfd" // 0.2.0
     modCompileOnly "org.lwjgl:lwjgl-vma:3.3.3"
     modCompileOnly "org.lwjgl:lwjgl-vulkan:3.3.3"
+
+    /* RuOK */
+    modCompileOnly "curse.maven:ruok-910904:7637299" // 1.7.4
 }
 
 tasks.register('compileSpirv', Exec) {
