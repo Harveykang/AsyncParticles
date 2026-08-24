@@ -99,7 +99,7 @@ dependencies {
     modLocalRuntime 'maven.modrinth:spark:1.10.109-fabric'
 
     /* Particle Rain */
-    modLocalRuntime "maven.modrinth:particle-rain:v4-beta.10+$minecraft_version-fabric"
+    modLocalRuntime "maven.modrinth:particle-rain:v4-beta.11+$minecraft_version-fabric"
 
     /* Effectual */
 //    modLocalRuntime 'maven.modrinth:tlib:1.3.0-1.21.1'

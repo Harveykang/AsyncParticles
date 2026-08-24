@@ -103,7 +103,7 @@ dependencies {
     /* ===End Performance=== */
 
     /* Particle Rain */
-    modLocalRuntime("maven.modrinth:particle-rain:v4-beta.10+$minecraft_version-neoforge")
+    modLocalRuntime("maven.modrinth:particle-rain:v4-beta.11+$minecraft_version-neoforge")
 
     /* Effectual */
 //    if (rootProject.use_connector_mod == "true") {
