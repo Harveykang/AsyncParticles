@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
@@ -13,7 +12,6 @@ import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 
@@ -73,8 +71,7 @@ public class ParticleHelper {
 	}
 
 	public static <T extends Particle> void onEvict(T particle) {
-		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
-		particle.getParticleLimit().ifPresent(limit -> particleEngine.updateCount(limit, -1));
+		particle.getParticleLimit().ifPresent(limit -> Minecraft.getInstance().particleEngine.updateCount(limit, -1));
 		if (particle.isAlive()) {
 			particle.remove();
 		}
@@ -90,8 +87,7 @@ public class ParticleHelper {
 	}
 
 	public static void onEvictIgnoreExceptions(Particle particle) {
-		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
-		particle.getParticleLimit().ifPresent(limit -> particleEngine.updateCount(limit, -1));
+		particle.getParticleLimit().ifPresent(limit -> Minecraft.getInstance().particleEngine.updateCount(limit, -1));
 		try {
 			if (particle.isAlive()) {
 				particle.remove();
