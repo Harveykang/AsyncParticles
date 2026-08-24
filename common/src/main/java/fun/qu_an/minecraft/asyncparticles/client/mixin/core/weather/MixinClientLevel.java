@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.Diagnostic;
+import fun.qu_an.minecraft.asyncparticles.client.core.Phase;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.client.multiplayer.ClientLevel;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,7 +14,7 @@ public class MixinClientLevel {
 	@WrapMethod(method = "tickWeatherEffects")
 	private void wrapTickRain(Operation<Void> original) {
 		if (ConfigHelper.isTickWeatherAsync()) {
-			AsyncTickBehavior.getInstance().addTaskEnsureLevelRunning(original::call, Diagnostic::errorAsyncRainTick);
+			AsyncTickBehavior.getInstance().addTaskEnsureLevelRunning(original::call, Diagnostic::errorAsyncWeatherTick, Phase.WEATHER_TICK);
 		} else {
 			original.call();
 		}
