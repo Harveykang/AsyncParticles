@@ -140,10 +140,8 @@ public class AsyncTickBehavior {
 		return false;
 	}
 
-	public void preTick(boolean isHeadTick, boolean isTailTick) {
-		if (isHeadTick) {
-			tickTaskHelper.waitForCompletion(exceptionHandler::tickExceptionally);
-		}
+	public void preTick(boolean isTailTick) {
+		tickTaskHelper.waitForCompletion(exceptionHandler::tickExceptionally);
 		this.isTailTick = isTailTick;
 		if (ConfigHelper.isAsyncParticleTick()) {
 			if (!LevelBundle.isLevelRunning()) {
