@@ -2,9 +2,9 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.compat.sodium;
 
 import com.bawnorton.mixinsquared.TargetHandler;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -21,9 +21,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(value = QuadParticleRenderState.class, priority = 1500)
 public class MixinQuadParticleRenderState {
 	@Unique
-	private static final ParticleThreadLocal<Quaternionf> asyncparticles$TEMP_QUAT = ParticleThreadLocal.withInitial(RenderSystem::isOnRenderThread, Quaternionf::new);
+	private static final ParticleThreadLocal<Quaternionf> asyncparticles$TEMP_QUAT = ParticleThreadLocal.withInitial(ThreadUtil::isOnMainThread, Quaternionf::new);
 	@Unique
-	private static final ParticleThreadLocal<Vector3f> asyncparticles$TEMP_VEC = ParticleThreadLocal.withInitial(RenderSystem::isOnRenderThread, Vector3f::new);
+	private static final ParticleThreadLocal<Vector3f> asyncparticles$TEMP_VEC = ParticleThreadLocal.withInitial(ThreadUtil::isOnMainThread, Vector3f::new);
 
 	@Dynamic
 	@TargetHandler(

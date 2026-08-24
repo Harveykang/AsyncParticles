@@ -139,25 +139,20 @@ public class AsyncTickBehavior {
 		return false;
 	}
 
-	public void preTick(boolean isHeadTick, boolean isTailTick) {
-		if (isHeadTick) {
-			tickTaskHelper.waitForCompletion(exceptionHandler::tickExceptionally);
-		}
+	public void preTick(boolean isTailTick) {
+		tickTaskHelper.waitForCompletion(exceptionHandler::tickExceptionally);
 		this.isTailTick = isTailTick;
-		if (!ConfigHelper.isAsyncParticleTick()) {
-			return;
-		}
-		Minecraft mc = Minecraft.getInstance();
-		boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
-		if (!levelRunning) {
-			return;
-		}
-		if (ConfigHelper.getParticleCleanupStrategy() == ParticleCleanupStrategy.PARALLEL_WITH_TICK) {
-			if (cleanupTaskHelper.isRunning()) {
-				cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
+		if (ConfigHelper.isAsyncParticleTick()) {
+			if (!LevelBundle.isLevelRunning()) {
+				return;
 			}
-			prepareCleanupTasks(cleanupTaskHelper);
-			cleanupTaskHelper.submitAll();
+			if (ConfigHelper.getParticleCleanupStrategy() == ParticleCleanupStrategy.PARALLEL_WITH_TICK) {
+				if (cleanupTaskHelper.isRunning()) {
+					cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
+				}
+				prepareCleanupTasks(cleanupTaskHelper);
+				cleanupTaskHelper.submitAll();
+			}
 		}
 	}
 
@@ -210,14 +205,13 @@ public class AsyncTickBehavior {
 	}
 
 	public void postTick() {
-		if (cleanupTaskHelper.isRunning()) {
-			cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
-		}
+		cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
+		tryReload();
 		Minecraft mc = Minecraft.getInstance();
 		ClientLevel level = mc.level;
 		LocalPlayer player = mc.player;
 		Entity cameraEntity = mc.getCameraEntity();
-		boolean levelRunning = level != null && player != null && cameraEntity != null && !mc.isPaused();
+		boolean levelRunning = LevelBundle.isLevelRunning();
 		if (!levelRunning || !isTailTick()) {
 			tickTaskHelper.disposeTasks();
 			Queue<Particle> particlesToAdd = mc.particleEngine.particlesToAdd;
@@ -226,7 +220,6 @@ public class AsyncTickBehavior {
 			}
 			return;
 		}
-		tryReload();
 		tryDebug();
 		tickTaskHelper.groupTasks(false);
 		if (ConfigHelper.isAsyncParticleTick()) {
