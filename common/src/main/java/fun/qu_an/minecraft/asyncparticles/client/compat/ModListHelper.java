@@ -106,6 +106,8 @@ public class ModListHelper {
 	public static final boolean ASYNC_LOADED = isModLoaded("async");
 	/* Particle Tweaks */
 	public static final boolean PARTICLE_TWEAKS_LOADED = isModLoaded("particletweaks");
+	/* Ruok */
+	public static final boolean RUOK_LOADED = isModLoaded("ruok");
 
 	public static boolean isModLoaded(String modId) {
 		return PLATFORM.isModLoaded(modId);
