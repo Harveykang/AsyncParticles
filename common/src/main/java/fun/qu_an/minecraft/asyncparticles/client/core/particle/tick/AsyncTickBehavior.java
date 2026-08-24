@@ -6,11 +6,14 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleGroupAddition;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.DevRuntimeDebug;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCleanupStrategy;
+import fun.qu_an.minecraft.asyncparticles.client.core.Phase;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
+import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -21,6 +24,7 @@ import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 
@@ -39,6 +43,7 @@ import java.util.stream.Collectors;
 
 public class AsyncTickBehavior {
 	static final Logger LOGGER = LogManager.getLogger();
+	public static final ParticleThreadLocal<Phase> PHASE = ParticleThreadLocal.withInitial(ThreadUtil::isOnMainThread, () -> Phase.NONE);
 	public static final int THREADS;
 
 	static {
@@ -99,8 +104,29 @@ public class AsyncTickBehavior {
 		}
 	}
 
+	public void ensureLevelRunning(Runnable r, Consumer<Exception> exceptionHandler, Phase phase) {
+		LevelBundle levelBundle = getLevelBundle();
+		if (levelBundle == null || levelBundle.isLevelReset()) {
+			return;
+		}
+		PHASE.set(phase);
+		try {
+			r.run();
+		} catch (Exception e) {
+			if (!levelBundle.isLevelReset()) {
+				exceptionHandler.accept(e);
+			}
+		} finally {
+			PHASE.set(Phase.NONE);
+		}
+	}
+
 	public void addTaskEnsureLevelRunning(Runnable r, Consumer<Exception> exceptionHandler) {
 		getTickTaskManager().addTask(() -> ensureLevelRunning(r, exceptionHandler));
+	}
+
+	public void addTaskEnsureLevelRunning(Runnable r, Consumer<Exception> exceptionHandler, @NotNull Phase phase) {
+		getTickTaskManager().addTask(() -> ensureLevelRunning(r, exceptionHandler, phase));
 	}
 
 	public boolean shouldRemove(Particle particle) {

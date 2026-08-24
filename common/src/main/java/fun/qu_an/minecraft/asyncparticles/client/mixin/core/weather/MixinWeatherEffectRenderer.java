@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.Diagnostic;
+import fun.qu_an.minecraft.asyncparticles.client.core.Phase;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -23,7 +24,7 @@ public class MixinWeatherEffectRenderer {
 		if (ConfigHelper.isTickWeatherAsync()
 			&& AsyncTickBehavior.getInstance().isTailTick()) {
 			AsyncTickBehavior.getInstance().addTaskEnsureLevelRunning(
-				() -> original.call(level, camera, ticks, particleStatus, weatherRadius), Diagnostic::errorAsyncRainTick);
+				() -> original.call(level, camera, ticks, particleStatus, weatherRadius), Diagnostic::errorAsyncWeatherTick, Phase.WEATHER_TICK);
 		} else {
 			original.call(level, camera, ticks, particleStatus, weatherRadius);
 		}

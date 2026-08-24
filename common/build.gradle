@@ -33,7 +33,7 @@ dependencies {
     compileOnly "org.lwjgl:lwjgl-vulkan:3.3.3"
 
 //    /* Particle Rain */
-    compileOnly "maven.modrinth:particle-rain:v4-beta.10+26.1-fabric"
+    compileOnly "maven.modrinth:particle-rain:v4-beta.11+26.1-fabric"
 //
 //    /* Effectual */
 //    compileOnly 'maven.modrinth:effectual:1.1.0-1.21.8'
