@@ -8,6 +8,7 @@ import fun.qu_an.minecraft.asyncparticles.client.config.DevRuntimeDebug;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCleanupStrategy;
 import fun.qu_an.minecraft.asyncparticles.client.core.Phase;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
@@ -211,38 +212,42 @@ public class AsyncTickBehavior {
 		ClientLevel level = mc.level;
 		LocalPlayer player = mc.player;
 		Entity cameraEntity = mc.getCameraEntity();
-		boolean levelRunning = LevelBundle.isLevelRunning();
+		boolean levelAvailable = level != null && player != null && cameraEntity != null;
+		boolean levelRunning = levelAvailable && !mc.isPaused();
 		if (!levelRunning || !isTailTick()) {
-			tickTaskHelper.disposeTasks();
 			Queue<Particle> particlesToAdd = mc.particleEngine.particlesToAdd;
 			if (!particlesToAdd.isEmpty()) {
 				particlesToAdd.clear();
 			}
-			return;
-		}
-		tryDebug();
-		tickTaskHelper.groupTasks(false);
-		if (ConfigHelper.isAsyncParticleTick()) {
-			ParticleCleanupStrategy cleanupStrategy = ConfigHelper.getParticleCleanupStrategy();
-			if (cleanupStrategy == ParticleCleanupStrategy.BLOCK_MAIN_THREAD) {
-				prepareCleanupTasks(cleanupTaskHelper);
-				cleanupTaskHelper.submitAll();
-				cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
-			} else if (cleanupStrategy == ParticleCleanupStrategy.MAIN_THREAD) {
-				Collection<ParticleGroup<?>> groups = mc.particleEngine.particles.values();
-				for (ParticleGroup<?> group : groups) {
-					if (!groups.isEmpty()) {
-						((ParticleGroupAddition) group).asyncparticles$removeDeadParticles();
+			if (!levelAvailable) {
+				tickTaskHelper.disposeTasks();
+				return;
+			}
+		} else {
+			tryDebug();
+			tickTaskHelper.groupTasks(false);
+			if (ConfigHelper.isAsyncParticleTick()) {
+				ParticleCleanupStrategy cleanupStrategy = ConfigHelper.getParticleCleanupStrategy();
+				if (cleanupStrategy == ParticleCleanupStrategy.BLOCK_MAIN_THREAD) {
+					prepareCleanupTasks(cleanupTaskHelper);
+					cleanupTaskHelper.submitAll();
+					cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
+				} else if (cleanupStrategy == ParticleCleanupStrategy.MAIN_THREAD) {
+					Collection<ParticleGroup<?>> groups = mc.particleEngine.particles.values();
+					for (ParticleGroup<?> group : groups) {
+						if (!groups.isEmpty()) {
+							((ParticleGroupAddition) group).asyncparticles$removeDeadParticles();
+						}
+					}
+					Queue<TrackingEmitter> trackingEmitters = mc.particleEngine.trackingEmitters;
+					if (!trackingEmitters.isEmpty()) {
+						doEmittersRemoveIf(trackingEmitters);
 					}
 				}
-				Queue<TrackingEmitter> trackingEmitters = mc.particleEngine.trackingEmitters;
-				if (!trackingEmitters.isEmpty()) {
-					doEmittersRemoveIf(trackingEmitters);
-				}
+				particlePhase = true;
+				mc.particleEngine.tick();
+				particlePhase = false;
 			}
-			particlePhase = true;
-			mc.particleEngine.tick();
-			particlePhase = false;
 		}
 		tickTaskHelper.submitAll(() -> {
 			timeUsageNano.setRelease(System.nanoTime());
