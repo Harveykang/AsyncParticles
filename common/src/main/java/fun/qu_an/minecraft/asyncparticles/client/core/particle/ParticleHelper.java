@@ -12,7 +12,6 @@ import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 
@@ -72,8 +71,7 @@ public class ParticleHelper {
 	}
 
 	public static <T extends Particle> void onEvict(T particle) {
-		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
-		particle.getParticleGroup().ifPresent(limit -> particleEngine.updateCount(limit, -1));
+		particle.getParticleGroup().ifPresent(limit -> Minecraft.getInstance().particleEngine.updateCount(limit, -1));
 		if (particle.isAlive()) {
 			particle.remove();
 		}
@@ -89,8 +87,7 @@ public class ParticleHelper {
 	}
 
 	public static void onEvictIgnoreExceptions(Particle particle) {
-		ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
-		particle.getParticleGroup().ifPresent(limit -> particleEngine.updateCount(limit, -1));
+		particle.getParticleGroup().ifPresent(limit -> Minecraft.getInstance().particleEngine.updateCount(limit, -1));
 		try {
 			if (particle.isAlive()) {
 				particle.remove();

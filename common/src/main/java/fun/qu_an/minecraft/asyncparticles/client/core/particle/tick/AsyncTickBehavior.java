@@ -149,9 +149,7 @@ public class AsyncTickBehavior {
 		}
 		this.isTailTick = isTailTick;
 		if (ConfigHelper.isAsyncParticleTick()) {
-			Minecraft mc = Minecraft.getInstance();
-			boolean levelRunning = mc.level != null && mc.player != null && !mc.isPaused();
-			if (!levelRunning) {
+			if (!LevelBundle.isLevelRunning()) {
 				return;
 			}
 			if (ConfigHelper.getParticleCleanupStrategy() == ParticleCleanupStrategy.PARALLEL_WITH_TICK) {
@@ -217,19 +215,20 @@ public class AsyncTickBehavior {
 
 	public void postTick() {
 		cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
+		tryReload();
 		Minecraft mc = Minecraft.getInstance();
 		ClientLevel level = mc.level;
 		LocalPlayer player = mc.player;
 		Entity cameraEntity = mc.getCameraEntity();
-		boolean levelRunning = level != null && player != null && cameraEntity != null && !mc.isPaused();
-		tryReload();
+		boolean levelAvailable = level != null && player != null && cameraEntity != null;
+		boolean levelRunning = levelAvailable && !mc.isPaused();
 		if (!levelRunning || !isTailTick()) {
 			Queue<Particle> particlesToAdd = mc.particleEngine.particlesToAdd;
 			if (!particlesToAdd.isEmpty()) {
 				particlesToAdd.forEach(ParticleHelper::onEvictIgnoreExceptions);
 				particlesToAdd.clear();
 			}
-			if (!mc.isPaused()) {
+			if (!levelAvailable) {
 				tickTaskHelper.disposeTasks();
 				return;
 			}
