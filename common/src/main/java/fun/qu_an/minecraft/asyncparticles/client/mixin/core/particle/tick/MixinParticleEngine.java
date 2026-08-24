@@ -99,15 +99,14 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 				});
 				if (!group.add(particle)) {
 					particle.getParticleLimit().ifPresent(options -> this.updateCount(options, -1));
-					if (tickAsync
-						&& ((ParticleGroupAddition) group).asyncparticles$canTickAsync()
+				} else if (tickAsync
+					&& ((ParticleGroupAddition) group).asyncparticles$canTickAsync()
 //					&& ConfigHelper.isAsyncTickParticle() // tested in asyncparticles$canTickAsync()
-						&& tickBehavior.shouldSync(((ParticleAddon) particle).asyncparticles$getRealClass())) {
-						if (GpuParticleBehavior.getInstance().canRenderFast(particle)) {
-							((AsyncTickableParticleGroup) group).asyncparticles$addSyncGpuParticle(particle);
-						} else if (asyncAll) {
-							((AsyncTickableParticleGroup) group).asyncparticles$addSyncParticle(particle);
-						}
+					&& tickBehavior.shouldSync(((ParticleAddon) particle).asyncparticles$getRealClass())) {
+					if (GpuParticleBehavior.getInstance().canRenderFast(particle)) {
+						((AsyncTickableParticleGroup) group).asyncparticles$addSyncGpuParticle(particle);
+					} else if (asyncAll) {
+						((AsyncTickableParticleGroup) group).asyncparticles$addSyncParticle(particle);
 					}
 				}
 			}
