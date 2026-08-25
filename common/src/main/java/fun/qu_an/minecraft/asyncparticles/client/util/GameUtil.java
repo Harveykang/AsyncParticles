@@ -1,10 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.ReportedException;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceLocation;
@@ -15,7 +13,6 @@ import net.minecraft.world.level.lighting.LayerLightEventListener;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.Queue;
 import java.util.function.Predicate;
 
 import static java.lang.Math.abs;
@@ -45,13 +42,6 @@ public class GameUtil {
 
 	public static double manhattanLength(Vec3 vec3) {
 		return abs(vec3.x) + abs(vec3.y) + abs(vec3.z);
-	}
-
-	public static Queue<Particle> newParticleQueue() {
-		return IterationSafeEvictingQueue.newInstance(
-			16,
-			ConfigHelper.getParticleLimit(),
-			AsyncTickBehavior.getInstance()::onEvicted);
 	}
 
 	public static int getLightColorFromNeighbor(ClientLevel level, BlockPos pos) {

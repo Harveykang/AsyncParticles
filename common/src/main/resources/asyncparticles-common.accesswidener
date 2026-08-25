@@ -72,6 +72,7 @@ accessible method net/minecraft/world/entity/Entity collideWithShapes (Lnet/mine
 accessible class net/minecraft/client/particle/FireworkParticles$SparkParticle
 accessible field net/minecraft/client/renderer/texture/AbstractTexture mipmap Z
 accessible method net/minecraft/client/gui/screens/Screen addRenderableWidget (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
+accessible method com/mojang/blaze3d/vertex/VertexFormatElement$Usage setupBufferState (IIIJII)V
 
 accessible class com/mojang/blaze3d/platform/GlStateManager$TextureState
 accessible field com/mojang/blaze3d/vertex/VertexBuffer vertexBufferId I

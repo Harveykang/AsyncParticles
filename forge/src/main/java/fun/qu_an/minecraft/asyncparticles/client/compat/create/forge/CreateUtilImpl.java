@@ -11,6 +11,7 @@ import java.util.Map;
 
 @SuppressWarnings("unused")
 public class CreateUtilImpl {
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static Map<Integer, WeakReference<?>> loadedContraptions0(LevelAccessor level) {
 		return (Map) ContraptionHandler.loadedContraptions.get(level);
 	}

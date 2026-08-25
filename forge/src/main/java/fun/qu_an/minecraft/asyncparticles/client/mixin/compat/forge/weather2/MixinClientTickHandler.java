@@ -1,29 +1,24 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.compat.forge.weather2;
 
-import fun.qu_an.minecraft.asyncparticles.client.task.EndTickEvent;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import net.minecraftforge.event.TickEvent;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 import weather2.ClientTickHandler;
 
 @Mixin(value = ClientTickHandler.class, remap = false)
 public class MixinClientTickHandler {
-	@Shadow @Final public static ClientTickHandler INSTANCE;
-
-	static {
-		EndTickEvent.register(() -> INSTANCE.onTickInGame());
-	}
-
-	/**
-	 * @author
-	 * @reason
-	 */
-	@SuppressWarnings("OverwriteModifiers")
-	// Remove @SubscribeEvent annotation
-	@Overwrite
-	public static void tick(TickEvent.ClientTickEvent event) {
-		// do nothing
+	@WrapMethod(method = "tick")
+	private static void tick(TickEvent.ClientTickEvent event, Operation<Void> original) {
+		if (ConfigHelper.isTickWeatherAsync()
+			&& AsyncTickBehavior.getInstance().isTailTick()) {
+			AsyncTickBehavior.getInstance().addTaskEnsureLevelRunning(
+				() -> original.call(event), ExceptionUtil::toThrowDirectly);
+		} else {
+			original.call(event);
+		}
 	}
 }

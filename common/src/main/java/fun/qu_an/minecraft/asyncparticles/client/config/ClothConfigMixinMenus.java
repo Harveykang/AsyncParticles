@@ -34,8 +34,7 @@ public class ClothConfigMixinMenus {
 			.setDefaultValue(defaultConfig.isSafeClassInstanceMultiMap())
 			.setSaveConsumer(displayConfig::setSafeClassInstanceMultiMap)
 			.setTooltipSupplier(() -> {
-				if ((IRONS_SPELLBOOKS_LOADED &&
-					IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
+				if (IRONS_SPELLBOOKS_LOADED ||
 					MAKE_BUBBLES_POP_LOADED ||
 					COSYCRITTERS_LOADED ||
 					IMMERSIVE_PORTALS_LOADED) {
@@ -55,8 +54,7 @@ public class ClothConfigMixinMenus {
 				}
 			})
 			.requireRestart()
-			.setRequirement(() -> (!IRONS_SPELLBOOKS_LOADED ||
-				!IRONS_SPELLBOOKS_LESS_THAN_3_13_0) &&
+			.setRequirement(() -> !IRONS_SPELLBOOKS_LOADED &&
 				!MAKE_BUBBLES_POP_LOADED &&
 				!COSYCRITTERS_LOADED &&
 				!IMMERSIVE_PORTALS_LOADED)

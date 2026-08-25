@@ -41,10 +41,6 @@ public class MixinLevelRenderer {
 		if (ship != null) {
 			((VSParticleAddon) particle).asyncparticles$setShip(ship);
 			((LightCachedParticleAddon) particle).asyncparticles$tickLightCache();
-			switch (ConfigHelper.getParticleCullingMode()) {
-				case ASYNC_AABB -> ((ParticleAddon) particle).asyncparticles$tickAABBCulling();
-				case ASYNC_SPHERE -> ((ParticleAddon) particle).asyncparticles$tickSphereCulling();
-			}
 		}
 		return particle;
 	}

@@ -5,8 +5,6 @@ import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.ParticleVertexFormatElement;
 
 public class ParticleVertexFormats {
-	public static final int RAW_PARTICLE_BYTES = 68; // GPU_PARTICLE.getVertexSize();
-	public static final int PROCESSED_PARTICLE_VERTEX_BYTES = 44; // PARTICLE.getVertexSize();
 	public static final ParticleVertexFormatElement POSITION = new ParticleVertexFormatElement(0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.POSITION, 3);
 	public static final ParticleVertexFormatElement COLOR = new ParticleVertexFormatElement(0, VertexFormatElement.Type.UBYTE, VertexFormatElement.Usage.COLOR, 4);
 	public static final ParticleVertexFormatElement UV0_4F = new ParticleVertexFormatElement(0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.UV, 4);

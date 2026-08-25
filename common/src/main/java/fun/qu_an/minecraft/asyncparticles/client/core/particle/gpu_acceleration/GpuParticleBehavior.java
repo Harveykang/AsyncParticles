@@ -8,7 +8,6 @@ import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.GlTfParticleRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan.VkCompParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
@@ -20,7 +19,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
-import org.joml.Quaternionf;
 
 import java.util.List;
 import java.util.Map;
@@ -29,8 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class GpuParticleBehavior {
 	public static final String RENDER_METHOD = Mappings.getRenderMethod();
-	public static final String RENDER_ROTATED_QUAD_METHOD_1 = Mappings.getRenderRotatedQuadMethod1();
-	public static final String RENDER_ROTATED_QUAD_METHOD_2 = Mappings.getRenderRotatedQuadMethod2();
 	private static final GpuParticleBehavior INSTANCE = new GpuParticleBehavior();
 	public IParticleRenderer renderer;
 	/**
@@ -84,9 +80,9 @@ public class GpuParticleBehavior {
 	}
 
 	public boolean canRenderFast(TextureSheetParticle tsp) {
-		if (tsp.getFacingCameraMode() != TextureSheetParticle.FacingCameraMode.LOOKAT_XYZ) {
-			return false;
-		}
+//		if (tsp.getFacingCameraMode() != TextureSheetParticle.FacingCameraMode.LOOKAT_XYZ) {
+//			return false;
+//		}
 		if (ThreadUtil.isOnMainThread()) {
 			return CAN_RENDER_FAST_CACHE.computeIfAbsent(((ParticleAddon) tsp).asyncparticles$getRealClass(), this::canRenderFast0);
 		}
@@ -108,21 +104,7 @@ public class GpuParticleBehavior {
 				VertexConsumer.class,
 				Camera.class,
 				float.class).getDeclaringClass();
-			Class<?> renderRotatedQuadMethod1DeclaringClass = findDeclaringClass(k, RENDER_ROTATED_QUAD_METHOD_1,
-				VertexConsumer.class,
-				Camera.class,
-				Quaternionf.class,
-				float.class);
-			Class<?> renderRotatedQuadMethod2DeclaringClass = findDeclaringClass(k, RENDER_ROTATED_QUAD_METHOD_2,
-				VertexConsumer.class,
-				Quaternionf.class,
-				float.class,
-				float.class,
-				float.class,
-				float.class);
-			return GPU_PARTICLE_CLASSES.contains(renderMethodDeclaringClass)
-				&& GPU_PARTICLE_CLASSES.contains(renderRotatedQuadMethod1DeclaringClass)
-				&& GPU_PARTICLE_CLASSES.contains(renderRotatedQuadMethod2DeclaringClass);
+			return GPU_PARTICLE_CLASSES.contains(renderMethodDeclaringClass);
 		} catch (NoSuchMethodException e) {
 			return false;
 		}
@@ -186,9 +168,9 @@ public class GpuParticleBehavior {
 	}
 
 	public IParticleRenderer createRenderer() {
-		if (Backends.isVk()) {
-			return new VkCompParticleRenderer(ConfigHelper.getParticleLimit());
-		}
+//		if (Backends.isVk()) {
+//			return new VkCompParticleRenderer(ConfigHelper.getParticleLimit());
+//		}
 		if (Backends.isGl()) {
 			if (Backends.glTf.isSupported()) {
 				return new GlTfParticleRenderer(ConfigHelper.getParticleLimit());

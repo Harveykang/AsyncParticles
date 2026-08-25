@@ -9,14 +9,8 @@
     "minVersion": "0.5.0"
   },
   "client": [
-    "compat.forge.epicacg.MixinAsyncRenderer",
-    "compat.forge.epicfight.MixinCustomModelParticle",
-    "compat.forge.epicfight.MixinEpicFightRenderTypes",
     "compat.forge.flerovium.MixinSingleQuadParticleMixin",
-    "compat.forge.fluffy_fur.MixinShadersIntegration",
     "compat.forge.gateways.MixinGatewayParticle",
-    "compat.forge.iris_like.MixinLevelRenderer_Late",
-    "compat.forge.iris_like_else.MixinLevelRenderer_Late",
     "compat.forge.prettyrain.MixinGroundFogParticle",
     "compat.forge.prettyrain.MixinGroundFogRenderType",
     "compat.forge.prettyrain.MixinRainParticle",

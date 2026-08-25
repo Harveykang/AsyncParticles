@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.conditional;
 
+import fun.qu_an.minecraft.asyncparticles.client.config.MixinConfigHelper;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

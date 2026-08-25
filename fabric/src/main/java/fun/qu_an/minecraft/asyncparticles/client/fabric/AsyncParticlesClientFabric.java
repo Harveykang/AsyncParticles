@@ -7,6 +7,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;

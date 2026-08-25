@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.create.fabric;
 
 import com.simibubi.create.content.contraptions.ContraptionHandler;
-import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 import net.createmod.catnip.math.VecHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
@@ -12,6 +11,7 @@ import java.util.Map;
 
 @SuppressWarnings("unused")
 public class CreateUtilImpl {
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static Map<Integer, WeakReference<?>> loadedContraptions0(LevelAccessor level) {
 		return (Map) ContraptionHandler.loadedContraptions.get(level);
 	}

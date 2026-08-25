@@ -32,10 +32,6 @@ public abstract class MixinPostParticle extends MixinParticle implements LightCa
 	}
 
 	@Override
-	protected void onInit(CallbackInfo ci) {
-	}
-
-	@Override
 	public int getLightColor(float partialTick) {
 		return parent.getLightColor(partialTick);
 	}
@@ -75,24 +71,6 @@ public abstract class MixinPostParticle extends MixinParticle implements LightCa
 		return ((ParticleAddon) parent).asyncparticles$isRenderSync();
 	}
 
-	@Override
-	public void asyncparticles$setTickSync() {
-		((ParticleAddon) parent).asyncparticles$setTickSync();
-	}
-
-	@Override
-	public boolean asyncparticles$isTickSync() {
-		return ((ParticleAddon) parent).asyncparticles$isTickSync();
-	}
-
-	public void asyncparticles$enableLightCache() {
-		((LightCachedParticleAddon) parent).asyncparticles$enableLightCache();
-	}
-
-	public void asyncparticles$disableLightCache() {
-		((LightCachedParticleAddon) parent).asyncparticles$disableLightCache();
-	}
-
 	public boolean asyncparticles$isEnabledLightCache() {
 		return ((LightCachedParticleAddon) parent).asyncparticles$isEnabledLightCache();
 	}
@@ -106,16 +84,8 @@ public abstract class MixinPostParticle extends MixinParticle implements LightCa
 		return ((ParticleAddon) parent).asyncparticles$isVisibleOnScreen();
 	}
 
-	public void asyncparticles$tickAABBCulling() {
-		((ParticleAddon) parent).asyncparticles$tickAABBCulling();
-	}
-
-	public void asyncparticles$tickSphereCulling() {
-		((ParticleAddon) parent).asyncparticles$tickSphereCulling();
-	}
-
 	@Override
-	public Class<? extends Particle> asyncparticles$getRealClass() {
+	public <T extends Particle> Class<T> asyncparticles$getRealClass() {
 		return ((ParticleAddon) parent).asyncparticles$getRealClass();
 	}
 }

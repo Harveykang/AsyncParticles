@@ -19,7 +19,7 @@ public class MixinMinecraft {
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
 	private void onPreTick(boolean bl, CallbackInfo ci, @Local(ordinal = 0) int ticksToDo, @Local(ordinal = 1) int i) {
-		AsyncTickBehavior.getInstance().preTick(i == 0, i == ticksToDo - 1);
+		AsyncTickBehavior.getInstance().preTick(i == ticksToDo - 1);
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/Minecraft;tick()V"))
