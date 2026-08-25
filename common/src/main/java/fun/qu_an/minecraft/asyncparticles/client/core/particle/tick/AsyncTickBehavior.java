@@ -219,7 +219,10 @@ public class AsyncTickBehavior {
 			if (!particlesToAdd.isEmpty()) {
 				ParticleEngine engine = mc.particleEngine;
 				particlesToAdd.forEach(particle -> {
-					particle.remove();
+					try {
+						particle.remove();
+					} catch (Exception _) {
+					}
 					particle.getParticleLimit().ifPresent(options -> engine.updateCount(options, -1));
 				});
 				particlesToAdd.clear();
