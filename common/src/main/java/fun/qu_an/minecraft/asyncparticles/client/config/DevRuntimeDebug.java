@@ -31,6 +31,7 @@ public class DevRuntimeDebug {
 					case AUTO -> Backends.getGlTf(GL.getCapabilities());
 					case GL30 -> new GlCommands.TransformFeedback.GL30();
 					case ARB2 -> new GlCommands.TransformFeedback.ARB2();
+					case GL40 -> new GlCommands.TransformFeedback.GL40();
 					case GL45 -> new GlCommands.TransformFeedback.GL45();
 				};
 				Backends.gl = switch (directStateAccess) {
@@ -52,6 +53,7 @@ public class DevRuntimeDebug {
 		AUTO,
 		GL30,
 		ARB2,
+		GL40,
 		GL45
 	}
 }

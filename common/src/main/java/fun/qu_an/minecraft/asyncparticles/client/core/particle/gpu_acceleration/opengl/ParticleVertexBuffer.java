@@ -74,9 +74,7 @@ public class ParticleVertexBuffer {
 			offset, size,
 			GL30C.GL_MAP_WRITE_BIT |
 				(invalidateBufferBit ? GL30C.GL_MAP_INVALIDATE_BUFFER_BIT : 0) |
-				GL30C.GL_MAP_FLUSH_EXPLICIT_BIT |
-				GL30C.GL_MAP_UNSYNCHRONIZED_BIT |
-				0,
+				GL30C.GL_MAP_FLUSH_EXPLICIT_BIT,
 			this.mappedBuffer);
 		mapped = true;
 		mapOffset = offset;

@@ -79,6 +79,8 @@ public class Backends {
 	public static GlCommands.TransformFeedback getGlTf(GLCapabilities glCapabilities) {
 		if (glCapabilities.OpenGL45) {
 			return new GlCommands.TransformFeedback.GL45();
+		} else if (glCapabilities.OpenGL40) {
+			return new GlCommands.TransformFeedback.GL40();
 		} else if (glCapabilities.GL_ARB_transform_feedback2) {
 			return new GlCommands.TransformFeedback.ARB2();
 		} else if (glCapabilities.OpenGL30) {

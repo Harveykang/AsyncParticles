@@ -334,6 +334,38 @@ public abstract class GlCommands {
 
 		public abstract void glTransformFeedbackVaryings(int tshProg, String[] varyings, int glInterleavedAttribs);
 
+		protected final void bindTransformFeedbackBufferBasePreservingState(int tf, int index, int buffer) {
+			int binding = GL11C.glGetInteger(GL40C.GL_TRANSFORM_FEEDBACK_BINDING);
+			int bufferBinding = GL11C.glGetInteger(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER_BINDING);
+			try {
+				if (binding != tf) {
+					glBindTransformFeedback(tf);
+				}
+				GL30C.glBindBufferBase(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, buffer);
+			} finally {
+				if (binding != tf) {
+					glBindTransformFeedback(binding);
+				}
+				GL15C.glBindBuffer(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, bufferBinding);
+			}
+		}
+
+		protected final void bindTransformFeedbackBufferRangePreservingState(int tf, int index, int buffer, long offset, long size) {
+			int binding = GL11C.glGetInteger(GL40C.GL_TRANSFORM_FEEDBACK_BINDING);
+			int bufferBinding = GL11C.glGetInteger(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER_BINDING);
+			try {
+				if (binding != tf) {
+					glBindTransformFeedback(tf);
+				}
+				GL30C.glBindBufferRange(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, buffer, offset, size);
+			} finally {
+				if (binding != tf) {
+					glBindTransformFeedback(binding);
+				}
+				GL15C.glBindBuffer(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, bufferBinding);
+			}
+		}
+
 		public String toString() {
 			return "TransformFeedback." + this.getClass().getSimpleName();
 		}
@@ -491,14 +523,7 @@ public abstract class GlCommands {
 				if (Backends.gl.directStateAccess()) {
 					ARBDirectStateAccess.glTransformFeedbackBufferBase(tf, index, buffer);
 				} else {
-					int binding = GL11C.glGetInteger(ARBTransformFeedback2.GL_TRANSFORM_FEEDBACK_BINDING);
-					if (binding == tf) {
-						GL30C.glBindBufferBase(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, buffer);
-					} else {
-						glBindTransformFeedback(tf);
-						GL30C.glBindBufferBase(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, buffer);
-						glBindTransformFeedback(binding);
-					}
+					bindTransformFeedbackBufferBasePreservingState(tf, index, buffer);
 				}
 			}
 
@@ -507,14 +532,7 @@ public abstract class GlCommands {
 				if (Backends.gl.directStateAccess()) {
 					ARBDirectStateAccess.glTransformFeedbackBufferRange(tf, index, buffer, offset, size);
 				} else {
-					int binding = GL11C.glGetInteger(ARBTransformFeedback2.GL_TRANSFORM_FEEDBACK_BINDING);
-					if (binding == tf) {
-						GL30C.glBindBufferRange(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, buffer, offset, size);
-					} else {
-						glBindTransformFeedback(tf);
-						GL30C.glBindBufferRange(GL30C.GL_TRANSFORM_FEEDBACK_BUFFER, index, buffer, offset, size);
-						glBindTransformFeedback(binding);
-					}
+					bindTransformFeedbackBufferRangePreservingState(tf, index, buffer, offset, size);
 				}
 			}
 
@@ -534,7 +552,49 @@ public abstract class GlCommands {
 			}
 		}
 
-		public static class GL45 extends ARB2 {
+		public static class GL40 extends GL30 {
+			@Override
+			public boolean isTfObjectSupported() {
+				return true;
+			}
+
+			@Override
+			public int genTransformFeedback() {
+				return GL40C.glGenTransformFeedbacks();
+			}
+
+			@Override
+			public void deleteTransformFeedback(int tf) {
+				GL40C.glDeleteTransformFeedbacks(tf);
+			}
+
+			@Override
+			public void glBindTransformFeedbackBufferBase(int tf, int index, int buffer) {
+				bindTransformFeedbackBufferBasePreservingState(tf, index, buffer);
+			}
+
+			@Override
+			public void glBindTransformFeedbackBufferRange(int tf, int index, int buffer, long offset, long size) {
+				bindTransformFeedbackBufferRangePreservingState(tf, index, buffer, offset, size);
+			}
+
+			@Override
+			public void glBindTransformFeedback(int tf) {
+				GL40C.glBindTransformFeedback(GL40C.GL_TRANSFORM_FEEDBACK, tf);
+			}
+
+			@Override
+			public void glPauseTransformFeedback() {
+				GL40C.glPauseTransformFeedback();
+			}
+
+			@Override
+			public void glResumeTransformFeedback(int primitiveMode) {
+				GL40C.glResumeTransformFeedback();
+			}
+		}
+
+		public static class GL45 extends GL40 {
 			@Override
 			public int genTransformFeedback() {
 				return GL45C.glCreateTransformFeedbacks();
