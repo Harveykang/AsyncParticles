@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.task;
 
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import net.minecraft.client.Minecraft;
 
 public interface EndTickEvent extends Runnable {

@@ -187,7 +187,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			final int max = this.max;
 			this.pos = max;
 			for (final int mask = queue.length - 1;
-			     pos < max; ++pos) {
+				 pos < max; ++pos) {
 				E e = (E) a[pos & mask];
 				if (e != null) {
 					action.accept(e);
@@ -240,13 +240,13 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 	}
 
 	private class anIterator implements Iterator<E> {
-		private final Object[] a = queue;
-		private final int mask = a.length - 1;
-		private final int head = Math.min(mask, IterationSafeEvictingQueue.this.head);
-		private int tail = Math.min(a.length, IterationSafeEvictingQueue.this.size) + head;
-		private int cursor = head;
-		private Object curr;
-		private Object next;
+		protected final Object[] a = queue;
+		protected final int mask = a.length - 1;
+		protected final int head = Math.min(mask, IterationSafeEvictingQueue.this.head);
+		protected int tail = Math.min(a.length, IterationSafeEvictingQueue.this.size) + head;
+		protected int cursor = head;
+		protected Object curr;
+		protected Object next;
 
 		@Override
 		public boolean hasNext() {
@@ -291,6 +291,7 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			}
 			IterationSafeEvictingQueue.this.removeIndex(a, i, tail);
 			tail--;
+			cursor--;
 			curr = null;
 		}
 	}

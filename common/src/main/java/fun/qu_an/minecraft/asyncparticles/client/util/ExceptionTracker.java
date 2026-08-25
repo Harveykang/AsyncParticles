@@ -58,7 +58,11 @@ public class ExceptionTracker<T> {
 				queue.dequeueLong();
 			}
 			queue.enqueue(time);
-			return queue.size() / (duration.getAsInt() * 0.001) >= failurePerSecThreshold.getAsInt();
+			boolean b = queue.size() / (duration.getAsInt() * 0.001) >= failurePerSecThreshold.getAsInt();
+			if (b) {
+				queue.clear();
+			}
+			return b;
 		}
 
 		public String toString() {

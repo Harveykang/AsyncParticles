@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.components.StringWidget;
@@ -117,11 +116,5 @@ public class FallbackScreen extends Screen {
 			return;
 		}
 		super.tick();
-	}
-
-	@Override
-	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-		this.renderBackground(guiGraphics);
-		super.render(guiGraphics, mouseX, mouseY, partialTick);
 	}
 }

@@ -30,7 +30,7 @@
     "compat.forge.weather2.MixinEntityRotFX",
     "compat.forge.weather2_create.MixinEntityRotFX",
     "compat.forge.weather2_vs.MixinEntityRotFX",
-    "forge.MixinParticleEngine_Render"
+    "forge.core.particle.render.MixinParticleEngine_Render"
   ],
   "injectors": {
     "defaultRequire": 1

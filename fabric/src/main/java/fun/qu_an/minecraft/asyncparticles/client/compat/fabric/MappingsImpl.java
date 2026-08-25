@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.fabric;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.MappingResolver;
 
 @SuppressWarnings("unused")
 public class MappingsImpl {

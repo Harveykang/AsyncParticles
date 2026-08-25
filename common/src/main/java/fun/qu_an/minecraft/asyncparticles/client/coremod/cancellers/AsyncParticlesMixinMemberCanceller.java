@@ -37,12 +37,12 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 				"tick".equals(mixinMethodName);
 			case "qouteall.imm_ptl.core.mixin.client.particle.MixinParticleEngine" ->
 				"onTickParticle".equals(mixinMethodName);
-			case "me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin" ->
-				"particle_core_synchronizeParticleAdds".equals(mixinMethodName);
 			case "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin" ->
 				"tick".equals(mixinMethodName);
 			case "team.teampotato.ruok.mixin.minecraft.particle.ParticleManagerMixin" ->
 				"tick".equals(mixinMethodName);
+			case "me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin" ->
+				"particle_core_synchronizeParticleAdds".equals(mixinMethodName);
 			default -> false;
 		};
 	}

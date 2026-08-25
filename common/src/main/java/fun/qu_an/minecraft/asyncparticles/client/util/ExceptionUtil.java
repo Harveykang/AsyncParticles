@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
+import net.minecraft.ReportedException;
 import org.jetbrains.annotations.NotNull;
 
 public class ExceptionUtil {

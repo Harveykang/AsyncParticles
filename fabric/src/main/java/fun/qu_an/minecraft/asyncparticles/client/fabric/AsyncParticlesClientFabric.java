@@ -4,12 +4,9 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncRenderBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
-import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -40,7 +37,7 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 		}
 
 		AsyncParticlesClient.init();
-		if (ModListHelper.FABRIC_API_LOADED) { // assert !IS_FORGE
+		if (ModListHelper.FABRIC_API_LOADED) {
 			ClientCommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
 				dispatcher.register(literal(AsyncParticlesClient.MOD_ID)
 					.then(literal("isfabricmod")
@@ -63,9 +60,6 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 						.executes(context -> {
 							FabricClientCommandSource source = context.getSource();
 							AsyncTickBehavior.getInstance().debugLater(s -> source.sendFeedback(Component.literal(s)
-								.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
-									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
-							AsyncRenderBehavior.getInstance().debugLater(s -> source.sendFeedback(Component.literal(s)
 								.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s))
 									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))))));
 							return 1;
@@ -136,10 +130,9 @@ public final class AsyncParticlesClientFabric implements ClientModInitializer {
 						.executes(context -> {
 							FabricClientCommandSource source = context.getSource();
 							try {
-								ConfigHelper.load();
+								AsyncParticlesConfig.load();
 							} catch (Exception e) {
-								source.sendFeedback(Component.literal("Failed to reload config")
-									.append(e.getMessage()));
+								source.sendFeedback(Component.literal("Failed to reload config"));
 								return 1;
 							}
 							AsyncTickBehavior.getInstance().reloadLater();

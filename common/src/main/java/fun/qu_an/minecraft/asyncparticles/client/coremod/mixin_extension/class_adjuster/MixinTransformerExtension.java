@@ -1,14 +1,11 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster;
 
-import com.bawnorton.mixinsquared.reflection.FieldReference;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfig;
-import org.spongepowered.asm.mixin.throwables.MixinError;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
 
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * These codes are from my fork of MixinSquared.<p>
@@ -16,60 +13,63 @@ import java.util.function.Consumer;
  * APIs may be removed or change frequently before pull requests are merged.
  */
 public class MixinTransformerExtension {
-    private final IMixinTransformer reference;
-    private static FieldReference<List<IMixinConfig>> pendingConfigs;
-    private static FieldReference<?> mixinProcessor;
+	public static Optional<List<IMixinConfig>> getPendingConfigs(Object reference) {
+		Optional<IMixinTransformer> mixinTransformer = tryAs(reference);
+		if (mixinTransformer.isEmpty()) {
+			return Optional.empty();
+		}
+		Field pendingConfigs;
+		Field mixinProcessor;
+		try {
+			Class<?> mixinTransformerClass = Class.forName("org.spongepowered.asm.mixin.transformer.MixinTransformer");
+			mixinProcessor = mixinTransformerClass.getDeclaredField("processor");
+			mixinProcessor.setAccessible(true);
+		} catch (Exception e) {
+			return Optional.empty();
+		}
+		try {
+			Class<?> mixinProcessorClass = Class.forName("org.spongepowered.asm.mixin.transformer.MixinProcessor");
+			pendingConfigs = mixinProcessorClass.getDeclaredField("pendingConfigs");
+			pendingConfigs.setAccessible(true);
+		} catch (Exception e) {
+			return Optional.empty();
+		}
+		try {
+			@SuppressWarnings("unchecked")
+			List<IMixinConfig> value = (List<IMixinConfig>) pendingConfigs.get(mixinProcessor.get(mixinTransformer.get()));
+			return Optional.ofNullable(value);
+		} catch (Exception e) {
+			return Optional.empty();
+		}
+	}
 
-    private MixinTransformerExtension(IMixinTransformer reference) {
-        this.reference = reference;
-        prepareReflections();
-    }
+	public static Optional<IMixinTransformer> tryAs(Object reference) {
+		if (reference.getClass().getName().equals("org.spongepowered.asm.mixin.transformer.MixinTransformer")) {
+			return Optional.of((IMixinTransformer) reference);
+		}
+		Object delegate;
+		try {
+			Field field = recursiveGetDelegate(reference.getClass());
+			field.setAccessible(true);
+			delegate = field.get(reference);
+		} catch (IllegalAccessException | NoSuchFieldException e) {
+			return Optional.empty();
+		}
+		if (delegate instanceof IMixinTransformer) {
+			return tryAs(delegate);
+		} else {
+			return Optional.empty();
+		}
+	}
 
-    private static void prepareReflections() {
-        if (mixinProcessor == null) {
-            Class<?> mixinTransformerClass;
-            try {
-                mixinTransformerClass = Class.forName("org.spongepowered.asm.mixin.transformer.MixinTransformer");
-            } catch (ClassNotFoundException e) {
-                throw new MixinError(e);
-            }
-            mixinProcessor = new FieldReference<>(mixinTransformerClass, "processor");
-        }
-        if (pendingConfigs == null) {
-            Class<?> mixinProcessorClass;
-            try {
-                mixinProcessorClass = Class.forName("org.spongepowered.asm.mixin.transformer.MixinProcessor");
-            } catch (ClassNotFoundException e) {
-                throw new MixinError(e);
-            }
-            pendingConfigs = new FieldReference<>(mixinProcessorClass, "pendingConfigs");
-        }
-    }
-
-    public static void tryAs(IMixinTransformer reference, Consumer<MixinTransformerExtension> consumer) {
-        tryAs(reference).ifPresent(consumer);
-    }
-
-    public static Optional<MixinTransformerExtension> tryAs(IMixinTransformer reference) {
-        if (reference.getClass().getName().equals("org.spongepowered.asm.mixin.transformer.MixinTransformer")) {
-            return Optional.of(new MixinTransformerExtension(reference));
-        }
-        Object delegate;
-        try {
-            Field field = reference.getClass().getDeclaredField("delegate");
-            field.setAccessible(true);
-            delegate = field.get(reference);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            return Optional.empty();
-        }
-        if (delegate instanceof IMixinTransformer) {
-            return tryAs((IMixinTransformer) delegate);
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    public List<IMixinConfig> getPendingConfigs() {
-        return pendingConfigs.get(mixinProcessor.get(reference));
-    }
+	private static Field recursiveGetDelegate(Class<?> reference) throws NoSuchFieldException {
+		if (!IMixinTransformer.class.isAssignableFrom(reference)) {
+			throw new NoSuchFieldException();
+		}
+		try {
+			return reference.getDeclaredField("delegate");
+		} catch (NoSuchFieldException e) {
+			return recursiveGetDelegate(reference.getSuperclass());
+		}
+	}
 }

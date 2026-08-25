@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.compat.forge.fluffy_fur;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import fun.qu_an.minecraft.asyncparticles.client.compat.InternalRenderingMode;
 import mod.maxbogomol.fluffy_fur.integration.client.ShadersIntegration;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

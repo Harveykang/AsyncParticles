@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MixinBlocksParticlesManager {
 	@Mutable
 	@Shadow(remap = false) @Final protected static Map<BlockPos, PlacingBlockParticle> PARTICLES;
+
 	@Inject(method = "<clinit>", at = @At("RETURN"))
 	private static void onInit(CallbackInfo ci) {
 		PARTICLES = new ConcurrentHashMap<>();

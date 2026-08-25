@@ -2,7 +2,6 @@ package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import net.minecraft.ReportedException;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;

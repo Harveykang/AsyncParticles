@@ -8,12 +8,8 @@ public interface ParticleAddon {
 	void asyncparticles$setTicked();
 	void asyncparticles$resetTicked();
 	boolean asyncparticles$isTicked();
-	void asyncparticles$setGpuLightGot();
-	boolean asyncparticles$isFirstGpuLightGet();
 	void asyncparticles$setRenderSync();
 	boolean asyncparticles$isRenderSync();
-	void asyncparticles$setTickSync();
-	boolean asyncparticles$isTickSync();
 
 	/**
 	 * Forge shouldCull()
@@ -22,9 +18,8 @@ public interface ParticleAddon {
 
 	boolean asyncparticles$isVisibleOnScreen();
 
-	void asyncparticles$tickAABBCulling();
-
-	void asyncparticles$tickSphereCulling();
-
-	Class<? extends Particle> asyncparticles$getRealClass();
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	default <T extends Particle> Class<T> asyncparticles$getRealClass() {
+		return (Class) this.getClass();
+	}
 }

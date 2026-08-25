@@ -1,6 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.task;
 
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
 
 public final class DefaultEndTickEvent implements EndTickEvent {

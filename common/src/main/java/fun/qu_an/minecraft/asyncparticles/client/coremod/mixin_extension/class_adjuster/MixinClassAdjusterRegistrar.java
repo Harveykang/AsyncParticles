@@ -3,7 +3,10 @@ package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.service.MixinService;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * These codes are from my fork of MixinSquared.<p>
@@ -28,7 +31,7 @@ public class MixinClassAdjusterRegistrar {
 			throw new IllegalStateException("Cannot register class provider after pre-launch!");
 		}
 		pendingProviders.add(mixinClassProvider);
-		LOGGER.debug("Registered target modifier {}", mixinClassProvider.getClass().getName());
+		LOGGER.debug("Registered mixin class provider {}", mixinClassProvider.getClass().getName());
 	}
 
 	static Map<String, MixinClassAdjuster> endAdjusters() {

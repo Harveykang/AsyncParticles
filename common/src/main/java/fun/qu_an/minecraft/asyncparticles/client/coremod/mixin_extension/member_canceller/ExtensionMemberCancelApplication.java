@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller;
 
 import com.bawnorton.mixinsquared.adjuster.tools.AdjustableAnnotationNode;
-import com.bawnorton.mixinsquared.reflection.FieldReference;
 import org.objectweb.asm.tree.*;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.MixinEnvironment;
@@ -13,6 +12,7 @@ import org.spongepowered.asm.mixin.transformer.ext.ITargetClassContext;
 import org.spongepowered.asm.service.MixinService;
 import org.spongepowered.asm.util.Annotations;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -25,21 +25,27 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 	static final Set<MixinMemberCanceller> CANCELLERS = new HashSet<>();
 	// from MixinExtras com.llamalad7.mixinextras.transformer.MixinTransformerExtension
 	private final Set<ClassNode> preparedMixins = Collections.newSetFromMap(new WeakHashMap<>());
-	private final FieldReference<Object> field_MixinInfo$state;
-	private final FieldReference<ClassNode> field_MixinInfo$State$classNode;
-	private final FieldReference<SortedSet<IMixinInfo>> field_TargetClassContext$mixins;
+	private static final Field field_MixinInfo$state;
+	private static final Field field_MixinInfo$State$classNode;
+	private static final Field field_TargetClassContext$mixins;
 
-	public ExtensionMemberCancelApplication() {
+	static {
 		try {
 			Class<?> infoClass = Class.forName("org.spongepowered.asm.mixin.transformer.MixinInfo");
-			field_MixinInfo$state = new FieldReference<>(infoClass, "state");
+			field_MixinInfo$state = infoClass.getDeclaredField("state");
+			field_MixinInfo$state.setAccessible(true);
 			Class<?> stateClass = Class.forName("org.spongepowered.asm.mixin.transformer.MixinInfo$State");
-			field_MixinInfo$State$classNode = new FieldReference<>(stateClass, "classNode");
+			field_MixinInfo$State$classNode = stateClass.getDeclaredField("classNode");
+			field_MixinInfo$State$classNode.setAccessible(true);
 			Class<?> contextClass = Class.forName("org.spongepowered.asm.mixin.transformer.TargetClassContext");
-			field_TargetClassContext$mixins = new FieldReference<>(contextClass, "mixins");
-		} catch (ClassNotFoundException e) {
+			field_TargetClassContext$mixins = contextClass.getDeclaredField("mixins");
+			field_TargetClassContext$mixins.setAccessible(true);
+		} catch (Exception e) {
 			throw new MixinError(e);
 		}
+	}
+
+	public ExtensionMemberCancelApplication() {
 	}
 
 	@Override
@@ -47,15 +53,26 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void preApply(ITargetClassContext context) {
 		if (CANCELLERS.isEmpty()) {
 			return;
 		}
-		SortedSet<IMixinInfo> mixins = field_TargetClassContext$mixins.get(context);
+		SortedSet<IMixinInfo> mixins;
+		try {
+			mixins = (SortedSet<IMixinInfo>) field_TargetClassContext$mixins.get(context);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 		for (IMixinInfo mixin : mixins) {
 			// Get the internal class node of the mixinInfo.
-			ClassNode cNode = field_MixinInfo$State$classNode.get(field_MixinInfo$state.get(mixin));
+			ClassNode cNode;
+			try {
+				cNode = (ClassNode) field_MixinInfo$State$classNode.get(field_MixinInfo$state.get(mixin));
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 			if (preparedMixins.contains(cNode)) {
 				continue;
 			}
@@ -64,7 +81,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 			List<String> l = mixin.getTargetClasses();
 			List<String> targetClassNames = new ArrayList<>(l.size());
 			for (String s : l) {
-				String string = s.replaceAll("/", ".");
+				String string = s.replace("/", ".");
 				targetClassNames.add(string);
 			}
 
@@ -116,7 +133,7 @@ public final class ExtensionMemberCancelApplication implements IExtension {
 						continue;
 					}
 					List<String> methodValue = opt.get();
-					// Copy to ensure the type is ArrayList (not Arrays$ArrayList).
+					// Copy to ensure the indexType is ArrayList (not Arrays$ArrayList).
 					targetMethodDescs = new ArrayList<>(methodValue);
 					break VisibleAnnotations;
 				}

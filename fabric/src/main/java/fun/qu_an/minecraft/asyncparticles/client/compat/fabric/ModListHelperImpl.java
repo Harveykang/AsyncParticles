@@ -13,16 +13,12 @@ public class ModListHelperImpl {
 		return false;
 	}
 
-	public static boolean isModLoaded(String modId) {
-		return FabricLoader.getInstance().isModLoaded(modId);
-	}
-
-	public static boolean isDevelopmentEnvironment() {
-		return FabricLoader.getInstance().isDevelopmentEnvironment();
-	}
-
 	public static boolean isClient() {
 		return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
+	}
+
+	public static boolean isModLoaded(String modId) {
+		return FabricLoader.getInstance().isModLoaded(modId);
 	}
 
 	/**
@@ -58,5 +54,9 @@ public class ModListHelperImpl {
 			.map(container -> container.getMetadata()
 				.getVersion().getFriendlyString())
 			.orElseThrow(() -> new IllegalArgumentException("Mod " + modId + " is not loaded."));
+	}
+
+	public static boolean isDevelopmentEnvironment() {
+		return FabricLoader.getInstance().isDevelopmentEnvironment();
 	}
 }

@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class AsyncParticleWorkerThread extends ForkJoinWorkerThread {
 	private static final AtomicInteger indexGenerator = new AtomicInteger(0);
-	private Object[] data = new Object[Math.max(HashCommon.nextPowerOfTwo(indexGenerator.get()), 1)];
+	private Object[] data = new Object[Math.max(HashCommon.nextPowerOfTwo(indexGenerator.get()), 4)];
 
 	protected AsyncParticleWorkerThread(ForkJoinPool pool) {
 		super(pool);

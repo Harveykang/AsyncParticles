@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.compat.particlerain_create;
 
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -70,8 +72,9 @@ public class MixinParticleSpawner {
 		canSpawn.set(value);
 	}
 
-	@Inject(method = "tickSurfaceFX", at = @At(value = "INVOKE_ASSIGN",
-		target = "Lpigcart/particlerain/ParticleSpawner;getHeight(Lnet/minecraft/client/multiplayer/ClientLevel;II)I"))
+	@Definition(id = "getHeight", method = "Lpigcart/particlerain/ParticleSpawner;getHeight(Lnet/minecraft/client/multiplayer/ClientLevel;II)I")
+	@Expression("? = getHeight(?, ?, ?)")
+	@Inject(method = "tickSurfaceFX", at = @At(value = "MIXINEXTRAS:EXPRESSION", shift = At.Shift.AFTER))
 	private static void onTickSurfaceFX(ClientLevel level,
 	                                    Vec3 cameraPos,
 	                                    CallbackInfo ci,

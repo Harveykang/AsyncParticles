@@ -2,7 +2,7 @@ package fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers;
 
 import com.bawnorton.mixinsquared.api.MixinCanceller;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinConfigHelper;
+import fun.qu_an.minecraft.asyncparticles.client.config.MixinConfigHelper;
 
 import java.util.List;
 
@@ -13,11 +13,9 @@ public class AsyncParticlesMixinCanceller implements MixinCanceller {
 			return MixinConfigHelper.isSafeClassInstanceMultiMap();
 		}
 		return switch (mixinClassName) {
-			case "net.irisshaders.iris.mixin.fantastic.MixinLevelRenderer",
-				 "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
+			case "com.moepus.flerovium.mixins.Particle.ParticleEngineMixin",
 				 "com.moepus.flerovium.mixins.Particle.ParticleMixin",
-				// TODO: 这里处理一下
-				//				 "net.diebuddies.mixins.ocean.MixinParticleEngine"
+//				 "net.diebuddies.mixins.ocean.MixinParticleEngine", // Physics mod
 				 "indi.yunherry.weather.mixin.MixinParticle",
 				 "ca.fxco.moreculling.mixin.WorldRenderer_rainMixin",
 				 "forge.me.thosea.badoptimizations.mixin.MixinParticleManager",

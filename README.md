@@ -3,26 +3,29 @@
 - [中文](./README_zh.md)|English
 - [Modrinth](https://modrinth.com/mod/asyncparticles)|[CurseForge](https://www.curseforge.com/minecraft/mc-mods/asyncparticles)
 
+## Configuration
+
+- Settings can be accessed via the ModList/ModMenu.
+
 ## Features
 
 - Minecraft
-  - High performance/compatibility gpu particle acceleration.
-  - Particle culling.
-  - Async particle ticking/rendering(buffer filling).
-  - Async particle light cache.
-- Create + Simple Weather/Pretty Rain/Particle Rain
-  - Weather particles can now collide with contraptions.
-- Valkyrien Skies + Pretty Rain/Particle Rain
-  - Weather particles can now collide with ships.
-- Pretty Rain/Particle Rain/Effectual/Particular/Simple Weather
-  - Async particle gen.
+    - Fast particle culling.
+    - GPU particle acceleration.
+    - Async particle tick.
+    - Async particle light cache.
+    - Delayed texture tick by one frame to reduce client tick duration.
+    - Async rain tick.
+- Create:
+    - Contraptions now block vanilla rains.
+    - Modded weather particles can now collide with ships/contraptions.
 
 ## Mods Recommended
 
-- ModernFix
 - Sodium/Embeddium
-- Flerovium
 - Startlight/ScalableLux
+- ModernFix
+- Flerovium
 
 ## Mod Compatability
 
@@ -30,32 +33,15 @@
 
 - Sodium/Embeddium
 - Flerovium
-- Iris/Oculus
+- Iris
 - Create
 - Valkyrien Skies
 - Particle Rain/Pretty Rain
 - Simple Weather
-- Effectual
-- Effective
-- Particular
 - ...
 
-### ❔ Works fine, but not fully tested
-- Epic Fight
-- Draconic Evolution
-
 ### ❌ Incompatible
+
 - OptiFine
 - MadParticle
-
-## License
--   1.x   MIT
-- < ?.4.0 MIT
-- \>=?.4.0 LGPL-3.0
-
-## Credits
-
-- [wahfl2/sodium-fabric](https://github.com/wahfl2/sodium-fabric/blob/16768661afc57ab52e7dd580eb4e2b01373bab16) for the approach to detect GPU-acceleratable particles.
-- [Flerovium](https://github.com/MoePus/Flerovium) for the faster particle rendering code.
-- [MixinSquared](https://github.com/Bawnorton/MixinSquared) for the amazing mixin-based framework.
-- [MixinConstraints](https://github.com/Moulberry/MixinConstraints) for the version checking code.
+- Particle Core

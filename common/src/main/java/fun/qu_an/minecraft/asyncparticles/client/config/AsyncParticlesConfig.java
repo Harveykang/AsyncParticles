@@ -5,8 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
-import fun.qu_an.minecraft.asyncparticles.client.compat.GLCaps;
-import fun.qu_an.minecraft.asyncparticles.client.particle.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -35,7 +36,7 @@ public class AsyncParticlesConfig {
 	public static final int MIN_PARTICLE_LIMIT = 1024;
 	public static final int DEFAULT_PARTICLE_LIMIT = 16384;
 	public static final int MAX_PARTICLE_LIMIT = 262144;
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 	public static final Path CONFIG_FILE = Path.of("config", AsyncParticlesClient.MOD_ID, AsyncParticlesClient.MOD_ID + ".json");
 	static final Gson GSON = new GsonBuilder()
 		.setLenient()
@@ -44,13 +45,13 @@ public class AsyncParticlesConfig {
 		.create();
 	static final Logger LOGGER = LogUtils.getLogger();
 	public static int particle$particleLimit;
-	public static boolean particle$removeIfMissedTick;
+	public static ParticleCleanupStrategy particle$cleanupStrategy;
 	public static boolean particle$parallelQueueRemoval;
 	public static boolean particle$parallelQueueEviction;
 	public static boolean particle$particleLightCache;
 	public static boolean particle$cullUnderwaterParticleType;
-	public static TickMode tick$animationTickMode;
-	public static TickMode tick$particleTickMode;
+	public static boolean tick$animationTickMode;
+	public static ParticleAsyncMode tick$particleAsyncMode;
 	public static boolean tick$gpuOnlyAsyncParticleTick;
 	public static boolean tick$tickWeatherAsync;
 	public static boolean tick$deferredTextureTick;
@@ -58,18 +59,18 @@ public class AsyncParticlesConfig {
 	public static FailBehavior tick$failBehavior;
 	public static boolean tick$suppressCME;
 	public static Set<String> tick$syncParticleClasses = new LinkedHashSet<>();
-	public static RenderingMode rendering$particleRenderingMode;
 	public static boolean rendering$gpuAcceleration;
 	public static boolean rendering$appendNewParticlesToRenderer;
+	public static ComputeExecutionStage rendering$computeExecutionStage;
+	public static boolean rendering$tickRendererOnMainThread;
 	public static ParticleCullingMode rendering$particleCulling;
 	public static boolean rendering$cullWeathers;
-	public static int rendering$failPerSecLimit;
-	public static FailBehavior rendering$failBehavior;
-	public static Set<String> rendering$syncParticleClasses = new LinkedHashSet<>();
 	public static RainEffect valkyrienSkies$rainEffect;
 	public static boolean valkyrienSkies$fixParticleLights;
+	public static boolean sable$fixParticleLights;
 	public static RainEffect create$rainEffect;
 	public static int create$tickRainBlockingRange;
+	public static boolean mobile$multiDrawWorkaround;
 
 	static {
 		LOGGER.debug("AsyncParticlesConfig initialized.");
@@ -82,7 +83,7 @@ public class AsyncParticlesConfig {
 
 	public static Screen newConfigScreen(Screen parent) {
 		if (CLOTH_CONFIG_LOADED) {
-			return ClothConfigMenus.screenBuilder(parent).build();
+			return ClothConfigMenus.screen(parent);
 		} else {
 			return fallBackScreen(parent);
 		}
@@ -196,11 +197,16 @@ public class AsyncParticlesConfig {
 
 	@Contract
 	private static ConfigObj upgrade(int ver, ConfigObj configObj) {
-		if (VERSION != 1) {
+		if (VERSION != 2) {
 			throw new RuntimeException("I forgot to update the upgrade method.");
 		}
 		return switch (ver) {
-			case 1 -> configObj;
+			case 2 -> configObj;
+			case 1 -> {
+				configObj.particle.parallelQueueEviction = false;
+				configObj.particle.parallelQueueRemoval = false;
+				yield configObj;
+			}
 			default -> new ConfigObj();
 		};
 	}
@@ -224,41 +230,71 @@ public class AsyncParticlesConfig {
 		}
 	}
 
+	static ConfigObj getCurrentConfig() {
+		ConfigObj configObj = new ConfigObj();
+		configObj.fold();
+		return configObj;
+	}
+
+	static ConfigObj getDefaultConfigExceptCollections() {
+		ConfigObj configObj = new ConfigObj();
+		configObj.tick.syncParticleClasses = getCurrentConfig().tick.syncParticleClasses;
+		return configObj;
+	}
+
+	static ConfigObj getDefaultConfig() {
+		return new ConfigObj();
+	}
+
 	static class ConfigObj {
+		private ConfigObj() {
+		}
+
 		int version = 0; // 0 means no version, will reset to default values.
 		Particle particle = new Particle();
 		Tick tick = new Tick();
 		Rendering rendering = new Rendering();
 		ValkyrienSkies valkyrienSkies = new ValkyrienSkies();
 		Create create = new Create();
+		Mobile mobile = new Mobile();
 
-		private void flat() {
+		void flat() {
 			particle.flat();
 			tick.flat();
 			rendering.flat();
 			valkyrienSkies.flat();
 			create.flat();
+			mobile.flat();
 		}
 
-		private void fold() {
+		void fold() {
 			particle.fold();
 			tick.fold();
 			rendering.fold();
 			valkyrienSkies.fold();
 			create.fold();
+			mobile.fold();
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(particle, tick, rendering, valkyrienSkies, create, mobile);
 		}
 
 		static class Particle {
+			private Particle() {
+			}
+
 			int particleLimit = DEFAULT_PARTICLE_LIMIT;
-			boolean removeIfMissedTick = false;
-			boolean parallelQueueRemoval = true;
-			boolean parallelQueueEviction = true;
+			ParticleCleanupStrategy cleanupStrategy = ParticleCleanupStrategy.PARALLEL_WITH_TICK;
+			boolean parallelQueueRemoval = false;
+			boolean parallelQueueEviction = false;
 			boolean particleLightCache = true;
 			boolean cullUnderwaterParticleType = true;
 
 			private void flat() {
 				particle$particleLimit = Mth.clamp(particleLimit, MIN_PARTICLE_LIMIT, MAX_PARTICLE_LIMIT);
-				particle$removeIfMissedTick = removeIfMissedTick;
+				particle$cleanupStrategy = requireNonNullElse(cleanupStrategy, ParticleCleanupStrategy.PARALLEL_WITH_TICK);
 				particle$parallelQueueRemoval = parallelQueueRemoval;
 				particle$parallelQueueEviction = parallelQueueEviction;
 				particle$particleLightCache = particleLightCache;
@@ -267,7 +303,7 @@ public class AsyncParticlesConfig {
 
 			private void fold() {
 				particleLimit = particle$particleLimit;
-				removeIfMissedTick = particle$removeIfMissedTick;
+				cleanupStrategy = particle$cleanupStrategy;
 				parallelQueueRemoval = particle$parallelQueueRemoval;
 				parallelQueueEviction = particle$parallelQueueEviction;
 				particleLightCache = particle$particleLightCache;
@@ -276,9 +312,11 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Tick {
-			TickMode animationTickMode = REIGNOFNETHER_LOADED || IMMERSIVE_PORTALS_LOADED
-				? TickMode.SYNCHRONOUSLY : TickMode.INTERRUPTIBLE;
-			TickMode particleTickMode = TickMode.INTERRUPTIBLE;
+			private Tick() {
+			}
+
+			boolean animationTickMode = !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED;
+			ParticleAsyncMode particleAsyncMode = ParticleAsyncMode.SEQUENTIAL;
 			boolean gpuOnlyAsyncParticleTick = false;
 			boolean tickWeatherAsync = !PHYSICSMOD_LOADED;
 			boolean deferredTextureTick = !AXIOM_LOADED;
@@ -287,14 +325,9 @@ public class AsyncParticlesConfig {
 			boolean suppressCME = false;
 			Set<String> syncParticleClasses = new LinkedHashSet<>();
 
-			{
-			}
-
 			private void flat() {
-				tick$animationTickMode = REIGNOFNETHER_LOADED || IMMERSIVE_PORTALS_LOADED
-					? TickMode.SYNCHRONOUSLY
-					: requireNonNullElse(animationTickMode, TickMode.INTERRUPTIBLE);
-				tick$particleTickMode = requireNonNullElse(particleTickMode, TickMode.INTERRUPTIBLE);
+				tick$animationTickMode = !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED && animationTickMode;
+				tick$particleAsyncMode = requireNonNullElse(particleAsyncMode, ParticleAsyncMode.SEQUENTIAL);
 				tick$gpuOnlyAsyncParticleTick = gpuOnlyAsyncParticleTick;
 				tick$tickWeatherAsync = tickWeatherAsync && !PHYSICSMOD_LOADED;
 				tick$deferredTextureTick = deferredTextureTick && !AXIOM_LOADED;
@@ -306,7 +339,7 @@ public class AsyncParticlesConfig {
 
 			private void fold() {
 				animationTickMode = tick$animationTickMode;
-				particleTickMode = tick$particleTickMode;
+				particleAsyncMode = tick$particleAsyncMode;
 				gpuOnlyAsyncParticleTick = tick$gpuOnlyAsyncParticleTick;
 				tickWeatherAsync = tick$tickWeatherAsync;
 				deferredTextureTick = tick$deferredTextureTick;
@@ -318,52 +351,39 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Rendering {
-			ParticleCullingMode particleCulling = ParticleCullingMode.SPHERE;
-			RenderingMode particleRenderingMode = RenderingMode.SYNCHRONOUSLY;
-			boolean gpuAcceleration = GLCaps.supportsGpuAcceleration();
-			boolean appendNewParticlesToRenderer = true;
-			boolean cullWeathers = true;
-			int failPerSecLimit = 20;
-			FailBehavior failBehavior = FailBehavior.MARK_AS_SYNC;
-			Set<String> syncParticleClasses = new LinkedHashSet<>();
-
-			{
-				syncParticleClasses.add("com.lootbeams.VFXParticle");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleCasting");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleGhost");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleGraveSoul");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleMagicCircle");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleMarker");
-				syncParticleClasses.add("ovh.corail.tombstone.particle.ParticleRounding");
-				syncParticleClasses.add("concerrox.effective.particle.SplashParticle");
-				syncParticleClasses.add("org.ladysnake.effective.particle.SplashParticle");
-				syncParticleClasses.add("net.mehvahdjukaar.dummmmmmy.client.DamageNumberParticle");
+			private Rendering() {
 			}
+
+			ParticleCullingMode particleCulling = ParticleCullingMode.SPHERE;
+			boolean gpuAcceleration = Backends.supportsGpuAcceleration();
+			boolean appendNewParticlesToRenderer = true;
+			ComputeExecutionStage computeExecutionStage = ComputeExecutionStage.LEVEL_RENDERING;
+			public boolean tickRendererOnMainThread = false;
+			boolean cullWeathers = true;
 
 			private void flat() {
 				rendering$particleCulling = requireNonNullElse(particleCulling, ParticleCullingMode.SPHERE);
-				rendering$particleRenderingMode = requireNonNullElse(particleRenderingMode, RenderingMode.DELAYED);
-				rendering$gpuAcceleration = gpuAcceleration && GLCaps.supportsGpuAcceleration();
+				rendering$gpuAcceleration = gpuAcceleration && Backends.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
+				rendering$computeExecutionStage = requireNonNullElse(computeExecutionStage, ComputeExecutionStage.LEVEL_RENDERING);
 				rendering$cullWeathers = cullWeathers;
-				rendering$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
-				rendering$failBehavior = requireNonNullElse(failBehavior, FailBehavior.MARK_AS_SYNC);
-				rendering$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
+				rendering$tickRendererOnMainThread = tickRendererOnMainThread;
 			}
 
 			private void fold() {
 				particleCulling = rendering$particleCulling;
-				particleRenderingMode = rendering$particleRenderingMode;
 				gpuAcceleration = rendering$gpuAcceleration;
 				appendNewParticlesToRenderer = rendering$appendNewParticlesToRenderer;
+				computeExecutionStage = rendering$computeExecutionStage;
+				tickRendererOnMainThread = rendering$tickRendererOnMainThread;
 				cullWeathers = rendering$cullWeathers;
-				failPerSecLimit = rendering$failPerSecLimit;
-				failBehavior = rendering$failBehavior;
-				syncParticleClasses = new LinkedHashSet<>(rendering$syncParticleClasses);
 			}
 		}
 
 		static class ValkyrienSkies {
+			private ValkyrienSkies() {
+			}
+
 			RainEffect rainEffect = RainEffect.STATIONARY;
 			boolean fixParticleLights = true;
 
@@ -379,8 +399,11 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Create {
+			private Create() {
+			}
+
 			RainEffect rainEffect = RainEffect.ALWAYS;
-			int tickRainBlockingRange = PARTICLERAIN_LOADED || FORGE_PRETTY_RAIN_LOADED ? 32 : 16;
+			int tickRainBlockingRange = PARTICLERAIN_LOADED ? 32 : 16;
 
 			private void flat() {
 				create$rainEffect = requireNonNullElse(rainEffect, RainEffect.ALWAYS);
@@ -392,6 +415,20 @@ public class AsyncParticlesConfig {
 				tickRainBlockingRange = create$tickRainBlockingRange;
 			}
 		}
-	}
 
+		static class Mobile {
+			private Mobile() {
+			}
+
+			boolean multiDrawWorkaround = true;
+
+			private void flat() {
+				mobile$multiDrawWorkaround = multiDrawWorkaround;
+			}
+
+			private void fold() {
+				multiDrawWorkaround = mobile$multiDrawWorkaround;
+			}
+		}
+	}
 }

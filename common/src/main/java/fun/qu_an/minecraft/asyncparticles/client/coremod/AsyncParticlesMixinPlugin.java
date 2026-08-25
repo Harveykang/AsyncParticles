@@ -4,6 +4,7 @@ import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particle_core.ParticleCoreEarlyCompat;
+import fun.qu_an.minecraft.asyncparticles.client.config.MixinConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.*;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticlesMixinCanceller;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticlesMixinMemberCanceller;
@@ -34,7 +35,8 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesNoCulling());
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesNoLightCache());
 		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockProvider());
-		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired());
+		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired_Tick());
+		MixinClassAdjusterRegistrar.register(new AdjusterParticlesLockRequired_Extract());
 		MixinClassAdjusterRegistrar.register(new AdjusterReplaceRandom());
 		MixinClassAdjusterRegistrar.register(new AdjusterContraptionNoParticleCollision());
 		MixinMemberCancellerRegistrar.register(new AsyncParticlesMixinMemberCanceller());
@@ -53,9 +55,6 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 	private static final int PACKAGE_LENGTH = AsyncParticlesClient.class.getPackage().getName().length() +
 		".mixin.".length();
 
-	/// - mixins located in `mixin/fabric` or `mixin/<mod_id>/fabric` package only take effect on fabric.
-	/// - mixins located in `mixin/fabric/<mod_id>` take effect on fabric or Sinytra Connector.
-	/// - others take effect on any platform.
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		if (!IS_CLIENT) {
@@ -67,7 +66,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		}
 		return switch (split[0]) {
-			case "core" -> !"fabric".equals(split[1]) || !IS_FORGE;
+			case "core", "off_thread_access" -> true;
 			case "conditional" -> switch (split[1]) {
 				case "MixinClassInstanceMultiMap_SafeClassInstanceMultiMap_On" ->
 					MixinConfigHelper.isSafeClassInstanceMultiMap();
@@ -76,23 +75,10 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "MixinLevelChunk_SafeBlockEntityMap_On_Late", "MixinLevelChunk_SafeBlockEntityMap_On" ->
 					MixinConfigHelper.isSafeBlockEntityMap();
 				case "MixinLevelChunk_SafeBlockEntityMap_Off" -> !MixinConfigHelper.isSafeBlockEntityMap();
-				case "MixinParticleEngine_SplitTick" -> MixinConfigHelper.isParticleSplitTick();
 				case "MixinLegacyRandomSource" -> !ASYNC_LOADED;
 				default -> true;
 			};
 			case "compat" -> switch (split[1]) {
-				case "fabric" -> switch (split[2]) {
-					case "effective" -> FABRIC_EFFECTIVE_LOADED;
-					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
-					case "particular" -> FABRIC_PARTICULAR_LOADED;
-					case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
-					case "iris" -> FABRIC_IRIS_LOADED;
-					case "iris_else" -> !IS_FORGE && !FABRIC_IRIS_LOADED;
-					case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;
-					case "loot_beams_up" -> FABRIC_LOOT_BEAMS_UP_LOADED;
-					case "sodium_extra" -> FABRIC_SODIUM_EXTRA_LOADED;
-					default -> throw new IllegalArgumentException("Unknown fabric compat mixin: " + mixinClassName);
-				};
 				case "particlerain" -> PARTICLERAIN_LOADED;
 				case "particlerain_vs" -> PARTICLERAIN_LOADED && VS_LOADED;
 				case "particlerain_create" -> PARTICLERAIN_LOADED && CREATE_LOADED;
@@ -121,6 +107,22 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "goop" -> GOOP_LOADED;
 				default -> throw new IllegalArgumentException("Unknown compat mixin: " + mixinClassName);
 			};
+			case "fabric" -> switch (split[1]) {
+				case "core" -> !IS_FORGE;
+				case "compat" -> switch (split[2]) {
+					case "effective" -> FABRIC_EFFECTIVE_LOADED;
+					case "effectual" -> FABRIC_EFFECTUAL_LOADED;
+					case "particular" -> FABRIC_PARTICULAR_LOADED;
+					case "vulkanmod" -> FABRIC_VULKAN_MOD_LOADED;
+					case "iris" -> FABRIC_IRIS_LOADED;
+					case "iris_else" -> !IS_FORGE && !FABRIC_IRIS_LOADED;
+					case "porting_lib_base" -> FABRIC_PORTING_LIB_BASE_LOADED;
+					case "loot_beams_up" -> FABRIC_LOOT_BEAMS_UP_LOADED;
+					case "sodium_extra" -> FABRIC_SODIUM_EXTRA_LOADED;
+					default -> throw new IllegalArgumentException("Unknown fabric compat mixin: " + mixinClassName);
+				};
+				default -> throw new IllegalArgumentException("Unknown fabric mixin: " + mixinClassName);
+			};
 			default -> throw new IllegalArgumentException("Unknown mixin: " + mixinClassName);
 		};
 	}
@@ -144,4 +146,5 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
 
 	}
+
 }

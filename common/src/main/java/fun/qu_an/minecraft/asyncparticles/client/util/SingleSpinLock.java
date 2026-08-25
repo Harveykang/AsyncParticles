@@ -2,7 +2,6 @@ package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
-import java.util.function.Supplier;
 
 public class SingleSpinLock implements SpinLock {
 	private static final VarHandle OWNER;
@@ -41,8 +40,8 @@ public class SingleSpinLock implements SpinLock {
 
 	@Override
 	public void unlock() {
-		Thread thread = Thread.currentThread();
-		if (!OWNER.compareAndSet(this, thread, null)) {
+		Thread currentThread = Thread.currentThread();
+		if (!OWNER.compareAndSet(this, currentThread, null)) {
 			throw new IllegalMonitorStateException("Attempt to unlock an non-locked lock!");
 		}
 	}

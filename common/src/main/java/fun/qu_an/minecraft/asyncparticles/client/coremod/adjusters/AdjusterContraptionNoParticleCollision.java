@@ -1,13 +1,8 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters;
 
-import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.MixinUtil;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.MixinClassAdjuster;
-import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.MixinClassProvider;
-import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.tree.ClassNode;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AdjusterContraptionNoParticleCollision implements MixinClassAdjuster {

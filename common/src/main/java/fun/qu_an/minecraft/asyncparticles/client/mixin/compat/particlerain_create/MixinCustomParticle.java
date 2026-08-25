@@ -31,7 +31,7 @@ public abstract class MixinCustomParticle extends TextureSheetParticle {
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(ClientLevel level, double x, double y, double z, ParticleData opts, CallbackInfo ci){
-		asyncparticles$isRain = opts.id.contains("rain") && opts.needsSkyAccess;
+		 asyncparticles$isRain = opts.id.contains("rain") && opts.needsSkyAccess;
 	}
 
 	@WrapOperation(method = "tickCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;clip(Lnet/minecraft/world/level/ClipContext;)Lnet/minecraft/world/phys/BlockHitResult;"))
