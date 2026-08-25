@@ -319,6 +319,10 @@ public class AsyncParticlesConfig {
 			boolean suppressCME = false;
 			Set<String> syncParticleClasses = new LinkedHashSet<>();
 
+			{
+				syncParticleClasses.add("pigcart.particlerain.particle.BlockDisplayParticle");
+			}
+
 			private void flat() {
 				tick$asyncAnimateTick = animationTickMode;
 				tick$particleAsyncMode = requireNonNullElse(particleAsyncMode, ParticleAsyncMode.SEQUENTIAL);
@@ -338,7 +342,7 @@ public class AsyncParticlesConfig {
 				deferredTextureTick = tick$deferredTextureTick;
 				failPerSecLimit = tick$failPerSecLimit;
 				suppressCME = tick$suppressCME;
-				syncParticleClasses = new LinkedHashSet<>(tick$syncParticleClasses);
+				syncParticleClasses.addAll(tick$syncParticleClasses);
 			}
 		}
 

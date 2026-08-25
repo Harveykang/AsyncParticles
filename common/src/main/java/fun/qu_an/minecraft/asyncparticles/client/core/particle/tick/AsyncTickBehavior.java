@@ -217,6 +217,11 @@ public class AsyncTickBehavior {
 		if (!levelRunning || !isTailTick()) {
 			Queue<Particle> particlesToAdd = mc.particleEngine.particlesToAdd;
 			if (!particlesToAdd.isEmpty()) {
+				ParticleEngine engine = mc.particleEngine;
+				particlesToAdd.forEach(particle -> {
+					particle.remove();
+					particle.getParticleLimit().ifPresent(options -> engine.updateCount(options, -1));
+				});
 				particlesToAdd.clear();
 			}
 			if (!levelAvailable) {
