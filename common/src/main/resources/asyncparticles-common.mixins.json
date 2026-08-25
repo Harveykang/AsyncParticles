@@ -86,7 +86,6 @@
     "core.weather.MixinLevelRenderer_WeatherCulling",
     "fabric.compat.effective.MixinEffectiveLights",
     "fabric.compat.loot_beams_up.MixinParticleRenderType",
-    "fabric.compat.porting_lib_base.MixinMixinParticleEngine",
     "fabric.core.particle.render.MixinParticle",
     "fabric.core.particle.render.MixinParticleEngine_Render",
     "off_thread_access.MixinActiveProfiler",

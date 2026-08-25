@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
@@ -112,6 +113,9 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 					if (asyncAll && !tickBehavior.shouldSyncRenderType(renderType.getClass())) {
 						AsyncTickBehavior.getInstance().getTickTaskManager()
 							.addTask(() -> tickParticleList(queue1));
+					}
+					if (ModListHelper.FABRIC_PORTING_LIB_BASE_LOADED) {
+						asyncparticle$addRenderType(renderType);
 					}
 					return queue1;
 				}).add(particle);
