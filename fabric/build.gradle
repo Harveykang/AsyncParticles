@@ -128,11 +128,13 @@ dependencies {
     }
     modLocalRuntime "maven.modrinth:forge-config-api-port:v8.0.2-1.20.1-Fabric"
 
-    modLocalRuntime "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
-    modLocalRuntime("com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:1.20.1-SNAPSHOT") { transitive = false }
-    modLocalRuntime("com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:1.20.1-SNAPSHOT") { transitive = false }
-    modLocalRuntime("com.github.iPortalTeam.ImmersivePortalsMod:build:1.20.1-SNAPSHOT") { transitive = false }
-    return
+    if (false) {
+        modLocalRuntime "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
+        modLocalRuntime("com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:1.20.1-SNAPSHOT") { transitive = false }
+        modLocalRuntime("com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:1.20.1-SNAPSHOT") { transitive = false }
+        modLocalRuntime("com.github.iPortalTeam.ImmersivePortalsMod:build:1.20.1-SNAPSHOT") { transitive = false }
+        return
+    }
 
     modLocalRuntime "maven.modrinth:fzzy-config:0.7.6+1.20.1"
 

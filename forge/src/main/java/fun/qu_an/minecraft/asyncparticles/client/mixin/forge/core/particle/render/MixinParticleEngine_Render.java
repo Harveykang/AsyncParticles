@@ -10,6 +10,7 @@ import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ComputeResult;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleRenderer;
+import fun.qu_an.minecraft.asyncparticles.client.util.CombinedIterable;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeTesselator;
 import fun.qu_an.minecraft.asyncparticles.client.util.FrustumUtil;
@@ -82,7 +83,8 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 
 		Frustum frustum = asyncparticle$getFrustum();
 		ParticleCullingMode particleCullingMode = ConfigHelper.getParticleCullingMode();
-		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
+		Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = GpuParticleBehavior.getInstance().gpuParticles;
+		for (ParticleRenderType particleRenderType : CombinedIterable.ofIdentitySet(gpuParticles.keySet(), particles.keySet())) {
 			// FABRIC skips NO_RENDER
 //				if (particleRenderType == ParticleRenderType.NO_RENDER) {
 //					continue;
