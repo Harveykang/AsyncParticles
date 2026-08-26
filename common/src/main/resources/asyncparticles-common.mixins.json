@@ -8,7 +8,6 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "fun.qu_an.minecraft.asyncparticles.client.coremod.AsyncParticlesMixinPlugin",
   "client": [
-    "accessor.AccessorFrustumIntersection",
     "compat.a_good_place.AccessorBlocksParticlesManager",
     "compat.a_good_place.MixinBlocksParticlesManager",
     "compat.a_good_place.MixinPlacingBlockParticle",
