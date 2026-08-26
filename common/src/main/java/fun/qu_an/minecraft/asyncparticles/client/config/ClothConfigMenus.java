@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.cloth_config.AbstractConfigEntryAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.cloth_config.AbstractListListEntryAddon;
@@ -185,8 +186,18 @@ class ClothConfigMenus {
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.gpuAcceleration"),
 					displayConfig.rendering.gpuAcceleration)
 				.setDefaultValue(defaultConfig.rendering.gpuAcceleration)
-				.setTooltip(Component.translatable("config.asyncparticles.rendering.gpuAcceleration.tooltip"))
-				// todo add gpu acceleration requirement
+				.setTooltipSupplier(() -> {
+					if (Backends.supportsGpuAcceleration()) {
+						return Optional.of(new MutableComponent[]{Component.translatable("config.asyncparticles.rendering.gpuAcceleration.tooltip")});
+					} else {
+						return Optional.of(new MutableComponent[]{
+							Component.translatable("config.asyncparticles.rendering.gpuAcceleration.tooltip")
+								.withStyle(ChatFormatting.STRIKETHROUGH),
+							Component.translatable("config.asyncparticles.incompatibility.backend", RenderSystem.getDevice().getBackendName())
+								.withStyle(ChatFormatting.YELLOW)
+						});
+					}
+				})
 				.setSaveConsumer(newValue -> displayConfig.rendering.gpuAcceleration = newValue)
 				.setRequirement(Backends::supportsGpuAcceleration)
 				.build(), originalConfig.rendering.gpuAcceleration))

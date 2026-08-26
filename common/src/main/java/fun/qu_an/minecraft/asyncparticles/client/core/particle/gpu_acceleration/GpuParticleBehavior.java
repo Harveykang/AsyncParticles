@@ -41,7 +41,6 @@ public class GpuParticleBehavior {
 	private final List<Class<? extends Particle>> GPU_PARTICLE_CLASSES;
 	private float partialTick;
 //	private Frustum frustum = new Frustum(new Matrix4f(), new Matrix4f());
-	private final Map<ParticleRenderType, ParticleRenderType> renderTypes = new Object2ObjectArrayMap<>();
 	private int limitMultiplier = 1;
 
 	{
@@ -191,13 +190,6 @@ public class GpuParticleBehavior {
 		if (renderer != null) {
 			renderer.beginFrame(deltaPartialTick);
 		}
-	}
-
-	public ParticleRenderType ofRenderType(ParticleRenderType renderType) {
-		if (renderType == ParticleRenderType.SINGLE_QUADS) {
-			return GPU_SINGLE_QUADS;
-		}
-		return renderTypes.computeIfAbsent(renderType, _ -> new ParticleRenderType("gpu_" + renderType.name()));
 	}
 
 	public IParticleRenderer createRenderer() {

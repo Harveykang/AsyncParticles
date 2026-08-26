@@ -4,11 +4,9 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.AsyncTickableParticleGrou
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.client.particle.ParticleGroup;
 
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 @SuppressWarnings("rawtypes")
