@@ -125,7 +125,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 			if (hasGpu) {
 				particleRenderer.render(particleRenderType);
 			}
-			if (toBegin.building() && hasCpu && !syncParticles.isEmpty()) {
+			if (hasCpu && !syncParticles.isEmpty()) {
 				float f2 = f + 1f;
 				for (Particle particle : syncParticles) {
 					if (!particle.isAlive()) {
@@ -153,7 +153,6 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 				}
 			}
 			profiler.popPush("build_buffer");
-			// Write like this to be compatible with TenshiLib
 			if (!toBegin.building()) {
 				tesselator = FakeTesselator.INSTANCE;
 			}

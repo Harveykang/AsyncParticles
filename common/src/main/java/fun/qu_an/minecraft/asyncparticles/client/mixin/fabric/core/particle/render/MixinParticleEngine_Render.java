@@ -132,7 +132,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 			if (hasGpu) {
 				particleRenderer.render(particleRenderType);
 			}
-			if (toBegin.building() && hasCpu && !syncParticles.isEmpty()) {
+			if (hasCpu && !syncParticles.isEmpty()) {
 				float f2 = f + 1f;
 				for (Particle particle : syncParticles) {
 					if (!particle.isAlive()) {
