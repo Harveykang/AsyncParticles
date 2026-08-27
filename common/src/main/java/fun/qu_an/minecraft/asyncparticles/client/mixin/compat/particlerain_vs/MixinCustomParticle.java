@@ -20,7 +20,7 @@ import pigcart.particlerain.particle.CustomParticle;
 @Mixin(CustomParticle.class)
 public abstract class MixinCustomParticle extends MixinWeatherParticle {
 	@Shadow(remap = false)
-	public ParticleData opts;
+	public ParticleData data;
 
 	protected MixinCustomParticle(ClientLevel clientLevel, double d, double e, double f) {
 		super(clientLevel, d, e, f);
@@ -31,7 +31,7 @@ public abstract class MixinCustomParticle extends MixinWeatherParticle {
 										  ClipContext clipContext,
 										  @Local(ordinal = 0) Vec3 quadCenterPos,
 										  @Local(ordinal = 1) Vec3 quadEdgePos) {
-		if (!opts.needsSkyAccess) {
+		if (!data.needsSkyAccess) {
 			return level.clip(clipContext);
 		}
 		BlockHitResult clip = VSClientUtils.clipVanillaAndShip(level, clipContext, true);
@@ -43,7 +43,7 @@ public abstract class MixinCustomParticle extends MixinWeatherParticle {
 
 	@Override
 	protected void onTick(CallbackInfo ci) {
-		if (VSClientUtils.isEntityMovColShipOnly(new Vec3(xd, yd, zd), getBoundingBox(), level, opts.size * 0.5f)) {
+		if (VSClientUtils.isEntityMovColShipOnly(new Vec3(xd, yd, zd), getBoundingBox(), level, data.size * 0.5f)) {
 			remove();
 		}
 	}

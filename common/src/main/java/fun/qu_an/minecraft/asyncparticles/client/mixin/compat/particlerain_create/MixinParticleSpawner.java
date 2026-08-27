@@ -12,7 +12,6 @@ import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.CreateCompat;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,7 +22,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pigcart.particlerain.ParticleSpawner;
 import pigcart.particlerain.config.ParticleData;
 import pigcart.particlerain.config.Whitelist;
-import pigcart.particlerain.particle.CustomParticle;
 import pigcart.particlerain.particle.StreakParticle;
 
 @Mixin(ParticleSpawner.class)
@@ -94,18 +92,14 @@ public class MixinParticleSpawner {
 		return original && (!data.needsSkyAccess || canSpawn.get());
 	}
 
-	@WrapOperation(method = "tickBlockFX", at = @At(value = "NEW", target = "(Lnet/minecraft/client/multiplayer/ClientLevel;DDDLpigcart/particlerain/config/ParticleData;)Lpigcart/particlerain/particle/CustomParticle;"))
-	private static CustomParticle onTickBlockFX(ClientLevel level,
-	                                            double x,
-	                                            double y,
-	                                            double z,
-	                                            ParticleData data,
-	                                            Operation<CustomParticle> original) {
-		if (!data.needsSkyAccess || CreateCompat.canSpawnWeatherParticleFloorToInt(level, x, y, z)) {
-			return original.call(level, x, y, z, data);
-		} else {
-			return null;
-		}
+	@WrapWithCondition(method = "tickBlockFX", at = @At(value = "INVOKE", target = "Lpigcart/particlerain/config/ParticleData$ParticleStyle;spawn(Lnet/minecraft/client/multiplayer/ClientLevel;DDDLpigcart/particlerain/config/ParticleData;)V"))
+	private static boolean onTickBlockFX(ParticleData.ParticleStyle instance,
+	                                     ClientLevel level,
+	                                     double x,
+	                                     double y,
+	                                     double z,
+	                                     ParticleData data) {
+		return !data.needsSkyAccess || CreateCompat.canSpawnWeatherParticleFloorToInt(level, x, y, z);
 	}
 
 	@WrapOperation(method = "tickBlockFX", at = @At(value = "NEW",
@@ -133,19 +127,4 @@ public class MixinParticleSpawner {
 //	private static boolean onTickBlockFX(ParticleEngine instance, Particle particle) {
 //		return particle != null;
 //	}
-
-	@WrapWithCondition(method = "tickBlockFX", at = @At(value = "INVOKE",
-		target = "Lnet/minecraft/client/multiplayer/ClientLevel;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"))
-	private static boolean onTickBlockFX(ClientLevel instance,
-	                                     ParticleOptions particleOptions,
-	                                     double x,
-	                                     double y,
-	                                     double z,
-	                                     double g,
-	                                     double h,
-	                                     double i,
-	                                     @Local(ordinal = 0) ClientLevel level,
-	                                     @Local(ordinal = 0) ParticleData opts) {
-		return !opts.needsSkyAccess || CreateCompat.canSpawnWeatherParticleFloorToInt(level, x, y, z);
-	}
 }
