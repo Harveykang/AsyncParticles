@@ -128,14 +128,14 @@ public class GpuParticlePipelines {
 					case POSITION, GENERIC, UV -> {
 						if (element.type() == VertexFormatElement.Type.FLOAT) {
 							GlStateManager._vertexAttribPointer(
-								i, element.count(), GlConst.toGl(element.type()), false, i, offset);
+								i, element.count(), GlConst.toGl(element.type()), false, vertexSize, offset);
 						} else {
 							GlStateManager._vertexAttribIPointer(
-								i, element.count(), GlConst.toGl(element.type()), i, offset);
+								i, element.count(), GlConst.toGl(element.type()), vertexSize, offset);
 						}
 					}
 					case NORMAL, COLOR -> GlStateManager._vertexAttribPointer(
-						i, element.count(), GlConst.toGl(element.type()), true, i, offset);
+						i, element.count(), GlConst.toGl(element.type()), true, vertexSize, offset);
 				}
 				offset += element.byteSize();
 			}
