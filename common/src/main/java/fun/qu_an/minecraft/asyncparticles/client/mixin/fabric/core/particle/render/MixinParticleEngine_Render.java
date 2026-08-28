@@ -160,10 +160,6 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 				}
 			}
 			profiler.popPush("build_buffer");
-			// Write like this to be compatible with TenshiLib
-			if (!toBegin.building()) {
-				tesselator = FakeTesselator.INSTANCE;
-			}
 			particleRenderType.end(tesselator);
 			if (toBegin.building()) {
 				profiler.popPush("upload_particles");
