@@ -27,7 +27,6 @@
     "compat.particlerain.MixinParticleSpawner",
     "compat.particlerain.MixinWeatherParticle",
     "compat.particletweaks.MixinMixinSingleQuadParticle",
-    "compat.sodium.MixinQuadParticleRenderState",
     "compat.sodium_extra.MixinFireworkParticles$Starter",
     "compat.sodium_extra.MixinParticleEngine",
     "conditional.Mixin_ReplaceRandom",
