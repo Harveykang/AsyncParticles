@@ -42,8 +42,6 @@
     "compat.physicsmod_create.MixinWeatherParticle",
     "compat.sable.MixinMixinClientLevel",
     "compat.sable.MixinParticle",
-    "compat.sodium_0_6.MixinSingleQuadParticle",
-    "compat.sodium_0_7.MixinSingleQuadParticle",
     "compat.sodium_extra.MixinParticleEngine",
     "compat.veil.MixinLightRenderer",
     "compat.vulkanmod.AccessorBuffer",
