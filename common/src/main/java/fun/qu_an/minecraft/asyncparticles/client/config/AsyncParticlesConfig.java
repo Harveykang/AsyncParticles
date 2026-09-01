@@ -65,6 +65,7 @@ public class AsyncParticlesConfig {
 	public static boolean rendering$tickRendererOnMainThread;
 	public static ParticleCullingMode rendering$particleCulling;
 	public static boolean rendering$cullWeathers;
+	public static boolean iris$improveOpaqueParticlesInWater;
 	public static RainEffect valkyrienSkies$rainEffect;
 	public static boolean valkyrienSkies$fixParticleLights;
 	public static boolean sable$fixParticleLights;
@@ -247,21 +248,23 @@ public class AsyncParticlesConfig {
 	}
 
 	static class ConfigObj {
-		private ConfigObj() {
-		}
-
 		int version = 0; // 0 means no version, will reset to default values.
 		Particle particle = new Particle();
 		Tick tick = new Tick();
 		Rendering rendering = new Rendering();
 		ValkyrienSkies valkyrienSkies = new ValkyrienSkies();
+		Iris iris = new Iris();
 		Create create = new Create();
 		Mobile mobile = new Mobile();
+
+		private ConfigObj() {
+		}
 
 		void flat() {
 			particle.flat();
 			tick.flat();
 			rendering.flat();
+			iris.flat();
 			valkyrienSkies.flat();
 			create.flat();
 			mobile.flat();
@@ -271,6 +274,7 @@ public class AsyncParticlesConfig {
 			particle.fold();
 			tick.fold();
 			rendering.fold();
+			iris.fold();
 			valkyrienSkies.fold();
 			create.fold();
 			mobile.fold();
@@ -282,15 +286,15 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Particle {
-			private Particle() {
-			}
-
 			int particleLimit = DEFAULT_PARTICLE_LIMIT;
 			ParticleCleanupStrategy cleanupStrategy = ParticleCleanupStrategy.PARALLEL_WITH_TICK;
 			boolean parallelQueueRemoval = false;
 			boolean parallelQueueEviction = false;
 			boolean particleLightCache = true;
 			boolean cullUnderwaterParticleType = true;
+
+			private Particle() {
+			}
 
 			private void flat() {
 				particle$particleLimit = Mth.clamp(particleLimit, MIN_PARTICLE_LIMIT, MAX_PARTICLE_LIMIT);
@@ -312,9 +316,6 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Tick {
-			private Tick() {
-			}
-
 			boolean animationTickMode = !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED;
 			ParticleAsyncMode particleAsyncMode = ParticleAsyncMode.SEQUENTIAL;
 			boolean gpuOnlyAsyncParticleTick = false;
@@ -324,6 +325,9 @@ public class AsyncParticlesConfig {
 			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
 			boolean suppressCME = false;
 			Set<String> syncParticleClasses = new LinkedHashSet<>();
+
+			private Tick() {
+			}
 
 			{
 				syncParticleClasses.add("pigcart.particlerain.particle.BlockDisplayParticle");
@@ -355,15 +359,15 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Rendering {
-			private Rendering() {
-			}
-
 			ParticleCullingMode particleCulling = ParticleCullingMode.SPHERE;
 			boolean gpuAcceleration = Backends.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
 			ComputeExecutionStage computeExecutionStage = ComputeExecutionStage.LEVEL_RENDERING;
 			public boolean tickRendererOnMainThread = false;
 			boolean cullWeathers = true;
+
+			private Rendering() {
+			}
 
 			private void flat() {
 				rendering$particleCulling = requireNonNullElse(particleCulling, ParticleCullingMode.SPHERE);
@@ -384,12 +388,26 @@ public class AsyncParticlesConfig {
 			}
 		}
 
-		static class ValkyrienSkies {
-			private ValkyrienSkies() {
+		static class Iris {
+			public boolean improveOpaqueParticlesInWater = true;
+
+			private Iris() {
 			}
 
+			private void flat() {
+				iris$improveOpaqueParticlesInWater = improveOpaqueParticlesInWater;
+			}
+			private void fold() {
+				improveOpaqueParticlesInWater = iris$improveOpaqueParticlesInWater;
+			}
+		}
+
+		static class ValkyrienSkies {
 			RainEffect rainEffect = RainEffect.STATIONARY;
 			boolean fixParticleLights = true;
+
+			private ValkyrienSkies() {
+			}
 
 			private void flat() {
 				valkyrienSkies$rainEffect = requireNonNullElse(rainEffect, RainEffect.STATIONARY);
@@ -403,11 +421,11 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Create {
-			private Create() {
-			}
-
 			RainEffect rainEffect = RainEffect.ALWAYS;
 			int tickRainBlockingRange = PARTICLERAIN_LOADED ? 32 : 16;
+
+			private Create() {
+			}
 
 			private void flat() {
 				create$rainEffect = requireNonNullElse(rainEffect, RainEffect.ALWAYS);
@@ -421,10 +439,10 @@ public class AsyncParticlesConfig {
 		}
 
 		static class Mobile {
+			boolean multiDrawWorkaround = true;
+
 			private Mobile() {
 			}
-
-			boolean multiDrawWorkaround = true;
 
 			private void flat() {
 				mobile$multiDrawWorkaround = multiDrawWorkaround;

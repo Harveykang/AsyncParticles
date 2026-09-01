@@ -59,7 +59,7 @@ public class CompatibilityTryItButton extends Button {
 			new ClothConfigMenus.ConfigBundle(pair.first(),
 				AsyncParticlesConfig.getDefaultConfig(),
 				AsyncParticlesConfig.getCurrentConfig()),
-			new ClothConfigMixinMenus.MixinConfigBundle(
+			new ClothConfigMenus.MixinConfigBundle(
 				pair.second(),
 				AsyncParticlesMixinConfig.getDefaultConfig(),
 				AsyncParticlesMixinConfig.getCurrentConfig()
@@ -138,6 +138,7 @@ public class CompatibilityTryItButton extends Button {
 		return isMatch(o.particle, configObj.particle)
 			&& isMatch(o.tick, configObj.tick)
 			&& isMatch(o.rendering, configObj.rendering)
+			&& isMatch(o.iris, configObj.iris)
 			&& isMatch(o.valkyrienSkies, configObj.valkyrienSkies)
 			&& isMatch(o.create, configObj.create)
 			&& isMatch(o.mobile, configObj.mobile);
@@ -173,6 +174,10 @@ public class CompatibilityTryItButton extends Button {
 			&& o.tickRendererOnMainThread == rendering.tickRendererOnMainThread
 			&& o.cullWeathers == rendering.cullWeathers
 			&& o.particleCulling == rendering.particleCulling;
+	}
+
+	private static boolean isMatch(ConfigObj.Iris o, ConfigObj.Iris iris) {
+		return true;
 	}
 
 	private static boolean isMatch(ConfigObj.ValkyrienSkies o, ConfigObj.ValkyrienSkies valkyrienSkies) {

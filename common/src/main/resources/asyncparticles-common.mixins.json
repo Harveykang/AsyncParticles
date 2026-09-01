@@ -38,6 +38,7 @@
     "compat.immersive_portals.MixinParticleEngine",
     "compat.iris_like.MixinDSAUnsupported",
     "compat.iris_like.MixinIris",
+    "compat.iris_like.MixinLevelRenderer",
     "compat.lambdynlights.MixinParticleEngineMixin",
     "compat.modernui.MixinRenderSystem",
     "compat.particlerain.MixinParticleRain",

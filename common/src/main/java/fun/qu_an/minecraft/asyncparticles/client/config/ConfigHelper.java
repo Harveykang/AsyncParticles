@@ -125,4 +125,8 @@ public class ConfigHelper {
 	public static boolean fixParticleLightOnVsShips() {
 		return valkyrienSkies$fixParticleLights;
 	}
+
+	public static boolean isIrisImproveOpaqueParticlesInWater() {
+		return iris$improveOpaqueParticlesInWater;
+	}
 }
