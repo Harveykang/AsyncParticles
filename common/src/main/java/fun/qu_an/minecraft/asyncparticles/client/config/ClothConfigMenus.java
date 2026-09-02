@@ -3,7 +3,6 @@ package fun.qu_an.minecraft.asyncparticles.client.config;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.cloth_config.AbstractConfigEntryAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.cloth_config.AbstractListListEntryAddon;
-import fun.qu_an.minecraft.asyncparticles.client.config.ClothConfigMixinMenus.MixinConfigBundle;
 import fun.qu_an.minecraft.asyncparticles.client.config.CompatibilityTryItButton.CompatibilityTryIt;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backend;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
@@ -16,7 +15,6 @@ import me.shedaniel.clothconfig2.gui.entries.AbstractListListEntry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -25,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collector;
 
 import static fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper.*;
@@ -36,24 +33,67 @@ class ClothConfigMenus {
 		return screen(parent, ConfigBundle.create(), MixinConfigBundle.create(), 0, null);
 	}
 
-	@SuppressWarnings("UnstableApiUsage")
 	static Screen screen(Screen parent,
 	                     ConfigBundle bundle,
 	                     MixinConfigBundle mixinBundle,
 	                     int selectedCategoryIndex,
 	                     @Nullable CompatibilityTryIt compatibilityTryIt) {
-		AsyncParticlesConfig.ConfigObj displayConfig = bundle.displayConfig();
-		AsyncParticlesConfig.ConfigObj defaultConfig = bundle.defaultConfig();
-		AsyncParticlesConfig.ConfigObj originalConfig = bundle.originalConfig();
-
 		ConfigBuilder builder = ConfigBuilder.create()
 			.setParentScreen(parent)
 			.setTitle(Component.translatable("gui.asyncparticles"))
 			.setTransparentBackground(true);
 		ConfigEntryBuilder entryBuilder = builder.entryBuilder();
-		ConfigEntryBuilder revertEntryBuilder = builder.entryBuilder()
+		ConfigEntryBuilder revertButtonEntryBuilder = builder.entryBuilder()
 			.setResetButtonKey(Component.translatable("gui.asyncparticles.revert"));
 
+		buildParticleCategory(builder, entryBuilder, bundle);
+		buildTickCategory(builder, entryBuilder, revertButtonEntryBuilder, bundle);
+		buildRenderingCategory(builder, entryBuilder, bundle);
+		buildIntegrationCategory(builder, entryBuilder, revertButtonEntryBuilder, bundle, mixinBundle);
+		buildMixinCategory(builder, entryBuilder, revertButtonEntryBuilder, mixinBundle);
+		buildMobileCategory(builder, entryBuilder, bundle);
+		buildDevCategory(builder, entryBuilder);
+
+		AsyncParticlesConfig.ConfigObj displayConfig = bundle.displayConfig();
+		AsyncParticlesMixinConfig.MixinConfigObj displayMixinConfig = mixinBundle.displayConfig();
+		builder.setSavingRunnable(() -> {
+			try {
+				displayConfig.flat();
+				AsyncParticlesConfig.save();
+				displayMixinConfig.flat();
+				AsyncParticlesMixinConfig.save();
+				DevRuntimeDebug.apply();
+			} catch (Exception e) {
+				AsyncParticlesConfig.LOGGER.error("Failed to save config", e);
+				Minecraft mc = Minecraft.getInstance();
+				Screen configScreen = mc.screen;
+				ThreadUtil.enqueueClientTask(() -> {
+					Screen prevScreen = mc.screen;
+					mc.setScreen(new FallbackScreen(
+						null,
+						Component.translatable("gui.asyncparticles.error"),
+						Component.translatable("gui.asyncparticles.failed-to-save", e.toString()),
+						Component.translatable("gui.back"),
+						current -> Minecraft.getInstance().setScreen(configScreen),
+						Component.translatable("gui.continue"),
+						current -> Minecraft.getInstance().setScreen(prevScreen)));
+				});
+			}
+			AsyncTickBehavior.getInstance().reloadLater();
+		});
+
+		builder.setAfterInitConsumer(screen -> screen.addRenderableWidget(
+			new CompatibilityTryItButton(screen, displayConfig, displayMixinConfig, compatibilityTryIt)));
+
+		Screen screen = builder.build();
+		((AbstractConfigScreen) screen).selectedCategoryIndex = selectedCategoryIndex;
+		return screen;
+	}
+
+	private static void buildParticleCategory(ConfigBuilder builder, ConfigEntryBuilder entryBuilder, ConfigBundle bundle) {
+		AsyncParticlesConfig.ConfigObj displayConfig = bundle.displayConfig();
+		AsyncParticlesConfig.ConfigObj defaultConfig = bundle.defaultConfig();
+		AsyncParticlesConfig.ConfigObj originalConfig = bundle.originalConfig();
 		// region Particle Category
 		builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.particle"))
 			.addEntry(modifyOriginal(entryBuilder
@@ -102,6 +142,12 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> displayConfig.particle.cullUnderwaterParticleType = newValue)
 				.build(), originalConfig.particle.cullUnderwaterParticleType));
 		// endregion
+	}
+
+	private static void buildTickCategory(ConfigBuilder builder, ConfigEntryBuilder entryBuilder, ConfigEntryBuilder revertButtonEntryBuilder, ConfigBundle bundle) {
+		AsyncParticlesConfig.ConfigObj displayConfig = bundle.displayConfig();
+		AsyncParticlesConfig.ConfigObj defaultConfig = bundle.defaultConfig();
+		AsyncParticlesConfig.ConfigObj originalConfig = bundle.originalConfig();
 		// region Tick Category
 		builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.tick"))
 			.addEntry(modifyOriginal(entryBuilder
@@ -180,7 +226,7 @@ class ClothConfigMenus {
 				.setTooltip(Component.translatable("config.asyncparticles.tick.suppressCME.tooltip"))
 				.setSaveConsumer(newValue -> displayConfig.tick.suppressCME = newValue)
 				.build(), originalConfig.tick.suppressCME))
-			.addEntry(modifyOriginal(revertEntryBuilder
+			.addEntry(modifyOriginal(revertButtonEntryBuilder
 				.startStrList(Component.translatable("config.asyncparticles.tick.syncParticleClasses"),
 					new ArrayList<>(displayConfig.tick.syncParticleClasses))
 				.setDefaultValue(new ArrayList<>(originalConfig.tick.syncParticleClasses))
@@ -192,6 +238,12 @@ class ClothConfigMenus {
 				})
 				.build(), originalConfig.tick.syncParticleClasses));
 		// endregion
+	}
+
+	private static void buildRenderingCategory(ConfigBuilder builder, ConfigEntryBuilder entryBuilder, ConfigBundle bundle) {
+		AsyncParticlesConfig.ConfigObj displayConfig = bundle.displayConfig();
+		AsyncParticlesConfig.ConfigObj defaultConfig = bundle.defaultConfig();
+		AsyncParticlesConfig.ConfigObj originalConfig = bundle.originalConfig();
 		// region Rendering Category
 		builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.rendering"))
 			.addEntry(modifyOriginal(entryBuilder
@@ -233,7 +285,16 @@ class ClothConfigMenus {
 				.setSaveConsumer(newValue -> displayConfig.rendering.tickRendererOnMainThread = newValue)
 				.build(), originalConfig.rendering.tickRendererOnMainThread));
 		// endregion
+	}
 
+	private static void buildIntegrationCategory(ConfigBuilder builder, ConfigEntryBuilder entryBuilder, ConfigEntryBuilder revertButtonEntryBuilder, ConfigBundle bundle, MixinConfigBundle mixinBundle) {
+		AsyncParticlesConfig.ConfigObj displayConfig = bundle.displayConfig();
+		AsyncParticlesConfig.ConfigObj defaultConfig = bundle.defaultConfig();
+		AsyncParticlesConfig.ConfigObj originalConfig = bundle.originalConfig();
+
+		AsyncParticlesMixinConfig.MixinConfigObj originalMixinConfig = mixinBundle.originalConfig();
+		AsyncParticlesMixinConfig.MixinConfigObj defaultMixinConfig = mixinBundle.defaultConfig();
+		AsyncParticlesMixinConfig.MixinConfigObj displayMixinConfig = mixinBundle.displayConfig();
 		// region Compat Category
 		@SuppressWarnings("rawtypes")
 		List<AbstractConfigListEntry> vsEntries = new ArrayList<>();
@@ -285,11 +346,22 @@ class ClothConfigMenus {
 			.setSaveConsumer(newValue -> displayConfig.create.tickRainBlockingRange = newValue)
 			.setRequirement(() -> ModListHelper.CREATE_LOADED)
 			.build(), originalConfig.create.tickRainBlockingRange));
-		// endregion
-
-		// region Mixin
-		ClothConfigMixinMenus.addModCompatCategory(entryBuilder, revertEntryBuilder, mixinBundle, vsEntries, sableEntries, createEntries);
-
+		List<String> contraptionNoParticleCollision = List.copyOf(originalMixinConfig.getContraptionNoParticleCollision());
+		createEntries.add(modifyOriginal(new StringListListEntryFixRestart(revertButtonEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.create.contraptionsNoParticleCollision"), contraptionNoParticleCollision)
+			.setDefaultValue(contraptionNoParticleCollision)
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultMixinConfig.getContraptionNoParticleCollision());
+				displayMixinConfig.setContraptionNoParticleCollision(Collections.unmodifiableSet(s));
+			})
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.create.contraptionsNoParticleCollision.tooltip"),
+				Component.translatable("config.asyncparticles.mixin.tooltip"))
+			.requireRestart()
+			.build()), originalMixinConfig.getContraptionNoParticleCollision()));
 		builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mod-compat"))
 			.addEntry(new SubCategoryListEntryFix(entryBuilder
 				// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
@@ -306,12 +378,14 @@ class ClothConfigMenus {
 				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
 					createEntries)
 				.build()));
-
-		ConfigCategory mixinCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mixin"));
-		ClothConfigMixinMenus.buildCategory(mixinBundle, mixinCategory, entryBuilder, revertEntryBuilder);
 		// endregion
+	}
 
-		// region Mobile
+	private static void buildMobileCategory(ConfigBuilder builder, ConfigEntryBuilder entryBuilder, ConfigBundle bundle) {
+		AsyncParticlesConfig.ConfigObj displayConfig = bundle.displayConfig();
+		AsyncParticlesConfig.ConfigObj defaultConfig = bundle.defaultConfig();
+		AsyncParticlesConfig.ConfigObj originalConfig = bundle.originalConfig();
+
 		if (Backends.backend == Backend.OPENGL_ON_ES) {
 			builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mobile"))
 				.addEntry(modifyOriginal(entryBuilder
@@ -321,8 +395,143 @@ class ClothConfigMenus {
 					.setSaveConsumer(newValue -> displayConfig.mobile.multiDrawWorkaround = newValue)
 					.build(), originalConfig.mobile.multiDrawWorkaround));
 		}
-		// endregion
+	}
 
+	private static void buildMixinCategory(ConfigBuilder builder, ConfigEntryBuilder entryBuilder, ConfigEntryBuilder revertButtonEntryBuilder, MixinConfigBundle mixinBundle) {
+		AsyncParticlesMixinConfig.MixinConfigObj displayMixinConfig = mixinBundle.displayConfig();
+		AsyncParticlesMixinConfig.MixinConfigObj defaultMixinConfig = mixinBundle.defaultConfig();
+		AsyncParticlesMixinConfig.MixinConfigObj originalMixinConfig = mixinBundle.originalConfig();
+
+		ConfigCategory mixinCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mixin"));
+
+		mixinCategory.addEntry(modifyOriginal(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap"),
+				displayMixinConfig.isSafeClassInstanceMultiMap())
+			.setDefaultValue(defaultMixinConfig.isSafeClassInstanceMultiMap())
+			.setSaveConsumer(displayMixinConfig::setSafeClassInstanceMultiMap)
+			.setTooltipSupplier(() -> {
+				if ((IRONS_SPELLBOOKS_LOADED &&
+					IRONS_SPELLBOOKS_LESS_THAN_3_13_0) ||
+					MAKE_BUBBLES_POP_LOADED ||
+					COSYCRITTERS_LOADED ||
+					IMMERSIVE_PORTALS_LOADED) {
+					return limitedTooltip(
+						Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip"),
+						IRONS_SPELLBOOKS_LOADED ? "Irons Spellbooks" : null,
+						MAKE_BUBBLES_POP_LOADED ? "Make Bubbles Pop" : null,
+						COSYCRITTERS_LOADED ? "CosyCritters" : null,
+						IMMERSIVE_PORTALS_LOADED ? "Immersive Portals" : null
+					);
+				} else {
+					return Optional.of(new Component[]{
+						Component.translatable("text.cloth-config.restart_required")
+							.withStyle(ChatFormatting.DARK_RED),
+						Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap.tooltip")
+					});
+				}
+			})
+			.requireRestart()
+			.setRequirement(() -> (!IRONS_SPELLBOOKS_LOADED ||
+				!IRONS_SPELLBOOKS_LESS_THAN_3_13_0) &&
+				!MAKE_BUBBLES_POP_LOADED &&
+				!COSYCRITTERS_LOADED &&
+				!IMMERSIVE_PORTALS_LOADED)
+			.build(), originalMixinConfig.isSafeClassInstanceMultiMap()));
+		mixinCategory.addEntry(modifyOriginal(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap"),
+				displayMixinConfig.isSafeBlockEntityMap())
+			.setDefaultValue(defaultMixinConfig.isSafeBlockEntityMap())
+			.setSaveConsumer(displayMixinConfig::setSafeBlockEntityMap)
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap.tooltip"))
+			.requireRestart()
+			.build(), originalMixinConfig.isSafeBlockEntityMap()));
+		mixinCategory.addEntry(new StringListListEntryFixRestart(revertButtonEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noCulling"),
+				List.copyOf(displayMixinConfig.getNoCulling()))
+			.setDefaultValue(List.copyOf(originalMixinConfig.getNoCulling()))
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(displayMixinConfig.getNoCulling());
+				displayMixinConfig.setNoCulling(Collections.unmodifiableSet(s));
+			})
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.tooltip"))
+			.requireRestart()
+			.build()));
+		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertButtonEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.noLightCache"),
+				List.copyOf(displayMixinConfig.getNoLightCache()))
+			.setDefaultValue(List.copyOf(originalMixinConfig.getNoLightCache()))
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultMixinConfig.getNoLightCache());
+				displayMixinConfig.setNoLightCache(Collections.unmodifiableSet(s));
+			})
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.tooltip"))
+			.requireRestart()
+			.build()), originalMixinConfig.getNoLightCache()));
+		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertButtonEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockProvider"), List.copyOf(displayMixinConfig.getLockProvider()))
+			.setDefaultValue(List.copyOf(originalMixinConfig.getLockProvider()))
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultMixinConfig.getLockProvider());
+				displayMixinConfig.setLockProvider(Collections.unmodifiableSet(s));
+			})
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.tooltip"))
+			.requireRestart()
+			.build()), originalMixinConfig.getLockProvider()));
+		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertButtonEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.particle.lockRequired"), List.copyOf(displayMixinConfig.getLockRequired()))
+			.setDefaultValue(List.copyOf(originalMixinConfig.getLockRequired()))
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultMixinConfig.getLockRequired());
+				displayMixinConfig.setLockRequired(Collections.unmodifiableSet(s));
+			})
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.tooltip"))
+			.requireRestart()
+			.build()), originalMixinConfig.getLockRequired()));
+		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertButtonEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.replaceRandom"), List.copyOf(displayMixinConfig.getReplaceRandom()))
+			.setDefaultValue(List.copyOf(originalMixinConfig.getReplaceRandom()))
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultMixinConfig.getReplaceRandom());
+				displayMixinConfig.setReplaceRandom(Collections.unmodifiableSet(s));
+			})
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.replaceRandom.tooltip"),
+				Component.translatable("config.asyncparticles.mixin.tooltip"))
+			.requireRestart()
+			.build()), originalMixinConfig.getReplaceRandom()));
+		mixinCategory.addEntry(modifyOriginal(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mixin.particle.safeLegacyRandomSource"),
+				displayMixinConfig.isSafeLegacyRandomSource())
+			.setDefaultValue(defaultMixinConfig.isSafeLegacyRandomSource())
+			.setSaveConsumer(displayMixinConfig::setSafeLegacyRandomSource)
+			.setTooltip(Component.translatable("config.asyncparticles.mixin.particle.safeLegacyRandomSource.tooltip"))
+//			.requireRestart()
+			.build(), originalMixinConfig.isSafeLegacyRandomSource()));
+	}
+
+	private static void buildDevCategory(ConfigBuilder builder, ConfigEntryBuilder entryBuilder) {
 		// region Dev
 		builder.getOrCreateCategory(Component.literal("Dev"))
 			.addEntry(entryBuilder
@@ -349,41 +558,6 @@ class ClothConfigMenus {
 					.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, Backends.debugInfo()))))
 				.setTooltip(Component.literal("Click the text to copy to clipboard."))
 				.build());
-		// endregion
-
-		AsyncParticlesMixinConfig.MixinConfigObj displayMixinConfig = mixinBundle.displayConfig();
-		builder.setSavingRunnable(() -> {
-			try {
-				displayConfig.flat();
-				AsyncParticlesConfig.save();
-				displayMixinConfig.flat();
-				AsyncParticlesMixinConfig.save();
-				DevRuntimeDebug.apply();
-			} catch (Exception e) {
-				AsyncParticlesConfig.LOGGER.error("Failed to save config", e);
-				Minecraft mc = Minecraft.getInstance();
-				Screen configScreen = mc.screen;
-				ThreadUtil.enqueueClientTask(() -> {
-					Screen prevScreen = mc.screen;
-					mc.setScreen(new FallbackScreen(
-						null,
-						Component.translatable("gui.asyncparticles.error"),
-						Component.translatable("gui.asyncparticles.failed-to-save", e.toString()),
-						Component.translatable("gui.back"),
-						current -> Minecraft.getInstance().setScreen(configScreen),
-						Component.translatable("gui.continue"),
-						current -> Minecraft.getInstance().setScreen(prevScreen)));
-				});
-			}
-			AsyncTickBehavior.getInstance().reloadLater();
-		});
-
-		builder.setAfterInitConsumer(screen -> screen.addRenderableWidget(
-			new CompatibilityTryItButton(screen, displayConfig, displayMixinConfig, compatibilityTryIt)));
-
-		Screen screen = builder.build();
-		((AbstractConfigScreen) screen).selectedCategoryIndex = selectedCategoryIndex;
-		return screen;
 	}
 
 	@SuppressWarnings({"UnstableApiUsage", "unchecked"})
@@ -413,6 +587,19 @@ class ClothConfigMenus {
 		});
 	}
 
+	private static Optional<Component[]> limitedTooltip(MutableComponent description, Object... modNames) {
+		Component modNamesStr = Arrays.stream(modNames)
+			.filter(Objects::nonNull)
+			.map(modName -> modName instanceof Component ? (Component) modName : Component.literal(String.valueOf(modName)))
+			.collect(Collector.of(Component::empty, MutableComponent::append, (a, b) -> a.append(", ").append(b)));
+
+		return Optional.of(new MutableComponent[]{
+			description.withStyle(ChatFormatting.STRIKETHROUGH),
+			Component.translatable("config.asyncparticles.limited", modNamesStr)
+				.withStyle(ChatFormatting.YELLOW)
+		});
+	}
+
 	record ConfigBundle(
 		AsyncParticlesConfig.ConfigObj displayConfig,
 		AsyncParticlesConfig.ConfigObj defaultConfig,
@@ -423,6 +610,20 @@ class ClothConfigMenus {
 
 		@Override
 		public AsyncParticlesConfig.ConfigObj originalConfig() {
+			return originalConfig == null ? displayConfig : originalConfig;
+		}
+	}
+
+	record MixinConfigBundle(
+		AsyncParticlesMixinConfig.MixinConfigObj displayConfig,
+		AsyncParticlesMixinConfig.MixinConfigObj defaultConfig,
+		AsyncParticlesMixinConfig.@Nullable MixinConfigObj originalConfig) {
+		public static MixinConfigBundle create() {
+			return new MixinConfigBundle(AsyncParticlesMixinConfig.getCurrentConfig(), AsyncParticlesMixinConfig.getDefaultConfig(), null);
+		}
+
+		@Override
+		public AsyncParticlesMixinConfig.MixinConfigObj originalConfig() {
 			return originalConfig == null ? displayConfig : originalConfig;
 		}
 	}
