@@ -22,6 +22,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.Block;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -84,6 +85,7 @@ public class AsyncTickBehavior {
 	private boolean reloadLater;
 	private boolean isTailTick;
 
+	private final Set<Class<?>> syncAnimationTypes = new ReferenceOpenHashSet<>();
 	private final Set<Class<?>> syncParticleTypes = new ReferenceOpenHashSet<>();
 
 	public static AsyncTickBehavior getInstance() {
@@ -282,6 +284,8 @@ public class AsyncTickBehavior {
 			cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
 		}
 		cleanupTaskHelper.disposeTasks();
+		syncAnimationTypes.clear();
+		syncAnimationTypes.addAll(ConfigHelper.getSyncAnimationClassesTick());
 		syncParticleTypes.clear();
 		syncParticleTypes.addAll(ConfigHelper.getSyncParticleClassesTick());
 	}
@@ -329,6 +333,10 @@ public class AsyncTickBehavior {
 
 	public boolean shouldSync(Class<?> aClass) {
 		return syncParticleTypes.contains(aClass) || DevRuntimeDebug.isSyncAllParticles();
+	}
+
+	public boolean shouldSyncAnimateTick(Block block) {
+		return syncAnimationTypes.contains(block.getClass());
 	}
 
 	public boolean isTailTick() {
