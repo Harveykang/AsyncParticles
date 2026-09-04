@@ -56,6 +56,20 @@ public class ConfigHelper {
 		return rendering$particleCulling;
 	}
 
+	public static List<? extends Class<?>> getSyncAnimationClassesTick() {
+		return tick$syncAnimationClasses
+			.stream()
+			.map(className -> {
+				try {
+					return Class.forName(className);
+				} catch (ClassNotFoundException e) {
+					return null;
+				}
+			})
+			.filter(Objects::nonNull)
+			.toList();
+	}
+
 	public static List<? extends Class<?>> getSyncParticleClassesTick() {
 		return tick$syncParticleClasses
 			.stream()

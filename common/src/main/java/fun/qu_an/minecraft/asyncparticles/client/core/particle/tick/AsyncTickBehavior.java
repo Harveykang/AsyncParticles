@@ -85,6 +85,7 @@ public class AsyncTickBehavior {
 	private boolean reloadLater;
 	private boolean isTailTick;
 
+	private final Set<Class<?>> syncAnimationTypes = new ReferenceOpenHashSet<>();
 	private final Set<Class<?>> syncParticleTypes = new ReferenceOpenHashSet<>();
 	private final Map<ParticleRenderType, Set<Particle>> syncParticles = new Reference2ReferenceOpenHashMap<>();
 	private final Map<ParticleRenderType, Set<TextureSheetParticle>> syncGpuParticles = new Reference2ReferenceOpenHashMap<>();
@@ -305,6 +306,8 @@ public class AsyncTickBehavior {
 			cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
 		}
 		cleanupTaskHelper.disposeTasks();
+		syncAnimationTypes.clear();
+		syncAnimationTypes.addAll(ConfigHelper.getSyncAnimationClassesTick());
 		syncParticleTypes.clear();
 		syncParticleTypes.addAll(ConfigHelper.getSyncParticleClassesTick());
 	}
@@ -351,6 +354,10 @@ public class AsyncTickBehavior {
 
 	public boolean shouldSync(Class<? extends Particle> aClass) {
 		return syncParticleTypes.contains(aClass) || DevRuntimeDebug.isSyncAllParticles();
+	}
+
+	public boolean shouldSyncAnimateTick(Object block) {
+		return syncAnimationTypes.contains(block.getClass());
 	}
 
 	public boolean shouldSyncRenderType(Class<? extends ParticleRenderType> aClass) {
