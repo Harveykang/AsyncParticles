@@ -168,7 +168,14 @@ class ClothConfigMenus {
 				.setTooltip(Component.translatable("config.asyncparticles.tick.suppressCME.tooltip"))
 				.setSaveConsumer(newValue -> displayConfig.tick.suppressCME = newValue)
 				.build(), originalConfig.tick.suppressCME))
-			.addEntry(modifyOriginal(revertEntryBuilder
+			.addEntry(modifyOriginal(revertButtonEntryBuilder
+				.startStrList(Component.translatable("config.asyncparticles.tick.syncAnimationClasses"),
+					new ArrayList<>(displayConfig.tick.syncAnimationClasses))
+				.setDefaultValue(new ArrayList<>(defaultConfig.tick.syncAnimationClasses))
+				.setTooltip(Component.translatable("config.asyncparticles.tick.syncAnimationClasses.tooltip"))
+				.setSaveConsumer(newValue -> displayConfig.tick.syncAnimationClasses = new LinkedHashSet<>(newValue))
+				.build(), originalConfig.tick.syncAnimationClasses))
+			.addEntry(modifyOriginal(revertButtonEntryBuilder
 				.startStrList(Component.translatable("config.asyncparticles.tick.syncParticleClasses"),
 					new ArrayList<>(displayConfig.tick.syncParticleClasses))
 				.setDefaultValue(new ArrayList<>(originalConfig.tick.syncParticleClasses))
