@@ -8,7 +8,10 @@ import fun.qu_an.minecraft.asyncparticles.client.core.Phase;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -16,6 +19,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
@@ -47,5 +52,21 @@ public abstract class MixinClientLevel_AnimateTick extends Level {
 	@WrapOperation(method = "animateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;create()Lnet/minecraft/util/RandomSource;"))
 	private RandomSource redirectRandomSource(Operation<RandomSource> original) {
 		return new SingleThreadedRandomSource(RandomSupport.generateUniqueSeed());
+	}
+
+	@WrapOperation(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;animateTick(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"))
+	private void asyncparticles_shouldSyncAnimateTick(Block block, BlockState state, Level level, BlockPos pos, RandomSource random, Operation<Void> original) {
+		if (ThreadUtil.isOnParticleThread()
+			&& AsyncTickBehavior.getInstance().shouldSyncAnimateTick(block)) {
+			BlockPos immutablePos = pos.immutable();
+			RandomSource mainThreadRandom = new SingleThreadedRandomSource(RandomSupport.generateUniqueSeed());
+			ThreadUtil.runOnClient(() -> {
+				if (Minecraft.getInstance().level == level) {
+					original.call(block, state, level, immutablePos, mainThreadRandom);
+				}
+			});
+		} else {
+			original.call(block, state, level, pos, random);
+		}
 	}
 }

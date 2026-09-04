@@ -58,6 +58,7 @@ public class AsyncParticlesConfig {
 	public static int tick$failPerSecLimit;
 	public static FailBehavior tick$failBehavior;
 	public static boolean tick$suppressCME;
+	public static Set<String> tick$syncAnimationClasses = new LinkedHashSet<>();
 	public static Set<String> tick$syncParticleClasses = new LinkedHashSet<>();
 	public static boolean rendering$gpuAcceleration;
 	public static boolean rendering$appendNewParticlesToRenderer;
@@ -238,6 +239,7 @@ public class AsyncParticlesConfig {
 
 	static ConfigObj getDefaultConfigExceptCollections() {
 		ConfigObj configObj = new ConfigObj();
+		configObj.tick.syncAnimationClasses = getCurrentConfig().tick.syncAnimationClasses;
 		configObj.tick.syncParticleClasses = getCurrentConfig().tick.syncParticleClasses;
 		return configObj;
 	}
@@ -326,6 +328,7 @@ public class AsyncParticlesConfig {
 			int failPerSecLimit = 5;
 			FailBehavior failBehavior = FailBehavior.RAISE_CRASH;
 			boolean suppressCME = false;
+			Set<String> syncAnimationClasses = new LinkedHashSet<>();
 			Set<String> syncParticleClasses = new LinkedHashSet<>();
 
 			{
@@ -341,6 +344,7 @@ public class AsyncParticlesConfig {
 				tick$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				tick$failBehavior = requireNonNullElse(failBehavior, FailBehavior.RAISE_CRASH);
 				tick$suppressCME = suppressCME;
+				tick$syncAnimationClasses = new LinkedHashSet<>(syncAnimationClasses);
 				tick$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
 			}
 
@@ -353,6 +357,7 @@ public class AsyncParticlesConfig {
 				failPerSecLimit = tick$failPerSecLimit;
 				failBehavior = tick$failBehavior;
 				suppressCME = tick$suppressCME;
+				syncAnimationClasses.addAll(tick$syncAnimationClasses);
 				syncParticleClasses.addAll(tick$syncParticleClasses);
 			}
 		}
