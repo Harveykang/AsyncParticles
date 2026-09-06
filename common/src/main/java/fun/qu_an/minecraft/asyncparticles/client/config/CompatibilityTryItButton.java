@@ -193,6 +193,7 @@ public class CompatibilityTryItButton extends Button {
 
 	private static void preserve(ConfigObj modified, MixinConfigObj mixinModified, ConfigObj config, MixinConfigObj mixinConfig) {
 		// preserve modified collections
+		config.tick.syncAnimationClasses = modified.tick.syncAnimationClasses;
 		config.tick.syncParticleClasses = modified.tick.syncParticleClasses;
 		config.particle.particleLimit = modified.particle.particleLimit;
 		config.valkyrienSkies.fixParticleLights = modified.valkyrienSkies.fixParticleLights;
