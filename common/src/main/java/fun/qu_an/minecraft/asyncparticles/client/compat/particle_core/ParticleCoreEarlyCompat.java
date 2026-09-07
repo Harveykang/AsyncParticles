@@ -8,12 +8,12 @@ public class ParticleCoreEarlyCompat {
 	/**
 	 * These mixins conflict with us
 	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleManagerFrustumMixin
-	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleManagerRotationMixin
 	 * @see me.fzzyhmstrs.particle_core.mixins.WorldRendererFrustumMixin
 	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleManagerRenderDistanceMixin
 	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleManagerCountMixin
-	 * @see me.fzzyhmstrs.particle_core.mixins.BillboardParticleMixin
 	 * while these are compatible with us
+	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleManagerRotationMixin
+	 * @see me.fzzyhmstrs.particle_core.mixins.BillboardParticleMixin
 	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin
 	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleBrightnessCacheMixin
 	 * @see me.fzzyhmstrs.particle_core.mixins.ParticleManagerCachedLightMixin
@@ -31,7 +31,6 @@ public class ParticleCoreEarlyCompat {
 		set.addAll(disableOptimizations);
 		set.add("COUNT");
 		set.add("CULLING");
-		set.add("ROTATION");
 		set.add("LIGHTMAP");
 		PcDisable.INSTANCE.getDisabledOptimizations().setDisableOptimizations(List.copyOf(set));
 	}
