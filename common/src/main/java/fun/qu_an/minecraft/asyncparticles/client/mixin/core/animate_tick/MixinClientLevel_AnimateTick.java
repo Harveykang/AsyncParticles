@@ -50,7 +50,7 @@ public abstract class MixinClientLevel_AnimateTick {
 			ThreadUtil.enqueueClientTask(() -> {
 				// We must use strict checks because level, player, and cameraEntity
 				// are not always available at the same time, which can cause crashes.
-				if (LevelBundle.isLevelAvailable()) {
+				if (LevelBundle.isLevelAvailable(level)) {
 					original.call(block, state, level, immutablePos, this.asyncparticles$getRandom());
 				}
 			});
@@ -65,7 +65,7 @@ public abstract class MixinClientLevel_AnimateTick {
 			&& AsyncTickBehavior.getInstance().shouldSyncAnimateTick(fluidState.getType())) {
 			BlockPos immutablePos = pos.immutable();
 			ThreadUtil.enqueueClientTask(() -> {
-				if (LevelBundle.isLevelAvailable()) {
+				if (LevelBundle.isLevelAvailable(level)) {
 					original.call(fluidState, level, immutablePos, this.asyncparticles$getRandom());
 				}
 			});
