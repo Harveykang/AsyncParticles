@@ -235,8 +235,9 @@ public class AsyncParticlesConfig {
 
 	static ConfigObj getDefaultConfigExceptCollections() {
 		ConfigObj configObj = new ConfigObj();
-		configObj.tick.syncAnimationClasses = getCurrentConfig().tick.syncAnimationClasses;
-		configObj.tick.syncParticleClasses = getCurrentConfig().tick.syncParticleClasses;
+		ConfigObj currentConfig = getCurrentConfig();
+		configObj.tick.syncAnimationClasses = currentConfig.tick.syncAnimationClasses;
+		configObj.tick.syncParticleClasses = currentConfig.tick.syncParticleClasses;
 		return configObj;
 	}
 

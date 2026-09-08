@@ -33,7 +33,7 @@
   "config.asyncparticles.tick.suppressCME": "忽略并发修改异常",
   "config.asyncparticles.tick.suppressCME.tooltip": "在未超过“每秒 Tick 异常上限”时忽略\nConcurrentModificationException 。",
   "config.asyncparticles.tick.syncAnimationClasses": "同步 Tick 的动画类",
-  "config.asyncparticles.tick.syncAnimationClasses.tooltip": "需要同步执行 Tick 任务的动画类。",
+  "config.asyncparticles.tick.syncAnimationClasses.tooltip": "需要同步执行 Tick 任务的动画类（Block 或 Fluid 的子类）。",
   "config.asyncparticles.tick.syncParticleClasses": "同步 Tick 的粒子类",
   "config.asyncparticles.tick.syncParticleClasses.tooltip": "需要同步执行 Tick 任务的粒子类。",
   "config.asyncparticles.category.rendering": "渲染",

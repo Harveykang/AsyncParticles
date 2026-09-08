@@ -2,31 +2,36 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.animate_tick;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.Diagnostic;
 import fun.qu_an.minecraft.asyncparticles.client.core.Phase;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.LevelBundle;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.Holder;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.storage.WritableLevelData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.RandomSupport;
+import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
+import net.minecraft.world.level.material.FluidState;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = ClientLevel.class, priority = 1100)
-public abstract class MixinClientLevel extends Level {
-	protected MixinClientLevel(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, boolean isClientSide, boolean isDebug, long biomeZoomSeed, int maxChainedNeighborUpdates) {
-		super(levelData, dimension, registryAccess, dimensionTypeRegistration, isClientSide, isDebug, biomeZoomSeed, maxChainedNeighborUpdates);
-	}
+public abstract class MixinClientLevel {
+	@Unique
+	private RandomSource asyncparticles$random;
 
 	@WrapMethod(method = "animateTick")
 	public void animateTick(int xt, int yt, int zt, Operation<Void> original) {
@@ -47,5 +52,48 @@ public abstract class MixinClientLevel extends Level {
 		}
 		ParticleHelper.CULL_UNDERWATER_PARTICLE_TYPE.set(!ConfigHelper.isCullUnderwaterParticleType() ||
 			cameraEntity.level().getFluidState(cameraEntity.blockPosition()).is(FluidTags.WATER));
+	}
+
+	@WrapOperation(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;animateTick(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"))
+	private void asyncparticles_shouldSyncAnimateTick(Block block, BlockState state, Level level, BlockPos pos, RandomSource random, Operation<Void> original) {
+		if (ThreadUtil.isOnParticleThread()
+			&& AsyncTickBehavior.getInstance().shouldSyncAnimateTick(block)) {
+			BlockPos immutablePos = pos.immutable();
+			ThreadUtil.enqueueClientTask(() -> {
+				// We must use strict checks because level, player, and cameraEntity
+				// are not always available at the same time, which can cause crashes.
+				if (LevelBundle.isLevelAvailable(level)) {
+					original.call(block, state, level, immutablePos, this.asyncparticles$getRandom());
+				}
+			});
+		} else {
+			original.call(block, state, level, pos, random);
+		}
+	}
+
+	@WrapOperation(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/material/FluidState;animateTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"))
+	private void asyncparticles_shouldSyncAnimateTick(FluidState fluidState, Level level, BlockPos pos, RandomSource random, Operation<Void> original) {
+		if (ThreadUtil.isOnParticleThread()
+			&& AsyncTickBehavior.getInstance().shouldSyncAnimateTick(fluidState.getType())) {
+			BlockPos immutablePos = pos.immutable();
+			ThreadUtil.enqueueClientTask(() -> {
+				if (LevelBundle.isLevelAvailable(level)) {
+					original.call(fluidState, level, immutablePos, this.asyncparticles$getRandom());
+				}
+			});
+		} else {
+			original.call(fluidState, level, pos, random);
+		}
+	}
+
+	@Unique
+	private RandomSource asyncparticles$getRandom() {
+		// Reuse a main thread only random source to avoid repeated allocation,
+		// since doAnimateTick is invoked 1664 times per tick, and we cannot ignore the worst cases.
+		RandomSource random = this.asyncparticles$random;
+		if (random != null) {
+			return random;
+		}
+		return this.asyncparticles$random = new SingleThreadedRandomSource(RandomSupport.generateUniqueSeed());
 	}
 }
