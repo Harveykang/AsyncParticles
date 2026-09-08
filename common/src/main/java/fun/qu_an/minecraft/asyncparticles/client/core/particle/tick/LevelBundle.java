@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 
 public record LevelBundle(
 	ClientLevel level,
@@ -17,6 +18,11 @@ public record LevelBundle(
 	public static boolean isLevelAvailable() {
 		Minecraft mc = Minecraft.getInstance();
 		return mc.level != null && mc.player != null && mc.getCameraEntity() != null;
+	}
+
+	public static boolean isLevelAvailable(Level level) {
+		Minecraft mc = Minecraft.getInstance();
+		return mc.level == level && mc.player != null && mc.getCameraEntity() != null;
 	}
 
 	public boolean isLevelReset() {
