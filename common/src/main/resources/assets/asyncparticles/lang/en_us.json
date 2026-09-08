@@ -33,7 +33,7 @@
   "config.asyncparticles.tick.suppressCME": "Suppress CME",
   "config.asyncparticles.tick.suppressCME.tooltip": "Ignore 'ConcurrentModificationException'\nwhile under 'Fail Per Second Limit'.",
   "config.asyncparticles.tick.syncAnimationClasses": "Animation Classes for Synchronous Tick",
-  "config.asyncparticles.tick.syncAnimationClasses.tooltip": "Animation classes that should be ticked synchronously.",
+  "config.asyncparticles.tick.syncAnimationClasses.tooltip": "Animation classes that should be ticked synchronously (subclasses of Block or Fluid).",
   "config.asyncparticles.tick.syncParticleClasses": "Particle Classes for Synchronous Tick",
   "config.asyncparticles.tick.syncParticleClasses.tooltip": "Particle classes that should be ticked synchronously.",
   "config.asyncparticles.category.rendering": "Rendering",

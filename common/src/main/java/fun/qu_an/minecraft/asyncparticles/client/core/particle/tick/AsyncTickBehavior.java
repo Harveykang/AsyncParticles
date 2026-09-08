@@ -22,7 +22,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.Block;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -335,7 +334,7 @@ public class AsyncTickBehavior {
 		return syncParticleTypes.contains(aClass) || DevRuntimeDebug.isSyncAllParticles();
 	}
 
-	public boolean shouldSyncAnimateTick(Block block) {
+	public boolean shouldSyncAnimateTick(Object block) {
 		return syncAnimationTypes.contains(block.getClass());
 	}
 

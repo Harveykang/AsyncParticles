@@ -52,7 +52,7 @@ class ClothConfigMenus {
 			.setTitle(Component.translatable("gui.asyncparticles"))
 			.setTransparentBackground(true);
 		ConfigEntryBuilder entryBuilder = builder.entryBuilder();
-		ConfigEntryBuilder revertEntryBuilder = builder.entryBuilder()
+		ConfigEntryBuilder revertButtonEntryBuilder = builder.entryBuilder()
 			.setResetButtonKey(Component.translatable("gui.asyncparticles.revert"));
 
 		// region Particle Category
@@ -275,7 +275,7 @@ class ClothConfigMenus {
 		// endregion
 
 		// region Mixin
-		ClothConfigMixinMenus.addModCompatCategory(entryBuilder, revertEntryBuilder, vsEntries, createEntries);
+		ClothConfigMixinMenus.addModCompatCategory(entryBuilder, revertButtonEntryBuilder, vsEntries, createEntries);
 
 		builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mod-compat"))
 			.addEntry(new SubCategoryListEntryFix(entryBuilder
@@ -290,7 +290,7 @@ class ClothConfigMenus {
 				.build()));
 
 		ConfigCategory mixinCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mixin"));
-		ClothConfigMixinMenus.buildCategory(mixinBundle, mixinCategory, entryBuilder, revertEntryBuilder);
+		ClothConfigMixinMenus.buildCategory(mixinBundle, mixinCategory, entryBuilder, revertButtonEntryBuilder);
 		// endregion
 
 		// region Mobile
