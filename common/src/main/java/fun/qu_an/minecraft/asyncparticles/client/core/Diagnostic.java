@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.core;
 
-import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -30,27 +30,43 @@ public class Diagnostic {
 	}
 
 	public static void illegalEntityStorageAccess() {
-		if (!illegalEntityStorageAccess) {
-			LOGGER.error("""
-				[AsyncParticles] Entity storage accessed off the main thread!
-				Consider enabling 'safeClassInstanceMultiMap'.""", new IllegalStateException(""));
-			sendChat(() -> Component.literal("[AsyncParticles] ").append(
-				Component.translatable("chat.asyncparticles.warn.get_entities_off_main_thread",
-					Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap"))));
-			illegalEntityStorageAccess = true;
+		if (ThreadUtil.isOnParticleThread()) {
+			switch (AsyncTickBehavior.PHASE.get()) {
+				case ANIMATE_TICK -> errorAsyncAnimateTick(new IllegalStateException(""));
+				case WEATHER_TICK -> errorAsyncWeatherTick(new IllegalStateException(""));
+				default -> {
+					if (!illegalEntityStorageAccess) {
+						LOGGER.error("""
+							[AsyncParticles] Entity storage accessed off the main thread!
+							Consider enabling 'safeClassInstanceMultiMap'.""", new IllegalStateException(""));
+						sendChat(() -> Component.literal("[AsyncParticles] ").append(
+							Component.translatable("chat.asyncparticles.warn.get_entities_off_main_thread",
+								Component.translatable("config.asyncparticles.mixin.safeClassInstanceMultiMap"))));
+						illegalEntityStorageAccess = true;
+					}
+				}
+			}
 		}
 	}
 
 	@Unique
 	public static void illegalBlockEntityStorageAccess() {
-		if (ThreadUtil.isOnParticleThread() && !illegalBlockEntityStorageAccess) {
-			LOGGER.error("""
-				[AsyncParticles] Block entity storage accessed off the main thread!
-				Consider enabling 'safeBlockEntityMap'.""", new IllegalStateException(""));
-			sendChat(() -> Component.literal("[AsyncParticles] ").append(
-				Component.translatable("chat.asyncparticles.warn.get_block_entity_off_main_thread",
-					Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap"))));
-			illegalBlockEntityStorageAccess = true;
+		if (ThreadUtil.isOnParticleThread()) {
+			switch (AsyncTickBehavior.PHASE.get()) {
+				case ANIMATE_TICK -> errorAsyncAnimateTick(new IllegalStateException(""));
+				case WEATHER_TICK -> errorAsyncWeatherTick(new IllegalStateException(""));
+				default -> {
+					if (!illegalBlockEntityStorageAccess) {
+						LOGGER.error("""
+							[AsyncParticles] Block entity storage accessed off the main thread!
+							Consider enabling 'safeBlockEntityMap'.""", new IllegalStateException(""));
+						sendChat(() -> Component.literal("[AsyncParticles] ").append(
+							Component.translatable("chat.asyncparticles.warn.get_block_entity_off_main_thread",
+								Component.translatable("config.asyncparticles.mixin.safeBlockEntityMap"))));
+						illegalBlockEntityStorageAccess = true;
+					}
+				}
+			}
 		}
 	}
 
@@ -73,7 +89,6 @@ public class Diagnostic {
 						.withStyle(ChatFormatting.UNDERLINE))));
 		}
 	}
-
 
 	public static boolean isTemporaryGpuOnlyAsyncParticleTick() {
 		return temporaryMark_gpuOnlyAsyncParticleTick;
@@ -124,7 +139,7 @@ public class Diagnostic {
 		return temporaryMark_disableAnimationTick;
 	}
 
-	public static void errorAsyncRainTick(Exception e) {
+	public static void errorAsyncWeatherTick(Exception e) {
 		if (!temporaryMark_disableAsyncRainTick) {
 			temporaryMark_disableAsyncRainTick = true;
 			LOGGER.error("""

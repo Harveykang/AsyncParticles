@@ -10,7 +10,7 @@ import java.util.Objects;
 public class ParticleVertexBuffer {
 	public final int vao;
 	public final int vbo;
-	private ByteBuffer mappedBuffer;
+	private ByteBuffer oldBuffer;
 	private int size;
 	private boolean mapped = false;
 	private final int usage;
@@ -63,6 +63,7 @@ public class ParticleVertexBuffer {
 		return mapRange(0, size, invalidateBufferBit);
 	}
 
+	@SuppressWarnings("PointlessBitwiseExpression")
 	public ByteBuffer mapRange(int offset, int size, boolean invalidateBufferBit) {
 		if (offset + size > this.size) {
 			throw new IllegalArgumentException("Range exceeds buffer size: " + (offset + size) + " > " + this.size);
@@ -75,13 +76,13 @@ public class ParticleVertexBuffer {
 			GL30C.GL_MAP_WRITE_BIT |
 				(invalidateBufferBit ? GL30C.GL_MAP_INVALIDATE_BUFFER_BIT : 0) |
 				GL30C.GL_MAP_FLUSH_EXPLICIT_BIT |
-				GL30C.GL_MAP_UNSYNCHRONIZED_BIT |
+//				GL30C.GL_MAP_UNSYNCHRONIZED_BIT |
 				0,
-			this.mappedBuffer);
+			this.oldBuffer);
 		mapped = true;
 		mapOffset = offset;
 		Objects.requireNonNull(buf);
-		return this.mappedBuffer = buf;
+		return this.oldBuffer = buf;
 	}
 
 	public void flush(int size) {
@@ -146,9 +147,5 @@ public class ParticleVertexBuffer {
 
 	public boolean isMapped() {
 		return mapped;
-	}
-
-	public ByteBuffer getMappedBuffer() {
-		return mapped ? mappedBuffer : null;
 	}
 }

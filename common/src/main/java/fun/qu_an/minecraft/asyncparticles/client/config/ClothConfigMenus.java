@@ -52,7 +52,7 @@ class ClothConfigMenus {
 			.setTitle(Component.translatable("gui.asyncparticles"))
 			.setTransparentBackground(true);
 		ConfigEntryBuilder entryBuilder = builder.entryBuilder();
-		ConfigEntryBuilder revertEntryBuilder = builder.entryBuilder()
+		ConfigEntryBuilder revertButtonEntryBuilder = builder.entryBuilder()
 			.setResetButtonKey(Component.translatable("gui.asyncparticles.revert"));
 
 		// region Particle Category
@@ -168,7 +168,14 @@ class ClothConfigMenus {
 				.setTooltip(Component.translatable("config.asyncparticles.tick.suppressCME.tooltip"))
 				.setSaveConsumer(newValue -> displayConfig.tick.suppressCME = newValue)
 				.build(), originalConfig.tick.suppressCME))
-			.addEntry(modifyOriginal(revertEntryBuilder
+			.addEntry(modifyOriginal(revertButtonEntryBuilder
+				.startStrList(Component.translatable("config.asyncparticles.tick.syncAnimationClasses"),
+					new ArrayList<>(displayConfig.tick.syncAnimationClasses))
+				.setDefaultValue(new ArrayList<>(defaultConfig.tick.syncAnimationClasses))
+				.setTooltip(Component.translatable("config.asyncparticles.tick.syncAnimationClasses.tooltip"))
+				.setSaveConsumer(newValue -> displayConfig.tick.syncAnimationClasses = new LinkedHashSet<>(newValue))
+				.build(), originalConfig.tick.syncAnimationClasses))
+			.addEntry(modifyOriginal(revertButtonEntryBuilder
 				.startStrList(Component.translatable("config.asyncparticles.tick.syncParticleClasses"),
 					new ArrayList<>(displayConfig.tick.syncParticleClasses))
 				.setDefaultValue(new ArrayList<>(originalConfig.tick.syncParticleClasses))
@@ -268,7 +275,7 @@ class ClothConfigMenus {
 		// endregion
 
 		// region Mixin
-		ClothConfigMixinMenus.addModCompatCategory(entryBuilder, revertEntryBuilder, vsEntries, createEntries);
+		ClothConfigMixinMenus.addModCompatCategory(entryBuilder, revertButtonEntryBuilder, vsEntries, createEntries);
 
 		builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mod-compat"))
 			.addEntry(new SubCategoryListEntryFix(entryBuilder
@@ -283,7 +290,7 @@ class ClothConfigMenus {
 				.build()));
 
 		ConfigCategory mixinCategory = builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mixin"));
-		ClothConfigMixinMenus.buildCategory(mixinBundle, mixinCategory, entryBuilder, revertEntryBuilder);
+		ClothConfigMixinMenus.buildCategory(mixinBundle, mixinCategory, entryBuilder, revertButtonEntryBuilder);
 		// endregion
 
 		// region Mobile

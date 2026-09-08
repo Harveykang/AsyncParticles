@@ -9,9 +9,11 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 	public boolean preCancel(List<String> targetClassNames, String mixinClassName) {
 		return switch (mixinClassName) {
 			case "einstein.subtle_effects.mixin.client.particle.ParticleEngineMixin",
-				 "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin",
-				 "net.diebuddies.mixins.weather.MixinParticleEngine",
-				 "me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin" -> true;
+			     "io.github.fabricators_of_create.porting_lib.mixin.client.ParticleEngineMixin",
+			     "net.diebuddies.mixins.weather.MixinParticleEngine",
+			     "me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin",
+			     "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin",
+			     "team.teampotato.ruok.mixin.minecraft.particle.ParticleManagerMixin" -> true;
 			default -> false;
 		};
 	}
@@ -27,6 +29,8 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 				"tick".equals(mixinMethodName);
 			case "me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin" ->
 				"particle_core_synchronizeParticleAdds".equals(mixinMethodName);
+			case "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin" -> "tick".equals(mixinMethodName);
+			case "team.teampotato.ruok.mixin.minecraft.particle.ParticleManagerMixin" -> "tick".equals(mixinMethodName);
 			default -> false;
 		};
 	}

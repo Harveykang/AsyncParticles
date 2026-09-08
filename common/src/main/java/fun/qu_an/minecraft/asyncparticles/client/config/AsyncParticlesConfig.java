@@ -57,6 +57,7 @@ public class AsyncParticlesConfig {
 	public static boolean tick$deferredTextureTick;
 	public static int tick$failPerSecLimit;
 	public static boolean tick$suppressCME;
+	public static Set<String> tick$syncAnimationClasses = new LinkedHashSet<>();
 	public static Set<String> tick$syncParticleClasses = new LinkedHashSet<>();
 	public static boolean rendering$gpuAcceleration;
 	public static boolean rendering$appendNewParticlesToRenderer;
@@ -233,7 +234,9 @@ public class AsyncParticlesConfig {
 
 	static ConfigObj getDefaultConfigExceptCollections() {
 		ConfigObj configObj = new ConfigObj();
-		configObj.tick.syncParticleClasses = getCurrentConfig().tick.syncParticleClasses;
+		ConfigObj currentConfig = getCurrentConfig();
+		configObj.tick.syncAnimationClasses = currentConfig.tick.syncAnimationClasses;
+		configObj.tick.syncParticleClasses = currentConfig.tick.syncParticleClasses;
 		return configObj;
 	}
 
@@ -317,7 +320,12 @@ public class AsyncParticlesConfig {
 			boolean deferredTextureTick = !ModListHelper.AXIOM_LOADED;
 			int failPerSecLimit = 5;
 			boolean suppressCME = false;
+			Set<String> syncAnimationClasses = new LinkedHashSet<>();
 			Set<String> syncParticleClasses = new LinkedHashSet<>();
+
+			{
+				syncParticleClasses.add("pigcart.particlerain.particle.BlockDisplayParticle");
+			}
 
 			private void flat() {
 				tick$asyncAnimateTick = animationTickMode;
@@ -327,6 +335,7 @@ public class AsyncParticlesConfig {
 				tick$deferredTextureTick = deferredTextureTick && !ModListHelper.AXIOM_LOADED;
 				tick$failPerSecLimit = Mth.clamp(failPerSecLimit, 0, 256);
 				tick$suppressCME = suppressCME;
+				tick$syncAnimationClasses = new LinkedHashSet<>(syncAnimationClasses);
 				tick$syncParticleClasses = new LinkedHashSet<>(syncParticleClasses);
 			}
 
@@ -338,7 +347,8 @@ public class AsyncParticlesConfig {
 				deferredTextureTick = tick$deferredTextureTick;
 				failPerSecLimit = tick$failPerSecLimit;
 				suppressCME = tick$suppressCME;
-				syncParticleClasses = new LinkedHashSet<>(tick$syncParticleClasses);
+				syncAnimationClasses.addAll(tick$syncAnimationClasses);
+				syncParticleClasses.addAll(tick$syncParticleClasses);
 			}
 		}
 
