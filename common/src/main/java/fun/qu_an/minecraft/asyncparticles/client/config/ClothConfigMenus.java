@@ -230,7 +230,8 @@ class ClothConfigMenus {
 				.startStrList(Component.translatable("config.asyncparticles.tick.syncAnimationClasses"),
 					new ArrayList<>(displayConfig.tick.syncAnimationClasses))
 				.setDefaultValue(new ArrayList<>(originalConfig.tick.syncAnimationClasses))
-				.setTooltip(Component.translatable("config.asyncparticles.tick.syncAnimationClasses.tooltip"))
+				.setTooltip(Component.translatable("config.asyncparticles.tick.syncAnimationClasses.tooltip"),
+					Component.translatable("config.asyncparticles.tooltip.list-how-to-reset"))
 				.setSaveConsumer(newValue -> {
 					LinkedHashSet<String> set = new LinkedHashSet<>(newValue);
 					set.addAll(defaultConfig.tick.syncAnimationClasses);
@@ -241,7 +242,8 @@ class ClothConfigMenus {
 				.startStrList(Component.translatable("config.asyncparticles.tick.syncParticleClasses"),
 					new ArrayList<>(displayConfig.tick.syncParticleClasses))
 				.setDefaultValue(new ArrayList<>(originalConfig.tick.syncParticleClasses))
-				.setTooltip(Component.translatable("config.asyncparticles.tick.syncParticleClasses.tooltip"))
+				.setTooltip(Component.translatable("config.asyncparticles.tick.syncParticleClasses.tooltip"),
+					Component.translatable("config.asyncparticles.tooltip.list-how-to-reset"))
 				.setSaveConsumer(newValue -> {
 					LinkedHashSet<String> set = new LinkedHashSet<>(newValue);
 					set.addAll(defaultConfig.tick.syncParticleClasses);
@@ -359,7 +361,7 @@ class ClothConfigMenus {
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
 				Component.translatable("config.asyncparticles.mixin.create.contraptionsNoParticleCollision.tooltip"),
-				Component.translatable("config.asyncparticles.mixin.tooltip"))
+				Component.translatable("config.asyncparticles.tooltip.list-how-to-reset"))
 			.requireRestart()
 			.build()), originalMixinConfig.getContraptionNoParticleCollision()));
 		builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mod-compat"))
@@ -450,7 +452,7 @@ class ClothConfigMenus {
 			.setTooltip(
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
-				Component.translatable("config.asyncparticles.mixin.tooltip"))
+				Component.translatable("config.asyncparticles.tooltip.list-how-to-reset"))
 			.requireRestart()
 			.build()));
 		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertButtonEntryBuilder
@@ -465,7 +467,7 @@ class ClothConfigMenus {
 			.setTooltip(
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
-				Component.translatable("config.asyncparticles.mixin.tooltip"))
+				Component.translatable("config.asyncparticles.tooltip.list-how-to-reset"))
 			.requireRestart()
 			.build()), originalMixinConfig.getNoLightCache()));
 		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertButtonEntryBuilder
@@ -479,7 +481,7 @@ class ClothConfigMenus {
 			.setTooltip(
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
-				Component.translatable("config.asyncparticles.mixin.tooltip"))
+				Component.translatable("config.asyncparticles.tooltip.list-how-to-reset"))
 			.requireRestart()
 			.build()), originalMixinConfig.getLockProvider()));
 		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertButtonEntryBuilder
@@ -493,7 +495,7 @@ class ClothConfigMenus {
 			.setTooltip(
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
-				Component.translatable("config.asyncparticles.mixin.tooltip"))
+				Component.translatable("config.asyncparticles.tooltip.list-how-to-reset"))
 			.requireRestart()
 			.build()), originalMixinConfig.getLockRequired()));
 		mixinCategory.addEntry(modifyOriginal(new StringListListEntryFixRestart(revertButtonEntryBuilder
@@ -508,7 +510,7 @@ class ClothConfigMenus {
 				Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
 				Component.translatable("config.asyncparticles.mixin.replaceRandom.tooltip"),
-				Component.translatable("config.asyncparticles.mixin.tooltip"))
+				Component.translatable("config.asyncparticles.tooltip.list-how-to-reset"))
 			.requireRestart()
 			.build()), originalMixinConfig.getReplaceRandom()));
 		mixinCategory.addEntry(modifyOriginal(entryBuilder
