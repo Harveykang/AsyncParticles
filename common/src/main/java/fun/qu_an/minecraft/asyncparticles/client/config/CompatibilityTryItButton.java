@@ -58,7 +58,7 @@ public class CompatibilityTryItButton extends Button {
 			new ClothConfigMenus.ConfigBundle(pair.first(),
 				AsyncParticlesConfig.getDefaultConfig(),
 				AsyncParticlesConfig.getCurrentConfig()),
-			new ClothConfigMixinMenus.MixinConfigBundle(
+			new ClothConfigMenus.MixinConfigBundle(
 				pair.second(),
 				AsyncParticlesMixinConfig.getDefaultConfig(),
 				AsyncParticlesMixinConfig.getCurrentConfig()
