@@ -62,7 +62,7 @@
   "config.asyncparticles.mod-compat.create.tickRainBlockingRange.tooltip": "Rain blocking access outside of this range(X/Z direction)\nare calculated using the slower fallback method.",
   "config.asyncparticles.category.mixin": "Mixin",
   "config.asyncparticles.mixin.invalid-class": "Class not found or not a subclass of '%s'!",
-  "config.asyncparticles.mixin.tooltip": "Default entries can't be deleted.\n(Reset to default by removing all entries.)",
+  "config.asyncparticles.tooltip.list-how-to-reset": "Default entries can't be deleted.\n(Reset to default by removing all entries.)",
   "config.asyncparticles.mixin.particle.splitTick": "Split Vanilla Particle Ticking",
   "config.asyncparticles.mixin.particle.splitTick.tooltip": "Split the supported particle tick tasks more evenly\ninstead of grouping by ParticleRenderType.",
   "config.asyncparticles.mixin.safeClassInstanceMultiMap": "Make 'ClassInstanceMultiMap' Thread-Safe",
