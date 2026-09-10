@@ -229,9 +229,13 @@ class ClothConfigMenus {
 			.addEntry(modifyOriginal(revertButtonEntryBuilder
 				.startStrList(Component.translatable("config.asyncparticles.tick.syncAnimationClasses"),
 					new ArrayList<>(displayConfig.tick.syncAnimationClasses))
-				.setDefaultValue(new ArrayList<>(defaultConfig.tick.syncAnimationClasses))
+				.setDefaultValue(new ArrayList<>(originalConfig.tick.syncAnimationClasses))
 				.setTooltip(Component.translatable("config.asyncparticles.tick.syncAnimationClasses.tooltip"))
-				.setSaveConsumer(newValue -> displayConfig.tick.syncAnimationClasses = new LinkedHashSet<>(newValue))
+				.setSaveConsumer(newValue -> {
+					LinkedHashSet<String> set = new LinkedHashSet<>(newValue);
+					set.addAll(defaultConfig.tick.syncAnimationClasses);
+					displayConfig.tick.syncAnimationClasses = set;
+				})
 				.build(), originalConfig.tick.syncAnimationClasses))
 			.addEntry(modifyOriginal(revertButtonEntryBuilder
 				.startStrList(Component.translatable("config.asyncparticles.tick.syncParticleClasses"),
