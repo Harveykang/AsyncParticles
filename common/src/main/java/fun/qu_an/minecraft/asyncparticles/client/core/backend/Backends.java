@@ -40,7 +40,7 @@ public class Backends {
 			glCs = getGlCs(GL_ES, glCapabilities);
 			vk = new VkCommands.Unsupported();
 			backend = GL_ES ? Backend.OPENGL_ON_ES : Backend.OPENGL;
-		} else if (backendName.toLowerCase(Locale.ROOT).contains("vulkan")) {
+		} else if (backendName.toLowerCase(Locale.ROOT).contains("vulkan") && ModListHelper.VULKAN_MOD_0_6) {
 			gl = new GlCommands.Unsupported();
 			glTf = new GlCommands.TransformFeedback.Unsupported();
 			glCs = new GlCommands.ComputeShader.Unsupported();
