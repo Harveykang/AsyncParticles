@@ -66,7 +66,7 @@ dependencies {
     modCompileOnly "maven.modrinth:a-good-place:fabric_1.21-1.2.6"
 
     /* Physics Mod */
-        modCompileOnly "maven.modrinth:physicsmod:di4A1Lqo" // 3.0.26
+        modCompileOnly "maven.modrinth:physicsmod:WlIhw5p0" // 3.0.32
 
     /* Subtle Effects */
 //    modCompileOnly "maven.modrinth:subtle-effects:1.14.1"
