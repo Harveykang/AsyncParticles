@@ -36,6 +36,9 @@ repositories {
 }
 
 dependencies {
+    // fix crashing neoforge runClient
+    localRuntime 'io.github.llamalad7:mixinextras-neoforge:0.5.5'
+
     // MixinSquared's annotationProcessor MUST be registered BEFORE Mixin's one.
     compileOnly(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:0.3.7-beta.3"))
     implementation(include("com.github.bawnorton.mixinsquared:mixinsquared-neoforge:0.3.7-beta.3"))
@@ -48,14 +51,14 @@ dependencies {
 
     /* APIs */
 //    localRuntime 'maven.modrinth:architectury-api:17.0.8+neoforge'
-    localRuntime "me.shedaniel.cloth:cloth-config-neoforge:26.2.155"
+//    localRuntime "me.shedaniel.cloth:cloth-config-neoforge:26.2.155"
 //    localRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
 //
 //    /* Performance */
-    localRuntime "maven.modrinth:spark:1.10.172-neoforge"
+//    localRuntime "maven.modrinth:spark:1.10.172-neoforge"
 //    compileOnly 'maven.modrinth:sodium:mc26.2-0.9.0-neoforge'
-    localRuntime 'maven.modrinth:sodium:mc26.2-0.9.0-neoforge'
-    localRuntime 'maven.modrinth:sodium-extra:mc26.2-0.8.9+neoforge'
+//    localRuntime 'maven.modrinth:sodium:mc26.2-0.9.0-neoforge'
+//    localRuntime 'maven.modrinth:sodium-extra:mc26.2-0.8.9+neoforge'
 //
 //    compileOnly "maven.modrinth:iris:1.10.9+26.1-neoforge"
 //    localRuntime "maven.modrinth:iris:1.10.9+26.1-neoforge"
@@ -158,4 +161,15 @@ shadowJar {
     configurations = [project.configurations.shadowCommon]
     archiveClassifier = null           // shadowJar becomes the main artifact
     from rootProject.file("LICENSE")
+}
+
+runClient {
+    // fix crash during earlyWindow
+    doFirst {
+        def config = loom.runs.client.runDirectory.file('config/fml.toml').get().asFile
+        config.parentFile.mkdirs()
+        def lines = config.exists() ? config.readLines('UTF-8') : []
+        lines.removeAll { it ==~ /[ \t]*earlyWindowControl[ \t]*=.*/ }
+        config.setText((['earlyWindowControl = false'] + lines).join('\n') + '\n', 'UTF-8')
+    }
 }

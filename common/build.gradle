@@ -16,7 +16,7 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
     compileOnly "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 //    compileOnly "org.sinytra:connector:2.0.0-beta.7+1.21.1"
-    compileOnly("me.shedaniel.cloth:cloth-config:26.2.155")
+    compileOnly("me.shedaniel.cloth:cloth-config:26.3.158")
 //
 //    /* APIs */
 //    compileOnly "maven.modrinth:fzzy-config:0.7.2+1.21.6"

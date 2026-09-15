@@ -10,12 +10,12 @@ displayName = "AsyncParticles"
 authors = "Harvey_Husky"
 description = '''
 '''
-logoFile = "assets/asyncparticles/icon.png"
+iconFile = "assets/asyncparticles/icon.png"
 
 [[dependencies.asyncparticles]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.11.42,)"
+versionRange = "(26.2,)"
 ordering = "NONE"
 side = "CLIENT"
 

@@ -18,6 +18,20 @@ subprojects {
     apply plugin: 'architectury-plugin'
     apply plugin: 'maven-publish'
 
+    // Transformer 5.2.91 cannot read LWJGL 3.4.2/3.4.3's Java 27 multi-release classes.
+    // Keep Minecraft's compile/runtime libraries intact and downgrade only the core
+    // LWJGL JAR used for Architectury's bytecode analysis.
+    configurations.matching {
+        it.name == 'architecturyTransformerClasspath'
+    }.configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == 'org.lwjgl' && requested.name == 'lwjgl') {
+                useVersion '3.4.1'
+                because 'Architectury Transformer does not support Java 27 class files yet'
+            }
+        }
+    }
+
     loom {
         runs {
             configureEach {
@@ -103,6 +117,14 @@ subprojects {
         maven { // fzzy config
             name = "FzzyMaven"
             url = "https://maven.fzzyhmstrs.me/"
+        }
+        maven {
+            name = "Maven for PR #3403" // https://github.com/neoforged/NeoForge/pull/3403
+            url = uri("https://prmaven.neoforged.net/NeoForge/pr3403")
+            content {
+                includeModule("net.neoforged", "neoforge")
+                includeModule("net.neoforged", "testframework")
+            }
         }
     }
 
