@@ -51,8 +51,6 @@
     "compat.particlerain_vs.MixinWeatherParticleManager",
     "compat.physicsmod.MixinClientLevel",
     "compat.physicsmod.MixinLevelRenderer",
-    "compat.physicsmod.MixinRainParticle",
-    "compat.physicsmod.MixinSnowParticle",
     "compat.physicsmod.MixinWeatherParticle",
     "compat.physicsmod_create.MixinLevelRenderer",
     "compat.physicsmod_create.MixinWeatherParticle",

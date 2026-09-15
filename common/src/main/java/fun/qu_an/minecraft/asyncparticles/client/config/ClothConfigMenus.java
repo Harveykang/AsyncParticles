@@ -192,6 +192,18 @@ class ClothConfigMenus {
 				.setDefaultValue(defaultConfig.tick.tickWeatherAsync)
 				.setTooltip(Component.translatable("config.asyncparticles.tick.tickWeatherAsync.tooltip"))
 				.setSaveConsumer(newValue -> displayConfig.tick.tickWeatherAsync = newValue)
+				.setTooltipSupplier(() -> {
+					if (PHYSICSMOD_LOADED) {
+						return incompatibilityTooltip(
+							Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip"),
+							"Physics Mod");
+					} else {
+						return Optional.of(new MutableComponent[]{
+							Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip")
+						});
+					}
+				})
+				.setRequirement(() -> !PHYSICSMOD_LOADED)
 				.build(), originalConfig.tick.tickWeatherAsync))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.tick.deferredTextureTick"),
