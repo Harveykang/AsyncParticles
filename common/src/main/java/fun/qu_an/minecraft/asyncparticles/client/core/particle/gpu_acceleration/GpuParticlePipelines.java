@@ -66,8 +66,8 @@ public class GpuParticlePipelines {
 				original1.pushConstantSize(),
 				original1.getSortKey());
 			if (ModListHelper.IRIS_LOADED) {
-//				IrisApi.getInstance().assignPipeline(pipeline,
-//					translucent ? IrisProgram.PARTICLES_TRANSLUCENT : IrisProgram.PARTICLES);
+				IrisApi.getInstance().assignPipeline(pipeline,
+					translucent ? IrisProgram.PARTICLES_TRANSLUCENT : IrisProgram.PARTICLES);
 			}
 			return pipeline;
 		});
