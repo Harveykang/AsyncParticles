@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backend;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.ChatFormatting;
@@ -364,7 +365,8 @@ public class AsyncParticlesConfig {
 			ParticleCullingMode particleCulling = ParticleCullingMode.SPHERE;
 			boolean gpuAcceleration = Backends.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
-			ComputeExecutionStage computeExecutionStage = ComputeExecutionStage.LEVEL_RENDERING;
+			ComputeExecutionStage computeExecutionStage = Backends.backend == Backend.OPENGL_ON_ES
+				? ComputeExecutionStage.PARTICLE_RENDERING : ComputeExecutionStage.LEVEL_RENDERING;
 			public boolean tickRendererOnMainThread = false;
 			boolean cullWeathers = true;
 
@@ -375,7 +377,9 @@ public class AsyncParticlesConfig {
 				rendering$particleCulling = requireNonNullElse(particleCulling, ParticleCullingMode.SPHERE);
 				rendering$gpuAcceleration = gpuAcceleration && Backends.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
-				rendering$computeExecutionStage = requireNonNullElse(computeExecutionStage, ComputeExecutionStage.LEVEL_RENDERING);
+				rendering$computeExecutionStage = Backends.backend == Backend.OPENGL_ON_ES
+					? ComputeExecutionStage.PARTICLE_RENDERING
+					: requireNonNullElse(computeExecutionStage, ComputeExecutionStage.LEVEL_RENDERING);
 				rendering$cullWeathers = cullWeathers;
 				rendering$tickRendererOnMainThread = tickRendererOnMainThread;
 			}

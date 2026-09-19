@@ -287,7 +287,8 @@ class ClothConfigMenus {
 								.withStyle(ChatFormatting.YELLOW)
 						});
 					}
-				})				.setSaveConsumer(newValue -> displayConfig.rendering.gpuAcceleration = newValue)
+				})
+				.setSaveConsumer(newValue -> displayConfig.rendering.gpuAcceleration = newValue)
 				.setRequirement(Backends::supportsGpuAcceleration)
 				.build(), originalConfig.rendering.gpuAcceleration))
 			.addEntry(modifyOriginal(entryBuilder
@@ -310,8 +311,19 @@ class ClothConfigMenus {
 					ComputeExecutionStage.class, displayConfig.rendering.computeExecutionStage)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
 				.setDefaultValue(defaultConfig.rendering.computeExecutionStage)
-				.setTooltip(Component.translatable("config.asyncparticles.rendering.computeExecutionStage.tooltip"))
+				.setTooltipSupplier(() -> {
+					if (Backends.backend != Backend.OPENGL_ON_ES) {
+						return Optional.of(new MutableComponent[]{Component.translatable("config.asyncparticles.rendering.computeExecutionStage.tooltip")});
+					} else {
+						return Optional.of(new MutableComponent[]{
+							Component.translatable("config.asyncparticles.rendering.computeExecutionStage.tooltip")
+								.withStyle(ChatFormatting.STRIKETHROUGH),
+							Component.translatable("config.asyncparticles.incompatibility.backend", "OpenGL on ES")
+								.withStyle(ChatFormatting.YELLOW)});
+					}
+				})
 				.setSaveConsumer(newValue -> displayConfig.rendering.computeExecutionStage = newValue)
+				.setRequirement(() -> Backends.backend != Backend.OPENGL_ON_ES)
 				.build(), originalConfig.rendering.computeExecutionStage))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.tickRendererOnMainThread"),
