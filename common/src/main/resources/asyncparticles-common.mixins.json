@@ -39,6 +39,7 @@
     "compat.physicsmod_create.MixinLevelRenderer",
     "compat.physicsmod_create.MixinWeatherParticle",
     "compat.sable.MixinMixinClientLevel",
+    "compat.sable.MixinMixinParticle_LightScan",
     "compat.sable.MixinParticle",
     "compat.sodium_extra.MixinParticleEngine",
     "compat.veil.MixinLightRenderer",
