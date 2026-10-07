@@ -20,7 +20,7 @@ import java.util.Queue;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-@Mixin(ParticleEngine.class)
+@Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	@Shadow
 	@Final
