@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pigcart.particlerain.ParticleSpawner;
 import pigcart.particlerain.config.ParticleData;
@@ -68,13 +69,15 @@ public class MixinWeatherParticleManager {
 		canSpawn.set(value);
 	}
 
-	@Inject(method = "tickSurfaceFX", at = @At(value = "INVOKE_ASSIGN",
-		target = "Lpigcart/particlerain/ParticleSpawner;getHeight(Lnet/minecraft/client/multiplayer/ClientLevel;II)I"))
+	@Inject(method = "tickSurfaceFX", slice = @Slice(
+		from = @At(value = "INVOKE", target = "Lpigcart/particlerain/ParticleSpawner;getHeight(Lnet/minecraft/client/multiplayer/ClientLevel;DD)I")
+	), at = @At(value = "INVOKE", ordinal = 0,
+		target = "Lnet/minecraft/core/BlockPos$MutableBlockPos;set(DDD)Lnet/minecraft/core/BlockPos$MutableBlockPos;"))
 	private static void onTickSurfaceFX(ClientLevel level,
 										Vec3 cameraPos,
 										CallbackInfo ci,
 										@Local(name = "x") double x,
-										@Local(name = "y") int y,
+										@Local(name = "y") double y,
 										@Local(name = "z") double z,
 										@Share("canSpawn") LocalBooleanRef canSpawn) {
 		boolean value = VSCompat.canSpawnWeatherParticle(level, x, y, z);

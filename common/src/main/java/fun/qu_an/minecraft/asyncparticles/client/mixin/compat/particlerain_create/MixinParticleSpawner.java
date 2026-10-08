@@ -1,7 +1,5 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.compat.particlerain_create;
 
-import com.llamalad7.mixinextras.expression.Definition;
-import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -18,6 +16,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pigcart.particlerain.ParticleSpawner;
 import pigcart.particlerain.config.ParticleData;
@@ -70,14 +69,15 @@ public class MixinParticleSpawner {
 		canSpawn.set(value);
 	}
 
-	@Definition(id = "getHeight", method = "Lpigcart/particlerain/ParticleSpawner;getHeight(Lnet/minecraft/client/multiplayer/ClientLevel;II)I")
-	@Expression("? = getHeight(?, ?, ?)")
-	@Inject(method = "tickSurfaceFX", at = @At(value = "MIXINEXTRAS:EXPRESSION", shift = At.Shift.AFTER))
+	@Inject(method = "tickSurfaceFX", slice = @Slice(
+		from = @At(value = "INVOKE", target = "Lpigcart/particlerain/ParticleSpawner;getHeight(Lnet/minecraft/client/multiplayer/ClientLevel;DD)I")
+	), at = @At(value = "INVOKE", ordinal = 0,
+		target = "Lnet/minecraft/core/BlockPos$MutableBlockPos;set(DDD)Lnet/minecraft/core/BlockPos$MutableBlockPos;"))
 	private static void onTickSurfaceFX(ClientLevel level,
 	                                    Vec3 cameraPos,
 	                                    CallbackInfo ci,
 	                                    @Local(name = "x") double x,
-	                                    @Local(name = "y") int y,
+	                                    @Local(name = "y") double y,
 	                                    @Local(name = "z") double z,
 	                                    @Share("canSpawn") LocalBooleanRef canSpawn) {
 		boolean value = CreateCompat.canSpawnWeatherParticleFloorToInt(level, x, y, z);
