@@ -46,11 +46,11 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void onClearParticles(CallbackInfo ci) {
+		ParticleHelper.onClearParticles();
 		particlesToAdd.forEach(ParticleHelper::onClearParticle);
 		particlesToAdd = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT, ConfigHelper.getParticleLimit(), ParticleHelper::onEvict);
 		trackingEmitters.forEach(ParticleHelper::onClearParticle);
 		trackingEmitters = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT / 4, ConfigHelper.getParticleLimit(), ParticleHelper::onEvict);
 		particles.values().forEach(queue -> queue.forEach(ParticleHelper::onClearParticle));
-		ParticleHelper.onClearParticles();
 	}
 }

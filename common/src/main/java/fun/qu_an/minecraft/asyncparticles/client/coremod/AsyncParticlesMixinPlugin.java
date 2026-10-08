@@ -4,6 +4,7 @@ import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particle_core.ParticleCoreEarlyCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.MixinConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.*;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers.AsyncParticlesMixinCanceller;
@@ -78,6 +79,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				default -> true;
 			};
 			case "compat" -> switch (split[1]) {
+				case "polytone" -> PolytoneEarlyCompat.isAvailable();
 				case "sable" -> SABLE_LOADED;
 				case "particlerain" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN;
 				case "particlerain_vs" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && VS_LOADED;

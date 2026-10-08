@@ -27,9 +27,9 @@ dependencies {
     modCompileOnly "maven.modrinth:fzzy-config:0.7.5+1.21"
 
     /* Performance */
-    modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.8.12-alpha.3-fabric"
-    modCompileOnly "maven.modrinth:sodium-extra:mc1.21.1-0.6.0+fabric"
-    modCompileOnly 'maven.modrinth:iris:1.8.8+1.21.1-fabric'
+    modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.8.13-fabric"
+    modCompileOnly "maven.modrinth:sodium-extra:mc1.21.1-0.9.4+fabric"
+    modCompileOnly 'maven.modrinth:iris:1.8.14-beta.1+1.21.1-fabric'
 
     /* Particle Rain */
     modCompileOnly "maven.modrinth:particle-rain:v4.0.1+$minecraft_version-fabric"
@@ -61,6 +61,9 @@ dependencies {
 
     /* Particle Core */
     modCompileOnly "maven.modrinth:particle-core:0.3.3+1.21"
+
+    /* Polytone */
+    modCompileOnly "maven.modrinth:polytone:yXYXQ87k" // 1.21-5.0.3
 
     /* A Good Place */
     modCompileOnly "maven.modrinth:a-good-place:fabric_1.21-1.2.6"

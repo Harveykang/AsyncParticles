@@ -69,6 +69,11 @@ public class AsyncParticlesConfig {
 	public static RainEffect valkyrienSkies$rainEffect;
 	public static boolean valkyrienSkies$fixParticleLights;
 	public static boolean sable$fixParticleLights;
+	public static boolean polytone$takeover;
+	public static boolean polytone$asyncTick;
+	public static boolean polytone$gpuOnlyAsyncTick;
+	public static boolean polytone$gpuRendering;
+	public static boolean polytone$lightCache;
 	public static RainEffect create$rainEffect;
 	public static int create$tickRainBlockingRange;
 	public static boolean mobile$multiDrawWorkaround;
@@ -259,6 +264,7 @@ public class AsyncParticlesConfig {
 		Rendering rendering = new Rendering();
 		ValkyrienSkies valkyrienSkies = new ValkyrienSkies();
 		Sable sable = new Sable();
+		Polytone polytone = new Polytone();
 		Create create = new Create();
 		Mobile mobile = new Mobile();
 
@@ -268,6 +274,7 @@ public class AsyncParticlesConfig {
 			rendering.flat();
 			valkyrienSkies.flat();
 			sable.flat();
+			polytone.flat();
 			create.flat();
 			mobile.flat();
 		}
@@ -278,13 +285,9 @@ public class AsyncParticlesConfig {
 			rendering.fold();
 			valkyrienSkies.fold();
 			sable.fold();
+			polytone.fold();
 			create.fold();
 			mobile.fold();
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(particle, tick, rendering, valkyrienSkies, create, mobile);
 		}
 
 		static class Particle {
@@ -423,6 +426,33 @@ public class AsyncParticlesConfig {
 
 			private void fold() {
 				fixParticleLights = sable$fixParticleLights;
+			}
+		}
+
+		static class Polytone {
+			private Polytone() {
+			}
+
+			boolean takeover = true;
+			boolean asyncTick = true;
+			boolean gpuOnlyAsyncTick = false;
+			boolean gpuRendering = true;
+			boolean lightCache = false;
+
+			private void flat() {
+				polytone$takeover = takeover;
+				polytone$asyncTick = asyncTick;
+				polytone$gpuOnlyAsyncTick = gpuOnlyAsyncTick;
+				polytone$gpuRendering = gpuRendering;
+				polytone$lightCache = lightCache;
+			}
+
+			private void fold() {
+				takeover = polytone$takeover;
+				asyncTick = polytone$asyncTick;
+				gpuOnlyAsyncTick = polytone$gpuOnlyAsyncTick;
+				gpuRendering = polytone$gpuRendering;
+				lightCache = polytone$lightCache;
 			}
 		}
 

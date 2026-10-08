@@ -38,6 +38,12 @@
     "compat.physicsmod.MixinWeatherParticle",
     "compat.physicsmod_create.MixinLevelRenderer",
     "compat.physicsmod_create.MixinWeatherParticle",
+    "compat.polytone.MixinBlockPropertiesManager",
+    "compat.polytone.MixinCustomParticleInstance",
+    "compat.polytone.MixinCustomParticleType",
+    "compat.polytone.MixinOptionHolder",
+    "compat.polytone.MixinPolytoneAsyncParticleHandler",
+    "compat.polytone.MixinPolytoneReloadManager",
     "compat.sable.MixinMixinClientLevel",
     "compat.sable.MixinMixinParticle_LightScan",
     "compat.sable.MixinParticle",
@@ -100,5 +106,6 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "compat.polytone.AccessorPolytoneAsyncParticleHandler"
   ]
 }

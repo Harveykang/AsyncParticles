@@ -4,6 +4,9 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneEarlyCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
@@ -41,6 +44,9 @@ public class ParticleHelper {
 		if (ModListHelper.PARTICLERAIN_LOADED) {
 			ParticleRainCompat.onParticleEngineClear();
 		}
+		if (PolytoneEarlyCompat.isAvailable()) {
+			PolytoneCompat.onParticleEngineClear();
+		}
 	}
 
 	public static void doFirstRefresh(Particle particle) {
@@ -51,7 +57,8 @@ public class ParticleHelper {
 			&& GpuParticleBehavior.getInstance().canRenderFast(tsp))) {
 			addon.asyncparticles$enableLightCache(true);
 		}
-		Integer i = DESTRUCTION_LIGHT_CACHE.get();
+		Integer i = PolytoneEarlyCompat.isAvailable() && particle instanceof PolytoneParticleAddon
+			? null : DESTRUCTION_LIGHT_CACHE.get();
 		if (i != null) {
 			addon.asyncparticles$setLight(i);
 		} else if (b) {

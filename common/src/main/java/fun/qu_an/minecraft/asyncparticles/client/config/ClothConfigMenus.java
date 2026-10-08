@@ -1,9 +1,9 @@
 package fun.qu_an.minecraft.asyncparticles.client.config;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.cloth_config.AbstractConfigEntryAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.cloth_config.AbstractListListEntryAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.CompatibilityTryItButton.CompatibilityTryIt;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backend;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
@@ -13,6 +13,7 @@ import fun.qu_an.minecraft.asyncparticles.client.util.TranslatableEnum;
 import me.shedaniel.clothconfig2.api.*;
 import me.shedaniel.clothconfig2.gui.AbstractConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.AbstractListListEntry;
+import net.mehvahdjukaar.polytone.Polytone;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -58,6 +59,10 @@ class ClothConfigMenus {
 		AsyncParticlesConfig.ConfigObj displayConfig = bundle.displayConfig();
 		AsyncParticlesMixinConfig.MixinConfigObj displayMixinConfig = mixinBundle.displayConfig();
 		builder.setSavingRunnable(() -> {
+			boolean previousAsyncTick = false;
+			if (PolytoneEarlyCompat.isAvailable()) {
+				previousAsyncTick = Polytone.CONFIGS.particlesOffThread.get();
+			}
 			try {
 				displayConfig.flat();
 				AsyncParticlesConfig.save();
@@ -81,6 +86,10 @@ class ClothConfigMenus {
 				});
 			}
 			AsyncTickBehavior.getInstance().reloadLater();
+			if (PolytoneEarlyCompat.isAvailable()
+				&& previousAsyncTick != Polytone.CONFIGS.particlesOffThread.get()) {
+				ThreadUtil.enqueueClientTask(() -> Minecraft.getInstance().reloadResourcePacks());
+			}
 		});
 
 		builder.setAfterInitConsumer(screen -> screen.addRenderableWidget(
@@ -287,7 +296,7 @@ class ClothConfigMenus {
 								.withStyle(ChatFormatting.YELLOW)
 						});
 					}
-				})				.setSaveConsumer(newValue -> displayConfig.rendering.gpuAcceleration = newValue)
+				}).setSaveConsumer(newValue -> displayConfig.rendering.gpuAcceleration = newValue)
 				.setRequirement(Backends::supportsGpuAcceleration)
 				.build(), originalConfig.rendering.gpuAcceleration))
 			.addEntry(modifyOriginal(entryBuilder
@@ -364,6 +373,65 @@ class ClothConfigMenus {
 			.build());
 
 		@SuppressWarnings("rawtypes")
+		List<AbstractConfigListEntry> polytoneEntries = new ArrayList<>();
+		AbstractConfigListEntry<Boolean> polytoneMixin = modifyOriginal(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.polytone.mixin"),
+				displayMixinConfig.isPolytoneCompatEnabled())
+			.setDefaultValue(defaultMixinConfig.isPolytoneCompatEnabled())
+			.setTooltip(Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mod-compat.polytone.mixin.tooltip"))
+			.setSaveConsumer(displayMixinConfig::setPolytoneCompatEnabled)
+			.requireRestart()
+			.build(), originalMixinConfig.isPolytoneCompatEnabled());
+		AbstractConfigListEntry<Boolean> polytoneTakeover = modifyOriginal(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.polytone.takeover"),
+				displayConfig.polytone.takeover)
+			.setDefaultValue(defaultConfig.polytone.takeover)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.polytone.takeover.tooltip"))
+			.setSaveConsumer(newValue -> displayConfig.polytone.takeover = newValue)
+			.setRequirement(() -> PolytoneEarlyCompat.isAvailable())
+			.build(), originalConfig.polytone.takeover);
+		AbstractConfigListEntry<Boolean> polytoneAsyncTick = modifyOriginal(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.polytone.asyncTick"),
+				displayConfig.polytone.asyncTick)
+			.setDefaultValue(defaultConfig.polytone.asyncTick)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.polytone.asyncTick.tooltip"))
+			.setSaveConsumer(newValue -> displayConfig.polytone.asyncTick = newValue)
+			.setRequirement(() -> PolytoneEarlyCompat.isAvailable() && polytoneTakeover.getValue())
+			.build(), originalConfig.polytone.asyncTick);
+		AbstractConfigListEntry<Boolean> polytoneGpuRendering = modifyOriginal(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.polytone.gpuRendering"),
+				displayConfig.polytone.gpuRendering)
+			.setDefaultValue(defaultConfig.polytone.gpuRendering)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.polytone.gpuRendering.tooltip"))
+			.setSaveConsumer(newValue -> displayConfig.polytone.gpuRendering = newValue)
+			.setRequirement(() -> PolytoneEarlyCompat.isAvailable() && polytoneTakeover.getValue())
+			.build(), originalConfig.polytone.gpuRendering);
+		AbstractConfigListEntry<Boolean> polytoneGpuOnlyAsyncTick = modifyOriginal(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.polytone.gpuOnlyAsyncTick"),
+				displayConfig.polytone.gpuOnlyAsyncTick)
+			.setDefaultValue(defaultConfig.polytone.gpuOnlyAsyncTick)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.polytone.gpuOnlyAsyncTick.tooltip"))
+			.setSaveConsumer(newValue -> displayConfig.polytone.gpuOnlyAsyncTick = newValue)
+			.setRequirement(() -> PolytoneEarlyCompat.isAvailable() && polytoneTakeover.getValue() && polytoneAsyncTick.getValue() && polytoneGpuRendering.getValue())
+			.build(), originalConfig.polytone.gpuOnlyAsyncTick);
+		AbstractConfigListEntry<Boolean> polytoneLightCache = modifyOriginal(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.polytone.lightCache"),
+				displayConfig.polytone.lightCache)
+			.setDefaultValue(defaultConfig.polytone.lightCache)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.polytone.lightCache.tooltip"))
+			.setSaveConsumer(newValue -> displayConfig.polytone.lightCache = newValue)
+			.setRequirement(() -> PolytoneEarlyCompat.isAvailable() && polytoneTakeover.getValue())
+			.build(), originalConfig.polytone.lightCache);
+		polytoneEntries.add(polytoneMixin);
+		polytoneEntries.add(polytoneTakeover);
+		polytoneEntries.add(polytoneAsyncTick);
+		polytoneEntries.add(polytoneGpuRendering);
+		polytoneEntries.add(polytoneGpuOnlyAsyncTick);
+		polytoneEntries.add(polytoneLightCache);
+
+		@SuppressWarnings("rawtypes")
 		List<AbstractConfigListEntry> createEntries = new ArrayList<>();
 		createEntries.add(modifyOriginal(entryBuilder
 			.startEnumSelector(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect"),
@@ -408,6 +476,10 @@ class ClothConfigMenus {
 				// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
 				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.sable"),
 					sableEntries)
+				.build()))
+			.addEntry(new SubCategoryListEntryFix(entryBuilder
+				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.polytone"),
+					polytoneEntries)
 				.build()))
 			.addEntry(new SubCategoryListEntryFix(entryBuilder
 				// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),

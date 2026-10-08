@@ -2,6 +2,8 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.DevRuntimeDebug;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCleanupStrategy;
@@ -306,6 +308,9 @@ public class AsyncTickBehavior {
 			cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
 		}
 		cleanupTaskHelper.disposeTasks();
+		if (PolytoneEarlyCompat.isAvailable()) {
+			PolytoneCompat.awaitTicks();
+		}
 		syncAnimationTypes.clear();
 		syncAnimationTypes.addAll(ConfigHelper.getSyncAnimationClassesTick());
 		syncParticleTypes.clear();
@@ -352,8 +357,10 @@ public class AsyncTickBehavior {
 		debugConsumer = null;
 	}
 
-	public boolean shouldSync(Class<? extends Particle> aClass) {
-		return syncParticleTypes.contains(aClass) || DevRuntimeDebug.isSyncAllParticles();
+	public boolean shouldSync(Particle particle) {
+		return syncParticleTypes.contains(((ParticleAddon) particle).asyncparticles$getRealClass())
+			|| DevRuntimeDebug.isSyncAllParticles()
+			|| (ModListHelper.POLYTONE_LOADED && PolytoneCompat.shouldSync(particle));
 	}
 
 	public boolean shouldSyncAnimateTick(Object block) {

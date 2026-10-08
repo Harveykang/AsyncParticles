@@ -134,6 +134,8 @@ public class ModListHelper {
 		&& !PcDisable.INSTANCE.getDisabledOptimizations().getDisableOptimizations().contains("ASYNC");
 	/* Polytone */
 	public static final boolean POLYTONE_LOADED = isModLoaded("polytone");
+	public static final boolean POLYTONE_LATER_THAN_5 = POLYTONE_LOADED
+		&& versionCheck("polytone", "1.21-5.0.0", null);
 	/* Goop */
 	public static final boolean GOOP_LOADED = isModLoaded("goop");
 	/* Async */

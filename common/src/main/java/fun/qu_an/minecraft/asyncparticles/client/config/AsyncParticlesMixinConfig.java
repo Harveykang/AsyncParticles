@@ -133,6 +133,7 @@ public class AsyncParticlesMixinConfig {
 													MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED;
 		boolean safeBlockEntityMap = false;
 		boolean safeLegacyRandomSource = true;
+		boolean polytone$CompatEnabled = true;
 		Set<String> particle$noCulling = new LinkedHashSet<>();
 
 		{
@@ -191,6 +192,7 @@ public class AsyncParticlesMixinConfig {
 			particle$lockRequired = toSaveConfig.particle$lockRequired;
 			replaceRandom = toSaveConfig.replaceRandom;
 			create$contraptionNoParticleCollision = toSaveConfig.create$contraptionNoParticleCollision;
+			polytone$CompatEnabled = toSaveConfig.polytone$CompatEnabled;
 		}
 
 		private void read(Properties properties) {
@@ -211,6 +213,7 @@ public class AsyncParticlesMixinConfig {
 			particle$lockRequired = getSet(properties, "particle$lockRequired", defaultConfig.particle$lockRequired);
 			replaceRandom = getSet(properties, "replaceRandom", defaultConfig.replaceRandom);
 			create$contraptionNoParticleCollision = getSet(properties, "create$contraptionNoParticleCollision", defaultConfig.create$contraptionNoParticleCollision);
+			polytone$CompatEnabled = getBoolean(properties, "polytone$CompatEnabled", defaultConfig.polytone$CompatEnabled);
 		}
 
 		void flat() {
@@ -228,6 +231,7 @@ public class AsyncParticlesMixinConfig {
 			properties.setProperty("particle$lockRequired", String.join(",", particle$lockRequired));
 			properties.setProperty("replaceRandom", String.join(",", replaceRandom));
 			properties.setProperty("create$contraptionNoParticleCollision", String.join(",", create$contraptionNoParticleCollision));
+			properties.setProperty("polytone$CompatEnabled", Boolean.toString(polytone$CompatEnabled));
 		}
 
 		private static Set<String> getSet(Properties properties, String key, Set<String> defaultValue) {
@@ -349,6 +353,15 @@ public class AsyncParticlesMixinConfig {
 		void setContraptionNoParticleCollision(Set<String> contraptionNoParticleCollision) {
 			assertNotGlobal();
 			this.create$contraptionNoParticleCollision = contraptionNoParticleCollision;
+		}
+
+		boolean isPolytoneCompatEnabled() {
+			return polytone$CompatEnabled;
+		}
+
+		void setPolytoneCompatEnabled(boolean polytone$CompatEnabled) {
+			assertNotGlobal();
+			this.polytone$CompatEnabled = polytone$CompatEnabled;
 		}
 	}
 }

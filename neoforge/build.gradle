@@ -183,6 +183,9 @@ dependencies {
 //    modLocalRuntime "maven.modrinth:create-propulsion-simulated:H13U56dc"
 
 //    modLocalRuntime "maven.modrinth:particle-interactions:0.4.1"
+
+    /* Polytone */
+//    modLocalRuntime "maven.modrinth:polytone:cbVEfkjU" // 1.21-5.0.1
 }
 
 processResources {

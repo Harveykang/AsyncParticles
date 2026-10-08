@@ -139,4 +139,24 @@ public class ConfigHelper {
 	public static boolean fixParticleLightOnVsShips() {
 		return valkyrienSkies$fixParticleLights;
 	}
+
+	public static boolean isPolytoneTakeover() {
+		return polytone$takeover;
+	}
+
+	public static boolean isPolytoneAsyncTick() {
+		return isPolytoneTakeover() && polytone$asyncTick;
+	}
+
+	public static boolean isPolytoneGpuRendering() {
+		return isPolytoneTakeover() && polytone$gpuRendering;
+	}
+
+	public static boolean isPolytoneGpuOnlyAsyncTick() {
+		return isPolytoneGpuRendering() && polytone$gpuOnlyAsyncTick;
+	}
+
+	public static boolean isPolytoneLightCache() {
+		return isPolytoneTakeover() && polytone$lightCache;
+	}
 }

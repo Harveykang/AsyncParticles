@@ -3,6 +3,8 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
+import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneEarlyCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
@@ -84,6 +86,9 @@ public class GpuParticleBehavior {
 	}
 
 	public boolean canRenderFast(TextureSheetParticle tsp) {
+		if (PolytoneEarlyCompat.isAvailable() && tsp instanceof PolytoneParticleAddon polytone) {
+			return polytone.asyncparticles$canRenderFast();
+		}
 		if (tsp.getFacingCameraMode() != TextureSheetParticle.FacingCameraMode.LOOKAT_XYZ) {
 			return false;
 		}

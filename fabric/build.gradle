@@ -59,7 +59,7 @@ dependencies {
     }
 
     /* Iris */
-    modCompileOnly 'maven.modrinth:iris:1.8.8+1.21.1-fabric'
+    modCompileOnly 'maven.modrinth:iris:1.8.14-beta.1+1.21.1-fabric'
 
     /* Immersive Portals */
 //    modLocalRuntime "maven.modrinth:immersiveportals:v6.0.6-mc1.21.1"
@@ -68,13 +68,12 @@ dependencies {
 //    return
 
     /* Performance */
-//    modLocalRuntime "maven.modrinth:sodium:mc1.21.1-0.8.12-alpha.3-fabric"
     if (rootProject.enable_vulkan == 'false') {
-        modLocalRuntime "maven.modrinth:sodium:mc1.21.1-0.6.13-fabric"
-        modLocalRuntime "maven.modrinth:sodium-extra:mc1.21.1-0.6.0+fabric"
-        modLocalRuntime 'maven.modrinth:iris:1.8.8+1.21.1-fabric'
+        modLocalRuntime "maven.modrinth:sodium:mc1.21.1-0.8.13-fabric"
+        modLocalRuntime "maven.modrinth:sodium-extra:mc1.21.1-0.9.4+fabric"
+//        modLocalRuntime 'maven.modrinth:iris:1.8.14-beta.1+1.21.1-fabric'
         localRuntime "org.antlr:antlr4-runtime:4.13.1"
-        localRuntime "io.github.douira:glsl-transformer:2.0.1"
+        localRuntime "io.github.douira:glsl-transformer:3.0.0-pre3"
         localRuntime "org.anarres:jcpp:1.4.14"
     } else {
         /* Vulkan Mod */
@@ -100,6 +99,9 @@ dependencies {
 
     /* Particle Rain */
     modLocalRuntime "maven.modrinth:particle-rain:v4.0.1+$minecraft_version-fabric"
+
+    /* Polytone */
+//    modLocalRuntime "maven.modrinth:polytone:bXTt4H7V" // 1.21-5.0.1
 
     /* Effectual */
 //    modLocalRuntime 'maven.modrinth:tlib:1.3.0-1.21.1'
