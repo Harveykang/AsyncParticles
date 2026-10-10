@@ -155,8 +155,4 @@ public class ConfigHelper {
 	public static boolean isPolytoneGpuOnlyAsyncTick() {
 		return isPolytoneGpuRendering() && polytone$gpuOnlyAsyncTick;
 	}
-
-	public static boolean isPolytoneLightCache() {
-		return isPolytoneTakeover() && polytone$lightCache;
-	}
 }

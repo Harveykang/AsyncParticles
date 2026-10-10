@@ -68,7 +68,7 @@
   "config.asyncparticles.mod-compat.polytone.asyncTick": "Take Over Async Particle Ticking",
   "config.asyncparticles.mod-compat.polytone.asyncTick.tooltip": "Takes over async ticking for Polytone particles.",
   "config.asyncparticles.mod-compat.polytone.gpuOnlyAsyncTick": "GPU Only Async Particle Tick",
-  "config.asyncparticles.mod-compat.polytone.gpuOnlyAsyncTick.tooltip": "Only ticks GPU-rendered Polytone particles asynchronously.",
+  "config.asyncparticles.mod-compat.polytone.gpuOnlyAsyncTick.tooltip": "Only ticks GPU-accelerated Polytone particles asynchronously.",
   "config.asyncparticles.mod-compat.polytone.gpuRendering": "GPU Particle Acceleration",
   "config.asyncparticles.mod-compat.polytone.gpuRendering.tooltip": "Enables AsyncParticles GPU acceleration for supported Polytone particles.",
   "config.asyncparticles.mod-compat.polytone.lightCache": "Take Over Particle Light Caching",

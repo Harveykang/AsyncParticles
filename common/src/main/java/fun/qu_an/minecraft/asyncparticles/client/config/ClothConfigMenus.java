@@ -59,9 +59,9 @@ class ClothConfigMenus {
 		AsyncParticlesConfig.ConfigObj displayConfig = bundle.displayConfig();
 		AsyncParticlesMixinConfig.MixinConfigObj displayMixinConfig = mixinBundle.displayConfig();
 		builder.setSavingRunnable(() -> {
-			boolean previousAsyncTick = false;
+			boolean previousPolytoneAsyncTick = false;
 			if (PolytoneEarlyCompat.isAvailable()) {
-				previousAsyncTick = Polytone.CONFIGS.particlesOffThread.get();
+				previousPolytoneAsyncTick = Polytone.CONFIGS.particlesOffThread.get();
 			}
 			try {
 				displayConfig.flat();
@@ -87,7 +87,7 @@ class ClothConfigMenus {
 			}
 			AsyncTickBehavior.getInstance().reloadLater();
 			if (PolytoneEarlyCompat.isAvailable()
-				&& previousAsyncTick != Polytone.CONFIGS.particlesOffThread.get()) {
+				&& previousPolytoneAsyncTick != Polytone.CONFIGS.particlesOffThread.get()) {
 				ThreadUtil.enqueueClientTask(() -> Minecraft.getInstance().reloadResourcePacks());
 			}
 		});
@@ -416,20 +416,11 @@ class ClothConfigMenus {
 			.setSaveConsumer(newValue -> displayConfig.polytone.gpuOnlyAsyncTick = newValue)
 			.setRequirement(() -> PolytoneEarlyCompat.isAvailable() && polytoneTakeover.getValue() && polytoneAsyncTick.getValue() && polytoneGpuRendering.getValue())
 			.build(), originalConfig.polytone.gpuOnlyAsyncTick);
-		AbstractConfigListEntry<Boolean> polytoneLightCache = modifyOriginal(entryBuilder
-			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.polytone.lightCache"),
-				displayConfig.polytone.lightCache)
-			.setDefaultValue(defaultConfig.polytone.lightCache)
-			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.polytone.lightCache.tooltip"))
-			.setSaveConsumer(newValue -> displayConfig.polytone.lightCache = newValue)
-			.setRequirement(() -> PolytoneEarlyCompat.isAvailable() && polytoneTakeover.getValue())
-			.build(), originalConfig.polytone.lightCache);
 		polytoneEntries.add(polytoneMixin);
 		polytoneEntries.add(polytoneTakeover);
 		polytoneEntries.add(polytoneAsyncTick);
 		polytoneEntries.add(polytoneGpuRendering);
 		polytoneEntries.add(polytoneGpuOnlyAsyncTick);
-		polytoneEntries.add(polytoneLightCache);
 
 		@SuppressWarnings("rawtypes")
 		List<AbstractConfigListEntry> createEntries = new ArrayList<>();

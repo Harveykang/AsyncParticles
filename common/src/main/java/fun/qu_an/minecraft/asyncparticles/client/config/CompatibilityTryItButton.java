@@ -140,6 +140,7 @@ public class CompatibilityTryItButton extends Button {
 			&& isMatch(o.valkyrienSkies, configObj.valkyrienSkies)
 			&& isMatch(o.sable, configObj.sable)
 			&& isMatch(o.create, configObj.create)
+			&& isMatch(o.polytone, configObj.polytone)
 			&& isMatch(o.mobile, configObj.mobile);
 	}
 
@@ -184,6 +185,10 @@ public class CompatibilityTryItButton extends Button {
 	}
 
 	private static boolean isMatch(ConfigObj.Create o, ConfigObj.Create create) {
+		return true;
+	}
+
+	private static boolean isMatch(ConfigObj.Polytone o, ConfigObj.Polytone polytone) {
 		return true;
 	}
 

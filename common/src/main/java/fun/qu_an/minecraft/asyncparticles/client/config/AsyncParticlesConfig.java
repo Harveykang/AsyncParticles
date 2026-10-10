@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -73,7 +72,6 @@ public class AsyncParticlesConfig {
 	public static boolean polytone$asyncTick;
 	public static boolean polytone$gpuOnlyAsyncTick;
 	public static boolean polytone$gpuRendering;
-	public static boolean polytone$lightCache;
 	public static RainEffect create$rainEffect;
 	public static int create$tickRainBlockingRange;
 	public static boolean mobile$multiDrawWorkaround;
@@ -437,14 +435,12 @@ public class AsyncParticlesConfig {
 			boolean asyncTick = true;
 			boolean gpuOnlyAsyncTick = false;
 			boolean gpuRendering = true;
-			boolean lightCache = false;
 
 			private void flat() {
 				polytone$takeover = takeover;
 				polytone$asyncTick = asyncTick;
 				polytone$gpuOnlyAsyncTick = gpuOnlyAsyncTick;
 				polytone$gpuRendering = gpuRendering;
-				polytone$lightCache = lightCache;
 			}
 
 			private void fold() {
@@ -452,7 +448,6 @@ public class AsyncParticlesConfig {
 				asyncTick = polytone$asyncTick;
 				gpuOnlyAsyncTick = polytone$gpuOnlyAsyncTick;
 				gpuRendering = polytone$gpuRendering;
-				lightCache = polytone$lightCache;
 			}
 		}
 

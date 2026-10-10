@@ -23,10 +23,6 @@ public class PolytoneCompat {
 	}
 
 	public static void deferToMain(Runnable action) {
-		if (ThreadUtil.isOnMainThread()) {
-			action.run();
-			return;
-		}
 		ClientLevel level = Minecraft.getInstance().level;
 		ThreadUtil.enqueueClientTask(() -> {
 			if (LevelBundle.isLevelAvailable(level)) {
