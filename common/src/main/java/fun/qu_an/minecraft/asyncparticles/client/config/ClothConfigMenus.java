@@ -167,18 +167,19 @@ class ClothConfigMenus {
 				.setTooltip(Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip"))
 				.setSaveConsumer(newValue -> displayConfig.tick.animationTickMode = newValue)
 				.setTooltipSupplier(() -> {
-					if (REIGNOFNETHER_LOADED || IMMERSIVE_PORTALS_LOADED) {
+					if (REIGNOFNETHER_LOADED || IMMERSIVE_PORTALS_LOADED || PARTICLE_STORM_LOADED) {
 						return incompatibilityTooltip(
 							Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip"),
 							REIGNOFNETHER_LOADED ? "Reign of Nether" : null,
-							IMMERSIVE_PORTALS_LOADED ? "Immersive Portals" : null);
+							IMMERSIVE_PORTALS_LOADED ? "Immersive Portals" : null,
+							PARTICLE_STORM_LOADED ? "Particle Storm" : null);
 					} else {
 						return Optional.of(new MutableComponent[]{
 							Component.translatable("config.asyncparticles.tick.animationTickMode.tooltip")
 						});
 					}
 				})
-				.setRequirement(() -> !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED)
+				.setRequirement(() -> !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED && !PARTICLE_STORM_LOADED)
 				.build(), originalConfig.tick.animationTickMode))
 			.addEntry(modifyOriginal(entryBuilder
 				.startEnumSelector(Component.translatable("config.asyncparticles.tick.particleAsyncMode"),

@@ -143,6 +143,8 @@ public class ModListHelper {
 	public static final boolean ASYNC_LOADED = isModLoaded("async");
 	/* Ruok */
 	public static final boolean RUOK_LOADED = isModLoaded("ruok");
+	/* Particle Storm */
+	public static final boolean PARTICLE_STORM_LOADED = isModLoaded("particlestorm");
 
 	@ExpectPlatform
 	private static boolean isForge() {

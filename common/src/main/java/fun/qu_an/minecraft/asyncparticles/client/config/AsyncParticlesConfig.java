@@ -321,7 +321,7 @@ public class AsyncParticlesConfig {
 			private Tick() {
 			}
 
-			boolean animationTickMode = !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED;
+			boolean animationTickMode = !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED && !PARTICLE_STORM_LOADED;
 			ParticleAsyncMode particleAsyncMode = ParticleAsyncMode.SEQUENTIAL;
 			boolean gpuOnlyAsyncParticleTick = false;
 			boolean tickWeatherAsync = !PHYSICSMOD_LOADED;
@@ -337,7 +337,8 @@ public class AsyncParticlesConfig {
 			}
 
 			private void flat() {
-				tick$animationTickMode = !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED && animationTickMode;
+				tick$animationTickMode = !REIGNOFNETHER_LOADED && !IMMERSIVE_PORTALS_LOADED && !PARTICLE_STORM_LOADED
+					&& animationTickMode;
 				tick$particleAsyncMode = requireNonNullElse(particleAsyncMode, ParticleAsyncMode.SEQUENTIAL);
 				tick$gpuOnlyAsyncParticleTick = gpuOnlyAsyncParticleTick;
 				tick$tickWeatherAsync = tickWeatherAsync && !PHYSICSMOD_LOADED;
