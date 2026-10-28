@@ -7,9 +7,10 @@ import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.Tesselator;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
+import fun.qu_an.minecraft.asyncparticles.client.config.ComputeExecutionStage;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ComputeResult;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ParticleLayout;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.util.FakeBufferBuilder;
@@ -27,7 +28,6 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.*;
 
 import java.util.*;
@@ -69,12 +69,14 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 		textureAtlas.setFilter(false, textureAtlas.mipmap);
 		profiler.pop();
 
-		ComputeResult computeResult = null;
+		ParticleLayout particleLayout = null;
 		IParticleRenderer particleRenderer = null;
 		if (ConfigHelper.isGpuParticles()) {
-			GpuParticleBehavior.getInstance().compute(camera, f);
-			computeResult = GpuParticleBehavior.getInstance().ensureComputeReady();
-			if (computeResult != null) {
+			if (ConfigHelper.getComputeExecutionStage() == ComputeExecutionStage.PARTICLE_RENDERING) {
+				GpuParticleBehavior.getInstance().compute(camera, f);
+			}
+			particleLayout = GpuParticleBehavior.getInstance().ensureComputeReady();
+			if (particleLayout != null) {
 				particleRenderer = GpuParticleBehavior.getInstance().getOrCreateRenderer();
 			}
 		}
@@ -88,7 +90,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 //				}
 			Queue<Particle> queue = this.particles.get(particleRenderType);
 			Queue<TextureSheetParticle> gpuQueue = GpuParticleBehavior.getInstance().gpuParticles.get(particleRenderType);
-			boolean hasGpu = computeResult != null && gpuQueue != null && !gpuQueue.isEmpty();
+			boolean hasGpu = particleLayout != null && gpuQueue != null && !gpuQueue.isEmpty();
 			boolean hasCpu = queue != null && !queue.isEmpty();
 			if (!hasCpu && !hasGpu) {
 				continue;

@@ -8,19 +8,25 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.vulkanmod.RendererAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.*;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.vulkanmod.AccessorBuffer;
+import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.vulkanmod.AccessorVkGlFramebuffer;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
+import net.vulkanmod.gl.VkGlFramebuffer;
 import net.vulkanmod.vulkan.Drawer;
 import net.vulkanmod.vulkan.Renderer;
 import net.vulkanmod.vulkan.Synchronization;
 import net.vulkanmod.vulkan.Vulkan;
 import net.vulkanmod.vulkan.device.DeviceManager;
+import net.vulkanmod.vulkan.framebuffer.Framebuffer;
+import net.vulkanmod.vulkan.framebuffer.RenderPass;
 import net.vulkanmod.vulkan.memory.MemoryManager;
 import net.vulkanmod.vulkan.memory.MemoryTypes;
 import net.vulkanmod.vulkan.memory.buffer.Buffer;
@@ -37,9 +43,10 @@ import java.util.*;
 
 import static fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ParticleVertexFormats.RAW_PARTICLE;
 
-public class VkCompParticleRenderer implements IParticleRenderer {
-	private static final int WORKGROUP_SIZE = 64;
+public class VkCompParticleRenderer<C> implements IParticleRenderer {
+	public static final int WORKGROUP_SIZE = 64;
 	private static final int GROUP_RECORD_INTS = 3;
+	private static final int PUSH_CONSTANT_BYTES = 44;
 	private static final int DESCRIPTOR_SET_LAYOUT_SIZE = 3;
 	private static final int SOURCE_SLOT_COUNT = 3;
 	private static final long GPU_WAIT_TIMEOUT_NS = 5_000_000_000L;
@@ -47,9 +54,12 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	// VK backend
 	private final VkDevice device;
+	private final IVkParticleBatchStrategy<C> batchStrategy;
+	private final C renderInfo;
 
 	// source buffers (pooled, persistently mapped)
-	private final SourceSlot[] sourceSlots = new SourceSlot[SOURCE_SLOT_COUNT];
+	@SuppressWarnings("unchecked")
+	private final SourceSlot[] sourceSlots = (SourceSlot[]) new VkCompParticleRenderer<?>.SourceSlot[SOURCE_SLOT_COUNT];
 	private ByteBuffer mappedBuffer;
 	private int processingSrcIdx;
 	private int renderSrcIdx = -1;
@@ -68,16 +78,18 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	private long descriptorPool;
 
 	// multi-draw / compute result
-	private boolean computed;
-	private CameraState computedCamera;
+	private IComputeReuseCondition reuseCondition;
 
-	public VkCompParticleRenderer(int particleLimit) {
+	@SuppressWarnings("unchecked")
+	public VkCompParticleRenderer(int particleLimit, IVkParticleBatchStrategy<C> batchStrategy) {
+		this.batchStrategy = batchStrategy;
+		this.renderInfo = batchStrategy.createVkRenderInfo();
 		this.particleLimit = particleLimit;
 		device = DeviceManager.vkDevice;
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			sourceSlots[i] = new SourceSlot();
 		}
-		submitSlots = new SubmitSlot[Renderer.getFramesNum()];
+		submitSlots = (SubmitSlot[]) new VkCompParticleRenderer<?>.SubmitSlot[Renderer.getFramesNum()];
 		for (int i = 0; i < submitSlots.length; i++) {
 			submitSlots[i] = new SubmitSlot();
 		}
@@ -101,8 +113,9 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void createSubmitSlots(int size, int particleLimit) {
-		submitSlots = new SubmitSlot[Renderer.getFramesNum()];
+		submitSlots = (SubmitSlot[]) new VkCompParticleRenderer<?>.SubmitSlot[Renderer.getFramesNum()];
 		for (int i = 0; i < submitSlots.length; i++) {
 			submitSlots[i] = new SubmitSlot();
 		}
@@ -153,7 +166,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			descriptorSetLayout = pdsl.get(0);
 
 			VkPushConstantRange.Buffer pcRange = VkPushConstantRange.calloc(1, stack);
-			pcRange.get(0).stageFlags(VK10.VK_SHADER_STAGE_COMPUTE_BIT).offset(0).size(40);
+			pcRange.get(0).stageFlags(VK10.VK_SHADER_STAGE_COMPUTE_BIT).offset(0).size(PUSH_CONSTANT_BYTES);
 
 			VkPipelineLayoutCreateInfo plci = VkPipelineLayoutCreateInfo.calloc(stack).sType(VK10.VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO)
 				.pSetLayouts(stack.longs(descriptorSetLayout)).pPushConstantRanges(pcRange);
@@ -228,8 +241,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void beginFrame(float deltaPartialTick) {
-		computed = false;
-		computedCamera = null;
+		reuseCondition = null;
 	}
 
 	@Override
@@ -258,7 +270,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				source.camPosition = prevGpuCamPos;
 				prepareBuffer();
 			}
-			extractAppendParticles(prevGpuCamPos, pendingAppends, source.layerBatches);
+			extractAppendParticles(pendingAppends, source.layerBatches);
 		}
 
 		// Reset for next frame
@@ -271,77 +283,44 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		mappedBuffer = null;
 	}
 
-	private void extractAppendParticles(Vec3 prevGpuCamPos, List<TextureSheetParticle> pending, List<LayerBatch> batches) {
+	private void extractAppendParticles(List<TextureSheetParticle> pending, List<LayerBatch> batches) {
 		int appendCount = pending.size();
 		int vertexSize = ParticleVertexFormats.RAW_PARTICLE.getVertexSize();
-		final double cx = prevGpuCamPos.x;
-		final double cy = prevGpuCamPos.y;
-		final double cz = prevGpuCamPos.z;
 		int pi = processingSrcIdx;
 		SourceSlot sourceSlot = sourceSlots[pi];
 		int offset = particleLimit * vertexSize;
 		long bufferAddress = MemoryUtil.memAddress(mappedBuffer) + offset;
 
-		Map<ParticleBatchKey, List<TextureSheetParticle>> layerMap = new LinkedHashMap<>();
+		Map<IParticleBatchKey, List<TextureSheetParticle>> layerMap = new Object2ReferenceOpenHashMap<>();
 		for (int i = 0, pendingSize = Math.min(particleLimit, appendCount); i < pendingSize; i++) {
 			TextureSheetParticle p = pending.get(i);
-			layerMap.computeIfAbsent(ParticleBatchKey.of(p), a -> new ReferenceArrayList<>()).add(p);
+			layerMap.computeIfAbsent(batchStrategy.keyFor(p), a -> new ReferenceArrayList<>()).add(p);
 		}
 
 		int baseCount = 0;
 		int baseWrite = 0;
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			long address = stack.nmalloc(vertexSize);
-			for (Map.Entry<ParticleBatchKey, List<TextureSheetParticle>> entry : layerMap.entrySet()) {
+			for (Map.Entry<IParticleBatchKey, List<TextureSheetParticle>> entry : layerMap.entrySet()) {
+				IParticleBatchKey key = entry.getKey();
 				List<TextureSheetParticle> list = entry.getValue();
 				LayerBatch batch = null;
 				for (LayerBatch b : batches) {
-					if (b.key.equals(entry.getKey())) {
+					if (b.key.equals(key)) {
 						batch = b;
 						break;
 					}
 				}
 				int layerAppend = list.size();
 				if (batch == null) {
-					batch = new LayerBatch(entry.getKey());
+					batch = batchStrategy.createBatch(key, sourceSlot.camPosition);
 					batch.tickOffset = sourceSlot.tickCount;
 					batches.add(batch);
 				}
 				batch.appendOffset = baseCount;
 				batch.appendCount = layerAppend;
-				for (TextureSheetParticle particle : list) {
-					GpuParticleAddon gpuParticle = (GpuParticleAddon) particle;
-
-					// We have done our best to replicate the order in which fields are retrieved
-					// during the original particle rendering, as some mods may depend on this order.
-					MemoryUtil.memPutFloat(address, (float) (gpuParticle.asyncparticles$getXo() - cx));
-					MemoryUtil.memPutFloat(address + 4L, (float) (gpuParticle.asyncparticles$getYo() - cy));
-					MemoryUtil.memPutFloat(address + 8L, (float) (gpuParticle.asyncparticles$getZo() - cz));
-					MemoryUtil.memPutFloat(address + 12L, (float) (gpuParticle.asyncparticles$getX() - cx));
-					MemoryUtil.memPutFloat(address + 16L, (float) (gpuParticle.asyncparticles$getY() - cy));
-					MemoryUtil.memPutFloat(address + 20L, (float) (gpuParticle.asyncparticles$getZ() - cz));
-
-					MemoryUtil.memPutFloat(address + 24L, gpuParticle.asyncparticles$getQuadSize(0f));
-					int oColor = gpuParticle.asyncparticles$getOColor();
-					MemoryUtil.memPutInt(address + 48L, oColor);
-					MemoryUtil.memPutFloat(address + 60L, gpuParticle.asyncparticles$getORoll());
-
-					MemoryUtil.memPutInt(address + 56L, gpuParticle.asyncparticles$getCachedLight());
-
-					MemoryUtil.memPutFloat(address + 32L, gpuParticle.asyncparticles$getU0());
-					MemoryUtil.memPutFloat(address + 36L, gpuParticle.asyncparticles$getV0());
-					MemoryUtil.memPutFloat(address + 40L, gpuParticle.asyncparticles$getU1());
-					MemoryUtil.memPutFloat(address + 44L, gpuParticle.asyncparticles$getV1());
-
-					MemoryUtil.memPutFloat(address + 28L, gpuParticle.asyncparticles$getQuadSize(1f));
-					MemoryUtil.memPutInt(address + 52L, gpuParticle.asyncparticles$getColor(oColor));
-					MemoryUtil.memPutFloat(address + 64L, gpuParticle.asyncparticles$getRoll());
-
-					gpuParticle.asyncparticles$postTick(address);
-
-					MemoryUtil.memCopy(address, bufferAddress + baseWrite, vertexSize);
-					baseWrite += vertexSize;
-				}
+				batchStrategy.extractLayer(renderInfo, list, batch, address, bufferAddress + baseWrite, sourceSlot.camPosition, true);
+				baseWrite += layerAppend * vertexSize;
 				baseCount += layerAppend;
 			}
 		}
@@ -354,9 +333,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	}
 
 	private int acquireSubmitSlot(int idx) {
-		int renderSubmitIdx = (idx + 1) % submitSlots.length;
-//		submitSlots[renderSubmitIdx].waitReady();
-		return renderSubmitIdx;
+		return (idx + 1) % submitSlots.length;
 	}
 
 	@Override
@@ -369,9 +346,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		source.prepared = false;
 		source.camPosition = camPos;
 
-		final double cx = camPos.x;
-		final double cy = camPos.y;
-		final double cz = camPos.z;
 		final long bufferAddress = MemoryUtil.memAddress(mappedBuffer);
 		final int vertexSize = RAW_PARTICLE.getVertexSize();
 
@@ -382,7 +356,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		int baseCount = 0;
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			final long address = stack.nmalloc(vertexSize);
-			for (Map.Entry<ParticleBatchKey, Collection<TextureSheetParticle>> entry : ParticleBatchKey.groupParticles(particles).entrySet()) {
+			for (Map.Entry<IParticleBatchKey, Collection<TextureSheetParticle>> entry : batchStrategy.groupParticles(particles).entrySet()) {
 				Collection<TextureSheetParticle> collection = entry.getValue();
 				if (baseCount + collection.size() > particleLimit) {
 					throw new IllegalStateException("Particle limit exceeded! particle limit: " + particleLimit
@@ -390,47 +364,11 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 						+ ", collection size: " + collection.size());
 				}
 
-				int tickCount = 0;
-				for (TextureSheetParticle particle : collection) {
-					GpuParticleAddon gpuParticle = (GpuParticleAddon) particle;
-					if (!particle.isAlive() || !IParticleRenderer.shouldRenderParticle(gpuParticle, camPos)) {
-						continue;
-					}
-
-					// We have done our best to replicate the order in which fields are retrieved
-					// during the original particle rendering, as some mods may depend on this order.
-					MemoryUtil.memPutFloat(address, (float) (gpuParticle.asyncparticles$getXo() - cx));
-					MemoryUtil.memPutFloat(address + 4L, (float) (gpuParticle.asyncparticles$getYo() - cy));
-					MemoryUtil.memPutFloat(address + 8L, (float) (gpuParticle.asyncparticles$getZo() - cz));
-					MemoryUtil.memPutFloat(address + 12L, (float) (gpuParticle.asyncparticles$getX() - cx));
-					MemoryUtil.memPutFloat(address + 16L, (float) (gpuParticle.asyncparticles$getY() - cy));
-					MemoryUtil.memPutFloat(address + 20L, (float) (gpuParticle.asyncparticles$getZ() - cz));
-
-					MemoryUtil.memPutFloat(address + 24L, gpuParticle.asyncparticles$getQuadSize(0f));
-					int oColor = gpuParticle.asyncparticles$getOColor();
-					MemoryUtil.memPutInt(address + 48L, oColor);
-					MemoryUtil.memPutFloat(address + 60L, gpuParticle.asyncparticles$getORoll());
-
-					MemoryUtil.memPutInt(address + 56L, gpuParticle.asyncparticles$getGpuLightCoords(0f));
-
-					MemoryUtil.memPutFloat(address + 32L, gpuParticle.asyncparticles$getU0());
-					MemoryUtil.memPutFloat(address + 36L, gpuParticle.asyncparticles$getV0());
-					MemoryUtil.memPutFloat(address + 40L, gpuParticle.asyncparticles$getU1());
-					MemoryUtil.memPutFloat(address + 44L, gpuParticle.asyncparticles$getV1());
-
-					MemoryUtil.memPutFloat(address + 28L, gpuParticle.asyncparticles$getQuadSize(1f));
-					MemoryUtil.memPutInt(address + 52L, gpuParticle.asyncparticles$getColor(oColor));
-					MemoryUtil.memPutFloat(address + 64L, gpuParticle.asyncparticles$getRoll());
-
-					gpuParticle.asyncparticles$postTick(address);
-
-					MemoryUtil.memCopy(address, bufferAddress + position, vertexSize);
-					position += vertexSize;
-					tickCount++;
-				}
+				LayerBatch batch = batchStrategy.createBatch(entry.getKey(), camPos);
+				int tickCount = batchStrategy.extractLayer(renderInfo, collection, batch, address, bufferAddress + position, camPos, false);
+				position += tickCount * vertexSize;
 
 				if (tickCount > 0) {
-					LayerBatch batch = new LayerBatch(entry.getKey());
 					batch.tickOffset = baseCount;
 					batch.tickCount = tickCount;
 					batches.add(batch);
@@ -453,14 +391,12 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void compute(Camera camera, float partialTicks) {
-		CameraState cameraState = CameraState.of(camera, partialTicks);
-		if (computed && cameraState.equals(computedCamera)) {
+		if (reuseCondition != null && reuseCondition.matches(camera, partialTicks)) {
 			return;
 		}
 		if (!Renderer.isRecording()) {
+			reuseCondition = null;
 			renderSrcIdx = -1;
-			computed = true;
-			computedCamera = cameraState;
 			return;
 		}
 		if (isShouldSkip()) {
@@ -473,43 +409,58 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			source.buildLayout();
 		}
 		if (source.workgroupCount == 0) {
-			renderSrcIdx = -1;
-			computed = true;
-			computedCamera = cameraState;
+			reuseCondition = null;
+			return;
+		}
+		IComputeReuseCondition condition = batchStrategy.prepareView(renderInfo, source.layerBatches, camera, partialTicks);
+		if (condition == null) {
+			reuseCondition = null;
 			return;
 		}
 		SubmitSlot submit = submitSlots[renderSubmitIdx = acquireSubmitSlot(renderSubmitIdx)];
 		if (!submit.isPreparedFor(source)) {
+			submit.waitReady();
 			submit.prepare(source);
 		}
 		dispatch(source, submit, camera, partialTicks);
-		computed = true;
-		computedCamera = cameraState;
+		reuseCondition = condition;
 	}
 
 	private void dispatch(SourceSlot source, SubmitSlot submit, Camera camera, float partialTicks) {
+		Renderer renderer = Renderer.getInstance();
 		VkCommandBuffer cb = Renderer.getCommandBuffer();
+		long frame = ((RendererAddon) renderer).asyncparticles$getActualFrame();
+		Framebuffer boundFramebuffer = renderer.getBoundFramebuffer();
+		RenderPass boundRenderPass = renderer.getBoundRenderPass();
+		VkGlFramebuffer framebuffer = VkGlFramebuffer.getBoundFramebuffer();
+		if (framebuffer != null && (framebuffer.getFramebuffer() != boundFramebuffer || boundRenderPass == null)) {
+			framebuffer = null;
+		}
 
 		// vkCmdDispatch and vkCmdPipelineBarrier cannot be called inside an active render pass.
 		// VulkanMod keeps the render pass active for the entire frame, so we must end it
 		// before issuing compute commands and restore it afterward.
-		Renderer.getInstance().endRenderPass();
+		renderer.endRenderPass();
 
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
-			VkBufferMemoryBarrier.Buffer targetReuseBarrier = VkBufferMemoryBarrier.calloc(1, stack)
-				.sType(VK10.VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
-				.srcAccessMask(VK10.VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT | VK10.VK_ACCESS_SHADER_WRITE_BIT)
-				.dstAccessMask(VK10.VK_ACCESS_SHADER_WRITE_BIT)
-				.buffer(submit.targetBuffer.getId())
-				.offset(0)
-				.size(VK10.VK_WHOLE_SIZE);
-			VK10.vkCmdPipelineBarrier(cb,
-				VK10.VK_PIPELINE_STAGE_VERTEX_INPUT_BIT | VK10.VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-				VK10.VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-				0,
-				null,
-				targetReuseBarrier,
-				null);
+			// VulkanMod has waited for uses at least getFramesNum() frames ago.
+			// Multiple dispatches can rotate back to this target before that wait covers it.
+			if (submit.lastFrameUsed >= 0 && frame - submit.lastFrameUsed < Renderer.getFramesNum()) {
+				VkBufferMemoryBarrier.Buffer targetReuseBarrier = VkBufferMemoryBarrier.calloc(1, stack)
+					.sType(VK10.VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
+					.srcAccessMask(VK10.VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT | VK10.VK_ACCESS_SHADER_WRITE_BIT)
+					.dstAccessMask(VK10.VK_ACCESS_SHADER_WRITE_BIT)
+					.buffer(submit.targetBuffer.getId())
+					.offset(0)
+					.size(VK10.VK_WHOLE_SIZE);
+				VK10.vkCmdPipelineBarrier(cb,
+					VK10.VK_PIPELINE_STAGE_VERTEX_INPUT_BIT | VK10.VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+					VK10.VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+					0,
+					null,
+					targetReuseBarrier,
+					null);
+			}
 
 			VK10.vkCmdBindPipeline(cb, VK10.VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
 			VK10.vkCmdBindDescriptorSets(cb, VK10.VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, stack.longs(submit.descriptorSet), null);
@@ -520,11 +471,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			float upX = camera.getUpVector().x();
 			float upY = camera.getUpVector().y();
 			float upZ = camera.getUpVector().z();
-			float camX = (float) (source.camPosition.x - camera.getPosition().x);
-			float camY = (float) (source.camPosition.y - camera.getPosition().y);
-			float camZ = (float) (source.camPosition.z - camera.getPosition().z);
-
-			ByteBuffer pc = stack.malloc(40);
+			ByteBuffer pc = stack.malloc(PUSH_CONSTANT_BYTES);
 			pc.putFloat(partialTicks);
 			pc.putFloat(leftX);
 			pc.putFloat(leftY);
@@ -532,12 +479,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			pc.putFloat(upX);
 			pc.putFloat(upY);
 			pc.putFloat(upZ);
-			pc.putFloat(camX);
-			pc.putFloat(camY);
-			pc.putFloat(camZ);
-			pc.flip();
-			VK10.vkCmdPushConstants(cb, pipelineLayout, VK10.VK_SHADER_STAGE_COMPUTE_BIT, 0, pc);
-			VK10.vkCmdDispatch(cb, source.workgroupCount, 1, 1);
+			pc.position(0);
+			batchStrategy.dispatchVkBatches(renderInfo, pipelineLayout, pc, source.layerBatches, source.camPosition, camera, partialTicks, source.workgroupCount);
 
 			VkBufferMemoryBarrier.Buffer bb = VkBufferMemoryBarrier.calloc(1, stack)
 				.sType(VK10.VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
@@ -555,30 +498,42 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				null);
 		}
 
-		// Restore the main render pass
-		// which preserves the framebuffer contents rendered so far.
-		Renderer.getInstance().getMainPass().rebindMainTarget();
+		// Off-screen passes use LOAD/STORE. Resume without beginRendering(), which
+		// flips the viewport and resets scissor/culling after ImmPtl has configured them.
+		if (framebuffer != null) {
+			try (MemoryStack stack = MemStackUtil.stackPush()) {
+				boundFramebuffer.beginRenderPass(cb, boundRenderPass, stack);
+			}
+			renderer.setBoundFramebuffer(boundFramebuffer);
+			AccessorVkGlFramebuffer.setBoundFramebuffer(framebuffer);
+		} else {
+			renderer.getMainPass().rebindMainTarget();
+		}
 
-		sourceSlots[renderSrcIdx].lastFrameUsed = ((RendererAddon) Renderer.getInstance()).asyncparticles$getActualFrame();
+		source.lastFrameUsed = frame;
+		submit.lastFrameUsed = frame;
 	}
 
 	@Override
-	public ComputeResult awaitCompute() {
-		return isShouldSkip() || renderSubmitIdx == -1 ? null : submitSlots[renderSubmitIdx].preparedComputeResult;
+	public ParticleLayout awaitCompute() {
+		return reuseCondition == null || isShouldSkip() || renderSubmitIdx == -1 ? null : submitSlots[renderSubmitIdx].preparedParticleLayout;
 	}
 
 	@Override
 	public void render(ParticleRenderType renderType) {
+		if (reuseCondition == null) {
+			return;
+		}
 		if (renderSubmitIdx == -1) {
 			throw new IllegalStateException("No compute result to render!");
 		}
 		SubmitSlot submit = submitSlots[renderSubmitIdx];
-		ComputeResult computeResult = submit.preparedComputeResult;
-		if (computeResult == null) {
+		ParticleLayout particleLayout = submit.preparedParticleLayout;
+		if (particleLayout == null) {
 			return;
 		}
 		RenderSystem.assertOnRenderThread();
-		ComputeResult.ParticleSlice particleSlice = computeResult.sliceForRender(renderType);
+		ParticleLayout.ParticleSlice particleSlice = particleLayout.slices().get(batchStrategy.keyFor(renderType));
 		if (particleSlice == null) {
 			return;
 		}
@@ -597,6 +552,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 		((AccessorBuffer) vertexBuffer).setOffset((long) particleSlice.vertexOffset() * PARTICLE_VERTEX_SIZE);
 		drawer.drawIndexed(vertexBuffer, quadsIndexBuffer.getIndexBuffer(), particleSlice.indexCount());
+//		submit.lastFrameUsed = ((RendererAddon) Renderer.getInstance()).asyncparticles$getActualFrame();
 //		((AccessorBuffer) vertexBuffer).setOffset(0L);
 
 		shader.clear();
@@ -625,6 +581,9 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		}
 		int proceed = 4 * particleLimit * PARTICLE_VERTEX_SIZE;
 		createSubmitSlots(proceed, particleLimit);
+		renderSubmitIdx = -1;
+		reuseCondition = null;
+		mappedBuffer = null;
 	}
 
 	@Override
@@ -633,9 +592,9 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			return List.of();
 		}
 		List<LayerBatch> batches = sourceSlots[renderSrcIdx].layerBatches;
-		Set<ParticleRenderType> result = new LinkedHashSet<>();
+		Set<ParticleRenderType> result = new ObjectLinkedOpenHashSet<>();
 		for (LayerBatch b : batches) {
-			result.add(b.layer);
+			result.add(b.key.layer());
 		}
 		return result;
 	}
@@ -653,13 +612,14 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		processingSrcIdx = 0;
 		renderSrcIdx = -1;
 		renderSubmitIdx = -1;
+		reuseCondition = null;
 		mappedBuffer = null;
 	}
 
 	private void resetSubmitSlots() {
 		if (submitSlots.length == Renderer.getFramesNum()) {
 			for (SubmitSlot slot : submitSlots) {
-				slot.clearPrepared();
+				slot.reset();
 			}
 		} else {
 			for (SubmitSlot slot : submitSlots) {
@@ -691,7 +651,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	}
 
 	private final class SourceSlot {
-		private static final int[] EMPTY_INT_ARR = new int[0];
+		private static final int[] EMPTY_RECORDS = new int[0];
 		public long lastFrameUsed;
 		private long srcBuf;
 		private long srcMem;
@@ -700,10 +660,9 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		private int tickCount;
 		private Vec3 camPosition = Vec3.ZERO;
 		private long generation;
-		private int totalCount;
+		private ParticleLayout particleLayout;
 		private int workgroupCount;
-		private int[] groupRecords = EMPTY_INT_ARR;
-		private Map<ParticleBatchKey, ComputeResult.ParticleSlice> slices = Map.of();
+		private int[] groupRecords = EMPTY_RECORDS;
 		private boolean prepared;
 
 		private void createBuffer(int size) {
@@ -760,41 +719,27 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			VK10.vkUnmapMemory(device, oldMem);
 			VK10.vkDestroyBuffer(device, oldBuf, null);
 			VK10.vkFreeMemory(device, oldMem, null);
+
+			prepared = false;
 		}
 
 		private void buildLayout() {
 			this.generation = ++sourceGenerationCounter;
-
-			List<LayerBatch> batches = this.layerBatches;
-			int sz = batches.size();
-			this.slices = new HashMap<>();
-
-			int groups = 0;
-			for (LayerBatch batch : batches) {
-				groups += (batch.tickCount + WORKGROUP_SIZE - 1) / WORKGROUP_SIZE;
-				groups += (batch.appendCount + WORKGROUP_SIZE - 1) / WORKGROUP_SIZE;
-			}
-			int[] records = new int[groups * GROUP_RECORD_INTS];
+			VkLayoutResult layoutResult = batchStrategy.buildVkLayout(layerBatches, particleLimit);
+			particleLayout = layoutResult.particleLayout();
+			workgroupCount = layoutResult.workgroupCount();
+			int[] records = new int[workgroupCount * GROUP_RECORD_INTS];
 			int recordPos = 0;
-			int dstBase = 0;
-			for (int i = 0; i < sz; i++) {
-				LayerBatch batch = batches.get(i);
-				int layerTotal = batch.tickCount + batch.appendCount;
-				this.slices.put(batch.key, new ComputeResult.ParticleSlice(batch.layer, dstBase, layerTotal));
-				recordPos = writeSegmentGroups(records, recordPos, batch.tickOffset, dstBase, batch.tickCount);
+			for (LayerBatch batch : layerBatches) {
+				recordPos = writeSegmentGroups(records, recordPos, batch.tickOffset, batch.targetOffset, batch.tickCount);
 				recordPos = writeSegmentGroups(records, recordPos,
-					particleLimit + batch.appendOffset,
-					dstBase + batch.tickCount,
-					batch.appendCount);
-				dstBase += layerTotal;
+					particleLimit + batch.appendOffset, batch.targetOffset + batch.tickCount, batch.appendCount);
 			}
-			this.totalCount = dstBase;
-			this.workgroupCount = groups;
-			this.groupRecords = records;
+			groupRecords = records;
 			this.prepared = true;
 		}
 
-		private int writeSegmentGroups(int[] records, int recordPos, int srcBase, int dstBase, int count) {
+		private static int writeSegmentGroups(int[] records, int recordPos, int srcBase, int dstBase, int count) {
 			for (int localBase = 0; localBase < count; localBase += WORKGROUP_SIZE) {
 				int groupCount = Math.min(WORKGROUP_SIZE, count - localBase);
 				records[recordPos++] = srcBase + localBase;
@@ -806,10 +751,9 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 		private void reset() {
 			waitReady();
-			totalCount = 0;
+			particleLayout = null;
 			workgroupCount = 0;
-			groupRecords = EMPTY_INT_ARR;
-			slices = Map.of();
+			groupRecords = EMPTY_RECORDS;
 			tickCount = 0;
 			camPosition = Vec3.ZERO;
 			layerBatches.clear();
@@ -832,13 +776,14 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 	private final class SubmitSlot {
 		private Buffer targetBuffer;
+		private long lastFrameUsed = -1L;
 		private long indBuf;
 		private long indMem;
 		private ByteBuffer indMapped;
 		private int indSize;
 		private long descriptorSet;
 		private long preparedSourceGeneration = -1L;
-		private ComputeResult preparedComputeResult;
+		private ParticleLayout preparedParticleLayout;
 
 		private void createIndirectionBuffer(int size) {
 			try (MemoryStack stack = MemStackUtil.stackPush()) {
@@ -870,7 +815,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			if (bytes <= indSize) {
 				return;
 			}
-//			waitReady();
 			VK10.vkUnmapMemory(device, indMem);
 			VK10.vkDestroyBuffer(device, indBuf, null);
 			VK10.vkFreeMemory(device, indMem, null);
@@ -890,7 +834,6 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			if (targetBuffer != null) {
 				MemoryManager.getInstance().addToFreeable(targetBuffer);
 			}
-			clearPrepared();
 
 			Buffer buffer = new Buffer("ParticleTargetBuffer", VK10.VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK10.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, MemoryTypes.GPU_MEM);
 			MemoryManager.getInstance().createBuffer(
@@ -899,6 +842,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 				VK10.VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK10.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 				VK10.VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 			targetBuffer = buffer;
+			reset();
 		}
 
 		private void ensureTargetSize(int bytes) {
@@ -907,9 +851,14 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			}
 		}
 
+		private void reset() {
+			clearPrepared();
+			lastFrameUsed = -1L;
+		}
+
 		private void clearPrepared() {
 			preparedSourceGeneration = -1L;
-			preparedComputeResult = null;
+			preparedParticleLayout = null;
 		}
 
 		private void updateDescriptorFor(SourceSlot source) {
@@ -943,17 +892,27 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			}
 		}
 
-//		private void waitReady() {
-//		}
+		private void waitReady() {
+			if (lastFrameUsed < 0) {
+				return;
+			}
+			RendererAddon renderer = (RendererAddon) Renderer.getInstance();
+			long diff = renderer.asyncparticles$getActualFrame() - lastFrameUsed;
+			// New sources are published before rendering; same-frame views reuse prepared data.
+			if (diff > 0 && diff < Renderer.getFramesNum()) {
+				Synchronization.waitFence(renderer.asyncparticles$getInFlightFence(lastFrameUsed));
+			}
+			lastFrameUsed = -1L;
+		}
 
 		public void prepare(SourceSlot source) {
-			int needBytes = source.totalCount * 4 * PARTICLE_VERTEX_SIZE;
+			int needBytes = source.particleLayout.totalCount() * 4 * PARTICLE_VERTEX_SIZE;
 			this.ensureTargetSize(needBytes);
 			this.ensureIndirectionSize(source.groupRecords.length * Integer.BYTES);
 			this.uploadGroupRecords(source.groupRecords);
 			this.updateDescriptorFor(source);
 			this.preparedSourceGeneration = source.generation;
-			this.preparedComputeResult = ComputeResult.of(source.totalCount, source.slices);
+			this.preparedParticleLayout = source.particleLayout;
 		}
 	}
 }

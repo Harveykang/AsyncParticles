@@ -16,7 +16,6 @@ public class ShaderCompiler {
 	}
 
 	public static int createShaderProgram(int type, String resource, IntConsumer beforeLink) {
-		final int programId;
 		String source;
 		try (InputStream is = ShaderCompiler.class
 			.getResourceAsStream(resource)) {
@@ -26,27 +25,35 @@ public class ShaderCompiler {
 		}
 
 		int shaderId = GL20C.glCreateShader(type);
-		GL20C.glShaderSource(shaderId, source);
-		GL20C.glCompileShader(shaderId);
+		int programId = 0;
+		try {
+			GL20C.glShaderSource(shaderId, source);
+			GL20C.glCompileShader(shaderId);
 
-		int compileStatus = GL20C.glGetShaderi(shaderId, GlConst.GL_COMPILE_STATUS);
-		if (compileStatus == GlConst.GL_FALSE) {
-			String log = GL20C.glGetShaderInfoLog(shaderId);
+			int compileStatus = GL20C.glGetShaderi(shaderId, GlConst.GL_COMPILE_STATUS);
+			if (compileStatus == GlConst.GL_FALSE) {
+				String log = GL20C.glGetShaderInfoLog(shaderId);
+				throw new IllegalStateException("Compile error: " + log);
+			}
+
+			programId = GL20C.glCreateProgram();
+			GL20C.glAttachShader(programId, shaderId);
+			beforeLink.accept(programId);
+			GL20C.glLinkProgram(programId);
+
+			int linkStatus = GL20C.glGetProgrami(programId, GlConst.GL_LINK_STATUS);
+			if (linkStatus == GlConst.GL_FALSE) {
+				String log = GL20C.glGetProgramInfoLog(programId, 1024);
+				throw new IllegalStateException("Link error: " + log);
+			}
+			return programId;
+		} catch (RuntimeException | Error exception) {
+			if (programId != 0) {
+				GL20C.glDeleteProgram(programId);
+			}
+			throw exception;
+		} finally {
 			GL20C.glDeleteShader(shaderId);
-			throw new IllegalStateException("Compile error: " + log);
 		}
-
-		programId = GL20C.glCreateProgram();
-		GL20C.glAttachShader(programId, shaderId);
-		beforeLink.accept(programId);
-		GL20C.glLinkProgram(programId);
-		GL20C.glDeleteShader(shaderId);
-
-		int linkStatus = GL20C.glGetProgrami(programId, GlConst.GL_LINK_STATUS);
-		if (linkStatus == GlConst.GL_FALSE) {
-			String log = GL20C.glGetProgramInfoLog(programId, 1024);
-			throw new IllegalStateException("Link error: " + log);
-		}
-		return programId;
 	}
 }

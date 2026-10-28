@@ -35,7 +35,7 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 			case "net.diebuddies.mixins.weather.MixinParticleEngine" ->
 				"tick".equals(mixinMethodName);
 			case "qouteall.imm_ptl.core.mixin.client.particle.MixinParticleEngine" ->
-				// The compatibility mixin handles remote-world ticks.
+				// The compatibility mixin handles remote-level ticks.
 				"onTickParticle".equals(mixinMethodName);
 			case "foundry.veil.mixin.performance.client.PerformanceLevelRendererMixin" ->
 				"clearParticlesColor".equals(mixinMethodName);

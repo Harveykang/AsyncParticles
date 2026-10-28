@@ -124,7 +124,7 @@ public class ModListHelper {
 	public static final boolean PARTICLE_INTERACTIONS_LOADED = isModLoaded("eg_particle_interactions");
 	/* Immersive Portals */
 	public static final boolean IMMERSIVE_PORTALS_LOADED = isModLoaded("immersive_portals")
-		|| isModLoaded("immersive_portals_core");
+		|| isModLoaded("immersive_portals_core")|| isModLoaded("imm_ptl");
 	/* CosyCritters */
 	public static final boolean COSYCRITTERS_LOADED = isModLoaded("cosycritters");
 	/* Reign of Nether */

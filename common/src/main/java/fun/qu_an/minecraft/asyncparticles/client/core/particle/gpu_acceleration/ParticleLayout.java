@@ -4,19 +4,15 @@ import net.minecraft.client.particle.ParticleRenderType;
 
 import java.util.Map;
 
-public record ComputeResult(int totalCount, Map<ParticleBatchKey, ParticleSlice> slices, int maxCount) {
-	public static ComputeResult of(int totalCount, Map<ParticleBatchKey, ParticleSlice> slices) {
+public record ParticleLayout(int totalCount, Map<IParticleBatchKey, ParticleSlice> slices, int maxCount) {
+	public static ParticleLayout of(int totalCount, Map<IParticleBatchKey, ParticleSlice> slices) {
 		int maxCount = 0;
 		for (ParticleSlice slice : slices.values()) {
 			if (slice.count() > maxCount) {
 				maxCount = slice.count();
 			}
 		}
-		return new ComputeResult(totalCount, slices, maxCount);
-	}
-
-	public ParticleSlice sliceForRender(ParticleRenderType layer) {
-		return slices.get(ParticleBatchKey.forRender(layer));
+		return new ParticleLayout(totalCount, slices, maxCount);
 	}
 
 	public int totalVertexCount() {

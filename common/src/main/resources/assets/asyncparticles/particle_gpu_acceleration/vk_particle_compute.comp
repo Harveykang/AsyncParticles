@@ -11,12 +11,13 @@ layout(std430, binding = 1) writeonly buffer TargetBuf { int dst_data[]; };
 // Binding 2: one record per workgroup: srcBase, dstBase, count
 layout(std430, binding = 2) readonly buffer GroupTableBuf { int group_data[]; };
 
-// === Push constants (matches Java: 10 floats = 40 bytes) ===
+// === Push constants (matches Java: 10 floats + 1 uint = 44 bytes) ===
 layout(push_constant) uniform PushConstants {
     float uPartialTick;
     float uCameraLeft_x, uCameraLeft_y, uCameraLeft_z;
     float uCameraUp_x, uCameraUp_y, uCameraUp_z;
     float uPartialCameraPos_x, uPartialCameraPos_y, uPartialCameraPos_z;
+    uint groupOffset;
 } pc;
 
 // === Source layout: RAW_PARTICLE (68 bytes = 17 ints per particle) ===
@@ -72,7 +73,7 @@ void writeVertex(uint dstBase, vec3 pos, vec2 uv, vec4 col, int packedLight) {
 }
 
 void main() {
-    uint groupBase = gl_WorkGroupID.x * GROUP_RECORD_STRIDE;
+    uint groupBase = (gl_WorkGroupID.x + pc.groupOffset) * GROUP_RECORD_STRIDE;
     uint count = uint(group_data[groupBase + GROUP_OFF_COUNT]);
     uint localIdx = gl_LocalInvocationID.x;
     if (localIdx >= count) {

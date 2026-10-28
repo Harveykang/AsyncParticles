@@ -14,7 +14,7 @@ import qouteall.imm_ptl.core.render.context_management.RenderStates;
 public class MixinParticleEngine {
 	@Inject(method = "tick", at = @At("HEAD"), cancellable = true)
 	private void onRemoteTick(CallbackInfo ci) {
-		// The regular tick already advances particles in every world.
+		// The regular tick already advances particles in every level.
 		if (ClientWorldLoader.isClientRemoteTicking) {
 			ci.cancel();
 		}

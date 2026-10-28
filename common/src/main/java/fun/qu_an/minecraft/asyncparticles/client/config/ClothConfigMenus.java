@@ -319,8 +319,19 @@ class ClothConfigMenus {
 					ComputeExecutionStage.class, displayConfig.rendering.computeExecutionStage)
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
 				.setDefaultValue(defaultConfig.rendering.computeExecutionStage)
-				.setTooltip(Component.translatable("config.asyncparticles.rendering.computeExecutionStage.tooltip"))
+				.setTooltipSupplier(() -> {
+					if (IMMERSIVE_PORTALS_LOADED) {
+						return limitedTooltip(
+							Component.translatable("config.asyncparticles.rendering.computeExecutionStage.tooltip"),
+							"Immersive Portals");
+					} else {
+						return Optional.of(new MutableComponent[]{
+							Component.translatable("config.asyncparticles.rendering.computeExecutionStage.tooltip")
+						});
+					}
+				})
 				.setSaveConsumer(newValue -> displayConfig.rendering.computeExecutionStage = newValue)
+				.setRequirement(() -> !IMMERSIVE_PORTALS_LOADED)
 				.build(), originalConfig.rendering.computeExecutionStage))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.tickRendererOnMainThread"),

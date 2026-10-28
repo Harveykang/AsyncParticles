@@ -370,7 +370,8 @@ public class AsyncParticlesConfig {
 			ParticleCullingMode particleCulling = ParticleCullingMode.SPHERE;
 			boolean gpuAcceleration = Backends.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
-			ComputeExecutionStage computeExecutionStage = ComputeExecutionStage.LEVEL_RENDERING;
+			ComputeExecutionStage computeExecutionStage = IMMERSIVE_PORTALS_LOADED
+				? ComputeExecutionStage.PARTICLE_RENDERING : ComputeExecutionStage.LEVEL_RENDERING;
 			public boolean tickRendererOnMainThread = false;
 			boolean cullWeathers = true;
 
@@ -378,7 +379,8 @@ public class AsyncParticlesConfig {
 				rendering$particleCulling = requireNonNullElse(particleCulling, ParticleCullingMode.SPHERE);
 				rendering$gpuAcceleration = gpuAcceleration && Backends.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
-				rendering$computeExecutionStage = requireNonNullElse(computeExecutionStage, ComputeExecutionStage.LEVEL_RENDERING);
+				rendering$computeExecutionStage = IMMERSIVE_PORTALS_LOADED ? ComputeExecutionStage.PARTICLE_RENDERING
+					: requireNonNullElse(computeExecutionStage, ComputeExecutionStage.LEVEL_RENDERING);
 				rendering$cullWeathers = cullWeathers;
 				rendering$tickRendererOnMainThread = tickRendererOnMainThread;
 			}

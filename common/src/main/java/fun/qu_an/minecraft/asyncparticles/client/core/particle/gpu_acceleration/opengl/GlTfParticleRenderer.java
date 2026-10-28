@@ -4,16 +4,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
-import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ComputeResult;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.LayerBatch;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ParticleBatchKey;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ParticleVertexFormats;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.*;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -30,8 +26,11 @@ import java.util.*;
 import static org.lwjgl.opengl.GL11C.glGetInteger;
 import static org.lwjgl.opengl.GL20C.GL_CURRENT_PROGRAM;
 
-public class GlTfParticleRenderer implements IParticleRenderer {
+public class GlTfParticleRenderer<C> implements IParticleRenderer {
 	private static final int SOURCE_SLOT_COUNT = 3;
+	private final IGlParticleBatchStrategy<C> batchStrategy;
+	private final C renderInfo;
+	private final ParticleVertexFormat inputFormat;
 	private final ParticleVertexBuffer[] sources = new ParticleVertexBuffer[SOURCE_SLOT_COUNT];
 	private ByteBuffer mappedBuffer;
 	private int processingSrcIdx = 0;
@@ -45,25 +44,24 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 
 	// append: temporarily stored particles
 	private final List<TextureSheetParticle> pendingAppends = new ReferenceArrayList<>();
-	private int appendCount;
 
 	private final Vec3[] camPositions = new Vec3[SOURCE_SLOT_COUNT];
 
 	private final ParticleVertexBuffer target;
 	private final int tf;
-	private int[] multiDrawFirst;
-	private int[] multiDrawCount;
 
 	private boolean shouldSkip = true;
-	private boolean computed = false;
-	private CameraState computedCamera;
-	private ComputeResult computeResult;
+	private IComputeReuseCondition reuseCondition;
+	private ParticleLayout particleLayout;
 
-	public GlTfParticleRenderer(int particleLimit) {
+	public GlTfParticleRenderer(int particleLimit, IGlParticleBatchStrategy<C> batchStrategy) {
+		this.batchStrategy = batchStrategy;
+		this.inputFormat = batchStrategy.getInputFormat();
+		this.renderInfo = batchStrategy.createGlRenderInfo();
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			sources[i] = new ParticleVertexBuffer(GL15C.GL_DYNAMIC_DRAW);
 			sources[i].bind();
-			ParticleVertexFormats.RAW_PARTICLE.setupBufferState(); // attributes
+			inputFormat.setupBufferState(); // attributes
 			layerBatches[i] = new ReferenceArrayList<>();
 			tickCount[i] = 0;
 			camPositions[i] = Vec3.ZERO;
@@ -76,19 +74,18 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 
 		tf = Backends.glTf.genTransformFeedback();
 
-		resize(Math.max(particleLimit, AsyncParticlesConfig.MIN_PARTICLE_LIMIT));
+		resize(particleLimit);
 	}
 
 	@Override
 	public void beginFrame(float deltaPartialTick) {
-		computed = false;
-		computedCamera = null;
+		reuseCondition = null;
 	}
 
 	@Override
 	public void flushBufferAndSwap(Vec3 prevGpuCamPos) {
 		int pi = processingSrcIdx;
-		int vertexSize = ParticleVertexFormats.RAW_PARTICLE.getVertexSize();
+		int vertexSize = inputFormat.getVertexSize();
 
 		int tickCount = this.tickCount[pi];
 		if (tickCount > 0) {
@@ -102,7 +99,6 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 				camPositions[pi] = prevGpuCamPos;
 			}
 		}
-		this.appendCount = appendCount;
 
 		// Reset for next frame
 		if (isMapped()) {
@@ -119,7 +115,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 			processingSrcIdx = acquireSourceSlot(pi);
 		}
 
-		computeResult = null;
+		particleLayout = null;
 	}
 
 	private int acquireSourceSlot(int idx) {
@@ -130,10 +126,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 	                                   List<TextureSheetParticle> pending,
 	                                   List<LayerBatch> batches) {
 		int appendCount = pending.size();
-		int vertexSize = ParticleVertexFormats.RAW_PARTICLE.getVertexSize();
-		final double cx = prevGpuCamPos.x;
-		final double cy = prevGpuCamPos.y;
-		final double cz = prevGpuCamPos.z;
+		int vertexSize = inputFormat.getVertexSize();
 
 		int pi = processingSrcIdx;
 		int offsetRelativeToMap;
@@ -145,66 +138,36 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		}
 		final long bufferAddress = MemoryUtil.memAddress(mappedBuffer) + offsetRelativeToMap;
 
-		Map<ParticleBatchKey, List<TextureSheetParticle>> layerMap = new LinkedHashMap<>();
+		Map<IParticleBatchKey, List<TextureSheetParticle>> layerMap = new Object2ReferenceOpenHashMap<>(batches.size());
 		for (int i = 0, pendingSize = Math.min(particleLimit, pending.size()); i < pendingSize; i++) {
 			TextureSheetParticle p = pending.get(i);
-			layerMap.computeIfAbsent(ParticleBatchKey.of(p), ignored -> new ReferenceArrayList<>()).add(p);
+			layerMap.computeIfAbsent(batchStrategy.keyFor(p), ignored -> new ReferenceArrayList<>()).add(p);
 		}
 
 		int baseCount = 0;
 		int baseWrite = 0;
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			long address = stack.nmalloc(vertexSize);
-			for (Map.Entry<ParticleBatchKey, List<TextureSheetParticle>> entry : layerMap.entrySet()) {
+			for (Map.Entry<IParticleBatchKey, List<TextureSheetParticle>> entry : layerMap.entrySet()) {
+				IParticleBatchKey key = entry.getKey();
 				List<TextureSheetParticle> list = entry.getValue();
 				LayerBatch batch = null;
 				for (LayerBatch b : batches) {
-					if (b.key.equals(entry.getKey())) {
+					if (b.key.equals(key)) {
 						batch = b;
 						break;
 					}
 				}
 				int layerAppend = list.size();
 				if (batch == null) {
-					batch = new LayerBatch(entry.getKey());
+					batch = batchStrategy.createBatch(key, prevGpuCamPos);
 					batch.tickOffset = this.tickCount[pi];
 					batches.add(batch);
 				}
 				batch.appendOffset = baseCount;
 				batch.appendCount = layerAppend;
-				for (TextureSheetParticle particle : list) {
-					GpuParticleAddon gpuParticle = (GpuParticleAddon) particle;
-
-					// We have done our best to replicate the order in which fields are retrieved
-					// during the original particle rendering, as some mods may depend on this order.
-					MemoryUtil.memPutFloat(address, (float) (gpuParticle.asyncparticles$getXo() - cx));
-					MemoryUtil.memPutFloat(address + 4L, (float) (gpuParticle.asyncparticles$getYo() - cy));
-					MemoryUtil.memPutFloat(address + 8L, (float) (gpuParticle.asyncparticles$getZo() - cz));
-					MemoryUtil.memPutFloat(address + 12L, (float) (gpuParticle.asyncparticles$getX() - cx));
-					MemoryUtil.memPutFloat(address + 16L, (float) (gpuParticle.asyncparticles$getY() - cy));
-					MemoryUtil.memPutFloat(address + 20L, (float) (gpuParticle.asyncparticles$getZ() - cz));
-
-					MemoryUtil.memPutFloat(address + 24L, gpuParticle.asyncparticles$getQuadSize(0f));
-					int oColor = gpuParticle.asyncparticles$getOColor();
-					MemoryUtil.memPutInt(address + 48L, oColor);
-					MemoryUtil.memPutFloat(address + 60L, gpuParticle.asyncparticles$getORoll());
-
-					MemoryUtil.memPutInt(address + 56L, gpuParticle.asyncparticles$getCachedLight());
-
-					MemoryUtil.memPutFloat(address + 32L, gpuParticle.asyncparticles$getU0());
-					MemoryUtil.memPutFloat(address + 36L, gpuParticle.asyncparticles$getV0());
-					MemoryUtil.memPutFloat(address + 40L, gpuParticle.asyncparticles$getU1());
-					MemoryUtil.memPutFloat(address + 44L, gpuParticle.asyncparticles$getV1());
-
-					MemoryUtil.memPutFloat(address + 28L, gpuParticle.asyncparticles$getQuadSize(1f));
-					MemoryUtil.memPutInt(address + 52L, gpuParticle.asyncparticles$getColor(oColor));
-					MemoryUtil.memPutFloat(address + 64L, gpuParticle.asyncparticles$getRoll());
-
-					gpuParticle.asyncparticles$postTick(address);
-
-					MemoryUtil.memCopy(address, bufferAddress + baseWrite, vertexSize);
-					baseWrite += vertexSize;
-				}
+				batchStrategy.extractLayer(renderInfo, list, batch, address, bufferAddress + baseWrite, prevGpuCamPos, true);
+				baseWrite += layerAppend * vertexSize;
 				baseCount += layerAppend;
 			}
 		}
@@ -216,7 +179,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		if (isMapped()) {
 			throw new IllegalStateException("Mapped buffer is not null");
 		}
-		int vertexSize = ParticleVertexFormats.RAW_PARTICLE.getVertexSize();
+		int vertexSize = inputFormat.getVertexSize();
 		// Map the full source buffer : tick uses [0, particleLimit), append uses [particleLimit, 2*particleLimit)
 		mappedBuffer = sources[processingSrcIdx].map(2 * this.particleLimit * vertexSize);
 	}
@@ -239,11 +202,8 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		int pi = processingSrcIdx;
 		camPositions[pi] = camPos;
 
-		final double cx = camPos.x;
-		final double cy = camPos.y;
-		final double cz = camPos.z;
 		final long bufferAddress = MemoryUtil.memAddress(mappedBuffer);
-		final int vertexSize = ParticleVertexFormats.RAW_PARTICLE.getVertexSize();
+		final int vertexSize = inputFormat.getVertexSize();
 
 		List<LayerBatch> batches = layerBatches[pi];
 		batches.clear();
@@ -252,7 +212,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		int baseCount = 0;
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			final long address = stack.nmalloc(vertexSize);
-			for (Map.Entry<ParticleBatchKey, Collection<TextureSheetParticle>> entry : ParticleBatchKey.groupParticles(particles).entrySet()) {
+			for (Map.Entry<IParticleBatchKey, Collection<TextureSheetParticle>> entry : batchStrategy.groupParticles(particles).entrySet()) {
 				Collection<TextureSheetParticle> collection = entry.getValue();
 				if (baseCount + collection.size() > particleLimit) {
 					throw new IllegalStateException("Particle limit exceeded! particle limit: " + particleLimit
@@ -260,47 +220,11 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 						+ ", collection size: " + collection.size());
 				}
 
-				int tickCount = 0;
-				for (TextureSheetParticle particle : collection) {
-					GpuParticleAddon gpuParticle = (GpuParticleAddon) particle;
-					if (!particle.isAlive() || !IParticleRenderer.shouldRenderParticle(gpuParticle, camPos)) {
-						continue;
-					}
-
-					// We have done our best to replicate the order in which fields are retrieved
-					// during the original particle rendering, as some mods may depend on this order.
-					MemoryUtil.memPutFloat(address, (float) (gpuParticle.asyncparticles$getXo() - cx));
-					MemoryUtil.memPutFloat(address + 4L, (float) (gpuParticle.asyncparticles$getYo() - cy));
-					MemoryUtil.memPutFloat(address + 8L, (float) (gpuParticle.asyncparticles$getZo() - cz));
-					MemoryUtil.memPutFloat(address + 12L, (float) (gpuParticle.asyncparticles$getX() - cx));
-					MemoryUtil.memPutFloat(address + 16L, (float) (gpuParticle.asyncparticles$getY() - cy));
-					MemoryUtil.memPutFloat(address + 20L, (float) (gpuParticle.asyncparticles$getZ() - cz));
-
-					MemoryUtil.memPutFloat(address + 24L, gpuParticle.asyncparticles$getQuadSize(0f));
-					int oColor = gpuParticle.asyncparticles$getOColor();
-					MemoryUtil.memPutInt(address + 48L, oColor);
-					MemoryUtil.memPutFloat(address + 60L, gpuParticle.asyncparticles$getORoll());
-
-					MemoryUtil.memPutInt(address + 56L, gpuParticle.asyncparticles$getGpuLightCoords(0f));
-
-					MemoryUtil.memPutFloat(address + 32L, gpuParticle.asyncparticles$getU0());
-					MemoryUtil.memPutFloat(address + 36L, gpuParticle.asyncparticles$getV0());
-					MemoryUtil.memPutFloat(address + 40L, gpuParticle.asyncparticles$getU1());
-					MemoryUtil.memPutFloat(address + 44L, gpuParticle.asyncparticles$getV1());
-
-					MemoryUtil.memPutFloat(address + 28L, gpuParticle.asyncparticles$getQuadSize(1f));
-					MemoryUtil.memPutInt(address + 52L, gpuParticle.asyncparticles$getColor(oColor));
-					MemoryUtil.memPutFloat(address + 64L, gpuParticle.asyncparticles$getRoll());
-
-					gpuParticle.asyncparticles$postTick(address);
-
-					MemoryUtil.memCopy(address, bufferAddress + position, vertexSize);
-					position += vertexSize;
-					tickCount++;
-				}
+				LayerBatch batch = batchStrategy.createBatch(entry.getKey(), camPos);
+				int tickCount = batchStrategy.extractLayer(renderInfo, collection, batch, address, bufferAddress + position, camPos, false);
+				position += tickCount * vertexSize;
 
 				if (tickCount > 0) {
-					LayerBatch batch = new LayerBatch(entry.getKey());
 					batch.tickOffset = baseCount;
 					batch.tickCount = tickCount;
 					batches.add(batch);
@@ -323,8 +247,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void compute(Camera camera, float partialTicks) {
-		CameraState cameraState = CameraState.of(camera, partialTicks);
-		if (computed && cameraState.equals(computedCamera)) {
+		if (reuseCondition != null && reuseCondition.matches(camera, partialTicks)) {
 			return;
 		}
 		if (shouldSkip) {
@@ -335,39 +258,26 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		if (usingIdx < 0) {
 			throw new IllegalStateException("No published source slot for GPU particle rendering");
 		}
+		if (particleLayout == null) {
+			particleLayout = batchStrategy.buildGlLayout(renderInfo, layerBatches[usingIdx], particleLimit);
+		}
+		IComputeReuseCondition condition = batchStrategy.prepareView(renderInfo, layerBatches[usingIdx], camera, partialTicks);
+		if (condition == null) {
+			reuseCondition = null;
+			return;
+		}
+
 		BufferUploader.invalidate();
-
 		int prevProgram = glGetInteger(GL_CURRENT_PROGRAM);
-		ParticleTransformFeedbackShader.INSTANCE.use();
-		ParticleTransformFeedbackShader.INSTANCE.setup(
-			partialTicks,
-			camera.getLeftVector().x(), camera.getLeftVector().y(), camera.getLeftVector().z(),
-			camera.getUpVector().x(), camera.getUpVector().y(), camera.getUpVector().z(),
-			(float) (camPositions[usingIdx].x - camera.getPosition().x),
-			(float) (camPositions[usingIdx].y - camera.getPosition().y),
-			(float) (camPositions[usingIdx].z - camera.getPosition().z));
-
 		sources[usingIdx].bind();
 		if (tf != 0) {
 			Backends.glTf.glBindTransformFeedback(tf);
-		} else {
-			int needSize = 4 * (tickCount[usingIdx] + appendCount) * ParticleVertexFormats.IDENTITY_PARTICLE.getVertexSize();
-			Backends.glTf.glBindTransformFeedbackBufferRange(0,
-				0,
-				target.vbo,
-				0L,
-				needSize);
 		}
+		batchStrategy.prepareGlCompute(renderInfo, camera, partialTicks, camPositions[usingIdx], particleLayout.totalCount(), tf, target.vbo);
 
 		GL11C.glEnable(GL30C.GL_RASTERIZER_DISCARD);
 		Backends.glTf.glBeginTransformFeedback(GL11C.GL_POINTS);
-
-		if (computeResult == null) {
-			buildDrawStuffs(layerBatches[usingIdx]);
-		}
-
-		Backends.gl.glMultiDrawArrays(GL11C.GL_POINTS, multiDrawFirst, multiDrawCount);
-
+		batchStrategy.drawGlCompute(renderInfo, camera, partialTicks, camPositions[usingIdx], layerBatches[usingIdx], particleLimit);
 		Backends.glTf.glEndTransformFeedback();
 		GL11C.glDisable(GL30C.GL_RASTERIZER_DISCARD);
 		ParticleVertexBuffer.unbind();
@@ -376,26 +286,24 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 			Backends.glTf.glBindTransformFeedback(0);
 		}
 		GL30C.glUseProgram(prevProgram);
-
-		computed = true;
-		computedCamera = cameraState;
+		reuseCondition = condition;
 	}
 
 	@Override
-	public ComputeResult awaitCompute() {
-		if (shouldSkip || !computed) {
+	public ParticleLayout awaitCompute() {
+		if (shouldSkip || reuseCondition == null) {
 			return null;
 		}
-		return computeResult;
+		return particleLayout;
 	}
 
 	@Override
 	public void render(ParticleRenderType renderType) {
-		if (computeResult == null) {
+		if (particleLayout == null || reuseCondition == null) {
 			return;
 		}
 		RenderSystem.assertOnRenderThread();
-		ComputeResult.ParticleSlice particleSlice = computeResult.sliceForRender(renderType);
+		ParticleLayout.ParticleSlice particleSlice = particleLayout.slices().get(batchStrategy.keyFor(renderType));
 		if (particleSlice == null) {
 			return;
 		}
@@ -429,37 +337,11 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		ParticleVertexBuffer.unbind();
 	}
 
-	private void buildDrawStuffs(List<LayerBatch> layerBatch) {
-		int size = layerBatch.size();
-		Map<ParticleBatchKey, ComputeResult.ParticleSlice> slices = new HashMap<>(size);
-		IntArrayList first = new IntArrayList(size * 2);
-		IntArrayList count = new IntArrayList(size * 2);
-		int baseCount = 0;
-		for (LayerBatch batch : layerBatch) {
-			int appendCount = batch.appendCount;
-			int tickCount = batch.tickCount;
-			if (tickCount > 0) {
-				first.add(batch.tickOffset);
-				count.add(tickCount);
-			}
-			if (appendCount > 0) {
-				first.add(particleLimit + batch.appendOffset);
-				count.add(appendCount);
-			}
-			int batchCount = tickCount + appendCount;
-			slices.put(batch.key, new ComputeResult.ParticleSlice(batch.layer, baseCount, batchCount));
-			baseCount += batchCount;
-		}
-		multiDrawFirst = first.toIntArray();
-		multiDrawCount = count.toIntArray();
-		computeResult = ComputeResult.of(baseCount, slices);
-	}
-
 	@Override
 	public void resize(int particleLimit) {
-		int oldRawSize = 2 * this.particleLimit * ParticleVertexFormats.RAW_PARTICLE.getVertexSize();
+		int oldRawSize = 2 * this.particleLimit * inputFormat.getVertexSize();
 		this.particleLimit = particleLimit;
-		int rawSize = 2 * particleLimit * ParticleVertexFormats.RAW_PARTICLE.getVertexSize();
+		int rawSize = 2 * particleLimit * inputFormat.getVertexSize();
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			ParticleVertexBuffer source = sources[i];
 			if (source.isMapped()) {
@@ -493,6 +375,8 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 			target.resize(proceedSize);
 		}
 
+		particleLayout = null;
+		reuseCondition = null;
 		if (tf != 0) {
 			// Attach the whole target buffer once. Transform feedback object state is persistent,
 			// so there is no need to re-bind a buffer range every frame.
@@ -503,9 +387,9 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 	@Override
 	public Collection<ParticleRenderType> getComputeLayers() {
 		List<LayerBatch> batches = renderSrcIdx >= 0 ? layerBatches[renderSrcIdx] : List.of();
-		Set<ParticleRenderType> result = new LinkedHashSet<>();
+		Set<ParticleRenderType> result = new ObjectLinkedOpenHashSet<>();
 		for (LayerBatch batch : batches) {
-			result.add(batch.layer);
+			result.add(batch.key.layer());
 		}
 		return result;
 	}
@@ -531,11 +415,11 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 			}
 		}
 		pendingAppends.clear();
-		appendCount = 0;
 		shouldSkip = true;
 		processingSrcIdx = 0;
 		renderSrcIdx = -1;
-		computeResult = null;
+		particleLayout = null;
+		reuseCondition = null;
 		mappedBuffer = null;
 	}
 }

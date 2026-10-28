@@ -14,7 +14,7 @@ public class ParticleTransformFeedbackShader {
 	public final int CameraUp;
 	public final int PartialCameraPos;
 
-	protected ParticleTransformFeedbackShader() {
+	private ParticleTransformFeedbackShader() {
 		programId = ShaderCompiler.createShaderProgram(
 			GlConst.GL_VERTEX_SHADER,
 			"/assets/asyncparticles/particle_gpu_acceleration/gl_particle_transformfeedback.vert",
@@ -40,16 +40,21 @@ public class ParticleTransformFeedbackShader {
 			}
 		);
 
-		int loc = GL20C.glGetAttribLocation(programId, "Rolls");
-		if (loc != 8) {
-			throw new IllegalStateException("Attrib binding failed: Rolls at " + loc);
-		}
+		try {
+			int loc = GL20C.glGetAttribLocation(programId, "Rolls");
+			if (loc != 8) {
+				throw new IllegalStateException("Attrib binding failed: Rolls at " + loc);
+			}
 
-		// Uniforms
-		PartialTick = GL20C.glGetUniformLocation(programId, "PartialTick");
-		CameraLeft = GL20C.glGetUniformLocation(programId, "CameraLeft");
-		CameraUp = GL20C.glGetUniformLocation(programId, "CameraUp");
-		PartialCameraPos = GL20C.glGetUniformLocation(programId, "PartialCameraPos");
+			// Uniforms
+			PartialTick = GL20C.glGetUniformLocation(programId, "PartialTick");
+			CameraLeft = GL20C.glGetUniformLocation(programId, "CameraLeft");
+			CameraUp = GL20C.glGetUniformLocation(programId, "CameraUp");
+			PartialCameraPos = GL20C.glGetUniformLocation(programId, "PartialCameraPos");
+		} catch (RuntimeException | Error exception) {
+			GL20C.glDeleteProgram(programId);
+			throw exception;
+		}
 	}
 
 	public void use() {

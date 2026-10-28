@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particle_core.ParticleCoreCompat;
@@ -11,92 +11,25 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 import java.io.Closeable;
 import java.util.Collection;
 import java.util.Map;
 
 public interface IParticleRenderer extends Closeable {
-	record CameraState(Vec3 position, Vector3f left, Vector3f up, float partialTicks) {
-		public static CameraState of(Camera camera, float partialTicks) {
-			return new CameraState(
-				camera.getPosition(),
-				new Vector3f(camera.getLeftVector()),
-				new Vector3f(camera.getUpVector()),
-				partialTicks);
-		}
-	}
-
 	static boolean shouldRenderParticle(GpuParticleAddon gpuParticle, Vec3 camPos) {
 		// Skip Particle Core distance culling because this camera position may not match portal views.
 		return gpuParticle.asyncparticles$shouldRender()
 			&& (ModListHelper.IMMERSIVE_PORTALS_LOADED || !ModListHelper.PARTICLE_CORE_LOADED
-				|| ParticleCoreCompat.shouldRenderParticle(gpuParticle, camPos));
+			|| ParticleCoreCompat.shouldRenderParticle(gpuParticle, camPos));
 	}
 
 	static void prepareShader(ShaderInstance shader) {
-		for (int i = 0; i < 12; ++i) {
-			int j = RenderSystem.getShaderTexture(i);
-			shader.setSampler("Sampler" + i, j);
-		}
-
-		if (shader.MODEL_VIEW_MATRIX != null) {
-			shader.MODEL_VIEW_MATRIX.set(RenderSystem.getModelViewMatrix());
-		}
-
-		if (shader.PROJECTION_MATRIX != null) {
-			shader.PROJECTION_MATRIX.set(RenderSystem.getProjectionMatrix());
-		}
-
-//		if (shader.INVERSE_VIEW_ROTATION_MATRIX != null) {
-//			shader.INVERSE_VIEW_ROTATION_MATRIX.set(RenderSystem.getInverseViewRotationMatrix());
-//		}
-
-		if (shader.COLOR_MODULATOR != null) {
-			shader.COLOR_MODULATOR.set(RenderSystem.getShaderColor());
-		}
-
-		if (shader.GLINT_ALPHA != null) {
-			shader.GLINT_ALPHA.set(RenderSystem.getShaderGlintAlpha());
-		}
-
-		if (shader.FOG_START != null) {
-			shader.FOG_START.set(RenderSystem.getShaderFogStart());
-		}
-
-		if (shader.FOG_END != null) {
-			shader.FOG_END.set(RenderSystem.getShaderFogEnd());
-		}
-
-		if (shader.FOG_COLOR != null) {
-			shader.FOG_COLOR.set(RenderSystem.getShaderFogColor());
-		}
-
-		if (shader.FOG_SHAPE != null) {
-			shader.FOG_SHAPE.set(RenderSystem.getShaderFogShape().getIndex());
-		}
-
-		if (shader.TEXTURE_MATRIX != null) {
-			shader.TEXTURE_MATRIX.set(RenderSystem.getTextureMatrix());
-		}
-
-		if (shader.GAME_TIME != null) {
-			shader.GAME_TIME.set(RenderSystem.getShaderGameTime());
-		}
-
-		if (shader.SCREEN_SIZE != null) {
-			Window window = Minecraft.getInstance().getWindow();
-			shader.SCREEN_SIZE.set((float) window.getWidth(), (float) window.getHeight());
-		}
-
-//		if (shader.LINE_WIDTH != null && (this.mode == VertexFormat.Mode.LINES || this.mode == VertexFormat.Mode.LINE_STRIP)) {
-//			shader.LINE_WIDTH.set(RenderSystem.getShaderLineWidth());
-//		}
-
-		RenderSystem.setupShaderLights(shader);
+		shader.setDefaultUniforms(VertexFormat.Mode.QUADS,
+			RenderSystem.getModelViewMatrix(),
+			RenderSystem.getProjectionMatrix(),
+			Minecraft.getInstance().getWindow());
 	}
-
 
 	void beginFrame(float deltaPartialTick);
 
@@ -139,7 +72,7 @@ public interface IParticleRenderer extends Closeable {
 	 * Ensures the previously submitted compute dispatch has completed.
 	 * Called on the render thread, right before the GPU particle draw.
 	 */
-	ComputeResult awaitCompute();
+	ParticleLayout awaitCompute();
 
 	void render(ParticleRenderType renderType);
 
