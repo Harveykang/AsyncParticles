@@ -9,11 +9,11 @@ import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ComputeResult;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.LayerBatch;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ParticleBatchKey;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ParticleVertexFormats;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -56,6 +56,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 
 	private boolean shouldSkip = true;
 	private boolean computed = false;
+	private CameraState computedCamera;
 	private ComputeResult computeResult;
 
 	public GlTfParticleRenderer(int particleLimit) {
@@ -81,6 +82,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 	@Override
 	public void beginFrame(float deltaPartialTick) {
 		computed = false;
+		computedCamera = null;
 	}
 
 	@Override
@@ -143,21 +145,21 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		}
 		final long bufferAddress = MemoryUtil.memAddress(mappedBuffer) + offsetRelativeToMap;
 
-		Map<ParticleRenderType, List<TextureSheetParticle>> layerMap = new Reference2ReferenceOpenHashMap<>();
+		Map<ParticleBatchKey, List<TextureSheetParticle>> layerMap = new LinkedHashMap<>();
 		for (int i = 0, pendingSize = Math.min(particleLimit, pending.size()); i < pendingSize; i++) {
 			TextureSheetParticle p = pending.get(i);
-			layerMap.computeIfAbsent(p.getRenderType(), ignored -> new ReferenceArrayList<>(appendCount / 2)).add(p);
+			layerMap.computeIfAbsent(ParticleBatchKey.of(p), ignored -> new ReferenceArrayList<>()).add(p);
 		}
 
 		int baseCount = 0;
 		int baseWrite = 0;
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			long address = stack.nmalloc(vertexSize);
-			for (Map.Entry<ParticleRenderType, List<TextureSheetParticle>> entry : layerMap.entrySet()) {
+			for (Map.Entry<ParticleBatchKey, List<TextureSheetParticle>> entry : layerMap.entrySet()) {
 				List<TextureSheetParticle> list = entry.getValue();
 				LayerBatch batch = null;
 				for (LayerBatch b : batches) {
-					if (b.layer == entry.getKey()) {
+					if (b.key.equals(entry.getKey())) {
 						batch = b;
 						break;
 					}
@@ -250,7 +252,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		int baseCount = 0;
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			final long address = stack.nmalloc(vertexSize);
-			for (Map.Entry<ParticleRenderType, T> entry : particles.entrySet()) {
+			for (Map.Entry<ParticleBatchKey, Collection<TextureSheetParticle>> entry : ParticleBatchKey.groupParticles(particles).entrySet()) {
 				Collection<TextureSheetParticle> collection = entry.getValue();
 				if (baseCount + collection.size() > particleLimit) {
 					throw new IllegalStateException("Particle limit exceeded! particle limit: " + particleLimit
@@ -321,7 +323,8 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 
 	@Override
 	public void compute(Camera camera, float partialTicks) {
-		if (computed) {
+		CameraState cameraState = CameraState.of(camera, partialTicks);
+		if (computed && cameraState.equals(computedCamera)) {
 			return;
 		}
 		if (shouldSkip) {
@@ -375,6 +378,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		GL30C.glUseProgram(prevProgram);
 
 		computed = true;
+		computedCamera = cameraState;
 	}
 
 	@Override
@@ -391,7 +395,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 			return;
 		}
 		RenderSystem.assertOnRenderThread();
-		ComputeResult.ParticleSlice particleSlice = computeResult.slices().get(renderType);
+		ComputeResult.ParticleSlice particleSlice = computeResult.sliceForRender(renderType);
 		if (particleSlice == null) {
 			return;
 		}
@@ -427,7 +431,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 
 	private void buildDrawStuffs(List<LayerBatch> layerBatch) {
 		int size = layerBatch.size();
-		Map<ParticleRenderType, ComputeResult.ParticleSlice> slices = new Reference2ReferenceOpenHashMap<>(size);
+		Map<ParticleBatchKey, ComputeResult.ParticleSlice> slices = new HashMap<>(size);
 		IntArrayList first = new IntArrayList(size * 2);
 		IntArrayList count = new IntArrayList(size * 2);
 		int baseCount = 0;
@@ -443,7 +447,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 				count.add(appendCount);
 			}
 			int batchCount = tickCount + appendCount;
-			slices.put(batch.layer, new ComputeResult.ParticleSlice(batch.layer, baseCount, batchCount));
+			slices.put(batch.key, new ComputeResult.ParticleSlice(batch.layer, baseCount, batchCount));
 			baseCount += batchCount;
 		}
 		multiDrawFirst = first.toIntArray();
@@ -499,7 +503,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 	@Override
 	public Collection<ParticleRenderType> getComputeLayers() {
 		List<LayerBatch> batches = renderSrcIdx >= 0 ? layerBatches[renderSrcIdx] : List.of();
-		List<ParticleRenderType> result = new ArrayList<>(batches.size());
+		Set<ParticleRenderType> result = new LinkedHashSet<>();
 		for (LayerBatch batch : batches) {
 			result.add(batch.layer);
 		}

@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals.ImmersivePortalsCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particle_core.ParticleCoreCompat;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -12,16 +11,28 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 import java.io.Closeable;
 import java.util.Collection;
 import java.util.Map;
 
 public interface IParticleRenderer extends Closeable {
+	record CameraState(Vec3 position, Vector3f left, Vector3f up, float partialTicks) {
+		public static CameraState of(Camera camera, float partialTicks) {
+			return new CameraState(
+				camera.getPosition(),
+				new Vector3f(camera.getLeftVector()),
+				new Vector3f(camera.getUpVector()),
+				partialTicks);
+		}
+	}
+
 	static boolean shouldRenderParticle(GpuParticleAddon gpuParticle, Vec3 camPos) {
+		// Skip Particle Core distance culling because this camera position may not match portal views.
 		return gpuParticle.asyncparticles$shouldRender()
-			&& (!ModListHelper.IMMERSIVE_PORTALS_LOADED || ImmersivePortalsCompat.shouldRenderParticle(gpuParticle))
-			&& (!ModListHelper.PARTICLE_CORE_LOADED || ParticleCoreCompat.shouldRenderParticle(gpuParticle, camPos));
+			&& (ModListHelper.IMMERSIVE_PORTALS_LOADED || !ModListHelper.PARTICLE_CORE_LOADED
+				|| ParticleCoreCompat.shouldRenderParticle(gpuParticle, camPos));
 	}
 
 	static void prepareShader(ShaderInstance shader) {
@@ -119,7 +130,7 @@ public interface IParticleRenderer extends Closeable {
 	void append(Vec3 cameraPos, TextureSheetParticle tsp);
 
 	/**
-	 * Called multiple per frame, but only computed once.
+	 * Called multiple per frame, recomputing when the camera or partial tick changes.
 	 * Called on main thread.
 	 */
 	void compute(Camera camera, float partialTicks);

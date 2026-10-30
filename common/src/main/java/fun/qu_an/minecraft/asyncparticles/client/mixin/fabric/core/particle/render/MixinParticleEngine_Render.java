@@ -7,7 +7,6 @@ import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.Tesselator;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
-import fun.qu_an.minecraft.asyncparticles.client.config.ComputeExecutionStage;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ComputeResult;
@@ -73,9 +72,7 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 		ComputeResult computeResult = null;
 		IParticleRenderer particleRenderer = null;
 		if (ConfigHelper.isGpuParticles()) {
-			if (ConfigHelper.getComputeExecutionStage() == ComputeExecutionStage.PARTICLE_RENDERING) {
-				GpuParticleBehavior.getInstance().compute(camera, f);
-			}
+			GpuParticleBehavior.getInstance().compute(camera, f);
 			computeResult = GpuParticleBehavior.getInstance().ensureComputeReady();
 			if (computeResult != null) {
 				particleRenderer = GpuParticleBehavior.getInstance().getOrCreateRenderer();
