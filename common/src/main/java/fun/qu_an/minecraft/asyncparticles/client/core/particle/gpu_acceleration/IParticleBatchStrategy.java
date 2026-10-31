@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 public interface IParticleBatchStrategy<C> {
-	IParticleBatchKey keyFor(TextureSheetParticle particle);
+	IParticleBatchKey batchKey(TextureSheetParticle particle);
 
-	IParticleBatchKey keyFor(ParticleRenderType layer);
+	IParticleRenderKey renderKey(ParticleRenderType layer);
 
 	/**
 	 * Groups particles for extraction, may return the original map.

@@ -2,12 +2,8 @@ package fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.*;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.ParticleTransformFeedbackShader;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ParticleLayout;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IComputeReuseCondition;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleBatchKey;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.LayerBatch;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ParticleVertexFormats;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.IGlParticleBatchStrategy;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan.IVkParticleBatchStrategy;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan.VkCompParticleRenderer;
@@ -51,7 +47,7 @@ public class ImmPtlParticleBatchStrategy implements IGlParticleBatchStrategy<Imm
 	}
 
 	@Override
-	public IParticleBatchKey keyFor(TextureSheetParticle particle) {
+	public IParticleBatchKey batchKey(TextureSheetParticle particle) {
 		// Input key: split each level/layer into regions with separate position origins.
 		return new ImmPtlRegionKey(particle.getRenderType(), ImmersivePortalsCompat.getParticleWorld(particle),
 			region(particle.x), region(particle.y), region(particle.z));
@@ -71,7 +67,7 @@ public class ImmPtlParticleBatchStrategy implements IGlParticleBatchStrategy<Imm
 		Map<IParticleBatchKey, Collection<TextureSheetParticle>> grouped = new Object2ReferenceOpenHashMap<>(particles.size());
 		for (Collection<TextureSheetParticle> layer : particles.values()) {
 			for (TextureSheetParticle particle : layer) {
-				grouped.computeIfAbsent(keyFor(particle), ignored -> new ReferenceArrayList<>()).add(particle);
+				grouped.computeIfAbsent(batchKey(particle), ignored -> new ReferenceArrayList<>()).add(particle);
 			}
 		}
 		return grouped;
@@ -97,7 +93,7 @@ public class ImmPtlParticleBatchStrategy implements IGlParticleBatchStrategy<Imm
 	}
 
 	@Override
-	public IParticleBatchKey keyFor(ParticleRenderType layer) {
+	public IParticleRenderKey renderKey(ParticleRenderType layer) {
 		// Output key: select the current level/layer from the shared slice map, regardless of region.
 		return new ImmPtlRenderKey(layer, Minecraft.getInstance().level);
 	}
@@ -225,7 +221,7 @@ public class ImmPtlParticleBatchStrategy implements IGlParticleBatchStrategy<Imm
 			levels.computeIfAbsent(((ImmPtlRegionKey) batch.key).level(), ignored -> new Object2ReferenceLinkedOpenHashMap<>())
 				.computeIfAbsent(batch.key.layer(), ignored -> new ReferenceArrayList<>()).add(batch);
 		}
-		Map<IParticleBatchKey, ParticleLayout.ParticleSlice> slices = new Object2ReferenceOpenHashMap<>(batches.size());
+		Map<IParticleRenderKey, ParticleLayout.ParticleSlice> slices = new Object2ReferenceOpenHashMap<>(batches.size());
 		batches.clear();
 		int totalCount = 0;
 		for (var level : levels.entrySet()) {

@@ -294,7 +294,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 		Map<IParticleBatchKey, List<TextureSheetParticle>> layerMap = new Object2ReferenceOpenHashMap<>();
 		for (int i = 0, pendingSize = Math.min(particleLimit, appendCount); i < pendingSize; i++) {
 			TextureSheetParticle p = pending.get(i);
-			layerMap.computeIfAbsent(batchStrategy.keyFor(p), a -> new ReferenceArrayList<>()).add(p);
+			layerMap.computeIfAbsent(batchStrategy.batchKey(p), a -> new ReferenceArrayList<>()).add(p);
 		}
 
 		int baseCount = 0;
@@ -533,7 +533,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 			return;
 		}
 		RenderSystem.assertOnRenderThread();
-		ParticleLayout.ParticleSlice particleSlice = particleLayout.slices().get(batchStrategy.keyFor(renderType));
+		ParticleLayout.ParticleSlice particleSlice = particleLayout.slices().get(batchStrategy.renderKey(renderType));
 		if (particleSlice == null) {
 			return;
 		}

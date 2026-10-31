@@ -141,7 +141,7 @@ public class GlTfParticleRenderer<C> implements IParticleRenderer {
 		Map<IParticleBatchKey, List<TextureSheetParticle>> layerMap = new Object2ReferenceOpenHashMap<>(batches.size());
 		for (int i = 0, pendingSize = Math.min(particleLimit, pending.size()); i < pendingSize; i++) {
 			TextureSheetParticle p = pending.get(i);
-			layerMap.computeIfAbsent(batchStrategy.keyFor(p), ignored -> new ReferenceArrayList<>()).add(p);
+			layerMap.computeIfAbsent(batchStrategy.batchKey(p), ignored -> new ReferenceArrayList<>()).add(p);
 		}
 
 		int baseCount = 0;
@@ -303,7 +303,7 @@ public class GlTfParticleRenderer<C> implements IParticleRenderer {
 			return;
 		}
 		RenderSystem.assertOnRenderThread();
-		ParticleLayout.ParticleSlice particleSlice = particleLayout.slices().get(batchStrategy.keyFor(renderType));
+		ParticleLayout.ParticleSlice particleSlice = particleLayout.slices().get(batchStrategy.renderKey(renderType));
 		if (particleSlice == null) {
 			return;
 		}

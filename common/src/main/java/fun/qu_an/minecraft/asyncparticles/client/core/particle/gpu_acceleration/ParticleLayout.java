@@ -4,8 +4,8 @@ import net.minecraft.client.particle.ParticleRenderType;
 
 import java.util.Map;
 
-public record ParticleLayout(int totalCount, Map<IParticleBatchKey, ParticleSlice> slices, int maxCount) {
-	public static ParticleLayout of(int totalCount, Map<IParticleBatchKey, ParticleSlice> slices) {
+public record ParticleLayout(int totalCount, Map<IParticleRenderKey, ParticleSlice> slices, int maxCount) {
+	public static ParticleLayout of(int totalCount, Map<IParticleRenderKey, ParticleSlice> slices) {
 		int maxCount = 0;
 		for (ParticleSlice slice : slices.values()) {
 			if (slice.count() > maxCount) {

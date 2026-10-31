@@ -37,8 +37,13 @@ public class ParticleBatchStrategy implements IGlParticleBatchStrategy<ParticleB
 	}
 
 	@Override
-	public IParticleBatchKey keyFor(TextureSheetParticle particle) {
+	public IParticleBatchKey batchKey(TextureSheetParticle particle) {
 		return (IParticleBatchKey) particle.getRenderType();
+	}
+
+	@Override
+	public IParticleRenderKey renderKey(ParticleRenderType layer) {
+		return (IParticleRenderKey) layer;
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -64,11 +69,6 @@ public class ParticleBatchStrategy implements IGlParticleBatchStrategy<ParticleB
 		MemoryUtil.memPutFloat(address + 12L, (float) (particle.asyncparticles$getX() - cx));
 		MemoryUtil.memPutFloat(address + 16L, (float) (particle.asyncparticles$getY() - cy));
 		MemoryUtil.memPutFloat(address + 20L, (float) (particle.asyncparticles$getZ() - cz));
-	}
-
-	@Override
-	public IParticleBatchKey keyFor(ParticleRenderType layer) {
-		return (IParticleBatchKey) layer;
 	}
 
 	@Override
@@ -131,7 +131,7 @@ public class ParticleBatchStrategy implements IGlParticleBatchStrategy<ParticleB
 	@Override
 	public ParticleLayout buildGlLayout(RenderInfo renderInfo, List<LayerBatch> batches, int particleLimit) {
 		int size = batches.size();
-		Map<IParticleBatchKey, ParticleLayout.ParticleSlice> slices = new Object2ReferenceOpenHashMap<>(size);
+		Map<IParticleRenderKey, ParticleLayout.ParticleSlice> slices = new Object2ReferenceOpenHashMap<>(size);
 		IntArrayList first = new IntArrayList(size * 2);
 		IntArrayList count = new IntArrayList(size * 2);
 		int totalCount = 0;
@@ -149,7 +149,7 @@ public class ParticleBatchStrategy implements IGlParticleBatchStrategy<ParticleB
 			batch.targetOffset = totalCount;
 			int batchCount = tickCount + appendCount;
 			if (batchCount > 0) {
-				slices.put(batch.key, new ParticleLayout.ParticleSlice(batch.key.layer(), totalCount, batchCount));
+				slices.put((IParticleRenderKey) batch.key, new ParticleLayout.ParticleSlice(batch.key.layer(), totalCount, batchCount));
 				totalCount += batchCount;
 			}
 		}
@@ -160,14 +160,14 @@ public class ParticleBatchStrategy implements IGlParticleBatchStrategy<ParticleB
 
 	@Override
 	public VkLayoutResult buildVkLayout(List<LayerBatch> batches, int particleLimit) {
-		Map<IParticleBatchKey, ParticleLayout.ParticleSlice> slices = new Object2ReferenceOpenHashMap<>(batches.size());
+		Map<IParticleRenderKey, ParticleLayout.ParticleSlice> slices = new Object2ReferenceOpenHashMap<>(batches.size());
 		int totalCount = 0;
 		int groups = 0;
 		for (LayerBatch batch : batches) {
 			batch.targetOffset = totalCount;
 			int count = batch.count();
 			if (count > 0) {
-				slices.put(batch.key, new ParticleLayout.ParticleSlice(batch.key.layer(), totalCount, count));
+				slices.put((IParticleRenderKey) batch.key, new ParticleLayout.ParticleSlice(batch.key.layer(), totalCount, count));
 				totalCount += count;
 			}
 			groups += (batch.tickCount + VkCompParticleRenderer.WORKGROUP_SIZE - 1) / VkCompParticleRenderer.WORKGROUP_SIZE;
