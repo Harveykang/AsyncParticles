@@ -145,6 +145,18 @@ public class ModListHelper {
 	public static final boolean RUOK_LOADED = isModLoaded("ruok");
 	/* Particle Storm */
 	public static final boolean PARTICLE_STORM_LOADED = isModLoaded("particlestorm");
+	public static final boolean FABRIC_PARTICLE_STORM_LOADED = isFabricModLoaded("particlestorm");
+	public static final boolean FORGE_PARTICLE_STORM_LOADED = isForgeModLoaded("particlestorm");
+	public static final boolean PARTICLE_STORM_LATER_THAN_1_4_3_1 = PARTICLE_STORM_LOADED
+		&& versionCheck("particlestorm", "1.4.3.1", null);
+	public static final boolean FORGE_PARTICLE_STORM_LATER_THAN_1_5_0 = FORGE_PARTICLE_STORM_LOADED
+		&& versionCheck("particlestorm", "1.5.0", null);
+	/* Confluence: Otherworld */
+	public static final boolean CONFLUENCE_LOADED = isModLoaded("confluence");
+	/* Opal Light */
+	public static final boolean OPAL_LIGHT_LOADED = isModLoaded("opallight");
+	public static final boolean OPAL_LIGHT_LATER_THAN_1_2_3_3 = OPAL_LIGHT_LOADED
+		&& versionCheck("opallight", "1.2.3.3", null);
 
 	@ExpectPlatform
 	private static boolean isForge() {

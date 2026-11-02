@@ -2,9 +2,10 @@ package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.gpu_accele
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.opallight.OpalLightCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.opallight.OpalLightEarlyCompat;
+import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.util.FastColor;
@@ -34,8 +35,10 @@ public abstract class MixinTextureSheetParticle extends SingleQuadParticle imple
 	public abstract float getV1();
 
 	@Override
-	public void asyncparticles$postTick(long address) {
-		// no-op
+	public void asyncparticles$postTick(long address, boolean appending) {
+		if (OpalLightEarlyCompat.AVAILABLE && ConfigHelper.isOpalLightFixGpuCompat()) {
+			OpalLightCompat.apply(this, appending, address);
+		}
 	}
 
 	@Override

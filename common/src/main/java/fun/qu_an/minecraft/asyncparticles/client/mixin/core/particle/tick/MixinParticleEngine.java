@@ -91,7 +91,7 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		}
 		if (!this.trackingEmitters.isEmpty()) {
 			for (TrackingEmitter trackingEmitter : this.trackingEmitters) {
-				trackingEmitter.tick(); // TODO can be async-lized safely?
+				trackingEmitter.tick();
 				// clear in AsyncTickBehavior
 			}
 			if (!tickAsync) {

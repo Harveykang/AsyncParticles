@@ -15,8 +15,9 @@ public interface GpuParticleAddon extends LightCachedParticleAddon {
 	int COLOR_GREEN_OFFSET = COLOR_OFFSET + 1;
 	int COLOR_BLUE_OFFSET = COLOR_OFFSET + 2;
 	int COLOR_ALPHA_OFFSET = COLOR_OFFSET + 3;
+	int LIGHT_OFFSET = 56;
 
-	void asyncparticles$postTick(long address);
+	void asyncparticles$postTick(long address, boolean appending);
 
 	boolean asyncparticles$shouldRender();
 

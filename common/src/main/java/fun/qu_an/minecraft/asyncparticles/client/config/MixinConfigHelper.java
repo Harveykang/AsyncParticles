@@ -43,7 +43,15 @@ public class MixinConfigHelper {
 		return CONFIG.getContraptionNoParticleCollision().stream().filter(ModListHelper::classExists).toList();
 	}
 
-	public static boolean isPolytoneCompatEnabled() {
-		return CONFIG.isPolytoneCompatEnabled();
+	public static boolean isPolytoneMixinEnabled() {
+		return CONFIG.isPolytoneMixinEnabled();
+	}
+
+	public static boolean isParticleStormMixinEnabled() {
+		return CONFIG.isParticleStormMixinEnabled();
+	}
+
+	public static boolean isOpalLightMixinEnabled() {
+		return CONFIG.isOpalLightMixinEnabled();
 	}
 }

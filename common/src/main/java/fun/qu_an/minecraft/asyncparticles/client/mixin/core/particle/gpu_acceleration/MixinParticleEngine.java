@@ -5,6 +5,8 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.opallight.OpalLightCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.opallight.OpalLightEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
@@ -93,6 +95,9 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 		if (!tickAsync && ConfigHelper.isTickRendererOnMainThread()) {
 			asyncparticles$tickRenderer(renderer);
 		} else {
+			if (OpalLightEarlyCompat.AVAILABLE && ConfigHelper.isOpalLightFixGpuCompat()) {
+				OpalLightCompat.capture();
+			}
 			taskHelper.addTask(() -> asyncparticles$tickRenderer(renderer));
 		}
 	}

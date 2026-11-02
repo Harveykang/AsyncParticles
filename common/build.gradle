@@ -24,6 +24,8 @@ dependencies {
     modCompileOnly("me.shedaniel.cloth:cloth-config:15.0.140")
 
     /* APIs */
+    modCompileOnly('org.mesdag:ParticleStorm-fabric-1.21.1:1.4.4') { transitive = false }
+    modCompileOnly('org.mesdag:OpalLight-neoforge-1.21.1:1.2.3.3') { transitive = false }
     modCompileOnly "maven.modrinth:fzzy-config:0.7.5+1.21"
 
     /* Performance */
@@ -128,17 +130,22 @@ dependencies {
     modCompileOnly "curse.maven:ruok-910904:7637299" // 1.7.4
 }
 
-tasks.register('compileSpirv', Exec) {
-    def shaderSrc = file('src/main/resources/assets/asyncparticles/particle_gpu_acceleration/vk_particle_compute.comp')
-    def spvOutDir = layout.buildDirectory.dir('resources/main/assets/asyncparticles/particle_gpu_acceleration/').get().asFile
-    inputs.file shaderSrc
-
-    def dest = new File(spvOutDir, 'vk_particle_compute.spv')
-    dest.delete()
-    outputs.file dest
-    commandLine rootProject.glsl_validator,
-            '-V', '-S', 'comp', '--target-env', 'vulkan1.0',
-            shaderSrc.absolutePath, '-o', dest.absolutePath
+tasks.register('compileSpirv') {
+    def paths = ['particle_gpu_acceleration/vk_particle_compute', 'compat/particlestorm/vk_quad']
+    paths.each { shader ->
+        def shaderSrc = file("src/main/resources/assets/asyncparticles/${shader}.comp")
+        def dest = layout.buildDirectory.file("resources/main/assets/asyncparticles/${shader}.spv").get().asFile
+        inputs.file shaderSrc
+        outputs.file dest
+        doLast {
+            dest.parentFile.mkdirs()
+            project.exec {
+                commandLine rootProject.glsl_validator,
+                        '-V', '-S', 'comp', '--target-env', 'vulkan1.0',
+                        shaderSrc.absolutePath, '-o', dest.absolutePath
+            }
+        }
+    }
 }
 
 processResources {

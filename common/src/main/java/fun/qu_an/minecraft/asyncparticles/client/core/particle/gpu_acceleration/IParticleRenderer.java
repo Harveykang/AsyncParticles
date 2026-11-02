@@ -51,7 +51,7 @@ public interface IParticleRenderer extends Closeable {
 
 	/**
 	 * Called per tick.
-	 * Called on non-main thread.
+	 * Extracts a tick snapshot after particle ticks, on the main or worker thread.
 	 */
 	<T extends Collection<TextureSheetParticle>> void tick(Vec3 cameraPos, Map<ParticleRenderType, T> particles);
 

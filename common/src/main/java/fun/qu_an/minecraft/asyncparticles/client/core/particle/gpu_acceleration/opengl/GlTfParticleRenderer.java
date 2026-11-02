@@ -61,7 +61,7 @@ public class GlTfParticleRenderer<C> implements IParticleRenderer {
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			sources[i] = new ParticleVertexBuffer(GL15C.GL_DYNAMIC_DRAW);
 			sources[i].bind();
-			inputFormat.setupBufferState(); // attributes
+			inputFormat.glSetupBufferState(); // attributes
 			layerBatches[i] = new ReferenceArrayList<>();
 			tickCount[i] = 0;
 			camPositions[i] = Vec3.ZERO;
@@ -69,7 +69,7 @@ public class GlTfParticleRenderer<C> implements IParticleRenderer {
 
 		target = new ParticleVertexBuffer(GL15C.GL_STREAM_COPY);
 		target.bind();
-		ParticleVertexFormats.IDENTITY_PARTICLE.setupBufferState(); // attributes
+		ParticleVertexFormats.IDENTITY_PARTICLE.glSetupBufferState(); // attributes
 		ParticleVertexBuffer.unbind();
 
 		tf = Backends.glTf.genTransformFeedback();
@@ -166,7 +166,7 @@ public class GlTfParticleRenderer<C> implements IParticleRenderer {
 				}
 				batch.appendOffset = baseCount;
 				batch.appendCount = layerAppend;
-				particlePipeline.extractBatch(list, batch, address, bufferAddress + baseWrite, prevGpuCamPos, true);
+				particlePipeline.extractBatch(pipelineState, list, batch, address, bufferAddress + baseWrite, prevGpuCamPos, true);
 				baseWrite += layerAppend * vertexSize;
 				baseCount += layerAppend;
 			}
@@ -221,7 +221,7 @@ public class GlTfParticleRenderer<C> implements IParticleRenderer {
 				}
 
 				LayerBatch batch = particlePipeline.createBatch(entry.getKey(), camPos);
-				int tickCount = particlePipeline.extractBatch(collection, batch, address, bufferAddress + position, camPos, false);
+				int tickCount = particlePipeline.extractBatch(pipelineState, collection, batch, address, bufferAddress + position, camPos, false);
 				position += tickCount * vertexSize;
 
 				if (tickCount > 0) {

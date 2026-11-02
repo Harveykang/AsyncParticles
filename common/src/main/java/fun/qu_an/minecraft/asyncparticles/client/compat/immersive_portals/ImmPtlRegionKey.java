@@ -4,7 +4,7 @@ import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleRenderType;
 
-record ImmPtlRegionKey(
+public record ImmPtlRegionKey(
 	ParticleRenderType layer,
 	ClientLevel level,
 	long x,

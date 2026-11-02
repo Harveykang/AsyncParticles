@@ -28,6 +28,10 @@
     "compat.immersive_portals.MixinParticleEngine",
     "compat.iris_like.MixinDSAUnsupported",
     "compat.modernui.MixinRenderSystem",
+    "compat.opallight.MixinParticleEngine",
+    "compat.particlestorm.MixinLevelRenderer",
+    "compat.particlestorm.MixinMinecraft",
+    "compat.particlestorm.MixinMolangParticleInstance",
     "compat.particlerain.MixinParticleRain",
     "compat.particlerain.MixinParticleSpawner",
     "compat.particlerain.MixinWeatherParticle",
@@ -39,6 +43,7 @@
     "compat.physicsmod.MixinWeatherParticle",
     "compat.physicsmod_create.MixinLevelRenderer",
     "compat.physicsmod_create.MixinWeatherParticle",
+    "compat.polytone.AccessorPolytoneAsyncParticleHandler",
     "compat.polytone.MixinBlockPropertiesManager",
     "compat.polytone.MixinCustomParticleInstance",
     "compat.polytone.MixinCustomParticleType",
@@ -82,6 +87,8 @@
     "core.particle.gpu_acceleration.MixinParticleRenderType",
     "core.particle.gpu_acceleration.MixinTextureSheetParticle",
     "core.particle.light_cache.MixinParticle_LightCache",
+    "core.particle.light_cache.MixinParticle_LightCache_Byte",
+    "core.particle.light_cache.MixinParticle_LightCache_Int",
     "core.particle.light_cache.MixinParticle_LightCache_Late",
     "core.particle.light_cache.MixinParticleEngine_FixBlackDestructionParticle",
     "core.particle.render.MixinLevelRenderer",
@@ -92,6 +99,8 @@
     "core.weather.MixinLevelRenderer_WeatherCulling",
     "fabric.compat.effective.MixinEffectiveLights",
     "fabric.compat.loot_beams_up.MixinParticleRenderType",
+    "fabric.compat.particlestorm.MixinMolangParticleEngine",
+    "fabric.compat.particlestorm.MixinParticleEngine",
     "fabric.core.particle.render.MixinParticle",
     "fabric.core.particle.render.MixinParticleEngine_Render",
     "off_thread_access.MixinActiveProfiler",
@@ -109,6 +118,5 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "compat.polytone.AccessorPolytoneAsyncParticleHandler"
   ]
 }

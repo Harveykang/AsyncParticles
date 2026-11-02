@@ -3,7 +3,9 @@ package fun.qu_an.minecraft.asyncparticles.client.coremod;
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.compat.opallight.OpalLightEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particle_core.ParticleCoreEarlyCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlestorm.ParticleStormEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.MixinConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.adjusters.*;
@@ -68,6 +70,14 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 		}
 		return switch (split[0]) {
 			case "core" -> switch (split[1]) {
+				case "particle" -> switch (split[2]) {
+					case "light_cache" -> switch (split[3]) {
+						case "MixinParticle_LightCache_Byte" -> !OpalLightEarlyCompat.AVAILABLE;
+						case "MixinParticle_LightCache_Int" -> OpalLightEarlyCompat.AVAILABLE;
+						default -> true;
+					};
+					default -> true;
+				};
 				case "weather" -> !"MixinLevelRenderer_WeatherCulling".equals(split[2]) || !MORE_CULLING_LOADED;
 				default -> true;
 			};
@@ -83,7 +93,9 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				default -> true;
 			};
 			case "compat" -> switch (split[1]) {
-				case "polytone" -> PolytoneEarlyCompat.isAvailable();
+				case "opallight" -> OpalLightEarlyCompat.AVAILABLE;
+				case "particlestorm" -> ParticleStormEarlyCompat.AVAILABLE;
+				case "polytone" -> PolytoneEarlyCompat.AVAILABLE;
 				case "sable" -> SABLE_LOADED;
 				case "particlerain" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN;
 				case "particlerain_vs" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN && VS_LOADED;
@@ -114,7 +126,8 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 			};
 			case "fabric" -> switch (split[1]) {
 				case "core" -> !IS_FORGE;
-				case "compat" -> !IS_FORGE && switch (split[2]) {
+				case "compat" -> switch (split[2]) {
+					case "particlestorm" -> FABRIC_PARTICLE_STORM_LOADED && ParticleStormEarlyCompat.AVAILABLE;
 					case "create" -> FABRIC_CREATE_LOADED;
 					case "effective" -> FABRIC_EFFECTIVE_LOADED;
 					case "iris" -> FABRIC_IRIS_LOADED;

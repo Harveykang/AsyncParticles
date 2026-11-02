@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import org.jetbrains.annotations.Nullable;

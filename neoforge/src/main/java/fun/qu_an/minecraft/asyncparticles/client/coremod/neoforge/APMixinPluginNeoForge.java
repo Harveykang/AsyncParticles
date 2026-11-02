@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.neoforge;
 
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlestorm.ParticleStormEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.class_adjuster.MixinClassAdjusterRegistrar;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -39,6 +40,12 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 		return switch (split[0]) {
 			case "neoforge" -> IS_FORGE;
 			case "compat" -> "neoforge".equals(split[1]) && switch (split[2]) {
+				case "particlestorm" -> FORGE_PARTICLE_STORM_LOADED && ParticleStormEarlyCompat.AVAILABLE
+					&& switch (split[3]) {
+						case "v1_4_x" -> !FORGE_PARTICLE_STORM_LATER_THAN_1_5_0;
+						case "v1_5_0" -> FORGE_PARTICLE_STORM_LATER_THAN_1_5_0;
+						default -> true;
+					};
 				case "particlerain_create" -> PARTICLERAIN_LOADED && !IS_LEGACY_PARTICLERAIN;
 				case "create" -> FORGE_CREATE_LOADED;
 				case "sable_create" -> SABLE_LOADED && CREATE_LOADED;

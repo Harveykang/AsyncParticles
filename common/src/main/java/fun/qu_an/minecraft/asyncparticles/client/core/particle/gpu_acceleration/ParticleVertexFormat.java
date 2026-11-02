@@ -1,4 +1,4 @@
-package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl;
+package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 
@@ -20,7 +20,7 @@ public class ParticleVertexFormat {
 		size = offset;
 	}
 
-	public void setupBufferState() {
+	public void glSetupBufferState() {
 		for (int i = 0, l = elements.length; i < l; ++i) {
 			ParticleVertexFormatElement element = elements[i];
 			GlStateManager._enableVertexAttribArray(i);

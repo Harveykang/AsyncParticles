@@ -141,6 +141,8 @@ public class CompatibilityTryItButton extends Button {
 			&& isMatch(o.sable, configObj.sable)
 			&& isMatch(o.create, configObj.create)
 			&& isMatch(o.polytone, configObj.polytone)
+			&& isMatch(o.particleStorm, configObj.particleStorm)
+			&& isMatch(o.opalLight, configObj.opalLight)
 			&& isMatch(o.mobile, configObj.mobile);
 	}
 
@@ -192,6 +194,14 @@ public class CompatibilityTryItButton extends Button {
 		return true;
 	}
 
+	private static boolean isMatch(ConfigObj.ParticleStorm o, ConfigObj.ParticleStorm particleStorm) {
+		return true;
+	}
+
+	private static boolean isMatch(ConfigObj.OpalLight o, ConfigObj.OpalLight opalLight) {
+		return true;
+	}
+
 	private static boolean isMatch(ConfigObj.Mobile o, ConfigObj.Mobile mobile) {
 		return o.multiDrawWorkaround == mobile.multiDrawWorkaround;
 	}
@@ -208,6 +218,9 @@ public class CompatibilityTryItButton extends Button {
 		config.polytone.gpuOnlyAsyncTick = modified.polytone.gpuOnlyAsyncTick;
 		config.polytone.gpuRendering = modified.polytone.gpuRendering;
 		config.polytone.takeover = modified.polytone.takeover;
+		config.particleStorm.gpuRendering = modified.particleStorm.gpuRendering;
+		config.opalLight.gpuRenderingCompatibility = modified.opalLight.gpuRenderingCompatibility;
+		config.opalLight.destructionColorPrediction = modified.opalLight.destructionColorPrediction;
 		config.create.rainEffect = modified.create.rainEffect;
 		config.create.tickRainBlockingRange = modified.create.tickRainBlockingRange;
 		mixinConfig.setContraptionNoParticleCollision(mixinModified.getContraptionNoParticleCollision());
@@ -216,6 +229,9 @@ public class CompatibilityTryItButton extends Button {
 		mixinConfig.setLockRequired(mixinModified.getLockRequired());
 		mixinConfig.setReplaceRandom(mixinModified.getReplaceRandom());
 		mixinConfig.setNoLightCache(mixinModified.getNoLightCache());
+		mixinConfig.setPolytoneMixinEnabled(mixinModified.isPolytoneMixinEnabled());
+		mixinConfig.setParticleStormMixinEnabled(mixinModified.isParticleStormMixinEnabled());
+		mixinConfig.setOpalLightMixinEnabled(mixinModified.isOpalLightMixinEnabled());
 	}
 
 	enum CompatibilityTryIt implements TranslatableEnum {

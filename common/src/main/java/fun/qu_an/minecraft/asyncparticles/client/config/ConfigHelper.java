@@ -144,6 +144,18 @@ public class ConfigHelper {
 		return isAsyncParticleTick() && polytone$asyncTick;
 	}
 
+	public static boolean isParticleStormGpuRendering() {
+		return isGpuParticles() && particleStorm$gpuRendering;
+	}
+
+	public static boolean isOpalLightFixGpuCompat() {
+		return opalLight$gpuRenderingCompatibility;
+	}
+
+	public static boolean isOpalLightDestructionColorPrediction() {
+		return isOpalLightFixGpuCompat() && opalLight$destructionColorPrediction;
+	}
+
 	public static boolean isPolytoneGpuRendering() {
 		return isPolytoneAsyncTick() && isGpuParticles() && polytone$gpuRendering;
 	}

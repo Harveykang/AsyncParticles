@@ -21,6 +21,8 @@ import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL15C;
 import org.lwjgl.vulkan.VK10;
 import org.lwjgl.vulkan.VkCommandBuffer;
+import org.lwjgl.system.MemoryUtil;
+import qouteall.imm_ptl.core.mixin.client.particle.IEParticle;
 
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -47,7 +49,7 @@ public class ImmPtlParticlePipeline implements IGlParticlePipeline<ImmPtlParticl
 	@Override
 	public IParticleBatchKey batchKey(TextureSheetParticle particle) {
 		// Input key: split each level/layer into regions with separate position origins.
-		return new ImmPtlRegionKey(particle.getRenderType(), ImmersivePortalsCompat.getParticleWorld(particle),
+		return new ImmPtlRegionKey(particle.getRenderType(), ((IEParticle) particle).portal_getWorld(),
 			region(particle.x), region(particle.y), region(particle.z));
 	}
 
@@ -215,8 +217,8 @@ public class ImmPtlParticlePipeline implements IGlParticlePipeline<ImmPtlParticl
 		Map<IParticleRenderKey, ParticleLayout.Slice> slices = new Object2ReferenceOpenHashMap<>(batches.size());
 		batches.clear();
 		int totalCount = 0;
-		for (var level : levels.entrySet()) {
-			for (var layer : level.getValue().entrySet()) {
+		for (Map.Entry<ClientLevel, Map<ParticleRenderType, List<LayerBatch>>> level : levels.entrySet()) {
+			for (Map.Entry<ParticleRenderType, List<LayerBatch>> layer : level.getValue().entrySet()) {
 				int start = totalCount;
 				for (LayerBatch batch : layer.getValue()) {
 					batch.targetOffset = totalCount;

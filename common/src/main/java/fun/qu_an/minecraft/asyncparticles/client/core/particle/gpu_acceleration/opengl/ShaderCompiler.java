@@ -4,12 +4,25 @@ import com.mojang.blaze3d.platform.GlConst;
 import org.apache.commons.io.IOUtils;
 import org.lwjgl.opengl.GL20C;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.function.IntConsumer;
 
 public class ShaderCompiler {
+	public static byte[] readSpirv(String resource) {
+		try (InputStream is = ShaderCompiler.class.getResourceAsStream(resource)) {
+			if (is == null) {
+				throw new IllegalStateException("Compute shader not found: " + resource);
+			}
+			return is.readAllBytes();
+		} catch (IOException e) {
+			throw new UncheckedIOException("Failed to load SPIR-V: " + resource, e);
+		}
+	}
+
 	public static int createShaderProgram(int type, String resource) {
 		return createShaderProgram(type, resource, ignored -> {
 		});

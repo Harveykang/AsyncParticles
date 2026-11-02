@@ -7,6 +7,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.vulkanmod.RendererAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.*;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ParticleVertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.vulkanmod.AccessorBuffer;
 import fun.qu_an.minecraft.asyncparticles.client.mixin.compat.vulkanmod.AccessorVkGlFramebuffer;
 import fun.qu_an.minecraft.asyncparticles.client.util.MemStackUtil;
@@ -36,17 +37,13 @@ import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.vulkan.*;
 
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 import java.util.*;
 
-import static fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ParticleVertexFormats.RAW_PARTICLE;
-
 public class VkCompParticleRenderer<C> implements IParticleRenderer {
 	public static final int WORKGROUP_SIZE = 64;
 	private static final int GROUP_RECORD_INTS = 3;
-	private static final int PUSH_CONSTANT_BYTES = 44;
 	private static final int DESCRIPTOR_SET_LAYOUT_SIZE = 3;
 	private static final int SOURCE_SLOT_COUNT = 3;
 	private static final long GPU_WAIT_TIMEOUT_NS = 5_000_000_000L;
@@ -55,6 +52,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 	// VK backend
 	private final VkDevice device;
 	private final IVkParticlePipeline<C> particlePipeline;
+	private final ParticleVertexFormat inputFormat;
 	private final C pipelineState;
 
 	// source buffers (pooled, persistently mapped)
@@ -83,6 +81,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 	@SuppressWarnings("unchecked")
 	public VkCompParticleRenderer(int particleLimit, IVkParticlePipeline<C> particlePipeline) {
 		this.particlePipeline = particlePipeline;
+		this.inputFormat = particlePipeline.getInputFormat();
 		this.pipelineState = particlePipeline.createVkState();
 		this.particleLimit = particleLimit;
 		device = DeviceManager.vkDevice;
@@ -94,7 +93,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 			submitSlots[i] = new SubmitSlot();
 		}
 
-		int raw = 2 * Math.max(particleLimit, AsyncParticlesConfig.MIN_PARTICLE_LIMIT) * RAW_PARTICLE.getVertexSize();
+		int raw = 2 * Math.max(particleLimit, AsyncParticlesConfig.MIN_PARTICLE_LIMIT) * inputFormat.getVertexSize();
 		createSourceBuffers(raw);
 
 		int proceed = 4 * particleLimit * PARTICLE_VERTEX_SIZE;
@@ -166,7 +165,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 			descriptorSetLayout = pdsl.get(0);
 
 			VkPushConstantRange.Buffer pcRange = VkPushConstantRange.calloc(1, stack);
-			pcRange.get(0).stageFlags(VK10.VK_SHADER_STAGE_COMPUTE_BIT).offset(0).size(PUSH_CONSTANT_BYTES);
+			pcRange.get(0).stageFlags(VK10.VK_SHADER_STAGE_COMPUTE_BIT).offset(0).size(particlePipeline.getVkPushConstantSize());
 
 			VkPipelineLayoutCreateInfo plci = VkPipelineLayoutCreateInfo.calloc(stack).sType(VK10.VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO)
 				.pSetLayouts(stack.longs(descriptorSetLayout)).pPushConstantRanges(pcRange);
@@ -174,7 +173,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 			VK10.vkCreatePipelineLayout(device, plci, null, ppl);
 			pipelineLayout = ppl.get(0);
 
-			byte[] spirv = loadSpirv();
+			byte[] spirv = particlePipeline.getSpirv();
 			ByteBuffer spirvBuf = stack.malloc(spirv.length);
 			spirvBuf.put(spirv).flip();
 			VkShaderModuleCreateInfo smci = VkShaderModuleCreateInfo.calloc(stack).sType(VK10.VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO)
@@ -191,17 +190,6 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 			VK10.vkCreateComputePipelines(device, 0L, cpci, null, pp);
 			pipeline = pp.get(0);
 			VK10.vkDestroyShaderModule(device, sm, null);
-		}
-	}
-
-	private byte[] loadSpirv() {
-		try (InputStream is = getClass().getResourceAsStream("/assets/asyncparticles/particle_gpu_acceleration/vk_particle_compute.spv")) {
-			if (is == null) {
-				throw new RuntimeException("particle_compute.spv not found — compile .comp with: glslc -fshader-stage=compute vk_particle_compute.comp -o particle_compute.spv --target-env=vulkan1.0");
-			}
-			return is.readAllBytes();
-		} catch (Exception e) {
-			throw new RuntimeException("Failed to load SPIR-V", e);
 		}
 	}
 
@@ -256,7 +244,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 
 	@Override
 	public void prepareBuffer() {
-		mappedBuffer = sourceSlots[processingSrcIdx].mapped.position(0).limit(2 * particleLimit * RAW_PARTICLE.getVertexSize());
+		mappedBuffer = sourceSlots[processingSrcIdx].mapped.position(0).limit(2 * particleLimit * inputFormat.getVertexSize());
 	}
 
 	@Override
@@ -285,7 +273,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 
 	private void extractAppendParticles(List<TextureSheetParticle> pending, List<LayerBatch> batches) {
 		int appendCount = pending.size();
-		int vertexSize = ParticleVertexFormats.RAW_PARTICLE.getVertexSize();
+		int vertexSize = inputFormat.getVertexSize();
 		int pi = processingSrcIdx;
 		SourceSlot sourceSlot = sourceSlots[pi];
 		int offset = particleLimit * vertexSize;
@@ -319,7 +307,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 				}
 				batch.appendOffset = baseCount;
 				batch.appendCount = layerAppend;
-				particlePipeline.extractBatch(list, batch, address, bufferAddress + baseWrite, sourceSlot.camPosition, true);
+				particlePipeline.extractBatch(pipelineState, list, batch, address, bufferAddress + baseWrite, sourceSlot.camPosition, true);
 				baseWrite += layerAppend * vertexSize;
 				baseCount += layerAppend;
 			}
@@ -347,7 +335,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 		source.camPosition = camPos;
 
 		final long bufferAddress = MemoryUtil.memAddress(mappedBuffer);
-		final int vertexSize = RAW_PARTICLE.getVertexSize();
+		final int vertexSize = inputFormat.getVertexSize();
 
 		List<LayerBatch> batches = source.layerBatches;
 		batches.clear();
@@ -365,7 +353,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 				}
 
 				LayerBatch batch = particlePipeline.createBatch(entry.getKey(), camPos);
-				int tickCount = particlePipeline.extractBatch(collection, batch, address, bufferAddress + position, camPos, false);
+				int tickCount = particlePipeline.extractBatch(pipelineState, collection, batch, address, bufferAddress + position, camPos, false);
 				position += tickCount * vertexSize;
 
 				if (tickCount > 0) {
@@ -471,7 +459,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 			float upX = camera.getUpVector().x();
 			float upY = camera.getUpVector().y();
 			float upZ = camera.getUpVector().z();
-			ByteBuffer pc = stack.malloc(PUSH_CONSTANT_BYTES);
+			ByteBuffer pc = stack.malloc(particlePipeline.getVkPushConstantSize());
 			pc.putFloat(partialTicks);
 			pc.putFloat(leftX);
 			pc.putFloat(leftY);
@@ -564,7 +552,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 		int oldLimit = this.particleLimit;
 		this.particleLimit = particleLimit;
 
-		int raw = 2 * particleLimit * RAW_PARTICLE.getVertexSize();
+		int raw = 2 * particleLimit * inputFormat.getVertexSize();
 		for (int i = 0; i < sourceSlots.length; i++) {
 			// The slot being rendered this tick still feeds the next compute();
 			// migrate its contents. Others are fully rewritten by the next tick().
@@ -706,7 +694,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 
 			createBuffer(newSize);
 
-			int vertexSize = RAW_PARTICLE.getVertexSize();
+			int vertexSize = inputFormat.getVertexSize();
 			long regionBytes = (long) Math.min(oldLimit, newLimit) * vertexSize;
 			long newAddress = MemoryUtil.memAddress(mapped);
 			long oldAddress = MemoryUtil.memAddress(oldMapped);

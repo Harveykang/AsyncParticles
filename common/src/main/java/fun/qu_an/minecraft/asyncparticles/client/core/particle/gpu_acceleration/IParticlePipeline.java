@@ -17,6 +17,10 @@ public interface IParticlePipeline<C> {
 
 	IParticleRenderKey renderKey(ParticleRenderType layer);
 
+	default ParticleVertexFormat getInputFormat() {
+		return ParticleVertexFormats.RAW_PARTICLE;
+	}
+
 	/**
 	 * Groups particles for extraction, may return the original map.
 	 */
@@ -33,7 +37,13 @@ public interface IParticlePipeline<C> {
 	/**
 	 * Writes batch snapshots to bufferAddress and returns their count.
 	 */
-	default int extractBatch(Collection<TextureSheetParticle> particles, LayerBatch batch, long address, long bufferAddress, Vec3 cameraPos, boolean append) {
+	default int extractBatch(C pipelineState,
+							 Collection<TextureSheetParticle> particles,
+							 LayerBatch batch,
+							 long address,
+							 long bufferAddress,
+							 Vec3 cameraPos,
+							 boolean appending) {
 		int vertexSize = ParticleVertexFormats.RAW_PARTICLE.getVertexSize();
 		Vec3 origin = positionOrigin(batch, cameraPos);
 		final double cx = origin.x;
@@ -43,7 +53,7 @@ public interface IParticlePipeline<C> {
 		for (TextureSheetParticle particle : particles) {
 			GpuParticleAddon gpuParticle = (GpuParticleAddon) particle;
 			// Appends keep the visibility decision made when queued.
-			if (!append && (!particle.isAlive() || !IParticleRenderer.shouldRenderParticle(gpuParticle, cameraPos))) {
+			if (!appending && (!particle.isAlive() || !IParticleRenderer.shouldRenderParticle(gpuParticle, cameraPos))) {
 				continue;
 			}
 
@@ -58,7 +68,7 @@ public interface IParticlePipeline<C> {
 			int oColor = gpuParticle.asyncparticles$getOColor();
 			MemoryUtil.memPutInt(address + 48L, oColor);
 			MemoryUtil.memPutFloat(address + 60L, gpuParticle.asyncparticles$getORoll());
-			MemoryUtil.memPutInt(address + 56L, append ? gpuParticle.asyncparticles$getCachedLight()
+			MemoryUtil.memPutInt(address + 56L, appending ? gpuParticle.asyncparticles$getCachedLight()
 				: gpuParticle.asyncparticles$getGpuLightCoords(0f));
 			MemoryUtil.memPutFloat(address + 32L, gpuParticle.asyncparticles$getU0());
 			MemoryUtil.memPutFloat(address + 36L, gpuParticle.asyncparticles$getV0());
@@ -67,7 +77,7 @@ public interface IParticlePipeline<C> {
 			MemoryUtil.memPutFloat(address + 28L, gpuParticle.asyncparticles$getQuadSize(1f));
 			MemoryUtil.memPutInt(address + 52L, gpuParticle.asyncparticles$getColor(oColor));
 			MemoryUtil.memPutFloat(address + 64L, gpuParticle.asyncparticles$getRoll());
-			gpuParticle.asyncparticles$postTick(address);
+			gpuParticle.asyncparticles$postTick(address, appending);
 			MemoryUtil.memCopy(address, bufferAddress, vertexSize);
 			bufferAddress += vertexSize;
 			count++;

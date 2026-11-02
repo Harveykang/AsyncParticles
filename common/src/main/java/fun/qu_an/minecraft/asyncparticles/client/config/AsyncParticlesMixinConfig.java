@@ -133,7 +133,9 @@ public class AsyncParticlesMixinConfig {
 													MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED || SUBTLE_EFFECTS_LOADED;
 		boolean safeBlockEntityMap = false;
 		boolean safeLegacyRandomSource = true;
-		boolean polytone$CompatEnabled = false;
+		boolean polytone$MixinEnabled = false;
+		boolean particlestorm$MixinEnabled = false;
+		boolean opallight$MixinEnabled = false;
 		Set<String> particle$noCulling = new LinkedHashSet<>();
 
 		{
@@ -193,7 +195,9 @@ public class AsyncParticlesMixinConfig {
 			particle$lockRequired = toSaveConfig.particle$lockRequired;
 			replaceRandom = toSaveConfig.replaceRandom;
 			create$contraptionNoParticleCollision = toSaveConfig.create$contraptionNoParticleCollision;
-			polytone$CompatEnabled = toSaveConfig.polytone$CompatEnabled;
+			polytone$MixinEnabled = toSaveConfig.polytone$MixinEnabled;
+			particlestorm$MixinEnabled = toSaveConfig.particlestorm$MixinEnabled;
+			opallight$MixinEnabled = toSaveConfig.opallight$MixinEnabled;
 		}
 
 		private void read(Properties properties) {
@@ -214,7 +218,9 @@ public class AsyncParticlesMixinConfig {
 			particle$lockRequired = getSet(properties, "particle$lockRequired", defaultConfig.particle$lockRequired);
 			replaceRandom = getSet(properties, "replaceRandom", defaultConfig.replaceRandom);
 			create$contraptionNoParticleCollision = getSet(properties, "create$contraptionNoParticleCollision", defaultConfig.create$contraptionNoParticleCollision);
-			polytone$CompatEnabled = getBoolean(properties, "polytone$CompatEnabled", defaultConfig.polytone$CompatEnabled);
+			polytone$MixinEnabled = getBoolean(properties, "polytone$MixinEnabled", defaultConfig.polytone$MixinEnabled);
+			particlestorm$MixinEnabled = getBoolean(properties, "particlestorm$MixinEnabled", defaultConfig.particlestorm$MixinEnabled);
+			opallight$MixinEnabled = getBoolean(properties, "opallight$MixinEnabled", defaultConfig.opallight$MixinEnabled);
 		}
 
 		void flat() {
@@ -232,7 +238,9 @@ public class AsyncParticlesMixinConfig {
 			properties.setProperty("particle$lockRequired", String.join(",", particle$lockRequired));
 			properties.setProperty("replaceRandom", String.join(",", replaceRandom));
 			properties.setProperty("create$contraptionNoParticleCollision", String.join(",", create$contraptionNoParticleCollision));
-			properties.setProperty("polytone$CompatEnabled", Boolean.toString(polytone$CompatEnabled));
+			properties.setProperty("polytone$MixinEnabled", Boolean.toString(polytone$MixinEnabled));
+			properties.setProperty("particlestorm$MixinEnabled", Boolean.toString(particlestorm$MixinEnabled));
+			properties.setProperty("opallight$MixinEnabled", Boolean.toString(opallight$MixinEnabled));
 		}
 
 		private static Set<String> getSet(Properties properties, String key, Set<String> defaultValue) {
@@ -356,13 +364,31 @@ public class AsyncParticlesMixinConfig {
 			this.create$contraptionNoParticleCollision = contraptionNoParticleCollision;
 		}
 
-		boolean isPolytoneCompatEnabled() {
-			return polytone$CompatEnabled;
+		boolean isPolytoneMixinEnabled() {
+			return polytone$MixinEnabled;
 		}
 
-		void setPolytoneCompatEnabled(boolean polytone$CompatEnabled) {
+		void setPolytoneMixinEnabled(boolean polytone$MixinEnabled) {
 			assertNotGlobal();
-			this.polytone$CompatEnabled = polytone$CompatEnabled;
+			this.polytone$MixinEnabled = polytone$MixinEnabled;
+		}
+
+		boolean isParticleStormMixinEnabled() {
+			return particlestorm$MixinEnabled;
+		}
+
+		void setParticleStormMixinEnabled(boolean particlestorm$MixinEnabled) {
+			assertNotGlobal();
+			this.particlestorm$MixinEnabled = particlestorm$MixinEnabled;
+		}
+
+		boolean isOpalLightMixinEnabled() {
+			return opallight$MixinEnabled;
+		}
+
+		void setOpalLightMixinEnabled(boolean opallight$MixinEnabled) {
+			assertNotGlobal();
+			this.opallight$MixinEnabled = opallight$MixinEnabled;
 		}
 	}
 }

@@ -72,6 +72,11 @@ subprojects {
                 includeGroup "curse.maven"
             }
         }
+        maven {
+            name = 'Confluence'
+            url = 'https://maven.confluence.ink/releases'
+            content { includeGroup 'org.mesdag' }
+        }
         maven { // Fabric ASM for Porting Lib
             url = "https://jitpack.io/"
             content { includeGroupAndSubgroups("com.github") }

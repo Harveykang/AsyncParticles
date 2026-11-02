@@ -4,7 +4,7 @@ import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.LayerBatch;
 import net.minecraft.world.phys.Vec3;
 
-public final class ImmPtlLayerBatch extends LayerBatch {
+public class ImmPtlLayerBatch extends LayerBatch {
 	public final Vec3 origin;
 	public int groupOffset;
 	public int groupCount;

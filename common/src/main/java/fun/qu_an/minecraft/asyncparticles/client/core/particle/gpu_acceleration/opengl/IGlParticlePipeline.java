@@ -15,10 +15,6 @@ public interface IGlParticlePipeline<C> extends IParticlePipeline<C> {
 	 */
 	C createGlState();
 
-	default ParticleVertexFormat getInputFormat() {
-		return ParticleVertexFormats.RAW_PARTICLE;
-	}
-
 	ParticleLayout buildGlLayout(C context, List<LayerBatch> batches, int particleLimit);
 
 	void prepareGlCompute(C context,

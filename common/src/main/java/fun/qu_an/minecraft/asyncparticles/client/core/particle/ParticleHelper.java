@@ -3,13 +3,14 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle;
 import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.opallight.OpalLightCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.opallight.OpalLightEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
@@ -37,13 +38,16 @@ public class ParticleHelper {
 
 	public static void onClearParticles() {
 		GpuParticleBehavior.getInstance().onClearParticles();
+		if (OpalLightEarlyCompat.AVAILABLE) {
+			OpalLightCompat.clear();
+		}
 		if (ModListHelper.A_GOOD_PLACE_LOADED) {
 			AGoodPlaceCompat.onParticleEngineClear();
 		}
 		if (ModListHelper.PARTICLERAIN_LOADED) {
 			ParticleRainCompat.onParticleEngineClear();
 		}
-		if (PolytoneEarlyCompat.isAvailable()) {
+		if (PolytoneEarlyCompat.AVAILABLE) {
 			PolytoneCompat.onParticleEngineClear();
 		}
 	}
@@ -56,7 +60,7 @@ public class ParticleHelper {
 			&& GpuParticleBehavior.getInstance().canRenderFast(tsp))) {
 			addon.asyncparticles$enableLightCache(true);
 		}
-		Integer i = PolytoneEarlyCompat.isAvailable() && particle instanceof PolytoneParticleAddon
+		Integer i = PolytoneEarlyCompat.AVAILABLE && particle instanceof PolytoneParticleAddon
 			? null : DESTRUCTION_LIGHT_CACHE.get();
 		if (i != null) {
 			addon.asyncparticles$setLight(i);
@@ -73,6 +77,9 @@ public class ParticleHelper {
 				lightColor = 0;
 			}
 			addon.asyncparticles$setLight(lightColor);
+		}
+		if (OpalLightEarlyCompat.AVAILABLE && ThreadUtil.isOnMainThread()) {
+			OpalLightCompat.cacheDestructionColor(particle);
 		}
 	}
 

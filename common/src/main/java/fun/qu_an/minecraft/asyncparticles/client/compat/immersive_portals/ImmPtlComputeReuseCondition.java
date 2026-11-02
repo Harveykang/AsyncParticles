@@ -7,7 +7,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
-record ImmPtlComputeReuseCondition(
+public record ImmPtlComputeReuseCondition(
 	ClientLevel level,
 	Vec3 position,
 	Vector3f leftVector,
@@ -23,7 +23,7 @@ record ImmPtlComputeReuseCondition(
 			&& this.partialTicks == partialTicks;
 	}
 
-	static IComputeReuseCondition of(ClientLevel level, Camera camera, float partialTicks) {
+	public static IComputeReuseCondition of(ClientLevel level, Camera camera, float partialTicks) {
 		Vector3f leftVector = camera.getLeftVector();
 		Vector3f upVector = camera.getUpVector();
 		return new ImmPtlComputeReuseCondition(

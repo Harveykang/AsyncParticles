@@ -164,13 +164,13 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 
 		profiler.push("cleanup");
 		RenderSystem.applyModelViewMatrix();
-		RenderSystem.depthMask(true);
-		RenderSystem.disableBlend();
 		// reset blend func and culling state
 		// other mods may change them...
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.enableCull();
 		RenderSystem.enableDepthTest();
+		RenderSystem.depthMask(true);
+		RenderSystem.disableBlend();
 		lightTexture.turnOffLightLayer();
 		profiler.pop();
 	}

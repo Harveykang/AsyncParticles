@@ -3,6 +3,8 @@ package fun.qu_an.minecraft.asyncparticles.client.config;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.cloth_config.AbstractConfigEntryAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.cloth_config.AbstractListListEntryAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.opallight.OpalLightEarlyCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlestorm.ParticleStormEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.CompatibilityTryItButton.CompatibilityTryIt;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backend;
@@ -36,10 +38,10 @@ class ClothConfigMenus {
 	}
 
 	static Screen screen(Screen parent,
-	                     ConfigBundle bundle,
-	                     MixinConfigBundle mixinBundle,
-	                     int selectedCategoryIndex,
-	                     @Nullable CompatibilityTryIt compatibilityTryIt) {
+						 ConfigBundle bundle,
+						 MixinConfigBundle mixinBundle,
+						 int selectedCategoryIndex,
+						 @Nullable CompatibilityTryIt compatibilityTryIt) {
 		ConfigBuilder builder = ConfigBuilder.create()
 			.setParentScreen(parent)
 			.setTitle(Component.translatable("gui.asyncparticles"))
@@ -60,7 +62,7 @@ class ClothConfigMenus {
 		AsyncParticlesMixinConfig.MixinConfigObj displayMixinConfig = mixinBundle.displayConfig();
 		builder.setSavingRunnable(() -> {
 			boolean previousPolytoneAsyncTick = false;
-			if (PolytoneEarlyCompat.isAvailable()) {
+			if (PolytoneEarlyCompat.AVAILABLE) {
 				previousPolytoneAsyncTick = Polytone.CONFIGS.particlesOffThread.get();
 			}
 			try {
@@ -86,7 +88,7 @@ class ClothConfigMenus {
 				});
 			}
 			AsyncTickBehavior.getInstance().reloadLater();
-			if (PolytoneEarlyCompat.isAvailable()
+			if (PolytoneEarlyCompat.AVAILABLE
 				&& previousPolytoneAsyncTick != Polytone.CONFIGS.particlesOffThread.get()) {
 				ThreadUtil.enqueueClientTask(() -> Minecraft.getInstance().reloadResourcePacks());
 			}
@@ -346,19 +348,20 @@ class ClothConfigMenus {
 					displayConfig.rendering.cullWeathers)
 				.setDefaultValue(defaultConfig.rendering.cullWeathers)
 				.setTooltipSupplier(() -> {
-					if (!MORE_CULLING_LOADED) {
-						return Optional.of(new MutableComponent[]{Component.translatable("config.asyncparticles.rendering.cullWeathers.tooltip")});
+					if (CONFLUENCE_LOADED) {
+						return incompatibilityTooltip(
+							Component.translatable("config.asyncparticles.rendering.cullWeathers.tooltip"),
+							"Confluence: Otherworld");
+					} else if (MORE_CULLING_LOADED) {
+						return limitedTooltip(
+							Component.translatable("config.asyncparticles.rendering.cullWeathers.tooltip"),
+							"More Culling");
 					} else {
-						return Optional.of(new MutableComponent[]{
-							Component.translatable("config.asyncparticles.rendering.cullWeathers.tooltip")
-								.withStyle(ChatFormatting.STRIKETHROUGH),
-							Component.translatable("config.asyncparticles.limited", "More Culling")
-								.withStyle(ChatFormatting.YELLOW)
-						});
+						return Optional.of(new MutableComponent[]{Component.translatable("config.asyncparticles.rendering.cullWeathers.tooltip")});
 					}
 				})
 				.setSaveConsumer(newValue -> displayConfig.rendering.cullWeathers = newValue)
-				.setRequirement(() -> !MORE_CULLING_LOADED)
+				.setRequirement(() -> !MORE_CULLING_LOADED && !CONFLUENCE_LOADED)
 				.build(), originalConfig.rendering.cullWeathers));
 		// endregion
 	}
@@ -407,15 +410,15 @@ class ClothConfigMenus {
 		List<AbstractConfigListEntry> polytoneEntries = new ArrayList<>();
 		AbstractConfigListEntry<Boolean> polytoneMixin = modifyOriginal(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.polytone.mixin"),
-				displayMixinConfig.isPolytoneCompatEnabled())
-			.setDefaultValue(defaultMixinConfig.isPolytoneCompatEnabled())
+				displayMixinConfig.isPolytoneMixinEnabled())
+			.setDefaultValue(defaultMixinConfig.isPolytoneMixinEnabled())
 			.setTooltip(Component.translatable("text.cloth-config.restart_required")
 					.withStyle(ChatFormatting.DARK_RED),
 				Component.translatable("config.asyncparticles.mod-compat.polytone.mixin.tooltip"))
-			.setSaveConsumer(displayMixinConfig::setPolytoneCompatEnabled)
-			.setRequirement(() -> ModListHelper.POLYTONE_LATER_THAN_5_1)
+			.setSaveConsumer(displayMixinConfig::setPolytoneMixinEnabled)
+			.setRequirement(() -> PolytoneEarlyCompat.isSupportedVersion())
 			.requireRestart()
-			.build(), originalMixinConfig.isPolytoneCompatEnabled());
+			.build(), originalMixinConfig.isPolytoneMixinEnabled());
 		AbstractConfigListEntry<Boolean> polytoneAsyncTick = modifyOriginal(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.polytone.asyncTick"),
 				displayConfig.polytone.asyncTick)
@@ -430,8 +433,8 @@ class ClothConfigMenus {
 			.setDefaultValue(defaultConfig.polytone.gpuRendering)
 			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.polytone.gpuRendering.tooltip"))
 			.setSaveConsumer(newValue -> displayConfig.polytone.gpuRendering = newValue)
-			.setRequirement(() -> polytoneMixin.getValue()
-				&& polytoneAsyncTick.getValue())
+			.setRequirement(() -> polytoneMixin.getValue() && polytoneAsyncTick.getValue()
+				&& Backends.supportsGpuAcceleration())
 			.build(), originalConfig.polytone.gpuRendering);
 		AbstractConfigListEntry<Boolean> polytoneGpuOnlyAsyncTick = modifyOriginal(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.polytone.gpuOnlyAsyncTick"),
@@ -446,6 +449,64 @@ class ClothConfigMenus {
 		polytoneEntries.add(polytoneAsyncTick);
 		polytoneEntries.add(polytoneGpuRendering);
 		polytoneEntries.add(polytoneGpuOnlyAsyncTick);
+
+		@SuppressWarnings("rawtypes")
+		List<AbstractConfigListEntry> particleStormEntries = new ArrayList<>();
+		AbstractConfigListEntry<Boolean> particleStormMixin = modifyOriginal(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.particlestorm.mixin"),
+				displayMixinConfig.isParticleStormMixinEnabled())
+			.setDefaultValue(defaultMixinConfig.isParticleStormMixinEnabled())
+			.setTooltip(Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mod-compat.particlestorm.mixin.tooltip"))
+			.setSaveConsumer(displayMixinConfig::setParticleStormMixinEnabled)
+			.setRequirement(() -> ParticleStormEarlyCompat.isSupportedVersion())
+			.requireRestart()
+			.build(), originalMixinConfig.isParticleStormMixinEnabled());
+		AbstractConfigListEntry<Boolean> particleStormGpuRendering = modifyOriginal(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.particlestorm.gpuRendering"),
+				displayConfig.particleStorm.gpuRendering)
+			.setDefaultValue(defaultConfig.particleStorm.gpuRendering)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.particlestorm.gpuRendering.tooltip"))
+			.setSaveConsumer(newValue -> displayConfig.particleStorm.gpuRendering = newValue)
+			.setRequirement(() -> particleStormMixin.getValue() && Backends.supportsGpuAcceleration())
+			.build(), originalConfig.particleStorm.gpuRendering);
+		particleStormEntries.add(particleStormMixin);
+		particleStormEntries.add(particleStormGpuRendering);
+
+		@SuppressWarnings("rawtypes")
+		List<AbstractConfigListEntry> opalLightEntries = new ArrayList<>();
+		AbstractConfigListEntry<Boolean> opalLightMixin = modifyOriginal(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.opallight.mixin"),
+				displayMixinConfig.isOpalLightMixinEnabled())
+			.setDefaultValue(defaultMixinConfig.isOpalLightMixinEnabled())
+			.setTooltip(Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mod-compat.opallight.mixin.tooltip"))
+			.setSaveConsumer(displayMixinConfig::setOpalLightMixinEnabled)
+			.setRequirement(() -> OpalLightEarlyCompat.isSupportedVersion())
+			.requireRestart()
+			.build(), originalMixinConfig.isOpalLightMixinEnabled());
+		AbstractConfigListEntry<Boolean> opalLightGpuRenderingCompatibility = modifyOriginal(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.opallight.gpuRenderingCompatibility"),
+				displayConfig.opalLight.gpuRenderingCompatibility)
+			.setDefaultValue(defaultConfig.opalLight.gpuRenderingCompatibility)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.opallight.gpuRenderingCompatibility.tooltip"))
+			.setSaveConsumer(newValue -> displayConfig.opalLight.gpuRenderingCompatibility = newValue)
+			.setRequirement(() -> opalLightMixin.getValue() && Backends.supportsGpuAcceleration())
+			.build(), originalConfig.opalLight.gpuRenderingCompatibility);
+		AbstractConfigListEntry<Boolean> opalLightDestructionColorPrediction = modifyOriginal(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.opallight.destructionColorPrediction"),
+				displayConfig.opalLight.destructionColorPrediction)
+			.setDefaultValue(defaultConfig.opalLight.destructionColorPrediction)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.opallight.destructionColorPrediction.tooltip"))
+			.setSaveConsumer(newValue -> displayConfig.opalLight.destructionColorPrediction = newValue)
+			.setRequirement(() -> opalLightMixin.getValue() && opalLightGpuRenderingCompatibility.getValue()
+				&& Backends.supportsGpuAcceleration())
+			.build(), originalConfig.opalLight.destructionColorPrediction);
+		opalLightEntries.add(opalLightMixin);
+		opalLightEntries.add(opalLightGpuRenderingCompatibility);
+		opalLightEntries.add(opalLightDestructionColorPrediction);
 
 		@SuppressWarnings("rawtypes")
 		List<AbstractConfigListEntry> createEntries = new ArrayList<>();
@@ -496,6 +557,14 @@ class ClothConfigMenus {
 			.addEntry(new SubCategoryListEntryFix(entryBuilder
 				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.polytone"),
 					polytoneEntries)
+				.build()))
+			.addEntry(new SubCategoryListEntryFix(entryBuilder
+				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.particlestorm"),
+					particleStormEntries)
+				.build()))
+			.addEntry(new SubCategoryListEntryFix(entryBuilder
+				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.opallight"),
+					opalLightEntries)
 				.build()))
 			.addEntry(new SubCategoryListEntryFix(entryBuilder
 				// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),

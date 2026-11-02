@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
+import com.google.gson.annotations.SerializedName;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
@@ -71,6 +72,9 @@ public class AsyncParticlesConfig {
 	public static boolean polytone$asyncTick;
 	public static boolean polytone$gpuOnlyAsyncTick;
 	public static boolean polytone$gpuRendering;
+	public static boolean particleStorm$gpuRendering;
+	public static boolean opalLight$gpuRenderingCompatibility;
+	public static boolean opalLight$destructionColorPrediction;
 	public static RainEffect create$rainEffect;
 	public static int create$tickRainBlockingRange;
 	public static boolean mobile$multiDrawWorkaround;
@@ -262,6 +266,8 @@ public class AsyncParticlesConfig {
 		ValkyrienSkies valkyrienSkies = new ValkyrienSkies();
 		Sable sable = new Sable();
 		Polytone polytone = new Polytone();
+		ParticleStorm particleStorm = new ParticleStorm();
+		OpalLight opalLight = new OpalLight();
 		Create create = new Create();
 		Mobile mobile = new Mobile();
 
@@ -272,6 +278,8 @@ public class AsyncParticlesConfig {
 			valkyrienSkies.flat();
 			sable.flat();
 			polytone.flat();
+			particleStorm.flat();
+			opalLight.flat();
 			create.flat();
 			mobile.flat();
 		}
@@ -283,6 +291,8 @@ public class AsyncParticlesConfig {
 			valkyrienSkies.fold();
 			sable.fold();
 			polytone.fold();
+			particleStorm.fold();
+			opalLight.fold();
 			create.fold();
 			mobile.fold();
 		}
@@ -334,6 +344,7 @@ public class AsyncParticlesConfig {
 
 			{
 				syncParticleClasses.add("pigcart.particlerain.particle.BlockDisplayParticle");
+				syncParticleClasses.add("org.mesdag.particlestorm.particle.MolangParticleInstance");
 			}
 
 			private void flat() {
@@ -374,7 +385,7 @@ public class AsyncParticlesConfig {
 			ComputeExecutionStage computeExecutionStage = IMMERSIVE_PORTALS_LOADED
 				? ComputeExecutionStage.PARTICLE_RENDERING : ComputeExecutionStage.LEVEL_RENDERING;
 			public boolean tickRendererOnMainThread = false;
-			boolean cullWeathers = true;
+			boolean cullWeathers = !CONFLUENCE_LOADED;
 
 			private void flat() {
 				rendering$particleCulling = requireNonNullElse(particleCulling, ParticleCullingMode.SPHERE);
@@ -382,7 +393,7 @@ public class AsyncParticlesConfig {
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
 				rendering$computeExecutionStage = IMMERSIVE_PORTALS_LOADED ? ComputeExecutionStage.PARTICLE_RENDERING
 					: requireNonNullElse(computeExecutionStage, ComputeExecutionStage.LEVEL_RENDERING);
-				rendering$cullWeathers = cullWeathers;
+				rendering$cullWeathers = !CONFLUENCE_LOADED && cullWeathers;
 				rendering$tickRendererOnMainThread = tickRendererOnMainThread;
 			}
 
@@ -448,6 +459,39 @@ public class AsyncParticlesConfig {
 				asyncTick = polytone$asyncTick;
 				gpuOnlyAsyncTick = polytone$gpuOnlyAsyncTick;
 				gpuRendering = polytone$gpuRendering;
+			}
+		}
+
+		static class ParticleStorm {
+			private ParticleStorm() {
+			}
+
+			boolean gpuRendering = true;
+
+			private void flat() {
+				particleStorm$gpuRendering = gpuRendering;
+			}
+
+			private void fold() {
+				gpuRendering = particleStorm$gpuRendering;
+			}
+		}
+
+		static class OpalLight {
+			private OpalLight() {
+			}
+
+			boolean gpuRenderingCompatibility = true;
+			boolean destructionColorPrediction = true;
+
+			private void flat() {
+				opalLight$gpuRenderingCompatibility = gpuRenderingCompatibility;
+				opalLight$destructionColorPrediction = destructionColorPrediction;
+			}
+
+			private void fold() {
+				gpuRenderingCompatibility = opalLight$gpuRenderingCompatibility;
+				destructionColorPrediction = opalLight$destructionColorPrediction;
 			}
 		}
 

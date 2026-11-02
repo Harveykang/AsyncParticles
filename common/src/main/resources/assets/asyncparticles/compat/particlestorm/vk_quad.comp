@@ -1,0 +1,127 @@
+#version 450
+layout(local_size_x = 64) in;
+
+layout(std430, binding = 0) readonly buffer SourceBuf { int src_data[]; };
+layout(std430, binding = 1) writeonly buffer TargetBuf { int dst_data[]; };
+layout(std430, binding = 2) readonly buffer GroupTableBuf { int group_data[]; };
+
+layout(push_constant) uniform PushConstants {
+    float uPartialTick;
+    float uCameraLeft_x, uCameraLeft_y, uCameraLeft_z;
+    float uCameraUp_x, uCameraUp_y, uCameraUp_z;
+    float uPartialCameraPos_x, uPartialCameraPos_y, uPartialCameraPos_z;
+    uint groupOffset;
+    float uCameraRotation_x, uCameraRotation_y, uCameraRotation_z, uCameraRotation_w;
+} pc;
+
+vec4 multiply(vec4 a, vec4 b) {
+    return vec4(a.w * b.xyz + b.w * a.xyz + cross(a.xyz, b.xyz), a.w * b.w - dot(a.xyz, b.xyz));
+}
+
+vec3 rotate(vec4 q, vec3 v) {
+    return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v) / dot(q, q);
+}
+
+vec4 lookAt(vec3 direction) {
+    vec3 z = normalize(direction);
+    vec3 x = normalize(cross(vec3(0.0, 1.0, 0.0), z));
+    mat3 m = mat3(x, cross(z, x), z);
+    float trace = m[0][0] + m[1][1] + m[2][2];
+    if (trace >= 0.0) {
+        float s = 2.0 * sqrt(trace + 1.0);
+        return vec4(m[1][2] - m[2][1], m[2][0] - m[0][2], m[0][1] - m[1][0], 0.25 * s * s) / s;
+    }
+    if (m[0][0] > m[1][1] && m[0][0] > m[2][2]) {
+        float s = 2.0 * sqrt(1.0 + m[0][0] - m[1][1] - m[2][2]);
+        return vec4(0.25 * s * s, m[0][1] + m[1][0], m[0][2] + m[2][0], m[1][2] - m[2][1]) / s;
+    }
+    if (m[1][1] > m[2][2]) {
+        float s = 2.0 * sqrt(1.0 + m[1][1] - m[0][0] - m[2][2]);
+        return vec4(m[0][1] + m[1][0], 0.25 * s * s, m[1][2] + m[2][1], m[2][0] - m[0][2]) / s;
+    }
+    float s = 2.0 * sqrt(1.0 + m[2][2] - m[0][0] - m[1][1]);
+    return vec4(m[0][2] + m[2][0], m[1][2] + m[2][1], 0.25 * s * s, m[0][1] - m[1][0]) / s;
+}
+
+vec3 readVec3(uint offset) {
+    return vec3(intBitsToFloat(src_data[offset]), intBitsToFloat(src_data[offset + 1u]), intBitsToFloat(src_data[offset + 2u]));
+}
+
+void writeVertex(uint offset, vec3 position, vec2 uv, int color, int light) {
+    dst_data[offset] = floatBitsToInt(position.x);
+    dst_data[offset + 1u] = floatBitsToInt(position.y);
+    dst_data[offset + 2u] = floatBitsToInt(position.z);
+    dst_data[offset + 3u] = floatBitsToInt(uv.x);
+    dst_data[offset + 4u] = floatBitsToInt(uv.y);
+    dst_data[offset + 5u] = color;
+    dst_data[offset + 6u] = light;
+}
+
+void main() {
+    uint groupBase = (gl_WorkGroupID.x + pc.groupOffset) * 3u;
+    uint localIdx = gl_LocalInvocationID.x;
+    if (localIdx >= uint(group_data[groupBase + 2u])) {
+        return;
+    }
+    uint srcBase = (uint(group_data[groupBase]) + localIdx) * 25u;
+    uint dstBase = (uint(group_data[groupBase + 1u]) + localIdx) * 28u;
+
+    vec3 OldPosition = readVec3(srcBase);
+    vec3 Position = readVec3(srcBase + 3u);
+    vec2 Size = vec2(intBitsToFloat(src_data[srcBase + 6u]), intBitsToFloat(src_data[srcBase + 7u]));
+    vec2 UVMin = vec2(intBitsToFloat(src_data[srcBase + 8u]), intBitsToFloat(src_data[srcBase + 9u]));
+    vec2 UVMax = vec2(intBitsToFloat(src_data[srcBase + 10u]), intBitsToFloat(src_data[srcBase + 11u]));
+    int color = src_data[srcBase + 12u];
+    int light = src_data[srcBase + 13u];
+    vec3 OldRotation = readVec3(srcBase + 14u);
+    vec4 RotationAndMode = vec4(readVec3(srcBase + 17u), intBitsToFloat(src_data[srcBase + 20u]));
+    vec4 Facing = vec4(readVec3(srcBase + 21u), intBitsToFloat(src_data[srcBase + 24u]));
+    float PartialTick = pc.uPartialTick;
+    vec3 CameraOffset = vec3(pc.uPartialCameraPos_x, pc.uPartialCameraPos_y, pc.uPartialCameraPos_z);
+    vec3 CameraLeft = vec3(pc.uCameraLeft_x, pc.uCameraLeft_y, pc.uCameraLeft_z);
+    vec3 CameraUp = vec3(pc.uCameraUp_x, pc.uCameraUp_y, pc.uCameraUp_z);
+    vec4 CameraRotation = vec4(pc.uCameraRotation_x, pc.uCameraRotation_y, pc.uCameraRotation_z, pc.uCameraRotation_w);
+    int mode = int(RotationAndMode.w);
+    vec3 center = mix(OldPosition, Position, PartialTick) + CameraOffset;
+
+    if (mode == 0) {
+        float nroll = -mix(OldRotation.z, RotationAndMode.z, PartialTick);
+        vec2 ss = sin(nroll) * Size;
+        vec2 cs = cos(nroll) * Size;
+        vec2 a = cs - ss.yx;
+        vec2 b = cs + ss.yx;
+        vec3 c = a.x * CameraLeft + b.y * CameraUp;
+        vec3 d = b.x * CameraLeft - a.y * CameraUp;
+        writeVertex(dstBase, center - c, UVMax, color, light);
+        writeVertex(dstBase + 7u, center - d, vec2(UVMax.x, UVMin.y), color, light);
+        writeVertex(dstBase + 14u, center + c, UVMin, color, light);
+        writeVertex(dstBase + 21u, center + d, vec2(UVMin.x, UVMax.y), color, light);
+        return;
+    }
+
+    vec4 q = Facing;
+    if (mode == 1) {
+        q = CameraRotation;
+    } else if (mode == 2) {
+        q = vec4(0.0, CameraRotation.y, 0.0, CameraRotation.w);
+    } else if (mode == 3 || mode == 4) {
+        q = lookAt(-center);
+        if (mode == 4) {
+            q.xz = vec2(0.0);
+        }
+    } else if (mode == 5) {
+        vec3 localCamera = rotate(vec4(-q.xyz, q.w), -center);
+        float angle = 0.5 * atan(-localCamera.y, localCamera.z);
+        q = multiply(q, vec4(sin(angle), 0.0, 0.0, cos(angle)));
+    }
+    vec3 angle = 0.5 * mix(OldRotation, RotationAndMode.xyz, PartialTick);
+    q = multiply(q, vec4(sin(angle.x), 0.0, 0.0, cos(angle.x)));
+    q = multiply(q, vec4(0.0, sin(angle.y), 0.0, cos(angle.y)));
+    q = multiply(q, vec4(0.0, 0.0, sin(angle.z), cos(angle.z)));
+    vec3 right = rotate(q, vec3(Size.x, 0.0, 0.0));
+    vec3 up = rotate(q, vec3(0.0, Size.y, 0.0));
+    writeVertex(dstBase, center + right - up, UVMax, color, light);
+    writeVertex(dstBase + 7u, center + right + up, vec2(UVMax.x, UVMin.y), color, light);
+    writeVertex(dstBase + 14u, center - right + up, UVMin, color, light);
+    writeVertex(dstBase + 21u, center - right - up, vec2(UVMin.x, UVMax.y), color, light);
+}

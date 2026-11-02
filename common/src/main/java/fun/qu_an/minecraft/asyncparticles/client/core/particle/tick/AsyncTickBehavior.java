@@ -2,6 +2,8 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlestorm.ParticleStormCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.particlestorm.ParticleStormEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
@@ -28,6 +30,7 @@ import net.minecraft.world.entity.Entity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.mesdag.particlestorm.api.IMolangParticleInstance;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 
@@ -305,7 +308,7 @@ public class AsyncTickBehavior {
 			cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
 		}
 		cleanupTaskHelper.disposeTasks();
-		if (PolytoneEarlyCompat.isAvailable()) {
+		if (PolytoneEarlyCompat.AVAILABLE) {
 			PolytoneCompat.awaitTicks();
 		}
 		syncAnimationTypes.clear();
@@ -324,7 +327,7 @@ public class AsyncTickBehavior {
 		if (debugConsumer == null) {
 			return;
 		}
-		debugConsumer.accept(String.format("""
+		debugConsumer.accept("""
 			[AsyncParticles Debug]
 			last tick duration: %.3f ms,
 			particle task count: %d,
@@ -333,7 +336,8 @@ public class AsyncTickBehavior {
 			GPU particles queues (render order, size): %s,
 			particles to add size: %d
 			sync particle types: %s,
-			Backend: %s"""
+			Backend: %s
+			%s"""
 			.formatted(
 				timeUsageNano.getAcquire() / 1000000d,
 				tickTaskHelper.taskCount(),
@@ -350,8 +354,9 @@ public class AsyncTickBehavior {
 					}).toList(),
 				Minecraft.getInstance().particleEngine.particlesToAdd.size(),
 				syncParticleTypes.stream().map(Class::getName).toList(),
-				Backends.debugInfo()
-			)));
+				Backends.debugInfo(),
+				ParticleStormEarlyCompat.AVAILABLE ? ParticleStormCompat.debugInfo() : ""
+			));
 
 		debugConsumer = null;
 	}
@@ -359,6 +364,7 @@ public class AsyncTickBehavior {
 	public boolean shouldSync(Particle particle) {
 		return syncParticleTypes.contains(((ParticleAddon) particle).asyncparticles$getRealClass())
 			|| DevRuntimeDebug.isSyncAllParticles()
+			|| (ModListHelper.FABRIC_PARTICLE_STORM_LOADED && particle instanceof IMolangParticleInstance)
 			|| (ModListHelper.POLYTONE_LOADED && PolytoneCompat.shouldSync(particle));
 	}
 
