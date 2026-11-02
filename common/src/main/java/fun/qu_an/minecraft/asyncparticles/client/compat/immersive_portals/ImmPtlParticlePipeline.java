@@ -1,11 +1,10 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals;
 
-import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.*;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.ParticleTransformFeedbackShader;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.IGlParticleBatchStrategy;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan.IVkParticleBatchStrategy;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.IGlParticlePipeline;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan.IVkParticlePipeline;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan.VkCompParticleRenderer;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan.VkLayoutResult;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
@@ -22,28 +21,27 @@ import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL15C;
 import org.lwjgl.vulkan.VK10;
 import org.lwjgl.vulkan.VkCommandBuffer;
-import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class ImmPtlParticleBatchStrategy implements IGlParticleBatchStrategy<ImmPtlParticleBatchStrategy.RenderInfo>,
-	IVkParticleBatchStrategy<ImmPtlParticleBatchStrategy.RenderInfo> {
+public class ImmPtlParticlePipeline implements IGlParticlePipeline<ImmPtlParticlePipeline.State>,
+	IVkParticlePipeline<ImmPtlParticlePipeline.State> {
 	private static final double REGION_SIZE = 256.0;
 
 	@Override
-	public RenderInfo createGlRenderInfo() {
-		RenderInfo renderInfo = new RenderInfo();
-		renderInfo.multiDrawFirst = new int[2];
-		renderInfo.multiDrawCount = new int[2];
-		return renderInfo;
+	public State createGlState() {
+		State state = new State();
+		state.multiDrawFirst = new int[2];
+		state.multiDrawCount = new int[2];
+		return state;
 	}
 
 	@Override
-	public RenderInfo createVkRenderInfo() {
-		return new RenderInfo();
+	public State createVkState() {
+		return new State();
 	}
 
 	@Override
@@ -75,21 +73,14 @@ public class ImmPtlParticleBatchStrategy implements IGlParticleBatchStrategy<Imm
 
 	@Override
 	public LayerBatch createBatch(IParticleBatchKey key, Vec3 snapshotCamPos) {
-		// Input batches only contain ImmPtlRegionKey, created by keyFor(particle).
+		// Input batches only contain ImmPtlRegionKey, created by batchKey(particle).
 		ImmPtlRegionKey region = (ImmPtlRegionKey) key;
 		return new ImmPtlLayerBatch(key, regionOrigin(region.x(), region.y(), region.z()));
 	}
 
 	@Override
-	public void writePositions(long address, GpuParticleAddon particle, LayerBatch batch, Vec3 snapshotCamPos) {
-		ImmPtlLayerBatch spatialBatch = (ImmPtlLayerBatch) batch;
-		Vec3 origin = spatialBatch.origin;
-		MemoryUtil.memPutFloat(address, (float) (particle.asyncparticles$getXo() - origin.x));
-		MemoryUtil.memPutFloat(address + 4L, (float) (particle.asyncparticles$getYo() - origin.y));
-		MemoryUtil.memPutFloat(address + 8L, (float) (particle.asyncparticles$getZo() - origin.z));
-		MemoryUtil.memPutFloat(address + 12L, (float) (particle.asyncparticles$getX() - origin.x));
-		MemoryUtil.memPutFloat(address + 16L, (float) (particle.asyncparticles$getY() - origin.y));
-		MemoryUtil.memPutFloat(address + 20L, (float) (particle.asyncparticles$getZ() - origin.z));
+	public Vec3 positionOrigin(LayerBatch batch, Vec3 snapshotCamPos) {
+		return ((ImmPtlLayerBatch) batch).origin;
 	}
 
 	@Override
@@ -99,11 +90,11 @@ public class ImmPtlParticleBatchStrategy implements IGlParticleBatchStrategy<Imm
 	}
 
 	@Override
-	public IComputeReuseCondition prepareView(RenderInfo renderInfo, List<LayerBatch> batches, Camera camera, float partialTicks) {
-		renderInfo.firstBatch = 0;
-		renderInfo.endBatch = 0;
-		renderInfo.targetOffset = 0;
-		renderInfo.visibleParticleCount = 0;
+	public IComputeReuseCondition prepareView(State state, List<LayerBatch> batches, Camera camera, float partialTicks) {
+		state.firstBatch = 0;
+		state.endBatch = 0;
+		state.targetOffset = 0;
+		state.visibleParticleCount = 0;
 		ClientLevel level = Minecraft.getInstance().level;
 		boolean found = false;
 		for (int i = 0; i < batches.size(); i++) {
@@ -112,23 +103,23 @@ public class ImmPtlParticleBatchStrategy implements IGlParticleBatchStrategy<Imm
 			if (((ImmPtlRegionKey) batch.key).level() == level) {
 				if (!found) {
 					found = true;
-					renderInfo.firstBatch = i;
-					renderInfo.targetOffset = batch.targetOffset;
+					state.firstBatch = i;
+					state.targetOffset = batch.targetOffset;
 				}
-				renderInfo.endBatch = i + 1;
-				renderInfo.visibleParticleCount += batch.count();
+				state.endBatch = i + 1;
+				state.visibleParticleCount += batch.count();
 			} else if (found) {
 				break;
 			}
 		}
-		if (renderInfo.visibleParticleCount == 0) {
+		if (state.visibleParticleCount == 0) {
 			return null;
 		}
 		return ImmPtlComputeReuseCondition.of(level, camera, partialTicks);
 	}
 
 	@Override
-	public void prepareGlCompute(RenderInfo renderInfo,
+	public void prepareGlCompute(State state,
 								 Camera camera,
 								 float partialTicks,
 								 Vec3 snapshotCamPos,
@@ -138,14 +129,14 @@ public class ImmPtlParticleBatchStrategy implements IGlParticleBatchStrategy<Imm
 		ParticleTransformFeedbackShader.INSTANCE.use();
 		long particleBytes = 4L * ParticleVertexFormats.IDENTITY_PARTICLE.getVertexSize();
 		Backends.glTf.glBindTransformFeedbackBufferRange(transformFeedback, 0, targetBuffer,
-			renderInfo.targetOffset * particleBytes, renderInfo.visibleParticleCount * particleBytes);
+			state.targetOffset * particleBytes, state.visibleParticleCount * particleBytes);
 	}
 
 	@Override
-	public void drawGlCompute(RenderInfo renderInfo, Camera camera, float partialTicks, Vec3 snapshotCamPos,
+	public void drawGlCompute(State state, Camera camera, float partialTicks, Vec3 snapshotCamPos,
 							  List<LayerBatch> batches, int particleLimit) {
 		Vec3 position = camera.getPosition();
-		for (int i = renderInfo.firstBatch; i < renderInfo.endBatch; i++) {
+		for (int i = state.firstBatch; i < state.endBatch; i++) {
 			ImmPtlLayerBatch batch = (ImmPtlLayerBatch) batches.get(i);
 			Vec3 origin = batch.origin;
 			ParticleTransformFeedbackShader.INSTANCE.setup(
@@ -156,11 +147,11 @@ public class ImmPtlParticleBatchStrategy implements IGlParticleBatchStrategy<Imm
 				(float) (origin.y - position.y),
 				(float) (origin.z - position.z));
 			if (batch.tickCount > 0 && batch.appendCount > 0) {
-				renderInfo.multiDrawFirst[0] = batch.tickOffset;
-				renderInfo.multiDrawCount[0] = batch.tickCount;
-				renderInfo.multiDrawFirst[1] = particleLimit + batch.appendOffset;
-				renderInfo.multiDrawCount[1] = batch.appendCount;
-				GL15C.glMultiDrawArrays(GL11C.GL_POINTS, renderInfo.multiDrawFirst, renderInfo.multiDrawCount);
+				state.multiDrawFirst[0] = batch.tickOffset;
+				state.multiDrawCount[0] = batch.tickCount;
+				state.multiDrawFirst[1] = particleLimit + batch.appendOffset;
+				state.multiDrawCount[1] = batch.appendCount;
+				GL15C.glMultiDrawArrays(GL11C.GL_POINTS, state.multiDrawFirst, state.multiDrawCount);
 			} else if (batch.tickCount > 0) {
 				GL11C.glDrawArrays(GL11C.GL_POINTS, batch.tickOffset, batch.tickCount);
 			} else if (batch.appendCount > 0) {
@@ -170,7 +161,7 @@ public class ImmPtlParticleBatchStrategy implements IGlParticleBatchStrategy<Imm
 	}
 
 	@Override
-	public void dispatchVkBatches(RenderInfo renderInfo,
+	public void dispatchVkBatches(State state,
 								  long pipelineLayout,
 								  ByteBuffer constants,
 								  List<LayerBatch> batches,
@@ -180,7 +171,7 @@ public class ImmPtlParticleBatchStrategy implements IGlParticleBatchStrategy<Imm
 								  int groupCount) {
 		Vec3 position = camera.getPosition();
 		VkCommandBuffer commandBuffer = Renderer.getCommandBuffer();
-		for (int i = renderInfo.firstBatch; i < renderInfo.endBatch; i++) {
+		for (int i = state.firstBatch; i < state.endBatch; i++) {
 			ImmPtlLayerBatch batch = (ImmPtlLayerBatch) batches.get(i);
 			if (batch.groupCount == 0) {
 				continue;
@@ -196,7 +187,7 @@ public class ImmPtlParticleBatchStrategy implements IGlParticleBatchStrategy<Imm
 	}
 
 	@Override
-	public ParticleLayout buildGlLayout(RenderInfo renderInfo, List<LayerBatch> batches, int particleLimit) {
+	public ParticleLayout buildGlLayout(State state, List<LayerBatch> batches, int particleLimit) {
 		return buildLayout(batches);
 	}
 
@@ -221,7 +212,7 @@ public class ImmPtlParticleBatchStrategy implements IGlParticleBatchStrategy<Imm
 			levels.computeIfAbsent(((ImmPtlRegionKey) batch.key).level(), ignored -> new Object2ReferenceLinkedOpenHashMap<>())
 				.computeIfAbsent(batch.key.layer(), ignored -> new ReferenceArrayList<>()).add(batch);
 		}
-		Map<IParticleRenderKey, ParticleLayout.ParticleSlice> slices = new Object2ReferenceOpenHashMap<>(batches.size());
+		Map<IParticleRenderKey, ParticleLayout.Slice> slices = new Object2ReferenceOpenHashMap<>(batches.size());
 		batches.clear();
 		int totalCount = 0;
 		for (var level : levels.entrySet()) {
@@ -235,14 +226,14 @@ public class ImmPtlParticleBatchStrategy implements IGlParticleBatchStrategy<Imm
 				if (totalCount > start) {
 					// Merge all regions of this level/layer; different levels have separate output ranges.
 					slices.put(new ImmPtlRenderKey(layer.getKey(), level.getKey()),
-						new ParticleLayout.ParticleSlice(layer.getKey(), start, totalCount - start));
+						new ParticleLayout.Slice(layer.getKey(), start, totalCount - start));
 				}
 			}
 		}
 		return ParticleLayout.of(totalCount, slices);
 	}
 
-	public static class RenderInfo {
+	public static class State {
 		int firstBatch;
 		int endBatch;
 		int targetOffset;

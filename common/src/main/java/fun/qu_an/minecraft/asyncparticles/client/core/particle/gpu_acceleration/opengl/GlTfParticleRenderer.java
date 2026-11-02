@@ -28,8 +28,8 @@ import static org.lwjgl.opengl.GL20C.GL_CURRENT_PROGRAM;
 
 public class GlTfParticleRenderer<C> implements IParticleRenderer {
 	private static final int SOURCE_SLOT_COUNT = 3;
-	private final IGlParticleBatchStrategy<C> batchStrategy;
-	private final C renderInfo;
+	private final IGlParticlePipeline<C> particlePipeline;
+	private final C pipelineState;
 	private final ParticleVertexFormat inputFormat;
 	private final ParticleVertexBuffer[] sources = new ParticleVertexBuffer[SOURCE_SLOT_COUNT];
 	private ByteBuffer mappedBuffer;
@@ -54,10 +54,10 @@ public class GlTfParticleRenderer<C> implements IParticleRenderer {
 	private IComputeReuseCondition reuseCondition;
 	private ParticleLayout particleLayout;
 
-	public GlTfParticleRenderer(int particleLimit, IGlParticleBatchStrategy<C> batchStrategy) {
-		this.batchStrategy = batchStrategy;
-		this.inputFormat = batchStrategy.getInputFormat();
-		this.renderInfo = batchStrategy.createGlRenderInfo();
+	public GlTfParticleRenderer(int particleLimit, IGlParticlePipeline<C> particlePipeline) {
+		this.particlePipeline = particlePipeline;
+		this.inputFormat = particlePipeline.getInputFormat();
+		this.pipelineState = particlePipeline.createGlState();
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
 			sources[i] = new ParticleVertexBuffer(GL15C.GL_DYNAMIC_DRAW);
 			sources[i].bind();
@@ -141,7 +141,7 @@ public class GlTfParticleRenderer<C> implements IParticleRenderer {
 		Map<IParticleBatchKey, List<TextureSheetParticle>> layerMap = new Object2ReferenceOpenHashMap<>(batches.size());
 		for (int i = 0, pendingSize = Math.min(particleLimit, pending.size()); i < pendingSize; i++) {
 			TextureSheetParticle p = pending.get(i);
-			layerMap.computeIfAbsent(batchStrategy.batchKey(p), ignored -> new ReferenceArrayList<>()).add(p);
+			layerMap.computeIfAbsent(particlePipeline.batchKey(p), ignored -> new ReferenceArrayList<>()).add(p);
 		}
 
 		int baseCount = 0;
@@ -160,13 +160,13 @@ public class GlTfParticleRenderer<C> implements IParticleRenderer {
 				}
 				int layerAppend = list.size();
 				if (batch == null) {
-					batch = batchStrategy.createBatch(key, prevGpuCamPos);
+					batch = particlePipeline.createBatch(key, prevGpuCamPos);
 					batch.tickOffset = this.tickCount[pi];
 					batches.add(batch);
 				}
 				batch.appendOffset = baseCount;
 				batch.appendCount = layerAppend;
-				batchStrategy.extractLayer(renderInfo, list, batch, address, bufferAddress + baseWrite, prevGpuCamPos, true);
+				particlePipeline.extractBatch(list, batch, address, bufferAddress + baseWrite, prevGpuCamPos, true);
 				baseWrite += layerAppend * vertexSize;
 				baseCount += layerAppend;
 			}
@@ -212,7 +212,7 @@ public class GlTfParticleRenderer<C> implements IParticleRenderer {
 		int baseCount = 0;
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			final long address = stack.nmalloc(vertexSize);
-			for (Map.Entry<IParticleBatchKey, Collection<TextureSheetParticle>> entry : batchStrategy.groupParticles(particles).entrySet()) {
+			for (Map.Entry<IParticleBatchKey, Collection<TextureSheetParticle>> entry : particlePipeline.groupParticles(particles).entrySet()) {
 				Collection<TextureSheetParticle> collection = entry.getValue();
 				if (baseCount + collection.size() > particleLimit) {
 					throw new IllegalStateException("Particle limit exceeded! particle limit: " + particleLimit
@@ -220,8 +220,8 @@ public class GlTfParticleRenderer<C> implements IParticleRenderer {
 						+ ", collection size: " + collection.size());
 				}
 
-				LayerBatch batch = batchStrategy.createBatch(entry.getKey(), camPos);
-				int tickCount = batchStrategy.extractLayer(renderInfo, collection, batch, address, bufferAddress + position, camPos, false);
+				LayerBatch batch = particlePipeline.createBatch(entry.getKey(), camPos);
+				int tickCount = particlePipeline.extractBatch(collection, batch, address, bufferAddress + position, camPos, false);
 				position += tickCount * vertexSize;
 
 				if (tickCount > 0) {
@@ -259,9 +259,9 @@ public class GlTfParticleRenderer<C> implements IParticleRenderer {
 			throw new IllegalStateException("No published source slot for GPU particle rendering");
 		}
 		if (particleLayout == null) {
-			particleLayout = batchStrategy.buildGlLayout(renderInfo, layerBatches[usingIdx], particleLimit);
+			particleLayout = particlePipeline.buildGlLayout(pipelineState, layerBatches[usingIdx], particleLimit);
 		}
-		IComputeReuseCondition condition = batchStrategy.prepareView(renderInfo, layerBatches[usingIdx], camera, partialTicks);
+		IComputeReuseCondition condition = particlePipeline.prepareView(pipelineState, layerBatches[usingIdx], camera, partialTicks);
 		if (condition == null) {
 			reuseCondition = null;
 			return;
@@ -273,11 +273,11 @@ public class GlTfParticleRenderer<C> implements IParticleRenderer {
 		if (tf != 0) {
 			Backends.glTf.glBindTransformFeedback(tf);
 		}
-		batchStrategy.prepareGlCompute(renderInfo, camera, partialTicks, camPositions[usingIdx], particleLayout.totalCount(), tf, target.vbo);
+		particlePipeline.prepareGlCompute(pipelineState, camera, partialTicks, camPositions[usingIdx], particleLayout.totalCount(), tf, target.vbo);
 
 		GL11C.glEnable(GL30C.GL_RASTERIZER_DISCARD);
 		Backends.glTf.glBeginTransformFeedback(GL11C.GL_POINTS);
-		batchStrategy.drawGlCompute(renderInfo, camera, partialTicks, camPositions[usingIdx], layerBatches[usingIdx], particleLimit);
+		particlePipeline.drawGlCompute(pipelineState, camera, partialTicks, camPositions[usingIdx], layerBatches[usingIdx], particleLimit);
 		Backends.glTf.glEndTransformFeedback();
 		GL11C.glDisable(GL30C.GL_RASTERIZER_DISCARD);
 		ParticleVertexBuffer.unbind();
@@ -303,8 +303,8 @@ public class GlTfParticleRenderer<C> implements IParticleRenderer {
 			return;
 		}
 		RenderSystem.assertOnRenderThread();
-		ParticleLayout.ParticleSlice particleSlice = particleLayout.slices().get(batchStrategy.renderKey(renderType));
-		if (particleSlice == null) {
+		ParticleLayout.Slice slice = particleLayout.slices().get(particlePipeline.renderKey(renderType));
+		if (slice == null) {
 			return;
 		}
 		BufferUploader.invalidate();
@@ -319,15 +319,15 @@ public class GlTfParticleRenderer<C> implements IParticleRenderer {
 		shader.apply();
 
 		RenderSystem.AutoStorageIndexBuffer autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
-		int indexCount = particleSlice.indexCount();
+		int indexCount = slice.indexCount();
 		autoStorageIndexBuffer.bind(indexCount);
-		int vertexOffset = particleSlice.vertexOffset();
-		int vertexCount = particleSlice.vertexCount();
+		int vertexOffset = slice.vertexOffset();
+		int vertexCount = slice.vertexCount();
 		GL32C.glDrawRangeElementsBaseVertex(
 			VertexFormat.Mode.QUADS.asGLMode,
 			0,
 			vertexCount - 1,
-			particleSlice.indexCount(),
+			slice.indexCount(),
 			autoStorageIndexBuffer.type().asGLType,
 			0L,
 			vertexOffset

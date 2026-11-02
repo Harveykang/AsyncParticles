@@ -4,15 +4,9 @@ import net.minecraft.client.particle.ParticleRenderType;
 
 import java.util.Map;
 
-public record ParticleLayout(int totalCount, Map<IParticleRenderKey, ParticleSlice> slices, int maxCount) {
-	public static ParticleLayout of(int totalCount, Map<IParticleRenderKey, ParticleSlice> slices) {
-		int maxCount = 0;
-		for (ParticleSlice slice : slices.values()) {
-			if (slice.count() > maxCount) {
-				maxCount = slice.count();
-			}
-		}
-		return new ParticleLayout(totalCount, slices, maxCount);
+public record ParticleLayout(int totalCount, Map<IParticleRenderKey, Slice> slices) {
+	public static ParticleLayout of(int totalCount, Map<IParticleRenderKey, Slice> slices) {
+		return new ParticleLayout(totalCount, slices);
 	}
 
 	public int totalVertexCount() {
@@ -23,11 +17,7 @@ public record ParticleLayout(int totalCount, Map<IParticleRenderKey, ParticleSli
 		return totalCount * 6;
 	}
 
-	public int maxIndexCount() {
-		return maxCount * 6;
-	}
-
-	public record ParticleSlice(ParticleRenderType layer, int baseCount, int count) {
+	public record Slice(ParticleRenderType layer, int baseCount, int count) {
 		public int vertexOffset() {
 			return baseCount * 4;
 		}

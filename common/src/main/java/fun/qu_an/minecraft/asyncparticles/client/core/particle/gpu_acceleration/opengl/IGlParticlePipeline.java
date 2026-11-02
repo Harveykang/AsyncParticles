@@ -1,7 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl;
 
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ParticleLayout;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleBatchStrategy;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticlePipeline;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.LayerBatch;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ParticleVertexFormats;
 import net.minecraft.client.Camera;
@@ -9,11 +9,11 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
-public interface IGlParticleBatchStrategy<C> extends IParticleBatchStrategy<C> {
+public interface IGlParticlePipeline<C> extends IParticlePipeline<C> {
 	/**
 	 * Creates renderer-local CPU state, or null when the strategy needs none.
 	 */
-	C createGlRenderInfo();
+	C createGlState();
 
 	default ParticleVertexFormat getInputFormat() {
 		return ParticleVertexFormats.RAW_PARTICLE;

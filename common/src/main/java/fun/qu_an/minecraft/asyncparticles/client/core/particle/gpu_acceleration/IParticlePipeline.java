@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface IParticleBatchStrategy<C> {
+public interface IParticlePipeline<C> {
 	IParticleBatchKey batchKey(TextureSheetParticle particle);
 
 	IParticleRenderKey renderKey(ParticleRenderType layer);
@@ -26,15 +26,19 @@ public interface IParticleBatchStrategy<C> {
 	LayerBatch createBatch(IParticleBatchKey key, Vec3 snapshotCamPos);
 
 	/**
-	 * Writes old/current positions to target address.
+	 * Returns the existing origin used to encode this batch.
 	 */
-	void writePositions(long address, GpuParticleAddon particle, LayerBatch batch, Vec3 snapshotCamPos);
+	Vec3 positionOrigin(LayerBatch batch, Vec3 snapshotCamPos);
 
 	/**
 	 * Writes batch snapshots to bufferAddress and returns their count.
 	 */
-	default int extractLayer(C context, Collection<TextureSheetParticle> particles, LayerBatch batch, long address, long bufferAddress, Vec3 cameraPos, boolean append) {
+	default int extractBatch(Collection<TextureSheetParticle> particles, LayerBatch batch, long address, long bufferAddress, Vec3 cameraPos, boolean append) {
 		int vertexSize = ParticleVertexFormats.RAW_PARTICLE.getVertexSize();
+		Vec3 origin = positionOrigin(batch, cameraPos);
+		final double cx = origin.x;
+		final double cy = origin.y;
+		final double cz = origin.z;
 		int count = 0;
 		for (TextureSheetParticle particle : particles) {
 			GpuParticleAddon gpuParticle = (GpuParticleAddon) particle;
@@ -44,7 +48,12 @@ public interface IParticleBatchStrategy<C> {
 			}
 
 			// Preserve getter order: some modded particles depend on it.
-			writePositions(address, gpuParticle, batch, cameraPos);
+			MemoryUtil.memPutFloat(address, (float) (gpuParticle.asyncparticles$getXo() - cx));
+			MemoryUtil.memPutFloat(address + 4L, (float) (gpuParticle.asyncparticles$getYo() - cy));
+			MemoryUtil.memPutFloat(address + 8L, (float) (gpuParticle.asyncparticles$getZo() - cz));
+			MemoryUtil.memPutFloat(address + 12L, (float) (gpuParticle.asyncparticles$getX() - cx));
+			MemoryUtil.memPutFloat(address + 16L, (float) (gpuParticle.asyncparticles$getY() - cy));
+			MemoryUtil.memPutFloat(address + 20L, (float) (gpuParticle.asyncparticles$getZ() - cz));
 			MemoryUtil.memPutFloat(address + 24L, gpuParticle.asyncparticles$getQuadSize(0f));
 			int oColor = gpuParticle.asyncparticles$getOColor();
 			MemoryUtil.memPutInt(address + 48L, oColor);

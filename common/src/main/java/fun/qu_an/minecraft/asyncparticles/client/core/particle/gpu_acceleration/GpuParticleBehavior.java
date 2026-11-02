@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
-import fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals.ImmPtlParticleBatchStrategy;
+import fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals.ImmPtlParticlePipeline;
 import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
@@ -12,9 +12,9 @@ import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.GlTfParticleRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.IGlParticleBatchStrategy;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.opengl.IGlParticlePipeline;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan.VkCompParticleRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan.IVkParticleBatchStrategy;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.vulkan.IVkParticlePipeline;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
@@ -196,14 +196,14 @@ public class GpuParticleBehavior {
 
 	public IParticleRenderer createRenderer() {
 		if (Backends.isVk()) {
-			IVkParticleBatchStrategy<?> strategy = ModListHelper.IMMERSIVE_PORTALS_LOADED
-				? new ImmPtlParticleBatchStrategy() : new ParticleBatchStrategy();
-			return new VkCompParticleRenderer<>(ConfigHelper.getParticleLimit(), strategy);
+			IVkParticlePipeline<?> pipeline = ModListHelper.IMMERSIVE_PORTALS_LOADED
+				? new ImmPtlParticlePipeline() : new ParticlePipeline();
+			return new VkCompParticleRenderer<>(ConfigHelper.getParticleLimit(), pipeline);
 		}
 		if (Backends.isGl() && Backends.glTf.isSupported()) {
-			IGlParticleBatchStrategy<?> strategy = ModListHelper.IMMERSIVE_PORTALS_LOADED
-				? new ImmPtlParticleBatchStrategy() : new ParticleBatchStrategy();
-			return new GlTfParticleRenderer<>(Math.max(ConfigHelper.getParticleLimit(), AsyncParticlesConfig.MIN_PARTICLE_LIMIT), strategy);
+			IGlParticlePipeline<?> pipeline = ModListHelper.IMMERSIVE_PORTALS_LOADED
+				? new ImmPtlParticlePipeline() : new ParticlePipeline();
+			return new GlTfParticleRenderer<>(Math.max(ConfigHelper.getParticleLimit(), AsyncParticlesConfig.MIN_PARTICLE_LIMIT), pipeline);
 		}
 		throw new IllegalStateException("No compatible particle renderer found");
 	}

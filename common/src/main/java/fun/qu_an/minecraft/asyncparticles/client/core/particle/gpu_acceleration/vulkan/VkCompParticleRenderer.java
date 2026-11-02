@@ -54,8 +54,8 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 
 	// VK backend
 	private final VkDevice device;
-	private final IVkParticleBatchStrategy<C> batchStrategy;
-	private final C renderInfo;
+	private final IVkParticlePipeline<C> particlePipeline;
+	private final C pipelineState;
 
 	// source buffers (pooled, persistently mapped)
 	@SuppressWarnings("unchecked")
@@ -81,9 +81,9 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 	private IComputeReuseCondition reuseCondition;
 
 	@SuppressWarnings("unchecked")
-	public VkCompParticleRenderer(int particleLimit, IVkParticleBatchStrategy<C> batchStrategy) {
-		this.batchStrategy = batchStrategy;
-		this.renderInfo = batchStrategy.createVkRenderInfo();
+	public VkCompParticleRenderer(int particleLimit, IVkParticlePipeline<C> particlePipeline) {
+		this.particlePipeline = particlePipeline;
+		this.pipelineState = particlePipeline.createVkState();
 		this.particleLimit = particleLimit;
 		device = DeviceManager.vkDevice;
 		for (int i = 0; i < SOURCE_SLOT_COUNT; i++) {
@@ -294,7 +294,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 		Map<IParticleBatchKey, List<TextureSheetParticle>> layerMap = new Object2ReferenceOpenHashMap<>();
 		for (int i = 0, pendingSize = Math.min(particleLimit, appendCount); i < pendingSize; i++) {
 			TextureSheetParticle p = pending.get(i);
-			layerMap.computeIfAbsent(batchStrategy.batchKey(p), a -> new ReferenceArrayList<>()).add(p);
+			layerMap.computeIfAbsent(particlePipeline.batchKey(p), a -> new ReferenceArrayList<>()).add(p);
 		}
 
 		int baseCount = 0;
@@ -313,13 +313,13 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 				}
 				int layerAppend = list.size();
 				if (batch == null) {
-					batch = batchStrategy.createBatch(key, sourceSlot.camPosition);
+					batch = particlePipeline.createBatch(key, sourceSlot.camPosition);
 					batch.tickOffset = sourceSlot.tickCount;
 					batches.add(batch);
 				}
 				batch.appendOffset = baseCount;
 				batch.appendCount = layerAppend;
-				batchStrategy.extractLayer(renderInfo, list, batch, address, bufferAddress + baseWrite, sourceSlot.camPosition, true);
+				particlePipeline.extractBatch(list, batch, address, bufferAddress + baseWrite, sourceSlot.camPosition, true);
 				baseWrite += layerAppend * vertexSize;
 				baseCount += layerAppend;
 			}
@@ -356,7 +356,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 		int baseCount = 0;
 		try (MemoryStack stack = MemStackUtil.stackPush()) {
 			final long address = stack.nmalloc(vertexSize);
-			for (Map.Entry<IParticleBatchKey, Collection<TextureSheetParticle>> entry : batchStrategy.groupParticles(particles).entrySet()) {
+			for (Map.Entry<IParticleBatchKey, Collection<TextureSheetParticle>> entry : particlePipeline.groupParticles(particles).entrySet()) {
 				Collection<TextureSheetParticle> collection = entry.getValue();
 				if (baseCount + collection.size() > particleLimit) {
 					throw new IllegalStateException("Particle limit exceeded! particle limit: " + particleLimit
@@ -364,8 +364,8 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 						+ ", collection size: " + collection.size());
 				}
 
-				LayerBatch batch = batchStrategy.createBatch(entry.getKey(), camPos);
-				int tickCount = batchStrategy.extractLayer(renderInfo, collection, batch, address, bufferAddress + position, camPos, false);
+				LayerBatch batch = particlePipeline.createBatch(entry.getKey(), camPos);
+				int tickCount = particlePipeline.extractBatch(collection, batch, address, bufferAddress + position, camPos, false);
 				position += tickCount * vertexSize;
 
 				if (tickCount > 0) {
@@ -412,7 +412,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 			reuseCondition = null;
 			return;
 		}
-		IComputeReuseCondition condition = batchStrategy.prepareView(renderInfo, source.layerBatches, camera, partialTicks);
+		IComputeReuseCondition condition = particlePipeline.prepareView(pipelineState, source.layerBatches, camera, partialTicks);
 		if (condition == null) {
 			reuseCondition = null;
 			return;
@@ -480,7 +480,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 			pc.putFloat(upY);
 			pc.putFloat(upZ);
 			pc.position(0);
-			batchStrategy.dispatchVkBatches(renderInfo, pipelineLayout, pc, source.layerBatches, source.camPosition, camera, partialTicks, source.workgroupCount);
+			particlePipeline.dispatchVkBatches(pipelineState, pipelineLayout, pc, source.layerBatches, source.camPosition, camera, partialTicks, source.workgroupCount);
 
 			VkBufferMemoryBarrier.Buffer bb = VkBufferMemoryBarrier.calloc(1, stack)
 				.sType(VK10.VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
@@ -533,8 +533,8 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 			return;
 		}
 		RenderSystem.assertOnRenderThread();
-		ParticleLayout.ParticleSlice particleSlice = particleLayout.slices().get(batchStrategy.renderKey(renderType));
-		if (particleSlice == null) {
+		ParticleLayout.Slice slice = particleLayout.slices().get(particlePipeline.renderKey(renderType));
+		if (slice == null) {
 			return;
 		}
 
@@ -545,13 +545,13 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 		shader.apply();
 
 		Drawer drawer = Renderer.getDrawer();
-		int vertexCount = particleSlice.vertexCount();
+		int vertexCount = slice.vertexCount();
 		AutoIndexBuffer quadsIndexBuffer = drawer.getAutoIndexBuffer(VertexFormat.Mode.QUADS, vertexCount);
 		quadsIndexBuffer.checkCapacity(vertexCount);
 		Buffer vertexBuffer = submit.targetBuffer;
 
-		((AccessorBuffer) vertexBuffer).setOffset((long) particleSlice.vertexOffset() * PARTICLE_VERTEX_SIZE);
-		drawer.drawIndexed(vertexBuffer, quadsIndexBuffer.getIndexBuffer(), particleSlice.indexCount());
+		((AccessorBuffer) vertexBuffer).setOffset((long) slice.vertexOffset() * PARTICLE_VERTEX_SIZE);
+		drawer.drawIndexed(vertexBuffer, quadsIndexBuffer.getIndexBuffer(), slice.indexCount());
 //		submit.lastFrameUsed = ((RendererAddon) Renderer.getInstance()).asyncparticles$getActualFrame();
 //		((AccessorBuffer) vertexBuffer).setOffset(0L);
 
@@ -725,7 +725,7 @@ public class VkCompParticleRenderer<C> implements IParticleRenderer {
 
 		private void buildLayout() {
 			this.generation = ++sourceGenerationCounter;
-			VkLayoutResult layoutResult = batchStrategy.buildVkLayout(layerBatches, particleLimit);
+			VkLayoutResult layoutResult = particlePipeline.buildVkLayout(layerBatches, particleLimit);
 			particleLayout = layoutResult.particleLayout();
 			workgroupCount = layoutResult.workgroupCount();
 			int[] records = new int[workgroupCount * GROUP_RECORD_INTS];
