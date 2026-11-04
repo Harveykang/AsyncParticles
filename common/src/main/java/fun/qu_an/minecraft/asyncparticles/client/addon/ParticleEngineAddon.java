@@ -6,9 +6,17 @@ import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public interface ParticleEngineAddon {
+	void asyncparticles$switchToDeferredQueue();
+
+	void asyncparticles$switchToTickQueue();
+
+	void asyncparticles$addDefers();
+
 	void asyncparticle$addRenderType(ParticleRenderType particleRenderType);
 
 	void asyncparticle$setFrustum(Frustum asyncparticle$frustum);
 
 	Frustum asyncparticle$getFrustum();
+
+	void asyncparticles$discardParticlesToAdd();
 }

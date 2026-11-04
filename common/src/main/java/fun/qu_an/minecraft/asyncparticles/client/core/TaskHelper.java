@@ -103,12 +103,14 @@ public final class TaskHelper {
 
 	/**
 	 * @param exceptionHandler Provides a handler for exceptions thrown by any group
+	 * @param orElse           Runnable to run if there are no groups to submit
 	 */
-	public void submitAll(Runnable whenStarted, Runnable whenCompleted, Consumer<Exception> exceptionHandler) {
+	public void submitAll(Runnable whenStarted, Runnable whenCompleted, Consumer<Exception> exceptionHandler, Runnable orElse) {
 		if (!tasks.isEmpty()) {
 			groupTasks(false);
 		}
 		if (groups.isEmpty()) {
+			orElse.run();
 			return;
 		}
 

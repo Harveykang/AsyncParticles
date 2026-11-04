@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.core.particle.tick;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlestorm.ParticleStormCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlestorm.ParticleStormEarlyCompat;
@@ -11,7 +12,6 @@ import fun.qu_an.minecraft.asyncparticles.client.config.DevRuntimeDebug;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCleanupStrategy;
 import fun.qu_an.minecraft.asyncparticles.client.core.Phase;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil;
@@ -223,12 +223,11 @@ public class AsyncTickBehavior {
 		Entity cameraEntity = mc.getCameraEntity();
 		boolean levelAvailable = level != null && player != null && cameraEntity != null;
 		boolean levelRunning = levelAvailable && !mc.isPaused();
+		ParticleEngineAddon particleEngineAddon = (ParticleEngineAddon) mc.particleEngine;
+		// Will not add particles until addDefers(), and make sure switch to tick queue for next tick.
+		particleEngineAddon.asyncparticles$switchToTickQueue();
 		if (!levelRunning || !isTailTick()) {
-			Queue<Particle> particlesToAdd = mc.particleEngine.particlesToAdd;
-			if (!particlesToAdd.isEmpty()) {
-				particlesToAdd.forEach(ParticleHelper::onEvictIgnoreExceptions);
-				particlesToAdd.clear();
-			}
+			particleEngineAddon.asyncparticles$discardParticlesToAdd();
 			if (!levelAvailable) {
 				tickTaskHelper.disposeTasks();
 				return;
@@ -265,13 +264,18 @@ public class AsyncTickBehavior {
 					}
 				}
 				particlePhase = true;
-				mc.particleEngine.tick();
-				particlePhase = false;
+				try {
+					mc.particleEngine.tick();
+				} finally {
+					particlePhase = false;
+				}
 			}
 		}
 		tickTaskHelper.submitAll(() -> {
 			timeUsageNano.setRelease(System.nanoTime());
 			levelBundle = new LevelBundle(level, player, cameraEntity);
+			// Add deferred particles to the tick queue for next tick.
+			particleEngineAddon.asyncparticles$addDefers();
 		}, () -> {
 			levelBundle = null;
 			timeUsageNano.setRelease(System.nanoTime() - timeUsageNano.getAcquire());
@@ -281,7 +285,7 @@ public class AsyncTickBehavior {
 				throw ExceptionUtil.toThrowDirectly(e);
 			}
 			// else level reset
-		});
+		}, particleEngineAddon::asyncparticles$addDefers); // Add deferred particles to the tick queue for next tick.
 	}
 
 	public void reloadLater() {
