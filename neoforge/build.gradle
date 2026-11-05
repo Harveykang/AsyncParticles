@@ -184,6 +184,9 @@ dependencies {
 //    modLocalRuntime "maven.modrinth:create-propulsion-simulated:H13U56dc"
 
 //    modLocalRuntime "maven.modrinth:particle-interactions:0.4.1"
+
+    /* Opal Light */
+    modCompileOnly('org.mesdag:OpalLight-neoforge-1.21.1:1.2.3.3') { transitive = false }
 }
 
 processResources {

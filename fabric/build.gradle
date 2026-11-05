@@ -165,6 +165,9 @@ dependencies {
 
     /* Cosy Critters */
     modLocalRuntime "maven.modrinth:cosy-critters:v0.3.2+1.21.1-fabric"
+
+    /* Opal Light */
+    modCompileOnly('org.mesdag:OpalLight-neoforge-1.21.1:1.2.3.3') { transitive = false }
 }
 
 processResources {

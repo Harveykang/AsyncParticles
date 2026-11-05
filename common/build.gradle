@@ -25,7 +25,6 @@ dependencies {
 
     /* APIs */
     modCompileOnly('org.mesdag:ParticleStorm-fabric-1.21.1:1.4.4') { transitive = false }
-    modCompileOnly('org.mesdag:OpalLight-neoforge-1.21.1:1.2.3.3') { transitive = false }
     modCompileOnly "maven.modrinth:fzzy-config:0.7.5+1.21"
 
     /* Performance */
@@ -128,6 +127,9 @@ dependencies {
 
     /* RuOK */
     modCompileOnly "curse.maven:ruok-910904:7637299" // 1.7.4
+
+    /* Opal Light */
+    modCompileOnly('org.mesdag:OpalLight-neoforge-1.21.1:1.2.3.3') { transitive = false }
 }
 
 tasks.register('compileSpirv') {
