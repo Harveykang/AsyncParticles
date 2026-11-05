@@ -315,7 +315,7 @@ public class AsyncParticlesConfig {
 				particle$parallelQueueRemoval = parallelQueueRemoval;
 				particle$parallelQueueEviction = parallelQueueEviction;
 				particle$particleLightCache = particleLightCache;
-				particle$cullUnderwaterParticleType = cullUnderwaterParticleType;
+				particle$cullUnderwaterParticleType = SABLE_LOADED || cullUnderwaterParticleType;
 			}
 
 			private void fold() {

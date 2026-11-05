@@ -25,12 +25,11 @@ public abstract class MixinMixinParticle_LightScan {
 		mixin = "dev.ryanhcode.sable.mixin.particle.ParticleMixin",
 		name = "sable$checkSubLevelLightColor"
 	)
-	@Definition(id = "getY", method = "Lnet/minecraft/core/BlockPos$MutableBlockPos;getY()I")
-	@Expression("?.getY() >= ?")
-	@Inject(method = "@MixinSquared:Handler", at = @At("MIXINEXTRAS:EXPRESSION"),
+	@Inject(method = "@MixinSquared:Handler", at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/core/BlockPos$MutableBlockPos;setWithOffset(Lnet/minecraft/core/Vec3i;III)Lnet/minecraft/core/BlockPos$MutableBlockPos;"),
 		require = 2, allow = 2)
-	private void cacheMaxScanSteps(CallbackInfo ci, @Share("maxScanSteps") LocalIntRef maxScanSteps) {
-		maxScanSteps.set(level.getHeight());
+	private void resetScanBudget(CallbackInfo ci, @Share("scanStepsRemaining") LocalIntRef stepsRemaining) {
+		stepsRemaining.set(level.getHeight());
 	}
 
 	@TargetHandler(
@@ -42,13 +41,12 @@ public abstract class MixinMixinParticle_LightScan {
 	@ModifyExpressionValue(method = "@MixinSquared:Handler", at = @At("MIXINEXTRAS:EXPRESSION"),
 		require = 2, allow = 2)
 	private boolean limitHeightScan(boolean original,
-	                                @Share("steps") LocalIntRef stepsRef,
-	                                @Share("maxScanSteps") LocalIntRef maxScanSteps) {
-		if (!original) {
+	                                @Share("scanStepsRemaining") LocalIntRef stepsRemaining) {
+		int remaining = stepsRemaining.get();
+		if (!original || remaining <= 0) {
 			return false;
 		}
-		int steps = stepsRef.get();
-		stepsRef.set(steps - 1);
-		return steps >= 0 && steps < maxScanSteps.get();
+		stepsRemaining.set(remaining - 1);
+		return true;
 	}
 }

@@ -153,7 +153,18 @@ class ClothConfigMenus {
 				.startBooleanToggle(Component.translatable("config.asyncparticles.particle.cullUnderwaterParticleType"),
 					displayConfig.particle.cullUnderwaterParticleType)
 				.setDefaultValue(defaultConfig.particle.cullUnderwaterParticleType)
-				.setTooltip(Component.translatable("config.asyncparticles.particle.cullUnderwaterParticleType.tooltip"))
+				.setTooltipSupplier(() -> {
+					if (SABLE_LOADED) {
+						return limitedTooltip(
+							Component.translatable("config.asyncparticles.particle.cullUnderwaterParticleType.tooltip"),
+							"Sable");
+					} else {
+						return Optional.of(new MutableComponent[]{
+							Component.translatable("config.asyncparticles.particle.cullUnderwaterParticleType.tooltip")
+						});
+					}
+				})
+				.setRequirement(() -> !SABLE_LOADED)
 				.setSaveConsumer(newValue -> displayConfig.particle.cullUnderwaterParticleType = newValue)
 				.build(), originalConfig.particle.cullUnderwaterParticleType));
 		// endregion

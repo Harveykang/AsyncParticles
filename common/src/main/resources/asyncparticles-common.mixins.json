@@ -29,15 +29,15 @@
     "compat.iris_like.MixinDSAUnsupported",
     "compat.modernui.MixinRenderSystem",
     "compat.opallight.MixinParticleEngine",
-    "compat.particlestorm.MixinLevelRenderer",
-    "compat.particlestorm.MixinMinecraft",
-    "compat.particlestorm.MixinMolangParticleInstance",
     "compat.particlerain.MixinParticleRain",
     "compat.particlerain.MixinParticleSpawner",
     "compat.particlerain.MixinWeatherParticle",
     "compat.particlerain_create.MixinCustomParticle",
     "compat.particlerain_create.MixinParticleSpawner",
     "compat.particlerain_create.MixinWeatherParticle",
+    "compat.particlestorm.MixinLevelRenderer",
+    "compat.particlestorm.MixinMinecraft",
+    "compat.particlestorm.MixinMolangParticleInstance",
     "compat.physicsmod.MixinClientLevel",
     "compat.physicsmod.MixinLevelRenderer",
     "compat.physicsmod.MixinWeatherParticle",
@@ -54,7 +54,9 @@
     "compat.sable.MixinMixinClientLevel",
     "compat.sable.MixinMixinParticle_LightScan",
     "compat.sable.MixinParticle",
+    "compat.sable.MixinParticle_Collision",
     "compat.sable.MixinSubLevelContainer",
+    "compat.sable.MixinWaterOcclusionContainer",
     "compat.sodium_extra.MixinParticleEngine",
     "compat.veil.MixinLightRenderer",
     "compat.vulkanmod.AccessorBuffer",
@@ -118,7 +120,5 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "mixins": [
-  ]
+  }
 }

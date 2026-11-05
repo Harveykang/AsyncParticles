@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
@@ -74,7 +75,16 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 
 	@Inject(method = "add", at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
 	public void onAdd(Particle particle, CallbackInfo ci) {
-		ParticleHelper.doFirstRefresh(particle);
+		if (!ModListHelper.SABLE_LOADED) {
+			ParticleHelper.doFirstRefresh(particle);
+		}
+	}
+
+	@Inject(method = "add", at = @At("TAIL"), order = 1500)
+	private void onAddAfterSubLevelTransform(Particle particle, CallbackInfo ci) {
+		if (ModListHelper.SABLE_LOADED) {
+			ParticleHelper.doFirstRefresh(particle);
+		}
 	}
 
 	@Inject(method = "clearParticles", at = @At("HEAD"))

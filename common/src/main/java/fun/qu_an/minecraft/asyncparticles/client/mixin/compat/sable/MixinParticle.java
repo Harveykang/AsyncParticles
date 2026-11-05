@@ -11,6 +11,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import org.joml.Vector3d;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -63,7 +64,12 @@ public abstract class MixinParticle implements LightCachedParticleAddon, Particl
 			return;
 		}
 		BlockPos blockPos = GameUtil.SHARED_POS.get().set(x, y, z);
-		int light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
+		int light;
+		try {
+			light = level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(level, blockPos) : 0;
+		} catch (MissingPaletteEntryException ignore) {
+			light = 0;
+		}
 		if (ConfigHelper.fixParticleLightOnSableSublevel()) {
 			asyncparticles$setLight(asyncparticles$calcLight(light, blockPos));
 		} else {

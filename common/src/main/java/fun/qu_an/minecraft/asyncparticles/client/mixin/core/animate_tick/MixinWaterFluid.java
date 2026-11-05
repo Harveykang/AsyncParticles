@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.animate_tick;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleOptions;
@@ -15,7 +16,7 @@ public class MixinWaterFluid {
 	public boolean cullUnderWaterParticleType(Level instance, ParticleOptions particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
 		// assert level instanceof ClientLevel;
 		return !ConfigHelper.isCullUnderwaterParticleType() ||
-			   Minecraft.useShaderTransparency() ||
+			   (!ModListHelper.SABLE_LOADED && Minecraft.useShaderTransparency()) ||
 			   Minecraft.getInstance().player.isUnderWater();
 	}
 }
