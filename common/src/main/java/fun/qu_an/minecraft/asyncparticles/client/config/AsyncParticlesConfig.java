@@ -70,6 +70,7 @@ public class AsyncParticlesConfig {
 	public static RainEffect valkyrienSkies$rainEffect;
 	public static boolean valkyrienSkies$fixParticleLights;
 	public static boolean sable$fixParticleLights;
+	public static boolean sable$simplifyParticleSkyLight;
 	public static boolean polytone$asyncTick;
 	public static boolean polytone$gpuOnlyAsyncTick;
 	public static boolean polytone$gpuRendering;
@@ -431,13 +432,16 @@ public class AsyncParticlesConfig {
 			}
 
 			boolean fixParticleLights = true;
+			boolean simplifyParticleSkyLight = true;
 
 			private void flat() {
 				sable$fixParticleLights = fixParticleLights;
+				sable$simplifyParticleSkyLight = simplifyParticleSkyLight;
 			}
 
 			private void fold() {
 				fixParticleLights = sable$fixParticleLights;
+				simplifyParticleSkyLight = sable$simplifyParticleSkyLight;
 			}
 		}
 

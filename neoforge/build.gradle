@@ -161,9 +161,6 @@ dependencies {
     /* Weather2 */
     modCompileOnly "maven.modrinth:weather-storms-tornadoes:1.21.0-2.8.6"
 
-    /* Epic Fight */
-    modCompileOnly "maven.modrinth:epic-fight:21.16.3-mc$minecraft_version-neoforge"
-
     /* Veil */
 //    modRuntimeOnly "maven.modrinth:veil:3.6.2"
 //    compileOnly("foundry.veil:veil-neoforge-${project.minecraft_version}:4.0.0") {

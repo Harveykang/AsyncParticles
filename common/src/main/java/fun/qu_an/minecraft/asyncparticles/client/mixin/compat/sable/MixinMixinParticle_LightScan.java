@@ -8,6 +8,7 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,6 +22,7 @@ public abstract class MixinMixinParticle_LightScan {
 	@Final
 	public ClientLevel level;
 
+	@Dynamic
 	@TargetHandler(
 		mixin = "dev.ryanhcode.sable.mixin.particle.ParticleMixin",
 		name = "sable$checkSubLevelLightColor"
@@ -32,6 +34,7 @@ public abstract class MixinMixinParticle_LightScan {
 		stepsRemaining.set(level.getHeight());
 	}
 
+	@Dynamic
 	@TargetHandler(
 		mixin = "dev.ryanhcode.sable.mixin.particle.ParticleMixin",
 		name = "sable$checkSubLevelLightColor"

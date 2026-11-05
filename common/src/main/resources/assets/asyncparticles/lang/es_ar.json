@@ -74,6 +74,8 @@
   "config.asyncparticles.category.mod-compat.sable": "Create: Aeronautics (Sable)",
   "config.asyncparticles.mod-compat.sable.fixParticleLights": "Iluminación mejorada de partículas",
   "config.asyncparticles.mod-compat.sable.fixParticleLights.tooltip": "Aumenta la distancia a la que las partículas generadas en subniveles reciben iluminación de dichos subniveles.",
+  "config.asyncparticles.mod-compat.sable.simplifyParticleSkyLight": "Simplificar las condiciones de luz del cielo de partículas [Traducción por IA]",
+  "config.asyncparticles.mod-compat.sable.simplifyParticleSkyLight.tooltip": "Activarlo reduce el cálculo de iluminación, pero puede afectar la luz del cielo de las partículas en estructuras físicas. [Traducción por IA]",
   "config.asyncparticles.category.mod-compat.create": "Create",
   "config.asyncparticles.category.mod-compat.polytone": "Polytone",
   "config.asyncparticles.mod-compat.polytone.mixin": "Activar mixin",

@@ -136,6 +136,10 @@ public class ConfigHelper {
 		return sable$fixParticleLights;
 	}
 
+	public static boolean simplifySableParticleSkyLight() {
+		return sable$simplifyParticleSkyLight;
+	}
+
 	public static boolean fixParticleLightOnVsShips() {
 		return valkyrienSkies$fixParticleLights;
 	}

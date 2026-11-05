@@ -53,7 +53,7 @@
     "compat.polytone.MixinPolytoneAsyncParticleHandler",
     "compat.sable.MixinMixinClientLevel",
     "compat.sable.MixinMixinParticle_LightScan",
-    "compat.sable.MixinParticle",
+    "compat.sable.MixinParticle_LightCache",
     "compat.sable.MixinParticle_Collision",
     "compat.sable.MixinSubLevelContainer",
     "compat.sable.MixinWaterOcclusionContainer",

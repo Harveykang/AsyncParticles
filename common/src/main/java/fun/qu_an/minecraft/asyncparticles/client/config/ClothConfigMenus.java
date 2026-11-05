@@ -455,6 +455,14 @@ class ClothConfigMenus {
 			.setSaveConsumer(newValue -> displayConfig.sable.fixParticleLights = newValue)
 			.setRequirement(() -> SABLE_LOADED)
 			.build());
+		sableEntries.add(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.sable.simplifyParticleSkyLight"),
+				displayConfig.sable.simplifyParticleSkyLight)
+			.setDefaultValue(defaultConfig.sable.simplifyParticleSkyLight)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.sable.simplifyParticleSkyLight.tooltip"))
+			.setSaveConsumer(newValue -> displayConfig.sable.simplifyParticleSkyLight = newValue)
+			.setRequirement(() -> SABLE_LOADED)
+			.build());
 
 		@SuppressWarnings("rawtypes")
 		List<AbstractConfigListEntry> immersivePortalsEntries = new ArrayList<>();

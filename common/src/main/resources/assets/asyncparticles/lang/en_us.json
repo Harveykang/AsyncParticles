@@ -74,6 +74,8 @@
   "config.asyncparticles.category.mod-compat.sable": "Create: Aeronautics (Sable)",
   "config.asyncparticles.mod-compat.sable.fixParticleLights": "Fancy Particle Lights",
   "config.asyncparticles.mod-compat.sable.fixParticleLights.tooltip": "Increases the distance at which particles spawned on sublevels receive lighting from those sublevels.",
+  "config.asyncparticles.mod-compat.sable.simplifyParticleSkyLight": "Simplify Particle Skylight Checks",
+  "config.asyncparticles.mod-compat.sable.simplifyParticleSkyLight.tooltip": "Enable to reduce lighting work, but this may affect particle skylight on physical structures.",
   "config.asyncparticles.category.mod-compat.create": "Create",
   "config.asyncparticles.category.mod-compat.polytone": "Polytone",
   "config.asyncparticles.mod-compat.polytone.mixin": "Enable Mixin",

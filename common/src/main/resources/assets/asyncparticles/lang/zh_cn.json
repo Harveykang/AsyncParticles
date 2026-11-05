@@ -74,6 +74,8 @@
   "config.asyncparticles.category.mod-compat.sable": "机械动力：航空学（Sable）",
   "config.asyncparticles.mod-compat.sable.fixParticleLights": "拓展粒子光照",
   "config.asyncparticles.mod-compat.sable.fixParticleLights.tooltip": "增加在子维度中生成的粒子接受子维度光照的距离。",
+  "config.asyncparticles.mod-compat.sable.simplifyParticleSkyLight": "简化粒子天空光条件",
+  "config.asyncparticles.mod-compat.sable.simplifyParticleSkyLight.tooltip": "启用可减少光照计算开销，但可能影响物理结构上粒子的天空光。",
   "config.asyncparticles.category.mod-compat.create": "机械动力",
   "config.asyncparticles.category.mod-compat.polytone": "Polytone",
   "config.asyncparticles.mod-compat.polytone.mixin": "启用 Mixin",

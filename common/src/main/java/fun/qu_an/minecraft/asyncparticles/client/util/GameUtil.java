@@ -13,6 +13,7 @@ import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.lighting.LayerLightEventListener;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3d;
 
 import java.util.function.Predicate;
 
@@ -21,6 +22,7 @@ import static org.joml.Math.max;
 
 public class GameUtil {
 	public static final ParticleThreadLocal<BlockPos.MutableBlockPos> SHARED_POS = ParticleThreadLocal.withInitial(ThreadUtil::isOnMainThread, BlockPos.MutableBlockPos::new);
+	public static final ParticleThreadLocal<Vector3d> SHARED_VECTOR3D = ParticleThreadLocal.withInitial(ThreadUtil::isOnMainThread, Vector3d::new);
 
 	@ExpectPlatform
 	public static AABB infinityAABB() {
