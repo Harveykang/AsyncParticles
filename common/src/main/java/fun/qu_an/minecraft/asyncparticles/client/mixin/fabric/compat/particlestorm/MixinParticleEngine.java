@@ -11,7 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.renderer.LightTexture;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,17 +33,24 @@ public abstract class MixinParticleEngine {
 		}
 	}
 
-	@Inject(method = "render", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target =
+	@Dynamic
+	@Inject(method = {
+		"Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V",
+		"Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"},
+		at = @At(value = "INVOKE", shift = At.Shift.AFTER, target =
 		"Lnet/minecraft/client/particle/ParticleRenderType;begin(Lcom/mojang/blaze3d/vertex/Tesselator;Lnet/minecraft/client/renderer/texture/TextureManager;)Lcom/mojang/blaze3d/vertex/BufferBuilder;"))
-	private void renderLayer(LightTexture lightTexture,
-							 Camera camera,
-							 float f,
-							 CallbackInfo ci,
+	private void renderLayer(CallbackInfo ci,
+							 @Local(argsOnly = true) Camera camera,
+							 @Local(argsOnly = true) float f,
 							 @Local(ordinal = 0) ParticleRenderType type) {
 		ParticleStormCompat.renderLayer(type, camera, f);
 	}
 
-	@WrapOperation(method = "render", at = @At(value = "INVOKE", target =
+	@Dynamic
+	@WrapOperation(method = {
+		"Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V",
+		"Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V"},
+		at = @At(value = "INVOKE", target =
 		"Lnet/minecraft/client/particle/Particle;render(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/Camera;F)V"))
 	private void renderParticle(Particle particle, VertexConsumer buffer, Camera camera, float partialTick,
 								Operation<Void> original) {

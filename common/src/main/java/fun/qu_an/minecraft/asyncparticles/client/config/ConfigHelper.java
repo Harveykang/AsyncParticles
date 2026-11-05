@@ -104,7 +104,7 @@ public class ConfigHelper {
 		return tick$gpuOnlyAsyncParticleTick || Diagnostic.isTemporaryGpuOnlyAsyncParticleTick();
 	}
 
-	public static boolean mobileCompatMultiDraw() {
+	public static boolean mobileMultiDrawWorkaround() {
 		return mobile$multiDrawWorkaround;
 	}
 

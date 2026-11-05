@@ -57,7 +57,7 @@ public abstract class GlCommands {
 
 		@Override
 		public void glMultiDrawArrays(int mode, int[] first, int[] count) {
-			if (ConfigHelper.mobileCompatMultiDraw()) {
+			if (ConfigHelper.mobileMultiDrawWorkaround()) {
 				for (int i = 0; i < first.length; i++) {
 					GL11C.glDrawArrays(mode, first[i], count[i]);
 				}

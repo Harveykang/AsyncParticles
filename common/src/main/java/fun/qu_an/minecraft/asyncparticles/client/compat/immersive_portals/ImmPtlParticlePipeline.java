@@ -18,10 +18,8 @@ import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.world.phys.Vec3;
 import net.vulkanmod.vulkan.Renderer;
 import org.lwjgl.opengl.GL11C;
-import org.lwjgl.opengl.GL15C;
 import org.lwjgl.vulkan.VK10;
 import org.lwjgl.vulkan.VkCommandBuffer;
-import org.lwjgl.system.MemoryUtil;
 import qouteall.imm_ptl.core.mixin.client.particle.IEParticle;
 
 import java.nio.ByteBuffer;
@@ -153,7 +151,7 @@ public class ImmPtlParticlePipeline implements IGlParticlePipeline<ImmPtlParticl
 				state.multiDrawCount[0] = batch.tickCount;
 				state.multiDrawFirst[1] = particleLimit + batch.appendOffset;
 				state.multiDrawCount[1] = batch.appendCount;
-				GL15C.glMultiDrawArrays(GL11C.GL_POINTS, state.multiDrawFirst, state.multiDrawCount);
+				Backends.gl.glMultiDrawArrays(GL11C.GL_POINTS, state.multiDrawFirst, state.multiDrawCount);
 			} else if (batch.tickCount > 0) {
 				GL11C.glDrawArrays(GL11C.GL_POINTS, batch.tickOffset, batch.tickCount);
 			} else if (batch.appendCount > 0) {

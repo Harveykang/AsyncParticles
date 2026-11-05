@@ -19,7 +19,9 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TextureSheetParticle;
+import net.vulkanmod.vulkan.VRenderSystem;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.opengl.GL11C;
 import org.mesdag.particlestorm.PSGameClient;
 import org.mesdag.particlestorm.api.IMolangParticleInstance;
 import org.mesdag.particlestorm.particle.EmitterPreset;
@@ -205,8 +207,19 @@ public class ParticleStormCompat {
 				renderer.compute(camera, partialTick);
 			}
 			if (renderer.awaitCompute() != null) {
-				renderer.render(type);
-				renderingLayer = layer;
+				// double-sided billboards.
+				boolean cull = Backends.isVk() ? VRenderSystem.cull : GL11C.glIsEnabled(GL11C.GL_CULL_FACE);
+				if (cull) {
+					RenderSystem.disableCull();
+				}
+				try {
+					renderer.render(type);
+					renderingLayer = layer;
+				} finally {
+					if (cull) {
+						RenderSystem.enableCull();
+					}
+				}
 			}
 		}
 	}
