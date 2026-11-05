@@ -23,6 +23,7 @@
     "compat.neoforge.particlestorm.v1_4_x.MixinMolangParticleEngine",
     "compat.neoforge.particlestorm.v1_5_0.MixinMolangParticleManager",
     "compat.neoforge.particlestorm.MixinParticleEngine",
+    "compat.neoforge.polytone_create.MixinGpuParticleHeightmap",
     "compat.neoforge.sable_create.MixinParticle_LightCache",
     "compat.neoforge.simple_weather.MixinRainParticle",
     "compat.neoforge.simple_weather.MixinSimpleWeather$NeoBus",

@@ -1,9 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.compat.polytone;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneCompat;
@@ -11,11 +8,11 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneParticl
 import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneParticleTypeAddon;
 import net.mehvahdjukaar.polytone.content.particle.custom.CustomParticleInstance;
 import net.mehvahdjukaar.polytone.content.particle.custom.CustomParticleType;
-import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.util.FastColor;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.objectweb.asm.Opcodes;
@@ -55,6 +52,11 @@ public abstract class MixinCustomParticleInstance extends TextureSheetParticle i
 		return ((Object) this).getClass() == CustomParticleInstance.class
 			&& getRenderType() != ParticleRenderType.CUSTOM
 			&& ((PolytoneParticleTypeAddon) type).asyncparticles$isSimpleQuad();
+	}
+
+	@Override
+	public boolean asyncparticles$shouldLockTickAndRender() {
+		return asyncparticles$lockTickAndRender;
 	}
 
 	@Override
@@ -133,26 +135,9 @@ public abstract class MixinCustomParticleInstance extends TextureSheetParticle i
 		}
 	}
 
-	@WrapMethod(method = "tickInternal", remap = false)
-	private void tickWithoutConcurrentRender(Operation<Void> original) {
-		if (asyncparticles$lockTickAndRender) {
-			synchronized (this) {
-				original.call();
-			}
-		} else {
-			original.call();
-		}
-	}
-
-	@WrapMethod(method = "render")
-	private void renderWithoutConcurrentTick(VertexConsumer buffer, Camera camera, float partialTick,
-	                                         Operation<Void> original) {
-		if (asyncparticles$lockTickAndRender) {
-			synchronized (this) {
-				original.call(buffer, camera, partialTick);
-			}
-		} else {
-			original.call(buffer, camera, partialTick);
-		}
+	@ModifyExpressionValue(method = "render", at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/util/Mth;lerp(FFF)F"))
+	private float clampColor(float color) {
+		return Mth.clamp(color, 0f, 1f);
 	}
 }

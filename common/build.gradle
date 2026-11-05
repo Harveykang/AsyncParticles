@@ -64,7 +64,7 @@ dependencies {
     modCompileOnly "maven.modrinth:particle-core:0.3.3+1.21"
 
     /* Polytone */
-    modCompileOnly "maven.modrinth:polytone:ZRDLMfVh" // 1.21-5.1.3
+    modCompileOnly "maven.modrinth:polytone:z4kdBKjr" // 1.21-5.3.4-fabric
 
     /* A Good Place */
     modCompileOnly "maven.modrinth:a-good-place:fabric_1.21-1.2.6"
@@ -92,7 +92,7 @@ dependencies {
     modCompileOnly "maven.modrinth:figura:0.1.5+1.21.1"
 
     /* Sable */
-    modApi "dev.ryanhcode.sable:sable-common-$minecraft_version:1.1.3" // 1.1.3
+    modApi "dev.ryanhcode.sable:sable-common-$minecraft_version:2.0.6"
 
     /* Particle Interactions */
     modCompileOnly "maven.modrinth:particle-interactions:0.4.1-patch.1"

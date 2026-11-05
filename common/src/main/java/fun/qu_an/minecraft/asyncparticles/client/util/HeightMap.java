@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.util;
 
 import it.unimi.dsi.fastutil.longs.Long2FloatMap;
-import it.unimi.dsi.fastutil.longs.Long2FloatMaps;
 import it.unimi.dsi.fastutil.longs.Long2FloatOpenCustomHashMap;
 import it.unimi.dsi.fastutil.longs.LongHash;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +32,7 @@ public class HeightMap {
 		this.defaultHeight = defaultHeight;
 		this.heightMap = newMap(defaultHeight);
 		this.pendingHeightMap = newMap(defaultHeight);
-		this.state = new State(0, 0, 0, Long2FloatMaps.EMPTY_MAP);
+		this.state = new State(0, 0, 0, newMap(defaultHeight));
 	}
 
 	protected static @NotNull Long2FloatMap newMap(float defaultHeight) {

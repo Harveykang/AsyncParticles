@@ -3,10 +3,10 @@ package fun.qu_an.minecraft.asyncparticles.client.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
-import com.google.gson.annotations.SerializedName;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
 import fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals.ImmPtlEarlyCompat;
+import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.ChatFormatting;
@@ -501,7 +501,7 @@ public class AsyncParticlesConfig {
 			}
 
 			RainEffect rainEffect = RainEffect.ALWAYS;
-			int tickRainBlockingRange = PARTICLERAIN_LOADED ? 32 : 16;
+			int tickRainBlockingRange = PARTICLERAIN_LOADED || PolytoneEarlyCompat.AVAILABLE ? 32 : 16;
 
 			private void flat() {
 				create$rainEffect = requireNonNullElse(rainEffect, RainEffect.ALWAYS);

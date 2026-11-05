@@ -159,4 +159,13 @@ public class Diagnostic {
 	public static boolean isTemporaryDisableAsyncRainTick() {
 		return temporaryMark_disableAsyncRainTick;
 	}
+
+	public static void reset() {
+		illegalEntityStorageAccess = false;
+		illegalBlockEntityStorageAccess = false;
+		temporaryMark_gpuOnlyAsyncParticleTick = false;
+		temporaryMark_disableAnimationTick = false;
+		temporaryMark_disableAsyncRainTick = false;
+		temporaryMark_disableAsyncParticleTick = false;
+	}
 }
