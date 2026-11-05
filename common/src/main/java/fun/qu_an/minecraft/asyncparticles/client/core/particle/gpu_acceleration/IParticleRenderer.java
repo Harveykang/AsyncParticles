@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import fun.qu_an.minecraft.asyncparticles.client.addon.GpuParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals.ImmPtlEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particle_core.ParticleCoreCompat;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -20,7 +21,7 @@ public interface IParticleRenderer extends Closeable {
 	static boolean shouldRenderParticle(GpuParticleAddon gpuParticle, Vec3 camPos) {
 		// Skip Particle Core distance culling because this camera position may not match portal views.
 		return gpuParticle.asyncparticles$shouldRender()
-			&& (ModListHelper.IMMERSIVE_PORTALS_LOADED || !ModListHelper.PARTICLE_CORE_LOADED
+			&& (ImmPtlEarlyCompat.AVAILABLE || !ModListHelper.PARTICLE_CORE_LOADED
 			|| ParticleCoreCompat.shouldRenderParticle(gpuParticle, camPos));
 	}
 

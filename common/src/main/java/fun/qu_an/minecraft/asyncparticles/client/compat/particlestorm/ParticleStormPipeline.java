@@ -1,6 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.compat.particlestorm;
 
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals.ImmPtlEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals.ImmPtlComputeReuseCondition;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.*;
@@ -96,7 +96,7 @@ public final class ParticleStormPipeline implements IGlParticlePipeline<Particle
 
 	@Override
 	public IComputeReuseCondition prepareView(Context context, List<LayerBatch> batches, Camera camera, float partialTicks) {
-		return ModListHelper.IMMERSIVE_PORTALS_LOADED
+		return ImmPtlEarlyCompat.AVAILABLE
 			? ImmPtlComputeReuseCondition.of(Minecraft.getInstance().level, camera, partialTicks)
 			: IComputeReuseCondition.DUMMY;
 	}

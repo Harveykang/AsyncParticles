@@ -6,6 +6,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.annotations.SerializedName;
 import com.mojang.logging.LogUtils;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals.ImmPtlEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.ChatFormatting;
@@ -382,7 +383,7 @@ public class AsyncParticlesConfig {
 			ParticleCullingMode particleCulling = ParticleCullingMode.SPHERE;
 			boolean gpuAcceleration = Backends.supportsGpuAcceleration();
 			boolean appendNewParticlesToRenderer = true;
-			ComputeExecutionStage computeExecutionStage = IMMERSIVE_PORTALS_LOADED
+			ComputeExecutionStage computeExecutionStage = ImmPtlEarlyCompat.AVAILABLE
 				? ComputeExecutionStage.PARTICLE_RENDERING : ComputeExecutionStage.LEVEL_RENDERING;
 			public boolean tickRendererOnMainThread = false;
 			boolean cullWeathers = !CONFLUENCE_LOADED;
@@ -391,7 +392,7 @@ public class AsyncParticlesConfig {
 				rendering$particleCulling = requireNonNullElse(particleCulling, ParticleCullingMode.SPHERE);
 				rendering$gpuAcceleration = gpuAcceleration && Backends.supportsGpuAcceleration();
 				rendering$appendNewParticlesToRenderer = appendNewParticlesToRenderer;
-				rendering$computeExecutionStage = IMMERSIVE_PORTALS_LOADED ? ComputeExecutionStage.PARTICLE_RENDERING
+				rendering$computeExecutionStage = ImmPtlEarlyCompat.AVAILABLE ? ComputeExecutionStage.PARTICLE_RENDERING
 					: requireNonNullElse(computeExecutionStage, ComputeExecutionStage.LEVEL_RENDERING);
 				rendering$cullWeathers = !CONFLUENCE_LOADED && cullWeathers;
 				rendering$tickRendererOnMainThread = tickRendererOnMainThread;

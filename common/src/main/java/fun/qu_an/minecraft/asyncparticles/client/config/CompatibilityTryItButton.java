@@ -229,6 +229,7 @@ public class CompatibilityTryItButton extends Button {
 		mixinConfig.setLockRequired(mixinModified.getLockRequired());
 		mixinConfig.setReplaceRandom(mixinModified.getReplaceRandom());
 		mixinConfig.setNoLightCache(mixinModified.getNoLightCache());
+		mixinConfig.setImmersivePortalsMixinEnabled(mixinModified.isImmersivePortalsMixinEnabled());
 		mixinConfig.setPolytoneMixinEnabled(mixinModified.isPolytoneMixinEnabled());
 		mixinConfig.setParticleStormMixinEnabled(mixinModified.isParticleStormMixinEnabled());
 		mixinConfig.setOpalLightMixinEnabled(mixinModified.isOpalLightMixinEnabled());

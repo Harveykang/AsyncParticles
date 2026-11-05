@@ -43,6 +43,10 @@ public class MixinConfigHelper {
 		return CONFIG.getContraptionNoParticleCollision().stream().filter(ModListHelper::classExists).toList();
 	}
 
+	public static boolean isImmersivePortalsMixinEnabled() {
+		return CONFIG.isImmersivePortalsMixinEnabled();
+	}
+
 	public static boolean isPolytoneMixinEnabled() {
 		return CONFIG.isPolytoneMixinEnabled();
 	}

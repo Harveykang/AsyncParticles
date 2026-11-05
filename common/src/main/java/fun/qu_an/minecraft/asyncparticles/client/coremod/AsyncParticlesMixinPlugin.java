@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.coremod;
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
 import fun.qu_an.minecraft.asyncparticles.client.AsyncParticlesClient;
+import fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals.ImmPtlEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.opallight.OpalLightEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particle_core.ParticleCoreEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlestorm.ParticleStormEarlyCompat;
@@ -118,7 +119,7 @@ public class AsyncParticlesMixinPlugin implements IMixinConfigPlugin {
 				case "figura" -> FIGURA_LOADED;
 				case "veil" -> VEIL_LOADED && versionCheck("veil", "1.999999", null);
 				case "particle_interactions" -> PARTICLE_INTERACTIONS_LOADED;
-				case "immersive_portals" -> IMMERSIVE_PORTALS_LOADED;
+				case "immersive_portals" -> ImmPtlEarlyCompat.AVAILABLE;
 				case "cosycritters" -> COSYCRITTERS_LOADED;
 				case "goop" -> GOOP_LOADED;
 				case "vulkanmod" -> VULKAN_MOD_LOADED;

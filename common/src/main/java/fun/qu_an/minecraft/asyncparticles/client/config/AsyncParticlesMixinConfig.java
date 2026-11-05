@@ -28,6 +28,7 @@ public class AsyncParticlesMixinConfig {
 		particle$lockProvider: A comma-separated list of classes extending 'Particle' that provide a spin lock.
 		replaceRandom: A comma-separated list of classes that require multithreaded random sources.
 		create$contraptionNoParticleCollision: A comma-separated list of classes extending 'AbstractContraptionEntity' that should not collide with particles.
+		immersivePortals$MixinEnabled: Boolean. Enable Immersive Portals compatibility. Requires a restart.
 		""";
 	static final MixinConfigObj CONFIG;
 	private static MixinConfigObj toSaveConfig;
@@ -133,6 +134,7 @@ public class AsyncParticlesMixinConfig {
 													MAKE_BUBBLES_POP_LOADED || COSYCRITTERS_LOADED || SUBTLE_EFFECTS_LOADED;
 		boolean safeBlockEntityMap = false;
 		boolean safeLegacyRandomSource = true;
+		boolean immersivePortals$MixinEnabled = true;
 		boolean polytone$MixinEnabled = false;
 		boolean particlestorm$MixinEnabled = false;
 		boolean opallight$MixinEnabled = false;
@@ -195,6 +197,7 @@ public class AsyncParticlesMixinConfig {
 			particle$lockRequired = toSaveConfig.particle$lockRequired;
 			replaceRandom = toSaveConfig.replaceRandom;
 			create$contraptionNoParticleCollision = toSaveConfig.create$contraptionNoParticleCollision;
+			immersivePortals$MixinEnabled = toSaveConfig.immersivePortals$MixinEnabled;
 			polytone$MixinEnabled = toSaveConfig.polytone$MixinEnabled;
 			particlestorm$MixinEnabled = toSaveConfig.particlestorm$MixinEnabled;
 			opallight$MixinEnabled = toSaveConfig.opallight$MixinEnabled;
@@ -218,6 +221,7 @@ public class AsyncParticlesMixinConfig {
 			particle$lockRequired = getSet(properties, "particle$lockRequired", defaultConfig.particle$lockRequired);
 			replaceRandom = getSet(properties, "replaceRandom", defaultConfig.replaceRandom);
 			create$contraptionNoParticleCollision = getSet(properties, "create$contraptionNoParticleCollision", defaultConfig.create$contraptionNoParticleCollision);
+			immersivePortals$MixinEnabled = getBoolean(properties, "immersivePortals$MixinEnabled", defaultConfig.immersivePortals$MixinEnabled);
 			polytone$MixinEnabled = getBoolean(properties, "polytone$MixinEnabled", defaultConfig.polytone$MixinEnabled);
 			particlestorm$MixinEnabled = getBoolean(properties, "particlestorm$MixinEnabled", defaultConfig.particlestorm$MixinEnabled);
 			opallight$MixinEnabled = getBoolean(properties, "opallight$MixinEnabled", defaultConfig.opallight$MixinEnabled);
@@ -238,6 +242,7 @@ public class AsyncParticlesMixinConfig {
 			properties.setProperty("particle$lockRequired", String.join(",", particle$lockRequired));
 			properties.setProperty("replaceRandom", String.join(",", replaceRandom));
 			properties.setProperty("create$contraptionNoParticleCollision", String.join(",", create$contraptionNoParticleCollision));
+			properties.setProperty("immersivePortals$MixinEnabled", Boolean.toString(immersivePortals$MixinEnabled));
 			properties.setProperty("polytone$MixinEnabled", Boolean.toString(polytone$MixinEnabled));
 			properties.setProperty("particlestorm$MixinEnabled", Boolean.toString(particlestorm$MixinEnabled));
 			properties.setProperty("opallight$MixinEnabled", Boolean.toString(opallight$MixinEnabled));
@@ -362,6 +367,15 @@ public class AsyncParticlesMixinConfig {
 		void setContraptionNoParticleCollision(Set<String> contraptionNoParticleCollision) {
 			assertNotGlobal();
 			this.create$contraptionNoParticleCollision = contraptionNoParticleCollision;
+		}
+
+		boolean isImmersivePortalsMixinEnabled() {
+			return immersivePortals$MixinEnabled;
+		}
+
+		void setImmersivePortalsMixinEnabled(boolean immersivePortals$MixinEnabled) {
+			assertNotGlobal();
+			this.immersivePortals$MixinEnabled = immersivePortals$MixinEnabled;
 		}
 
 		boolean isPolytoneMixinEnabled() {

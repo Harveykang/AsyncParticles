@@ -3,6 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.config;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.cloth_config.AbstractConfigEntryAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.cloth_config.AbstractListListEntryAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals.ImmPtlEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.opallight.OpalLightEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlestorm.ParticleStormEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneEarlyCompat;
@@ -323,7 +324,7 @@ class ClothConfigMenus {
 				.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
 				.setDefaultValue(defaultConfig.rendering.computeExecutionStage)
 				.setTooltipSupplier(() -> {
-					if (IMMERSIVE_PORTALS_LOADED) {
+					if (ImmPtlEarlyCompat.AVAILABLE) {
 						return limitedTooltip(
 							Component.translatable("config.asyncparticles.rendering.computeExecutionStage.tooltip"),
 							"Immersive Portals");
@@ -334,7 +335,7 @@ class ClothConfigMenus {
 					}
 				})
 				.setSaveConsumer(newValue -> displayConfig.rendering.computeExecutionStage = newValue)
-				.setRequirement(() -> !IMMERSIVE_PORTALS_LOADED)
+				.setRequirement(() -> !ImmPtlEarlyCompat.AVAILABLE)
 				.build(), originalConfig.rendering.computeExecutionStage))
 			.addEntry(modifyOriginal(entryBuilder
 				.startBooleanToggle(Component.translatable("config.asyncparticles.rendering.tickRendererOnMainThread"),
@@ -396,6 +397,42 @@ class ClothConfigMenus {
 			.build(), originalConfig.valkyrienSkies.fixParticleLights));
 
 		@SuppressWarnings("rawtypes")
+		List<AbstractConfigListEntry> createEntries = new ArrayList<>();
+		createEntries.add(modifyOriginal(entryBuilder
+			.startEnumSelector(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect"),
+				RainEffect.class, displayConfig.create.rainEffect)
+			.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
+			.setDefaultValue(defaultConfig.create.rainEffect)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect.tooltip"))
+			.setSaveConsumer(newValue -> displayConfig.create.rainEffect = newValue)
+			.setRequirement(() -> ModListHelper.CREATE_LOADED)
+			.build(), originalConfig.create.rainEffect));
+		createEntries.add(modifyOriginal(entryBuilder
+			.startIntField(Component.translatable("config.asyncparticles.mod-compat.create.tickRainBlockingRange"),
+				displayConfig.create.tickRainBlockingRange)
+			.setDefaultValue(defaultConfig.create.tickRainBlockingRange)
+			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.create.tickRainBlockingRange.tooltip"))
+			.setSaveConsumer(newValue -> displayConfig.create.tickRainBlockingRange = newValue)
+			.setRequirement(() -> ModListHelper.CREATE_LOADED)
+			.build(), originalConfig.create.tickRainBlockingRange));
+		List<String> contraptionNoParticleCollision = List.copyOf(originalMixinConfig.getContraptionNoParticleCollision());
+		createEntries.add(modifyOriginal(new StringListListEntryFixRestart(revertButtonEntryBuilder
+			.startStrList(Component.translatable("config.asyncparticles.mixin.create.contraptionsNoParticleCollision"), contraptionNoParticleCollision)
+			.setDefaultValue(contraptionNoParticleCollision)
+			.setSaveConsumer(l -> {
+				LinkedHashSet<String> s = new LinkedHashSet<>(l);
+				s.addAll(defaultMixinConfig.getContraptionNoParticleCollision());
+				displayMixinConfig.setContraptionNoParticleCollision(Collections.unmodifiableSet(s));
+			})
+			.setTooltip(
+				Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mixin.create.contraptionsNoParticleCollision.tooltip"),
+				Component.translatable("config.asyncparticles.tooltip.list-how-to-reset"))
+			.requireRestart()
+			.build()), originalMixinConfig.getContraptionNoParticleCollision()));
+
+		@SuppressWarnings("rawtypes")
 		List<AbstractConfigListEntry> sableEntries = new ArrayList<>();
 		sableEntries.add(entryBuilder
 			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.sable.fixParticleLights"),
@@ -405,6 +442,20 @@ class ClothConfigMenus {
 			.setSaveConsumer(newValue -> displayConfig.sable.fixParticleLights = newValue)
 			.setRequirement(() -> SABLE_LOADED)
 			.build());
+
+		@SuppressWarnings("rawtypes")
+		List<AbstractConfigListEntry> immersivePortalsEntries = new ArrayList<>();
+		immersivePortalsEntries.add(modifyOriginal(entryBuilder
+			.startBooleanToggle(Component.translatable("config.asyncparticles.mod-compat.immersivePortals.mixin"),
+				displayMixinConfig.isImmersivePortalsMixinEnabled())
+			.setDefaultValue(defaultMixinConfig.isImmersivePortalsMixinEnabled())
+			.setTooltip(Component.translatable("text.cloth-config.restart_required")
+					.withStyle(ChatFormatting.DARK_RED),
+				Component.translatable("config.asyncparticles.mod-compat.immersivePortals.mixin.tooltip"))
+			.setSaveConsumer(displayMixinConfig::setImmersivePortalsMixinEnabled)
+			.setRequirement(() -> IMMERSIVE_PORTALS_LOADED)
+			.requireRestart()
+			.build(), originalMixinConfig.isImmersivePortalsMixinEnabled()));
 
 		@SuppressWarnings("rawtypes")
 		List<AbstractConfigListEntry> polytoneEntries = new ArrayList<>();
@@ -508,41 +559,6 @@ class ClothConfigMenus {
 		opalLightEntries.add(opalLightGpuRenderingCompatibility);
 		opalLightEntries.add(opalLightDestructionColorPrediction);
 
-		@SuppressWarnings("rawtypes")
-		List<AbstractConfigListEntry> createEntries = new ArrayList<>();
-		createEntries.add(modifyOriginal(entryBuilder
-			.startEnumSelector(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect"),
-				RainEffect.class, displayConfig.create.rainEffect)
-			.setEnumNameProvider(value -> ((TranslatableEnum) value).getComponent())
-			.setDefaultValue(defaultConfig.create.rainEffect)
-			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.create.rainEffect.tooltip"))
-			.setSaveConsumer(newValue -> displayConfig.create.rainEffect = newValue)
-			.setRequirement(() -> ModListHelper.CREATE_LOADED)
-			.build(), originalConfig.create.rainEffect));
-		createEntries.add(modifyOriginal(entryBuilder
-			.startIntField(Component.translatable("config.asyncparticles.mod-compat.create.tickRainBlockingRange"),
-				displayConfig.create.tickRainBlockingRange)
-			.setDefaultValue(defaultConfig.create.tickRainBlockingRange)
-			.setTooltip(Component.translatable("config.asyncparticles.mod-compat.create.tickRainBlockingRange.tooltip"))
-			.setSaveConsumer(newValue -> displayConfig.create.tickRainBlockingRange = newValue)
-			.setRequirement(() -> ModListHelper.CREATE_LOADED)
-			.build(), originalConfig.create.tickRainBlockingRange));
-		List<String> contraptionNoParticleCollision = List.copyOf(originalMixinConfig.getContraptionNoParticleCollision());
-		createEntries.add(modifyOriginal(new StringListListEntryFixRestart(revertButtonEntryBuilder
-			.startStrList(Component.translatable("config.asyncparticles.mixin.create.contraptionsNoParticleCollision"), contraptionNoParticleCollision)
-			.setDefaultValue(contraptionNoParticleCollision)
-			.setSaveConsumer(l -> {
-				LinkedHashSet<String> s = new LinkedHashSet<>(l);
-				s.addAll(defaultMixinConfig.getContraptionNoParticleCollision());
-				displayMixinConfig.setContraptionNoParticleCollision(Collections.unmodifiableSet(s));
-			})
-			.setTooltip(
-				Component.translatable("text.cloth-config.restart_required")
-					.withStyle(ChatFormatting.DARK_RED),
-				Component.translatable("config.asyncparticles.mixin.create.contraptionsNoParticleCollision.tooltip"),
-				Component.translatable("config.asyncparticles.tooltip.list-how-to-reset"))
-			.requireRestart()
-			.build()), originalMixinConfig.getContraptionNoParticleCollision()));
 		builder.getOrCreateCategory(Component.translatable("config.asyncparticles.category.mod-compat"))
 			.addEntry(new SubCategoryListEntryFix(entryBuilder
 				// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
@@ -550,9 +566,18 @@ class ClothConfigMenus {
 					vsEntries)
 				.build()))
 			.addEntry(new SubCategoryListEntryFix(entryBuilder
+				// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
+				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
+					createEntries)
+				.build()))
+			.addEntry(new SubCategoryListEntryFix(entryBuilder
 				// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.valkyrienskies"),
 				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.sable"),
 					sableEntries)
+				.build()))
+			.addEntry(new SubCategoryListEntryFix(entryBuilder
+				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.immersivePortals"),
+					immersivePortalsEntries)
 				.build()))
 			.addEntry(new SubCategoryListEntryFix(entryBuilder
 				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.polytone"),
@@ -565,11 +590,6 @@ class ClothConfigMenus {
 			.addEntry(new SubCategoryListEntryFix(entryBuilder
 				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.opallight"),
 					opalLightEntries)
-				.build()))
-			.addEntry(new SubCategoryListEntryFix(entryBuilder
-				// .startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
-				.startSubCategory(Component.translatable("config.asyncparticles.category.mod-compat.create"),
-					createEntries)
 				.build()));
 		// endregion
 	}

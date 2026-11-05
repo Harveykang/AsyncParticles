@@ -1,5 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.coremod.cancellers;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals.ImmPtlEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.coremod.mixin_extension.member_canceller.MixinMemberCanceller;
 
 import java.util.List;
@@ -14,10 +15,10 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 			     "team.teampotato.ruok.mixin.minecraft.ParticleManagerMixin",
 			     "team.teampotato.ruok.mixin.minecraft.particle.ParticleManagerMixin",
 			     "net.diebuddies.mixins.weather.MixinParticleEngine",
-			     "qouteall.imm_ptl.core.mixin.client.particle.MixinParticleEngine",
 			     "foundry.veil.mixin.performance.client.PerformanceLevelRendererMixin",
 			     "me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin"
 				-> true;
+			case "qouteall.imm_ptl.core.mixin.client.particle.MixinParticleEngine" -> ImmPtlEarlyCompat.AVAILABLE;
 			default -> false;
 		};
 	}
@@ -36,7 +37,7 @@ public class AsyncParticlesMixinMemberCanceller implements MixinMemberCanceller 
 				"tick".equals(mixinMethodName);
 			case "qouteall.imm_ptl.core.mixin.client.particle.MixinParticleEngine" ->
 				// The compatibility mixin handles remote-level ticks.
-				"onTickParticle".equals(mixinMethodName);
+				ImmPtlEarlyCompat.AVAILABLE && "onTickParticle".equals(mixinMethodName);
 			case "foundry.veil.mixin.performance.client.PerformanceLevelRendererMixin" ->
 				"clearParticlesColor".equals(mixinMethodName);
 			case "me.fzzyhmstrs.particle_core.mixins.ParticleManagerAsyncMixin" ->

@@ -3,7 +3,7 @@ package fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.Mappings;
-import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals.ImmPtlEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.immersive_portals.ImmPtlParticlePipeline;
 import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneEarlyCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.polytone.PolytoneParticleAddon;
@@ -196,12 +196,12 @@ public class GpuParticleBehavior {
 
 	public IParticleRenderer createRenderer() {
 		if (Backends.isVk()) {
-			IVkParticlePipeline<?> pipeline = ModListHelper.IMMERSIVE_PORTALS_LOADED
+			IVkParticlePipeline<?> pipeline = ImmPtlEarlyCompat.AVAILABLE
 				? new ImmPtlParticlePipeline() : new ParticlePipeline();
 			return new VkCompParticleRenderer<>(ConfigHelper.getParticleLimit(), pipeline);
 		}
 		if (Backends.isGl() && Backends.glTf.isSupported()) {
-			IGlParticlePipeline<?> pipeline = ModListHelper.IMMERSIVE_PORTALS_LOADED
+			IGlParticlePipeline<?> pipeline = ImmPtlEarlyCompat.AVAILABLE
 				? new ImmPtlParticlePipeline() : new ParticlePipeline();
 			return new GlTfParticleRenderer<>(Math.max(ConfigHelper.getParticleLimit(), AsyncParticlesConfig.MIN_PARTICLE_LIMIT), pipeline);
 		}
