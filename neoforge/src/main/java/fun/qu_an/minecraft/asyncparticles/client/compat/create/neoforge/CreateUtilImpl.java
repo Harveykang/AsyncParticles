@@ -167,6 +167,11 @@ public class CreateUtilImpl {
 		return original;
 	}
 
+	public static Vec3 toWorldHitPos(AbstractContraptionEntity entity, Vec3 localHit) {
+		Vec3 pos = entity.toGlobalVector(localHit, 1.0F);
+		return ModListHelper.SABLE_LOADED ? SableCompat.toWorldPosition(pos, entity) : pos;
+	}
+
 	public static Matrix3d asMatrix(AbstractContraptionEntity contraptionEntity, AbstractContraptionEntity.ContraptionRotationState rotation) {
 		Matrix3d original = rotation.asMatrix();
 		if (ModListHelper.SABLE_LOADED) {

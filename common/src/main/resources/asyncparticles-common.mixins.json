@@ -51,6 +51,7 @@
     "compat.polytone.MixinParticleEngine",
     "compat.polytone.MixinPolytone",
     "compat.polytone.MixinPolytoneAsyncParticleHandler",
+    "compat.sable.MixinLevelPlot",
     "compat.sable.MixinMixinClientLevel",
     "compat.sable.MixinMixinParticle_LightScan",
     "compat.sable.MixinParticle_LightCache",

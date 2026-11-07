@@ -9,7 +9,6 @@ import dev.ryanhcode.sable.sublevel.SubLevel;
 import fun.qu_an.minecraft.asyncparticles.client.compat.create.neoforge.CreateUtilImpl;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4d;
 
 public class SableCompat {
 	public static Vec3 getContactPointMotion(Vec3 original,
@@ -53,8 +52,17 @@ public class SableCompat {
 		if (subLevel == null) {
 			return original;
 		}
-		// sublevel to world
-		return subLevel.logicalPose().transformPosition(original.add(0.5, 0.5, 0.5)).subtract(0.5, 0.5, 0.5);
+		return subLevel.logicalPose()
+			.transformPosition(original.add(0.5, 0.5, 0.5))
+			.subtract(0.5, 0.5, 0.5);
+	}
+
+	public static Vec3 toWorldPosition(Vec3 pos, AbstractContraptionEntity contraptionEntity) {
+		SubLevel subLevel = Sable.HELPER.getContaining(contraptionEntity);
+		if (subLevel == null) {
+			return pos;
+		}
+		return subLevel.logicalPose().transformPosition(pos);
 	}
 
 	public static Matrix3d asMatrix(Matrix3d original,

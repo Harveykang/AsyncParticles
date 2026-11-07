@@ -23,4 +23,10 @@ public abstract class MixinParticle_LightCache extends fun.qu_an.minecraft.async
 	private int wrapGetLightColor(BlockAndTintGetter level, BlockPos blockPos, Operation<Integer> original) {
 		return asyncparticles$calcLight(level, blockPos, original);
 	}
+
+	@WrapOperation(method = "getLightColor", at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/client/renderer/LevelRenderer;getLightColor(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;)I"))
+	private int wrapGetLightColor2(BlockAndTintGetter level, BlockPos blockPos, Operation<Integer> original) {
+		return asyncparticles$calcLight(level, blockPos, original);
+	}
 }

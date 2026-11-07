@@ -353,15 +353,16 @@ public class CollideUtilImpl {
 			AbstractContraptionEntity entity = (AbstractContraptionEntity) it.next();
 			BlockHitResult hitResult1 = ContraptionHandlerClient.rayTraceContraption(start, end, entity);
 			if (hitResult1 != null && hitResult1.getType() != HitResult.Type.MISS) {
-				Vec3 hit1 = entity.toGlobalVector(hitResult1.getLocation(), 1.0F);
-				double hitDiff = start.y - hit1.y;
-				if (shortestDistance > hitDiff) {
+				Vec3 hit1 = CreateUtilImpl.toWorldHitPos(entity, hitResult1.getLocation());
+				double distance = Math.abs(start.x - hit1.x) + Math.abs(start.y - hit1.y) + Math.abs(start.z - hit1.z);
+				if (distance < shortestDistance) {
+					shortestDistance = distance;
 					hitResult = hitResult1;
 					hit = hit1;
 				}
 			}
 		}
-		if (hitResult == null || hitResult.getType() == HitResult.Type.MISS) {
+		if (hitResult == null) {
 			return null;
 		}
 		return new BlockHitResult(hit, hitResult.getDirection(), BlockPos.containing(hit), hitResult.isInside());
@@ -383,17 +384,18 @@ public class CollideUtilImpl {
 				continue;
 			}
 			BlockHitResult hitResult1 = ContraptionHandlerClient.rayTraceContraption(start, end, entity1);
-			if (hitResult1 != null) {
-				Vec3 hit1 = entity1.toGlobalVector(hitResult1.getLocation(), 1.0F);
-				double hitDiff = start.y - hit1.y;
-				if (shortestDistance > hitDiff) {
+			if (hitResult1 != null && hitResult1.getType() != HitResult.Type.MISS) {
+				Vec3 hit1 = CreateUtilImpl.toWorldHitPos(entity1, hitResult1.getLocation());
+				double distance = Math.abs(start.x - hit1.x) + Math.abs(start.y - hit1.y) + Math.abs(start.z - hit1.z);
+				if (distance < shortestDistance) {
+					shortestDistance = distance;
 					hitResult = hitResult1;
 					hit = hit1;
 					entity = entity1;
 				}
 			}
 		}
-		if (hitResult == null || hitResult.getType() == HitResult.Type.MISS) {
+		if (hitResult == null) {
 			return null;
 		}
 		return new ContraptionHitResult(CreateUtilImpl.getContactPointMotion(entity, hit),

@@ -214,6 +214,7 @@ public class CompatibilityTryItButton extends Button {
 		config.valkyrienSkies.fixParticleLights = modified.valkyrienSkies.fixParticleLights;
 		config.valkyrienSkies.rainEffect = modified.valkyrienSkies.rainEffect;
 		config.sable.fixParticleLights = modified.sable.fixParticleLights;
+		config.sable.simplifyParticleSkyLight = modified.sable.simplifyParticleSkyLight;
 		config.polytone.asyncTick = modified.polytone.asyncTick;
 		config.polytone.gpuOnlyAsyncTick = modified.polytone.gpuOnlyAsyncTick;
 		config.polytone.gpuRendering = modified.polytone.gpuRendering;

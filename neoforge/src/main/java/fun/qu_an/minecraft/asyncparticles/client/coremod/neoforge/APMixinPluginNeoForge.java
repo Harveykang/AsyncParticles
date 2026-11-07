@@ -49,7 +49,7 @@ public class APMixinPluginNeoForge implements IMixinConfigPlugin {
 					};
 				case "polytone_create" -> FORGE_CREATE_LOADED && PolytoneEarlyCompat.AVAILABLE;
 				case "create" -> FORGE_CREATE_LOADED;
-				case "sable_create" -> SABLE_LOADED && CREATE_LOADED;
+				case "sable_create" -> SABLE_LOADED && FORGE_CREATE_LOADED;
 				case "simple_weather" -> FORGE_SIMPLE_WEATHER_LOADED;
 				case "simple_weather_create" -> FORGE_SIMPLE_WEATHER_LOADED && CREATE_LOADED;
 				case "weather2" -> FORGE_WEATHER2_LOADED;

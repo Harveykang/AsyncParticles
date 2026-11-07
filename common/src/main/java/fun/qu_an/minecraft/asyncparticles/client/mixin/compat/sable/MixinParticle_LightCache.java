@@ -98,6 +98,18 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 
 	@Dynamic
 	@TargetHandler(mixin = "dev.ryanhcode.sable.mixin.particle.ParticleMixin", name = "sable$checkSubLevelLightColor")
+	@Inject(method = "@MixinSquared:Handler", remap = false, at = @At("HEAD"), cancellable = true)
+	private void resolveLightTracking(CallbackInfo ci, @Share("lightSubLevel") LocalRef<ClientSubLevel> subLevelRef) {
+		ClientSubLevel subLevel = asyncparticles$getExtendedTrackingSubLevel();
+		if (subLevel == null && ConfigHelper.simplifySableParticleSkyLight()) {
+			ci.cancel();
+			return;
+		}
+		subLevelRef.set(subLevel);
+	}
+
+	@Dynamic
+	@TargetHandler(mixin = "dev.ryanhcode.sable.mixin.particle.ParticleMixin", name = "sable$checkSubLevelLightColor")
 	@Inject(method = "@MixinSquared:Handler", remap = false, at = @At(value = "FIELD",
 		target = "sable$trackingSubLevel:Ldev/ryanhcode/sable/sublevel/ClientSubLevel;", ordinal = 0, opcode = Opcodes.GETFIELD),
 		cancellable = true)
@@ -107,24 +119,11 @@ public abstract class MixinParticle_LightCache implements LightCachedParticleAdd
 							  @Share("lightSubLevel") LocalRef<ClientSubLevel> subLevelRef,
 							  @Local(ordinal = 0) BlockPos pos,
 							  @Local(ordinal = 0) BlockState state) {
-		ClientSubLevel subLevel = asyncparticles$getExtendedTrackingSubLevel();
-
-		if (!ConfigHelper.simplifySableParticleSkyLight()) {
-			if (subLevel != null) {
-				subLevelRef.set(subLevel);
-			}
-			return;
-		}
-
-		if (subLevel == null) {
+		ClientSubLevel subLevel = subLevelRef.get();
+		if (subLevel != null && ConfigHelper.simplifySableParticleSkyLight()) {
+			cir.setReturnValue(asyncparticles$getPackedLight(pos, state, subLevel));
 			ci.cancel();
-			return;
 		}
-
-		int packedLight = asyncparticles$getPackedLight(pos, state, subLevel);
-
-		cir.setReturnValue(packedLight);
-		ci.cancel();
 	}
 
 	@Unique

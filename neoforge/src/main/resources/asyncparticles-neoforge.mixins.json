@@ -18,7 +18,6 @@
     "compat.neoforge.create.MixinLevelRenderer_Rain_Early",
     "compat.neoforge.create.MixinParticle",
     "compat.neoforge.create.MixinParticle_LightCache",
-    "compat.neoforge.create.MixinParticle_LightCache_Late",
     "compat.neoforge.particlestorm.MixinMolangParticleEngine",
     "compat.neoforge.particlestorm.v1_4_x.MixinMolangParticleEngine",
     "compat.neoforge.particlestorm.v1_5_0.MixinMolangParticleManager",
