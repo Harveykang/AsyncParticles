@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.Tesselator;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleAddon;
@@ -11,6 +12,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ComputeExecutionStage;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ComputeResult;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
@@ -149,7 +151,18 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 						}
 						default -> f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
 					}
-					particle.render(bufferBuilder, camera, f3);
+					try {
+						particle.render(bufferBuilder, camera, f3);
+					} catch (Exception e) {
+						AsyncTickBehavior.getInstance().getExceptionHandler().onRenderParticleException(e);
+						ByteBufferBuilder.Result result = bufferBuilder.buffer.build();
+						if (result != null) {
+							result.close();
+						}
+						bufferBuilder.building = false;
+						bufferBuilder = null;
+						break;
+					}
 				}
 			}
 			profiler.popPush("build_buffer");

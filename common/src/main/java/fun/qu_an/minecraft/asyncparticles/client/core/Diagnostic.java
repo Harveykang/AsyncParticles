@@ -70,6 +70,26 @@ public class Diagnostic {
 		}
 	}
 
+	public static void errorParticleRenderOnMainThread(Exception e) {
+		if (!temporaryMark_gpuOnlyAsyncParticleTick) {
+			temporaryMark_gpuOnlyAsyncParticleTick = true;
+			LOGGER.error("""
+					[AsyncParticles] Unexpected error while rendering particles on the main thread.
+					Temporarily enabled 'gpuOnlyAsyncParticleTick' internally. You may also want to turn it on manually,\
+					 otherwise this error will recur after restarting the game.
+					If crashes persist after this fallback takes effect, the cause may be unrelated to AsyncParticles.
+					It is highly recommended to report this error to {} to help the author identify and fix potential issues.""",
+				AsyncParticlesClient.ISSUE_URL, e);
+			sendChat(() -> Component.literal("[AsyncParticles] ").append(
+				Component.translatable("chat.asyncparticles.warn.error_during_main_thread_particle_rendering",
+					e.toString(),
+					Component.translatable("config.asyncparticles.tick.gpuOnlyAsyncParticleTick"),
+					Component.literal("GitHub Issue")
+						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncParticlesClient.ISSUE_URL)))
+						.withStyle(ChatFormatting.UNDERLINE))));
+		}
+	}
+
 	public static void errorAsyncParticleTick(Exception e) {
 		if (!temporaryMark_gpuOnlyAsyncParticleTick) {
 			temporaryMark_gpuOnlyAsyncParticleTick = true;

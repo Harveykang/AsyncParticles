@@ -296,14 +296,14 @@ public class AsyncTickBehavior {
 		Minecraft.getInstance().particleEngine.clearParticles();
 	}
 
+	public void awaitParticleTasks() {
+		tickTaskHelper.waitForCompletion(exceptionHandler::tickExceptionally);
+		cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
+	}
+
 	public void reset() {
-		if (tickTaskHelper.isRunning()) {
-			tickTaskHelper.waitForCompletion(exceptionHandler::tickExceptionally);
-		}
+		awaitParticleTasks();
 		tickTaskHelper.disposeTasks();
-		if (cleanupTaskHelper.isRunning()) {
-			cleanupTaskHelper.waitForCompletion(ExceptionUtil::toThrowDirectly);
-		}
 		cleanupTaskHelper.disposeTasks();
 		if (PolytoneEarlyCompat.isAvailable()) {
 			PolytoneCompat.awaitTicks();
