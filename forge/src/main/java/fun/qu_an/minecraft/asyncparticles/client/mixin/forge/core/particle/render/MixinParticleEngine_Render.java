@@ -7,6 +7,7 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ComputeExecutionStage;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.config.ParticleCullingMode;
+import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.ComputeResult;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleRenderer;
@@ -149,7 +150,17 @@ public abstract class MixinParticleEngine_Render implements ParticleEngineAddon 
 						}
 						default -> f3 = particleAddon.asyncparticles$isTicked() ? f : f2;
 					}
-					particle.render(toBegin, camera, f3);
+					try {
+						particle.render(toBegin, camera, f3);
+					} catch (Exception e) {
+						AsyncTickBehavior.getInstance().getExceptionHandler().onRenderParticleException(e);
+						if (toBegin.building()) {
+							toBegin.end().release();
+						}
+						tesselator = FakeTesselator.INSTANCE;
+						toBegin = FakeBufferBuilder.INSTANCE;
+						break;
+					}
 				}
 			}
 			profiler.popPush("build_buffer");

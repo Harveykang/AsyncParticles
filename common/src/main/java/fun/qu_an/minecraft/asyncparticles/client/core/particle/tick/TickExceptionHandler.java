@@ -113,7 +113,11 @@ public class TickExceptionHandler {
 		return new ReportedException(crashReport);
 	}
 
-	public void resetCancelled() {
-		cancelled.setRelease(false);
+	public void onRenderParticleException(Exception e) {
+		if (!ConfigHelper.isAsyncParticleTick() || ConfigHelper.isGpuOnlyAsyncParticleTick()) {
+			throw toThrowDirectly(e);
+		}
+		asyncTickBehavior.awaitParticleTasks();
+		Diagnostic.errorParticleRenderOnMainThread(e);
 	}
 }
