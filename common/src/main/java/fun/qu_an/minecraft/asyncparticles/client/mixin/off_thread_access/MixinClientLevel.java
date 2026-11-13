@@ -1,12 +1,14 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeArrayList;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.RandomSupport;
@@ -30,8 +32,35 @@ public abstract class MixinClientLevel extends Level {
 	@Final
 	List<AbstractClientPlayer> players;
 
+	@Shadow
+	public abstract void addEntity(Entity entity);
+
+	@Shadow
+	public abstract void removeEntity(int id, Entity.RemovalReason removalReason);
+
 	protected MixinClientLevel(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, Supplier<ProfilerFiller> profiler, boolean isClientSide, boolean isDebug, long biomeZoomSeed, int maxChainedNeighborUpdates) {
 		super(levelData, dimension, registryAccess, dimensionTypeRegistration, profiler, isClientSide, isDebug, biomeZoomSeed, maxChainedNeighborUpdates);
+	}
+
+	@Inject(method = "addEntity", at = @At("HEAD"), cancellable = true)
+	private void onAddEntity(Entity entity, CallbackInfo ci) {
+		if (ThreadUtil.isOnParticleThread()) {
+			ci.cancel();
+			ThreadUtil.enqueueClientTask(() -> {
+				// The particle may have been discarded before its entity is added.
+				if (!entity.isRemoved()) {
+					this.addEntity(entity);
+				}
+			});
+		}
+	}
+
+	@Inject(method = "removeEntity", at = @At("HEAD"), cancellable = true)
+	private void onRemoveEntity(int id, Entity.RemovalReason removalReason, CallbackInfo ci) {
+		if (ThreadUtil.isOnParticleThread()) {
+			ci.cancel();
+			ThreadUtil.enqueueClientTask(() -> this.removeEntity(id, removalReason));
+		}
 	}
 
 	@Inject(method = "<init>", at = @At("RETURN"))

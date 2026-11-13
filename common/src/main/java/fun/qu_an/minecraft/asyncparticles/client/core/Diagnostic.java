@@ -179,4 +179,28 @@ public class Diagnostic {
 	public static boolean isTemporaryDisableAsyncRainTick() {
 		return temporaryMark_disableAsyncRainTick;
 	}
+
+	public static void reset() {
+		illegalEntityStorageAccess = false;
+		illegalBlockEntityStorageAccess = false;
+		temporaryMark_gpuOnlyAsyncParticleTick = false;
+		temporaryMark_disableAnimationTick = false;
+		temporaryMark_disableAsyncRainTick = false;
+		temporaryMark_disableAsyncParticleTick = false;
+	}
+
+	public static void wtfEntityInit() {
+		if (!temporaryMark_disableAsyncParticleTick) {
+			temporaryMark_disableAsyncParticleTick = true;
+			LOGGER.error("[AsyncParticles] WTF! Entity init on particle thread! Disabling async particle tick.");
+			sendChat(() -> Component.literal("[AsyncParticles] ").append(
+				Component.translatable("chat.asyncparticles.warn.wtf_entity_init_on_particle_thread",
+					Component.translatable("config.asyncparticles.tick.particleAsyncMode"),
+					Component.literal("GitHub Issue")
+						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, AsyncParticlesClient.ISSUE_URL)))
+						.withStyle(ChatFormatting.UNDERLINE))
+			));
+			ThreadUtil.runOnClient(() -> AsyncTickBehavior.getInstance().reset());
+		}
+	}
 }

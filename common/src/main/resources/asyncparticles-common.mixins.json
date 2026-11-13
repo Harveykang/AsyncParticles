@@ -28,6 +28,7 @@
     "compat.immersive_portals.MixinParticleEngine",
     "compat.iris_like.MixinDSAUnsupported",
     "compat.modernui.MixinRenderSystem",
+    "compat.particlerain.MixinBlockModelParticleStyle",
     "compat.particlerain.MixinParticleRain",
     "compat.particlerain.MixinParticleSpawner",
     "compat.particlerain.MixinWeatherParticle",
@@ -45,6 +46,7 @@
     "compat.polytone.MixinOptionHolder",
     "compat.polytone.MixinPolytone",
     "compat.polytone.MixinPolytoneAsyncParticleHandler",
+    "compat.polytone.AccessorPolytoneAsyncParticleHandler",
     "compat.sable.MixinMixinClientLevel",
     "compat.sable.MixinMixinParticle_LightScan",
     "compat.sable.MixinParticle",
@@ -95,6 +97,8 @@
     "off_thread_access.MixinActiveProfiler",
     "off_thread_access.MixinClientChunkCache",
     "off_thread_access.MixinClientLevel",
+    "off_thread_access.MixinEntity",
+    "off_thread_access.MixinTransientEntitySectionManager",
     "off_thread_access.MixinEntityGetter",
     "off_thread_access.MixinGlStateManager",
     "off_thread_access.MixinLevel",
@@ -107,6 +111,5 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "compat.polytone.AccessorPolytoneAsyncParticleHandler"
   ]
 }
