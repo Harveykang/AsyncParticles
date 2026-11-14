@@ -102,7 +102,7 @@ void main() {
 
     // --- identical math to gl_particle_transformfeedback.vert ---
     vec3 p = mix(oPos, pos, pc.uPartialTick) + vec3(pc.uPartialCameraPos_x, pc.uPartialCameraPos_y, pc.uPartialCameraPos_z);
-    float nroll = mix(rolls.x, rolls.y, pc.uPartialTick);
+    float nroll = -mix(rolls.x, rolls.y, pc.uPartialTick);
     float size = mix(sizes.x, sizes.y, pc.uPartialTick);
     vec4 color = mix(oCol, col, pc.uPartialTick);
 

@@ -95,7 +95,7 @@ public abstract class MixinCustomParticleType implements PolytoneParticleTypeAdd
 				if (custom.hasAgeLeft()) {
 					return null;
 				}
-				custom.remove();
+				particle.remove();
 			}
 		}
 		return particle;

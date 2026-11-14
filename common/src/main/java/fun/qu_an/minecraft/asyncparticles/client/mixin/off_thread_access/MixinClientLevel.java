@@ -42,7 +42,7 @@ public abstract class MixinClientLevel extends Level {
 		super(levelData, dimension, registryAccess, dimensionTypeRegistration, profiler, isClientSide, isDebug, biomeZoomSeed, maxChainedNeighborUpdates);
 	}
 
-	@Inject(method = "addEntity", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "addEntity", at = @At("HEAD"), cancellable = true, order = 500)
 	private void onAddEntity(Entity entity, CallbackInfo ci) {
 		if (ThreadUtil.isOnParticleThread()) {
 			ci.cancel();
@@ -55,7 +55,7 @@ public abstract class MixinClientLevel extends Level {
 		}
 	}
 
-	@Inject(method = "removeEntity", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "removeEntity", at = @At("HEAD"), cancellable = true, order = 500)
 	private void onRemoveEntity(int id, Entity.RemovalReason removalReason, CallbackInfo ci) {
 		if (ThreadUtil.isOnParticleThread()) {
 			ci.cancel();

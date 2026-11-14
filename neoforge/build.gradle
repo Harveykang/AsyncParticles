@@ -53,6 +53,7 @@ dependencies {
 
     /* APIs */
     modLocalRuntime 'maven.modrinth:architectury-api:13.0.8+neoforge'
+    modCompileOnly "me.shedaniel.cloth:cloth-config-neoforge:15.0.140"
     modLocalRuntime "me.shedaniel.cloth:cloth-config-neoforge:15.0.140"
     localRuntime("dev.isxander:yet-another-config-lib:3.7.1+$minecraft_version-neoforge") {
         exclude group: "net.neoforged.fancymodloader", module: "loader"

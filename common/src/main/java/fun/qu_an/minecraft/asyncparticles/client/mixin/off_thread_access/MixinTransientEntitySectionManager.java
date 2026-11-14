@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(TransientEntitySectionManager.class)
+@Mixin(value = TransientEntitySectionManager.class, priority = 500)
 public abstract class MixinTransientEntitySectionManager<T extends EntityAccess> {
 	@Shadow
 	public abstract void addEntity(T entity);

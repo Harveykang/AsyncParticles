@@ -255,8 +255,9 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			}
 			final Object e = curr;
 			while (cursor < tail) {
-				next = a[cursor++ & mask];
-				if (next != null && next != e) {
+				Object candidate = a[cursor++ & mask];
+				if (candidate != null && candidate != e) {
+					next = candidate;
 					return true;
 				}
 			}
