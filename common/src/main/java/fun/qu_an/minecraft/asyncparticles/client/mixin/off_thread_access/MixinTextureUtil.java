@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(TextureUtil.class)
+@Mixin(value = TextureUtil.class, priority = 500)
 public class MixinTextureUtil {
 	@Inject(method = "releaseTextureId", remap = false, at = @At("HEAD"), cancellable = true)
 	private static void releaseTextureId(int i, CallbackInfo ci) {

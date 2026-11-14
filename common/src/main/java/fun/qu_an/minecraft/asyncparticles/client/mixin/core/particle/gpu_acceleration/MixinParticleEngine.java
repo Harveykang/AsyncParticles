@@ -6,31 +6,21 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
-import fun.qu_an.minecraft.asyncparticles.client.core.TaskHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.IParticleRenderer;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.client.particle.*;
-import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 
 @Mixin(value = ParticleEngine.class, priority = 1500)
 public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	@Shadow
 	public Map<ParticleRenderType, Queue<Particle>> particles;
-
-	@Shadow
-	protected abstract void tickParticleList(Collection<Particle> collection);
 
 	@ModifyExpressionValue(method = "countParticles", at = @At(value = "INVOKE", target = "Ljava/util/stream/IntStream;sum()I"))
 	private int modifyCount(int i) {
@@ -48,46 +38,5 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 			original.call(instance, e);
 		}
 		return true;
-	}
-
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	@Inject(method = "tick", order = 500, at = @At("TAIL"))
-	private void tickTail(CallbackInfo ci) {
-		if (!ConfigHelper.isGpuParticles()) {
-			return;
-		}
-		int sum = 0;
-		AsyncTickBehavior tickBehavior = AsyncTickBehavior.getInstance();
-		boolean tickAsync = ConfigHelper.isAsyncParticleTick() && tickBehavior.isParticlePhase();
-		TaskHelper taskHelper = tickBehavior.getTickTaskManager();
-		Map<ParticleRenderType, Queue<TextureSheetParticle>> gpuParticles = GpuParticleBehavior.getInstance().gpuParticles;
-		for (Map.Entry<ParticleRenderType, Queue<TextureSheetParticle>> entry : gpuParticles.entrySet()) {
-			Queue<TextureSheetParticle> queue = entry.getValue();
-			int size = queue.size();
-			if (size == 0) {
-				continue;
-			}
-			sum += size;
-			if (!tickAsync || tickBehavior.shouldSyncRenderType(entry.getKey().getClass())) {
-				ParticleHelper.tickGpuParticles(() -> tickParticleList((Collection) queue));
-			} else {
-				ParticleRenderType renderType = entry.getKey();
-				ParticleHelper.tickGpuParticles(() -> tickParticleList(tickBehavior.getSyncGpuParticles(renderType)));
-				taskHelper.addTask(() -> ParticleHelper.tickGpuParticles(() -> tickParticleList((Collection) queue)));
-			}
-		}
-		if (tickAsync) {
-			taskHelper.groupTasks(true);
-		}
-		if (!tickBehavior.isTailTick()) {
-			return;
-		}
-		GpuParticleBehavior gpuParticleBehavior = GpuParticleBehavior.getInstance();
-		gpuParticleBehavior.flushBufferAndSwap();
-		gpuParticleBehavior.setUpNextTickRendering(sum);
-		IParticleRenderer renderer = gpuParticleBehavior.getOrCreateRenderer();
-		renderer.prepareBuffer();
-		tickBehavior.getTickTaskManager().addTask(
-			() -> renderer.tick(GpuParticleBehavior.getInstance().getPerTickCameraPos(), gpuParticles));
 	}
 }

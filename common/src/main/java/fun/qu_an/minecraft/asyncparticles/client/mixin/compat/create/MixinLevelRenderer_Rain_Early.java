@@ -18,12 +18,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = LevelRenderer.class, priority = 490)
+@Mixin(value = LevelRenderer.class, priority = 100)
 public class MixinLevelRenderer_Rain_Early {
 	@Shadow
 	private @Nullable ClientLevel level;
 
-	@Inject(method = "tickRain", order = 100, at = @At("HEAD"))
+	@Inject(method = "tickRain", at = @At("HEAD"))
 	private void onTickRain(Camera camera,
 	                        CallbackInfo ci) {
 		BlockPos blockPos = camera.getBlockPosition();

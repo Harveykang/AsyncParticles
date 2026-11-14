@@ -32,10 +32,47 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	@Final
 	private Object2IntOpenHashMap<ParticleGroup> trackedParticleCounts;
 
-	@Inject(method = "<init>", order = 9000, at = @At(value = "RETURN"))
-	public void initTail(CallbackInfo ci) {
+	@Unique
+	private Queue<Particle> asyncparticles$tickQueue;
+	@Unique
+	private Queue<Particle> asyncparticles$deferredQueue;
+
+	@Override
+	public void asyncparticles$switchToDeferredQueue() {
+		particlesToAdd = asyncparticles$deferredQueue;
+	}
+
+	@Override
+	public void asyncparticles$switchToTickQueue() {
+		particlesToAdd = asyncparticles$tickQueue;
+	}
+
+	@Override
+	public void asyncparticles$addDefers() {
+		if (!asyncparticles$deferredQueue.isEmpty()) {
+			asyncparticles$tickQueue.addAll(asyncparticles$deferredQueue);
+			asyncparticles$deferredQueue.clear();
+		}
+	}
+
+	@Override
+	public void asyncparticles$discardParticlesToAdd() {
+		if (!asyncparticles$tickQueue.isEmpty()) {
+			asyncparticles$tickQueue.forEach(ParticleHelper::onEvictIgnoreExceptions);
+			asyncparticles$tickQueue.clear();
+		}
+		if (!asyncparticles$deferredQueue.isEmpty()) {
+			asyncparticles$deferredQueue.forEach(ParticleHelper::onEvictIgnoreExceptions);
+			asyncparticles$deferredQueue.clear();
+		}
+	}
+
+	@Override
+	public void asyncparticles$initializeQueues() {
 		trackedParticleCounts = new TrackedParticleCountsMap();
 		particlesToAdd = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT, ConfigHelper.getParticleLimit(), ParticleHelper::onEvict);
+		asyncparticles$tickQueue = particlesToAdd;
+		asyncparticles$deferredQueue = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT, ConfigHelper.getParticleLimit(), ParticleHelper::onEvict);
 		trackingEmitters = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT / 4, ConfigHelper.getParticleLimit(), ParticleHelper::onEvict);
 	}
 
@@ -47,8 +84,11 @@ public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	@Inject(method = "clearParticles", at = @At("HEAD"))
 	public void onClearParticles(CallbackInfo ci) {
 		AsyncTickBehavior.getInstance().reset();
-		particlesToAdd.forEach(ParticleHelper::onClearParticle);
+		asyncparticles$tickQueue.forEach(ParticleHelper::onClearParticle);
+		asyncparticles$deferredQueue.forEach(ParticleHelper::onClearParticle);
 		particlesToAdd = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT, ConfigHelper.getParticleLimit(), ParticleHelper::onEvict);
+		asyncparticles$tickQueue = particlesToAdd;
+		asyncparticles$deferredQueue = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT, ConfigHelper.getParticleLimit(), ParticleHelper::onEvict);
 		trackingEmitters.forEach(ParticleHelper::onClearParticle);
 		trackingEmitters = BusyWaitEvictingQueue.newInstance(AsyncParticlesConfig.MIN_PARTICLE_LIMIT / 4, ConfigHelper.getParticleLimit(), ParticleHelper::onEvict);
 		particles.values().forEach(queue -> queue.forEach(ParticleHelper::onClearParticle));

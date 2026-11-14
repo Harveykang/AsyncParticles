@@ -4,7 +4,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.cloth_config.AbstractConfigEntryAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.cloth_config.AbstractListListEntryAddon;
+import fun.qu_an.minecraft.asyncparticles.client.compat.cloth_config.ButtonListEntry;
 import fun.qu_an.minecraft.asyncparticles.client.config.CompatibilityTryItButton.CompatibilityTryIt;
+import fun.qu_an.minecraft.asyncparticles.client.core.Diagnostic;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backend;
 import fun.qu_an.minecraft.asyncparticles.client.core.backend.Backends;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
@@ -583,6 +585,10 @@ class ClothConfigMenus {
 	private static void buildDevCategory(ConfigBuilder builder, ConfigEntryBuilder entryBuilder) {
 		// region Dev
 		builder.getOrCreateCategory(Component.literal("Dev"))
+			.addEntry(new ButtonListEntry(Component.literal("Reset Diagnostics"), Component.literal("Reset"), () -> {
+				AsyncTickBehavior.getInstance().reload();
+				Diagnostic.reset();
+			}))
 			.addEntry(entryBuilder
 				.startBooleanToggle(Component.literal("Debug Sync Particle Classes"), DevRuntimeDebug.syncAllParticles)
 				.setTooltip(Component.literal("Never change it unless requested by the developer."))
