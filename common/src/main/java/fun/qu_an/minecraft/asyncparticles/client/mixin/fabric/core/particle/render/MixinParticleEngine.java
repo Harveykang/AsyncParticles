@@ -1,7 +1,6 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.fabric.core.particle.render;
 
 import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
 import org.spongepowered.asm.mixin.Final;
@@ -13,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(ParticleEngine.class)
-public class MixinParticleEngine implements ParticleEngineAddon {
+public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	@Mutable
 	@Shadow
 	@Final

@@ -233,7 +233,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		int pi = processingSrcIdx;
 		SourceSlot source = sourceSlots[pi];
 		int tc = source.tickCount;
-		int ac = pendingAppends.size();
+		int ac = Math.min(particleLimit, pendingAppends.size());
 		if (ac > 0) {
 			if (!isMapped()) {
 				source.camPosition = prevGpuCamPos;
@@ -253,7 +253,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	}
 
 	private void extractAppendParticles(Vec3 prevGpuCamPos, List<SingleQuadParticle> pending, List<LayerBatch> batches) {
-		int appendCount = pending.size();
+		int appendCount = Math.min(particleLimit, pending.size());
 		int vertexSize = GpuParticlePipelines.RAW_PARTICLE.getVertexSize();
 		final double cx = prevGpuCamPos.x;
 		final double cy = prevGpuCamPos.y;
@@ -264,7 +264,7 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		long bufferAddress = MemoryUtil.memAddress(mappedBuffer) + offset;
 
 		Map<SingleQuadParticle.Layer, List<SingleQuadParticle>> layerMap = new Reference2ReferenceOpenHashMap<>();
-		for (int i = 0, pendingSize = Math.min(particleLimit, appendCount); i < pendingSize; i++) {
+		for (int i = 0; i < appendCount; i++) {
 			SingleQuadParticle p = pending.get(i);
 			layerMap.computeIfAbsent(((GpuParticleAddon) p).asyncparticles$getLayer(), _ -> new ReferenceArrayList<>(appendCount / 2)).add(p);
 		}
