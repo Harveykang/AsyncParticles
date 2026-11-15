@@ -56,7 +56,7 @@ out ivec2 UV2_3;
 // geom shader may be slower but more testing needed
 void main() {
     vec3 pos = mix(oPosition, Position, PartialTick) + PartialCameraPos;
-    float nroll = mix(Rolls.x, Rolls.y, PartialTick);
+    float nroll = -mix(Rolls.x, Rolls.y, PartialTick);
     float size = mix(Sizes.x, Sizes.y, PartialTick);
     vec4 color = mix(oColor, Color, PartialTick);
 

@@ -1,6 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.tick;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import fun.qu_an.minecraft.asyncparticles.client.addon.ParticleEngineAddon;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import net.minecraft.client.Minecraft;
@@ -16,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinMinecraft {
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"))
 	private void onPreTick(boolean advanceGameTime, CallbackInfo ci, @Local(ordinal = 0) int ticksToDo, @Local(ordinal = 1) int i) {
-		AsyncTickBehavior.getInstance().preTick(i == ticksToDo - 1);
+		AsyncTickBehavior.getInstance().preTick(i == ticksToDo - 1 || i == 9);
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V", shift = At.Shift.AFTER))
@@ -32,7 +33,9 @@ public class MixinMinecraft {
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;tick()V"))
 	private void redirectParticleEngineTick(ParticleEngine instance) {
-		if (!ConfigHelper.isAsyncParticleTick()) {
+		if (ConfigHelper.isAsyncParticleTick()) {
+			((ParticleEngineAddon) instance).asyncparticles$switchToDeferredQueue();
+		} else {
 			instance.tick();
 		}
 	}

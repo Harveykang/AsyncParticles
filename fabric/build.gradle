@@ -41,6 +41,9 @@ dependencies {
 
     /* APIs */
 //    localRuntime 'maven.modrinth:architectury-api:17.0.6+fabric'
+    compileOnly("me.shedaniel.cloth:cloth-config-fabric:26.1.154") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
     localRuntime("me.shedaniel.cloth:cloth-config-fabric:26.1.154") {
         exclude(group: "net.fabricmc.fabric-api")
     }

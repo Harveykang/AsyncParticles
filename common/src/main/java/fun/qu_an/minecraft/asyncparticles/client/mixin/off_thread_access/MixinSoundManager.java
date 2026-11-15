@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 // TODO: Any better way to handle this?
-@Mixin(SoundManager.class)
+@Mixin(value = SoundManager.class, priority = 500)
 public abstract class MixinSoundManager {
 	@Shadow
 	@Final

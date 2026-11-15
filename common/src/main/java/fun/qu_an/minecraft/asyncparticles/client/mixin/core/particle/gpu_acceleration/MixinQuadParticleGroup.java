@@ -36,6 +36,12 @@ public abstract class MixinQuadParticleGroup implements GpuParticleGroup {
 	}
 
 	@Override
+	public QuadParticleRenderState asyncparticles$clearCpuRenderState() {
+		particleTypeRenderState.clear();
+		return particleTypeRenderState;
+	}
+
+	@Override
 	public void asyncparticles$removeDeadGpuParticles() {
 		AsyncTickBehavior.getInstance().doParticlesRemoveIf(asyncparticles$gpuParticles);
 	}

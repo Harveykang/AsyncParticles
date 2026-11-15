@@ -19,14 +19,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static fun.qu_an.minecraft.asyncparticles.client.util.ExceptionUtil.toThrowDirectly;
 
 public class TickExceptionHandler {
 	private static final Logger LOGGER = LogManager.getLogger();
-	final AtomicBoolean cancelled = new AtomicBoolean(false);
-	final Object cancelledLock = new Object();
 	private final ExceptionTracker<Object> exceptionTracker = new ExceptionTracker<>(
 		() -> 5000,
 		ConfigHelper::getTickFailurePerSecondThreshold
@@ -66,18 +63,7 @@ public class TickExceptionHandler {
 		if (tolerable && !exceptionTracker.addException(particleClass, e)) {
 			return false;
 		}
-		if (!cancelled.getAcquire()) { // idempotency
-			synchronized (cancelledLock) {
-				if (!cancelled.getAcquire()) {
-					cancelled.setRelease(true);
-					if (ConfigHelper.isGpuOnlyAsyncParticleTick()) {
-						Diagnostic.errorAsyncGpuParticleTick(e);
-					} else {
-						Diagnostic.errorAsyncParticleTick(e);
-					}
-				}
-			}
-		}
+		Diagnostic.errorAsyncParticleTick(e);
 		return true;
 	}
 
@@ -113,7 +99,11 @@ public class TickExceptionHandler {
 		return new ReportedException(crashReport);
 	}
 
-	public void resetCancelled() {
-		cancelled.setRelease(false);
+	public void onRenderParticleException(Exception e) {
+		if (!ThreadUtil.isOnMainThread()) {
+			throw toThrowDirectly(e);
+		}
+		asyncTickBehavior.awaitParticleTasks();
+		Diagnostic.errorParticleRenderOnMainThread(e);
 	}
 }
