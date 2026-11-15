@@ -40,6 +40,9 @@ dependencies {
 //    shadowCommon project(path: ':common_legacy_mod_compat', configuration: 'transformProductionFabric')
 
     /* APIs */
+    compileOnly("me.shedaniel.cloth:cloth-config-fabric:26.3.158") {
+        exclude(group: "net.fabricmc")
+    }
     localRuntime("me.shedaniel.cloth:cloth-config-fabric:26.3.158") {
         exclude(group: "net.fabricmc")
     }

@@ -48,6 +48,7 @@ dependencies {
 //    shadowCommon project(path: ':common_legacy_mod_compat', configuration: 'transformProductionNeoForge')
 
     /* APIs */
+    compileOnly "me.shedaniel.cloth:cloth-config-neoforge:26.3.158"
 //    localRuntime 'maven.modrinth:architectury-api:17.0.8+neoforge'
 //    localRuntime "me.shedaniel.cloth:cloth-config-neoforge:26.2.155"
 //    localRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')

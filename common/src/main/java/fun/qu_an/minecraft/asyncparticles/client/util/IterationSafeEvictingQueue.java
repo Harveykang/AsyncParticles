@@ -50,6 +50,13 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 	/**
 	 * @apiNote This queue does not allow the same object to be adjacent elements, which can cause issues with iteration.
 	 */
+	public static <E> IterationSafeEvictingQueue<E> newInstance(int initialCapacity) {
+		return new IterationSafeEvictingQueue<>(Math.min(initialCapacity, MAX_CAPACITY), MAX_CAPACITY);
+	}
+
+	/**
+	 * @apiNote This queue does not allow the same object to be adjacent elements, which can cause issues with iteration.
+	 */
 	public static <E> IterationSafeEvictingQueue<E> newInstance(int initialCapacity, int maxCapacity) {
 		return new IterationSafeEvictingQueue<>(Math.min(initialCapacity, maxCapacity), maxCapacity);
 	}
@@ -154,8 +161,9 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 				}
 				final Object e = curr;
 				while (cursor < tail) {
-					next = a[cursor++ & mask];
-					if (next != null && next != e && predicate.test((E) next)) {
+					Object candidate = a[cursor++ & mask];
+					if (candidate != null && candidate != e && predicate.test((E) candidate)) {
+						next = candidate;
 						return true;
 					}
 				}
@@ -274,8 +282,9 @@ public class IterationSafeEvictingQueue<E> implements Queue<E> {
 			}
 			final Object e = curr;
 			while (cursor < tail) {
-				next = a[cursor++ & mask];
-				if (next != null && next != e) {
+				Object candidate = a[cursor++ & mask];
+				if (candidate != null && candidate != e) {
+					next = candidate;
 					return true;
 				}
 			}

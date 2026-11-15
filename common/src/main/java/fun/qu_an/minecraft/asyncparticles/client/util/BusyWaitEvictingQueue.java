@@ -18,6 +18,10 @@ public class BusyWaitEvictingQueue<E> extends IterationSafeEvictingQueue<E> {
 		super(initialCapacity, maxCapacity, onEvict);
 	}
 
+	public static <E> BusyWaitEvictingQueue<E> newInstance(int initialCapacity) {
+		return new BusyWaitEvictingQueue<>(initialCapacity, MAX_CAPACITY);
+	}
+
 	public static <E> BusyWaitEvictingQueue<E> newInstance(int initialCapacity, int maxCapacity) {
 		return new BusyWaitEvictingQueue<>(Math.min(initialCapacity, maxCapacity), maxCapacity);
 	}

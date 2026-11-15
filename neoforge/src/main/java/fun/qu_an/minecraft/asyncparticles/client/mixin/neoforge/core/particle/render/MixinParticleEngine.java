@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(ParticleEngine.class)
-public class MixinParticleEngine implements ParticleEngineAddon {
+public abstract class MixinParticleEngine implements ParticleEngineAddon {
 	@Mutable
 	@Shadow
 	@Final

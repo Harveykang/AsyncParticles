@@ -4,7 +4,6 @@ import fun.qu_an.minecraft.asyncparticles.client.addon.LightCachedParticleAddon;
 import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
 import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceCompat;
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
-import fun.qu_an.minecraft.asyncparticles.client.config.AsyncParticlesConfig;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
@@ -12,6 +11,7 @@ import fun.qu_an.minecraft.asyncparticles.client.util.BusyWaitEvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.world.level.chunk.MissingPaletteEntryException;
@@ -27,9 +27,7 @@ public class ParticleHelper {
 	}
 
 	public static <T extends Particle> Queue<T> newParticleQueue(int initSize) {
-		return IterationSafeEvictingQueue.newInstance(
-			initSize,
-			AsyncParticlesConfig.MAX_PARTICLE_LIMIT);
+		return IterationSafeEvictingQueue.newInstance(initSize);
 	}
 
 	public static<T extends Particle> Queue<T> newBusyWaitParticleQueue() {
@@ -37,8 +35,7 @@ public class ParticleHelper {
 	}
 
 	public static<T extends Particle> Queue<T> newBusyWaitParticleQueue(int initSize) {
-		return BusyWaitEvictingQueue.newInstance(initSize,
-			AsyncParticlesConfig.MAX_PARTICLE_LIMIT);
+		return BusyWaitEvictingQueue.newInstance(initSize);
 	}
 
 	public static void onClearParticles() {
@@ -77,5 +74,9 @@ public class ParticleHelper {
 			}
 			addon.asyncparticles$setLight(lightColor);
 		}
+	}
+
+	public static void onEvict(Particle particle) {
+		particle.getParticleLimit().ifPresent(limit -> Minecraft.getInstance().particleEngine.updateCount(limit, -1));
 	}
 }
