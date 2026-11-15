@@ -51,6 +51,7 @@ dependencies {
 
     /* APIs */
 //    localRuntime 'maven.modrinth:architectury-api:17.0.8+neoforge'
+    modCompileOnly "me.shedaniel.cloth:cloth-config-neoforge:21.11.153"
     modLocalRuntime "me.shedaniel.cloth:cloth-config-neoforge:21.11.153"
 //    localRuntime('me.fallenbreath:conditional-mixin-neoforge:0.6.4')
 //

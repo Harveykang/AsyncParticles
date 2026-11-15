@@ -1,11 +1,13 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.off_thread_access;
 
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeArrayList;
+import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.RandomSupport;
@@ -28,8 +30,35 @@ public abstract class MixinClientLevel extends Level {
 	@Final
 	private List<AbstractClientPlayer> players;
 
+	@Shadow
+	public abstract void addEntity(Entity entity);
+
+	@Shadow
+	public abstract void removeEntity(int id, Entity.RemovalReason removalReason);
+
 	protected MixinClientLevel(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, RegistryAccess registryAccess, Holder<DimensionType> holder, boolean bl, boolean bl2, long l, int i) {
 		super(writableLevelData, resourceKey, registryAccess, holder, bl, bl2, l, i);
+	}
+
+	@Inject(method = "addEntity", at = @At("HEAD"), cancellable = true, order = 500)
+	private void onAddEntity(Entity entity, CallbackInfo ci) {
+		if (ThreadUtil.isOnParticleThread()) {
+			ci.cancel();
+			ThreadUtil.enqueueClientTask(() -> {
+				// The particle may have been discarded before its entity is added.
+				if (!entity.isRemoved()) {
+					this.addEntity(entity);
+				}
+			});
+		}
+	}
+
+	@Inject(method = "removeEntity", at = @At("HEAD"), cancellable = true, order = 500)
+	private void onRemoveEntity(int id, Entity.RemovalReason removalReason, CallbackInfo ci) {
+		if (ThreadUtil.isOnParticleThread()) {
+			ci.cancel();
+			ThreadUtil.enqueueClientTask(() -> this.removeEntity(id, removalReason));
+		}
 	}
 
 	@Inject(method = "<init>", at = @At("RETURN"))

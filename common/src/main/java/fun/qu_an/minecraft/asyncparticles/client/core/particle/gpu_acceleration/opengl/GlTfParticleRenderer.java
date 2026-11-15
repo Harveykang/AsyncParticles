@@ -103,7 +103,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		if (tickCount > 0) {
 			sources[pi].flush(tickCount * vertexSize); // offsetRelativeToMap = 0
 		}
-		int appendCount = pendingAppends.size();
+		int appendCount = Math.min(particleLimit, pendingAppends.size());
 		if (appendCount > 0) {
 			int offsetRelativeToMap = extractAppendParticles(prevGpuCamPos, pendingAppends, layerBatches[pi]);
 			sources[pi].flush(offsetRelativeToMap, appendCount * vertexSize);
@@ -138,7 +138,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 	private int extractAppendParticles(Vec3 prevGpuCamPos,
 	                                   List<SingleQuadParticle> pending,
 	                                   List<LayerBatch> batches) {
-		int appendCount = pending.size();
+		int appendCount = Math.min(particleLimit, pending.size());
 		int vertexSize = GpuParticlePipelines.RAW_PARTICLE.getVertexSize();
 		final double cx = prevGpuCamPos.x;
 		final double cy = prevGpuCamPos.y;
@@ -155,7 +155,7 @@ public class GlTfParticleRenderer implements IParticleRenderer {
 		final long bufferAddress = MemoryUtil.memAddress(mappedBuffer) + offsetRelativeToMap;
 
 		Map<SingleQuadParticle.Layer, List<SingleQuadParticle>> layerMap = new Reference2ReferenceOpenHashMap<>();
-		for (int i = 0, pendingSize = Math.min(particleLimit, pending.size()); i < pendingSize; i++) {
+		for (int i = 0; i < appendCount; i++) {
 			SingleQuadParticle p = pending.get(i);
 			layerMap.computeIfAbsent(((GpuParticleAddon) p).asyncparticles$getLayer(), ignored -> new ReferenceArrayList<>(appendCount / 2)).add(p);
 		}
