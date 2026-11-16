@@ -13,7 +13,7 @@ public abstract class MixinEntity {
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void injectInit(CallbackInfo ci) {
 		if (ThreadUtil.isOnParticleThread()) {
-			Diagnostic.wtfEntityInit();
+			Diagnostic.wtfEntityLifecycle();
 		}
 	}
 }

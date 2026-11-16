@@ -6,7 +6,6 @@ import fun.qu_an.minecraft.asyncparticles.client.compat.a_good_place.AGoodPlaceC
 import fun.qu_an.minecraft.asyncparticles.client.compat.particlerain.ParticleRainCompat;
 import fun.qu_an.minecraft.asyncparticles.client.config.ConfigHelper;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticleBehavior;
-import fun.qu_an.minecraft.asyncparticles.client.core.particle.tick.AsyncTickBehavior;
 import fun.qu_an.minecraft.asyncparticles.client.util.IterationSafeEvictingQueue;
 import fun.qu_an.minecraft.asyncparticles.client.util.ParticleThreadLocal;
 import fun.qu_an.minecraft.asyncparticles.client.util.ThreadUtil;
