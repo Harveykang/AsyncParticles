@@ -13,7 +13,7 @@
   "config.asyncparticles.particle.parallelQueueEviction": "Expulsión de partículas en paralelo",
   "config.asyncparticles.particle.parallelQueueEviction.tooltip": "Expulsa más rápido las partículas excedentes mediante el procesamiento en paralelo.\nSolo tiene efecto cuando está activada la opción 'Limpieza de partículas en paralelo'.",
   "config.asyncparticles.particle.particleLightCache": "Caché de iluminación de partículas",
-  "config.asyncparticles.particle.particleLightCache.tooltip": "Activá la caché de iluminación de partículas\npara mejorar el rendimiento.",
+  "config.asyncparticles.particle.particleLightCache.tooltip": "Activa la caché de iluminación de partículas\npara mejorar el rendimiento.",
   "config.asyncparticles.particle.cullUnderwaterParticleType": "Culling del tipo de partícula 'UNDERWATER'",
   "config.asyncparticles.particle.cullUnderwaterParticleType.tooltip": "En los modos gráficos distintos de 'Fabuloso', esta opción hace que las partículas 'UNDERWATER'\nsolo aparezcan cuando estés realmente bajo el agua.",
   "config.asyncparticles.category.tick": "Tick",
