@@ -11,7 +11,24 @@ loom {
     }
 }
 
+repositories {
+    exclusiveContent {
+        forRepository {
+            maven {
+                url = 'https://maven.gegy.dev'
+                metadataSources { artifact() }
+            }
+        }
+        filter { includeGroup 'dev.lambdaurora.lambdynamiclights' }
+    }
+}
+
 dependencies {
+    /* LambDynamicLights */
+    compileOnly 'dev.lambdaurora.lambdynamiclights:lambdynamiclights-runtime:4.9.1+1.21.11:mojmap@jar'
+    compileOnly 'dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:4.9.1+1.21.11:mojmap@jar'
+    compileOnly 'dev.yumi.mc.core:yumi-mc-foundation:1.0.0-beta.1+1.21.11:mojmap@jar'
+
     // We depend on Fabric Loader here to use the Fabric @Environment annotations,
     // which get remapped to the correct annotations on each platform.
     // Do NOT use other classes from Fabric Loader.
