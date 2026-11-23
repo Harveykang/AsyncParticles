@@ -1,5 +1,7 @@
 package fun.qu_an.minecraft.asyncparticles.client.mixin.core.particle.light_cache;
 
+import fun.qu_an.minecraft.asyncparticles.client.compat.ModListHelper;
+import fun.qu_an.minecraft.asyncparticles.client.compat.lambdynlights.LambDynLightsCompat;
 import fun.qu_an.minecraft.asyncparticles.client.core.particle.ParticleHelper;
 import fun.qu_an.minecraft.asyncparticles.client.util.GameUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -21,6 +23,9 @@ public class MixinParticleEngine_FixBlackDestructionParticle {
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/phys/shapes/VoxelShape;"))
 	private void fixBlackDestroyParticle1(BlockPos blockPos, BlockState blockState, CallbackInfo ci) {
 		int lightColor = GameUtil.getLightColorFromNeighbor(level, blockPos);
+		if (ModListHelper.LAMBDYNLIGHTS_LOADED) {
+			lightColor = LambDynLightsCompat.addDynamicLight(blockPos, lightColor);
+		}
 		ParticleHelper.DESTRUCTION_LIGHT_CACHE.set(lightColor);
 	}
 }

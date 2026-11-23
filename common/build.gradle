@@ -103,6 +103,7 @@ dependencies {
 
     /* LambDynamicLights */
     modCompileOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:4.4.0+1.20.1")
+    modCompileOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-runtime:4.4.0+1.20.1") { transitive = false }
 
     /* Immersive Portals */
     modCompileOnly("com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:1.20.1-SNAPSHOT") { transitive = false }
