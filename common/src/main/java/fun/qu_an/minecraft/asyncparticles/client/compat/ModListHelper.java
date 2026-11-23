@@ -8,6 +8,8 @@ public class ModListHelper {
 	public static final boolean DEV_ENV = PLATFORM.isDevelopmentEnvironment();
 	public static final boolean FABRIC_API_LOADED = isModLoaded("fabric-api") || isModLoaded("fabric_api");
 	public static final boolean CONNECTORMOD_LOADED = isModLoaded("connectormod");
+	/* LambDynamicLights */
+	public static final boolean LAMBDYNLIGHTS_LOADED = isModLoaded("lambdynlights");
 	/* Valkyrien Skies */
 	public static final boolean VS_LOADED = isModLoaded("valkyrienskies");
 	public static final boolean FABRIC_VS_LOADED = isFabricModLoaded("valkyrienskies");
