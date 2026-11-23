@@ -11,6 +11,18 @@ loom {
     }
 }
 
+repositories {
+    exclusiveContent {
+        forRepository {
+            maven {
+                url = 'https://maven.gegy.dev'
+                metadataSources { artifact() }
+            }
+        }
+        filter { includeGroup 'dev.lambdaurora.lambdynamiclights' }
+    }
+}
+
 dependencies {
     // We depend on Fabric Loader here to use the Fabric @Environment annotations,
     // which get remapped to the correct annotations on each platform.
@@ -30,6 +42,11 @@ dependencies {
     modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.8.13-fabric"
     modCompileOnly "maven.modrinth:sodium-extra:mc1.21.1-0.9.4+fabric"
     modCompileOnly 'maven.modrinth:iris:1.8.14-beta.1+1.21.1-fabric'
+
+    /* LambDynamicLights */
+    compileOnly 'dev.lambdaurora.lambdynamiclights:lambdynamiclights-runtime:4.8.11+1.21.1:mojmap@jar'
+    compileOnly 'dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:4.8.11+1.21.1:mojmap@jar'
+    compileOnly 'dev.yumi.mc.core:yumi-mc-foundation:1.0.0-beta.1+1.21.1:mojmap@jar'
 
     /* Particle Rain */
     modCompileOnly "maven.modrinth:particle-rain:v4.0.1+$minecraft_version-fabric"

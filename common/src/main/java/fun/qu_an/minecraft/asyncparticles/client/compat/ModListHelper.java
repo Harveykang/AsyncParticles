@@ -14,6 +14,8 @@ public class ModListHelper {
 	public static final boolean VS_LOADED = isModLoaded("valkyrienskies");
 	public static final boolean FABRIC_VS_LOADED = isFabricModLoaded("valkyrienskies");
 	public static final boolean FORGE_VS_LOADED = isForgeModLoaded("valkyrienskies");
+	/* LambDynamicLights */
+	public static final boolean LAMBDYNLIGHTS_LOADED = isModLoaded("lambdynlights");
 	/* Sodium */
 	public static final boolean SODIUM_LOADED = isModLoaded("sodium");
 	public static final boolean FABRIC_SODIUM_LOADED = isFabricModLoaded("sodium");
