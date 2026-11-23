@@ -6,7 +6,24 @@ loom {
     accessWidenerPath = file('src/main/resources/asyncparticles-common.accesswidener')
 }
 
+repositories {
+    exclusiveContent {
+        forRepository {
+            maven {
+                url = 'https://maven.gegy.dev'
+                metadataSources { artifact() }
+            }
+        }
+        filter { includeGroup 'dev.lambdaurora.lambdynamiclights' }
+    }
+}
+
 dependencies {
+    /* LambDynamicLights */
+    compileOnly 'dev.lambdaurora.lambdynamiclights:lambdynamiclights-runtime:4.12.4+26.2@jar'
+    compileOnly 'dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:4.12.4+26.2@jar'
+    compileOnly 'dev.yumi.mc.core:yumi-mc-foundation:1.1.1+26.2@jar'
+
     // We depend on Fabric Loader here to use the Fabric @Environment annotations,
     // which get remapped to the correct annotations on each platform.
     // Do NOT use other classes from Fabric Loader.
