@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static fun.qu_an.minecraft.asyncparticles.client.core.particle.gpu_acceleration.GpuParticlePipelines.*;
 
@@ -40,7 +41,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	private static final int DESCRIPTOR_SET_LAYOUT_SIZE = 3;
 	private static final int SOURCE_SLOT_COUNT = 3;
 	private static final int SUBMIT_SLOT_COUNT = VulkanCommandEncoder.MAX_SUBMITS_IN_FLIGHT;
-	private static final long GPU_WAIT_TIMEOUT_NS = 5_000_000_000L;
+	private static final int GPU_WAIT_LIMIT_SECONDS = 60;
+	private static final long GPU_WAIT_TIMEOUT_NS = TimeUnit.SECONDS.toNanos(GPU_WAIT_LIMIT_SECONDS);
 
 	// VK backend
 	private final VulkanDevice vkBackend;
@@ -249,8 +251,11 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		if (tc + ac == 0) {
 			renderSrcIdx = -1;
 		} else {
-			renderSrcIdx = pi;
-			processingSrcIdx = acquireSourceSlot(pi);
+			int next = acquireSourceSlot(pi);
+			if (next != -1) {
+				renderSrcIdx = pi;
+				processingSrcIdx = next;
+			}
 		}
 		mappedBuffer = null;
 	}
@@ -332,13 +337,33 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 	}
 
 	private int acquireSourceSlot(int idx) {
-		int newIdx = (idx + 1) % SOURCE_SLOT_COUNT;
-		sourceSlots[newIdx].waitReady();
-		return newIdx;
+		int candidate = (idx + 1) % SOURCE_SLOT_COUNT;
+		var encoder = vkBackend.createCommandEncoder();
+		SourceSlot first = sourceSlots[candidate];
+		if (first.lastSubmitIndex == -1L || encoder.awaitSubmitCompletion(first.lastSubmitIndex, 0L)) {
+			first.lastSubmitIndex = -1L;
+			return candidate;
+		}
+		// If the oldest slot is still in use, find a usable slot.
+		for (int offset = 2; offset < SOURCE_SLOT_COUNT; offset++) {
+			int next = (idx + offset) % SOURCE_SLOT_COUNT;
+			if (sourceSlots[next].lastSubmitIndex < sourceSlots[candidate].lastSubmitIndex) {
+				candidate = next;
+			}
+		}
+		SourceSlot oldestSlot = sourceSlots[candidate];
+		if (oldestSlot.lastSubmitIndex == encoder.currentSubmitIndex) {
+			return -1; // Cannot find a usable slot.
+		}
+		oldestSlot.waitReady();
+		return candidate;
 	}
 
 	private int acquireSubmitSlot(int idx) {
 		int renderSubmitIdx = (idx + 1) % SUBMIT_SLOT_COUNT;
+		if (submitSlots[renderSubmitIdx].lastSubmitIndex == vkBackend.createCommandEncoder().currentSubmitIndex) {
+			return -1; // Cannot find a usable slot.
+		}
 		submitSlots[renderSubmitIdx].waitReady();
 		return renderSubmitIdx;
 	}
@@ -454,7 +479,12 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 			computed = true;
 			return;
 		}
-		SubmitSlot submit = submitSlots[renderSubmitIdx = acquireSubmitSlot(renderSubmitIdx)];
+		int next = acquireSubmitSlot(renderSubmitIdx);
+		if (next == -1) {
+			computed = true;
+			return;
+		}
+		SubmitSlot submit = submitSlots[renderSubmitIdx = next];
 		if (!submit.isPreparedFor(source)) {
 			submit.prepare(source);
 		}
@@ -641,6 +671,9 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		}
 
 		private void destroy() {
+			if (srcBuf == VK10.VK_NULL_HANDLE) {
+				return;
+			}
 			VK10.vkUnmapMemory(device, srcMem);
 			VK10.vkDestroyBuffer(device, srcBuf, null);
 			srcBuf = VK10.VK_NULL_HANDLE;
@@ -728,7 +761,8 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		private void waitReady() {
 			if (lastSubmitIndex != -1L) {
 				if (!vkBackend.createCommandEncoder().awaitSubmitCompletion(lastSubmitIndex, GPU_WAIT_TIMEOUT_NS)) {
-					throw new IllegalStateException("Timeout waiting for GPU particle source slot submit: " + lastSubmitIndex);
+					throw new IllegalStateException("GPU particle source" + " slot timed out after "
+						+ GPU_WAIT_LIMIT_SECONDS + "s waiting for submit " + lastSubmitIndex);
 				}
 				lastSubmitIndex = -1L;
 			}
@@ -871,11 +905,13 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 		}
 
 		private void destroy() {
-			VK10.vkUnmapMemory(device, indMem);
-			VK10.vkDestroyBuffer(device, indBuf, null);
-			indBuf = VK10.VK_NULL_HANDLE;
-			VK10.vkFreeMemory(device, indMem, null);
-			indMem = VK10.VK_NULL_HANDLE;
+			if (indBuf != VK10.VK_NULL_HANDLE) {
+				VK10.vkUnmapMemory(device, indMem);
+				VK10.vkDestroyBuffer(device, indBuf, null);
+				indBuf = VK10.VK_NULL_HANDLE;
+				VK10.vkFreeMemory(device, indMem, null);
+				indMem = VK10.VK_NULL_HANDLE;
+			}
 			if (targetBuffer != null) {
 				targetBuffer.close();
 				targetBuffer = null;
@@ -884,9 +920,9 @@ public class VkCompParticleRenderer implements IParticleRenderer {
 
 		private void waitReady() {
 			if (lastSubmitIndex != -1L) {
-				// Should always ready but just in case
 				if (!vkBackend.createCommandEncoder().awaitSubmitCompletion(lastSubmitIndex, GPU_WAIT_TIMEOUT_NS)) {
-					throw new IllegalStateException("Timeout waiting for GPU particle submit slot submit: " + lastSubmitIndex);
+					throw new IllegalStateException("GPU particle submit" + " slot timed out after "
+						+ GPU_WAIT_LIMIT_SECONDS + "s waiting for submit " + lastSubmitIndex);
 				}
 				lastSubmitIndex = -1L;
 			}
